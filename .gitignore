@@ -1,21 +1,74 @@
-# never commit game data
+# ---- NEVER COMMIT GAME DATA -------------------------------------------------
+# Refused rather than merely omitted: the accident should be impossible, not
+# something a future contributor has to remember not to have.
+
+# disc images and their sidecars
 *.iso
 *.bin
 *.cue
 *.img
-*.exe
+*.ccd
+*.sub
+*.mdf
+*.mds
+*.chd
+*.pbp
+
+# the game executable, by every regional prefix
 SLES_*
 SLUS_*
 SLPS_*
 SCES_*
 SCUS_*
+SCPS_*
+*.exe
+
+# game assets
 *.XA
 *.STR
 *.TIM
 *.VB
 *.VH
+*.FOLIO
+FOLIO*
 
-# build output
+# ⚠ CONSOLE BIOS. Not the game, still not ours to distribute.
+scph*.bin
+scph*.BIN
+*.bios
+
+# ⚠ SAVE STATES AND MEMORY CARDS ARE GAME DATA. A save state is a dump of the
+# game's own memory with its code in it; a memory card is its save format.
+# (tinyclaw's catch -- this list did not refuse either.)
+*.sstate
+*.state
+*.savestate
+*.mcd
+*.mcr
+*.srm
+
+# ⚠ RAW DISASSEMBLY IS THE GAME'S CODE WEARING A DIFFERENT HAT. Bulk dumps of
+# the executable are the executable. (tinyclaw's catch.)
+*.dis
+*.disasm
+disasm/
+disassembly/
+
+# ⚠ NOT BLOCKED, DELIBERATELY: *.s and *.asm. A matching decomp legitimately
+# commits extracted assembly -- that IS the workflow -- so a blanket rule here
+# would refuse the project's own source. Raw bulk dumps are what the rules above
+# are for; if an .s file ever holds a whole segment rather than one function,
+# that is a review question and not something a pattern can decide.
+
+# emulator trees and their unpacked contents
+duckstation/
+pcsx*/
+mednafen/
+bios/
+
+# ---- build output -----------------------------------------------------------
 bin/
 obj/
 build/
+*.o
+*.elf
