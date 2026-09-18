@@ -9,14 +9,26 @@ namespace TPW.Sim
     /// `delta * Cycle.Speed` and diverges per client). Getting this right once, here, is cheaper than finding
     /// it later in six places.
     ///
-    /// ⚠ SOURCE: `tick_s = 0.04` and `day_ticks = 99` come from the PSX findings (`findings/rides.json`,
-    /// units block) -- DERIVED, from analysis, not independently confirmed against the running game by this
-    /// project. 0.04 s is 25 Hz, which is a plausible PAL-ish sim rate and not proof of anything. 99 ticks a
-    /// day is odd enough to be real rather than rounded, which is mild evidence it was read rather than
-    /// guessed. Both want a fixture before anything depends on them numerically.</summary>
+    /// ✅ SOURCE, UPGRADED 2026-09-18: both numbers are now MEASURED LIVE off the running game by tinyclaw,
+    /// independently of fable's report, and both match it. The clock ticks at exactly half the frame rate, and
+    /// a game day is exactly 99 ticks. The 20.12 fixed-point format in `Fixed` is NOT covered by that and
+    /// remains fable's alone -- see its own note.
+    ///
+    /// ⚠⚠ AND 99 IS THE NUMBER THAT NEARLY GOT AWAY. Sampled every 600 frames it reads as exactly 100: one
+    /// blip in eighteen intervals is the only thing that says otherwise, and it took 300x finer sampling to
+    /// see. A coarse instrument cannot resolve a phenomenon finer than its interval, and it does not report
+    /// uncertainty -- it reports a confident round number. 100 is the most dangerous possible wrong answer
+    /// here precisely BECAUSE it looks like a designed constant; 97.3 would have been investigated on sight.
+    ///
+    /// ⚠ TickSeconds IS REGION-DEPENDENT AND 0.04 ASSUMES PAL. "Half the frame rate" is 25 Hz on a 50 Hz PAL
+    /// machine (SLES) and 30 Hz on a 60 Hz NTSC one (SLUS) -- so the same rule gives 0.04 s or 0.0333 s
+    /// depending on the disc. TicksPerDay is a count and does not change; this does. It belongs in the
+    /// per-variant table the checksum selects, not in a const, the day a second SKU is supported.</summary>
     public sealed class ParkClock
     {
-        /// <summary>Seconds of wall time one sim tick represents. Presentation only -- see the class note.</summary>
+        /// <summary>Seconds of wall time one sim tick represents. Presentation only -- see the class note.
+        /// ⚠ PAL value. NTSC discs run the same rule at 60 Hz and get 0.0333 s; this moves to the per-variant
+        /// table when a second SKU lands.</summary>
         public const double TickSeconds = 0.04;
 
         /// <summary>Ticks in one in-game day.</summary>
