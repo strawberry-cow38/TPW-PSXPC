@@ -1244,3 +1244,40 @@ VRAM and those are simply different representations.
 The productive direction is the reverse: hand me a **decompressed** block and I can
 say whether it is in VRAM and where — which tests the decoder and the layout
 together, and works precisely because the raw bytes do not match.
+
+## The PSX texture model, and what it settles by arithmetic
+
+Worth stating plainly because it turns two open questions into closed ones. The
+PlayStation's GPU is publicly and thoroughly documented (Martin Korth's *nocash
+PSX spec* is canonical); nothing here needed reverse engineering.
+
+```
+VRAM           1024 x 512 halfwords, 16-bit
+texture page   64 halfwords wide x 256 rows
+at 4bpp        4 texels per halfword -> 256 x 256 TEXELS per page
+CLUT           16 colours for 4bpp, addressed as x/16, y
+UVs            0..255 within a page
+```
+
+**Applied to the archive entries:**
+
+```
+entry                131,156 bytes
+minus 0x54 header  =  65,536 halfwords
+one 4bpp page      =  64 x 256 = 16,384 halfwords
+65,536 / 16,384    =  4 exactly
+```
+
+⭐ **Each entry is exactly four texture pages**, and four pages of 256×256 texels
+side by side is 1024×256 — **catboy's layout, which they reached by eye and then
+doubted, is correct and now follows from the hardware.** It stops being "the render
+looked coherent" and becomes arithmetic.
+
+The same model explains my upload trace: I logged 64 blocks of 64×64 halfwords, and
+a page is four such blocks stacked. **64 blocks = 16 pages = four entries' worth
+resident at once** — which also retires my "12 sheets rotating through 4 slots"
+worry, since 16 page-slots exist and nothing needs to rotate.
+
+**What remains open is bookkeeping, not format:** *which* archive entries hold the
+in-game art. The twelve we characterised are something else. That is a lookup
+problem and the format work is done.
