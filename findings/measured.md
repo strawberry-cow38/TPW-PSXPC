@@ -112,6 +112,27 @@ parkopen report; without it a young low-level ride computes to zero guests.
 | `0x80102E54 = 100` | cadence unchanged, 7 guests per bus |
 | `0x80102E60 = 1` | 20 guests per bus |
 
+**Head-count confirmed, three predictions, three exact hits.** Same state, same
+window, only the held word differs. Batch = admissions grouped within 200 frames:
+
+| held word | fable predicted | measured batches | total in 6000 frames |
+|---|---|---|---|
+| none | 1 per bus | 1, 1, 1, 1, 1 | 5 |
+| `0x80102E54 = 100` | **7** per bus | 1, **7, 7, 7**, 6 | 28 |
+| `0x80102E60 = 1` | **20** per bus | 1, **20, 20, 20**, 5 | 66 |
+
+The cadence is identical in all three -- five buses either way. Only the load
+changes. (The leading 1 is the bus already in flight when the save state is
+restored; the trailing short batch is the window ending mid-bus.)
+
+**So the answer to "does building more bring more guests" is yes -- by filling the
+bus, never by sending more buses.** `0x80102E54` is an offset added to the park
+score, and +100 takes the head-count from 1 to 7. That is the mechanism the score
+acts through, and it is now measured rather than assumed.
+
+Together with the cadence test (328 predicted, 320 measured) that is **four
+independent numbers called before the run and hit**.
+
 ⚠ **Trap:** a phase-4 target ≤ 25 (`0x800E0F18 = 17`) shortens the cycle to 411 but
 **freezes admissions permanently**. Use 26 or more.
 
