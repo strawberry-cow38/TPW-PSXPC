@@ -1,0 +1,38 @@
+{
+ "state": "park.state",
+ "input": "det_in.txt",
+ "frames": 1300,
+ "fields": [
+  "clock",
+  "day",
+  "money",
+  "money_tmp",
+  "notmoney_a",
+  "notmoney_b",
+  "day2"
+ ],
+ "verified_deterministic_frames": 1300,
+ "verify_runs": 3,
+ "trace": [
+  {
+   "frame": 600,
+   "clock": 12328,
+   "day": 123,
+   "money": 500000,
+   "money_tmp": 500000,
+   "notmoney_a": 50000,
+   "notmoney_b": 50000,
+   "day2": 3
+  },
+  {
+   "frame": 1200,
+   "clock": 12628,
+   "day": 126,
+   "money": 500000,
+   "money_tmp": 500000,
+   "notmoney_a": 50000,
+   "notmoney_b": 50000,
+   "day2": 6
+  }
+ ]
+}

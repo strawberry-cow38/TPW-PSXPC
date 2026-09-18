@@ -1,0 +1,6 @@
+# pan onto grass, then lay path with the tool already selected
+300 650 up
+750 758 cross
+820 828 cross
+890 898 cross
+960 968 cross

@@ -34,7 +34,11 @@ FIELDS = {
     # these two hold 50000 and do NOT move on a purchase -- not the balance.
     "notmoney_a": (0x1D5694, "<i"),
     "notmoney_b": (0x1D56AC, "<i"),
-    "day2":    (0x1E8B5C, "<i"),   # increments in exact lockstep with `day`; purpose unconfirmed,
+    "day2":    (0x1E8B5C, "<i"),
+    # guest economy: admissions total and overall income (BANK = 0x801D5658)
+    "gate_total":   (0x1D6920, "<i"),   # BANK+0x12C8, rises GBP 40 per guest admitted
+    "income_total": (0x1D6930, "<i"),   # BANK+0x12D8
+    "park_open":    (0x102D30, "<I"),   # 0 shut, 1 open   # increments in exact lockstep with `day`; purpose unconfirmed,
                                    # but deterministic and day-driven, so valid to hold a port to
 
 }
@@ -56,30 +60,81 @@ def trace(outdir):
                     **{k: struct.unpack_from(fmt, d, off)[0] for k, (off, fmt) in FIELDS.items()}})
     return out
 
+def load(name):
+    return json.load(open(f"{FIXDIR}/{name}.json"))
+
+def compare(want, got):
+    """Returns a list of human-readable mismatches."""
+    bad = []
+    for a, b in zip(want, got):
+        for k in FIELDS:
+            if k not in a:      # field added after this fixture was recorded
+                continue
+            if a[k] != b[k]:
+                bad.append(f"frame {a['frame']} {k}: expected {a[k]}, got {b[k]}")
+    if len(want) != len(got):
+        bad.append(f"LENGTH differs: expected {len(want)} samples, got {len(got)}")
+    return bad
+
 def main():
     mode, name, state, script, frames = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5])
     os.makedirs(FIXDIR, exist_ok=True)
     work = f"{TPW}/.oracle_{name}"
-    run(work, state, script, frames, 600)
-    t = trace(work)
     path = f"{FIXDIR}/{name}.json"
+
     if mode == "record":
+        run(work, state, script, frames, 600)
+        t = trace(work)
         json.dump({"state": os.path.basename(state), "input": os.path.basename(script),
-                   "frames": frames, "fields": list(FIELDS), "trace": t},
-                  open(path, "w"), indent=1)
+                   "frames": frames, "fields": list(FIELDS),
+                   # ---- SCOPE OF THE GUARANTEE ------------------------------
+                   # null until `verify` has actually replayed it. A fixture
+                   # RECORDED to N frames has not been SHOWN deterministic to N
+                   # frames -- recording it once proves nothing. Non-determinism
+                   # ACCUMULATES, so a pass at 1300 cannot speak for 12000: the
+                   # short run could not have failed. (cow tools' suggestion,
+                   # after a 12000-frame fixture gave FAIL/FAIL/PASS on identical
+                   # input while a 1300-frame check had called it reproducible.)
+                   "verified_deterministic_frames": None,
+                   "verify_runs": 0,
+                   "trace": t}, open(path, "w"), indent=1)
         print(f"recorded {len(t)} samples -> {path}")
-        for r in t[:4]: print("  ", r)
-    else:
-        want = json.load(open(path))["trace"]
-        bad = 0
-        for a, b in zip(want, t):
-            for k in FIELDS:
-                if a[k] != b[k]:
-                    print(f"  MISMATCH frame {a['frame']} {k}: expected {a[k]}, got {b[k]}")
-                    bad += 1
-        if len(want) != len(t):
-            print(f"  LENGTH differs: expected {len(want)} samples, got {len(t)}"); bad += 1
-        print("PASS" if not bad else f"FAIL ({bad} mismatches)")
+        print("  verified_deterministic_frames: null  (run `verify` to earn it)")
+        for r in t[:4]:
+            print("  ", r)
+
+    elif mode == "verify":
+        runs = int(sys.argv[6]) if len(sys.argv) > 6 else 3
+        fx = load(name)
+        want = fx["trace"]
+        for i in range(runs):
+            run(work, state, script, frames, 600)
+            bad = compare(want, trace(work))
+            if bad:
+                for b in bad:
+                    print(f"  MISMATCH {b}")
+                print(f"FAIL on run {i+1}/{runs} -- NOT deterministic to {frames} frames")
+                sys.exit(1)
+            print(f"  run {i+1}/{runs} identical")
+        fx["verified_deterministic_frames"] = frames
+        fx["verify_runs"] = runs
+        json.dump(fx, open(path, "w"), indent=1)
+        print(f"PASS {runs}/{runs} -- verified_deterministic_frames = {frames}")
+
+    else:  # check
+        fx = load(name)
+        vdf = fx.get("verified_deterministic_frames")
+        if vdf is None:
+            print(f"  ! {name} carries NO determinism guarantee (verified_deterministic_frames: null).")
+            print("  ! A mismatch below may be the emulator, not the port. Run `verify` first.")
+        elif frames > vdf:
+            print(f"  ! ASKING FOR {frames} FRAMES, GUARANTEE IS {vdf}.")
+            print(f"  ! Determinism does not stretch -- re-verify at {frames} before trusting a FAIL.")
+        run(work, state, script, frames, 600)
+        bad = compare(fx["trace"], trace(work))
+        for b in bad:
+            print(f"  MISMATCH {b}")
+        print("PASS" if not bad else f"FAIL ({len(bad)} mismatches)")
         sys.exit(1 if bad else 0)
 
 main()
