@@ -81,3 +81,4 @@ build/
 *.elf
 .vs/
 *.user
+findings/records.json
