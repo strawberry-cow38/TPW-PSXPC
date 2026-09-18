@@ -11,6 +11,15 @@
   "notmoney_b",
   "day2"
  ],
+ "field_units": {
+  "clock": "sim ticks; +0.5 per emulated frame; 99 ticks = 1 game day",
+  "day": "game days elapsed",
+  "money": "TENTHS of a pound (480800 = GBP 48,080)",
+  "money_tmp": "tenths of a pound; transient copy, read 0 mid-run once",
+  "notmoney_a": "NOT the balance; holds 50000 and does not move on a purchase",
+  "notmoney_b": "NOT the balance; as above",
+  "day2": "day of month, wraps at 30"
+ },
  "verified_deterministic_frames": 1300,
  "verify_runs": 3,
  "trace": [

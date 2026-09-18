@@ -43,6 +43,24 @@ FIELDS = {
 
 }
 
+# What a reader of the fixture JSON cannot see from the numbers alone, and gets
+# wrong if it is not written down. `money` reads 480800 and means GBP 48,080;
+# `gate_total` rises 400 and means one guest at GBP 40, not ten at GBP 4. That
+# exact mistake was made against this data, so the legend ships IN the fixture
+# rather than in a doc beside it.
+UNITS = {
+    "clock":        "sim ticks; +0.5 per emulated frame; 99 ticks = 1 game day",
+    "day":          "game days elapsed",
+    "day2":         "day of month, wraps at 30",
+    "money":        "TENTHS of a pound (480800 = GBP 48,080)",
+    "money_tmp":    "tenths of a pound; transient copy, read 0 mid-run once",
+    "notmoney_a":   "NOT the balance; holds 50000 and does not move on a purchase",
+    "notmoney_b":   "NOT the balance; as above",
+    "gate_total":   "tenths of a pound, admissions only; +400 = ONE guest at GBP 40",
+    "income_total": "tenths of a pound, all income; moves with gate_total here",
+    "park_open":    "0 shut, 1 open",
+}
+
 def run(outdir, state, script, frames, every):
     shutil.rmtree(outdir, ignore_errors=True)
     os.makedirs(outdir, exist_ok=True)
@@ -87,6 +105,7 @@ def main():
         t = trace(work)
         json.dump({"state": os.path.basename(state), "input": os.path.basename(script),
                    "frames": frames, "fields": list(FIELDS),
+                   "field_units": {k: UNITS.get(k, "UNDOCUMENTED -- do not lean on this") for k in FIELDS},
                    # ---- SCOPE OF THE GUARANTEE ------------------------------
                    # null until `verify` has actually replayed it. A fixture
                    # RECORDED to N frames has not been SHOWN deterministic to N
