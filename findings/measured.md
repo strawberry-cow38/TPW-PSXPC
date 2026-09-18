@@ -760,7 +760,30 @@ The general technique is worth keeping: **when two parties need to check that th
 decoded the same bytes, compare fingerprints of a canonical layout.** It settles
 the question exactly, and nobody has to distribute the asset.
 
-**And an oracle is more useful when it narrows what a mismatch would MEAN than
+⚠ **And the bare hash turned out to be a poor oracle in practice** — catboy's eight
+decode candidates all missed it, and a hash says only "no". Alignment-free
+invariants bisect the problem instead:
+
+```
+non-black pixels   11,143 of 81,920
+peak channel       R=14  G=30  B=29   (max 31)
+```
+
+The peak triple is **order-sensitive and position-independent**: a channel-order
+bug shows up as 30/29/14 and would miss every hash forever regardless of layout.
+The non-black count is invariant under row order, so it separates "decode is
+complete and correctly sized" from "ordering is wrong". Two numbers, and a
+mismatch localises itself.
+
+⚠ **My end may be the wrong target, and I should say so before someone trusts it.**
+I am reading the console's framebuffer *after a fade-in*, not the file. The fade
+plateaus and holds constant for 200 frames, so it has plainly finished — but I
+cannot prove the plateau is bit-identical to the source rather than the final step
+of a ramp that lands very close. Peak channels at the plateau are R=14 G=30 B=29 of
+31, which is consistent with the image's own light-blue palette but does not rule
+out a scale factor.
+
+**An oracle is more useful when it narrows what a mismatch would MEAN than
 when it just answers yes or no.** Three candidate causes were on the table — the
 mask bit, sector truncation, row order. Publishing the extra hashes eliminated one
 outright and made a second directly testable, so a failure now points at exactly
