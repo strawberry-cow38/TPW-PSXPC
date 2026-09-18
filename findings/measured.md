@@ -666,3 +666,51 @@ separate "the item price is 20" from "a Fries costs 20", and I have not managed 
 that works on the laptop menu and the ride list; three downs then X exits to the
 park instead of opening Shops. Recorded as an open navigation problem, not a fact
 about pricing.
+
+## ⭐ The radial menus are FACE-BUTTON MAPPED BY POSITION
+
+This is the key that makes every menu in the game navigable, and it explains
+every accidental success and failure of the last few hours.
+
+The in-park menu draws its options around a hub. **Each option sits where its
+button sits on the pad:**
+
+```
+            Build                      triangle  (top)
+   Hire       +      Laptop     square    +    circle     (left / right)
+            Path                        cross   (bottom)
+```
+
+- `triangle` = Build -> the purchase catalogue
+- `circle` = Laptop -> Information / Build & Hire / Park Statistics / …
+- `square` = Hire -> the staff catalogue
+- `cross` = Path
+
+That retroactively explains the sequences I found by brute force: `triangle,
+triangle` reaching Purchase is "open menu, pick Build"; `triangle, circle` is
+"open menu, pick Laptop". I had been treating those as magic strings.
+
+It also explains the failures. I spent hours pressing `cross` expecting "confirm"
+and getting nothing useful — `cross` is not a confirm, it is *the Path option*,
+and in a placement context it is whatever sits at the bottom. **There is no
+generic OK button.** The same applies inside panels: the Purchase button carries a
+**red** glyph, and red is Circle on a PSX pad — pressing `circle` on the staff
+detail screen is what finally committed something.
+
+## The save-state stepping technique (and why timed presses had to go)
+
+Timed button presses are an **open-loop instrument**: the script commits at a
+fixed frame with no read-back of what is highlighted, so it cannot tell you it
+missed. The identical sequence reached the staff screen once and the ride
+catalogue the next time. Two wage runs came back zero for two *different* invalid
+reasons — that pair is the tell, and a third would have been a third reason.
+
+The fix, which the harness already supported: **`SAVESTATE` after every verified
+step.** Run a few hundred frames, screenshot, confirm the screen is what was
+expected, save, and make that the base for the next hop. Navigation becomes a
+chain of one-move steps that are each checked once and never replayed. No timing
+dependence, and a wrong turn costs one short run instead of invalidating an
+eight-step sequence.
+
+States now live in `states/ui/` — `01_laptop`, `02_buildhire`, `03_staff`, and so
+on, each a verified position in the menu tree.
