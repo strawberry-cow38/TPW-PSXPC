@@ -130,6 +130,39 @@ only reason it was caught is that a known-present target came back empty. **Run 
 something you already know is there; if it does not come back, the search is broken rather than the
 world empty.**
 
+## 5d. Audio (MEASURED — this part came out clean)
+
+The archive holds **9 triples**: `[VAG body][VAB header][XM module]`, at entries 291-293, 294-296, …
+315-317. Sound effects are PlayStation ADPCM; music is FastTracker 2 XM whose instruments are
+supplied by the ADPCM bank rather than carried inline. 192 waveforms decode.
+
+- **The body is the entry BEFORE its header**, not after. Verified: a header's VAG size table must sum
+  to exactly a neighbour's size, and it matches the preceding entry **9 times out of 9**. The natural
+  guess fails all nine.
+- **Every VAB header is exactly 3104 bytes** = 32 + 2048 + 512 + 512, which is what marks them as
+  split VH headers rather than whole banks.
+- ⭐ **The grouping is confirmed from outside the parser.** Each XM declares an instrument count and
+  each VAB a waveform count; nothing makes those agree except being a true pair — 6/6, 26/26, 15/15,
+  21/21, 25/25, 22/22, 27/27, 23/23, 28/28.
+- ⚠ The size table is in **8-byte units**, and **flag 7 ends the stream** (decoding past it welds
+  noise from the next sound onto the end of a correct one).
+
+**Sample rate — DERIVED, and it caught a bad guess.** VAG carries no rate. The first implementation
+used 22,050 Hz "because that is a common PSX rate", which is not a reason. The XM modules keep their
+instrument headers with sample length ZEROED (data stripped, it lives in the VAG bank) while
+**relative note and finetune survive**: 0 or -12, finetune 0, giving **8363 Hz** and **4182 Hz** under
+`8363 * 2^((rel + fine/128)/12)`. The guess was 2.6x out. **A stripped file is not an empty one — every
+field describing the missing data was still present.**
+
+⭐ **The VAB tone attributes are vestigial, so they cannot be the authority.** Across all 9 banks every
+one of the 16 tone slots is byte-identical boilerplate (`centre=60, vol=127, pan=64, min=0, max=127`)
+and **every tone points at waveform index 1**, while the banks hold 6-28 waveforms; each declares
+`tones=1`. Do not spend time reading them, and do not expose the console's SPU registers to settle
+pitch: there is nothing there to settle it with. The tracker side wins by elimination.
+
+**Still open:** the rate is per-instrument (half an octave down), so it wants a per-waveform mapping
+from XM instrument index to VAG index.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is

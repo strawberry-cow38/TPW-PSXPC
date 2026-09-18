@@ -198,10 +198,17 @@ namespace TPWGodot
         /// module #296's 26 instruments those read 0 or -12 with finetune 0, and the XM convention
         /// `rate = 8363 * 2^((relative + finetune/128) / 12)` turns those into **8363 Hz** and **4182 Hz**.
         ///
-        /// ⚠ TWO REASONS THIS IS STILL NOT SETTLED. It is per-instrument, not global: half of them are an
-        /// octave down, so one constant is wrong for those by design and this should become a per-waveform
-        /// rate once the XM instrument to VAG mapping is wired. And it is the rate the TRACKER thinks in;
-        /// the SPU is pitched by the VAB tone attributes, which nobody has parsed. Those two could disagree.
+        /// ✅ AND THE SECOND WORRY IS CLOSED: the VAB tone attributes CANNOT disagree, because they say
+        /// nothing. Parsed across all 9 banks, every one of the 16 tone slots is byte-identical boilerplate —
+        /// `centre=60, fine=0, vol=127, pan=64, min=0, max=127` — and **every tone points at waveform index 1**
+        /// while the banks hold 6 to 28 distinct waveforms. Each declares `tones=1`. That is a default-filled
+        /// template, not an instrument map: the VAB is being used as a bare sample container and the game's
+        /// own XM player addresses waveforms directly. So the tracker side is the authority on pitch by
+        /// elimination, not by preference — which is worth more than picking it because it was convenient.
+        ///
+        /// ⚠ ONE REASON IT IS STILL NOT SETTLED. The rate is PER-INSTRUMENT, not global: half are an octave
+        /// down, so any single constant is wrong for those by design. This wants to become a per-waveform rate
+        /// once the XM-instrument to VAG-index mapping is wired.
         ///
         /// Kept as a constant only because a wrong rate is instantly audible as wrong pitch — the safe kind of
         /// wrong. 8363 is the better default because something measured points at it.</summary>
