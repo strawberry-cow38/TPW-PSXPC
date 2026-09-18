@@ -472,3 +472,39 @@ text entry in the game is the save-filename keyboard — A-Z plus space, seven
 characters, uppercase.** "bovine" is not typeable. The buffer is only `strcmp`'d
 against existing card titles; no pad-mask test for Square+Cross+Circle exists
 anywhere. Published TPW cheats are for the 1994 *Theme Park*, a different game.
+
+## ⭐ Building works — the full input recipe
+
+The blocker on the rest of the economy work is gone. From `park_ride.state`:
+
+```
+triangle                 back out to the top menu   (Build / Path / Laptop)
+triangle                 open the purchase screen   (stock counts per category)
+cross                    open a category            (Rides -> Crazy Ape, $2000, …)
+cross                    buy — the item is now held, footprint shown, Cost: $2000
+left or right, ~60 fr    nudge it off the existing ride
+cross                    PLACE
+```
+
+Result: two rides, both at status 10 (built). Verified in the pool, not just on
+screen.
+
+**Up does not work, and the screen says why: the footprint turns RED over water.**
+Placement is refused on invalid ground. This is exactly what strawberry described
+this morning — "it's red, you are overlapping the border" — and I could not act on
+it for eight hours because I had no way to see a colour.
+
+⚠ **Why this took all day, and it is worth writing down.** I concluded early that
+I could not drive these menus. Every test pressed a button and then read **memory
+addresses** — money, clock, attraction counts. Triangle opens the menu and changes
+roughly **1,800 pixels and zero of the words I was watching**, because a menu
+opening is a *rendering* event; simulation state does not move until you commit.
+So the instrument returned a clean null for a working input, and I believed it.
+
+The fix was to dump the framebuffer to a PNG and look. I had that capability from
+the start and had only ever pointed it at texture work. **Match the instrument to
+the KIND of effect: UI and selection are visual, and a RAM probe cannot see them.**
+
+The purchase screen also cross-confirms fable's pool table from the game's own UI:
+Rides 14 (with 1 built = 15), Track Rides 2, Roller Coasters 2, Shops 20,
+Sideshows 10, Features 45 — identical to `rides.json`, arrived at independently.
