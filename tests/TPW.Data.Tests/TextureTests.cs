@@ -137,49 +137,29 @@ namespace TPW.Data.Tests
             Assert.Equal(255, pal[2 * 4 + 2]);
         }
 
-        // The signature is what proves the 32-byte alignment on the real disc, so it has to be enforced.
-        [Fact]
-        public void AWellFormedTableNeedsTheSignatureAndSixteenDistinctColours()
-        {
-            var words = new ushort[16];
-            words[0] = 0x0000; words[1] = 0x8001;
-            for (int i = 2; i < 16; i++) words[i] = (ushort)(0x1000 + i);
-            Assert.True(Clut.LooksLikeTable(Strip(words), 0));
-        }
-
-        [Fact]
-        public void AWrongSignatureIsRejected()
-        {
-            var words = new ushort[16];
-            words[0] = 0x1234; words[1] = 0x8001;
-            for (int i = 2; i < 16; i++) words[i] = (ushort)(0x1000 + i);
-            Assert.False(Clut.LooksLikeTable(Strip(words), 0));
-        }
-
-        [Fact]
-        public void DuplicateColoursMeanItIsNotATable()
-        {
-            var words = new ushort[16];
-            words[0] = 0x0000; words[1] = 0x8001;
-            for (int i = 2; i < 16; i++) words[i] = 0x2222;   // all the same
-            Assert.False(Clut.LooksLikeTable(Strip(words), 0));
-        }
+        // ⚠ THE TESTS THAT WERE HERE ASSERTED A FALSE FACT. They pinned a `0x0000, 0x8001` prefix as the
+        // palette signature. The game's real palettes -- traced from draw commands rather than guessed from
+        // bytes -- do not have it, and entry #169, which holds three of them, contains zero blocks that do.
+        // Deleted rather than adjusted: there is no structural test for a palette, because 32 bytes of
+        // arbitrary colour is indistinguishable from 32 bytes of anything else.
 
         [Fact]
         public void OutOfRangeReadsAreSafe()
         {
+            // A read past the end returns a full-size palette of zeroes rather than throwing: the caller is
+            // handed an address by something else, and a bad one must not take the asset load down.
             Assert.Equal(Clut.Entries * 4, Clut.Read(Strip(0x0000, 0x8001), 9999).Length);
-            Assert.False(Clut.LooksLikeTable(Strip(0x0000, 0x8001), 9999));
-            Assert.False(Clut.LooksLikeTable(null, 0));
+            Assert.Equal(Clut.Entries * 4, Clut.Read(null, 0).Length);
             Assert.Equal(0, Clut.TableCount(null));
         }
 
         [Fact]
-        public void TableCountIsTheStripDividedByThirtyTwo()
-            => Assert.Equal(Clut.StripBytes / 32, Clut.TableCount(new byte[Clut.StripBytes]));
+        public void TableCountIsTheBufferDividedByThirtyTwo()
+            => Assert.Equal(4, Clut.TableCount(new byte[128]));
 
+        // Recorded as traced facts, not as anything the file structure implies.
         [Fact]
-        public void TheTwoPaletteStripsAreNamed()
-            => Assert.Equal(new[] { 0x104, 0x10C }, Clut.StripEntryIndices);
+        public void TheKnownPaletteEntriesAreTheTracedOnes()
+            => Assert.Equal(new[] { 169, 416 }, Clut.KnownPaletteEntries);
     }
 }

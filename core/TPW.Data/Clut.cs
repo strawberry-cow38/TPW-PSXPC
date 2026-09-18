@@ -3,35 +3,41 @@ using System.Collections.Generic;
 
 namespace TPW.Data
 {
-    /// <summary>Colour lookup tables — the palettes the 4bpp texture pages index into.
+    /// <summary>Colour lookup tables — the palettes the 4bpp texture pages index into. 32 bytes: 16 entries
+    /// of BGR555.
     ///
-    /// ⭐ THEY ARE NOT IN THE TEXTURE PAGES. They live in two headerless 128 KiB archive entries, `0x104` and
-    /// `0x10C`, which are streamed into a separate band of VRAM. tinyclaw found this from the drawing side:
-    /// their build logs every draw's CLUT address, and all of them sit at y &lt; 256, outside the region the
-    /// texture pages occupy. Searching the pages for palettes would have found nothing, forever.
+    /// ⚠⚠ PALETTES CANNOT BE FOUND BY SCANNING THIS ARCHIVE, AND AN EARLIER VERSION OF THIS FILE CLAIMED
+    /// THEY COULD. It said they live in two headerless 128 KiB entries, `0x104` and `0x10C`, and identified
+    /// them by every table opening `0x0000, 0x8001`. Both halves are wrong:
     ///
-    /// ✅ STRUCTURE CONFIRMED BY A SIGNATURE THE ALIGNMENT CANNOT FAKE. Each table is 32 bytes: 16 entries of
-    /// BGR555. Read at that stride, **every table begins `0000 8001`** — index 0 is `0x0000`, which is PSX
-    /// transparent, and index 1 is `0x8001`, black with the semi-transparency bit set. A wrong stride would
-    /// scatter those two words instead of landing them at the head of every block. Each table also holds 16
-    /// distinct colours, which a misaligned read would not reliably produce.
+    ///   • The palettes the game actually draws with are NOT in those strips. tinyclaw traced four of them
+    ///     back through the drawing commands: three are in entry **#169**, a contiguous array at a `0x20`
+    ///     stride, and one is in entry **#416** at `+0x36C0`. Entry #169 contains **zero** blocks matching
+    ///     the signature I was testing for.
+    ///   • The signature itself selects something, but not these. It hits 18 blocks in `0x104`, 47 in
+    ///     `0x10C` and 32 in `0x1A0` — structured data, just not the palettes in use.
     ///
-    /// Corroborated from the other direction: tinyclaw counted 177 draws using 47 distinct palettes in one
-    /// park, **every one of them 16 colours** — the drawing side independently agreeing with 4bpp.
+    /// ⚠ AND THE OBVIOUS FALLBACK IS VACUOUS. "16 distinct halfwords in 32 bytes" looks like a real
+    /// constraint and is not: sixteen random 16-bit values are all distinct about **99.8%** of the time, so
+    /// nearly every block in the archive passes it. There is no structural test here worth writing — a
+    /// palette is 32 bytes of arbitrary colour, which is indistinguishable from 32 bytes of anything else.
     ///
-    /// ⚠⚠ WHICH TABLE BELONGS TO WHICH TEXTURE IS NOT KNOWN AND IS NOT GUESSABLE. The CLUT id is packed into
-    /// the drawing commands, not stored with the page. There are 4,096 tables in a strip and roughly 47 in
-    /// use, so trying them until a picture looks plausible is not identification — it is the
-    /// match-by-rearranging failure that produces a decoder nobody can trust. Rendering a page under four
-    /// different tables gives four differently-coloured versions of the same coherent image, so "it looks
-    /// like something" cannot distinguish the right one.</summary>
+    /// ⭐ SO THE ADDRESSES MUST COME FROM THE DRAWING COMMANDS, NOT FROM THE FILE. That is not a gap to be
+    /// closed by a better scan; it is a property of the format. tinyclaw's tracing is the source, and the
+    /// reason to trust a given match is the evidence for THAT match — the (928,25) run has 16 distinct
+    /// halfwords out of 16 and occurs exactly twice in 16 MB, and three of five traced palettes cluster in
+    /// one entry, which chance does not do.
+    ///
+    /// ⚠ Two of the five traced palettes are not in the archive verbatim at all, so some arrive compressed
+    /// or are built at runtime. A plain lookup will not cover all 47 in use.</summary>
     public static class Clut
     {
         public const int Entries = 16;
         public const int Bytes = Entries * 2;
-        /// <summary>The two archive entries that carry palettes, and nothing else.</summary>
-        public static readonly int[] StripEntryIndices = { 0x104, 0x10C };
-        public const int StripBytes = 128 * 1024;
+        /// <summary>Entries known to hold palettes, from tinyclaw tracing draw commands back to bytes.
+        /// ⚠ NOT exhaustive and NOT derived from any property of the file — see the class note. #169 is a
+        /// contiguous array at a 0x20 stride; #416 holds at least one at +0x36C0.</summary>
+        public static readonly int[] KnownPaletteEntries = { 169, 416 };
 
         /// <summary>Read one table as RGBA8, 16 colours.
         ///
@@ -62,20 +68,9 @@ namespace TPW.Data
         /// <summary>How many tables a strip can hold.</summary>
         public static int TableCount(byte[] strip) => strip == null ? 0 : strip.Length / Bytes;
 
-        /// <summary>True if the block at <paramref name="tableIndex"/> carries the shape every real table on
-        /// this disc has. Used to check a strip is what we think it is, not to identify a palette.</summary>
-        public static bool LooksLikeTable(byte[] strip, int tableIndex)
-        {
-            if (strip == null) return false;
-            int at = tableIndex * Bytes;
-            if (at < 0 || at + Bytes > strip.Length) return false;
-            int first = strip[at] | (strip[at + 1] << 8);
-            int second = strip[at + 2] | (strip[at + 3] << 8);
-            if (first != 0x0000 || second != 0x8001) return false;
-
-            var seen = new HashSet<int>();
-            for (int i = 0; i < Entries; i++) seen.Add(strip[at + i * 2] | (strip[at + i * 2 + 1] << 8));
-            return seen.Count == Entries;
-        }
+        // ⚠ THERE IS DELIBERATELY NO LooksLikeTable HERE ANY MORE. The version that existed tested for a
+        // `0x0000, 0x8001` prefix that the game's actual palettes do not have, and the obvious replacement —
+        // "16 distinct halfwords" — passes ~99.8% of random blocks. Offering either would invite callers to
+        // scan for palettes, which cannot work. Read a table only at an address something else established.
     }
 }

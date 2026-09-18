@@ -213,6 +213,32 @@ the same target; both of us half-assumed they were. **Do not "fix" the decoder b
 until the transform is known** — matching numbers by rearranging bits is how a plausible wrong decoder
 gets built, which is the failure the oracle existed to prevent.
 
+## 5f. Palettes CANNOT be found by scanning, and I published that they could
+
+❌ **RETRACTED.** I recorded that the palettes live in two headerless 128 KiB entries, `0x104` and
+`0x10C`, identified by every 32-byte table opening `0x0000, 0x8001`, and put both facts in code with
+a test pinning them. Both halves are wrong.
+
+tinyclaw traced four palettes from the drawing commands back to bytes: three are in entry **#169**, a
+contiguous array at a `0x20` stride, and one is in entry **#416** at `+0x36C0`. **Entry #169 contains
+zero blocks matching the signature I was testing for.** The signature selects something real — 18
+blocks in `0x104`, 47 in `0x10C`, 32 in `0x1A0` — but not the palettes the game draws with.
+
+⚠⚠ **AND THE OBVIOUS FALLBACK IS VACUOUS.** "16 distinct halfwords in 32 bytes" reads like a real
+constraint. Sixteen random 16-bit values are all distinct about **99.8%** of the time, so nearly every
+block in the archive passes it. There is no structural test for a palette worth writing: 32 bytes of
+arbitrary colour is indistinguishable from 32 bytes of anything else.
+
+⭐ **That is a property of the format, not a gap to close with a better scan.** The addresses have to
+come from the drawing commands. What makes a traced match trustworthy is the evidence for that match:
+the `(928,25)` run has 16 distinct halfwords out of 16 and occurs exactly twice in 16 MB, and three of
+five traced palettes cluster in one entry — chance does not cluster.
+
+**Known open:** two of the five traced palettes are not in the archive verbatim, so some are
+compressed or built at runtime; a plain lookup will not cover all 47 in use. And **a page has MANY
+palettes, not one** — one atlas is drawn with up to 11 different CLUTs depending on the sprite, so
+"render page N under palette X until it looks right" is a malformed question, not a weak test.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is

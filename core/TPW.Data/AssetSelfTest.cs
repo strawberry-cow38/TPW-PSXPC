@@ -154,24 +154,10 @@ namespace TPW.Data
                     $"{pageEntries} entries sized for a {VramTexture.Width}x{VramTexture.Height} " +
                     $"{VramTexture.BitsPerPixel}bpp page (size only — pixel correctness is not checked here)");
 
-            // Palette strips. ⭐ THIS ONE CAN FAIL, unlike the page count above: it requires every 32-byte
-            // block to open 0x0000, 0x8001 and hold 16 distinct colours. A wrong stride, a wrong strip, or a
-            // compressed one all break that immediately.
-            int strips = 0, tables = 0, wellFormed = 0;
-            foreach (int idx in Clut.StripEntryIndices)
-            {
-                if (idx >= gaz.Entries.Count) continue;
-                var se = gaz.Entries[idx];
-                if (se.Size != Clut.StripBytes) continue;
-                strips++;
-                var strip = gaz.Read(se);
-                int n = Clut.TableCount(strip);
-                for (int t = 0; t < n; t++) { tables++; if (Clut.LooksLikeTable(strip, t)) wellFormed++; }
-            }
-            if (strips > 0)
-                r.Add("palette strips", wellFormed > 0,
-                    $"{strips} strips, {wellFormed:n0} of {tables:n0} 32-byte blocks are well-formed 16-colour tables");
-
+            // ⚠ NO PALETTE CHECK. An earlier version reported "2 strips, 65 of 8,192 well-formed
+            // 16-colour tables" and was measuring the wrong entries with a signature the real palettes do not
+            // carry. Palettes are 32 bytes of arbitrary colour and cannot be told from any other 32 bytes, so
+            // there is nothing here that could fail on a wrong answer. See Clut.
             CheckAudio(gaz, r);
 
             // Decode anything that is actually an image. Today that is TGA only; as formats are cracked they
