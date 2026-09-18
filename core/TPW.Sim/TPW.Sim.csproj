@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ENGINE-FREE BY CONSTRUCTION. No Godot reference here, ever. That is what lets the whole sim be tested
+       on a machine with no engine installed, and it is the property this split exists to protect. If this
+       file ever grows a Godot dependency the split is gone, and nobody will notice until the tests need a
+       GPU to run. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>TPW.Sim</RootNamespace>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+</Project>

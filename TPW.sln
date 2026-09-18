@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{ECEFFA78-F9B8-4592-9D95-E6D713067957}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPW.Sim", "core\TPW.Sim\TPW.Sim.csproj", "{5FB9EB91-5011-4FD7-91DE-8E7B9B2CC49D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6F83EA9A-BEBB-45EB-976C-1B3F9765EC87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPW.Sim.Tests", "tests\TPW.Sim.Tests\TPW.Sim.Tests.csproj", "{28814972-38C5-4175-8DE3-D93230E5F02B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FB9EB91-5011-4FD7-91DE-8E7B9B2CC49D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FB9EB91-5011-4FD7-91DE-8E7B9B2CC49D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FB9EB91-5011-4FD7-91DE-8E7B9B2CC49D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FB9EB91-5011-4FD7-91DE-8E7B9B2CC49D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28814972-38C5-4175-8DE3-D93230E5F02B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28814972-38C5-4175-8DE3-D93230E5F02B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28814972-38C5-4175-8DE3-D93230E5F02B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28814972-38C5-4175-8DE3-D93230E5F02B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5FB9EB91-5011-4FD7-91DE-8E7B9B2CC49D} = {ECEFFA78-F9B8-4592-9D95-E6D713067957}
+		{28814972-38C5-4175-8DE3-D93230E5F02B} = {6F83EA9A-BEBB-45EB-976C-1B3F9765EC87}
+	EndGlobalSection
+EndGlobal

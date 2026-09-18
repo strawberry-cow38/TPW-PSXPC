@@ -72,3 +72,12 @@ obj/
 build/
 *.o
 *.elf
+
+# build output
+bin/
+obj/
+build/
+*.o
+*.elf
+.vs/
+*.user
