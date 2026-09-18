@@ -856,3 +856,40 @@ and doing it without either party distributing the asset.
 The invariants did behave as designed, just slower: a 180 rotation leaves the
 non-black count and the peak channel triple **identical** and moves only the hash,
 so "count matches, peaks match, hash misses" could only ever have meant layout.
+
+## ⚠ CORRECTION: the "peak channel" invariant was a bad statistic
+
+I published `peak R=14 G=30 B=29` as an alignment-free invariant for checking a
+decoder. **It is an extremum over 81,920 samples and two stray pixels set it.**
+The distribution says the opposite of what the peak implied:
+
+```
+non-black pixels in the captured framebuffer   11,143
+    with low5  == 0                            11,141
+    with high5 == 0                                90
+```
+
+So the framebuffer's low 5 bits are **identically zero**, exactly as catboy
+measured in the file. The file and the framebuffer agree, and the "there must be a
+colour transform between file and screen" conclusion — which my peak triple is what
+produced — was wrong.
+
+**The real answer: the pixel data is PSX `BGR555`, not TGA `ARGB1555`.** Same bytes,
+opposite channel order:
+
+```
+0x73c0   low5=0  mid5=30  high5=28
+  as BGR555   (low bits RED)  -> R=0  G=30 B=28   cyan/blue   = what the console draws
+  as ARGB1555 (high bits RED) -> R=28 G=30 B=0    yellow      = what a TGA reader gives
+```
+
+That is mechanical rather than fitted: the loader DMAs the image straight to VRAM
+via `LoadImage`, so the data must already be in the hardware's format. The TGA
+header and footer wrap bytes authored for the console.
+
+⚠ **The lesson is one I already had filed and did not apply to my own number.** A
+single worst-case value cannot distinguish "one odd pixel" from "the whole image is
+like this" — print the DISTRIBUTION, not the extremum. Worse, I published the peak
+*as an invariant for someone else to test against*, so my bad statistic became
+their false lead. An instrument handed to a peer needs more scrutiny than one I
+only use myself, not less.
