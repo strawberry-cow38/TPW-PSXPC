@@ -42,57 +42,69 @@ over 12000 frames `money`, `gate_total` and `income_total` all moved by exactly
 ⚠ I first reported this as 80 admissions. It is 8. I divided stored units by the
 displayed price — right numerator, wrong denominator's unit.
 
-## Arrival rate
+## Arrival rate — there isn't one. Guests arrive by BUS.
 
-**An empty park gets ZERO arrivals. Any non-empty park gets roughly one guest per
-640-730 clock ticks, and how much is built barely moves that number.**
+**A bus runs a fixed timetable that the park cannot influence. What you build
+changes only the HEAD-COUNT per bus, never the cadence.** (fable, arrivals.md,
+from the code; confirmed live below.)
 
-Measured across six saved parks, 4000 frames each, 10-tick resolution:
+Spawn-to-spawn is **694 sim ticks**, measured by fable over 8 spawns with gaps
+694 694 694 695 697 694 694. The bus is stepped once per sim tick by the time
+delta at `0x80103A90`; its phase word is `0x80103964` and its position
+`0x80103968` in 16.16 fixed point.
 
-| park | arrivals | gaps (ticks) | mean |
-|---|---|---|---|
-| park_ride (one ride) | 3 | 710, 700 | 705 |
-| park_shop | 3 | 670, 640 | 655 |
-| park_shop5 | 3 | 670, 700 | 685 |
-| park_trail | 3 | 710, 730 | 720 |
-| park_trail2 | 2 | 640 | 640 |
-| park (empty) | **0** | - | - |
+**fable's prediction, made before the run, and the result:**
 
-⚠ **CORRECTION, and it was mine.** I reported this section earlier as *"periodic,
-not stochastic -- a constant interval, so the arrival model is a rate and not a
-dice roll."* That was three arrivals in one park, and it does not survive the
-wider measurement. The gaps range 640-730, a spread of 90 ticks against a
-sampling resolution of 10 -- so the variance is **nine times** what the
-instrument could have manufactured. It is real. There is jitter, and I called it
-constant from a sample too small to show otherwise.
+| | predicted | measured |
+|---|---|---|
+| baseline gap | 694 ticks | 710 (median of 4) |
+| holding `0x80102D40 = 1` | **328 ticks** | **320** (median of 7) |
 
-**But it is not a dice roll either, and that half was worth keeping.** Over the
-nine measured gaps: mean 685.6, sd 32.1, **CV 0.047**. A memoryless process -- a
-per-tick random draw -- has CV = 1.0, so this is **21x tighter than random**, and
-the sd is 11x the 2.9-tick quantisation floor of the sampling. A coin flipped
-every tick would give gaps of 12 and 3000; these run 640 to 730. That is a
-metronome with a wobble: **a counter reaching a threshold, with something small
-modulating it.** (Caught by cow tools, who ran the statistic I should have run on
-my own numbers before writing either claim.)
+That is a specific number called in advance and hit. Baseline admissions read
+slightly above 694 because **admission lags spawn**: a new gate batch cannot start
+until the previous bus passes position 25.0, so latency creeps ~+10 per cycle then
+snaps back. My earlier "705" is 694 plus that creep.
 
-⚠ **"Arrivals scale with what is built" is UNMEASURED, not disproved, and the
-distinction matters.** I wrote that the sweep did not support it, on the grounds
-that one ride gives 705 and five shops give 685. That is **two samples each**, and
-both sit well inside a 640-730 spread -- the difference cannot be told from noise.
-Calling it disproved would stop the next person looking. Separating the two needs
-roughly 5-9 gaps per condition, which is cheap and not yet done.
+⚠ **My six-park sweep could never have answered the contents question.** A proper
+census of all seven attraction pools says every non-empty state holds **exactly
+one** attraction:
 
-What the data *does* show is a **step at zero**: an open but empty park gets no
-guests at all, and anything built switches arrivals on. That finding survives.
+| state | contents | gaps (ticks) |
+|---|---|---|
+| park | 0 | no arrivals |
+| park_ride | 1 ride | 710, 700 |
+| park_shop | 1 shop | 670, 640 |
+| park_shop5 | 1 shop | 670, 700 |
+| park_trail | 1 shop | 710, 730 |
+| park_trail2 | 1 shop | 640 |
 
-**What DOES move it enormously is the debug switch.** With `0x80102D30 = 1` and
-`0x80102E60 = 1` held on an empty field: 120 guests in 3000 frames, about one per
-12.5 ticks -- roughly **55x** faster than any natural park here. So a large lever
-exists; it is just not "how much you have built", on this evidence.
+So the independent variable took the values {0, 1} and nothing else. I concluded
+"the sweep does not support contents scaling" from a dataset **in which contents
+never varied above one**. That is not weak evidence, it is none — and the earlier
+softening to "unmeasured" was right for a stronger reason than I knew. The
+filenames ("park_shop5") suggested variety that the memory did not contain, and I
+took the filename for the contents.
 
-⚠ **Scope of all of the above:** six parks, 2-3 arrivals each. That is enough to
-falsify "constant" and enough to show the zero step. It is *not* enough to fit a
-formula, and I should not have implied a model from three points the first time.
+**Head-count per bus** (fable, SOURCED at 0x80067274):
+`min(cap − guests, 20 − lanes, floor((S + [0x80102E54]) × 0x1333 / [0x80102E50]))`
+with **S = 10 + Σ terms**. ⚠ The base 10 at 0x80067444 was missing from the earlier
+parkopen report; without it a young low-level ride computes to zero guests.
+
+**Levers, all held per frame, all measured by fable from park_ride.state:**
+
+| write | effect |
+|---|---|
+| `0x80102D40 = 1` | bus every 328 ticks (confirmed here: 320) |
+| `0x80102D40 = 1` + `0x800E0F0C = 15` | every 131 ticks |
+| `0x80102E54 = 100` | cadence unchanged, 7 guests per bus |
+| `0x80102E60 = 1` | 20 guests per bus |
+
+⚠ **Trap:** a phase-4 target ≤ 25 (`0x800E0F18 = 17`) shortens the cycle to 411 but
+**freezes admissions permanently**. Use 26 or more.
+
+⚠ **Not reproduced:** my earlier "120 guests in 3000 frames on an empty field".
+fable got 60 spawned on the same pokes. My number is suspect and I have not
+re-run it.
 
 ## Shop revenue — first measured, via fable's pathfinder switch
 
