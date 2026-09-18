@@ -24,7 +24,8 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 4;   // v4: no functional change -- published to prove v3 self-updates, which is only testable against a HIGHER published version
+    const int LauncherVersion = 5;   // v5: branch dropdown, Godot auto-download, current-vs-latest commit, Options panel, settings persisted beside the exe
+    // v4: no functional change -- published to prove v3 self-updates, which is only testable against a HIGHER published version
     // v3: self-update -- downloads the published exe, verifies shape AND sha256, swaps via a shim that waits on this PID
     // v2: fixed a null-Text crash on the first log line; startup probe moved off the UI thread; unhandled exceptions now reach the panel and launcher-crash.log
     // v1: first TPW launcher -- clone/build, game-data identification, Play
@@ -35,7 +36,11 @@ public class MainWindow : Window
     // quietly downgrading itself.
     const string Sha256Url = "https://github.com/strawberry-cow38/TPW-PSXPC/releases/download/launcher/launcher.sha256";
 
-    static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
+    // Godot 4.6 mono win64, matching the game csproj's Godot.NET.Sdk/4.6.2. Auto-downloaded when absent, so a
+    // user needs git and the dotnet SDK and nothing else.
+    const string GodotUrl = "https://downloads.godotengine.org/?version=4.6&flavor=stable&slug=mono_win64.zip&platform=windows.64";
+
+    static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(10) };
 
     // Palette lifted from the in-game UI so launcher and game read as one product.
     static SolidColorBrush B(string hex) => new(Color.Parse(hex));
@@ -59,9 +64,20 @@ public class MainWindow : Window
     readonly Button _play = new() { Content = "Play", IsEnabled = false, MinWidth = 110 };
     readonly Button _update = new() { Content = "Update", MinWidth = 110 };
     readonly CheckBox _console = new() { Content = "Debug console", Foreground = TextBody };
+    readonly ComboBox _branches = new() { MinWidth = 180 };
+    readonly TextBlock _buildState = new() { Foreground = TextDim, FontSize = 12, TextWrapping = TextWrapping.Wrap };
+    string _branch = DefaultBranch;
 
     readonly string _baseDir = AppContext.BaseDirectory;
     string _repoDir => Path.Combine(_baseDir, "TPW-PSXPC");
+    // ⚠ SETTINGS LIVE ON DISK BESIDE THE EXE, NOT IN THE CONTROLS. Two reasons, both learned the hard way in
+    // the launcher this one is modelled on: an action can run on a launcher whose window was never shown, so
+    // the control may not be initialised; and a self-update replaces the exe, so anything held only in the
+    // process is lost on every upgrade. The checkbox WRITES the file; the file is what anything else reads.
+    string BranchFile => Path.Combine(_baseDir, "branch.txt");
+    string ConsoleFile => Path.Combine(_baseDir, "debug_console.txt");
+    string DataPathFile => Path.Combine(_baseDir, "game_data_path.txt");
+
     string _gameDataPath;          // what the user pointed us at (file or folder)
     GameDataResult _gameData;      // the result of identifying it
     bool _busy;
@@ -92,10 +108,41 @@ public class MainWindow : Window
             },
         });
 
+        _branches.SelectionChanged += async (_, _) =>
+        {
+            // ⚠ RECORD THE CHOICE BEFORE ANYTHING CAN DECLINE TO ACT ON IT. The launcher this is modelled on
+            // returned early when busy BEFORE persisting the selection, so the dropdown showed one branch
+            // while branch.txt held another and Update fetched the old one -- the visible half was the wrong
+            // half. Persist first, then let the refresh wait its turn.
+            if (_branches.SelectedItem is not string b || b == _branch) return;
+            _branch = b;
+            TryWrite(BranchFile, b);
+            Log($"Branch set to {b}.");
+            await WithBusy(RefreshBuildStateAsync);
+        };
+
+        var checkUpdate = new Button { Content = "Check for update", MinWidth = 130 };
+        checkUpdate.Click += async (_, _) => await WithBusy(async () =>
+        {
+            if (!await CheckSelfUpdateAsync()) Log($"Launcher is up to date (v{LauncherVersion}).");
+            await RefreshBuildStateAsync();
+        });
+
+        var options = new Expander
+        {
+            Header = "Options", Foreground = TextBody,
+            Content = new StackPanel { Spacing = 8, Margin = new Thickness(0, 8, 0, 0),
+                Children = { _console, checkUpdate, OpenFolderButton() } },
+        };
+
         var actions = new StackPanel
         {
             Orientation = Orientation.Horizontal, Spacing = 8,
-            Children = { _update, _play, _console },
+            Children =
+            {
+                new TextBlock { Text = "Branch", Foreground = TextDim, FontSize = 13, VerticalAlignment = VerticalAlignment.Center },
+                _branches, _update, _play,
+            },
         };
 
         Content = new ScrollViewer
@@ -103,7 +150,7 @@ public class MainWindow : Window
             Content = new StackPanel
             {
                 Margin = new Thickness(18), Spacing = 12,
-                Children = { head, sub, dataCard, actions, Card(_log) },
+                Children = { head, sub, dataCard, actions, _buildState, options, Card(_log) },
             },
         };
 
@@ -142,9 +189,21 @@ public class MainWindow : Window
         // image -- doing that inline freezes the window for seconds at startup, which reads to a user as a
         // hang or a crash. I had already put the MANUAL pick on a background thread and then called the same
         // work synchronously from startup: fixed in the place I was thinking about, missed the other caller.
+        // Restore what the user chose last time. A remembered game-data path matters most: re-hashing a
+        // 500 MB image on every launch is slow, and re-asking for it is worse.
+        _branch = TryRead(BranchFile) ?? DefaultBranch;
+        _console.IsChecked = (TryRead(ConsoleFile) ?? "1") == "1";
+        _console.IsCheckedChanged += (_, _) => TryWrite(ConsoleFile, _console.IsChecked == true ? "1" : "0");
+        _gameDataPath = TryRead(DataPathFile);
+
         Log("Looking for your copy of Theme Park World…");
-        var found = await Task.Run(() => GameDataLocator.Probe());
+        var found = await Task.Run(() => string.IsNullOrEmpty(_gameDataPath)
+            ? GameDataLocator.Probe()
+            : GameDataLocator.Identify(_gameDataPath));
         RefreshGameData(found);
+
+        await PopulateBranchesAsync();
+        await RefreshBuildStateAsync();
     }
 
     // ---- game data ----------------------------------------------------------------------------------
@@ -168,6 +227,7 @@ public class MainWindow : Window
         if (picked == null) return;
 
         _gameDataPath = picked;
+        TryWrite(DataPathFile, picked);
         Log($"Checking {picked} …");
         // Hashing a 500 MB image takes a moment; keep the UI alive.
         var r = await Task.Run(() => GameDataLocator.Identify(picked));
@@ -213,19 +273,24 @@ public class MainWindow : Window
         if (!Directory.Exists(_repoDir))
         {
             Log("Cloning …");
-            await RunAsync(git, new[] { "clone", "--branch", DefaultBranch, RepoUrl, _repoDir }, _baseDir);
+            await RunAsync(git, new[] { "clone", "--branch", _branch, RepoUrl, _repoDir }, _baseDir);
         }
         else
         {
             Log("Updating …");
             await RunAsync(git, new[] { "fetch", "--all", "--prune" }, _repoDir);
-            await RunAsync(git, new[] { "reset", "--hard", "origin/" + DefaultBranch }, _repoDir);
+            // ⚠ EXPLICIT REFSPEC so origin/<branch> exists locally for any branch, not just the cloned one.
+            // A --branch clone only configures tracking for that one, so a plain fetch of another updates
+            // FETCH_HEAD without creating the remote-tracking ref the reset below needs.
+            await RunAsync(git, new[] { "fetch", "origin", $"+{_branch}:refs/remotes/origin/{_branch}" }, _repoDir);
+            await RunAsync(git, new[] { "reset", "--hard", "origin/" + _branch }, _repoDir);
         }
 
         string dotnet = Which("dotnet") ?? throw new Exception("dotnet SDK not found on PATH.");
         Log("Building …");
         int rc = await RunAsync(dotnet, new[] { "build", Solution, "-c", BuildConfig, "--nologo" }, _repoDir);
         Log(rc == 0 ? "Build OK." : $"Build FAILED (exit {rc}).");
+        await RefreshBuildStateAsync();
         UpdateButtons();
     }
 
@@ -233,13 +298,16 @@ public class MainWindow : Window
     {
         if (!_gameData.CanPlay) { Log("No recognised game data — cannot start."); return; }
 
-        string godot = Which("godot");
-        if (godot == null) { Log("Godot not found on PATH. (Auto-download lands with the game project.)"); return; }
+        string godot = await EnsureGodotAsync();
+        if (godot == null) { Log("No Godot available — cannot start."); return; }
 
+        // ⚠ READ THE PREFERENCE FROM DISK, not from the checkbox. Play can run on a launcher whose window was
+        // never shown, and the file is also what survives a self-update. The checkbox writes it; this reads it.
+        bool wantConsole = (TryRead(ConsoleFile) ?? "1") == "1";
         // Ask core which binary to run, and then LOG WHAT WE DID rather than what was asked for.
-        var choice = LauncherRules.GodotExeFor(godot, _console.IsChecked == true, File.Exists);
+        var choice = LauncherRules.GodotExeFor(godot, wantConsole, File.Exists);
         if (!choice.Satisfied)
-            Log($"Note: the {( _console.IsChecked == true ? "console" : "windowed")} build was not found; starting {Path.GetFileName(choice.Path)} instead.");
+            Log($"Note: the {(wantConsole ? "console" : "windowed")} build was not found; starting {Path.GetFileName(choice.Path)} instead.");
 
         var psi = new ProcessStartInfo(choice.Path) { UseShellExecute = false, WorkingDirectory = _repoDir };
         psi.ArgumentList.Add("--path");
@@ -249,6 +317,132 @@ public class MainWindow : Window
         psi.Environment["TPW_VARIANT"] = _gameData.Variant?.Id ?? "";
         Log($"Starting {Path.GetFileName(choice.Path)} ({_gameData.Variant?.Id}) …");
         Process.Start(psi);
+    }
+
+    // ---- branches, build state, Godot ---------------------------------------------------------------
+
+    async Task PopulateBranchesAsync()
+    {
+        var names = new List<string> { DefaultBranch };
+        string git = Which("git");
+        if (git != null)
+        {
+            string outp = await Capture(git, new[] { "ls-remote", "--heads", RepoUrl });
+            foreach (string line in outp.Split('\n'))
+            {
+                int i = line.IndexOf("refs/heads/", StringComparison.Ordinal);
+                if (i < 0) continue;
+                string n = line[(i + "refs/heads/".Length)..].Trim();
+                if (n.Length > 0 && !names.Contains(n)) names.Add(n);
+            }
+        }
+        Dispatcher.UIThread.Post(() =>
+        {
+            _branches.ItemsSource = names;
+            // ⚠ A remembered branch that no longer exists must not silently become "whatever is first".
+            _branches.SelectedItem = names.Contains(_branch) ? _branch : DefaultBranch;
+            if (!names.Contains(_branch)) { Log($"Branch '{_branch}' no longer exists — using {DefaultBranch}."); _branch = DefaultBranch; }
+        });
+    }
+
+    /// <summary>Show the checked-out commit against the newest one on the selected branch, so "am I current?"
+    /// is answerable without running an update and watching what happens.</summary>
+    async Task RefreshBuildStateAsync()
+    {
+        string git = Which("git");
+        if (git == null) { Set("git not found — install it to clone and build."); return; }
+
+        string remote = (await Capture(git, new[] { "ls-remote", RepoUrl, _branch })).Split('\t')[0].Trim();
+        string local = Directory.Exists(_repoDir)
+            ? (await Capture(git, new[] { "-C", _repoDir, "rev-parse", "HEAD" })).Trim()
+            : "";
+
+        string Short(string h) => h.Length >= 7 ? h[..7] : h;
+        if (local.Length == 0) Set($"Not cloned yet. Latest on {_branch}: {Short(remote)}");
+        else if (remote.Length > 0 && !remote.StartsWith(local[..Math.Min(7, local.Length)], StringComparison.Ordinal))
+            Set($"Update available on {_branch}: {Short(local)} -> {Short(remote)}");
+        else Set($"Up to date on {_branch} ({Short(local)})");
+
+        void Set(string t) => Dispatcher.UIThread.Post(() => _buildState.Text = t);
+    }
+
+    /// <summary>Find Godot, or fetch it. A user should need git and the dotnet SDK and nothing else.</summary>
+    async Task<string> EnsureGodotAsync()
+    {
+        string onPath = Which("godot") ?? Environment.GetEnvironmentVariable("TPW_GODOT_EXE");
+        if (!string.IsNullOrEmpty(onPath) && File.Exists(onPath)) return onPath;
+
+        string dir = Path.Combine(_baseDir, "godot");
+        string have = FindGodotExe(dir);
+        if (have != null) { Log("Godot (downloaded earlier): " + Path.GetFileName(have)); return have; }
+
+        try
+        {
+            Log("Godot not found — downloading Godot 4.6 mono (win64), ~104 MB…");
+            Directory.CreateDirectory(dir);
+            byte[] bytes = await Http.GetByteArrayAsync(GodotUrl);
+            // ⚠ A zip begins "PK". Same reasoning as the launcher update: an error page is a successful HTTP
+            // response, and extracting one produces a confusing failure far from its cause.
+            if (bytes.Length < 20_000_000 || bytes[0] != (byte)'P' || bytes[1] != (byte)'K')
+            { Log($"Godot download looks wrong ({bytes.Length:n0} bytes) — skipped."); return null; }
+
+            string zip = Path.Combine(dir, "godot.zip");
+            await File.WriteAllBytesAsync(zip, bytes);
+            Log("Extracting…");
+            System.IO.Compression.ZipFile.ExtractToDirectory(zip, dir, overwriteFiles: true);
+            try { File.Delete(zip); } catch { }
+            string exe = FindGodotExe(dir);
+            Log(exe != null ? "Godot ready: " + Path.GetFileName(exe) : "Godot extracted but no editor exe was found.");
+            return exe;
+        }
+        catch (Exception e) { Log("Godot download failed: " + e.Message); return null; }
+    }
+
+    // The mono win64 zip extracts a Godot_v4.6-stable_mono_win64/ folder. Take the editor exe and skip the
+    // *_console.exe -- GodotExeFor adds that suffix back when the user wants it, and picking the console
+    // build here would make the toggle start from the wrong base.
+    static string FindGodotExe(string dir)
+    {
+        if (!Directory.Exists(dir)) return null;
+        foreach (string f in Directory.GetFiles(dir, "Godot_v*_win64.exe", SearchOption.AllDirectories))
+            if (!f.Contains("console", StringComparison.OrdinalIgnoreCase)) return f;
+        return null;
+    }
+
+    Button OpenFolderButton()
+    {
+        var b = new Button { Content = "Open launcher folder", MinWidth = 160 };
+        b.Click += (_, _) =>
+        {
+            try { Process.Start(new ProcessStartInfo(_baseDir) { UseShellExecute = true }); }
+            catch (Exception e) { Log("Could not open folder: " + e.Message); }
+        };
+        return b;
+    }
+
+    static string TryRead(string path)
+    {
+        try { return File.Exists(path) ? File.ReadAllText(path).Trim() : null; } catch { return null; }
+    }
+
+    static void TryWrite(string path, string value)
+    {
+        try { File.WriteAllText(path, value); } catch { /* a read-only install must not crash on a preference */ }
+    }
+
+    async Task<string> Capture(string exe, string[] args)
+    {
+        var psi = new ProcessStartInfo(exe) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (string a in args) psi.ArgumentList.Add(a);
+        try
+        {
+            using var p = new Process { StartInfo = psi };
+            p.Start();
+            string o = await p.StandardOutput.ReadToEndAsync();
+            await p.WaitForExitAsync();
+            return o;
+        }
+        catch { return ""; }
     }
 
     // ---- self update --------------------------------------------------------------------------------
