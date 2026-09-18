@@ -188,15 +188,24 @@ namespace TPWGodot
             _audio.Play();
         }
 
-        /// <summary>⚠⚠ OPEN — THE SAMPLE RATE IS NOT IN THE WAVEFORM AND HAS NOT BEEN MEASURED. VAG ADPCM
-        /// carries no rate; on hardware the pitch comes from the SPU register the tone attributes set, and
-        /// those attributes are in the VAB header's tone table, which is not parsed yet. 22,050 Hz is a common
-        /// PSX choice and is a PLACEHOLDER.
+        /// <summary>Base playback rate. ⚠ DERIVED from the music, not measured — but it is evidence, and it
+        /// replaced a guess that was wrong by a factor of 2.6.
         ///
-        /// It is a safe placeholder for one specific reason: getting it wrong makes the sound play at the
-        /// wrong pitch and speed, which is immediately obvious to anyone who hears it. A wrong value that
-        /// sounded fine would be the dangerous kind. Do not treat this as established.</summary>
-        const int SampleRateHz = 22050;
+        /// VAG ADPCM carries no sample rate, so the first version of this was 22,050 Hz "because that is a
+        /// common PSX rate". That is not a reason. The answer turned out to be in bytes already in hand: the
+        /// XM modules keep their instrument headers, with sample length ZEROED — the waveform data is stripped
+        /// because it lives in the VAG bank — while **relative note and finetune survive intact**. Across
+        /// module #296's 26 instruments those read 0 or -12 with finetune 0, and the XM convention
+        /// `rate = 8363 * 2^((relative + finetune/128) / 12)` turns those into **8363 Hz** and **4182 Hz**.
+        ///
+        /// ⚠ TWO REASONS THIS IS STILL NOT SETTLED. It is per-instrument, not global: half of them are an
+        /// octave down, so one constant is wrong for those by design and this should become a per-waveform
+        /// rate once the XM instrument to VAG mapping is wired. And it is the rate the TRACKER thinks in;
+        /// the SPU is pitched by the VAB tone attributes, which nobody has parsed. Those two could disagree.
+        ///
+        /// Kept as a constant only because a wrong rate is instantly audible as wrong pitch — the safe kind of
+        /// wrong. 8363 is the better default because something measured points at it.</summary>
+        const int SampleRateHz = 8363;
 
         public override void _Process(double delta)
         {
