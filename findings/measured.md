@@ -248,6 +248,43 @@ guests cut straight lines and path capacity stops mattering. Good for unblocking
 measurement; wrong for any number that depends on guests queueing or bunching.
 fable's 3.1 (write real path tiles) is the faithful version.
 
+## Wages and loans: zero, because no park I have has staff
+
+Over **81 game days (~2.7 months, several rollovers)** in a busy park with the
+debug switch held:
+
+| accumulator | address | start | end |
+|---|---|---|---|
+| cumulative wages | `bank+0x12D0` | 0 | **0** |
+| cumulative loan payments | `bank+0x12C0` | 0 | **0** |
+| gate | `bank+0x12C8` | — | **+82800** |
+| income | `bank+0x12D8` | — | **+82800** |
+
+`bank` is behind a pointer at `0x801031BC`; it resolved to `0x801D5658`, which is
+what makes `gate = bank+0x12C8 = 0x801D6920` agree with the address I had already
+been using.
+
+**The control that makes the zero meaningful.** My first attempt at this watched
+the *balance* for a decrease and found none — worthless, because I was sampling
+every 200 frames against a balance rising by 8000 per bus, so any charge absorbed
+between samples is invisible. A dedicated accumulator is the right instrument, and
+its zero is only trustworthy because **its immediate neighbours in the same struct
+moved**: gate at +0x12C8 and income at +0x12D8 both climbed 82800 while wages at
++0x12D0 sat at 0. The base is right, the region is live, the field is genuinely
+zero.
+
+So: **no staff are employed in any of my save states**, and wages cannot be
+measured until I have a park that has some. Not a fact about the game's wage
+model, a fact about my fixtures.
+
+⚠ **Untested cheat lead, and it is the strongest one yet by pattern.** fable's
+economy.json records `0x801031CC` as a **free-money flag** — "TrySpend returns 1
+without charging; placement always affordable" — with **no writer anywhere in
+TPW.BIN**. A reader with no writer is exactly how `0x80102E60` was found. It reads
+0 in my parks. I cannot test it, because testing it needs *spending*, and spending
+needs the build UI I cannot drive. It is the likely mechanism behind the published
+"build anything for free" cheat.
+
 ## A debug menu shipped in the build
 
 `FOLIO.GAZ` carries the game's symbolic string table, 1031 ids of the form `STR_*`.
