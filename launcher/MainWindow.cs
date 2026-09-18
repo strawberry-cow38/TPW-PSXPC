@@ -24,7 +24,8 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 1;   // v1: first TPW launcher -- clone/build, game-data identification, Play
+    const int LauncherVersion = 2;   // v2: fixed a null-Text crash on the first log line; startup probe moved off the UI thread; unhandled exceptions now reach the panel and launcher-crash.log
+    // v1: first TPW launcher -- clone/build, game-data identification, Play
     const string VersionUrl = "https://github.com/strawberry-cow38/TPW-PSXPC/releases/download/launcher/launcher.version";
 
     static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
@@ -45,6 +46,7 @@ public class MainWindow : Window
         IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.NoWrap,
         Background = Brushes.Transparent, Foreground = TextBody, BorderThickness = new Thickness(0),
         FontFamily = new FontFamily("Consolas,Menlo,monospace"), FontSize = 12, MinHeight = 220,
+        Text = "",   // see Log(): a default TextBox carries null here, and every append would dereference it
     };
     readonly TextBlock _dataStatus = new() { Foreground = TextDim, FontSize = 13, TextWrapping = TextWrapping.Wrap };
     readonly Button _play = new() { Content = "Play", IsEnabled = false, MinWidth = 110 };
@@ -98,7 +100,23 @@ public class MainWindow : Window
             },
         };
 
-        Opened += async (_, _) => await InitAsync();
+        // ⚠ `Opened += async ...` is effectively async void: an exception inside it takes the PROCESS down
+        // with no message a user can report. That is exactly how the first crash presented -- "crashes after
+        // a few seconds" and nothing else to go on. Now anything unhandled lands in the log panel AND in a
+        // file next to the exe, so the next one arrives as a stack trace instead of a symptom.
+        Opened += async (_, _) =>
+        {
+            try { await InitAsync(); }
+            catch (Exception e) { Fatal(e); }
+        };
+    }
+
+    void Fatal(Exception e)
+    {
+        try { File.AppendAllText(Path.Combine(_baseDir, "launcher-crash.log"), $"{DateTime.Now:s}  {e}\n\n"); }
+        catch { /* if even that fails, the panel below is still worth trying */ }
+        Log("UNEXPECTED ERROR — please report this:");
+        Log(e.ToString());
     }
 
     Border Card(Control inner) => new()
@@ -111,7 +129,13 @@ public class MainWindow : Window
     {
         Log($"TPW launcher v{LauncherVersion}");
         await CheckSelfUpdateAsync();
-        RefreshGameData(GameDataLocator.Probe());
+        // ⚠ OFF THE UI THREAD. Probing hashes whatever it finds, and the common case is a ~500 MB disc
+        // image -- doing that inline freezes the window for seconds at startup, which reads to a user as a
+        // hang or a crash. I had already put the MANUAL pick on a background thread and then called the same
+        // work synchronously from startup: fixed in the place I was thinking about, missed the other caller.
+        Log("Looking for your copy of Theme Park World…");
+        var found = await Task.Run(() => GameDataLocator.Probe());
+        RefreshGameData(found);
     }
 
     // ---- game data ----------------------------------------------------------------------------------
@@ -266,9 +290,19 @@ public class MainWindow : Window
         return p.ExitCode;
     }
 
+    // ⚠⚠ A FRESH Avalonia TextBox HAS Text == null, NOT "". `_log.Text.Length` therefore threw a
+    // NullReferenceException on the very FIRST line logged, which is the first thing the launcher does --
+    // so it died a moment after opening, every time, for everyone. Fixed by never assuming the property is
+    // initialised.
+    //
+    // ⚠ AND NOTE WHERE IT WAS: I moved every DECISION into core/TPW.Launcher precisely because a window
+    // cannot be tested, and 25 tests prove the decisions are right. Then shipped a null dereference on line
+    // one of the window. Moving logic out makes the remaining code MORE dangerous per line, not less --
+    // what is left is the part no test will ever touch, so it wants reading, not confidence.
     void Log(string line) => Dispatcher.UIThread.Post(() =>
     {
-        _log.Text += (_log.Text.Length > 0 ? "\n" : "") + line;
+        string cur = _log.Text ?? "";
+        _log.Text = cur.Length > 0 ? cur + "\n" + line : line;
         _log.CaretIndex = _log.Text.Length;
     });
 }
