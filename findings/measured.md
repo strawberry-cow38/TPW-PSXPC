@@ -765,3 +765,44 @@ when it just answers yes or no.** Three candidate causes were on the table — t
 mask bit, sector truncation, row order. Publishing the extra hashes eliminated one
 outright and made a second directly testable, so a failure now points at exactly
 one hypothesis instead of three.
+
+## Texture format solved (fable) — what I could and could not verify live
+
+fable's `folio.md`: **the `0x96` containers are geometry, not bitmaps.** Skinned
+meshes — s16 vertices, RGB vertex colours, 14-byte faces `{i0,i1,i2, 3x(u,v),
+clut}` under `{nfaces, tpage}` headers, bone matrices, animation tracks. Its parser
+ends exactly on the byte for all 556 sub-entries on the disc. So the pixels were
+never in them, and the hunt through those containers was in the wrong place.
+
+**The textures are the twelve 131,156-byte entries**: a 0x54-byte header plus a raw
+256-halfword x 256-row VRAM image, uploaded whole to **(512,256)-(767,511)**.
+⭐ That explains catboy's flat row-similarity test exactly — **the image starts at
++0x54 with a 512-byte stride**, and a test anchored at +0 with a 1024 stride is
+measuring nothing.
+
+It also corrects a premise **I** supplied: I told fable "FOLIO.GAZ is not a string
+in TPW.BIN". It is, three times, and the file is opened by name through
+`CdSearchFile` — no hardcoded LBA. I relayed catboy's search result as fact and it
+was a failed search, not an absence.
+
+**What I verified live:**
+
+| check | result |
+|---|---|
+| archive table parses at +8 | 422 declared, 433 entries 0x800-aligned |
+| twelve entries of exactly 131,156 bytes | **12 found** — matches fable |
+| VRAM (512,256)-(767,511) populated | yes, ~200 distinct values per row |
+
+**What did not match, stated honestly:** the 32-byte run I read live at VRAM
+(512..527, 272) is **absent from FOLIO.GAZ entirely** — not in the twelve banks,
+not anywhere in the file. That is *consistent* with fable's model rather than
+against it, since thirteen further entries are compressed, and the resident page is
+presumably one of those. But I have not shown that, so the upload path is verified
+in shape and not in bytes.
+
+⚠ **And I nearly reported a vacuous confirmation.** fable's cheapest falsifier
+reads VRAM at row 256 — which is **all zeros** in my state. My first scan "matched"
+nine archive entries, all of which are also zeros there. Nine matches, all
+meaningless. I caught it only because catboy had, an hour earlier, described
+exactly this: **check both sides vary before comparing them.** Row 272 has 212
+distinct values and is the row the test should use.
