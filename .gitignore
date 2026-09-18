@@ -3,17 +3,19 @@
 *.bin
 *.cue
 *.img
-*.MD2
-*.md2
-*.sdt
-*.wad
-*.sgn
-*.sam
+*.exe
 SLES_*
 SLUS_*
 SLPS_*
-*.exe
+SCES_*
+SCUS_*
+*.XA
+*.STR
+*.TIM
+*.VB
+*.VH
 
 # build output
 bin/
 obj/
+build/

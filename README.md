@@ -1,64 +1,58 @@
 # TPW-PSXPC
 
-Reverse-engineering notes and tooling for **Theme Park World** (Bullfrog / EA,
-1999), working from the **PC** and **PSX** releases.
+Bringing **Theme Park World**'s PlayStation release to PC — reverse-engineering
+notes and tooling.
 
-> ⚠ **This repository contains no game data and never will.** No executables, no
+> ⚠ **This repository contains no game data and never will.** No executable, no
 > assets, no archives, no disc images. Everything here is our own documentation
-> and our own code. Anything built from it requires **your own legally obtained
-> copy** of the game — the same model as ScummVM, OpenRCT2, OpenMW and OpenTPW.
+> and our own code, and anything built from it requires **your own legally
+> obtained copy** of the game. Same posture as ScummVM, OpenRCT2 and OpenMW.
 
-## Why this exists
+## Scope
 
-Theme Park World sits in an awkward gap. Theme Park (1994) and Theme Hospital
-(1997) are DOS-era, so they get re-released wrapped in DOSBox. TPW is 1999
-Direct3D — too late for DOSBox, too early to simply run on a modern machine — and
-it is routinely skipped when Bullfrog's back catalogue is reissued. A game that
-nobody reissues, that runs badly on anything current, and whose file formats
-almost nobody has decoded is a game that quietly stops being playable.
+**The PSX version, targeting PC. That is the whole scope.**
 
-## Why two platforms
+Explicitly **not** in this project:
 
-Each release is best at a different job:
+- the native Windows release, its file formats, or anything derived from them
+- the PS2 release
+- OpenTPW, which is a reimplementation of the *PC* version
 
-| release | good for | why |
-|---|---|---|
-| **PC** | assets, and the large maps | formats substantially decoded; the maps are the big ones |
-| **PSX** | readable algorithms | best-tooled decomp scene of the three; **no VU1 microcode wall** — the GTE is fixed-function and fully specified, so model data reaches it directly |
-| PS2 | the extra rides and content | needs a VU1 tracer first; a later job, not a foundation |
+Those are different games' worth of different data, and mixing them is how a
+project ends up half-doing three things.
 
-The PS2 release is widely considered the best version and is the least preserved,
-but its geometry only exists after a per-game VU1 microprogram runs — which is why
-static extraction from it produces garbage, and why it is not the starting point.
+## Why the PSX release is the tractable one
 
-⚠ The PSX sim is likely a **reduced** port. Treat numbers taken from it as
-approximating the PC logic rather than defining it, until that is checked.
+Of the three releases it is the **best-tooled for decompilation by a wide
+margin**, and the reason is hardware:
 
-## What is here
+- the PSX **GTE is fixed-function** — perspective transform, rotation, lighting,
+  depth cue and fixed-point matrix ops, fully specified publicly. Model data
+  reaches it directly.
+- there is **no microcode wall**. The PS2 equivalent (VU1) is an independent
+  processor running per-game microcode in a custom assembly, commonly built
+  separately from the ELF — which is why static extraction from a PS2 build
+  produces garbage and why that release is not the starting point.
+- the matching-decomp scene around PSX is mature: **splat**, **maspsx** (which
+  replicates the SDK's custom `aspsx` assembler), **decomp-permuter**, **m2c**
+  and **objdiff**, with the original **PsyQ GCC** obtainable and pinnable.
+  Precedents go the whole way to byte-identical rebuilds.
 
-- [`docs/pc-formats.md`](docs/pc-formats.md) — the PC `.MD2` model format (which
-  is **Bullfrog's own, unrelated to Quake 2** despite the extension), its
-  blend-shape animation and overlay files, the `TRIGANIM` id mapping, and the
-  runtime-rendered ride signs. Derived from `demon.MD2` and verified by playing
-  the animations back.
+⚠ The PSX build is likely a **reduced** port of the PC game. Treat any number
+taken from it as describing the PSX version, not as defining the original — until
+that is actually checked.
 
-Each section states whether it is **sourced**, **derived**, or **unmeasured**.
-That distinction is deliberate: a note that quietly mixes the three is how a wrong
-conclusion gets inherited.
+## Status
 
-## Prior art
+Early. Nothing is claimed as working yet.
 
-[**OpenTPW**](https://github.com/OpenTPW/OpenTPW) (MIT) is an existing C#
-reimplementation and is further along than it looks: container archives, EA's
-Refpack/LZSS compression, textures, the BFMU/BFST/SAM string tables, saves, and a
-ride-script VM with the full 105-opcode table. It requires an installation of the
-original game, and it is the obvious thing to build with rather than duplicate.
+## Conventions
 
-Its VM names `TRIGANIM` as opcode 16 but has no handler for it; our notes cover
-what a `TRIGANIM` argument actually resolves to. The two halves meet exactly
-there.
+Every claim recorded here is marked **sourced**, **derived** or **unmeasured**.
+That distinction is deliberate and load-bearing: a note that blends the three is
+how the next person inherits a previous person's confidence along with their
+mistakes.
 
 ## Licence
 
-MIT — see [`LICENSE`](LICENSE). Chosen to match OpenTPW so code can move between
-them; change it if you would rather something else.
+MIT — see [`LICENSE`](LICENSE).
