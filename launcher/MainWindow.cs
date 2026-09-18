@@ -24,9 +24,15 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 2;   // v2: fixed a null-Text crash on the first log line; startup probe moved off the UI thread; unhandled exceptions now reach the panel and launcher-crash.log
+    const int LauncherVersion = 3;   // v3: self-update -- downloads the published exe, verifies shape AND sha256, swaps via a shim that waits on this PID
+    // v2: fixed a null-Text crash on the first log line; startup probe moved off the UI thread; unhandled exceptions now reach the panel and launcher-crash.log
     // v1: first TPW launcher -- clone/build, game-data identification, Play
     const string VersionUrl = "https://github.com/strawberry-cow38/TPW-PSXPC/releases/download/launcher/launcher.version";
+    const string ExeUrl = "https://github.com/strawberry-cow38/TPW-PSXPC/releases/download/launcher/TPWLauncher-win-x64.exe";
+    // ⚠ Publish this beside the exe. Without it the update can only check the download LOOKS like a program,
+    // not that it is the one published -- see SelfUpdate.Check, which says so in its reason rather than
+    // quietly downgrading itself.
+    const string Sha256Url = "https://github.com/strawberry-cow38/TPW-PSXPC/releases/download/launcher/launcher.sha256";
 
     static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
 
@@ -128,7 +134,9 @@ public class MainWindow : Window
     async Task InitAsync()
     {
         Log($"TPW launcher v{LauncherVersion}");
-        await CheckSelfUpdateAsync();
+        // ⚠ If a handoff is underway this process is closing; doing anything further -- especially hashing a
+        // 500 MB disc -- races the swap and wastes the user's time on a launcher that is going away.
+        if (await CheckSelfUpdateAsync()) return;
         // ⚠ OFF THE UI THREAD. Probing hashes whatever it finds, and the common case is a ~500 MB disc
         // image -- doing that inline freezes the window for seconds at startup, which reads to a user as a
         // hang or a crash. I had already put the MANUAL pick on a background thread and then called the same
@@ -244,17 +252,76 @@ public class MainWindow : Window
 
     // ---- self update --------------------------------------------------------------------------------
 
-    async Task CheckSelfUpdateAsync()
+    /// <summary>Replace this launcher with the published build, via a shim that runs after we exit.
+    ///
+    /// ⚠ A PROCESS CANNOT OVERWRITE ITS OWN RUNNING EXECUTABLE ON WINDOWS -- the file is locked while it
+    /// runs. So the new build is written beside the old one, a tiny batch file is started that WAITS for this
+    /// PID to disappear, swaps the files, relaunches and deletes itself, and then we close. The shim exists
+    /// solely to be the thing still alive when the launcher is not.
+    /// Returns true if a handoff is underway, in which case the caller must stop doing anything else.</summary>
+    async Task<bool> CheckSelfUpdateAsync()
     {
+        // Self-update is Windows-only because the shim is a .bat. On anything else, say so rather than
+        // silently never updating.
+        if (!OperatingSystem.IsWindows()) return false;
+
+        string exePath = Environment.ProcessPath;
+        if (string.IsNullOrEmpty(exePath)) return false;
+
         try
         {
             string raw = await Http.GetStringAsync(VersionUrl);
-            // The comparison is in core and tested: strictly greater, and unparseable input does nothing --
-            // so a 404 page read as a version can never start a self-replacement.
-            if (LauncherRules.ShouldSelfUpdate(LauncherVersion, raw))
-                Log($"A newer launcher is published (v{raw.Trim()}). Download it from the releases page.");
+            // Tested in core: strictly greater, and unparseable does nothing -- so a 404 page read as a
+            // version can never start a self-replacement.
+            if (!LauncherRules.ShouldSelfUpdate(LauncherVersion, raw)) return false;
+
+            Log($"Launcher update available: v{LauncherVersion} -> v{raw.Trim()}. Downloading…");
+            byte[] bytes = await Http.GetByteArrayAsync(ExeUrl);
+
+            // The published hash, if there is one. ⚠ Its ABSENCE must not look like success -- Check()
+            // returns a reason either way and we log it, so a launcher that has stopped verifying says so.
+            string expected = null;
+            try { expected = (await Http.GetStringAsync(Sha256Url)).Trim().Split(' ')[0]; } catch { }
+
+            var verdict = SelfUpdate.Check(bytes, expected);
+            Log($"Update check: {verdict.Reason}");
+            if (!verdict.Accept) { Log("Update ABORTED — still running the current launcher."); return false; }
+
+            string newExe = exePath + ".new";
+            await File.WriteAllBytesAsync(newExe, bytes);
+
+            int pid = Environment.ProcessId;
+            string bat = Path.Combine(Path.GetTempPath(), "tpw_selfupdate.bat");
+            const string q = "\"";
+            // ⚠ WAIT ON THE PID, do not just sleep. A fixed delay is a race: too short and the move fails
+            // against a locked file, too long and the user stares at nothing. tasklist polling ends exactly
+            // when the process is gone.
+            await File.WriteAllTextAsync(bat, string.Join("\r\n", new[]
+            {
+                "@echo off",
+                ":wait",
+                $"tasklist /FI {q}PID eq {pid}{q} | find {q}{pid}{q} >nul && (ping -n 2 127.0.0.1 >nul & goto wait)",
+                $"move /y {q}{newExe}{q} {q}{exePath}{q} >nul",
+                $"start {q}{q} {q}{exePath}{q}",
+                // ⚠ The shim deletes itself LAST. Leaving it behind means the next update finds a stale file
+                // from a previous version and may run that instead of the one just written.
+                $"del {q}%~f0{q}",
+            }) + "\r\n");
+
+            Process.Start(new ProcessStartInfo("cmd.exe", $"/c {q}{bat}{q}")
+            { UseShellExecute = false, CreateNoWindow = true });
+
+            Log("Restarting into the new launcher…");
+            Dispatcher.UIThread.Post(Close);
+            return true;
         }
-        catch { /* offline is normal and must not block the launcher */ }
+        catch (Exception e)
+        {
+            // ⚠ Offline is NORMAL and must never block the launcher. Any failure here means "carry on with
+            // the version we have", never "stop".
+            Log("(launcher self-update skipped: " + e.Message + ")");
+            return false;
+        }
     }
 
     // ---- plumbing -----------------------------------------------------------------------------------

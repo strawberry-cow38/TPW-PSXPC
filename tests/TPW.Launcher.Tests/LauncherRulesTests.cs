@@ -59,7 +59,7 @@ namespace TPW.Launcher.Tests
         }
     }
 
-    public class SelfUpdateTests
+    public class SelfUpdateVersionTests
     {
         [Theory]
         [InlineData(1, "2", true)]     // newer published -> update
@@ -146,6 +146,74 @@ namespace TPW.Launcher.Tests
             // is wrong" -- the most confusing possible failure.
             Assert.True(GameData.Identify("2167c58486f14183e393f2010d33abbdf958953d").CanPlay);
             Assert.True(GameData.Identify("E5CEE3B51A26EE3A6965CF20F4394F1C9BB9D741").CanPlay);
+        }
+    }
+}
+
+namespace TPW.Launcher.Tests
+{
+    // ⚠ These guard an IRREVERSIBLE act: the bytes that pass here get written over the only copy of the
+    // launcher the user has. Every case below is a way that has actually gone wrong for someone.
+    public class SelfUpdateTests
+    {
+        static byte[] FakeExe(int n = SelfUpdate.MinPlausibleBytes)
+        {
+            var b = new byte[n];
+            b[0] = (byte)'M'; b[1] = (byte)'Z';
+            return b;
+        }
+
+        [Fact]
+        public void AnErrorPageIsRefused()
+        {
+            // ⚠ THE COMMON DISASTER. A 404 or a redirect body is a SUCCESSFUL http response, so nothing
+            // upstream complains -- and "<!DOCTYPE html>" copied over the exe leaves the user with no
+            // launcher and no way to get one.
+            var html = System.Text.Encoding.ASCII.GetBytes("<!DOCTYPE html><html>404</html>");
+            Assert.False(SelfUpdate.Check(html, null).Accept);
+        }
+
+        [Fact]
+        public void ATruncatedDownloadIsRefused()
+        {
+            var half = FakeExe(1_000_000);   // starts MZ, far too small
+            Assert.False(SelfUpdate.Check(half, null).Accept);
+        }
+
+        [Fact]
+        public void EmptyAndNullAreRefused()
+        {
+            Assert.False(SelfUpdate.Check(Array.Empty<byte>(), null).Accept);
+            Assert.False(SelfUpdate.Check(null, null).Accept);
+        }
+
+        [Fact]
+        public void AHashMismatchIsRefusedEvenThoughItIsAValidExe()
+        {
+            // The shape checks cannot tell a good exe from the WRONG good exe. This is the case where the
+            // download succeeded completely and is still not what was published.
+            var exe = FakeExe();
+            Assert.False(SelfUpdate.Check(exe, "00".PadRight(64, '0')).Accept);
+        }
+
+        [Fact]
+        public void AMatchingHashIsAccepted()
+        {
+            var exe = FakeExe();
+            var v = SelfUpdate.Check(exe, SelfUpdate.Sha256Of(exe));
+            Assert.True(v.Accept);
+            Assert.Contains("hash matches", v.Reason);
+        }
+
+        [Fact]
+        public void NoPublishedHashAcceptsButSaysTheStrongCheckDidNotRun()
+        {
+            // ⚠ Absent expectation is neither pass nor fail. Accepting silently is how verification becomes
+            // decorative -- the reason string is what keeps a launcher that stopped hash-checking honest in
+            // its own log.
+            var v = SelfUpdate.Check(FakeExe(), null);
+            Assert.True(v.Accept);
+            Assert.Contains("no published hash", v.Reason);
         }
     }
 }
