@@ -644,3 +644,25 @@ what caught it, not inspecting the wage figure.
 Handed to fable: what commits a hire, where employed staff live in memory, and a
 poke that employs someone directly. The displayed `$100` against the formula's
 150/165 stays open until the deducted figure settles it.
+
+## GBP 20 an item — now four independent confirmations
+
+Every sale figure measured so far, across two different parks and two window
+lengths, divides exactly:
+
+| sales | takings | GBP/sale |
+|---|---|---|
+| 2 | GBP 40 | **20.00** |
+| 5 | GBP 100 | **20.00** |
+| 21 | GBP 420 | **20.00** |
+| 31 | GBP 620 | **20.00** |
+
+No remainder at any point. This is the most solid number in the file.
+
+⚠ **Still unknown: whether GBP 20 is universal or specific to this shop.** All four
+readings are the *same Fries shop*. Buying a second shop of a different type would
+separate "the item price is 20" from "a Fries costs 20", and I have not managed it
+— the purchase screen's category list does not respond to the same down/X pattern
+that works on the laptop menu and the ride list; three downs then X exits to the
+park instead of opening Shops. Recorded as an open navigation problem, not a fact
+about pricing.
