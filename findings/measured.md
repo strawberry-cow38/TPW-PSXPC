@@ -982,3 +982,35 @@ renders grey levels and has no colours to apply.
 off my machine rather than out of a user's own disc. The standing offer instead: send
 a page and a CLUT id, and I report which of the sixteen indices differ from what the
 hardware holds — a bare yes/no having already proved too blunt once today.
+
+## The texture/palette pairing — a page has MANY palettes, not one
+
+The CLUT logger records the texture page and the palette together per draw, so it
+yields the *relationship* rather than the art. One park, 177 draws:
+
+| texture page | draws | distinct palettes |
+|---|---|---|
+| (704, 0) | 86 | **11** |
+| (576, 256) | 33 | 7 |
+| **(960, 256)** | 18 | **1** — `clut (928,25)`, every time |
+| (576, 0) | 7 | 5 |
+| (512, 0) | 6 | 4 |
+
+**This reframes the decoder question.** catboy was rendering a page under CLUTs 0-3
+and getting four coherent-looking images, and correctly refused to pick the
+plausible one. The reason none of them is *the* answer is that **a page does not
+have a palette** — different regions of the same atlas are drawn with different
+CLUTs, and the choice lives in the drawing command. Several of those four images
+were probably correct, for different sprites on the same sheet.
+
+⭐ **`tpage (960,256)` is the unambiguous test case:** eighteen draws, one palette,
+no pairing judgement required. Wrong colours there means the decode is wrong;
+right colours there means the decode is good and everything else is a pairing
+problem.
+
+**`bpp=0` on all 177 draws** — every texture drawn in that park is 4bpp. That is
+the pixel-side finding confirmed from the command side, on an unrelated code path.
+
+The log also carries UV bounds per draw, so the mapping can go to *rectangles of a
+page → palette*, which is what a renderer actually needs, rather than a page-level
+answer that cannot exist.
