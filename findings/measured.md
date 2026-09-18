@@ -508,3 +508,34 @@ the KIND of effect: UI and selection are visual, and a RAM probe cannot see them
 The purchase screen also cross-confirms fable's pool table from the game's own UI:
 Rides 14 (with 1 built = 15), Track Rides 2, Roller Coasters 2, Shops 20,
 Sideshows 10, Features 45 — identical to `rides.json`, arrived at independently.
+
+## ⭐ Does a fuller park bring more guests? YES — by filling the bus
+
+The question that was open all day, finally measured with the independent variable
+actually varied. Same save state, same 15,500-frame window, same free-money flag;
+one arm builds a second ride first and admissions are only counted afterwards.
+
+| | attractions | admissions | guests per bus |
+|---|---|---|---|
+| control | 1 | 11 | **1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1** |
+| built a 2nd ride | 2 | 15 | **2, 2, 2, 2, 1, 2, 1, 1, 1, 1** |
+
+**The per-bus breakdown is the result, not the total.** With one ride, every single
+bus carries exactly one guest, eleven times out of eleven. With two, most carry
+two. The number of buses is unchanged — 11 against 10 over the same window — so
+the cadence did not move and the *load* did.
+
+That closes the loop on the arrival model: **the timetable is fixed and the park
+determines how full each bus is.** It also confirms fable's head-count formula
+behaves as described with a real contents change rather than only with the score
+offset poked directly.
+
+⚠ The 2-ride arm drops back to 1 on four of its later buses. fable's formula has a
+`min(cap - guests, ...)` term, so a park filling up should throttle its own intake
+— consistent, but not something I have isolated.
+
+**This is the same question I twice reported on and twice got wrong**: first as
+"arrivals scale with what is built" (asserted, unmeasured), then as "the sweep does
+not support contents scaling" (retracted to *unmeasured*, correctly, because all
+six of those parks held exactly one attraction). It took being able to *build* to
+put a second value on the x-axis.
