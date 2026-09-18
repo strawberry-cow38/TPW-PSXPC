@@ -28,45 +28,78 @@ namespace TPW.Launcher
         public double TickSeconds;   // 0.04 PAL, 0.0333... NTSC
     }
 
+    /// <summary>What a known hash was taken OF. The same release is recognisable by several different files,
+    /// and which one matched is worth telling the user -- "recognised your boot executable" and "recognised
+    /// your disc image" mean different things about how portable that recognition is.</summary>
+    public enum HashedThing
+    {
+        /// <summary>The boot executable, e.g. SLES_026.88. ⭐ PREFERRED: ~48 KB, and identical across every
+        /// dump of the same disc, so sector mode, padding and iso-vs-bin all stop mattering.</summary>
+        BootExecutable,
+        /// <summary>A whole disc image. ⚠ Rip-sensitive -- a different dump of the same disc hashes
+        /// differently. Accepted so copies that already work keep working, not because it is a good key.</summary>
+        DiscImage,
+        /// <summary>A data file from inside the disc.</summary>
+        DataFile,
+    }
+
+    public sealed class KnownHash
+    {
+        public GameVariant Variant;
+        public HashedThing What;
+    }
+
     public readonly struct GameDataResult
     {
         public readonly GameDataState State;
         public readonly GameVariant Variant;   // null unless Known
+        public readonly HashedThing What;      // meaningful only when Known
         public readonly string Message;        // shown to the user verbatim
-        public GameDataResult(GameDataState s, GameVariant v, string m) { State = s; Variant = v; Message = m; }
+        public GameDataResult(GameDataState s, GameVariant v, HashedThing w, string m)
+        { State = s; Variant = v; What = w; Message = m; }
         public bool CanPlay => State == GameDataState.Known;
     }
 
     public static class GameData
     {
-        /// <summary>Known releases by executable hash.
+        /// <summary>Every hash that identifies a release, and what each hash was taken of.
         ///
-        /// ⚠ ONE ENTRY, AND EVERY FIELD IN IT WAS MEASURED. Added 2026-09-18 from a copy on the build box.
-        /// The boot id `SLES_026.88` was read out of the image itself (scanned for the boot identifier, not
-        /// inferred from a filename), which makes it the PAL/European release -- and that matches the source
-        /// tinyclaw's behaviour analysis cites, independently. SLES is a 50 Hz part, and the sim clock is
-        /// measured at half the frame rate, so TickSeconds is 0.04.
+        /// ⚠ SEVERAL HASHES MAP TO ONE VARIANT ON PURPOSE. A user may point us at an extracted boot
+        /// executable, a whole disc image, or a data file, and all three are the same game. Keying on only one
+        /// of them refuses copies we demonstrably recognise.
         ///
-        /// ⚠⚠ THIS KEYS ON A DISC IMAGE, WHICH IS RIP-SENSITIVE. The hash is of a raw 2352-byte-per-sector
-        /// .bin (515,998,224 bytes = exactly 219,387 sectors). A different dump of the SAME disc -- different
-        /// sector mode, different padding, a .iso rather than a .bin -- hashes differently and will be
-        /// reported Unrecognised even though the game is identical. That is the safe direction to fail, but it
-        /// is a real limitation: the better long-term key is the extracted EXECUTABLE, which is stable across
-        /// rips, and this should move to that once the port can read files out of the image. Recorded here
-        /// rather than discovered by the first person whose .iso is rejected.
+        /// ⭐ PREFER THE BOOT EXECUTABLE. It is ~48 KB, free to hash, and identical across every dump of the
+        /// same disc -- sector mode, padding and iso-vs-bin all fall away. The disc-image hash below is
+        /// rip-sensitive and is kept only so a copy that works today does not stop working (tinyclaw's point,
+        /// and the right one: migrating a key should never strand the person already using it).
         ///
-        /// To add another: hash a copy you own, read its boot id out of the image, and record the region and
-        /// tick rate you MEASURED rather than the ones you expect.</summary>
-        public static readonly IReadOnlyDictionary<string, GameVariant> Known =
-            new Dictionary<string, GameVariant>(StringComparer.OrdinalIgnoreCase)
+        /// ⚠ NAME COLLISION WORTH KNOWING: the image on the build box is called `TPW.bin` (515,998,224 bytes,
+        /// a raw 2352-byte-sector disc image) and there is ALSO a `TPW.BIN` data file INSIDE that disc
+        /// (1,065,308 bytes). Same name, four hundred times the size, completely different things. Anything
+        /// that resolves one by filename alone will eventually pick the wrong one.
+        ///
+        /// Every entry here was hashed from a real copy. Adding one means hashing your own and recording the
+        /// region and tick rate you MEASURED, not the ones you expect.</summary>
+        static readonly GameVariant PalSles02688 = new()
+        {
+            Id = "SLES-026.88",
+            Name = "Theme Park World (PSX)",
+            Region = "PAL",
+            TickSeconds = 0.04,   // 50 Hz half-rate; see ParkClock
+        };
+
+        public static readonly IReadOnlyDictionary<string, KnownHash> Known =
+            new Dictionary<string, KnownHash>(StringComparer.OrdinalIgnoreCase)
             {
-                ["2167C58486F14183E393F2010D33ABBDF958953D"] = new GameVariant
-                {
-                    Id = "SLES-026.88",
-                    Name = "Theme Park World (PSX, disc image)",
-                    Region = "PAL",
-                    TickSeconds = 0.04,   // 50 Hz half-rate; see ParkClock
-                },
+                // ⭐ the stable one
+                ["e5cee3b51a26ee3a6965cf20f4394f1c9bb9d741"] =
+                    new KnownHash { Variant = PalSles02688, What = HashedThing.BootExecutable },
+                // a data file from the same disc
+                ["f7dadde48db4b9f610e8757aaf64279e26e587c3"] =
+                    new KnownHash { Variant = PalSles02688, What = HashedThing.DataFile },
+                // ⚠ rip-sensitive, kept so the copy already in use keeps working
+                ["2167C58486F14183E393F2010D33ABBDF958953D"] =
+                    new KnownHash { Variant = PalSles02688, What = HashedThing.DiscImage },
             };
 
         /// <summary>Identify a copy of the game from the hash of its executable.
@@ -75,21 +108,33 @@ namespace TPW.Launcher
         /// region's offsets does not fail loudly -- it produces numbers that look entirely reasonable and are
         /// wrong, and the error surfaces hours later somewhere unrelated. ScummVM has refused unknown
         /// variants for twenty years for exactly this reason. "Best effort" is the wrong instinct here.</summary>
-        public static GameDataResult Identify(string sha1, IReadOnlyDictionary<string, GameVariant> known = null)
+        public static GameDataResult Identify(string sha1, IReadOnlyDictionary<string, KnownHash> known = null)
         {
             known ??= Known;
 
             if (string.IsNullOrWhiteSpace(sha1))
-                return new GameDataResult(GameDataState.Missing, null,
+                return new GameDataResult(GameDataState.Missing, null, default,
                     "No game data found. Point the launcher at your own copy of Theme Park World.");
 
-            if (known.TryGetValue(sha1.Trim(), out var v) && v != null)
-                return new GameDataResult(GameDataState.Known, v, $"Found {v.Name} ({v.Region}).");
+            if (known.TryGetValue(sha1.Trim(), out var k) && k?.Variant != null)
+            {
+                // ⚠ Say what matched, not just that something did. A user told "recognised your disc image"
+                // learns their recognition is rip-specific; told only "found it", they learn nothing and are
+                // surprised later when a re-dump stops working.
+                string what = k.What switch
+                {
+                    HashedThing.BootExecutable => "boot executable",
+                    HashedThing.DiscImage => "disc image",
+                    _ => "data file",
+                };
+                return new GameDataResult(GameDataState.Known, k.Variant, k.What,
+                    $"Found {k.Variant.Name} ({k.Variant.Region}) -- matched your {what}.");
+            }
 
             // ⚠ NAME THE HASH. "Unrecognised build" with no hash is unactionable -- the user cannot tell us
             // what they have, and we cannot add it. The hash is the one piece of information that turns a
             // dead end into a bug report someone can act on.
-            return new GameDataResult(GameDataState.Unrecognised, null,
+            return new GameDataResult(GameDataState.Unrecognised, null, default,
                 $"Unrecognised build (sha1 {sha1.Trim()}). This copy is not one the port knows how to read, "
                 + "so it will not run rather than guess at the layout. Please report the hash.");
         }

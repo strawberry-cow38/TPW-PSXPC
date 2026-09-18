@@ -76,6 +76,8 @@ namespace TPW.Launcher.Tests
     public class GameDataTests
     {
         static readonly GameVariant Pal = new() { Id = "TEST-PAL", Name = "Test PAL", Region = "PAL", TickSeconds = 0.04 };
+        static Dictionary<string, KnownHash> Table(string hash) =>
+            new(StringComparer.OrdinalIgnoreCase) { [hash] = new KnownHash { Variant = Pal, What = HashedThing.BootExecutable } };
 
         [Fact]
         public void MissingHashIsMissingNotUnrecognised()
@@ -89,7 +91,7 @@ namespace TPW.Launcher.Tests
         [Fact]
         public void UnknownHashRefusesAndNamesItself()
         {
-            var r = GameData.Identify("aabbccdd", new Dictionary<string, GameVariant>());
+            var r = GameData.Identify("aabbccdd", new Dictionary<string, KnownHash>());
             Assert.Equal(GameDataState.Unrecognised, r.State);
             Assert.False(r.CanPlay);
             // ⚠ The hash must appear in the message. Without it the user cannot tell us what they have and we
@@ -102,24 +104,36 @@ namespace TPW.Launcher.Tests
         {
             // The whole reason identification happens before anything is read: PAL and NTSC tick differently,
             // so the variant supplies the constant rather than the sim assuming one.
-            var r = GameData.Identify("HASH1", new Dictionary<string, GameVariant>(StringComparer.OrdinalIgnoreCase) { ["hash1"] = Pal });
+            var r = GameData.Identify("HASH1", Table("hash1"));
             Assert.True(r.CanPlay);
             Assert.Equal(0.04, r.Variant.TickSeconds);
         }
 
         [Fact]
-        public void TheShippedTableRecognisesTheOneMeasuredCopyAndNothingElse()
+        public void TheShippedTableRecognisesEveryMeasuredHashOfTheOneReleaseAndNothingElse()
         {
             // ⚠ BOTH HALVES MATTER. The first assertion says the one entry is real and works; the second says
             // the table has not quietly grown guesses. A variant added to make a flow "work" -- without a
             // hash someone actually took -- is a lie whose only symptom is wrong offsets producing plausible
             // garbage, so the count is pinned and anyone adding one has to change this line deliberately.
-            Assert.Single(GameData.Known);
+            Assert.Equal(3, GameData.Known.Count);
 
-            var pal = GameData.Identify("2167C58486F14183E393F2010D33ABBDF958953D");
-            Assert.True(pal.CanPlay);
-            Assert.Equal("PAL", pal.Variant.Region);
-            Assert.Equal(0.04, pal.Variant.TickSeconds);   // 50 Hz half-rate, measured
+            // ⭐ The stable key: a boot executable is identical across every dump of the same disc.
+            var exe = GameData.Identify("e5cee3b51a26ee3a6965cf20f4394f1c9bb9d741");
+            Assert.True(exe.CanPlay);
+            Assert.Equal(HashedThing.BootExecutable, exe.What);
+            Assert.Equal("PAL", exe.Variant.Region);
+            Assert.Equal(0.04, exe.Variant.TickSeconds);   // 50 Hz half-rate, measured
+
+            // ⚠ The rip-sensitive one still resolves. Migrating to a better key must not strand the copy
+            // already in use -- so this asserts the OLD key keeps working, which is the half a migration
+            // usually forgets.
+            var img = GameData.Identify("2167C58486F14183E393F2010D33ABBDF958953D");
+            Assert.True(img.CanPlay);
+            Assert.Equal(HashedThing.DiscImage, img.What);
+
+            // All three hashes are the SAME release, not three releases.
+            Assert.Equal(exe.Variant.Id, img.Variant.Id);
 
             Assert.Equal(GameDataState.Unrecognised, GameData.Identify("anything-at-all").State);
         }
@@ -131,6 +145,7 @@ namespace TPW.Launcher.Tests
             // A case-sensitive table rejects a copy it actually knows, which reads to the user as "your game
             // is wrong" -- the most confusing possible failure.
             Assert.True(GameData.Identify("2167c58486f14183e393f2010d33abbdf958953d").CanPlay);
+            Assert.True(GameData.Identify("E5CEE3B51A26EE3A6965CF20F4394F1C9BB9D741").CanPlay);
         }
     }
 }
