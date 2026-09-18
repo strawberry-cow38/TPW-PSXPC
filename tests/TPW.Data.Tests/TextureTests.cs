@@ -13,12 +13,46 @@ namespace TPW.Data.Tests
         public void TheLayoutArithmeticProducesTheEntrySize()
         {
             Assert.Equal(0x54, VramTexture.HeaderBytes);
-            Assert.Equal(512, VramTexture.Width);
-            Assert.Equal(512, VramTexture.Height);
+            Assert.Equal(1024, VramTexture.Width);
+            Assert.Equal(256, VramTexture.Height);
             Assert.Equal(4, VramTexture.BitsPerPixel);
             Assert.Equal(131_156, VramTexture.EntryBytes);
             Assert.Equal(VramTexture.HeaderBytes + VramTexture.Width * VramTexture.Height / 2,
                          VramTexture.EntryBytes);
+        }
+
+        // ⚠ 512x512 ALSO SATISFIES THE BYTE COUNT, AND WAS WRONG. Reinterpreting a 2D block at a multiple of
+        // its true width preserves the byte total and still renders a plausible picture, so the arithmetic
+        // above cannot distinguish them. A sheet is four 256-wide pages because a PSX texture page is 64
+        // halfwords across; that came from the GPU's tpage coordinates, not from the file.
+        [Fact]
+        public void ASheetIsFourPagesOfTwoFiftySix()
+        {
+            Assert.Equal(256, VramTexture.PageWidth);
+            Assert.Equal(256, VramTexture.PageHeight);
+            Assert.Equal(4, VramTexture.PagesPerSheet);
+            Assert.Equal(VramTexture.PageWidth * VramTexture.PagesPerSheet, VramTexture.Width);
+        }
+
+        [Fact]
+        public void PagesAreCutLeftToRightOutOfTheSheet()
+        {
+            // mark the first texel of each page with its own index
+            var d = new byte[VramTexture.EntryBytes];
+            for (int p = 0; p < VramTexture.PagesPerSheet; p++)
+            {
+                int texel = p * VramTexture.PageWidth;
+                d[VramTexture.HeaderBytes + (texel >> 1)] = (byte)(p + 1);   // even texel -> low nibble
+            }
+            Assert.True(VramTexture.TryDecode(d, out var sheet, out var err), err);
+            for (int p = 0; p < VramTexture.PagesPerSheet; p++)
+            {
+                var page = VramTexture.Page(sheet, p);
+                Assert.Equal(VramTexture.PageWidth, page.Width);
+                Assert.Equal((byte)((p + 1) * 17), page.Rgba[0]);
+            }
+            Assert.Null(VramTexture.Page(sheet, 4));
+            Assert.Null(VramTexture.Page(null, 0));
         }
 
         static byte[] Page(params (int index, int value)[] pixels)
@@ -56,8 +90,8 @@ namespace TPW.Data.Tests
         public void DecodedImageIsTheDeclaredSize()
         {
             Assert.True(VramTexture.TryDecode(Page(), out var img, out _));
-            Assert.Equal(VramTexture.Width, img.Width);
-            Assert.Equal(VramTexture.Height, img.Height);
+            Assert.Equal(1024, img.Width);
+            Assert.Equal(256, img.Height);
             Assert.Equal(VramTexture.Width * VramTexture.Height * 4, img.Rgba.Length);
         }
 

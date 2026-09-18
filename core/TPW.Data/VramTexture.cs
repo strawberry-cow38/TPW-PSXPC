@@ -3,42 +3,44 @@ using System.Collections.Generic;
 
 namespace TPW.Data
 {
-    /// <summary>The game's texture pages: a short header followed by a raw block of PlayStation VRAM.
+    /// <summary>The game's texture sheets: a short header, then a raw block of PlayStation VRAM holding
+    /// **four 256x256 texture pages side by side** at 4 bits per pixel.
     ///
-    /// ⭐ `0x54` bytes of header, then **512x512 texels at 4 BITS PER PIXEL**. Twelve archive entries on the
-    /// shipped disc, 131,156 bytes each, and 0x54 + 512*512/2 = 131,156.
+    /// ⭐ LAYOUT: `0x54` header + a **1024x256** sheet at 4bpp = 0x54 + 1024*256/2 = 131,156, which is
+    /// exactly the size of the twelve entries that carry it. A PSX texture page is 64 VRAM halfwords wide,
+    /// which at 4bpp is 256 texels, so a 256-halfword-wide upload is four pages in a row. UVs in the draw
+    /// commands run 0..255 within a page, confirming the same thing from the GPU side.
     ///
-    /// ⚠ NOT 16bpp. fable's report described the destination as a 256-word-wide, 256-row VRAM region at
-    /// (512,256), which is the same 131,072 bytes and is true of the upload — but read as 256x256 16-bit
-    /// pixels it decodes to coloured noise. 4bpp was the right depth (tinyclaw had already measured resident
-    /// textures as 4bpp with separate palettes) and **the width still had to be found by looking**: at
-    /// 1024x256 the picture comes out DOUBLED side by side, which is the signature of a width exactly twice
-    /// too large, since adjacent rows are similar. At 512x512 it resolves into a single coherent atlas with
-    /// legible text — a credits card reading "Gary Liddon / Lead Programmer" sits in the top right of page 1.
+    /// ⚠⚠ I GOT THIS WRONG TWICE, AND BOTH WRONG ANSWERS LOOKED RIGHT. First as 256x256 at 16bpp, because
+    /// 131,072 is exactly that and the size seemed to settle it — that decodes to coloured noise. Then as
+    /// **512x512 at 4bpp**, because rendering it that way produces a single coherent image with legible text
+    /// in it, while 1024x256 appeared to show the same picture twice. That "doubling" was not a duplicate: it
+    /// was pages 0 and 2 carrying **similar but different** terrain art, and I read a resemblance as a
+    /// repetition.
     ///
-    /// ⚠⚠ THE PIXELS ARE PALETTE INDICES AND THIS CLASS HAS NO PALETTE. The CLUT id is packed into the
-    /// drawing commands, so a page on its own cannot know its colours. `TryDecode` renders the index as a
-    /// grey level, which is enough to identify content and lay out an atlas and is NOT the real image.
+    /// ⭐ THE LESSON IS THAT "IT LOOKS COHERENT" IDENTIFIED NOTHING HERE. Both 512x512 and 1024x256 produce
+    /// plausible pictures, because reinterpreting a 2D layout at a multiple of its true width rearranges the
+    /// content without destroying local structure. What settled it was tinyclaw's tpage coordinates stepping
+    /// by 64 halfwords — evidence from outside the file, of a kind no amount of looking at the pixels could
+    /// supply. Rendered at this layout the four pages come apart cleanly: each is self-contained and no
+    /// sprite runs across a cut.
     ///
-    /// ⚠ I HAD THESE ENTRIES AND FAILED TO CRACK THEM, AND THE FAILURE IS INSTRUCTIVE. 131,072 is precisely a
-    /// 256x256 16-bit page, so the size alone made it look certain. I derived the stride from the data by
-    /// row-to-row difference — the right method — and got a flat result, so I recorded them as "not plain
-    /// bitmaps". The method was sound; I searched a grid of candidate header offsets and strides that did not
-    /// contain the true pair. **A negative from a search is only as strong as the space it covered**, and I
-    /// wrote mine down as though it had covered everything.
-    ///
-    /// ⚠ AND THE CHECK I FIRST WROTE FOR THESE WAS VACUOUS. "12/12 texture pages decoded" passed while the
-    /// output was noise, because the only way decoding could fail was a short buffer — so it restated "12
-    /// entries are 131,156 bytes long" and called it a decode. A check that cannot fail on wrong pixels must
-    /// not be worded as though it validated them.</summary>
+    /// ⚠ THE PIXELS ARE PALETTE INDICES AND THIS CLASS HAS NO PALETTE. The CLUT is chosen per DRAW, not per
+    /// page — one sheet is drawn with up to 11 different palettes for different rectangles of it — so a page
+    /// cannot know its own colours. `TryDecode` renders the index as a grey level: enough to identify content
+    /// and lay out an atlas, and not the real image.</summary>
     public static class VramTexture
     {
         public const int HeaderBytes = 0x54;
-        public const int Width = 512;
-        public const int Height = 512;
+        /// <summary>One PSX texture page: 64 VRAM halfwords wide, which is 256 texels at 4bpp.</summary>
+        public const int PageWidth = 256;
+        public const int PageHeight = 256;
+        public const int PagesPerSheet = 4;
+        public const int Width = PageWidth * PagesPerSheet;   // 1024
+        public const int Height = PageHeight;                 // 256
         public const int BitsPerPixel = 4;
         public const int StrideBytes = Width / 2;
-        /// <summary>Exactly the size of a texture-page entry in the archive: 0x54 + 512*512/2.</summary>
+        /// <summary>Exactly the size of a sheet entry in the archive: 0x54 + 1024*256/2.</summary>
         public const int EntryBytes = HeaderBytes + StrideBytes * Height;   // 131,156
 
         public static bool LooksLikeTexturePage(GazEntry e) => e != null && e.Size == EntryBytes;
@@ -65,7 +67,21 @@ namespace TPW.Data
             return true;
         }
 
-        /// <summary>Every texture page in the archive, in entry order.</summary>
+        /// <summary>One of the four 256x256 pages out of a decoded sheet. `pageIndex` 0..3 left to right,
+        /// which is the order their VRAM x coordinates run in.</summary>
+        public static TpwImage Page(TpwImage sheet, int pageIndex)
+        {
+            if (sheet == null || pageIndex < 0 || pageIndex >= PagesPerSheet) return null;
+            var rgba = new byte[PageWidth * PageHeight * 4];
+            for (int y = 0; y < PageHeight; y++)
+            {
+                int src = (y * Width + pageIndex * PageWidth) * 4;
+                Buffer.BlockCopy(sheet.Rgba, src, rgba, y * PageWidth * 4, PageWidth * 4);
+            }
+            return new TpwImage { Width = PageWidth, Height = PageHeight, Rgba = rgba, Source = $"{sheet.Source} page {pageIndex}" };
+        }
+
+        /// <summary>Every texture sheet in the archive, in entry order.</summary>
         public static List<(GazEntry Entry, TpwImage Image)> DecodeAll(GazArchive gaz)
         {
             var outp = new List<(GazEntry, TpwImage)>();

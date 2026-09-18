@@ -239,6 +239,33 @@ compressed or built at runtime; a plain lookup will not cover all 47 in use. And
 palettes, not one** — one atlas is drawn with up to 11 different CLUTs depending on the sprite, so
 "render page N under palette X until it looks right" is a malformed question, not a weak test.
 
+## 5g. The texture layout, corrected twice — and "it looks right" settled nothing
+
+A sheet entry is `0x54` header + a **1024x256** block at 4bpp: **four 256x256 texture pages side by
+side**. A PSX texture page is 64 VRAM halfwords wide, which at 4bpp is 256 texels, so a
+256-halfword-wide upload is four pages in a row — and the draw commands' UVs run 0..255 within a
+page, saying the same thing from the GPU side.
+
+I reached that after two wrong answers, **both of which looked right**:
+
+1. **256x256 at 16bpp.** 131,072 is exactly that, so the size appeared to settle it. Decodes to
+   coloured noise — the one failure mode that announces itself.
+2. **512x512 at 4bpp.** This is the instructive one. It renders a *single coherent image with legible
+   text in it*, and at 1024x256 the picture seemed to show the same thing twice, which I read as a
+   width exactly 2x too large. The "duplicate" was pages 0 and 2 carrying **similar but different**
+   terrain art. I mistook a resemblance for a repetition.
+
+⭐ **Reinterpreting a 2D block at a multiple of its true width preserves the byte total and rearranges
+the content without destroying local structure, so it still looks like a picture.** Coherence
+therefore cannot distinguish these layouts, and neither can the entry size, which both satisfy. What
+settled it was tinyclaw's tpage coordinates stepping by 64 halfwords — evidence from outside the
+file, of a kind no amount of looking at pixels could supply. Rendered correctly the four pages come
+apart cleanly: each is self-contained and no sprite runs across a cut.
+
+**`findings/texture_clut_map.json`** holds the mapping tinyclaw read off the GPU: 12 tpages, 177
+`(rect → clut)` pairs. Contiguous regions share a palette, so a sheet partitions into palette zones
+rather than needing a lookup per quad.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
