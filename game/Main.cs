@@ -135,6 +135,19 @@ namespace TPWGodot
             if (!ok) GD.PushWarning("[tpw] asset self-test reported failures — see the log above.");
 
             if (rgba == null || rgba.Length == 0 || w <= 0 || h <= 0) return;
+
+            // ⚠ THIS FILE DISPLAYS 180 DEGREES FROM A SPEC-CORRECT TGA DECODE, AND THAT IS AN OBSERVATION,
+            // NOT A THEORY. LEGAL.GFX has descriptor byte 0x00, which per the TGA spec means bottom-left
+            // origin, so Tga.TryDecode flips it vertically to produce the standard top-left layout. Rendered
+            // that way the text came out mirrored AND upside down — master ran it and read it off the screen.
+            //
+            // The rotation lives HERE and not in the decoder on purpose. Tga stays spec-correct and unit
+            // tested; this is a property of how this particular game presents this particular file, so it
+            // belongs with the presentation. Why the file is stored rotated is NOT established — a tool that
+            // exported it that way, or an upload path that walks VRAM backwards, would both produce it.
+            // Do not "tidy" this into the decoder without finding that out first.
+            Rotate180(rgba, w, h);
+
             var image = Image.CreateFromData(w, h, false, Image.Format.Rgba8, rgba);
             _preview.Texture = ImageTexture.CreateFromImage(image);
             GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
@@ -176,6 +189,17 @@ namespace TPWGodot
                 }
             }
             return best;
+        }
+
+        /// <summary>Rotate an RGBA8 buffer 180 degrees in place — the same as flipping both axes.</summary>
+        static void Rotate180(byte[] px, int w, int h)
+        {
+            int last = w * h - 1;
+            for (int i = 0; i < last - i; i++)
+            {
+                int a = i * 4, b = (last - i) * 4;
+                for (int k = 0; k < 4; k++) (px[a + k], px[b + k]) = (px[b + k], px[a + k]);
+            }
         }
 
         void PlaySample()

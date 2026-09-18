@@ -23,6 +23,23 @@ static class Program
         { Console.WriteLine("decode failed: " + err); return; }
 
         Console.WriteLine($"{img.Width}x{img.Height} decoded");
+
+        // ⭐ POSITION-INDEPENDENT INVARIANTS BISECT A HASH MISMATCH. A bare hash says "no" without saying
+        // which assumption is wrong. These two split the problem: the peak channel triple is order-SENSITIVE
+        // and position-INDEPENDENT, so it isolates channel order; the non-black count cannot change with row
+        // order, so it isolates completeness. Together they say whether a mismatch is colour or layout.
+        int nonBlack = 0, peakR = 0, peakG = 0, peakB = 0;
+        for (int i = 0; i < img.Rgba.Length; i += 4)
+        {
+            int r = img.Rgba[i] >> 3, g = img.Rgba[i + 1] >> 3, b = img.Rgba[i + 2] >> 3;
+            if ((r | g | b) != 0) nonBlack++;
+            if (r > peakR) peakR = r;
+            if (g > peakG) peakG = g;
+            if (b > peakB) peakB = b;
+        }
+        Console.WriteLine($"  non-black pixels : {nonBlack:n0} of {img.Width * img.Height:n0}");
+        Console.WriteLine($"  peak channel     : R={peakR} G={peakG} B={peakB}  (max 31)");
+
         // ⚠ THE PSX FRAMEBUFFER IS BGR, NOT RGB. A 16-bit VRAM word is 0bbbbbgggggrrrrr -- blue in the high
         // bits -- while a 15-bit TGA word is 0rrrrrgggggbbbbb. Same size, same layout, channels reversed. That
         // is invisible in every structural check: sizes match, the image decodes, the picture looks like a
