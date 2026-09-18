@@ -80,6 +80,19 @@ Structural guessing has stopped paying: the last three hypotheses each died on a
 the method working but not progressing. The loader in `SLES_026.88` / `TPW.BIN` knows the format
 exactly, so reading the code that consumes `FOLIO.GAZ` beats guessing at its output.
 
+**Where to start (MEASURED).** `SLES_026.88` is a `PS-X EXE`, loading at `0x801e0000`, entry
+`0x801e3970`. It names exactly two files:
+
+    0x9508  ram 0x801e8d08   "\\TPW.BIN;1"
+    0x9514  ram 0x801e8d14   "\\LEGAL.GFX;1"
+
+⭐ **`FOLIO.GAZ` does not appear as a string in either the boot executable or `TPW.BIN`.** `TPW.BIN`
+names only `ADVISOR.TPW`. So the boot exe's whole job is to pull in the `TPW.BIN` overlay and show
+the legal screen, and the archive is reached from inside that overlay either by walking the ISO
+directory generically or by a baked-in LBA (it sits at 174726 = 0x2AA46). Either way **the loader is
+in `TPW.BIN`, not in the boot executable** — which is the 1 MB of MIPS to point a decompiler at, and
+a smaller haystack than "somewhere on the disc".
+
 tinyclaw can dump console VRAM while the game runs and has established that resident textures are
 **4bpp with palettes held separately and the lookup packed into the drawing commands**. That is the
 *unpacked* form; this document is about the *packed* form, with an unpacking step between them. It
