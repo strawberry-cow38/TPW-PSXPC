@@ -16,7 +16,13 @@ public class MainWindow : Window
 {
     const string RepoUrl = "https://github.com/strawberry-cow38/TPW-PSXPC.git";
     const string DefaultBranch = "main";
-    const string Solution = "TPW.sln";
+    /// <summary>⚠⚠ BUILD THE GAME PROJECT, NOT THE SOLUTION. TPW.sln deliberately excludes
+    /// game/TPWGodot.csproj so the engine-free core can be built and tested on a machine with no Godot SDK.
+    /// The consequence is that `dotnet build TPW.sln` succeeds, reports zero errors, and produces NO GAME
+    /// ASSEMBLY -- after which Godot starts and dies with "Cannot instantiate C# script res://Main.cs".
+    /// Shipped exactly that in v7. The game csproj references the three core projects, so building it builds
+    /// everything the player needs.</summary>
+    const string GameProject = @"game\TPWGodot.csproj";
     const string BuildConfig = "Debug";
 
     // ⚠ BUMP THIS WITH EVERY LAUNCHER CHANGE **AND PUBLISH THE RELEASE**. Self-update only fires when the
@@ -24,7 +30,8 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 7;   // v7: --path pointed at the repo root, so Play opened Godot's project manager
+    const int LauncherVersion = 8;   // v8: built TPW.sln, which excludes the game project, so no game assembly was produced
+    // v7: --path pointed at the repo root, so Play opened Godot's project manager
     // v6: Install/Update/Play merged into ONE mode-driven button; build marker
     // v5: branch dropdown, Godot auto-download, current-vs-latest commit, Options panel, settings persisted beside the exe
     // v4: no functional change -- published to prove v3 self-updates, which is only testable against a HIGHER published version
@@ -329,7 +336,7 @@ public class MainWindow : Window
         string dotnet = Which("dotnet") ?? throw new Exception("dotnet SDK not found on PATH.");
         SetBusy("Building…");
         Log("Building …");
-        int rc = await RunAsync(dotnet, new[] { "build", Solution, "-c", BuildConfig, "--nologo" }, _repoDir);
+        int rc = await RunAsync(dotnet, new[] { "build", GameProject, "-c", BuildConfig, "--nologo" }, _repoDir);
         if (rc != 0)
         {
             Log($"Build FAILED (exit {rc}).");
