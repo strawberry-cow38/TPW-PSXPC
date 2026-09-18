@@ -714,3 +714,35 @@ eight-step sequence.
 
 States now live in `states/ui/` — `01_laptop`, `02_buildhire`, `03_staff`, and so
 on, each a verified position in the menu tree.
+
+## Ground truth for a decoder: the legal screen, as the console displays it
+
+An art-free way to check any decoder against the real hardware — exchange a hash,
+not an image.
+
+```
+320x256, 16bpp little-endian, row-major, no padding
+sha256 = 9b8b3bb5a338521c1959d68826130cac07292001c5c44be9fcb4e7c0600fec26
+```
+
+Captured from VRAM on a cold boot. **Three caveats, and the first nearly caught me
+out:**
+
+⚠ **The screen FADES.** Mean brightness ramps from frame 240, plateaus 280-460,
+fades out after 480. Frames 240 and 480 have *completely different hashes* to the
+plateau. I was about to publish a hash of a half-faded image as ground truth. The
+number above is from the plateau, and frames 280 and 360 are byte-identical, so it
+is a stable value rather than one lucky frame.
+
+⚠ **The last 9 pixels may legitimately differ.** The loader reads whole sectors
+(`size/2048`, C truncation), so the final 18 bytes of LEGAL.GFX never reach the
+console. A mismatch confined to the tail of the last row is that, not a decoder
+fault.
+
+⚠ **It is the framebuffer, not the file.** Anything the game does to the image on
+its way to the screen is baked in. A match proves agreement with what the hardware
+displays, which is the claim worth having.
+
+The general technique is worth keeping: **when two parties need to check that they
+decoded the same bytes, compare fingerprints of a canonical layout.** It settles
+the question exactly, and nobody has to distribute the asset.
