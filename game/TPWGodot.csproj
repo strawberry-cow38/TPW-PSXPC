@@ -1,0 +1,15 @@
+<Project Sdk="Godot.NET.Sdk/4.6.2">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>disable</Nullable>
+    <RootNamespace>TPWGodot</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- ⚠ THE DEPENDENCY POINTS THIS WAY AND NEVER THE OTHER. The render half may reference the sim; the sim
+         must never reference Godot, or it stops being testable on a machine with no engine and the split is
+         gone. Nothing enforces that but this comment and the sim csproj's own note, so both say it. -->
+    <ProjectReference Include="..\core\TPW.Sim\TPW.Sim.csproj" />
+    <ProjectReference Include="..\core\TPW.Launcher\TPW.Launcher.csproj" />
+  </ItemGroup>
+</Project>

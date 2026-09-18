@@ -1,0 +1,18 @@
+; Theme Park World -> Godot. The RENDER half; everything simulable lives in core/TPW.Sim, which has no
+; Godot reference at all and is tested without an engine.
+config_version=5
+
+[application]
+config/name="Theme Park World (Godot)"
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
+run/main_scene="res://Main.tscn"
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.13, 0.13, 0.14, 1)
+
+[dotnet]
+
+project/assembly_name="TPWGodot"
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
