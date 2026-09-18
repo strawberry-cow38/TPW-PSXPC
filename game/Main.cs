@@ -24,6 +24,19 @@ namespace TPWGodot
         PcmSample _sample;
         System.Collections.Generic.List<PcmSample> _sounds = new();
         readonly System.Random _rng = new();
+        OptionButton _rate;
+
+        /// <summary>⚠⚠ THE PLAYBACK RATE IS STILL NOT ESTABLISHED, AND THIS CONTROL EXISTS BECAUSE EARS BEAT
+        /// EVERY INSTRUMENT I HAVE. 8363 Hz came from the XM instrument headers, which survived with their
+        /// relative notes intact — real evidence, and it replaced a worse guess. But it is the rate the
+        /// TRACKER reasons in, and master listened and said it plays too slow. That is a measurement, and it
+        /// beats my reasoning.
+        ///
+        /// So rather than substitute one guess for another, the rate is selectable and logged. The PSX SPU
+        /// plays at 44,100 Hz at pitch 0x1000, so the candidates are that and its usual divisions. Whichever
+        /// sounds right IS right, and then this collapses back to a constant with a person's judgement behind
+        /// it instead of an inference.</summary>
+        static readonly int[] RateChoices = { 8363, 11025, 16726, 22050, 32000, 37800, 44100 };
         VBoxContainer _root;
         double _accum;
 
@@ -62,7 +75,18 @@ namespace TPWGodot
             AddChild(_audio);
             _playSound = new Button { Text = "Play a sound from your disc", Disabled = true };
             _playSound.Pressed += PlaySample;
-            _root.AddChild(_playSound);
+
+            _rate = new OptionButton();
+            foreach (int hz in RateChoices) _rate.AddItem($"{hz} Hz");
+            _rate.Selected = System.Array.IndexOf(RateChoices, 22050);
+            _rate.ItemSelected += _ => GD.Print($"[tpw] sample rate set to {CurrentRate} Hz");
+
+            var soundRow = new HBoxContainer { };
+            soundRow.AddThemeConstantOverride("separation", 8);
+            soundRow.AddChild(_playSound);
+            soundRow.AddChild(new Label { Text = "rate:", VerticalAlignment = VerticalAlignment.Center });
+            soundRow.AddChild(_rate);
+            _root.AddChild(soundRow);
 
             GD.Print($"[tpw] data: {_data.Message}");
             GD.Print($"[tpw] launcher said variant={variant}, we identified {_data.Variant?.Id ?? "(none)"}");
@@ -152,7 +176,7 @@ namespace TPWGodot
                 _playSound.Disabled = false;
                 _playSound.Text = $"Play a random sound from your disc ({_sounds.Count} available)";
                 GD.Print($"[tpw] decoded {_sounds.Count} waveforms; longest {_sample.SampleCount:n0} samples" +
-                         $" ({_sample.SampleCount / (double)SampleRateHz:0.00}s at {SampleRateHz} Hz)");
+                         $" ({_sample.SampleCount / (double)TrackerBaseHz:0.00}s at the {TrackerBaseHz} Hz tracker base)");
             }
             else _playSound.Text = "No sound decoded";
         }
@@ -198,8 +222,9 @@ namespace TPWGodot
             // you the BANK is being read correctly rather than one lucky entry.
             if (_sounds.Count > 0) _sample = _sounds[_rng.Next(_sounds.Count)];
             if (_sample == null || _sample.SampleCount == 0) return;
+            int hz = CurrentRate;
             GD.Print($"[tpw] playing {_sample.Source}: {_sample.SampleCount:n0} samples" +
-                     $" ({_sample.SampleCount / (double)SampleRateHz:0.00}s)");
+                     $" ({_sample.SampleCount / (double)hz:0.00}s at {hz} Hz)");
 
             // PCM16 little-endian, which is what AudioStreamWav.Format16Bits expects.
             var bytes = new byte[_sample.SampleCount * 2];
@@ -208,7 +233,7 @@ namespace TPWGodot
             _audio.Stream = new AudioStreamWav
             {
                 Format = AudioStreamWav.FormatEnum.Format16Bits,
-                MixRate = SampleRateHz,
+                MixRate = hz,
                 Stereo = false,
                 Data = bytes,
             };
@@ -237,9 +262,12 @@ namespace TPWGodot
         /// down, so any single constant is wrong for those by design. This wants to become a per-waveform rate
         /// once the XM-instrument to VAG-index mapping is wired.
         ///
-        /// Kept as a constant only because a wrong rate is instantly audible as wrong pitch — the safe kind of
-        /// wrong. 8363 is the better default because something measured points at it.</summary>
-        const int SampleRateHz = 8363;
+        /// Superseded by the selector above: master listened at 8363 and it plays too slow. Kept as the
+        /// documented lower bound of the range worth trying.</summary>
+        const int TrackerBaseHz = 8363;
+
+        int CurrentRate => _rate != null && _rate.Selected >= 0 && _rate.Selected < RateChoices.Length
+            ? RateChoices[_rate.Selected] : 22050;
 
         public override void _Process(double delta)
         {
