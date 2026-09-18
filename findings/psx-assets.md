@@ -74,6 +74,32 @@ blindly will read it as file data.
 - What the 12 uniform 131,156-byte entries are.
 - `FOLIO.GAZ` header word 2 (= 23).
 
+## 5b. The overlay is now decompilable (MEASURED)
+
+`TPW.BIN` is a raw overlay with no header, so it needs a load address before a decompiler can do
+anything with it. **It is `0x80010000`**, established two independent ways:
+
+- Of its 17,862 `jal` instructions, **92.9% target an address inside the overlay** at this base. The
+  next best candidate manages 87%, and `0x800c0000` — which the file's own first word,
+  `0x800c0498`, invites you to try — manages **15%**. That first word is not a load address.
+- Ghidra at this base produces coherent C with sane control flow. A wrong base decodes into
+  instruction midpoints and the decompiler produces noise.
+
+Recipe: import `TPW.BIN` raw, processor `MIPS:LE:32:default`, base `0x80010000`.
+
+⚠ **`0x96` IS NOT A MAGIC NUMBER IN THE CODE — the code search for it was a dead end.** Six sites in
+`TPW.BIN` load the immediate `0x96`, and every one decompiles to a **camera clamp**: `limit = 150`,
+or `25` in one mode, then a value pinned to ±limit. `FUN_800ce1c0` likewise just initialises a
+global to 150.
+
+It remains true that 268 archive payloads open with the word `0x96` — that is measured, and it is
+what makes them a distinguishable class. What is now disproven is the assumption that some routine
+tests for it, and therefore that finding the constant would find the parser. **The same lesson as
+the TIM scan, one level up: a small integer is not a signature. 150 is a perfectly ordinary number
+for a clamp to be, and there is no reason a format tag and an angle limit should not collide.**
+Either the parser switches on it in a way that does not materialise as that immediate, or the word
+is a length or count that happens to be 150 for this class of asset.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
