@@ -44,7 +44,31 @@ that is actually checked.
 
 ## Status
 
-Early. Nothing is claimed as working yet.
+Early — but the chain is joined end to end, verified rather than asserted.
+
+Run headless on 2026-09-18 against a real PAL disc:
+
+```
+[tpw] data: Found Theme Park World (PSX) (PAL) -- matched your disc image.
+[tpw] launcher said variant=SLES-026.88, we identified SLES-026.88
+```
+
+That single line exercises every seam built so far: the launcher identifies the
+user's own copy by hash, hands the answer to the game as environment, Godot
+starts, and the **engine-free** sim in `core/` ticks at the tick rate *that
+variant* carries. Each piece was built and tested separately; this is the first
+thing showing they meet.
+
+| part | state |
+|---|---|
+| `core/TPW.Sim` | fixed-point arithmetic + park clock, 8 tests, no engine |
+| `core/TPW.Launcher` | game-data identification + launcher rules, 17 tests |
+| `launcher/` | Avalonia, released as v1, identifies a copy and refuses unknown ones |
+| `game/` | Godot 4.6 C#, builds and runs, reports the identified variant |
+| the actual game | **not written.** No park, no guests, no rides. |
+
+⚠ The last row is the honest one. What exists is a verified skeleton and a real
+launcher; what does not exist is Theme Park World.
 
 ## Conventions
 
