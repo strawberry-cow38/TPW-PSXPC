@@ -142,18 +142,26 @@ namespace TPWGodot
             if (_sample != null && _sample.SampleCount > 0)
             {
                 _playSound.Disabled = false;
-                _playSound.Text = $"Play a sound from your disc ({_sample.SampleCount:n0} samples)";
-                GD.Print($"[tpw] decoded {_sample.SampleCount:n0} PCM samples from {_sample.Source}");
+                _playSound.Text = $"Play a sound from your disc ({_sample.SampleCount / (double)SampleRateHz:0.0}s)";
+                GD.Print($"[tpw] decoded {_sample.SampleCount:n0} PCM samples from {_sample.Source}" +
+                         $" ({_sample.SampleCount / (double)SampleRateHz:0.00}s at {SampleRateHz} Hz)");
             }
             else _playSound.Text = "No sound decoded";
         }
 
-        /// <summary>First non-empty waveform out of the first sound bank, decoded to PCM.</summary>
+        /// <summary>The LONGEST waveform on the disc, decoded to PCM.
+        ///
+        /// ⚠ IT USED TO TAKE THE FIRST NON-EMPTY ONE, WHICH IS A BUG YOU CANNOT SEE IN THE SOURCE. That reads
+        /// as perfectly sensible and picks a 64-byte waveform: 112 samples, **13 milliseconds**, an inaudible
+        /// click. The first run of this program is what exposed it — the log said "decoded 112 PCM samples"
+        /// and the number was too small to be a sound. Nothing about the code looked wrong, and no unit test
+        /// would have failed, because the behaviour was exactly what was written.</summary>
         static PcmSample FirstSound(DiscReader disc)
         {
             var f = disc.Find(AssetSelfTest.AssetArchive);
             if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return null;
 
+            PcmSample best = null;
             foreach (var e in gaz.Entries)
             {
                 if (e.Size != VabHeader.SplitHeaderSize) continue;
@@ -164,10 +172,10 @@ namespace TPWGodot
                 {
                     if (wave.Length == 0) continue;
                     var pcm = Vag.Decode(wave, $"bank #{e.Index}");
-                    if (pcm.SampleCount > 0) return pcm;
+                    if (best == null || pcm.SampleCount > best.SampleCount) best = pcm;
                 }
             }
-            return null;
+            return best;
         }
 
         void PlaySample()
