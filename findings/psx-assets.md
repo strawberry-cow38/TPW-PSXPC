@@ -160,8 +160,25 @@ and **every tone points at waveform index 1**, while the banks hold 6-28 wavefor
 `tones=1`. Do not spend time reading them, and do not expose the console's SPU registers to settle
 pitch: there is nothing there to settle it with. The tracker side wins by elimination.
 
-**Still open:** the rate is per-instrument (half an octave down), so it wants a per-waveform mapping
-from XM instrument index to VAG index.
+**Still open: the XM-instrument to VAG-index mapping is UNVERIFIED, and probably unverifiable from
+these two files.** Index order is the obvious reading and the counts match 9/9, but that is the same
+kind of "obvious" that has been wrong repeatedly here, so it was tested against loop points: an XM
+sample declaring a loop should line up with a VAG carrying the loop-start flag.
+
+Result 1/193, which reads as a dramatic refutation and **is worth nothing**. ⚠⚠ THE TEST WAS
+DEGENERATE AND THE MARGINALS PROVE IT: **0 of 193** XM samples declare a loop (stripping the sample
+data zeroed the loop fields too) and **192 of 193** VAGs carry the flag (it is how PSX ADPCM
+terminates). With one side constant, agreement is pinned at 0.5% *however the two are paired* —
+and 0.5% is exactly what came out. The number measured the marginals, not the ordering.
+
+**Always compute what agreement the marginals alone predict under random pairing, and compare the
+measured figure to THAT, not to 50%.** Here they matched to the decimal, which is the signature of a
+comparison carrying no information. Reported as a refutation it would have been a confident, precise,
+completely false finding.
+
+The stripping removed exactly the fields that could corroborate a mapping — length, loop points — so
+there may be no cross-check available between these two files. Do not go hunting for one; settle it
+from the player code, or by ear once something renders.
 
 ## 6. What would settle it
 
