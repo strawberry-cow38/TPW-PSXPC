@@ -108,13 +108,29 @@ namespace TPW.Launcher.Tests
         }
 
         [Fact]
-        public void TheShippedTableIsEmptyAndThatIsDeliberate()
+        public void TheShippedTableRecognisesTheOneMeasuredCopyAndNothingElse()
         {
-            // ⚠ This asserts an ABSENCE on purpose. Nobody has hashed a real disc, so the launcher refuses
-            // every copy -- correct, not a gap. If someone adds an invented entry to make the flow "work",
-            // this test fails and makes them say so out loud.
-            Assert.Empty(GameData.Known);
+            // ⚠ BOTH HALVES MATTER. The first assertion says the one entry is real and works; the second says
+            // the table has not quietly grown guesses. A variant added to make a flow "work" -- without a
+            // hash someone actually took -- is a lie whose only symptom is wrong offsets producing plausible
+            // garbage, so the count is pinned and anyone adding one has to change this line deliberately.
+            Assert.Single(GameData.Known);
+
+            var pal = GameData.Identify("2167C58486F14183E393F2010D33ABBDF958953D");
+            Assert.True(pal.CanPlay);
+            Assert.Equal("PAL", pal.Variant.Region);
+            Assert.Equal(0.04, pal.Variant.TickSeconds);   // 50 Hz half-rate, measured
+
             Assert.Equal(GameDataState.Unrecognised, GameData.Identify("anything-at-all").State);
+        }
+
+        [Fact]
+        public void HashComparisonIsCaseInsensitive()
+        {
+            // Get-FileHash yields uppercase, sha1sum lowercase, and a user reporting a hash will type either.
+            // A case-sensitive table rejects a copy it actually knows, which reads to the user as "your game
+            // is wrong" -- the most confusing possible failure.
+            Assert.True(GameData.Identify("2167c58486f14183e393f2010d33abbdf958953d").CanPlay);
         }
     }
 }

@@ -41,16 +41,33 @@ namespace TPW.Launcher
     {
         /// <summary>Known releases by executable hash.
         ///
-        /// ⚠⚠ DELIBERATELY EMPTY. Nobody has hashed a real disc yet, so this project cannot honestly claim to
-        /// recognise one -- and the consequence is that the launcher currently refuses every copy, which is
-        /// the CORRECT behaviour rather than a gap to paper over. An entry invented to make the flow "work"
-        /// would be a lie that only surfaces as wrong offsets producing plausible garbage, which is the most
-        /// expensive kind of wrong this project has.
+        /// ⚠ ONE ENTRY, AND EVERY FIELD IN IT WAS MEASURED. Added 2026-09-18 from a copy on the build box.
+        /// The boot id `SLES_026.88` was read out of the image itself (scanned for the boot identifier, not
+        /// inferred from a filename), which makes it the PAL/European release -- and that matches the source
+        /// tinyclaw's behaviour analysis cites, independently. SLES is a 50 Hz part, and the sim clock is
+        /// measured at half the frame rate, so TickSeconds is 0.04.
         ///
-        /// To add one: hash the executable from a copy you own, and record the region and tick rate you
-        /// MEASURED rather than the ones you expect.</summary>
+        /// ⚠⚠ THIS KEYS ON A DISC IMAGE, WHICH IS RIP-SENSITIVE. The hash is of a raw 2352-byte-per-sector
+        /// .bin (515,998,224 bytes = exactly 219,387 sectors). A different dump of the SAME disc -- different
+        /// sector mode, different padding, a .iso rather than a .bin -- hashes differently and will be
+        /// reported Unrecognised even though the game is identical. That is the safe direction to fail, but it
+        /// is a real limitation: the better long-term key is the extracted EXECUTABLE, which is stable across
+        /// rips, and this should move to that once the port can read files out of the image. Recorded here
+        /// rather than discovered by the first person whose .iso is rejected.
+        ///
+        /// To add another: hash a copy you own, read its boot id out of the image, and record the region and
+        /// tick rate you MEASURED rather than the ones you expect.</summary>
         public static readonly IReadOnlyDictionary<string, GameVariant> Known =
-            new Dictionary<string, GameVariant>(StringComparer.OrdinalIgnoreCase);
+            new Dictionary<string, GameVariant>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["2167C58486F14183E393F2010D33ABBDF958953D"] = new GameVariant
+                {
+                    Id = "SLES-026.88",
+                    Name = "Theme Park World (PSX, disc image)",
+                    Region = "PAL",
+                    TickSeconds = 0.04,   // 50 Hz half-rate; see ParkClock
+                },
+            };
 
         /// <summary>Identify a copy of the game from the hash of its executable.
         ///
