@@ -192,12 +192,22 @@ exactly, so reading the code that consumes `FOLIO.GAZ` beats guessing at its out
     0x9508  ram 0x801e8d08   "\\TPW.BIN;1"
     0x9514  ram 0x801e8d14   "\\LEGAL.GFX;1"
 
-⭐ **`FOLIO.GAZ` does not appear as a string in either the boot executable or `TPW.BIN`.** `TPW.BIN`
-names only `ADVISOR.TPW`. So the boot exe's whole job is to pull in the `TPW.BIN` overlay and show
-the legal screen, and the archive is reached from inside that overlay either by walking the ISO
-directory generically or by a baked-in LBA (it sits at 174726 = 0x2AA46). Either way **the loader is
-in `TPW.BIN`, not in the boot executable** — which is the 1 MB of MIPS to point a decompiler at, and
-a smaller haystack than "somewhere on the disc".
+❌ **RETRACTED — I CLAIMED `FOLIO.GAZ` APPEARS AS A STRING IN NEITHER BINARY. IT IS IN `TPW.BIN`.**
+It sits at file offset `0xcff84`, preceded by the pointer `0x800e00d4`, and the archive is opened by
+name through `CdSearchFile` — there is no hardcoded LBA. tinyclaw caught this after I had already
+published it, and it had been passed on to fable as a fact by then.
+
+⚠⚠ **THE CAUSE WAS A TRUNCATED LIST READ AS AN EXHAUSTIVE ONE.** My probe collected every printable
+string matching a keyword filter and printed `list(found.items())[:14]`. The filter matched **20**.
+`ADVISOR.TPW` was the fourteenth, so it was the last thing printed, and `FOLIO.GAZ` was in the six
+that never rendered. The output ended exactly at my own limit — **a result whose count equals your
+display limit is not a result** — and I read "the last line I can see" as "the last line there is".
+
+Same family as the marginals error and the flat stride test: the instrument described itself and I
+quoted it as though it described the disc. The difference is that this one **propagated into someone
+else's work before it was caught**, which is the expensive kind. Print the total count next to any
+truncated listing, and say "showing 14 of 20".
+
 
 tinyclaw can dump console VRAM while the game runs and has established that resident textures are
 **4bpp with palettes held separately and the lookup packed into the drawing commands**. That is the
