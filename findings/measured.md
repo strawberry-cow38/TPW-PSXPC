@@ -581,3 +581,44 @@ than at it, and fable's third `min()` term depends on the park score, which move
 as a newly-built ride ages. A score-term explanation fits the early-low pattern
 and is **unmeasured**. So: the specific prediction is not supported, and I am not
 claiming the replacement.
+
+## Staff and wages — the screen reached, and a number that disagrees with the formula
+
+With sandbox off, `triangle, circle, down, X, down, X` reaches the hire screen:
+
+```
+              Stock
+Guards          5
+Mechanics       5
+Cleaners        5
+Researchers     5
+Entertainers    5
+```
+
+Five types, five of each — and **five types is exactly the length of fable's
+`mult_by_type_index: [3, 1, 1, 2, 3]`**, which had been an unlabelled array.
+
+One more `X` opens the individual:
+
+```
+Gary Liddon
+Pay Grade       1
+Monthly Wage    $100
+Motivation      [bar]
+```
+
+(The roster is named after Bullfrog developers — Gary Liddon, Mike Baxter, Dave
+Owens. Easter egg, not data.)
+
+⚠ **$100 does not match the formula.** fable's `economy.json` gives
+`base[level] * mult[type] * proration`, with `base_by_level = [50, 55, 65, 80, 100]`
+and the first type's multiplier 3. Level 1 against that base table gives 50 or 55,
+so 150 or 165 — not 100.
+
+**Both readings are credible and I am not picking a winner yet.** Candidates:
+the displayed figure may be a different quantity from the charged one (a headline
+rate vs. a prorated charge); "Pay Grade 1" may not index `base_by_level` the way I
+assumed; or the category I opened may not be the one whose multiplier is 3. What
+settles it is neither the screen nor the formula but **the accumulator**: hire
+someone, run a month boundary, and read `bank+0x12D0`, which is the figure actually
+deducted. That is the next measurement.
