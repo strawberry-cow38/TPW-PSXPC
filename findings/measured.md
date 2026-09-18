@@ -42,20 +42,44 @@ over 12000 frames `money`, `gate_total` and `income_total` all moved by exactly
 ⚠ I first reported this as 80 admissions. It is 8. I divided stored units by the
 displayed price — right numerator, wrong denominator's unit.
 
-## Arrival rate (park_ride.state: one ride, nothing else)
+## Arrival rate
 
-**Periodic, not stochastic.** ~705 clock ticks between admissions — three
-arrivals, gaps of 710 and 700, at 10-tick resolution. Roughly one guest per 7
-game days.
+**An empty park gets ZERO arrivals. Any non-empty park gets roughly one guest per
+640-730 clock ticks, and how much is built barely moves that number.**
 
-⚠ **Scope:** this is the rate for *this park*, not a constant of the game. A park
-with more built should arrive faster; that is the thing to vary next. What
-generalises is the *shape*: for a fixed park the interval is constant, so the
-arrival model is a rate, not a dice roll.
+Measured across six saved parks, 4000 frames each, 10-tick resolution:
 
-⚠ At 600-frame sampling the gaps look like an alternating 1200/1800, which is an
-aliasing artifact of a constant ~1410-frame period. Same failure as the day
-period, one measurement apart.
+| park | arrivals | gaps (ticks) | mean |
+|---|---|---|---|
+| park_ride (one ride) | 3 | 710, 700 | 705 |
+| park_shop | 3 | 670, 640 | 655 |
+| park_shop5 | 3 | 670, 700 | 685 |
+| park_trail | 3 | 710, 730 | 720 |
+| park_trail2 | 2 | 640 | 640 |
+| park (empty) | **0** | - | - |
+
+⚠ **CORRECTION, and it was mine.** I reported this section earlier as *"periodic,
+not stochastic -- a constant interval, so the arrival model is a rate and not a
+dice roll."* That was three arrivals in one park, and it does not survive the
+wider measurement. The gaps range 640-730, a spread of 90 ticks against a
+sampling resolution of 10 -- so the variance is **nine times** what the
+instrument could have manufactured. It is real. There is jitter, and I called it
+constant from a sample too small to show otherwise.
+
+⚠ **Second thing the wider sweep does not support: "arrivals scale with what is
+built".** One ride and five shops give 705 and 685. Those parks differ a lot and
+their arrival rates do not. What the data does show is a **step at zero**: an
+open but empty park gets no guests at all, and anything built switches arrivals
+on. Beyond that step, this data cannot see a contents effect.
+
+**What DOES move it enormously is the debug switch.** With `0x80102D30 = 1` and
+`0x80102E60 = 1` held on an empty field: 120 guests in 3000 frames, about one per
+12.5 ticks -- roughly **55x** faster than any natural park here. So a large lever
+exists; it is just not "how much you have built", on this evidence.
+
+⚠ **Scope of all of the above:** six parks, 2-3 arrivals each. That is enough to
+falsify "constant" and enough to show the zero step. It is *not* enough to fit a
+formula, and I should not have implied a model from three points the first time.
 
 ## Addresses (PAL SLES build)
 
