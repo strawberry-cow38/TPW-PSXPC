@@ -93,9 +93,12 @@ namespace TPW.Data
 
         /// <summary>Read a whole file, including a partial final sector.
         ///
-        /// ⚠ THE CONSOLE DOES NOT DO THIS, AND THE DIFFERENCE WILL LOOK LIKE A DECODER BUG. tinyclaw read the
+        /// ⚠ THE CONSOLE DOES NOT DO THIS, AND THE DIFFERENCE WILL LOOK LIKE A DECODER BUG. fable read the
         /// boot executable's loader (CdSearchFile / CdControl seek / CdRead) and reports it sizes the transfer
-        /// as `size / 2048` with C truncation, so the game drops a partial last sector. Worked through for
+        /// as `size / 2048` with C truncation, so the game drops a partial last sector. (Relayed via tinyclaw,
+        /// who has NOT verified it live — an earlier version of this note said they had, which overstated the
+        /// chain. Provenance is part of the claim: "read off the instructions" and "watched it happen" are
+        /// different strengths and the note is worth less if it does not say which one this is.) Worked through for
         /// LEGAL.GFX with the figures this reader measures: 165,403 bytes is 80.76 sectors, so the console
         /// takes 80 -> 163,840 bytes, while the TGA header declares 18 + 320*256*2 = 163,858. The console is
         /// therefore missing the final 18 bytes, which is 9 pixels of 81,920 — invisible, but real.
