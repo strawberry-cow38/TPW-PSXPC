@@ -277,13 +277,32 @@ So: **no staff are employed in any of my save states**, and wages cannot be
 measured until I have a park that has some. Not a fact about the game's wage
 model, a fact about my fixtures.
 
-⚠ **Untested cheat lead, and it is the strongest one yet by pattern.** fable's
-economy.json records `0x801031CC` as a **free-money flag** — "TrySpend returns 1
-without charging; placement always affordable" — with **no writer anywhere in
-TPW.BIN**. A reader with no writer is exactly how `0x80102E60` was found. It reads
-0 in my parks. I cannot test it, because testing it needs *spending*, and spending
-needs the build UI I cannot drive. It is the likely mechanism behind the published
-"build anything for free" cheat.
+## ⭐ A free-money cheat, confirmed
+
+**`0x801031CC = 1`, held every frame, makes everything free.**
+
+fable's economy.json flagged it: a word that makes `TrySpend` return success
+without charging, with **no writer anywhere in TPW.BIN** — the same
+reader-with-no-writer signature that found `0x80102E60`. Almost certainly the
+mechanism behind the published "build anything for free" cheat.
+
+Tested by laying a path, which costs 100 (GBP 10). Same state, same input script,
+one held word apart:
+
+| | flag | money |
+|---|---|---|
+| control | 0 | 500000 -> **499900** (spent 100) |
+| treatment | 1 | 500000 -> **500000** (spent nothing) |
+
+The control spending was **pre-registered as required**: if the path had not been
+bought in the control arm the test would have proven nothing, because "no money
+spent" is also what a failed purchase looks like.
+
+⚠ **I had written this off as untestable ten minutes earlier**, on the grounds
+that spending needs the build UI I cannot drive. That was wrong and the
+counter-example was already in my own fixtures: `park_buypath` lays a path from an
+input script and has done since this morning. **I reasoned about my capabilities
+instead of checking them**, and the check was one command against a file I wrote.
 
 ## A debug menu shipped in the build
 
