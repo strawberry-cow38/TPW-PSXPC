@@ -913,3 +913,45 @@ like this" — print the DISTRIBUTION, not the extremum. Worse, I published the 
 *as an invariant for someone else to test against*, so my bad statistic became
 their false lead. An instrument handed to a peer needs more scrutiny than one I
 only use myself, not less.
+
+## SPU voice pitch — the emulator now exposes it, and what it does/doesn't say
+
+Patched pcsx_rearmed to expose the SPU register file (`spu.regArea`, 0x400
+halfwords) through the libretro memory interface under a private id, the same way
+I exposed VRAM. Voice *n*'s pitch is `regs[((n<<4)|4)>>1]`, and
+`rate = pitch / 0x1000 * 44100`.
+
+Read live from a running park, one instant:
+
+```
+v0 11143   v1 11143   v2 11111   v3 22298
+v4 22298   v5 11111   v6 16710   v7  8355
+```
+
+**What this proves: a single global sample rate is wrong.** Voices differ by
+nearly 3x at the same moment, and no one rate explains that. strawberry raised
+exactly this ("could be multiple different sample rates across different files")
+and it is the case a person listening to one sound structurally cannot detect.
+
+⚠ **What it does NOT give: base sample rates.** The pitch register is what the chip
+plays *now*, which is the sample's base rate **times the note it is being played
+at**. A tracker makes music by playing one waveform at many pitches, so a voice
+reading 8355 may be a 22050 sample an octave and a bit down. Getting base rates
+needs the note data, not the chip. **This narrows the question; it does not close
+it.**
+
+A suggestive pattern, recorded as suggestive: the two commonest values, 11143 and
+22298, are 11025 and 22050 **plus 1.1%** — the same ratio on both. Consistent with
+22050 being right and everything sitting slightly sharp, but a constant ~1% offset
+could equally be the emulator's clock or my arithmetic, so it stays a lead.
+
+⚠ `176389 Hz` recurs and is junk: pitch `0x4000`, the idle value, not a voice
+playing at four times CD rate. Worth naming because it is the most common entry in
+a naive histogram and would look like a finding.
+
+⚠ **Two masked build failures while doing this**, both from the same habit: I ran
+`make … | tail` and then read `$?`, which is the exit status of `tail`. The first
+build did not run at all ("run ./configure first") and reported success; the
+second failed on an include path and reported success. **A pipeline's exit status
+belongs to its last command.** Check the artifact's timestamp, or capture the
+compiler's own return code before anything else runs.

@@ -45,7 +45,16 @@ static bool env_cb(unsigned cmd, void *data) {
         *(bool *)data = true; return true;
     case RETRO_ENVIRONMENT_GET_VARIABLE: {
         struct retro_variable *v = (struct retro_variable *)data;
-        v->value = NULL;                 /* not set -> core keeps its default */
+        /* Answer only the options that affect REPRODUCIBILITY. The dynarec
+         * compiler thread and the threaded renderer both introduce timing
+         * variation: identical 12,000-frame runs otherwise diverge by a whole
+         * guest arrival (measured FAIL/FAIL/PASS on the same input). Everything
+         * else stays at the core default. */
+        if (v && v->key) {
+            if (!strcmp(v->key, "pcsx_rearmed_drc_thread")) { v->value = "disabled"; return true; }
+            if (!strcmp(v->key, "pcsx_rearmed_gpu_thread_rendering")) { v->value = "disabled"; return true; }
+        }
+        if (v) v->value = NULL;          /* not set -> core keeps its default */
         return false; }
     case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE:
         *(bool *)data = false; return true;
@@ -314,6 +323,13 @@ int main(int argc, char **argv) {
         }
     }
 
+    /* tinyclaw: SPU register file, exposed by our core patch under a private id.
+     * Voice n pitch = regs[((n<<4)|4)>>1]; rate Hz = pitch/0x1000 * 44100.
+     * Ears can settle one sample's rate; only this shows that voices DIFFER. */
+    #define TPW_MEMORY_SPU_REGS 0x1000
+    void *spur = retro_get_memory_data(TPW_MEMORY_SPU_REGS);
+    size_t spursz = retro_get_memory_size(TPW_MEMORY_SPU_REGS);
+    fprintf(stderr, "[fe] SPU regs %p size %zu\n", spur, spursz);
     void *vram = retro_get_memory_data(RETRO_MEMORY_VIDEO_RAM);
     size_t vramsz = retro_get_memory_size(RETRO_MEMORY_VIDEO_RAM);
     fprintf(stderr, "[fe] VRAM %p size %zu\n", vram, vramsz);
@@ -333,7 +349,11 @@ int main(int argc, char **argv) {
                 snprintf(p, sizeof p, "%s/vram_%06lu.bin", g_outdir, g_frame);
                 f = fopen(p, "wb"); if (f) { fwrite(vram, 1, vramsz, f); fclose(f); }
             }
-            fprintf(stderr, "[fe] frame %lu: dumped RAM+VRAM\n", g_frame);
+            if (spur && spursz) {
+                snprintf(p, sizeof p, "%s/spu_%06lu.bin", g_outdir, g_frame);
+                f = fopen(p, "wb"); if (f) { fwrite(spur, 1, spursz, f); fclose(f); }
+            }
+            fprintf(stderr, "[fe] frame %lu: dumped RAM+VRAM+SPU\n", g_frame);
         }
     }
     const char *savepath = getenv("SAVESTATE");
