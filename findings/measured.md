@@ -1014,3 +1014,39 @@ the pixel-side finding confirmed from the command side, on an unrelated code pat
 The log also carries UV bounds per draw, so the mapping can go to *rectangles of a
 page → palette*, which is what a renderer actually needs, rather than a page-level
 answer that cannot exist.
+
+## Palettes located in the archive — and NOT in the strips
+
+Searched the live VRAM palettes against the archive bytes:
+
+```
+clut (928,25)  -> entry #416, +0x36C0   (duplicated at 0x82B938)
+clut (704, 3)  -> entry #169, +0x6A4
+clut (720, 1)  -> entry #169, +0x5C4
+clut (704, 1)  -> entry #169, +0x5A4
+```
+
+**Entry #169 is a contiguous palette array** — those three sit 0x20 apart, exactly
+one 16-entry CLUT, so it can be walked rather than searched.
+
+⚠ **This corrects the model fable and I were both using.** I had said the palettes
+come from the two headerless 128 KB strips, reasoning from their VRAM band. They
+are in ordinary archive entries instead. The strips feed *something* at those
+coordinates; they are not where these CLUTs originate.
+
+**Why the match is trustworthy** — checked before reporting, because a 32-byte hit
+in a 16 MB file is exactly the kind of thing that is chance:
+- the (928,25) run has **16 distinct halfwords out of 16** — maximally varied
+- it occurs exactly **twice** in the whole archive
+- and the control is the real evidence: **five palettes searched, three land
+  clustered in one entry**. Coincidence does not cluster.
+
+⚠ **Two gaps, stated rather than smoothed:**
+- `clut (512,73)` and `(544,73)` are **not** in the archive verbatim, so some
+  palettes arrive compressed or are built at runtime. A plain lookup will not cover
+  all 47.
+- **`tpage (960,256)` is not in the archive verbatim either** — three different rows
+  searched, no match. So the page I had recommended as the clean single-palette test
+  case is *not* one of the twelve uncompressed banks, and testing a decode against
+  it would mean feeding a path that cannot yet be fed. My "start there" advice was
+  half wrong and is withdrawn; `(576,256)` or `(704,0)` are likelier plain banks.
