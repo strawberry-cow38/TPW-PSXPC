@@ -743,6 +743,25 @@ fault.
 its way to the screen is baked in. A match proves agreement with what the hardware
 displays, which is the claim worth having.
 
+**Bit 15 (PSX semi-transparency) is set on ZERO of the 81,920 pixels**, so the
+masked and unmasked hashes are identical — a TGA round trip cannot differ on it.
+Two further fingerprints, so a mismatch narrows itself:
+
+```
+full 16bpp             9b8b3bb5a338521c1959d68826130cac07292001c5c44be9fcb4e7c0600fec26
+bit 15 cleared         9b8b3bb5a338521c1959d68826130cac07292001c5c44be9fcb4e7c0600fec26
+same, minus last 9 px  aa237587d607926e83baf04007098055b7bafe2209af0bcc363cd8735eb8b604
+```
+
+Frames 280, 320 and 360 all hash identically, so the plateau value rests on three
+samples rather than two.
+
 The general technique is worth keeping: **when two parties need to check that they
 decoded the same bytes, compare fingerprints of a canonical layout.** It settles
 the question exactly, and nobody has to distribute the asset.
+
+**And an oracle is more useful when it narrows what a mismatch would MEAN than
+when it just answers yes or no.** Three candidate causes were on the table — the
+mask bit, sector truncation, row order. Publishing the extra hashes eliminated one
+outright and made a second directly testable, so a failure now points at exactly
+one hypothesis instead of three.
