@@ -180,6 +180,39 @@ The stripping removed exactly the fields that could corroborate a mapping — le
 there may be no cross-check available between these two files. Do not go hunting for one; settle it
 from the player code, or by ear once something renders.
 
+## 5e. The legal screen: decode is faithful, colour is NOT settled
+
+Master ran it and read the text off the screen: the image appeared, **rotated 180 degrees**. The pixel
+decode was therefore already sound and only orientation was wrong. `LEGAL.GFX` carries TGA descriptor
+`0x00` (bottom-left origin), so a spec-correct decode flips it vertically — and that is what comes out
+wrong, meaning the file is stored rotated relative to how the game presents it. The rotation is applied
+in the game layer, not in `Tga`, which stays spec-correct and unit tested. **Why** it is stored that
+way is not established, and the comment says so instead of inventing a reason.
+
+⭐ **A PERSON LOOKING AT THE SCREEN FOUND THIS IN SECONDS. NOTHING HEADLESS COULD.** The buffer was the
+right size, the right format, and full of the right pixels in the wrong order, so every check passed:
+the self-test, the decode, the invariants. Orientation is invisible to all of them.
+
+**Colour is a separate, still-open problem, and the file settles who is measuring what.** Compared
+against tinyclaw's console framebuffer capture:
+
+    FILE   high5 peaks 30   mid5 peaks 31   low5 peaks 0     non-black 11,234
+    VRAM   R = 14           G = 30          B = 29           non-black 11,143
+
+⚠⚠ **THE LOW 5 BITS ARE ZERO ON ALL 81,920 PIXELS OF THE FILE** — identically, not mostly. So under
+either labelling the file has one channel entirely absent (`R=30 G=31 B=0` read as ARGB1555, or
+`R=0 G=31 B=30` read as ABGR1555, the PSX convention). The framebuffer capture has **no zero channel**.
+
+⭐ **No fade, scale or rotation can turn an identically-zero channel into 14.** That single fact rules
+out the fade, the row order and the decoder all at once, and leaves only one explanation: **something
+applies a colour transform between file and framebuffer.** And the two are certainly the same picture —
+the non-black counts differ by 0.8%, which is what a fade rounding dim pixels to black costs.
+
+So the decode is faithful to the FILE and the capture is faithful to the SCREEN, and those were never
+the same target; both of us half-assumed they were. **Do not "fix" the decoder by swapping channels
+until the transform is known** — matching numbers by rearranging bits is how a plausible wrong decoder
+gets built, which is the failure the oracle existed to prevent.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
