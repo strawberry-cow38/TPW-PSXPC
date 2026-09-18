@@ -1,0 +1,15 @@
+# CANONICAL BOOT -> PRACTICE PARK (Theme Park World, PAL, 50fps)
+#
+# With NO input the game plays its logo + intro FMV and then sits on the
+# language screen FOREVER. Every gate below is a list menu: up/down move the
+# highlight, CROSS confirms; circle/triangle/start back out. Only cross advances
+# the language screen -- every other button does nothing there.
+#
+#   ~3663  language select appears (first screen that waits for input)
+4000 4008 cross
+#   -> Play Game / Options / Load Game   (Play Game already highlighted)
+4600 4608 cross
+#   -> Main Game / Practice Park / Exit  (Main Game already highlighted)
+5200 5208 down
+5800 5808 cross
+#   -> Practice Park loads

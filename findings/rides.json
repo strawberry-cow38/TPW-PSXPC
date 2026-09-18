@@ -1,0 +1,103 @@
+{
+  "binary": "/home/ec2-user/tpw/ext/TPW.BIN @ 0x80010000",
+  "units": {"tick_s": 0.04, "day_ticks": 99, "fixed_point": "20.12 (x4096) where noted"},
+  "companion_files": {
+    "records": "records.json (all 197 definition records, parsed by recs.py, with English names)",
+    "records_text": "records_named.txt",
+    "themes": "rides_themes.json (FOLIO ids per theme/set for rides, features, shops, sideshows)",
+    "english_text_table": "ext/rip/0407.bin (FOLIO 0x197): u32 count=1031, then u32 offsets"
+  },
+  "type_enum": {"0": "Void", "1": "RollerCoaster", "2": "Feature", "3": "NonPathedRide", "4": "Shop", "5": "SideShow", "6": "PathedRide", "7": "TourRide", "8": "TrackUpgrade",
+                "source": "CONTEXT_ strings 0x800DDDD4.., pointer table 0x800F1090; record+0 and A+0x6A hold the same value"},
+  "pools": [
+    {"type": 3, "name": "PoolOfRides", "ptr": "0x80103844", "count": 15, "stride": 260, "vtable": "0x800E5514", "update": "0x800A0084"},
+    {"type": 7, "name": "PoolOfTourRides", "ptr": "0x80103848", "count": 3, "stride": 332, "vtable": "0x800E586C", "update": "0x800A0E88"},
+    {"type": 6, "name": "PoolOfTrackRides", "ptr": "0x8010384C", "count": 2, "stride": 7460, "vtable": "0x800E5FE8", "update": "0x800A67B4"},
+    {"type": 1, "name": "PoolOfCoasters", "ptr": "0x80103850", "count": 2, "stride": 3632, "vtable": "0x800E65A0", "update": "0x800B0C94"},
+    {"type": 4, "name": "PoolOfShops", "ptr": "0x80103854", "count": 20, "stride": 148, "vtable": "0x800E6A8C", "update": "0x80065BE0"},
+    {"type": 2, "name": "PoolOfFeatures", "ptr": "0x80103858", "count": 45, "stride": 132, "vtable": "0x800DCA5C", "update": "0x80065BE0"},
+    {"type": 5, "name": "PoolOfSideshows", "ptr": "0x8010385C", "count": 10, "stride": 152, "vtable": "0x800E6D64", "update": "0x800B76CC"}
+  ],
+  "base_vtables": {"attraction": "0x800E1068", "queued_ride": "0x800E519C", "pool_entry_layout": "outer+0 link(8 bytes), A = outer+8, vptr at A+0xC; subclass overrides carry delta -8"},
+  "theme_tables": {
+    "pointer_table": "0x800DDDC4",
+    "tables": ["0x8010558C", "0x801054DC", "0x8010542C", "0x8010537C"],
+    "builder": "0x8002ED50",
+    "lookup": "0x8006A3CC(mgr,type,variant) -> FOLIO id; 0x8006A158(mgr,type) -> count; mgr = 0x80069610(), mgr+8 = theme, mgr+4 = set (0/1)",
+    "layout_Tprime_eq_table_plus_4xset": {"0x08/0x10": "t3 rides array/count", "0x18/0x20": "t7 tour (runtime gp array)", "0x28/0x30": "t6 track (runtime)", "0x38/0x40": "unknown", "0x48/0x50": "t1 coasters (runtime)", "0x58/0x60": "t2 features", "0x68/0x70": "t4 shops", "0x78/0x80": "t5 sideshows"}
+  },
+  "folio_entry": {"header_words": ["0x96", "1", "0", "0", "0", "record_offset", "entry_size", "4"], "record_at": "data + data[0x14] (0x800307DC)"},
+  "record_format": {
+    "0x00": "u32 type", "0x04": "u32 name text id", "0x08": "u8 footprint w", "0x09": "u8 unknown", "0x0A": "u8 footprint d", "0x0B": "0xFF",
+    "0x0C": "s16[2] entrance offset", "0x10": "s16[2] exit offset (-1,-1 none)", "0x14": "u8[4] unknown", "0x18": "u32 base intensity", "0x1C": "u32 body length", "0x20": "u32 =4",
+    "0x24 + 0x34*L": "level block L=0..2 (code allows L=3 which reads past the record)",
+    "level_block": {"0x00": "=4 (f24)", "0x04": "=4 (f28)", "0x08": "wear multiplier (slot 102)", "0x0C": "max seats (slot 99)", "0x10": "lifetime (A+0x68 at placement)", "0x14": "speed min (slot 95)", "0x18": "speed max (slot 96)", "0x1C": "cycles min (slot 97)", "0x20": "cycles max (slot 98)", "0x24": "f48 unknown", "0x28": "f4C unknown", "0x2C": "price GBP (0x8009F470)"},
+    "shop": {"0x20": "build price", "0x2C": "u16 default sale price -> A+0x88", "0x2E": "u16 unit cost", "0x30..0x36": "u16 product params"},
+    "sideshow": {"0x20": "build price", "0x2C": "u16 play price -> A+0x84", "0x2E": "u16 win chance % -> A+0x86", "0x30": "u8 prize GBP -> A+0x78"},
+    "feature": {"0x20": "build price", "0x2E": "flag byte: bit0 usable by guests (slot 54)"}
+  },
+  "attraction_fields": {
+    "0x0C": "vptr", "0x10": "anim-time object (frame counter at [0])", "0x14": "guests served (int)", "0x18": "FOLIO handle object", "0x54": "mechanic claim ptr",
+    "0x58": "s16 x tile", "0x5A": "s16 y", "0x5C": "s16 z", "0x60": "phase timer 20.12", "0x64": "u16 phase index", "0x66": "s16 -1 at placement",
+    "0x68": "s16 remaining lifetime (slot 83 set / 84 get)", "0x6A": "u8 type", "0x6B": "u8 variant", "0x6C": "u8 rotation", "0x6D": "u8 build anim variant", "0x6E": "u8 status", "0x6F": "flags",
+    "0x70": "queue path list", "0xB4": "reliability 20.12 (100.0 = 0x64000)", "0xB8": "speed slider (slot 89/92)", "0xBC": "capacity slider (slot 90/93)", "0xC0": "duration slider, cycles (slot 91/94)",
+    "0xC4": "queue member list", "0xD4": "riders list", "0xE4": "smoke effect", "0xE8": "upgrade effect", "0xEC": "closing progress 20.12 (0 open .. 10*(w+h) closed)",
+    "0xF0": "u16 riders on board", "0xF2": "u16 cycles done", "0xF4": "u16 day built", "0xF6": "u8 upgrade level", "0xF8": "int day stamp of last non-empty queue",
+    "shop_extra": {"0x78": "day built", "0x7C": "modifier", "0x88": "u16 price", "0x8A": "modifier", "0x8C": "takings", "0x90": "profit"},
+    "sideshow_extra": {"0x78": "prize", "0x84": "u16 price", "0x86": "u16 chance", "0x88": "wins", "0x8C": "prizes paid", "0x90": "takings"},
+    "feature_extra": {"0x80": "s8 capacity 0..100"}
+  },
+  "status": {
+    "set_status": "slot 57 = 0x80065768: A+0x6E := n; call slot 58+n (table 0x800E1340)",
+    "tick": "base Update 0x80065BE0: call slot 69+n (table 0x800E1370); queued-ride Update 0x8009CCD4 adds lifetime/closing logic; Ride Update 0x800A0084 adds 0x8009D0FC",
+    "values": {"0": "placed", "1": "under construction (tick 0x800659C4 -> 10 when the build phase completes)", "2": "running (rides) / open (others)", "3": "closed by player", "4": "about to break down (msg 0x3E)", "5": "broken down (msg 0x3F/0x40/0x41)", "6": "under repair (mechanic)", "7": "reopen: base -> 2; rides -> reliability 100, -> 10", "8": "dead (no writer)", "9": "dead (no writer)", "10": "loading (rides) / build complete -> 2 (others)", "11": "unloading"},
+    "open_for_queueing": [2, 10, 11],
+    "player_open": "slot 27 0x800637F8 -> 2", "player_close": "slot 28 0x8006382C -> 3",
+    "placement": "slot 37 (Ride 0x8009FB50) -> InitFromRecord 0x8009C344 -> slot 38 0x800625BC (status 0) ; slot 39 0x80062894 -> status 1",
+    "demolish": "Ride slot 29 0x8009FC1C -> 0x8009C690 (eject) -> 0x8006292C (refund half L0 price)",
+    "upgrade": "0x8009C56C: level<3 -> level++, 0x8009C410 resets sliders+reliability, TrySpend(record[level].price*10); triggered by mechanic state 54 from the upgrade queue 0x801099EC (count 0x80102D48, push 0x8005BE14 from UI 0x8003BE00)"
+  },
+  "queue": {
+    "join_rule": "0x8008DA14: status in {2,10,11} and (in-queue flag or members < 4*level+7)",
+    "capacity_by_level": [7, 11, 15],
+    "load": {"fn": "0x8009C884", "cadence_ticks": 20, "condition": "riders < A+0xBC and head.state == 18", "full": "A+0xF2 := 0; SetStatus(2)"},
+    "partial_start": {"fn": "0x800A0178", "rule": "queue empty for >= 5 game days (495 ticks) and riders > 0 -> SetStatus(2)"},
+    "run": {"fn": "0x8009CA60", "rule": "each animation phase completed: A+0xF2 += 1; A+0xF2 >= A+0xC0 -> SetStatus(11)", "phase_ticks": "duration_u16 * 4096 / timescale (timescale ~9930/tick) ; duration from the model animation resource, not extracted"},
+    "unload": {"fn": "0x8009CB5C", "cadence_ticks": 10, "empty": "A+0xF0 := 0; SetStatus(10)"},
+    "throughput_formula": "guests_per_tick = capacity / (30*capacity + cycles*phase_ticks)"
+  },
+  "sliders": {
+    "speed": {"field": "A+0xB8", "range": "record speed min..max (1..100; tour 80..100)", "default": "(min+max)/2 = 50", "panel_text": "0x1A1 Speed"},
+    "capacity": {"field": "A+0xBC", "range": "1..max seats(level)", "default": "max(1, max seats/2)", "panel_text": "0x364 Capacity"},
+    "duration": {"field": "A+0xC0", "range": "cycles min..max", "default": "max(1, cycles max/2)", "panel_text": "0x2D5 Duration"},
+    "panel_read": "0x80078F70", "panel_write": "0x80079300"
+  },
+  "intensity": {
+    "fn": "slot 53; Ride 0x800A0594",
+    "formula": "min(100, base * clamp(speed/100, 0.75, 1.25) * clamp(cycles/5, 0.75, 1.25))",
+    "sideshow": "0x800B7788: clamp(0,100, record+0x18/3 + 50 + max(0,price-prize)^2/16) (field names GUESS)",
+    "shop_feature": 0,
+    "note": "no stored excitement/appeal/queue rating exists; ride slots 54/55/56 return 0 for rides"
+  },
+  "wear": {
+    "fn": "slot 103 = 0x8009DD5C, every 4th tick while status == 2",
+    "rate_fn": "slot 104; Ride 0x800A0250 (a1=0 -> uses riders on board)",
+    "rate": "k = ((s + L)/2) * wearMult ; s = speed/100 (if speed>=100: (s+1)/2) ; L = riders/maxSeats (+((L-0.8)*64)^2/4096 if L>=0.8)",
+    "loss_per_4_ticks": "k/32 reliability points",
+    "lifetime": "A+0x68 -= floor(R/15) - floor(R'/15)",
+    "mode_flag": "0x80059A9C() != 0 -> no wear",
+    "examples_level0": {"speed50_full": {"k": 3.84, "loss_per_4_ticks": 0.12, "ticks_100_to_10": 3000}, "speed50_empty": {"k": 1.25, "ticks_100_to_10": 9200}, "speed100_full": {"k": 5.09, "ticks_100_to_10": 2260}}
+  },
+  "breakdown": {
+    "reliability_threshold": "A+0xB4 <= 0x9FFF (<10.0) while status 2 -> Ride: smoke + status 4 (0x8009D0FC); track 0x800A66EC / coaster 0x800B0A68 -> status 5",
+    "status4_to_5": "only if A+0xB4 == 0 exactly (practically unreachable for rides)",
+    "lifetime_zero": "A+0x68 == 0: message 0x99 (condemned), queued-ride Update closes the ride and sets 4; mechanics never claim it (0x80096C58 requires A+0x68 != 0); only placement/save-load reset A+0x68",
+    "messages": {"0x3E": "Your ride is about to break down!", "0x3F": "A ride has broken down, and you don't have any mechanics to fix it!", "0x40": "A ride has broken down and all your mechanics are busy.", "0x41": "A ride has broken down, and a mechanic is on his way to fix it.", "0x99": "One of your rides has become too old and has been condemned.", "table": "0x800EE4FC + 0x14*id, u16 text id at +0"},
+    "mechanic": {"claim": "0x80096C58: status in {4,5}, unclaimed, A+0x68 != 0", "closing": "state 16: A+0xEC += timescale/tick until 10*(w+h)<<12 (~33 ticks for 4x4)", "repair_ticks_by_skill": [240, 180, 120, 60, 60], "opening": "state 17: A+0xEC -= timescale/tick to 0, then SetStatus(7) -> reliability 100 -> status 10", "cost": 0, "skill_affects": "repair duration only"}
+  },
+  "corrections": [
+    "behaviour.md: type 2 is Feature (toilets/bins/scenery), not a shop; V+0x5D is the toilet need (GUESS-high); ride slots 54/55/56 return 0",
+    "economy.md: record numbers are in FOLIO.GAZ but the type/theme index arrays are in TPW.BIN (0x800F0CCC..0x800F1090); all 197 records now parsed",
+    "behaviour.md 3.5: 0x8009C1E8/0x8009EEE4/0x8009EFA8 are the closing-progress test/advance/retract; 0x8005BE44/0x8005BE70 are the player's upgrade queue; status 7 -> 2 -> 10 for rides"
+  ]
+}

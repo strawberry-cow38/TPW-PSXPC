@@ -1,0 +1,608 @@
+[
+ {
+  "theme": 0,
+  "guess_name": "Lost Kingdom",
+  "table": "0x8010558C",
+  "rides_A": [
+   220,
+   217,
+   216,
+   218,
+   227,
+   224,
+   222,
+   211
+  ],
+  "rides_B": [
+   210,
+   209,
+   221,
+   225,
+   226,
+   214
+  ],
+  "features_A": [
+   197,
+   195,
+   185,
+   193,
+   179,
+   200,
+   201,
+   181,
+   180,
+   188,
+   173,
+   194,
+   191
+  ],
+  "features_B": [
+   197,
+   195,
+   185,
+   193,
+   179,
+   200,
+   201,
+   181,
+   180,
+   188,
+   173,
+   194,
+   191
+  ],
+  "shops_A": [
+   237,
+   234,
+   236,
+   239,
+   235,
+   238
+  ],
+  "shops_B": [
+   237,
+   234,
+   236,
+   239,
+   232,
+   247
+  ],
+  "sideshows_A": [
+   248,
+   229,
+   244
+  ],
+  "sideshows_B": [
+   243,
+   245,
+   246
+  ],
+  "rides_A_names": [
+   "Crazy Ape",
+   "Inca Pot",
+   "Sun God",
+   "Mayan Spinner",
+   "Eruption",
+   "Tom Tom Twister",
+   "Rocky Racers",
+   "Aztec Bounce"
+  ],
+  "rides_B_names": [
+   "The Hot Pot",
+   "Belly Bounce",
+   "Mumbo",
+   "Inca Totem",
+   "Aztec Mayhem",
+   "Diplo-Dip"
+  ],
+  "features_A_names": [
+   "Staff Room",
+   "?0xc3",
+   "?0xb9",
+   "?0xc1",
+   "Toilet",
+   "Super Toilet",
+   "?0xc9",
+   "Large Tree",
+   "Big Palm",
+   "Fountain",
+   "?0xad",
+   "?0xc2",
+   "Mammoth Fountain"
+  ],
+  "features_B_names": [
+   "Staff Room",
+   "?0xc3",
+   "?0xb9",
+   "?0xc1",
+   "Toilet",
+   "Super Toilet",
+   "?0xc9",
+   "Large Tree",
+   "Big Palm",
+   "Fountain",
+   "?0xad",
+   "?0xc2",
+   "Mammoth Fountain"
+  ],
+  "shops_A_names": [
+   "Fries",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Costume Shop",
+   "Gift Shop"
+  ],
+  "shops_B_names": [
+   "Fries",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Balloon Shop",
+   "Restaurant"
+  ],
+  "sideshows_A_names": [
+   "Idol Smash",
+   "Arcade",
+   "Dino Racing"
+  ],
+  "sideshows_B_names": [
+   "Giant Puzzle",
+   "Sun Shooter",
+   "Strength Bird"
+  ]
+ },
+ {
+  "theme": 1,
+  "guess_name": "Halloween",
+  "table": "0x801054DC",
+  "rides_A": [
+   133,
+   129,
+   128,
+   131,
+   132,
+   140,
+   134,
+   122
+  ],
+  "rides_B": [
+   139,
+   137,
+   124,
+   121,
+   138,
+   136
+  ],
+  "features_A": [
+   109,
+   107,
+   105,
+   98,
+   106,
+   110,
+   95,
+   96,
+   99,
+   100,
+   101,
+   111,
+   103,
+   104
+  ],
+  "features_B": [
+   109,
+   107,
+   105,
+   98,
+   106,
+   110,
+   95,
+   96,
+   99,
+   100,
+   101,
+   111,
+   103,
+   104
+  ],
+  "shops_A": [
+   149,
+   146,
+   152,
+   151,
+   160,
+   150
+  ],
+  "shops_B": [
+   149,
+   146,
+   152,
+   151,
+   158,
+   147
+  ],
+  "sideshows_A": [
+   144,
+   159,
+   153
+  ],
+  "sideshows_B": [
+   154,
+   145,
+   155
+  ],
+  "rides_A_names": [
+   "Crazy Clown",
+   "Thrill Grill",
+   "Jaw Dropper",
+   "Tentacle Terror",
+   "Devils Disc",
+   "Eye Slide",
+   "Jumping Skulls",
+   "Insecticide "
+  ],
+  "rides_B_names": [
+   "Ghost Ship",
+   "Putrid Pumpkins",
+   "Hocus Pocus",
+   "Brain Buster",
+   "Rat Race",
+   "Phantom"
+  ],
+  "features_A_names": [
+   "Staff Room",
+   "?0x6b",
+   "?0x69",
+   "?0x62",
+   "?0x6a",
+   "Super Toilet",
+   "Large Rock Pillar",
+   "Huge Rock",
+   "?0x63",
+   "?0x64",
+   "Demon Statue",
+   "?0x6f",
+   "Gargoyle",
+   "?0x68"
+  ],
+  "features_B_names": [
+   "Staff Room",
+   "?0x6b",
+   "?0x69",
+   "?0x62",
+   "?0x6a",
+   "Super Toilet",
+   "Large Rock Pillar",
+   "Huge Rock",
+   "?0x63",
+   "?0x64",
+   "Demon Statue",
+   "?0x6f",
+   "Gargoyle",
+   "?0x68"
+  ],
+  "shops_A_names": [
+   "Fries Shop",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Costume Shop",
+   "Gift Shop"
+  ],
+  "shops_B_names": [
+   "Fries Shop",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Balloon Shop",
+   "Restaurant"
+  ],
+  "sideshows_A_names": [
+   "Arcade",
+   "Bone Crusher",
+   "Pumpkin Shy"
+  ],
+  "sideshows_B_names": [
+   "Giant Puzzle",
+   "Fortune Teller",
+   "Shooter"
+  ]
+ },
+ {
+  "theme": 2,
+  "guess_name": "Wonderland",
+  "table": "0x8010542C",
+  "rides_A": [
+   40,
+   53,
+   39,
+   54,
+   49,
+   51,
+   52
+  ],
+  "rides_B": [
+   42,
+   55,
+   43,
+   45,
+   48,
+   50
+  ],
+  "features_A": [
+   32,
+   31,
+   30,
+   19,
+   26,
+   29,
+   20,
+   21,
+   23,
+   24,
+   25,
+   28
+  ],
+  "features_B": [
+   32,
+   31,
+   30,
+   19,
+   26,
+   29,
+   20,
+   21,
+   23,
+   24,
+   25,
+   28
+  ],
+  "shops_A": [
+   65,
+   71,
+   62,
+   68,
+   60,
+   69
+  ],
+  "shops_B": [
+   65,
+   71,
+   62,
+   68,
+   64,
+   67
+  ],
+  "sideshows_A": [
+   66,
+   72,
+   70
+  ],
+  "sideshows_B": [
+   74,
+   58,
+   73
+  ],
+  "rides_A_names": [
+   "Bumper Bugs",
+   "Spore Spinner",
+   "The Dizzy Tree",
+   "Jelly Bounce",
+   "Flamingo Fling",
+   "Flying Fishes",
+   "Flying Fountain"
+  ],
+  "rides_B_names": [
+   "Caterpillar Capers",
+   "Escargot A-Go Go",
+   "Bugs TV ",
+   "Woodland Racers",
+   "Dragon Fliers",
+   "Flower Power"
+  ],
+  "features_A_names": [
+   "Staff Room",
+   "?0x1f",
+   "?0x1e",
+   "?0x13",
+   "?0x1a",
+   "Super Toilet",
+   "Bricks",
+   "Card Statue",
+   "?0x17",
+   "?0x18",
+   "?0x19",
+   "Plant Pot"
+  ],
+  "features_B_names": [
+   "Staff Room",
+   "?0x1f",
+   "?0x1e",
+   "?0x13",
+   "?0x1a",
+   "Super Toilet",
+   "Bricks",
+   "Card Statue",
+   "?0x17",
+   "?0x18",
+   "?0x19",
+   "Plant Pot"
+  ],
+  "shops_A_names": [
+   "Fries Shop",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Costume Shop",
+   "Gift Shop "
+  ],
+  "shops_B_names": [
+   "Fries Shop",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Balloon Shop",
+   "Restaurant"
+  ],
+  "sideshows_A_names": [
+   "Fruit Shy",
+   "Aqua Spray",
+   "Giant Puzzle"
+  ],
+  "sideshows_B_names": [
+   "Worm Bash",
+   "Arcade",
+   "Strength Flower"
+  ]
+ },
+ {
+  "theme": 3,
+  "guess_name": "Space",
+  "table": "0x8010537C",
+  "rides_A": [
+   377,
+   362,
+   369,
+   379,
+   371,
+   365,
+   376
+  ],
+  "rides_B": [
+   360,
+   364,
+   374,
+   375,
+   366,
+   370
+  ],
+  "features_A": [
+   353,
+   352,
+   350,
+   351,
+   343,
+   344,
+   334,
+   336,
+   337,
+   340,
+   341,
+   345,
+   346
+  ],
+  "features_B": [
+   353,
+   352,
+   350,
+   351,
+   343,
+   344,
+   334,
+   336,
+   337,
+   340,
+   341,
+   345
+  ],
+  "shops_A": [
+   385,
+   381,
+   383,
+   387,
+   382,
+   386
+  ],
+  "shops_B": [
+   385,
+   381,
+   383,
+   387,
+   384,
+   390
+  ],
+  "sideshows_A": [
+   388,
+   393,
+   391
+  ],
+  "sideshows_B": [
+   380,
+   389,
+   394
+  ],
+  "rides_A_names": [
+   "Rock 'n Roll",
+   "Crater Creature",
+   "The Orbiter",
+   "Zero G",
+   "The Gravatron",
+   "Romper Stomper",
+   "Cyclone Station"
+  ],
+  "rides_B_names": [
+   "Bounce on Iggy",
+   "Hover Bot Havoc",
+   "Space Balls",
+   "The Areotron",
+   "Moon Buggies",
+   "Missile Madness"
+  ],
+  "features_A_names": [
+   "Staff Room",
+   "?0x160",
+   "?0x15e",
+   "?0x15f",
+   "?0x157",
+   "Super Toilet",
+   "Alien Bubbler",
+   "?0x150",
+   "?0x151",
+   "Strange Growth",
+   "Gyrotron",
+   "Large Tree",
+   "Plasmatrope"
+  ],
+  "features_B_names": [
+   "Staff Room",
+   "?0x160",
+   "?0x15e",
+   "?0x15f",
+   "?0x157",
+   "Super Toilet",
+   "Alien Bubbler",
+   "?0x150",
+   "?0x151",
+   "Strange Growth",
+   "Gyrotron",
+   "Large Tree"
+  ],
+  "shops_A_names": [
+   "Fries Shop",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Costume Shop",
+   "Gift Shop"
+  ],
+  "shops_B_names": [
+   "Fries Shop",
+   "Burger Shop",
+   "Drinks Shop",
+   "Ice Cream Shop",
+   "Balloon Shop",
+   "Restaurant"
+  ],
+  "sideshows_A_names": [
+   "UFO Blaster",
+   "Strength Rocket",
+   "Giant Puzzle"
+  ],
+  "sideshows_B_names": [
+   "Arcade",
+   "Martian Mooners",
+   "Martian Mash"
+  ]
+ }
+]

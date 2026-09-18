@@ -1,0 +1,16 @@
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+# DuckStation's AppImage bundles Qt but not the system libs Qt links against.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libgl1 libegl1 libglx0 libopengl0 libgbm1 libgl1-mesa-dri libglx-mesa0 \
+      libxkbcommon0 libxkbcommon-x11-0 libfontconfig1 libfreetype6 \
+      libdbus-1-3 libxcb1 libx11-6 libxext6 libxrender1 libsm6 libice6 \
+      libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+      libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 \
+      libxcb-xkb1 libxcb-sync1 libxcb-shm0 libxcb-glx0 libxcb-xfixes0 \
+      libasound2t64 libpulse0 libudev1 libcurl4 xvfb ca-certificates \
+      libharfbuzz0b libfribidi0 libthai0 libwayland-cursor0 libwayland-egl1 \
+      libjpeg-turbo8 \
+    && rm -rf /var/lib/apt/lists/*
+ENV QT_QPA_PLATFORM=offscreen
+WORKDIR /work

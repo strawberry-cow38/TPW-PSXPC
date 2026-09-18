@@ -1,0 +1,465 @@
+# Theme Park World (PSX, SLES-026.88) — RIDES, SHOPS AND ATTRACTIONS
+
+Fourth report. Companions: `ai_out.txt` (state map), `behaviour.md` (person behaviour), `economy.md`
+(money). Same legend: **READ** = taken from the instructions at the quoted address in `TPW.BIN`
+(loaded at 0x80010000); **GUESS** = interpretation, with confidence. New helper scripts beside this
+file: `vt.py VT…` (side-by-side vtable dump), `fieldx.py OFF…` (every load/store of a struct offset),
+`recs.py` (parses every attraction definition record out of `/home/ec2-user/tpw/ext/rip/` into
+`records.json` / `records.txt`), `text.py ID…` (English string table), `records_named.txt` (all 197
+records with names), `rides_themes.json` (which record belongs to which theme/set).
+
+Units: 1 tick = 1/25 s. **1 game day = 99 ticks = 3.96 s** (confirmed). 20.12 fixed point = value×4096.
+Offsets written `A+0x..` are relative to the **attraction sub-object** — the pointer guests, mechanics
+and the UI hold. It sits 8 bytes into the pool entry (`outer+8`), exactly like Person inside Visitor;
+subclass overrides in the vtables carry delta −8 and take the outer pointer. Ride-class functions
+therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below to A-relative.
+
+## 0. Corrections to the earlier reports — read first
+
+1. **`behaviour.md` §2.4 "type 2 is a shop with a stock check"** — wrong. The type enum is the
+   `CONTEXT_*` string list at 0x800DDDD4 (pointer table 0x800F1090, READ): **1 RollerCoaster,
+   2 Feature, 3 NonPathedRide ("Rides"), 4 Shop, 5 SideShow, 6 PathedRide ("TrackRides"), 7 TourRide,
+   8 TrackUpgrade**, 0 Void. Every one of the 197 definition records carries the same number at
+   record+0 (READ, `recs.py`). So type 2 is a **Feature**: toilets, bins, benches, scenery, staff
+   room. Its "slot 54" is the record flag `rec+0x2E & 1` (0x80023F0C → 0x80024348, READ: "guests may
+   use it") and its "stock" is a **capacity byte A+0x80** 0..100 (0x800241BC get, 0x800241E8 subtract,
+   0x80024210 refill — the same byte the handyman empties on bins). Consequently the guest stat
+   **V+0x5D is the toilet need** (GUESS-high: fed by shop purchases, zeroed at a type-2 with capacity,
+   −40 nausea). And for real rides slot 54 = 0x8009C2A0 = **returns 0** (READ), so the two
+   "desire tables gated by slot 54" in the ride score (`behaviour.md` §2.2b, s6/s0) are **always zero
+   for rides**; only Features get them.
+2. **`economy.md` §4.6/§8 "the numbers are not in TPW.BIN — read FOLIO.GAZ"** — half right, and now
+   done. The records are FOLIO entries, but the tables saying *which* entry is which type in which
+   theme are static arrays in TPW.BIN (0x800F0CCC..0x800F1090, §1.4). I parsed all 197 records:
+   every price, upgrade price, seat count, lifetime and intensity is in `records.json`.
+3. **`behaviour.md` §3.5 guesses on the mechanic's ride calls** — READ now: `ride slot 57(6)` sets
+   status 6 (under repair) and `slot 57(7)` sets 7, a transient "reopen" that for rides ends in status
+   **10 (loading)** via 2 (§3.2). `0x8009C1E8` is not "riders still on it": it tests the **closing
+   progress A+0xEC** against 10×(w+h); `0x8009EEE4` advances that progress (closing), `0x8009EFA8`
+   retracts it (opening). `0x8005BE44` is not a "service-due list": it is the **player's upgrade queue**
+   (array 0x801099EC, count gp 0x80102D48, pushed by the panel button 0x8003BE00 → 0x8005BE14),
+   and `0x8005BE70` removes a ride from it. `slot 20` = status ∈ {4, 5} (READ 0x80063910).
+4. **`behaviour.md` §2.4 queue cap "4 × ride[0xF6] + 7"** stands, and `economy.md` was right that
+   `A+0xF6` is the upgrade level: READ again at 0x8008DA9C..0x8008DAAC → **7 / 11 / 15 guests at
+   level 0 / 1 / 2**.
+5. **`ai_out.txt`/`behaviour.md` "slot 86 = status ∈ {2,10,11} open"** stands, but note the Coaster
+   overrides it (0x800AD78C, not read).
+6. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
+   (41→18→21→22→23) and the mechanic states 56/16/14/17/58 and 57/52/54 all matched what the ride
+   side does.
+
+## 1. The building-type table — settled
+
+### 1.1 Type enum, pools, classes (READ)
+
+Pool creation 0x80050070 allocates one pool per class (`0x800BAB94(size,1)` then a per-class pool
+ctor that builds N objects of stride S and links them). Pool pointers live at gp:
+
+| type | class (CONTEXT_ name) | pool name | pool ptr | N | stride | vtable (at outer+0x14 = A+0xC) | Update slot 3 |
+|---|---|---|---|---|---|---|---|
+| 3 | NonPathedRide | PoolOfRides | 0x80103844 | 15 | 0x104 | 0x800E5514 | 0x800A0084 |
+| 7 | TourRide | PoolOfTourRides | 0x80103848 | 3 | 0x14C | 0x800E586C | 0x800A0E88 |
+| 6 | PathedRide (track) | PoolOfTrackRides | 0x8010384C | 2 | 0x1D24 | 0x800E5FE8 | 0x800A67B4 |
+| 1 | RollerCoaster | PoolOfCoasters | 0x80103850 | 2 | 0xE30 | 0x800E65A0 | 0x800B0C94 |
+| 4 | Shop | PoolOfShops | 0x80103854 | 20 | 0x94 | 0x800E6A8C | 0x80065BE0 (base) |
+| 2 | Feature | PoolOfFeatures | 0x80103858 | 45 | 0x84 | 0x800DCA5C | 0x80065BE0 (base) |
+| 5 | SideShow | PoolOfSideshows | 0x8010385C | 10 | 0x98 | 0x800E6D64 | 0x800B76CC |
+
+So a park holds at most 15 flat rides, 3 tour rides, 2 track rides, 2 coasters, 20 shops, 45
+features, 10 sideshows (READ from the pool ctors 0x80060FA8/0DA0/0B98/09A0/0798/05A0/0398).
+
+Class chain (READ from the ctors): base "Attraction" vtable 0x800E1068 (ctor 0x800662D8; sub-objects
+at A+0x10 (matrix, 0x800BC288) and A+0x18 (FOLIO handle, 0x800663FC)); **queued-ride base** vtable
+0x800E519C (ctor 0x8009F708: adds queue-path list A+0x70, queue-member list A+0xC4, riders list
+A+0xD4); the four ride classes derive from that, Shop/Feature/Sideshow from the base. All seven share
+slots 6–28, 30, 35–38, 40–41, 51, 57–61, 66–70, 81–85 (see `vt.py 800E5514 800E586C 800E5FE8
+800E65A0 800E6A8C 800DCA5C 800E6D64`).
+
+### 1.2 The theme tables (READ, 0x8002ED50)
+
+`0x8006A3CC(mgr, type, variant)` → FOLIO index of the definition record; `0x8006A158(mgr, type)` →
+how many variants. `mgr` is the level manager singleton `0x80069610()`; `mgr+8` = **theme 0..3**,
+`mgr+4` = **set index 0/1** (GUESS-medium: which of two attraction sets a scenario uses; its writer
+is not found — read `*(0x80069610()+4)` live). Table pointer = `0x800DDDC4[theme]` →
+0x8010558C / 0x801054DC / 0x8010542C / 0x8010537C (0xAC bytes each, built at boot by 0x8002ED50 from
+constants), and with `T' = table + 4×set`:
+
+| T' offset | contents |
+|---|---|
+| +0x08 / +0x10 | type 3 rides: pointer to array of FOLIO ids / count (count is a gp word filled at runtime) |
+| +0x18 / +0x20 | type 7 tour rides (runtime gp array) |
+| +0x28 / +0x30 | type 6 track rides (runtime gp array) |
+| +0x38 / +0x40 | unknown pair (static arrays [0x100,0] / [0xA5,0] / [0x4F] …) |
+| +0x48 / +0x50 | type 1 coasters (runtime gp array) |
+| +0x58 / +0x60 | type 2 features: static array / count (13, 14, 12, 13) |
+| +0x68 / +0x70 | type 4 shops: static array / 6 |
+| +0x78 / +0x80 | type 5 sideshows: static array / 3 |
+| +0xA0..+0xA8 | three constants per theme (0x102,0xA9,0xAA / 0xA8,0x5B,0x5C / 0x52,0x11,0x12 / 0x190,0x14C,0x14D) — GUESS: FOLIO ids of theme assets |
+
+The static arrays (all READ, contents in `rides_themes.json`):
+
+| theme (name GUESSED from content) | set A rides (8) | set B rides (6) |
+|---|---|---|
+| 0 Lost Kingdom | Crazy Ape, Inca Pot, Sun God, Mayan Spinner, Eruption, Tom Tom Twister, Rocky Racers, Aztec Bounce | The Hot Pot, Belly Bounce, Mumbo, Inca Totem, Aztec Mayhem, Diplo-Dip |
+| 1 Halloween | Crazy Clown, Thrill Grill, Jaw Dropper, Tentacle Terror, Devils Disc, Eye Slide, Jumping Skulls, Insecticide | Ghost Ship, Putrid Pumpkins, Hocus Pocus, Brain Buster, Rat Race, Phantom |
+| 2 Wonderland (7) | Bumper Bugs, Spore Spinner, The Dizzy Tree, Jelly Bounce, Flamingo Fling, Flying Fishes, Flying Fountain | Caterpillar Capers, Escargot A-Go Go, Bugs TV, Woodland Racers, Dragon Fliers, Flower Power |
+| 3 Space (7) | Rock 'n Roll, Crater Creature, The Orbiter, Zero G, The Gravatron, Romper Stomper, Cyclone Station | Bounce on Iggy, Hover Bot Havoc, Space Balls, The Areotron, Moon Buggies, Missile Madness |
+
+Shops are the same six per theme: set A = Fries, Burger, Drinks, Ice Cream, Costume, Gift; set B =
+Fries, Burger, Drinks, Ice Cream, **Balloon, Restaurant**. Sideshows: 3 per set (e.g. Lost Kingdom A:
+Idol Smash, Arcade, Dino Racing; B: Giant Puzzle, Sun Shooter, Strength Bird). Coasters, track rides
+and tour rides are **not** in the static tables — their arrays are gp words filled by the scenario
+loader, so which of the 12 coasters / 8 track rides / 4 tour rides a park offers is scenario data
+(not traced).
+
+### 1.3 FOLIO entry and the definition record (READ)
+
+`FOLIO.GAZ` is a pack: word 0 = 422 entries, then (offset, size) pairs; `ext/rip/NNNN.bin` is entry
+N. An attraction entry starts `0x96, 1, 0, 0, 0, recOff, size, 4`; the **definition record is at
+`recOff`** (0x800307DC: `data + data[0x14]`), and the same entry also carries the model. Guests reach
+the record through the handle object at A+0x18: `A+0x18[0]` = handle id, slot 7 (0x80062A20 →
+0x80031114) locks it and returns the record pointer, slot 6 (0x80062A40) releases. The record:
+
+| offset | size | meaning | how known |
+|---|---|---|---|
+| +0x00 | u32 | type (1..8, matches the enum) | READ (equals A+0x6A for every placed object) |
+| +0x04 | u32 | **name text id** in the language table | READ: 0x8006A76C → 0x8006F00C(id) → table `gp 0x801039A0`; English table = FOLIO 0x197 = `rip/0407.bin` (word0 = 1031 strings, then offsets) |
+| +0x08 | u8 | footprint width (tiles) | READ 0x8006A798, used by slot 12/14 with rotation A+0x6C |
+| +0x09 | u8 | 1..7, unknown (GUESS: model/anim variant) | — |
+| +0x0A | u8 | footprint depth | READ 0x8006A7A4 |
+| +0x0B | u8 | always 0xFF | — |
+| +0x0C | s16×2 | **entrance tile offset** (x,y) inside the footprint, rotated by 0x800634B8 | READ 0x80066004 / 0x80062E48 |
+| +0x10 | s16×2 | **exit tile offset**; (−1,−1) = none (all shops/features/sideshows) | READ 0x80065FD8 / 0x80062FF8 |
+| +0x14..+0x17 | u8×4 | unknown; +0x15 = 2 for most rides, +0x14 read by 0x80065FF8, +0x15 by 0x80065FCC | — |
+| +0x18 | u32 | **base intensity** (rides 40..95; coasters 90/95; shops 20; features 0) | READ 0x800A0B1C, §4 |
+| +0x1C | u32 | record body length; record ends at +0x20+this (0xA0 rides, 0xB4 coasters, 0xE8 track, 0x18 shops, 0x10 features, 0x14 sideshows) | READ 0x8006A7C8 |
+| +0x20 | u32 | 4 for all rides | unknown |
+| +0x24 + 0x34×L | 13 words | **per-level block, L = 0,1,2** (below) | READ 0x8009F470..0x8009F5B4 |
+
+Per-level block (rides, coasters, track and tour rides), word offsets from the block start:
+
+| +0 | +4 | +8 **wear multiplier** | +0xC **max seats** | +0x10 **lifetime** | +0x14 speed min | +0x18 speed max | +0x1C cycles min | +0x20 cycles max | +0x24 ? | +0x28 ? | +0x2C **price £** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| always 4 | always 4 | 5 / 3 / 2 (7 for tour rides & Rock 'n Roll) | e.g. 8/11/14 | 45..100 | 1 (tour: 80) | 100 | 1 or 10 or 30 | 1..60 | 0..3 | 0..900 | L0 = build price, L1/L2 = upgrade price |
+
+Which slot reads which (READ): slot 95 → speed min, 96 → speed max, 97 → cycles min, 98 → cycles
+max, 99 → max seats (+0xC), 100 → +0, 101 → +4, 102 → wear multiplier (+8); 0x8009F524 → lifetime
+(+0x10) used once at placement; 0x8009F470 → price (+0x2C). Words +0x24/+0x28 (`f48`/`f4C` in
+`records.json`) have no reader I found in the ride code. **The data holds three levels but the code
+allows a fourth**: 0x8009C56C increments `A+0xF6` while it is < 3, so level 3 reads 0x34 bytes past
+the record into the model chunk (for Crazy Ape that would be a £65,819 upgrade with 65818 seats).
+Whether the panel ever offers a third upgrade is not established — 0x8003BE00 has no level test.
+Live check: upgrade one ride three times and watch `A+0xF6` and the bank.
+
+Shop record (type 4, body 0x18): +0x20 build price (e.g. £250), +0x2C u16 **default sale price**
+(→ A+0x88, READ 0x800B7110/0x800B7140), +0x2E u16 unit cost (economy.md §4.2), +0x30/+0x32/+0x34/+0x36
+u16s (7, 25, 5, 10 for Fries: product parameters read by 0x800B6E18/0x800B6D40/0x800B6E60, not
+resolved). Sideshow record (type 5, body 0x14): +0x20 build price, +0x24 (500), +0x28 (1), +0x2C u16
+**play price** → A+0x84, +0x2E u16 **win chance %** → A+0x86, +0x30 u8 **prize £** → A+0x78 (READ
+0x800B79E0/0x800B79D4/0x800B79C8 → 0x800B773C/0x800B7750/0x800B7770; settles economy.md §6.2).
+Feature record (type 2, body 0x10): +0x20 build price, +0x2E flag byte (bit 0 usable-by-guests,
+bit 2 bin — GUESS from the handyman filter), +0x2C/+0x2F unknown.
+
+Tying a live object to its record: `A+0x6A` = type, `A+0x6B` = variant index (READ slot 38 0x800625BC
+stores them), and `0x8006A3CC(0x80069610(), A+0x6A, A+0x6B)` is the FOLIO id, i.e. the static array
+entry above. Live check: place the first ride of a Lost Kingdom park → A+0x6A = 3, A+0x6B = 0,
+`0x800F0CF0[0]` = 0xDC = Crazy Ape, and `A+0x68` (lifetime) reads 45 = Crazy Ape's record +0x34.
+
+### 1.4 All 59 flat rides (from `records_named.txt`; price / max seats L0→L2 / wear mult / lifetime / base intensity)
+
+| FOLIO | name | fp | £ build | £ up1 / up2 | seats L0/L1/L2 | life | int |
+|---|---|---|---|---|---|---|---|
+| 0x27 | The Dizzy Tree | 5×5 | 2500 | 250 / 250 | 4/8/? | 80 | 70 |
+| 0x28 | Bumper Bugs | 5×5 | 2000 | 200 / 200 | 2/4/? | 80 | 70 |
+| 0xDC | Crazy Ape | 4×4 | 2000 | 200 / 200 | 8/11/14 | 45 | 60 |
+| 0xD9 | Inca Pot | 4×4 | 1750 | 200 / 200 | 4/5/? | 80 | 65 |
+| 0xE0 | Tom Tom Twister | 5×5 | 4000 | 400 / ? | 20/30/? | 80 | 75 |
+| 0x7C | Hocus Pocus | 4×4 | 1250 | 150 / ? | 20/26/? | 50 | 55 |
+| 0x81 | Thrill Grill | 5×4 | 2500 | 250 / ? | 18/24/? | 55 | 70 |
+| 0x7B | Pumpkin Castle | 5×5 | 1500 | 1500 / ? | 4/6/? | 100 | 70 |
+| … | (full list, all fields, all three levels) | | `records_named.txt` / `records.json` | | | | |
+
+Coasters (type 1, 12 records): £10,000–12,500 to build, upgrades £5,000–5,500 then £2,000–2,500,
+seats 6..18 → +33% per level, intensity 90/95, lifetime 80 (Ghosta Coasta 65), cycles fixed at 1.
+Track rides (type 6, 8 records): £4,000–6,500, 8 seats at every level, intensity 75/80. Tour rides
+(type 7, 4 records): £3,000, 8 seats, wear multiplier 7 at every level, speed slider 80–100.
+
+## 2. Attraction object layout (A = pool entry + 8) — READ unless marked
+
+| offset | meaning | where read |
+|---|---|---|
+| A+0x0C | vptr | ctors |
+| A+0x10 | matrix/anim-time object (0x800BC288); A+0x10[0] = last frame counter for the animation step | 0x800658D8 |
+| A+0x14 | **guests served, all time** (slot 22 get, 0x80063164 inc from guest state 22) | |
+| A+0x18 | FOLIO handle object (`[0]` handle id; +8 second handle → animation resource; +0x34/+0x38 current frame/mesh) | 0x800663FC, 0x80066380/88 |
+| A+0x54 | **mechanic claim** (pointer to the mechanic, 0 = free) | 0x800632A8/B8 |
+| A+0x58/5A/5C | position x, y, z in tiles (slot 19 set; slot 9 returns x<<8,y,z<<8) | 0x80063334/58 |
+| A+0x5E | u16, zeroed at placement, unknown | 0x80062678 |
+| A+0x60 | **animation phase timer**, 20.12, += frame delta per tick, phase done at ≥ duration<<12 | 0x800658D8 |
+| A+0x64 | u16 **animation phase index** (status hooks write 0 or 1) | 0x80065688.. |
+| A+0x66 | s16 = −1 at placement, unknown | 0x80062644 |
+| A+0x68 | s16 **remaining lifetime** (§6.3): record+0x34 at placement, −1 per 15 reliability points lost, 0 = condemned. Slot 83 set (posts message 0x99 when it drops to ≤0), slot 84 get | 0x80063184/FC |
+| A+0x6A | **type** byte (slot 16) | 0x80063210 |
+| A+0x6B | **variant** index into the theme array | 0x80063320/28 |
+| A+0x6C | rotation 0..3 (slot 18) | 0x80063294/9C |
+| A+0x6D | build-animation variant, taken from the rotating counter gp 0x80102DD8 mod 8 at placement | 0x8006268C |
+| A+0x6E | **status** 0..11 (§3) | 0x8006321C / SetStatus 0x80065768 |
+| A+0x6F | flags: bit0 set at placement (0x80066240 set / 0x80066260 clear = slots 36/35), bit1 (0x800632C4) | |
+| A+0x70 | queue path tile list (ctor 0x8009FAF4; walked by 0x8009D57C) | |
+| A+0xB4 | **reliability**, 20.12, 100.0 at placement/upgrade/repair, 0..100 | 0x8009C410, 0x8009C828, 0x8009DD5C |
+| A+0xB8 | **speed slider** value (slot 89 get / 92 set), record range [speed min, speed max] = 1..100, default midpoint = 50 | 0x8009ED04/ECFC, 0x8009C410 |
+| A+0xBC | **capacity slider** (slot 90 / 93): riders loaded per cycle, 1..max seats, default max(1, max seats / 2) | 0x8009ED18/ED10 |
+| A+0xC0 | **duration slider** (slot 91 / 94): animation cycles per run, [cycles min, cycles max], default max(1, cycles max / 2) | 0x8009ED2C/ED24 |
+| A+0xC4 | queue member list (0x8009F21C head, 0x8009F23C next, 0x8009F1B8 remove, 0x8009F04C append, 0x8009EE98 count) | |
+| A+0xD4 | riders-on-board list (0x8009F110 head, 0x8009F108 end, 0x8009F130 append, 0x8009F0E8 remove) | |
+| A+0xE4 / A+0xE8 | effect handles: breakdown smoke (pool desc 0x800F7898) / upgrade sparkle (0x800F78D8) | 0x8009C2A8, 0x8009C56C |
+| A+0xEC | **closing progress**, 20.12, 0 = open, 10×(w+h) = fully closed; rises while a mechanic closes the ride (status 16), falls while it reopens (17) | 0x8009C1E8/EEE4/EFA8 |
+| A+0xF0 | u16 **riders on board** | 0x8009C884/CB5C |
+| A+0xF2 | u16 **cycles completed this run** | 0x8009CA60 |
+| A+0xF4 | u16 day built (McAi total days) | 0x8009C3FC |
+| A+0xF6 | u8 **upgrade level** 0..3 (0x8009F5E0 get / 0x8009F5EC set) | |
+| A+0xF8 | word: total-days stamp of the last tick on which the queue was non-empty (§4.3) | 0x800A01B4 |
+
+Shop/Feature/Sideshow extras: shop A+0x78 day built, A+0x7C / A+0x8A panel modifiers, A+0x88 sale
+price, A+0x8C/0x90 takings/profit (economy.md §4.2); sideshow A+0x78 prize, A+0x84 price, A+0x86
+chance, A+0x88 wins, A+0x8C prizes paid, A+0x90 takings; feature A+0x80 capacity 0..100.
+
+## 3. Ride lifecycle — the status machine (all READ)
+
+`SetStatus(A, n)` = vtable slot 57 = 0x80065768: writes A+0x6E and calls the **enter hook, slot
+58+n** (jump table 0x800E1340). The base `Update` slot 3 = 0x80065BE0 dispatches on status to the
+**tick hook, slot 69+n** (table 0x800E1370; status 0 has none) and then advances the animation
+(0x80065D6C: `phase → mesh` via 0x80030364, frame via 0x80066388). The queued-ride Update
+0x8009CCD4 wraps that with the breakdown logic (§6), and the Ride class's own Update 0x800A0084
+prepends the reliability check 0x8009D0FC.
+
+| status | meaning | enter hook (58+n) | tick hook (69+n) | leaves to |
+|---|---|---|---|---|
+| 0 | just placed | 0x80065688: phase 1, timer 0 | — (animate only) | slot 39 → 1 |
+| 1 | **under construction** | 0x80065698: phase 0, frame 0 | 0x800659C4: build matrix, run the build animation; **when the phase completes → SetStatus(10)** | 10 |
+| 2 | **running** (rides) / **open** (others) | rides 0x8009C708: phase 1, cycles A+0xF2 := 0 | rides 0x8009CA60: wear (slot 103) every tick; every 16 ticks a positional sound; each animation phase completed → A+0xF2 += 1; **A+0xF2 ≥ A+0xC0 → SetStatus(11)**. Shops/features: nothing | 11 |
+| 3 | **closed by the player** (panel button slot 28 = 0x8006382C, caller 0x8007841C) | phase 1 | nothing | 2 via the open button (slot 27 = 0x800637F8, callers 0x80078798, 0x8003BC18, 0x80017304) |
+| 4 | **"about to break down"** — reliability below 10 while running, or lifetime exhausted | rides 0x8009C730: post message 0x3E "Your ride is about to break down!", sound (8,0); Ride adds: if lifetime ≤ 0, eject everyone (0x8009D8C4) | nothing | 5 (only if A+0xB4 == 0), or a mechanic: 6 |
+| 5 | **broken down** (track rides/coasters jump straight here; rides only from 4 with reliability exactly 0) | 0x8009C7A8: post message 0x3F / 0x40 / 0x41 ("A ride has broken down, and you don't have any mechanics / all your mechanics are busy / a mechanic is on his way"), sound (8,1); Ride ejects everyone | nothing | 6 |
+| 6 | **under repair** (mechanic state 16→14 sets it, `slot 57(6)` at 0x80096650) | phase 1 | nothing | 7 |
+| 7 | **reopen** command (mechanic state 17, or the upgrade path 0x8005C2F4) | base 0x80065704: **SetStatus(2)**; rides 0x8009C828 additionally: clear smoke, **A+0xB4 := 100.0**, then **SetStatus(10)** | — | 2 (shops) / 10 (rides) |
+| 8 | (tick 0x8009EBCC: A+0xEC −= timescale>>12) — no writer of 8 found | | | |
+| 9 | (tick 0x8009EC08: A+0xEC += timescale>>12 up to 10×(w+h)) — no writer of 9 found | | | |
+| 10 | **loading** (rides) / build-complete (others) | 0x80065750: phase 1, timer 0 | rides: LoadGuests (§4.2); Shop/Feature/Sideshow 0x800B6EA8/0x80024258/0x800B7674: **SetStatus(2)** at once | 2 |
+| 11 | **unloading** | nop | rides 0x8009CB5C (§4.2) | 10 when empty |
+
+Guests may join the queue only in **2, 10 or 11** (slot 86 = 0x800632D8). Statuses 8 and 9 have
+tick code but no SetStatus caller anywhere in TPW.BIN (census of all 33 `SetStatus` sites: constants
+0,1,2,3,4,5,7,10,11,14,54 plus five computed) — dead in this build.
+
+**Placement → running (READ).** The build tool calls slot 37 (Ride: 0x8009FB50): resolves the record
+(0x8006A59C(mgr, variant)), binds the handle (0x800A0C98), `InitFromRecord` 0x8009C344 (lists reset,
+A+0xB4 := 100, A+0xF2 := 0, A+0xEC := 0, sliders to defaults from level 0 via 0x8009C410, riders 0,
+**A+0x68 := record lifetime**, A+0xF4 := today) and slot 38 (type/variant, SetStatus(0), guests 0).
+Then slot 39 (0x80062894) = SetStatus(**1**) plus the build animation variant; the construction
+animation runs (one phase of the build model; its length is in the model's animation chunk, §4.4)
+and the base tick-1 hook sets **10**. Rides then sit in 10 loading; everything else flips to 2.
+Money: charged by the tool (economy.md §4.6), not by the object.
+
+**Demolish (READ).** Ride slot 29 = 0x8009FC1C → 0x8009C690: free the queue tiles (slot 32 →
+0x8001A170), drop effects, **eject queue and riders** (0x8009D8C4(A,1): message 10 to each guest,
+riders placed at the exit, A+0xF0 := 0), then base 0x8006292C: remove from the map/lists, release
+the handle, **refund half the level-0 price** (0x8006AD58 → `Income(price/2 ×10)`).
+
+**Upgrade (READ, 0x8009C56C).** Player presses the panel button (0x8003BE00 → 0x8005BE14 pushes the
+ride on the upgrade queue 0x801099EC). A mechanic in Idle picks it (0x8005BE44 → state 57 → 52 → 54;
+closing/opening as for a repair, duration table 0x800E4574 = 240/180/120/60/60 ticks by skill) and
+calls 0x8009C56C(ride, 0): `if A+0xF6 < 3: A+0xF6++`, **0x8009C410 re-derives the three sliders from
+the new level's block and resets reliability to 100**, charges `record[level].price`, sound and
+sparkle effect. Effects of a level: +seats (max seats 8 → 11 → 14 for Crazy Ape), wear multiplier
+5 → 3 → 2 (§6.1), queue cap 7 → 11 → 15. Lifetime A+0x68 is **not** reset by an upgrade.
+
+## 4. Queues and throughput (READ)
+
+### 4.1 Joining
+`behaviour.md` §2.4 stands. Re-read of 0x8008DA14: a guest may join when the ride is open (status
+2/10/11) and `queue members < 4×level + 7` (**7 / 11 / 15**), or when it is already in the queue.
+Guests stand ¼ tile apart along the queue path (0x8009D57C). The queue-boredom exit is at
+`V+0x5C > 80` (behaviour.md §2.4).
+
+### 4.2 Loading and unloading — 0x8009C884 (tick-10) and 0x8009CB5C (tick-11)
+```
+LoadGuests(A):                       # called every tick in status 10 (Ride: via 0x800A0178)
+  if clock % 20 != 0: return         # one guest per 20 ticks = 0.8 s
+  if A+0xF0 (on board) < A+0xBC (capacity):
+      g = head of queue list; return if none or g.state != 18 (Waiting in queue)
+      remove g from the queue; SetState(g, 21) Loading; g.slot3/slot4 (hide, attach)
+      append g to riders; A+0xF0 += 1
+      for every guest still queued: send message 6 with stagger += rand(3), param 19
+          → each shuffles forward after 3×stagger ticks
+  else:                              # full
+      A+0xF2 := 0; SetStatus(2)      # start running
+```
+Ride tick-10 (0x800A0178) adds the **partial-load timeout**: `days = McAi total days`; while the
+queue is non-empty `A+0xF8 := days`; after `LoadGuests`, if `days − A+0xF8 ≥ 5` **and** at least one
+rider is on board → `SetStatus(2)`. So a ride waits for a full load as long as guests keep arriving,
+and starts a partial run once the queue has been empty for **5 game days = 495 ticks = 19.8 s**.
+
+```
+Unload(A):                           # every tick in status 11
+  if clock % 10 != 0: return         # one guest per 10 ticks = 0.4 s
+  if riders empty: A+0xF0 := 0; SetStatus(10)
+  else: g = first rider; remove; SetState(g, 22) Unloading; place g at the exit tile
+        (record exit offset rotated, 0x80062FF8 → 0x8009F380); re-register g (0x80053C04); A+0xF0 −= 1
+```
+Tour rides use the same 20-tick load cadence (0x800A11E8) but load into a vehicle
+(0x800A2318) and unload with 0x800A2464; track rides 0x800A80F0 / coasters 0x800B025C load per car
+(not traced beyond the SetState(21) sites).
+
+### 4.3 Run time
+Status 2 counts **animation phases**: each time the phase timer completes, A+0xF2 += 1; the run ends
+when `A+0xF2 ≥ A+0xC0` (duration slider, 1..cycles max, default cycles max / 2 → **5** for most
+rides, 25–30 for the 10–60 bouncers, fixed 1 for coasters and Escargot/Slither/Space Balls).
+Per phase, the timer adds the frame delta `0x800BC290(A+0x10)` = (counter 0x80103480 − last) << 7
+per tick — **the same quantity the calendar uses as its timescale** (0x800BDE88 stores it to
+0x80103A90), i.e. ≈ 9930 per tick given your 99-tick day — halved when gp 0x80103840 == 3
+(0x80053D98; GUESS: a slow-motion/menu mode), capped at 0x4000. A phase completes when the sum
+reaches `duration << 12`, so **one phase ≈ duration × 4096 / 9930 ≈ duration × 0.41 ticks**, where
+`duration` is the u16 at +0x38 of the phase's 40-byte animation record (0x800300B8 → 0x800314D4)
+in the model's animation resource (second handle at A+0x20; the chain 0x800311F4 → 0x800C0DB8 is
+not traced, so **I cannot give the per-ride phase length from the disc**).
+**Live check that gives the number in one run**: watch `A+0xF2` (u16) on a running ride and the clock
+0x80103A94; the tick delta between increments is the phase length P. Then run time = A+0xC0 × P.
+
+### 4.4 Throughput
+Per cycle: `load = 20×capacity` ticks (plus waiting for guests), `run = A+0xC0 × P`, `unload =
+10×capacity`, so **guests per second = capacity / ((30×capacity + A+0xC0×P) / 25)**. Crazy Ape at
+defaults (capacity 4, duration 5): 120 ticks load + 40 unload + 5P. If P ≈ 60 ticks (2.4 s) that is
+460 ticks = 18.4 s per 4 guests ≈ 13 guests/min, 4.6 game days per cycle. Raising the capacity slider
+to 8 (max at level 0) almost doubles it because the run time is per cycle, not per rider; raising
+duration lowers it linearly and raises intensity (§5).
+
+What stops a queue draining: status 3 (player closed), 4/5/6 (broken, until the mechanic finishes
+17 → 7 → 10), the 5-day wait with a queue that has thinned to below capacity, and — because loading
+only takes the head if its state is **18** — a head guest still in 19 (shuffling) stalls the load
+until it arrives. A guest at the head in any other state blocks loading for the whole ride until
+message 6/7/10 moves it.
+
+## 5. Ratings — what per-ride numbers exist (READ)
+
+There is **no excitement, appeal, popularity or queue rating stored per ride.** The values the game
+computes or keeps per attraction are exactly:
+
+1. **Intensity** — vtable slot 53, recomputed on every call (not stored). Ride (0x800A0594):
+   `base = record+0x18; f1 = clamp(A+0xB8 / 100, 0.75, 1.25); f2 = clamp(A+0xC0 / 5, 0.75, 1.25);
+   intensity = min(100, base × f1 × f2)` (20.12 arithmetic; 0x51EB851F = 1/100, 0x66666667 = 1/5).
+   With the speed slider capped at 100 by the record, f1 ∈ [0.75, 1.0]; f2 reaches 1.25 at a duration
+   of 7+ cycles. Defaults (50, 5) give **0.75 × base** → Crazy Ape 45, Tom Tom Twister 56. Tour
+   0x800A202C, track 0x800A8A0C, coaster 0x800B08C8 are the same shape (both sliders read; not
+   line-by-line read). Sideshow 0x800B7788: `record+0x18/3 + 50 + max(0, price − prize)²/16` clamped
+   to 100 (GUESS-medium on the field names; READ on the shape). Shop/Feature: 0x80066110 = 0.
+   Intensity is what the guest score (behaviour.md §2.2b, "ride.slot53") and the ride reward
+   (+15/+10/+5 happiness, nausea) use, and the entry-fee verdict sums it over the park.
+2. **Reliability** A+0xB4 (§6) — the panel's "State of Repair" (text 0x7A) reads it via 0x8009ECE4
+   (`>> 12`).
+3. **Lifetime** A+0x68 (§6.3).
+4. **Guests served** A+0x14 (all time) and, for shops/sideshows, takings/profit words.
+5. Upgrade level A+0xF6 and the three sliders.
+
+The guest-side choice therefore depends only on distance, the guest's intensity preference vs slot 53,
+the two need×attribute tables (slots 55/56, which for rides are 0x8009F5FC/0x8009F5F4 = **0**, so those
+terms are constant M[need][0]), and the repeat penalty — rides differ to guests only by intensity and
+position.
+
+## 6. Breakdowns (READ)
+
+### 6.1 Wear — slot 103 = 0x8009DD5C, called every tick of status 2, acts every 4th tick
+```
+k  = slot 104 (wear rate, Ride 0x800A0250)            # 20.12
+R  = A+0xB4;  R' = R − (k >> 5);  A+0xB4 := max(0, R')
+A+0x68 −= floor(R/15) − floor(R'/15)                   # lifetime loses 1 per 15-point band crossed
+```
+Wear rate (0x800A0250, a1 = 0 from the wear call):
+```
+if 0x80059A9C() != 0: return 0                     # the mode flag from behaviour.md: no wear
+s = A+0xB8/100 (20.12);  if A+0xB8 ≥ 100: s = (s + 1)/2       # speed term, ≈ 0.01..1.0
+L = A+0xF0 / maxSeats(level)                        # load fraction, riders on board
+if L ≥ 0.8: L += ((L − 0.8)×4096/64)²/4096          # +0.035 at full load
+k = ((s + L) / 2) × wearMult(level)                 # wearMult = record +8 of the level block: 5 / 3 / 2
+```
+(The record words `f24`/`f28` = 4 enter as `1 − 4/4096` and `+4/4096`, i.e. noise.) Per 4 ticks the
+reliability loses `k/32` points. Worked numbers, level 0 (wearMult 5):
+
+| speed | load | k | loss / 4 ticks | 100 → 10 takes | in seconds / game days (running time only) |
+|---|---|---|---|---|---|
+| 50 (default) | full | 3.84 | 0.120 | 3000 ticks | 120 s / 30 days |
+| 50 | empty | 1.25 | 0.039 | 9200 ticks | 368 s / 93 days |
+| 100 | full | 5.09 | 0.159 | 2260 ticks | 90 s / 23 days |
+| 50, **level 2** (mult 2) | full | 1.54 | 0.048 | 7500 ticks | 300 s / 76 days |
+
+Wear accrues **only while the status is 2**, so calendar time is longer by the loading/unloading
+duty cycle. Nothing random enters: breakdowns are deterministic in running time, speed and load.
+Live check: read A+0xB4 on a full Crazy Ape at default speed every 100 ticks; expect −3.0 per 100
+ticks of status 2 (0x0C00 units per 100 ticks), none in 10/11.
+
+### 6.2 Breaking and repairing
+- Ride Update 0x8009D0FC (before anything else each tick): `status == 2 and A+0xB4 ≤ 0x9FFF (< 10.0)`
+  → smoke effect at the ride centre → **SetStatus(4)** (message 0x3E "about to break down"). Track
+  rides (0x800A66EC) and coasters (0x800B0A68) do the same test but go to **5** directly. A ride in
+  4 with A+0xB4 exactly 0 goes to 5 (unreachable in practice: the wear step is < 0.2 and stops in 4).
+- Mechanic Idle (behaviour.md §3.5) claims a ride with slot 20 true (status 4 or 5), unclaimed and
+  **A+0x68 ≠ 0** (0x80096C58 at 0x80096CD4..0x80096CE8, READ) → states 56 → 16 (closing: A+0xEC rises
+  by the timescale per tick to 10×(w+h)<<12: **≈ 33 ticks for a 4×4**) → 14 repairing
+  (**240/180/120/60/60 ticks by skill 0..4 = 9.6/7.2/4.8/2.4/2.4 s**) → 17 opening (A+0xEC back to 0,
+  ≈ 33 ticks) → `SetStatus(7)` → reliability **:= 100**, smoke cleared, status 10. Mechanic morale
+  +10. Repair costs nothing (economy.md §4.7 stands). Total ≈ 66 ticks + repair time + walking.
+- Player levers: the speed slider (linear in k), capacity vs actual load, the duration slider (longer
+  runs = more status-2 time per guest), upgrades (wear multiplier 5 → 3 → 2 and a reliability reset),
+  mechanic count and skill (repair duration only — **skill does not change wear or the breakdown
+  threshold**), and closing the ride (status 3 stops wear).
+
+### 6.3 Lifetime — the "condemned" mechanic
+`A+0x68` starts at the record's lifetime (45 Crazy Ape, 50 Hocus Pocus, 55 Thrill Grill, 60 The
+Orbiter, 65 Phantom/Escargot/Ghosta Coasta, 75 Areotron, most rides 80, 100 for Pumpkin Castle /
+Spooky Spider / Uforia / Aztec Mayhem / Slither / Tower). Each 15-point band the reliability crosses
+costs 1, so a full 100 → 10 cycle costs 6: **Crazy Ape survives 7 breakdown-repair cycles, an
+80-lifetime ride 13, a 100-lifetime ride 16.** When it reaches 0: slot 83 posts message **0x99 "One of
+your rides has become too old and has been condemned. You should delete it and build a new ride"**,
+the queued-ride Update (0x8009CCD4) closes the ride (A+0xEC rises, 0x8005BE70 pulls it off the
+upgrade queue) and sets **4**, and no mechanic will ever claim it (the A+0x68 ≠ 0 test) — repair
+would in any case re-trip on the next tick because nothing resets A+0x68 except placement
+(0x8009C344) and the save-loader (0x8009CEFC). Demolish (half refund) and rebuild is the only exit.
+Live check: poke A+0x68 to 1 and A+0xB4 to 0x10000 (16.0) on a running ride; within 4 ticks the
+lifetime hits 0, message 0x99 appears and the status goes 2 → 4.
+
+## 7. The other ride classes (partly read)
+- **TourRide** (0x800E586C): loads one guest per 20 ticks into a transport object (`outer+0x108`,
+  0x800A3298 "vehicle available"), dispatches when the queue empties (0x800A27C0/0x800A3368),
+  unloads one per 20 ticks (0x800A2464). Own wear slot 103 (0x800A1FE8) and rate (0x800A1CA4).
+- **PathedRide/track** (0x800E5FE8): 34 track-piece sub-objects of 0xC0 at outer+0x198; loads at
+  0x800A80F0; unloads 0x800A8BD4; own tick-2/10/11 (0x800A6960/0x800A67F4/0x800A6A58); reliability
+  < 10 → status **5** with smoke (0x800A66EC); its own SetStatus(1)/(3) sites (0x800A462C/0x800A6F60).
+- **RollerCoaster** (0x800E65A0): 32 car sub-objects of 0x40 at outer+0x18C; overrides slot 86
+  (0x800AD78C), tick-2/10/11 (0x800B0D68/0x800B0DC8/0x800B0F90), loads at 0x800B025C, wear rate
+  0x800B05D0 (reads speed and capacity), breakdown → **5** (0x800B0A68).
+I did not trace these beyond the addresses above; the status model, sliders, wear structure and
+lifetime are shared through the queued-ride base.
+
+## 8. Live checks (in the order I would run them)
+1. `A+0x6E` of a freshly placed ride goes 0 → 1 → 10 and then loops 10 → 2 → 11 → 10; a shop goes
+   0 → 1 → 10 → 2 within one tick of 10.
+2. `A+0xF0` rises by 1 every 20 ticks in 10 while `A+0xC4[0] ≠ 0`; `A+0xF2` counts phases in 2; the
+   run ends when it equals `A+0xC0`.
+3. Default sliders on a Lost Kingdom Crazy Ape: `A+0xB8` = 50, `A+0xBC` = 4, `A+0xC0` = 5, `A+0x68` =
+   45, `A+0xF6` = 0. After an upgrade: `A+0xBC` = 5, `A+0xC0` = 5, `A+0xB4` = 0x64000, `A+0xF6` = 1,
+   bank −£2,000 (level-1 price for Crazy Ape is 200 → −2000 units).
+4. Wear: `A+0xB4` falls ≈ 0x0C00 per 100 ticks of status 2 at (50, full load).
+5. Queue cap: the 8th guest to arrive at a level-0 ride never enters the queue list (`0x8009EE98`
+   stays at 7).
+6. The theme/set: `*(0x80069610()+8)` and `+4`; `0x800F0CF0[A+0x6B]` must equal the FOLIO id whose
+   record's text id names the ride you placed.
+
+## 9. Not established (honest list)
+- The per-ride animation phase length (needs the animation resource chain 0x800311F4 → second handle
+  → 40-byte records, u16 at +0x38); hence run time is given as A+0xC0 × P with P measured live.
+- What `mgr+4` (set A/B) is and who sets it; which coaster/track/tour records each scenario exposes.
+- Record header bytes +0x09, +0x14..+0x17, +0x20 and the per-level words +0x24/+0x28 (`f48`/`f4C`).
+- Whether the UI ever offers the (out-of-data) third upgrade to level 3.
+- Statuses 8/9 (dead), the Coaster's slot-86 override, and everything inside the track/coaster
+  loading code beyond the SetState(21)/(22) sites.
+- The shop product parameters at record +0x30..+0x36 and the feature flag byte +0x2E bits 1–3.
