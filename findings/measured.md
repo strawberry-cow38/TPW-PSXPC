@@ -1190,3 +1190,40 @@ reporting "11,481 texture uploads" when 40 is the answer. A filter that excludes
 nothing is not a filter, and the count it produces looks exactly like a result.
 Caught only by printing the *distribution of shapes* rather than the total — the
 same "structure, not aggregate" correction as everything else today.
+
+## The twelve banks are NOT verbatim in VRAM — with the control that makes the null real
+
+catboy supplied 384 sha256 candidates: each of the twelve 131,156-byte entries cut
+two ways — 16 contiguous 8192-byte chunks (block-linear storage), and blocks cut
+from a 256-halfword × 256-row image (row-linear storage). Whichever matched would
+have given both the storage order and the entry→slot binding in one shot.
+
+**Zero of 40 uploaded blocks matched, in either cutting.**
+
+⚠ **The control, because a no-match is exactly what a mis-aimed instrument
+produces:**
+
+```
+blocks as logged at upload vs the same blocks in the final VRAM
+  37 of 40 unchanged
+   3 overwritten later
+```
+
+So the capture genuinely holds what was uploaded. **And my first attempt at this
+was invalid** — I matched against a *save state* rather than a cold boot, and would
+have reported the same zero for an entirely different reason. Redone on a cold boot
+with the upload log from the same run.
+
+**So the null is real: what lands in those 40 slots is not a verbatim slice of the
+twelve entries.** Decompression on the way in is the obvious candidate and fits the
+rest — `tpage (960,256)`'s rows were not in the archive either, and two of the 47
+palettes were not verbatim.
+
+⚠ **This leaves the 1024×256 sheet layout UNRESOLVED, not disproved.** If bytes are
+decompressed before upload, the layout question concerns the *decompressed* form,
+which my hashes cannot see at all. The comparison tests raw archive bytes against
+VRAM and those are simply different representations.
+
+The productive direction is the reverse: hand me a **decompressed** block and I can
+say whether it is in VRAM and where — which tests the decoder and the layout
+together, and works precisely because the raw bytes do not match.
