@@ -623,28 +623,42 @@ settles it is neither the screen nor the formula but **the accumulator**: hire
 someone, run a month boundary, and read `bank+0x12D0`, which is the figure actually
 deducted. That is the next measurement.
 
-## Wages: still blocked, and one failed experiment worth recording
+## Wages — measured. GBP 100 a month, and neither source was wrong
 
-I can reach the hire screen but cannot complete a hire. After pressing `X` on an
-individual staff member, `bank+0x12D0` stays at **0** across 127 game days and four
-month boundaries — same as the no-hire control. So either the hire never committed,
-or wages are not charged in this configuration.
+**Both the screen and fable's formula were right. I was wrong about what I was
+comparing**, and my experiments were failing for a reason I never suspected.
 
-⚠ **An earlier run of this looked like a clean null and was not.** With the laptop
-menu open the game is **paused**: 26,000 frames elapsed and the day counter did not
-move *at all* (146 → 146), against 121 days in the control. A wage measurement over
-a window in which no time passes cannot show a wage. Four `triangle` presses close
-the menu and time then runs normally (146 → 273).
+fable: `X` on the recruit card does not hire — it starts the **placement tool**. A
+second `X` in the world commits. **`triangle` runs the cancel and frees the node.**
+My four triangles, added purely to close the menu so time would pass, *destroyed
+the recruit every time*. Four month-rollovers then summed an empty list. That is
+the third distinct reason one of these runs returned a meaningless zero.
 
-That is the day's pattern once more — a null from a window that could not have
-contained the event. The tell was available and cheap: **the control advanced 121
-days and the treatment advanced 0.** Comparing that one number between arms is
-what caught it, not inspecting the wage figure.
+With no triangles, and `0x8001E754 = 0` held to nop the tile check so any tile
+accepts the drop:
 
-Handed to fable: what commits a hire, where employed staff live in memory, and a
-poke that employs someone directly. The displayed `$100` against the formula's
-150/165 stays open until the deducted figure settles it.
+| | | |
+|---|---|---|
+| day 155 (first rollover) | wages total **160** | GBP 16 — prorated, hired mid-month |
+| day 185 | **1160** | +1000 |
+| day 216 | **2160** | +1000 |
+| day 246 | **3160** | +1000 |
 
+**GBP 100 per month per staff member, exactly, and the first month prorated by
+days employed** — precisely the shape of `base[level] * mult[kind] *
+min(100, 100*daysEmployed/monthLen)/100`.
+
+**Why the GBP 100 "disagreement" was mine.** "Pay Grade 1" is `level + 1`, so the
+card shows level **0**, not 1. And `rec+0x10` is the staff *kind*, which
+economy.md had mapped wrongly — it is 0 Mechanic, 1 Entertainer, 2 Cleaner,
+3 Guard, 4 Researcher. Gary Liddon is a Guard, kind 3, multiplier 2. So
+`base[0] * mult[3] = 50 * 2 = 100`. The formula predicted the screen all along; I
+indexed both tables one place off and called it a contradiction.
+
+⭐ **And a fable claim confirmed by accident:** the arms "X then X (place)" and
+"X only (no drop)" produce **byte-identical wage series**. fable said an un-dropped
+recruit sitting on the cursor is still paid, and that is exactly what the two
+identical columns show.
 ## GBP 20 an item — now four independent confirmations
 
 Every sale figure measured so far, across two different parks and two window
