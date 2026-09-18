@@ -266,6 +266,53 @@ apart cleanly: each is self-contained and no sprite runs across a cut.
 `(rect → clut)` pairs. Contiguous regions share a palette, so a sheet partitions into palette zones
 rather than needing a lookup per quad.
 
+## 5h. File → VRAM binding, PROVEN by content hash — and two layouts, not one
+
+⭐ **Entry `0x10C` maps block-for-block into VRAM, 14 matches, confirmed independently by tinyclaw
+against their own capture.** Consecutive 8192-byte chunks at a `0x2000` stride:
+
+    +0x0     -> 768,0     +0x8000  -> 832,0     +0x10000 -> 768,256   +0x18000 -> 832,256
+    +0x2000  -> 768,64    +0xA000  -> 832,64    +0x12000 -> 768,320   +0x1A000 -> 832,320
+    +0x4000  -> 768,128   +0xC000  -> 832,128   +0x14000 -> 768,384
+    +0x6000  -> 768,192   +0xE000  -> 832,192   +0x16000 -> 768,448
+
+**THERE ARE TWO ENTRY SHAPES AND ONE RULE DOES NOT COVER BOTH:**
+
+| entry | header | layout |
+|---|---|---|
+| 131,156 bytes | `0x54` | **1024x256 px, ROW-MAJOR** — four 256x256 texture pages side by side |
+| 131,072 bytes | none | **256x1024 px, 16 BLOCKS** of 256x64 — uploads as two VRAM columns |
+
+Derivable from the hardware, not just observed: a texture page is 64 cells x 256 rows, and at 4bpp a
+cell is 4 pixels, so a page is 256x256 px. 131,072 bytes = 65,536 cells / 16,384 per page = **exactly
+4 pages**. At 256 px wide, 8192 bytes is exactly one 64x64-cell block — which is why the second shape
+matches VRAM blocks byte-for-byte while the first does not.
+
+⚠ **I nearly forced the block layout onto the sheets on the strength of one measured binding.**
+Assembling a 131,156 sheet block-linear shatters it — the credits text comes apart into fragments —
+while row-major renders it legibly. **The binding was real; its SCOPE was one entry.** A rule verified
+on one file and generalised to a file it was never tested on is the day's last repetition of the same
+mistake.
+
+## ⚠ 5i. Two null results that were about to be reported, and what saved them
+
+**135 of 149 "matches" were blank blocks.** Scanning all 422 entries against the VRAM hashes returned
+149 hits. The tell was one hash appearing at **34 different positions**, which is impossible for real
+content — it is the sha256 of 8192 zero bytes. **An empty block matches every other empty block, so
+it confirms whatever hypothesis it is pointed at.** With degenerate blocks excluded on both sides:
+14 matches, all one entry, consecutive and evenly spaced — which is what a true binding looks like
+and what 149 scattered blanks never could. ⚠ Honestly: this was caught by a number weird enough to
+trip over, not by having a control in place first.
+
+**And a clean zero that meant "you looked too early".** tinyclaw's cold-boot capture matched nothing,
+read as "the archive does not feed these slots". Entry `0x10C` is resident during a *park* and absent
+at *boot* — so the null was a timing artefact, and the DIFFERENCE between the two captures is now
+positive evidence that the twelve `0x54` sheets are intro/credits art rather than in-game textures.
+**Before reporting a null, say when you looked, and check you looked when the thing would be there.**
+
+`findings/vram_block_hashes.json` holds the console-side hashes; `texture_clut_map.json` the
+(rect -> palette) mapping. Neither contains pixels or colours.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
