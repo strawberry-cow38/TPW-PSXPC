@@ -24,7 +24,8 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 6;   // v6: Install/Update/Play merged into ONE mode-driven button; build marker
+    const int LauncherVersion = 7;   // v7: --path pointed at the repo root, so Play opened Godot's project manager
+    // v6: Install/Update/Play merged into ONE mode-driven button; build marker
     // v5: branch dropdown, Godot auto-download, current-vs-latest commit, Options panel, settings persisted beside the exe
     // v4: no functional change -- published to prove v3 self-updates, which is only testable against a HIGHER published version
     // v3: self-update -- downloads the published exe, verifies shape AND sha256, swaps via a shim that waits on this PID
@@ -369,9 +370,24 @@ public class MainWindow : Window
         if (!choice.Satisfied)
             Log($"Note: the {(wantConsole ? "console" : "windowed")} build was not found; starting {Path.GetFileName(choice.Path)} instead.");
 
-        var psi = new ProcessStartInfo(choice.Path) { UseShellExecute = false, WorkingDirectory = _repoDir };
+        // ⚠⚠ THE GODOT PROJECT IS IN game/, NOT AT THE REPO ROOT. Pointing --path at the repo root does not
+        // fail: Godot finds no project.godot, shrugs, and opens the PROJECT MANAGER. The user gets an empty
+        // Godot window and no error anywhere, which looks like the game failing to start for some deep reason.
+        // Shipped exactly that in v6 — and my own "it runs" test missed it because I typed the game/ path by
+        // hand instead of running the arguments the launcher actually builds. Testing the game is not testing
+        // the launcher launching the game.
+        string projectDir = Path.Combine(_repoDir, "game");
+        if (!File.Exists(Path.Combine(projectDir, "project.godot")))
+        {
+            // Say it plainly rather than letting Godot silently substitute its own UI.
+            Log($"No project.godot in {projectDir} — the build may be incomplete. Run Update first.");
+            await RefreshAsync();
+            return;
+        }
+
+        var psi = new ProcessStartInfo(choice.Path) { UseShellExecute = false, WorkingDirectory = projectDir };
         psi.ArgumentList.Add("--path");
-        psi.ArgumentList.Add(_repoDir);
+        psi.ArgumentList.Add(projectDir);
         // The port reads the user's own game data from here. Never bundled, never redistributed.
         psi.Environment["TPW_DATA"] = _gameDataPath ?? "";
         psi.Environment["TPW_VARIANT"] = _gameData.Variant?.Id ?? "";
