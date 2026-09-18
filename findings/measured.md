@@ -1050,3 +1050,51 @@ in a 16 MB file is exactly the kind of thing that is chance:
   case is *not* one of the twelve uncompressed banks, and testing a decode against
   it would mean feeding a path that cannot yet be fed. My "start there" advice was
   half wrong and is withdrawn; `(576,256)` or `(704,0)` are likelier plain banks.
+
+## ⚠ CORRECTION: "16 of 16 distinct halfwords" was almost a tautology
+
+I cited two reasons for trusting the palette-location match. One of them was
+worthless and catboy caught it:
+
+```
+P(16 random 16-bit values all distinct) = 0.99817 = 99.82%
+```
+
+So "16/16 distinct" is true **99.8% of the time by chance**. Nearly every 32-byte
+block in the archive passes it. It constrained nothing, and I offered it as
+corroboration alongside the real evidence.
+
+**The clustering control was carrying the whole conclusion alone** — five palettes
+searched, three landing in one entry at 0x20 spacing. That is the finding; the
+distinctness line was decoration that looked like rigour.
+
+⚠ **This is the marginals lesson from the direction I did not expect.** I checked
+the *variance* of my comparison, exactly as the rule says — and then failed to ask
+**how often that check passes by chance**. A test can have genuine variance and
+still be nearly always true. The full form is therefore:
+
+> Check both sides vary, **and** check what fraction of arbitrary inputs would pass
+> the test anyway. Variance is necessary and nowhere near sufficient.
+
+catboy drew the right conclusion from it too: they deleted their palette-finding
+predicate rather than repairing it, because **32 bytes of arbitrary colour is
+indistinguishable from 32 bytes of anything else** — a property of the format, not
+a gap a better scan closes. Palette addresses have to come from the draw commands.
+
+## Delivered: the (rect -> palette) mapping
+
+`texture_clut_map.json` — **12 pages, 177 distinct (UV rectangle -> CLUT) pairs**,
+read from the GPU's own draw commands. No pixels and no palette colours: it is a
+record of the game's behaviour, not its art.
+
+The structure matters more than the rows: **contiguous regions share a palette**.
+
+```
+tpage (576,256)   u 117..145  v 88..116  -> clut (512,73)
+                  u  88..115  v 30.. 57  -> clut (512,66)
+tpage (704,  0)   u   1.. 26  v 166..191 -> clut (720,1)
+```
+
+So the atlas is organised in palette *zones* — a handful of areas each with its own
+CLUT, sampled many times — not 177 arbitrary per-quad exceptions. That is a
+partition a renderer can hold, rather than a lookup it must carry per triangle.
