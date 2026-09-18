@@ -66,11 +66,24 @@ sampling resolution of 10 -- so the variance is **nine times** what the
 instrument could have manufactured. It is real. There is jitter, and I called it
 constant from a sample too small to show otherwise.
 
-⚠ **Second thing the wider sweep does not support: "arrivals scale with what is
-built".** One ride and five shops give 705 and 685. Those parks differ a lot and
-their arrival rates do not. What the data does show is a **step at zero**: an
-open but empty park gets no guests at all, and anything built switches arrivals
-on. Beyond that step, this data cannot see a contents effect.
+**But it is not a dice roll either, and that half was worth keeping.** Over the
+nine measured gaps: mean 685.6, sd 32.1, **CV 0.047**. A memoryless process -- a
+per-tick random draw -- has CV = 1.0, so this is **21x tighter than random**, and
+the sd is 11x the 2.9-tick quantisation floor of the sampling. A coin flipped
+every tick would give gaps of 12 and 3000; these run 640 to 730. That is a
+metronome with a wobble: **a counter reaching a threshold, with something small
+modulating it.** (Caught by cow tools, who ran the statistic I should have run on
+my own numbers before writing either claim.)
+
+⚠ **"Arrivals scale with what is built" is UNMEASURED, not disproved, and the
+distinction matters.** I wrote that the sweep did not support it, on the grounds
+that one ride gives 705 and five shops give 685. That is **two samples each**, and
+both sit well inside a 640-730 spread -- the difference cannot be told from noise.
+Calling it disproved would stop the next person looking. Separating the two needs
+roughly 5-9 gaps per condition, which is cheap and not yet done.
+
+What the data *does* show is a **step at zero**: an open but empty park gets no
+guests at all, and anything built switches arrivals on. That finding survives.
 
 **What DOES move it enormously is the debug switch.** With `0x80102D30 = 1` and
 `0x80102E60 = 1` held on an empty field: 120 guests in 3000 frames, about one per
@@ -80,6 +93,48 @@ exists; it is just not "how much you have built", on this evidence.
 ⚠ **Scope of all of the above:** six parks, 2-3 arrivals each. That is enough to
 falsify "constant" and enough to show the zero step. It is *not* enough to fit a
 formula, and I should not have implied a model from three points the first time.
+
+## Shop revenue — first measured, via fable's pathfinder switch
+
+**A shop sells nothing because no guest can reach it, and one word fixes it.**
+
+fable's finding: target selection never tests reachability, so a guest picks the
+shop, the path request fails, and it wanders off. The shop's own entrance tile is
+a real map tile of type 7, and the A* worker will not step onto it from grass.
+
+`u32 [0x8011419C] = 0x800EC28C`, held every frame -- the type-0 (grass) entry of
+the pathfinder's dispatch table redirected to the always-admit case.
+
+Measured on `park_shop5.state`, 12000 frames, identical arms but that one word:
+
+| | guests admitted | gate | income | **non-admission** |
+|---|---|---|---|---|
+| control | 8 | +3200 | +3200 | **0** |
+| with the poke | 8 | +3200 | +6400 | **+3200 (GBP 320)** |
+
+The discriminator was fixed before the run: `income_total - gate_total > 0` means
+something other than admissions was paid for. **The control is exactly zero**, so
+it is not a test that passes on anything.
+
+Both arms admitted the **same 8 guests**, which is the useful control within the
+control: the switch changed what guests could *reach*, not how many arrived.
+
+⚠ **Verify the table before trusting any result here.** fable supplied a sanity
+check and it passed live: `u32[0x8011419C] == 0x800EC24C`, `[+4*7] == 0x800EC208`,
+`[+4*2] == 0x800EC174`. If those ever differ, the loaded overlay is not the one
+the type map was read from and a null result would mean nothing. Also confirm
+`u32[0x801036C8] == 0` -- while a build item is held every path request queues
+forever, which looks exactly like "unreachable".
+
+⚠ **Unresolved:** GBP 320 over 8 guests is GBP 40 each, and the Fries price read
+GBP 60. So either not every guest bought, or a purchase is not one item, or the
+non-admission total includes something else. Not chased yet -- flagged rather
+than smoothed over.
+
+⚠ **This is a cheat, not the game.** It makes grass universally walkable, so
+guests cut straight lines and path capacity stops mattering. Good for unblocking
+measurement; wrong for any number that depends on guests queueing or bunching.
+fable's 3.1 (write real path tiles) is the faithful version.
 
 ## Addresses (PAL SLES build)
 
