@@ -126,15 +126,67 @@ the type map was read from and a null result would mean nothing. Also confirm
 `u32[0x801036C8] == 0` -- while a build item is held every path request queues
 forever, which looks exactly like "unreachable".
 
-⚠ **Unresolved:** GBP 320 over 8 guests is GBP 40 each, and the Fries price read
-GBP 60. So either not every guest bought, or a purchase is not one item, or the
-non-admission total includes something else. Not chased yet -- flagged rather
-than smoothed over.
+**RESOLVED, and it was a mislabelled field, not odd arithmetic.** A second run
+read the shop's own counters instead of the park totals:
+
+| frame | gate | income | non-admission | shop `served` | shop `V+0x7C` |
+|---|---|---|---|---|---|
+| 2000 | 800 | 800 | 0 | 0 | 0 |
+| 4000 | 1600 | 2000 | 400 | 2 | 40 |
+| 6000 | 2000 | 3000 | 1000 | 5 | 100 |
+
+- **The shop really does sell:** `served` goes 0 -> 2 -> 5, and it stays 0 for the
+  whole control run. This is not admissions being counted twice.
+- **`V+0x7C` is NOT the price. It is cumulative takings, in pounds.** It equals
+  non-admission-income / 10 at every sample. A price does not change when
+  customers arrive; that is what gave it away. fable's report labels it price, and
+  that label is wrong.
+- **An item costs GBP 20.** 400 tenths / 2 sales and 1000 tenths / 5 sales both
+  give exactly 20. The earlier GBP 60 came from an anchor fable had already told
+  me was 8 bytes low.
+- `income = gate + non-admission` holds at all three samples. Three fields at three
+  addresses agreeing arithmetically is a check on the *instrument*, not just the
+  finding.
+
+⚠ **UNMEASURED: whether a guest buys more than once.** I wrote that they "buy
+repeatedly". The counts above are 2 guests / 0 sales, 4 / 2, 5 / 5 -- that is one
+purchase per guest with a lag, not repeat buying. The 16-sales-from-8-guests
+figure came from a different run whose guest count was derived from the GBP 40
+assumption. Answering it needs `served` against guests-admitted in the *same* run.
 
 ⚠ **This is a cheat, not the game.** It makes grass universally walkable, so
 guests cut straight lines and path capacity stops mattering. Good for unblocking
 measurement; wrong for any number that depends on guests queueing or bunching.
 fable's 3.1 (write real path tiles) is the faithful version.
+
+## A debug menu shipped in the build
+
+`FOLIO.GAZ` carries the game's symbolic string table, 1031 ids of the form `STR_*`.
+Three of them should not be in a retail game:
+
+```
+STR_MAINMENU_DEBUG_MENU
+STR_MAINMENU_ENTER_SANDBOX_MODE
+STR_MAINMENU_EXIT_SANDBOX_MODE
+```
+
+`STR_MAINMENU_DEBUG_MENU` sits in the same id family as the in-game laptop menu's
+own entries -- OPEN_PARK, BUILD, FINANCE, RESEARCH, PARK_STATS, PURCHASE, STAFF,
+RIDES, SHOPS, SIDE_SHOWS, TOILETS, GOLDEN_TICKETS, LOAD_SAVE, GAME_OPTIONS,
+EXIT_TO_MAP_SCREEN, QUIT_GAME. So the menu probably has a debug entry that is in
+the build and hidden at runtime.
+
+⚠ **SOURCED only as a string, DERIVED as a menu entry, UNMEASURED as reachable.**
+A string id in an archive proves the string exists. It does not prove the menu
+entry exists, that it is gated rather than absent, or that anything can reach it.
+Handed to fable to resolve; not a finding yet.
+
+**On published cheat codes:** sources claim entering the nickname "bovine" unlocks
+all rides and shops and grants money on X+Square+Circle. The word does not appear
+in TPW.BIN, SLES_026.88, TPW.OVL or FOLIO.GAZ. ⚠ That is **not** a disproof -- the
+overlay is LZ-compressed and a raw grep cannot see inside it, and the comparison
+may be case-folded or obfuscated. Most published TPW cheats are for the 1994
+*Theme Park*, a different game.
 
 ## Addresses (PAL SLES build)
 
