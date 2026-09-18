@@ -123,7 +123,7 @@ namespace TPW.Launcher.Tests
             Assert.True(exe.CanPlay);
             Assert.Equal(HashedThing.BootExecutable, exe.What);
             Assert.Equal("PAL", exe.Variant.Region);
-            Assert.Equal(0.04, exe.Variant.TickSeconds);   // 50 Hz half-rate, measured
+            Assert.Equal(0.04, exe.Variant.TickSeconds);   // 2 frames/tick (measured) over 50 Hz (assumed)
 
             // ⚠ The rip-sensitive one still resolves. Migrating to a better key must not strand the copy
             // already in use -- so this asserts the OLD key keeps working, which is the half a migration

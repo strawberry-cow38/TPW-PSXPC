@@ -85,7 +85,10 @@ namespace TPW.Launcher
             Id = "SLES-026.88",
             Name = "Theme Park World (PSX)",
             Region = "PAL",
-            TickSeconds = 0.04,   // 50 Hz half-rate; see ParkClock
+            // ⚠ DERIVED, NOT MEASURED. The measured fact is 2 frames per tick (a ratio, exact); 50 Hz is
+            // assumed from "it is a PAL disc" and has not been watched on hardware. Per-variant because
+            // that assumption is the one thing that genuinely differs between SKUs. See ParkClock.
+            TickSeconds = 2 / 50.0,
         };
 
         public static readonly IReadOnlyDictionary<string, KnownHash> Known =
