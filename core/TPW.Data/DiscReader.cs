@@ -91,6 +91,20 @@ namespace TPW.Data
             return raw != null && (raw[18] & 0x20) != 0;
         }
 
+        /// <summary>Read a whole file, including a partial final sector.
+        ///
+        /// ⚠ THE CONSOLE DOES NOT DO THIS, AND THE DIFFERENCE WILL LOOK LIKE A DECODER BUG. tinyclaw read the
+        /// boot executable's loader (CdSearchFile / CdControl seek / CdRead) and reports it sizes the transfer
+        /// as `size / 2048` with C truncation, so the game drops a partial last sector. Worked through for
+        /// LEGAL.GFX with the figures this reader measures: 165,403 bytes is 80.76 sectors, so the console
+        /// takes 80 -> 163,840 bytes, while the TGA header declares 18 + 320*256*2 = 163,858. The console is
+        /// therefore missing the final 18 bytes, which is 9 pixels of 81,920 — invisible, but real.
+        ///
+        /// We round UP on purpose: extracting an asset wants the whole asset. The consequence to keep in mind
+        /// is that comparing our output against a VRAM dump of the running game is comparing against something
+        /// with 9 fewer pixels in it, and a mismatch confined to the last few pixels of the last row is THIS,
+        /// not a decode error. (Truncation is reported, not yet verified here — it is the shape of the claim
+        /// that matters: check the tail before concluding a decoder is wrong.)</summary>
         public byte[] ReadFile(DiscFile f)
         {
             var outBuf = new byte[f.Length];
