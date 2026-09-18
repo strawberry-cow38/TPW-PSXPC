@@ -24,7 +24,8 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 3;   // v3: self-update -- downloads the published exe, verifies shape AND sha256, swaps via a shim that waits on this PID
+    const int LauncherVersion = 4;   // v4: no functional change -- published to prove v3 self-updates, which is only testable against a HIGHER published version
+    // v3: self-update -- downloads the published exe, verifies shape AND sha256, swaps via a shim that waits on this PID
     // v2: fixed a null-Text crash on the first log line; startup probe moved off the UI thread; unhandled exceptions now reach the panel and launcher-crash.log
     // v1: first TPW launcher -- clone/build, game-data identification, Play
     const string VersionUrl = "https://github.com/strawberry-cow38/TPW-PSXPC/releases/download/launcher/launcher.version";
