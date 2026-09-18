@@ -100,6 +100,36 @@ for a clamp to be, and there is no reason a format tag and an angle limit should
 Either the parser switches on it in a way that does not materialise as that immediate, or the word
 is a length or count that happens to be 150 for this class of asset.
 
+## 5c. Three false trails in the code, and why each looked real
+
+All three were pursued and all three died. Written down because each looks like a lead again from
+cold, and because they share one shape: **a name or a number that was never a reference at all.**
+
+1. **`0x96` in the code = camera clamps** (§5b). A small integer is not a signature.
+
+2. **"`FUN_801e3a30` passes `\TPW.BIN;1` to a loader" — it does not.** The decompiler shows the call
+   `FUN_801e6bd0(s__TPW_BIN_1, s__TPW_BIN_1)`, and the raw instructions confirm both `r4` and `r5`
+   really are built as `0x801e8d08`, the string's address. But the callee's body is
+   `for (; p < end; p++) if (*p) (*p)();` — a **static-constructor runner**, the classic
+   `__main` / `__do_global_ctors(__CTOR_LIST__, __CTOR_END__)`. Both arguments are equal, so the loop
+   never executes: it is an EMPTY constructor list, and the linker happened to place its bounds
+   symbol at the same address the string table begins. **The filename is not an argument. It is a
+   different thing living at the same address.** Ghidra names an address after whatever symbol it
+   knows there, so the call reads as if it takes the filename, and the decompiled C is not wrong —
+   only the name in it is.
+
+3. **`\LEGAL.GFX;1` is never referenced by any `lui`/`addiu` pair in the boot executable.** Zero
+   sites, against four for `\TPW.BIN;1` (all four being case 2 above).
+
+⚠ **AND THE INSTRUMENT THAT FOUND THAT WAS BROKEN THE FIRST TIME.** The first run of that search
+returned **0 sites for both strings** — including for an address I could see being constructed two
+instructions earlier in my own disassembly output. The bug: MIPS builds an address as
+`lui` + `addiu`, and `addiu` **sign-extends**. `0x801e8d08` is assembled as
+`lui 0x801f` + `addiu -0x72f8`, so a search filtering for `lui 0x801e` misses every real site. The
+only reason it was caught is that a known-present target came back empty. **Run any search for
+something you already know is there; if it does not come back, the search is broken rather than the
+world empty.**
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
