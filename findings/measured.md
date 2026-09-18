@@ -539,3 +539,45 @@ offset poked directly.
 not support contents scaling" (retracted to *unmeasured*, correctly, because all
 six of those parks held exactly one attraction). It took being able to *build* to
 put a second value on the x-axis.
+
+## Sandbox mode is why the laptop was empty — and turning it off restores it
+
+Confirmed visually, which is the first time the sandbox finding has been checked
+against anything but the flag's value:
+
+| `0x80102D34` | laptop menu |
+|---|---|
+| 1 (as shipped in my fixtures) | Build, Game Options |
+| 0 (held) | **Information, Build & Hire, Park Statistics, Financial Information, Game Options, Leave Park** |
+
+**`Build & Hire` is the staff route and `Financial Information` is the wage
+readout** — both invisible while sandbox is on. So "no park I have employs staff"
+had a cause: I could not reach the hire screen, in a mode I did not know I was in.
+
+## The arrival throttle does NOT track guests-in-park
+
+cow tools predicted the drop from 2 guests/bus back to 1 is the `cap - guests_now`
+term of fable's head-count `min()` becoming binding — falsifiable, because it
+predicts the drop happens at a specific guest count rather than after a specific
+number of buses. Measured, two rides, 14 buses:
+
+```
+bus    1  2  3  4  5  6  7  8  9 10 11 12 13 14
+batch  1  1  2  2  2  2  1  2  1  1  1  1  1  2
+guests 2  3  5  5  4  6  5  3  4  5  5  6  6  6
+```
+
+**Batch 2 occurs at guest counts 5, 5, 4, 6, 3, 6. Batch 1 occurs at 2, 3, 5, 4,
+5, 6, 6.** Five and six each produce both answers, so batch size is not a function
+of guests-in-park. It does not track bus number cleanly either.
+
+⚠ **And the strongest signal points the other way.** The first two buses carry
+**1** guest at the *lowest* guest counts of the run (2 and 3). If `cap - guests`
+were binding, low occupancy should give the *largest* batch. That is the opposite.
+
+⚠ **Limits, stated because this is a weak test either way.** The effect is 1 vs 2
+— one unit — my guest count is sampled up to 200 frames before each spawn rather
+than at it, and fable's third `min()` term depends on the park score, which moves
+as a newly-built ride ages. A score-term explanation fits the early-low pattern
+and is **unmeasured**. So: the specific prediction is not supported, and I am not
+claiming the replacement.
