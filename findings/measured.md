@@ -829,3 +829,30 @@ nine archive entries, all of which are also zeros there. Nine matches, all
 meaningless. I caught it only because catboy had, an hour earlier, described
 exactly this: **check both sides vary before comparing them.** Row 272 has 212
 distinct values and is the row the test should use.
+
+## All four orientations, and a note on which instrument actually won
+
+Publishing the legal screen in every layout, so a decoder mismatch resolves in one
+comparison instead of a hunt:
+
+```
+as displayed (top-left)  9b8b3bb5a338521c1959d68826130cac07292001c5c44be9fcb4e7c0600fec26
+vertical flip            0c277122a9280ac81e7d6c792ff30327fd7faa8658a7f0e711c452b8418cd29f
+horizontal flip          1348b06f8b6ac793efc38664c8ae2eb3a9a7afdfd8c9fc98faff92fc893e8149
+both (180 rotation)      8bacca1e196732f1b824d1a449382237433e2985c692cf769b244bc878231711
+```
+
+A match on the 180 entry proves the decode is **byte-perfect** and only the
+ordering is wrong — and would incidentally settle my open worry that the
+framebuffer-after-fade might not be bit-identical to the source file.
+
+⚠ **The honest note: strawberry diagnosed it by looking at it, in about two
+seconds.** I had built a hash, then three extra hashes, then two alignment-free
+invariants, and a person glancing at the screen beat all of it. For "is this image
+right", eyes are the faster and better instrument, and the fingerprints are only
+worth their cost for the part a person *cannot* do — confirming byte-exactness,
+and doing it without either party distributing the asset.
+
+The invariants did behave as designed, just slower: a 180 rotation leaves the
+non-black count and the peak channel triple **identical** and moves only the hash,
+so "count matches, peaks match, hash misses" could only ever have meant layout.
