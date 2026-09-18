@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>tpwcheck</AssemblyName>
+    <RootNamespace>TPW.Check</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\TPW.Data\TPW.Data.csproj" />
+    <ProjectReference Include="..\..\core\TPW.Launcher\TPW.Launcher.csproj" />
+  </ItemGroup>
+</Project>

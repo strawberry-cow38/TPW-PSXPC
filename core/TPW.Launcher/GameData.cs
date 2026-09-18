@@ -55,8 +55,13 @@ namespace TPW.Launcher
         public readonly GameVariant Variant;   // null unless Known
         public readonly HashedThing What;      // meaningful only when Known
         public readonly string Message;        // shown to the user verbatim
-        public GameDataResult(GameDataState s, GameVariant v, HashedThing w, string m)
-        { State = s; Variant = v; What = w; Message = m; }
+        /// <summary>The file this verdict was reached about. ⚠ CARRIED WITH THE VERDICT ON PURPOSE: the asset
+        /// layer has to open the very file that was identified, and a second search for "the game" could
+        /// easily land on a different copy -- someone with two rips gets identified against one and reads
+        /// from the other, which fails in a way nothing downstream could explain.</summary>
+        public readonly string SourcePath;
+        public GameDataResult(GameDataState s, GameVariant v, HashedThing w, string m, string sourcePath = null)
+        { State = s; Variant = v; What = w; Message = m; SourcePath = sourcePath; }
         public bool CanPlay => State == GameDataState.Known;
     }
 

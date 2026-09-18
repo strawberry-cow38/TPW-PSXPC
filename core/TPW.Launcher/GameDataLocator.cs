@@ -44,7 +44,7 @@ namespace TPW.Launcher
 
             try
             {
-                if (File.Exists(path)) return GameData.Identify(Sha1Of(path), known);
+                if (File.Exists(path)) return WithPath(GameData.Identify(Sha1Of(path), known), path);
 
                 if (Directory.Exists(path))
                 {
@@ -56,7 +56,7 @@ namespace TPW.Launcher
                     GameDataResult firstSeen = default; bool any = false;
                     foreach (var f in files)
                     {
-                        var r = GameData.Identify(Sha1Of(f.FullName), known);
+                        var r = WithPath(GameData.Identify(Sha1Of(f.FullName), known), f.FullName);
                         if (r.CanPlay) return r;
                         if (!any) { firstSeen = r; any = true; }
                     }
@@ -81,6 +81,11 @@ namespace TPW.Launcher
 
         /// <summary>Try the default locations in order and return the first that identifies. Used on startup so
         /// a user whose copy is already in an obvious place never has to pick.</summary>
+        /// <summary>Re-stamp a verdict with the file it was reached about. GameData.Identify only ever sees a
+        /// hash -- deliberately, so it stays a pure function -- so the path is attached here, where it is known.</summary>
+        static GameDataResult WithPath(GameDataResult r, string path)
+            => new GameDataResult(r.State, r.Variant, r.What, r.Message, path);
+
         public static GameDataResult Probe(IReadOnlyDictionary<string, KnownHash> known = null)
         {
             foreach (var p in DefaultProbes)

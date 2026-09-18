@@ -11,5 +11,6 @@
          gone. Nothing enforces that but this comment and the sim csproj's own note, so both say it. -->
     <ProjectReference Include="..\core\TPW.Sim\TPW.Sim.csproj" />
     <ProjectReference Include="..\core\TPW.Launcher\TPW.Launcher.csproj" />
+    <ProjectReference Include="..\core\TPW.Data\TPW.Data.csproj" />
   </ItemGroup>
 </Project>

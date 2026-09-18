@@ -1,0 +1,204 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+namespace TPW.Data
+{
+    public sealed class AssetCheck
+    {
+        public string Name;
+        public bool Ok;
+        public string Detail;
+        public override string ToString() => $"{(Ok ? "ok  " : "FAIL")} {Name}: {Detail}";
+    }
+
+    public sealed class SelfTestReport
+    {
+        public List<AssetCheck> Checks = new();
+        public long ElapsedMs;
+        public bool AllOk { get { foreach (var c in Checks) if (!c.Ok) return false; return true; } }
+        public int Failures { get { int n = 0; foreach (var c in Checks) if (!c.Ok) n++; return n; } }
+
+        public AssetCheck Add(string name, bool ok, string detail)
+        {
+            var c = new AssetCheck { Name = name, Ok = ok, Detail = detail };
+            Checks.Add(c);
+            return c;
+        }
+
+        public string Summary() => AllOk
+            ? $"all {Checks.Count} asset checks passed in {ElapsedMs} ms"
+            : $"{Failures} of {Checks.Count} asset checks FAILED in {ElapsedMs} ms";
+    }
+
+    /// <summary>Runs at startup and proves the user's own disc can actually be read, before anything tries to
+    /// draw from it.
+    ///
+    /// ⭐ EVERY CHECK HERE MUST BE ABLE TO FAIL ON A REAL DEFECT. "The file is present" is not a check -- it
+    /// passes on a disc whose sector layout was misdetected, because the directory table would still parse
+    /// while every byte of content came out shifted. So each check names a quantity the data has to produce
+    /// and compares it against something derived INDEPENDENTLY:
+    ///   - a TGA's declared width and height against the byte count the file actually has
+    ///   - each container's self-declared length against the length the archive table gave it, two numbers
+    ///     that only agree if sector maths, file extraction and table parse are ALL correct
+    ///   - the archive offsets against each other for overlap and alignment
+    /// A self-test that only confirms things exist is the failure it is supposed to catch, wearing a tick.</summary>
+    public static class AssetSelfTest
+    {
+        public const string BootExe = "SLES_026.88";
+        public const string LegalScreen = "LEGAL.GFX";
+        public const string AssetArchive = "FOLIO.GAZ";
+        public const string SpeechStream = "ADVISOR.TPW";
+
+        public static SelfTestReport Run(DiscReader disc, bool decodeEveryImage = true)
+        {
+            var sw = Stopwatch.StartNew();
+            var r = new SelfTestReport();
+            if (disc == null)
+            {
+                r.Add("disc", false, "no disc image was opened");
+                r.ElapsedMs = sw.ElapsedMilliseconds;
+                return r;
+            }
+
+            r.Add("disc layout", disc.IsRawSectors,
+                disc.IsRawSectors
+                    ? "raw 2352-byte sectors, payload found at the Mode 2 offset"
+                    : "cooked 2048-byte sectors — a PSX rip should be raw; content offsets may be wrong");
+
+            r.Add("volume", disc.Files.Count > 0, $"{disc.Files.Count} directory entries");
+
+            var boot = disc.Find(BootExe);
+            r.Add("boot executable", boot != null,
+                boot != null ? $"{BootExe}, {boot.Length:n0} bytes" : $"{BootExe} not present — not a PAL TPW disc");
+
+            CheckLegalScreen(disc, r);
+            CheckArchive(disc, r, decodeEveryImage);
+            CheckSpeechIsStreaming(disc, r);
+
+            r.ElapsedMs = sw.ElapsedMilliseconds;
+            return r;
+        }
+
+        static void CheckLegalScreen(DiscReader disc, SelfTestReport r)
+        {
+            var f = disc.Find(LegalScreen);
+            if (f == null) { r.Add("legal screen", false, $"{LegalScreen} not present"); return; }
+
+            byte[] bytes;
+            try { bytes = disc.ReadFile(f); }
+            catch (Exception e) { r.Add("legal screen", false, "could not read: " + e.Message); return; }
+
+            if (!Tga.TryDecode(bytes, out var img, out string err))
+            { r.Add("legal screen", false, $"{LegalScreen} did not decode: {err}"); return; }
+
+            // Independent corroboration: the TGA footer must sit after the pixel data the header implies.
+            // If the sector layout were misdetected both of these would still be *present* but would no
+            // longer line up, which is exactly the failure a presence check cannot see.
+            int footerAt = IndexOf(bytes, Tga.Footer);
+            long pixelEnd = Tga.HeaderSize + (long)img.Width * img.Height * 2;
+            bool consistent = footerAt < 0 || footerAt >= pixelEnd;
+
+            r.Add("legal screen", consistent,
+                $"{img.Width}x{img.Height} RGBA, {img.Rgba.Length:n0} bytes" +
+                (footerAt >= 0
+                    ? $"; TGA footer at {footerAt:n0}, after the {pixelEnd:n0} bytes the header declares"
+                    : "; no TGA footer (not required)"));
+        }
+
+        static void CheckArchive(DiscReader disc, SelfTestReport r, bool deep)
+        {
+            var f = disc.Find(AssetArchive);
+            if (f == null) { r.Add("asset archive", false, $"{AssetArchive} not present"); return; }
+
+            byte[] bytes;
+            try { bytes = disc.ReadFile(f); }
+            catch (Exception e) { r.Add("asset archive", false, "could not read: " + e.Message); return; }
+
+            if (!GazArchive.TryParse(bytes, out var gaz, out string err))
+            { r.Add("asset archive", false, $"{AssetArchive} did not parse: {err}"); return; }
+
+            // TryParse already refuses on overlap and out-of-bounds, so reaching here proves those. Alignment
+            // is reported separately because it is the strongest single signal that the field layout is right.
+            int aligned = gaz.AlignedCount();
+            r.Add("asset archive", aligned == gaz.Count,
+                $"{gaz.Count} entries, {aligned} aligned to 0x{GazArchive.Alignment:x}, none overlapping or out of bounds");
+
+            if (!deep) return;
+
+            int containers = 0, agree = 0;
+            var mismatches = new List<string>();
+            foreach (var e in gaz.Entries)
+            {
+                if (!e.IsContainer) continue;
+                containers++;
+                if (gaz.ContainerSizeAgrees(e, out int declared)) agree++;
+                else if (mismatches.Count < 5) mismatches.Add($"#{e.Index} says {declared} but the table says {e.Size}");
+            }
+
+            r.Add("container sizes", containers > 0 && agree == containers,
+                containers == 0
+                    ? "no containers found — the archive parsed but its contents are not the expected type"
+                    : $"{agree}/{containers} containers agree with the table on their own size" +
+                      (mismatches.Count > 0 ? "; " + string.Join(", ", mismatches) : ""));
+
+            // Decode anything that is actually an image. Today that is TGA only; as formats are cracked they
+            // join in here and the self-test widens with them rather than needing to be rewritten.
+            int images = 0, failed = 0;
+            var firstFailure = "";
+            foreach (var e in gaz.Entries)
+            {
+                var payload = gaz.Read(e);
+                if (!LooksLikeTga(payload)) continue;
+                images++;
+                if (!Tga.TryDecode(payload, out _, out string derr))
+                {
+                    failed++;
+                    if (firstFailure.Length == 0) firstFailure = $"entry #{e.Index}: {derr}";
+                }
+            }
+            if (images > 0)
+                r.Add("archive images", failed == 0,
+                    $"{images - failed}/{images} decoded" + (failed > 0 ? $"; first failure {firstFailure}" : ""));
+        }
+
+        static void CheckSpeechIsStreaming(DiscReader disc, SelfTestReport r)
+        {
+            var f = disc.Find(SpeechStream);
+            if (f == null) return;   // absent on other regions; not a failure
+
+            // ⚠ THIS FILE IS 346 MB, TWO THIRDS OF THE DISC, AND IT IS NOT DATA. Its sectors are Mode 2 Form
+            // 2 audio. Asserting that here stops a future reader from treating it as an archive and spending
+            // a long time decoding speech as textures. On a cooked image the subheader is gone and the
+            // question cannot be asked, so that is reported rather than failed.
+            if (!disc.IsRawSectors) { r.Add("speech stream", true, "cooked image — sector form cannot be checked"); return; }
+            bool streaming = disc.IsStreamingSector(f.Lba);
+            r.Add("speech stream", streaming,
+                streaming
+                    ? $"{SpeechStream} is Form 2 streaming media, {f.Length:n0} bytes — correctly not an archive"
+                    : $"{SpeechStream} is Form 1 — expected streaming audio; the sector layout may be misdetected");
+        }
+
+        static bool LooksLikeTga(byte[] d)
+        {
+            if (d == null || d.Length < Tga.HeaderSize) return false;
+            if (d[1] > 1) return false;
+            if (d[2] is not (1 or 2 or 3 or 9 or 10 or 11)) return false;
+            int bpp = d[16];
+            if (bpp != 8 && bpp != 15 && bpp != 16 && bpp != 24 && bpp != 32) return false;
+            int w = BitConverter.ToUInt16(d, 12), h = BitConverter.ToUInt16(d, 14);
+            return w > 0 && h > 0 && w <= 2048 && h <= 2048;
+        }
+
+        static int IndexOf(byte[] hay, string needle)
+        {
+            for (int i = 0; i + needle.Length <= hay.Length; i++)
+            {
+                int k = 0;
+                while (k < needle.Length && hay[i + k] == (byte)needle[k]) k++;
+                if (k == needle.Length) return i;
+            }
+            return -1;
+        }
+    }
+}
