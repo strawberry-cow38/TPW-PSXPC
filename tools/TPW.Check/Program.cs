@@ -125,6 +125,8 @@ static class Program
         // "check the format" would test the script, which is the mistake that just shipped a broken launcher:
         // a harness that builds its own input is not testing the product.
         bool vramHash = Array.IndexOf(args, "--vramhash") >= 0;
+        int texAt = Array.IndexOf(args, "--tex");
+        int texIndex = texAt >= 0 && texAt + 1 < args.Length ? int.Parse(args[texAt + 1]) : -1;
         int rawAt = Array.IndexOf(args, "--rawrgba");
         string rawOut = rawAt >= 0 && rawAt + 1 < args.Length ? args[rawAt + 1] : null;
 
@@ -139,6 +141,19 @@ static class Program
 
         using (disc)
         {
+            if (rawOut != null && texIndex >= 0)
+            {
+                var af = disc.Find(AssetSelfTest.AssetArchive);
+                if (af == null) { Console.WriteLine("no asset archive on this disc"); return 1; }
+                if (!GazArchive.TryParse(disc.ReadFile(af), out var gz, out string gerr))
+                { Console.WriteLine("archive: " + gerr); return 1; }
+                var pages = VramTexture.DecodeAll(gz);
+                Console.WriteLine($"{pages.Count} texture pages");
+                if (texIndex >= pages.Count) { Console.WriteLine("out of range"); return 1; }
+                System.IO.File.WriteAllBytes(rawOut, pages[texIndex].Image.Rgba);
+                Console.WriteLine($"wrote page {texIndex} ({pages[texIndex].Image.Source}) to {rawOut}");
+                return 0;
+            }
             if (rawOut != null)
             {
                 // Dump the decoded image so a human can look at it. Orientation and colour are invisible to

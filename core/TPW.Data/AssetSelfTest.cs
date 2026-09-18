@@ -142,6 +142,18 @@ namespace TPW.Data
                     : $"{agree}/{containers} containers agree with the table on their own size" +
                       (mismatches.Count > 0 ? "; " + string.Join(", ", mismatches) : ""));
 
+            // ⚠ THIS IS A COUNT, NOT A VALIDATION, AND IT SAYS SO. An earlier version read "12/12 texture
+            // pages decoded" while the output was coloured noise, because decoding only fails on a short
+            // buffer -- so it restated "12 entries are 131,156 bytes" and dressed it as a decode. Whether the
+            // pixels are right was settled by rendering one and reading the text in it, which nothing here
+            // can do. Word a check for what it actually tests.
+            int pageEntries = 0;
+            foreach (var e in gaz.Entries) if (VramTexture.LooksLikeTexturePage(e)) pageEntries++;
+            if (pageEntries > 0)
+                r.Add("texture pages", true,
+                    $"{pageEntries} entries sized for a {VramTexture.Width}x{VramTexture.Height} " +
+                    $"{VramTexture.BitsPerPixel}bpp page (size only — pixel correctness is not checked here)");
+
             CheckAudio(gaz, r);
 
             // Decode anything that is actually an image. Today that is TGA only; as formats are cracked they

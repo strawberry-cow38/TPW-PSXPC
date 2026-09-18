@@ -26,17 +26,23 @@ namespace TPWGodot
         readonly System.Random _rng = new();
         OptionButton _rate;
 
-        /// <summary>⚠⚠ THE PLAYBACK RATE IS STILL NOT ESTABLISHED, AND THIS CONTROL EXISTS BECAUSE EARS BEAT
-        /// EVERY INSTRUMENT I HAVE. 8363 Hz came from the XM instrument headers, which survived with their
-        /// relative notes intact — real evidence, and it replaced a worse guess. But it is the rate the
-        /// TRACKER reasons in, and master listened and said it plays too slow. That is a measurement, and it
-        /// beats my reasoning.
+        /// <summary>✅ 22,050 Hz, SETTLED BY LISTENING. Master tried the selector and identified it, and also
+        /// worked out what these waveforms are: mostly short chunks of the game's MUSIC, cut up so it can
+        /// stream seamlessly off the CD. That explains why the XM modules treat them as instruments.
         ///
-        /// So rather than substitute one guess for another, the rate is selectable and logged. The PSX SPU
-        /// plays at 44,100 Hz at pitch 0x1000, so the candidates are that and its usual divisions. Whichever
-        /// sounds right IS right, and then this collapses back to a constant with a person's judgement behind
-        /// it instead of an inference.</summary>
+        /// ⚠ THE ROUTE TO THIS NUMBER IS THE CAUTIONARY BIT. 22,050 was my first value, picked because "it is
+        /// a common PSX rate" — not a reason. I then replaced it with 8363 Hz derived from the XM instrument
+        /// headers, which is real evidence, properly extracted, and WRONG: it is the rate the tracker reasons
+        /// in, not the rate the hardware plays at. So a lucky guess got overruled by a careful inference, and
+        /// the guess had been right.
+        ///
+        /// The moral is not "trust guesses". It is that a guess and an inference look identical once they are
+        /// a constant in a file, and neither of them was a measurement. Only listening was. The selector stays
+        /// so the next open rate is settled the same way instead of argued about.</summary>
         static readonly int[] RateChoices = { 8363, 11025, 16726, 22050, 32000, 37800, 44100 };
+
+        /// <summary>The rate master identified by ear. See the note above for why it is not 8363.</summary>
+        public const int ConfirmedRateHz = 22050;
         VBoxContainer _root;
         double _accum;
 
@@ -78,7 +84,7 @@ namespace TPWGodot
 
             _rate = new OptionButton();
             foreach (int hz in RateChoices) _rate.AddItem($"{hz} Hz");
-            _rate.Selected = System.Array.IndexOf(RateChoices, 22050);
+            _rate.Selected = System.Array.IndexOf(RateChoices, ConfirmedRateHz);
             _rate.ItemSelected += _ => GD.Print($"[tpw] sample rate set to {CurrentRate} Hz");
 
             var soundRow = new HBoxContainer { };
@@ -267,7 +273,7 @@ namespace TPWGodot
         const int TrackerBaseHz = 8363;
 
         int CurrentRate => _rate != null && _rate.Selected >= 0 && _rate.Selected < RateChoices.Length
-            ? RateChoices[_rate.Selected] : 22050;
+            ? RateChoices[_rate.Selected] : ConfirmedRateHz;
 
         public override void _Process(double delta)
         {
