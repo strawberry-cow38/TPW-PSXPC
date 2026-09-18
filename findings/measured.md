@@ -31,6 +31,19 @@ per interval, which reads as 100 ticks/day, and only a single +4 in eighteen
 intervals says otherwise. The coarse instrument could not separate 99 from 100
 and reported the wrong one with a perfectly straight face. Agrees with fable's 99.
 
+**Confirmed a second time, from a quantity I was not measuring.** fable's
+`economy.json` gives the month-rollover period as 2772 and 3069 ticks. Those are
+**exactly 28 x 99 and 31 x 99** -- calendar month lengths. If 99 ticks were an
+hour rather than a day, a month would be 28-31 *hours*. And `day2` wraps at 30 in
+lockstep, which is the same answer from a third place. (Raised by cow tools, who
+noticed that 99 ticks x 0.04 s = a 4-second day and asked whether the label was
+right before building on it.)
+
+⚠ **The thing that check relocates:** if any real-time figure looks absurd, the
+suspect is `TickSeconds`, not `TicksPerDay`. The 0.5-ticks-per-frame ratio is
+exact and measured; the 0.04 seconds comes from *assuming* PAL 50 Hz. That
+assumption is the only place real-time enters the model at all.
+
 ## Admission
 
 **£40 per guest.** `gate_total` rises 400 per admission.
