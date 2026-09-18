@@ -955,3 +955,30 @@ build did not run at all ("run ./configure first") and reported success; the
 second failed on an include path and reported success. **A pipeline's exit status
 belongs to its last command.** Check the artifact's timestamp, or capture the
 compiler's own return code before anything else runs.
+
+## Palettes: 47 in use, all 16-colour, and they live in the STRIPS not the banks
+
+The CLUT logger in my build records the palette of every draw. One park, 1200
+frames: **177 draws using 47 distinct palettes, every one of them 16 colours** —
+an independent confirmation of 4bpp from the *drawing* side, where catboy reached
+it from the file side.
+
+Their VRAM addresses are the useful part:
+
+```
+(704,3)  (928,25)  (720,1)  (512,73)  (704,1)  (544,73)  ...
+```
+
+**Every one is y < 256**, so none of them sit in the texture page at
+(512,256)-(767,511). They fall in the band fable identified as being fed by the two
+**headerless 128 KB strips**, entries `0x104` and `0x10C`, streamed sector-by-sector
+into (768..895, 0..511).
+
+**So the palettes are not inside the 131,156-byte texture banks.** They arrive from
+those strips, uploaded separately — which is why a decoder that has the banks
+renders grey levels and has no colours to apply.
+
+⚠ **Not publishing the colour values.** They are small, but they are EA's art coming
+off my machine rather than out of a user's own disc. The standing offer instead: send
+a page and a CLUT id, and I report which of the sixteen indices differ from what the
+hardware holds — a bare yes/no having already proved too blunt once today.
