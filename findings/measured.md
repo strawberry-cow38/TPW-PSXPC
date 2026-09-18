@@ -1098,3 +1098,40 @@ tpage (704,  0)   u   1.. 26  v 166..191 -> clut (720,1)
 So the atlas is organised in palette *zones* — a handful of areas each with its own
 CLUT, sampled many times — not 177 arbitrary per-quad exceptions. That is a
 partition a renderer can hold, rather than a lookup it must carry per triangle.
+
+## Eyes vs. the multiple-of-width error — the two instruments' blind spots
+
+Two results from the same afternoon that look contradictory and are not.
+
+**Eyes won decisively, twice.** A decoded image was flipped and mis-coloured. I had
+built a sha256, three more hashes, and two alignment-free invariants; strawberry
+glanced at the screen and said *"flipped horizontally and vertically"* and *"yeah
+its yellow"*. Three sentences beat the apparatus.
+
+**Eyes lost, twice, on the same image.** The texture sheets decoded at 512×512
+rendered a **coherent picture with legible text** — and were wrong. They are
+1024×256: four 256×256 pages side by side. Worse, when the correct width was tried
+it showed "the same picture twice" and was rejected as a doubling — but that was
+pages 0 and 2 carrying *similar terrain art*. **The correct answer looked exactly
+like the symptom of the error being avoided.**
+
+**The mechanism (catboy's, and it is the keeper):** re-reading a 2D block at a
+**multiple** of its true width preserves the byte total and rearranges content
+*without destroying local structure* — rows still neighbour rows they resemble. So
+it still looks like a picture, and `0x54 + w*h/2 = 131,156` holds for both layouts.
+Neither coherence nor size can separate them. Only evidence from **outside the
+file** can: the GPU's draw commands step page origins by 64 halfwords — exactly 256
+texels at 4bpp — and run UVs 0..255.
+
+| error class | caught by |
+|---|---|
+| wrong orientation, wrong channel order, garbage | **looking** — instantly, better than any metric |
+| wrong width by a multiple, wrong tiling, transposed pages | **never by looking** — needs external truth |
+
+So "render it and see" is necessary and nowhere near sufficient, and its failure
+mode is the dangerous one: a confident, coherent, wrong picture. That is the visual
+equivalent of a test that passes on anything.
+
+**Three layout corrections between us today, each needing the other's instrument.**
+The GPU-side observations could not have found the file format, and the file-side
+parsing could not have found the page geometry.
