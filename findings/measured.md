@@ -1155,3 +1155,38 @@ coherent, wrong picture — the visual equivalent of a test that passes on anyth
 **Three layout corrections between us today, each needing the other's instrument.**
 The GPU-side observations could not have found the file format, and the file-side
 parsing could not have found the page geometry.
+
+## Upload trace: textures arrive as 64×64 BLOCKS, not sheets
+
+Patched the GPU to log every CPU→VRAM transfer as *(destination rect, FNV-1a of
+the halfwords landed)* — a content fingerprint, so an archive entry can be bound to
+a VRAM position **without pixels crossing between parties**.
+
+Cold boot to a park, 11,481 uploads:
+
+| shape | count | what it is |
+|---|---|---|
+| 24×176 | **11,440** | the intro FMV, 286 distinct frames per slot |
+| 64×64 | **40** | the textures |
+| 320×256 | 1 | the legal screen |
+
+**The textures land on an 8×8 grid of 64×64 blocks**, x ∈ {512…960}, y ∈ {0…448},
+each destination receiving **exactly one content, once — zero swapping.**
+
+⚠ **This kills the "12 sheets rotating through 4 VRAM slots" model** that catboy
+inferred and I had accepted. There is no rotation to trace. The whole
+512..1023 × 0..511 region is filled once, block by block, so the sheets are being
+**cut into 64×64 tiles on the way in**. That also explains why I could not find
+`tpage (960,256)`'s rows verbatim in the archive: **I was searching for a
+contiguous page that never exists as one.**
+
+Each block now carries a hash, so the binding is: hash the same 4096 halfwords out
+of a decoded sheet and match it against the 40.
+
+⚠ **And my own count was nearly a false headline.** I filtered uploads at
+`>= 4096 halfwords` intending to isolate texture-sized ones — and 24×176 is 4,224,
+so **the filter matched 11,481 of 11,481 and excluded nothing.** I was one step from
+reporting "11,481 texture uploads" when 40 is the answer. A filter that excludes
+nothing is not a filter, and the count it produces looks exactly like a result.
+Caught only by printing the *distribution of shapes* rather than the total — the
+same "structure, not aggregate" correction as everything else today.
