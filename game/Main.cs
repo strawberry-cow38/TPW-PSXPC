@@ -22,6 +22,8 @@ namespace TPWGodot
         AudioStreamPlayer _audio;
         Button _playSound;
         PcmSample _sample;
+        System.Collections.Generic.List<PcmSample> _sounds = new();
+        readonly System.Random _rng = new();
         VBoxContainer _root;
         double _accum;
 
@@ -92,15 +94,17 @@ namespace TPWGodot
             {
                 SelfTestReport report;
                 TpwImage legal = null;
-                PcmSample sample = null;
+                System.Collections.Generic.List<PcmSample> sounds = new();
                 try
                 {
                     using var disc = DiscReader.Open(path);
                     report = AssetSelfTest.Run(disc);
 
                     var f = disc.Find(AssetSelfTest.LegalScreen);
-                    if (f != null && Tga.TryDecode(disc.ReadFile(f), out var img, out _)) legal = img;
-                    sample = FirstSound(disc);
+                    // ⚠ NOT the spec TGA path. This file is a VRAM block in a TGA wrapper: BGR channel
+                    // order, and the descriptor's origin bits do not apply. See Tga.TryDecodeVramBlock.
+                    if (f != null && Tga.TryDecodeVramBlock(disc.ReadFile(f), out var img, out _)) legal = img;
+                    sounds = AllSounds(disc);
                 }
                 catch (System.Exception e)
                 {
@@ -110,7 +114,9 @@ namespace TPWGodot
                 // ⚠ An empty array, never null: these arguments cross into Godot as Variants, and a null
                 // byte[] does not round-trip the way a managed null would -- it arrives as an empty
                 // PackedByteArray anyway, so say so here rather than relying on that.
-                _sample = sample;   // read back on the main thread once ApplySelfTest runs
+                // Published before CallDeferred, so the main thread sees a fully built list when it runs.
+                _sounds = sounds;
+                _sample = sounds.Count > 0 ? sounds[0] : null;
                 CallDeferred(nameof(ApplySelfTest), ReportToText(report), report.AllOk,
                     legal?.Rgba ?? System.Array.Empty<byte>(), legal?.Width ?? 0, legal?.Height ?? 0);
             });
@@ -136,17 +142,6 @@ namespace TPWGodot
 
             if (rgba == null || rgba.Length == 0 || w <= 0 || h <= 0) return;
 
-            // ⚠ THIS FILE DISPLAYS 180 DEGREES FROM A SPEC-CORRECT TGA DECODE, AND THAT IS AN OBSERVATION,
-            // NOT A THEORY. LEGAL.GFX has descriptor byte 0x00, which per the TGA spec means bottom-left
-            // origin, so Tga.TryDecode flips it vertically to produce the standard top-left layout. Rendered
-            // that way the text came out mirrored AND upside down — master ran it and read it off the screen.
-            //
-            // The rotation lives HERE and not in the decoder on purpose. Tga stays spec-correct and unit
-            // tested; this is a property of how this particular game presents this particular file, so it
-            // belongs with the presentation. Why the file is stored rotated is NOT established — a tool that
-            // exported it that way, or an upload path that walks VRAM backwards, would both produce it.
-            // Do not "tidy" this into the decoder without finding that out first.
-            Rotate180(rgba, w, h);
 
             var image = Image.CreateFromData(w, h, false, Image.Format.Rgba8, rgba);
             _preview.Texture = ImageTexture.CreateFromImage(image);
@@ -155,56 +150,56 @@ namespace TPWGodot
             if (_sample != null && _sample.SampleCount > 0)
             {
                 _playSound.Disabled = false;
-                _playSound.Text = $"Play a sound from your disc ({_sample.SampleCount / (double)SampleRateHz:0.0}s)";
-                GD.Print($"[tpw] decoded {_sample.SampleCount:n0} PCM samples from {_sample.Source}" +
+                _playSound.Text = $"Play a random sound from your disc ({_sounds.Count} available)";
+                GD.Print($"[tpw] decoded {_sounds.Count} waveforms; longest {_sample.SampleCount:n0} samples" +
                          $" ({_sample.SampleCount / (double)SampleRateHz:0.00}s at {SampleRateHz} Hz)");
             }
             else _playSound.Text = "No sound decoded";
         }
 
-        /// <summary>The LONGEST waveform on the disc, decoded to PCM.
+        /// <summary>Every waveform on the disc, decoded to PCM, longest first.
         ///
         /// ⚠ IT USED TO TAKE THE FIRST NON-EMPTY ONE, WHICH IS A BUG YOU CANNOT SEE IN THE SOURCE. That reads
         /// as perfectly sensible and picks a 64-byte waveform: 112 samples, **13 milliseconds**, an inaudible
         /// click. The first run of this program is what exposed it — the log said "decoded 112 PCM samples"
         /// and the number was too small to be a sound. Nothing about the code looked wrong, and no unit test
         /// would have failed, because the behaviour was exactly what was written.</summary>
-        static PcmSample FirstSound(DiscReader disc)
+        static System.Collections.Generic.List<PcmSample> AllSounds(DiscReader disc)
         {
+            var all = new System.Collections.Generic.List<PcmSample>();
             var f = disc.Find(AssetSelfTest.AssetArchive);
-            if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return null;
+            if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return all;
 
-            PcmSample best = null;
             foreach (var e in gaz.Entries)
             {
                 if (e.Size != VabHeader.SplitHeaderSize) continue;
                 if (!VabHeader.TryParse(gaz.Read(e), out var vab, out _)) continue;
                 int bodyIndex = e.Index - 1;   // ⚠ BEFORE, not after — see VabHeader
                 if (bodyIndex < 0 || gaz.Entries[bodyIndex].Size != vab.BodyBytes) continue;
+                int n = 0;
                 foreach (var wave in vab.SliceBody(gaz.Read(gaz.Entries[bodyIndex])))
                 {
+                    n++;
                     if (wave.Length == 0) continue;
-                    var pcm = Vag.Decode(wave, $"bank #{e.Index}");
-                    if (best == null || pcm.SampleCount > best.SampleCount) best = pcm;
+                    var pcm = Vag.Decode(wave, $"bank #{e.Index} waveform {n}");
+                    if (pcm.SampleCount > 0) all.Add(pcm);
                 }
             }
-            return best;
-        }
-
-        /// <summary>Rotate an RGBA8 buffer 180 degrees in place — the same as flipping both axes.</summary>
-        static void Rotate180(byte[] px, int w, int h)
-        {
-            int last = w * h - 1;
-            for (int i = 0; i < last - i; i++)
-            {
-                int a = i * 4, b = (last - i) * 4;
-                for (int k = 0; k < 4; k++) (px[a + k], px[b + k]) = (px[b + k], px[a + k]);
-            }
+            // Longest first, so the label and the very first press show something clearly audible rather
+            // than whichever 13-millisecond click happens to come first in the archive.
+            all.Sort((x, y) => y.SampleCount.CompareTo(x.SampleCount));
+            return all;
         }
 
         void PlaySample()
         {
+            // Master: "make it play a random sound. the one you chose isnt great for figuring out if its
+            // right." A single fixed sample tells you it decodes; a different one each press is what tells
+            // you the BANK is being read correctly rather than one lucky entry.
+            if (_sounds.Count > 0) _sample = _sounds[_rng.Next(_sounds.Count)];
             if (_sample == null || _sample.SampleCount == 0) return;
+            GD.Print($"[tpw] playing {_sample.Source}: {_sample.SampleCount:n0} samples" +
+                     $" ({_sample.SampleCount / (double)SampleRateHz:0.00}s)");
 
             // PCM16 little-endian, which is what AudioStreamWav.Format16Bits expects.
             var bytes = new byte[_sample.SampleCount * 2];

@@ -92,6 +92,8 @@ static class Program
         // "check the format" would test the script, which is the mistake that just shipped a broken launcher:
         // a harness that builds its own input is not testing the product.
         bool vramHash = Array.IndexOf(args, "--vramhash") >= 0;
+        int rawAt = Array.IndexOf(args, "--rawrgba");
+        string rawOut = rawAt >= 0 && rawAt + 1 < args.Length ? args[rawAt + 1] : null;
 
         var id = GameDataLocator.Identify(path);
         Console.WriteLine($"identify: {id.Message}");
@@ -104,6 +106,19 @@ static class Program
 
         using (disc)
         {
+            if (rawOut != null)
+            {
+                // Dump the decoded image so a human can look at it. Orientation and colour are invisible to
+                // every headless check -- both were wrong here while the buffer stayed the right size, format
+                // and content. Looking is the only instrument that sees them.
+                var lf = disc.Find(AssetSelfTest.LegalScreen);
+                if (lf == null) { Console.WriteLine("no legal screen on this disc"); return 1; }
+                if (!Tga.TryDecodeVramBlock(disc.ReadFile(lf), out var limg, out string lerr))
+                { Console.WriteLine("could not decode: " + lerr); return 1; }
+                System.IO.File.WriteAllBytes(rawOut, limg.Rgba);
+                Console.WriteLine($"wrote {limg.Width}x{limg.Height} RGBA to {rawOut}");
+                return 0;
+            }
             if (vramHash) { VramHash(disc); return 0; }
 
             var r = AssetSelfTest.Run(disc);

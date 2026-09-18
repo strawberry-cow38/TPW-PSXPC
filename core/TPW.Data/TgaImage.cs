@@ -26,7 +26,35 @@ namespace TPW.Data
 
         /// <summary>Decode a TGA. Returns false with a reason rather than throwing: the self-test reports on
         /// every asset, so one bad file must not end the run.</summary>
+        /// <summary>Channel order of the 5-5-5 fields in a 15/16-bit pixel.</summary>
+        public enum Order
+        {
+            /// <summary>Red in the high bits. What the TGA specification says.</summary>
+            Argb1555,
+            /// <summary>Blue in the high bits. What PlayStation VRAM holds natively, so a file whose pixel
+            /// block was produced ready to upload carries this regardless of the container it sits in.</summary>
+            Abgr1555,
+        }
+
         public static bool TryDecode(byte[] d, out TpwImage img, out string error)
+            => TryDecode(d, Order.Argb1555, out img, out error);
+
+        /// <summary>Decode a file whose pixel block was authored ready to DMA into PlayStation VRAM.
+        ///
+        /// ⭐ SUCH A FILE IS NOT REALLY A TGA — it is a VRAM image with a TGA header bolted on, so the parts
+        /// of the header that describe LAYOUT are meaningless and must be ignored. Two consequences, both
+        /// established by running it and looking:
+        ///   • channel order is BGR555 (low 5 bits RED), because that is what the hardware reads;
+        ///   • the descriptor's origin bits are NOT honoured, because the rows are already in upload order.
+        /// Applying the spec-correct bottom-up flip to this file produces a mirrored image, which is how this
+        /// was found: master read the text off the screen twice and said which way it was wrong.</summary>
+        public static bool TryDecodeVramBlock(byte[] d, out TpwImage img, out string error)
+            => TryDecode(d, Order.Abgr1555, respectDescriptor: false, out img, out error);
+
+        public static bool TryDecode(byte[] d, Order order, out TpwImage img, out string error)
+            => TryDecode(d, order, true, out img, out error);
+
+        public static bool TryDecode(byte[] d, Order order, bool respectDescriptor, out TpwImage img, out string error)
         {
             img = null; error = null;
             if (d == null || d.Length < HeaderSize) { error = "shorter than a TGA header"; return false; }
@@ -61,7 +89,7 @@ namespace TPW.Data
                 if (p + mapBytes > d.Length) { error = "colour map runs past the end"; return false; }
                 palette = new byte[cmapLen * 4];
                 for (int i = 0; i < cmapLen; i++)
-                    WritePixel(d, p + i * entryBytes, cmapBits, palette, i * 4, null, 0, false);
+                    WritePixel(d, p + i * entryBytes, cmapBits, palette, i * 4, null, 0, false, order);
                 p += mapBytes;
             }
             if (mapped && palette == null) { error = "colour-mapped image with no colour map"; return false; }
@@ -75,7 +103,7 @@ namespace TPW.Data
                 long need = (long)pixels * srcBytes;
                 if (p + need > d.Length) { error = $"pixel data needs {need:n0} bytes, {d.Length - p:n0} remain"; return false; }
                 for (int i = 0; i < pixels; i++)
-                    WritePixel(d, p + i * srcBytes, bpp, rgba, i * 4, palette, cmapFirst, gray);
+                    WritePixel(d, p + i * srcBytes, bpp, rgba, i * 4, palette, cmapFirst, gray, order);
             }
             else
             {
@@ -90,14 +118,14 @@ namespace TPW.Data
                     {
                         if (p + srcBytes > d.Length) { error = "RLE run header ran past the end"; return false; }
                         for (int k = 0; k < count; k++)
-                            WritePixel(d, p, bpp, rgba, (i + k) * 4, palette, cmapFirst, gray);
+                            WritePixel(d, p, bpp, rgba, (i + k) * 4, palette, cmapFirst, gray, order);
                         p += srcBytes;
                     }
                     else
                     {
                         if (p + count * srcBytes > d.Length) { error = "RLE literal run ran past the end"; return false; }
                         for (int k = 0; k < count; k++)
-                            WritePixel(d, p + k * srcBytes, bpp, rgba, (i + k) * 4, palette, cmapFirst, gray);
+                            WritePixel(d, p + k * srcBytes, bpp, rgba, (i + k) * 4, palette, cmapFirst, gray, order);
                         p += count * srcBytes;
                     }
                     i += count;
@@ -108,15 +136,19 @@ namespace TPW.Data
             // row; clear -- which is the common case and this disc's case -- means it is the BOTTOM. Getting
             // this wrong produces a perfectly valid, perfectly upside-down image, which reads as an engine or
             // UV problem and gets debugged in the wrong file entirely.
-            if ((desc & 0x20) == 0) FlipVertical(rgba, w, h);
-            // Bit 4 set means right-to-left. Rare, but free to honour.
-            if ((desc & 0x10) != 0) FlipHorizontal(rgba, w, h);
+            if (respectDescriptor)
+            {
+                if ((desc & 0x20) == 0) FlipVertical(rgba, w, h);
+                // Bit 4 set means right-to-left. Rare, but free to honour.
+                if ((desc & 0x10) != 0) FlipHorizontal(rgba, w, h);
+            }
 
             img = new TpwImage { Width = w, Height = h, Rgba = rgba };
             return true;
         }
 
-        static void WritePixel(byte[] src, int sp, int bits, byte[] dst, int dp, byte[] palette, int cmapFirst, bool gray)
+        static void WritePixel(byte[] src, int sp, int bits, byte[] dst, int dp, byte[] palette, int cmapFirst,
+                               bool gray, Order order = Order.Argb1555)
         {
             switch (bits)
             {
@@ -141,7 +173,9 @@ namespace TPW.Data
                     // A1R5G5B5, little-endian. 5 bits scale to 8 as (v<<3)|(v>>2): that maps 31 to 255, where a
                     // plain v<<3 maps it to 248 and every white in the image comes out faintly grey.
                     int v = src[sp] | (src[sp + 1] << 8);
-                    int r = (v >> 10) & 31, g = (v >> 5) & 31, b = v & 31;
+                    int hi = (v >> 10) & 31, g = (v >> 5) & 31, lo = v & 31;
+                    int r = order == Order.Abgr1555 ? lo : hi;
+                    int b = order == Order.Abgr1555 ? hi : lo;
                     dst[dp] = (byte)((r << 3) | (r >> 2));
                     dst[dp + 1] = (byte)((g << 3) | (g >> 2));
                     dst[dp + 2] = (byte)((b << 3) | (b >> 2));
