@@ -659,28 +659,34 @@ indexed both tables one place off and called it a contradiction.
 "X only (no drop)" produce **byte-identical wage series**. fable said an un-dropped
 recruit sitting on the cursor is still paid, and that is exactly what the two
 identical columns show.
-## GBP 20 an item — now four independent confirmations
+## Shop prices are PER SHOP TYPE, not universal — GBP 20 and GBP 30
 
-Every sale figure measured so far, across two different parks and two window
-lengths, divides exactly:
+Bought and placed different shop *variants* myself, then measured each:
 
-| sales | takings | GBP/sale |
-|---|---|---|
-| 2 | GBP 40 | **20.00** |
-| 5 | GBP 100 | **20.00** |
-| 21 | GBP 420 | **20.00** |
-| 31 | GBP 620 | **20.00** |
+| variant | sales | takings | per sale |
+|---|---|---|---|
+| 0 | 18 | GBP 360 | **20.00** |
+| 2 | 18 | GBP 360 | **20.00** |
+| 4 | 4 | GBP 120 | **30.00** |
 
-No remainder at any point. This is the most solid number in the file.
+Both figures divide exactly, so GBP 30 is a different price and not noise.
 
-⚠ **Still unknown: whether GBP 20 is universal or specific to this shop.** All four
-readings are the *same Fries shop*. Buying a second shop of a different type would
-separate "the item price is 20" from "a Fries costs 20", and I have not managed it
-— the purchase screen's category list does not respond to the same down/X pattern
-that works on the laptop menu and the ride list; three downs then X exits to the
-park instead of opening Shops. Recorded as an open navigation problem, not a fact
-about pricing.
+⚠ **I nearly published the opposite, and the near-miss is the point.** I had four
+confirmations of GBP 20 — 2, 5, 21 and 31 sales, all dividing perfectly. Then I
+bought a second shop, measured GBP 20.00 again, and was about to record "GBP 20 is
+the universal item price". Checking the **variant byte** showed both shops were
+variant 0: I had bought another of the same thing. Six readings of one shop type
+look exactly like six readings of the population.
 
+Only after selecting a genuinely different entry in the shop list did variant 4
+turn up at GBP 30. **Repetition on one instance is not replication across a
+population**, and the check that separates them costs one byte.
+
+This is the same error as the six-park arrival sweep — where all six parks held
+exactly one attraction and the independent variable never varied — committed a
+second time in one session, in a domain where I had explicitly flagged the risk
+("all four readings are the same Fries shop") and then failed to act on my own
+flag when the opportunity came.
 ## ⭐ The radial menus are FACE-BUTTON MAPPED BY POSITION
 
 This is the key that makes every menu in the game navigable, and it explains
