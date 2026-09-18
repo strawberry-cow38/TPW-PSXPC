@@ -1,0 +1,19 @@
+# never commit game data
+*.iso
+*.bin
+*.cue
+*.img
+*.MD2
+*.md2
+*.sdt
+*.wad
+*.sgn
+*.sam
+SLES_*
+SLUS_*
+SLPS_*
+*.exe
+
+# build output
+bin/
+obj/
