@@ -357,3 +357,62 @@ fixture now carries that length in `verified_deterministic_frames`. Currently
 This needs the dynarec compiler thread off (`pcsx_rearmed_drc_thread=disabled`);
 with it on, a 12000-frame fixture gave FAIL/FAIL/PASS on identical input while a
 1300-frame check called the same setup reproducible.
+
+## Dead end, recorded so it is not re-walked
+
+**`0x801036C8` (fable's "a build item is held") reads 0 in every save state I
+have** — including `park.state`, which successfully lays a path from a scripted
+button sequence. So it is not a tool selector and poking it will not let me place
+things. It is what fable said it was: a transient flag that pauses the pathfinder
+while something is being dragged, and its *correct* value during normal play is 0.
+
+The comment in my own `in_path_350.txt` says "with the tool already selected",
+which was my guess at why the script works, not something I verified. Whatever
+makes `park.state` accept a path placement from four `cross` presses, it is not
+that flag.
+
+⚠ **Why this matters beyond the dead end:** being unable to place attractions is
+what keeps three questions unmeasured — whether head-count really scales with
+contents, what staff wages are, and shop pricing. Every one of those needs a park
+with more in it than my six fixtures have, and all six hold at most one
+attraction. **The build UI is the single blocker on the remaining economy work**,
+which is why the hidden debug menu is worth more than any individual address.
+
+## No plane, no ferry — the PSX build has one transport
+
+strawberry (who knows the other releases) asked whether the plane and ferry that
+deliver guests in other versions exist here. fable checked the code and the answer
+is a **confident negative**, verified live on every value I could check:
+
+| | fable said | measured |
+|---|---|---|
+| exit-point count `[0x80103938]` | 2 | **2** |
+| exit array `[0x8010393C]` | 0x80181144 | **0x80181144** |
+| entries (tile x,y) | (18,5), (23,5) | **(18,5), (23,5)** |
+
+**The "exit point 0" I flagged as suspicious is a list of GATE TILES, not
+transports.** Two entries on every one of the eight maps on the disc, both sitting
+on the entrance building's footprint. `Arrivals()` takes the index as a parameter
+and has a dead `-1 -> random exit` branch; the only caller passes 0. Exit 0 is
+where everyone arrives, and any exit is where anyone may *leave* — that is the
+whole distinction.
+
+⚠ **So my inference was half right in the way that matters least.** I said "you do
+not index from zero if there is only one of a thing", and that was correct —
+there *are* two. They are just gates, not vehicles. Being right that something is
+indexed says nothing about what it indexes, and I had quietly supplied "transport"
+as the answer. The map record format also *ends* after the exit list, so there is
+no section a plane could live in.
+
+## ⚠ `STR_PARKSTATS_ARRIVAL_RATE` is not a rate — do not use it
+
+I had hoped the game's own arrival-rate statistic would be a better instrument
+than counting admissions. It is not an instrument at all. fable: it is a byte
+written **once per calendar month**, holding
+`max(0, guests_now - guests_at_previous_month_boundary)` — monthly growth in
+population, not a rate of arrival. Sampling it mid-month reads last month's value.
+
+**The actual better instrument, which I have now confirmed reads sanely:** the
+live guest count at `*(u32*)(*(u32*)0x80103884 + 0xC)`, sampled on the bus phase
+edge `[0x80103964]: 1 -> 2`, which is exactly the spawn event. Arrivals per bus is
+the jump in that word on that edge — direct, rather than inferred from money.
