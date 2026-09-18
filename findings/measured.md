@@ -622,3 +622,25 @@ assumed; or the category I opened may not be the one whose multiplier is 3. What
 settles it is neither the screen nor the formula but **the accumulator**: hire
 someone, run a month boundary, and read `bank+0x12D0`, which is the figure actually
 deducted. That is the next measurement.
+
+## Wages: still blocked, and one failed experiment worth recording
+
+I can reach the hire screen but cannot complete a hire. After pressing `X` on an
+individual staff member, `bank+0x12D0` stays at **0** across 127 game days and four
+month boundaries — same as the no-hire control. So either the hire never committed,
+or wages are not charged in this configuration.
+
+⚠ **An earlier run of this looked like a clean null and was not.** With the laptop
+menu open the game is **paused**: 26,000 frames elapsed and the day counter did not
+move *at all* (146 → 146), against 121 days in the control. A wage measurement over
+a window in which no time passes cannot show a wage. Four `triangle` presses close
+the menu and time then runs normally (146 → 273).
+
+That is the day's pattern once more — a null from a window that could not have
+contained the event. The tell was available and cheap: **the control advanced 121
+days and the treatment advanced 0.** Comparing that one number between arms is
+what caught it, not inspecting the wage figure.
+
+Handed to fable: what commits a hire, where employed staff live in memory, and a
+poke that employs someone directly. The displayed `$100` against the formula's
+150/165 stays open until the deducted figure settles it.
