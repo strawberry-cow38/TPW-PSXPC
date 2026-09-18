@@ -19,7 +19,7 @@ static class Program
     {
         var f = disc.Find(AssetSelfTest.LegalScreen);
         if (f == null) { Console.WriteLine("no legal screen"); return; }
-        if (!Tga.TryDecode(disc.ReadFile(f), out var img, out string err))
+        if (!Tga.TryDecodeVramBlock(disc.ReadFile(f), out var img, out string err))
         { Console.WriteLine("decode failed: " + err); return; }
 
         Console.WriteLine($"{img.Width}x{img.Height} decoded");
@@ -39,6 +39,39 @@ static class Program
         }
         Console.WriteLine($"  non-black pixels : {nonBlack:n0} of {img.Width * img.Height:n0}");
         Console.WriteLine($"  peak channel     : R={peakR} G={peakG} B={peakB}  (max 31)");
+
+        // ⭐ THE DISTRIBUTION, NOT THE EXTREMUM. A peak is a max over 81,920 samples, so two stray pixels set
+        // it -- which is exactly how a published peak of R=14 sent me hunting a colour transform that does not
+        // exist, on an image whose red is zero nearly everywhere. Counting how many pixels hold a channel at
+        // zero describes the image; the maximum describes its outliers.
+        int zeroR = 0, zeroB = 0;
+        for (int i = 0; i < img.Rgba.Length; i += 4)
+        {
+            int r = img.Rgba[i] >> 3, g = img.Rgba[i + 1] >> 3, b = img.Rgba[i + 2] >> 3;
+            if ((r | g | b) == 0) continue;
+            if (r == 0) zeroR++;
+            if (b == 0) zeroB++;
+        }
+        Console.WriteLine($"  of those, R=0    : {zeroR:n0}      B=0 : {zeroB:n0}");
+
+        // The words as the hardware holds them: BGR555, top-left origin, no padding.
+        var vram = new byte[img.Width * img.Height * 2];
+        for (int i = 0, o = 0; i < img.Rgba.Length; i += 4, o += 2)
+        {
+            int r = img.Rgba[i] >> 3, g = img.Rgba[i + 1] >> 3, b = img.Rgba[i + 2] >> 3;
+            int wv = (b << 10) | (g << 5) | r;
+            vram[o] = (byte)(wv & 0xFF);
+            vram[o + 1] = (byte)(wv >> 8);
+        }
+        using (var sha = System.Security.Cryptography.SHA256.Create())
+        {
+            Console.WriteLine($"  sha256 VRAM form : {Convert.ToHexString(sha.ComputeHash(vram)).ToLowerInvariant()}");
+            // Independent check: the file's pixel block untouched. Agreement proves the decode round-trips.
+            var raw = disc.ReadFile(f);
+            var block = new byte[vram.Length];
+            Buffer.BlockCopy(raw, Tga.HeaderSize, block, 0, block.Length);
+            Console.WriteLine($"  sha256 raw block : {Convert.ToHexString(sha.ComputeHash(block)).ToLowerInvariant()}");
+        }
 
         // ⚠ THE PSX FRAMEBUFFER IS BGR, NOT RGB. A 16-bit VRAM word is 0bbbbbgggggrrrrr -- blue in the high
         // bits -- while a 15-bit TGA word is 0rrrrrgggggbbbbb. Same size, same layout, channels reversed. That
