@@ -142,6 +142,8 @@ namespace TPW.Data
                     : $"{agree}/{containers} containers agree with the table on their own size" +
                       (mismatches.Count > 0 ? "; " + string.Join(", ", mismatches) : ""));
 
+            CheckAudio(gaz, r);
+
             // Decode anything that is actually an image. Today that is TGA only; as formats are cracked they
             // join in here and the self-test widens with them rather than needing to be rewritten.
             int images = 0, failed = 0;
@@ -160,6 +162,63 @@ namespace TPW.Data
             if (images > 0)
                 r.Add("archive images", failed == 0,
                     $"{images - failed}/{images} decoded" + (failed > 0 ? $"; first failure {firstFailure}" : ""));
+        }
+
+        /// <summary>Sound banks and music. The strong check here is not "the files parse" -- it is that two
+        /// separately-authored files agree about a number neither of them controls.</summary>
+        static void CheckAudio(GazArchive gaz, SelfTestReport r)
+        {
+            var headers = new List<(GazEntry Entry, VabHeader Vab)>();
+            foreach (var e in gaz.Entries)
+            {
+                if (e.Size != VabHeader.SplitHeaderSize) continue;
+                if (VabHeader.TryParse(gaz.Read(e), out var v, out _)) headers.Add((e, v));
+            }
+            if (headers.Count == 0) { r.Add("sound banks", false, "no VAB headers found"); return; }
+
+            // ⭐ THE BODY IS THE ENTRY BEFORE THE HEADER, WHICH IS THE OPPOSITE OF THE NATURAL GUESS. Verified
+            // rather than assumed: the VAG size table's sum must equal that entry's size EXACTLY. If the
+            // ordering were the other way, or the size units wrong, this is 0 for 9 rather than slightly off.
+            int paired = 0, decoded = 0, emptyWaves = 0;
+            string firstProblem = "";
+            foreach (var (entry, vab) in headers)
+            {
+                int idx = entry.Index - 1;
+                if (idx < 0 || gaz.Entries[idx].Size != vab.BodyBytes)
+                {
+                    if (firstProblem.Length == 0)
+                        firstProblem = $"bank #{entry.Index} wants a {vab.BodyBytes:n0}-byte body; entry #{idx} is " +
+                                       (idx < 0 ? "absent" : $"{gaz.Entries[idx].Size:n0}");
+                    continue;
+                }
+                paired++;
+                foreach (var wave in vab.SliceBody(gaz.Read(gaz.Entries[idx])))
+                {
+                    if (wave.Length == 0) { emptyWaves++; continue; }
+                    var pcm = Vag.Decode(wave);
+                    if (pcm.SampleCount > 0) decoded++;
+                    else if (firstProblem.Length == 0) firstProblem = $"a waveform in bank #{entry.Index} decoded to nothing";
+                }
+            }
+            r.Add("sound banks", paired == headers.Count,
+                $"{paired}/{headers.Count} banks paired with their waveform body, {decoded:n0} waveforms decoded" +
+                (emptyWaves > 0 ? $", {emptyWaves} empty slots" : "") +
+                (firstProblem.Length > 0 ? "; " + firstProblem : ""));
+
+            // Music. The XM header declares how many instruments it uses, and the VAB declares how many
+            // waveforms it holds. Nothing makes those agree except being the matching pair -- so agreement
+            // across every bank is evidence the grouping is right, from a direction the parser cannot fake.
+            int modules = 0, agree = 0;
+            foreach (var e in gaz.Entries)
+            {
+                if (!XmModule.TryReadCounts(gaz.Read(e), out _, out _, out int instruments)) continue;
+                modules++;
+                foreach (var (entry, vab) in headers)
+                    if (entry.Index == e.Index - 1 && vab.WaveCount == instruments) { agree++; break; }
+            }
+            if (modules > 0)
+                r.Add("music modules", agree == modules,
+                    $"{modules} XM modules, {agree} whose instrument count matches the paired bank's waveform count");
         }
 
         static void CheckSpeechIsStreaming(DiscReader disc, SelfTestReport r)

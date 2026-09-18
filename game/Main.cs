@@ -19,6 +19,9 @@ namespace TPWGodot
         Label _status;
         Label _selfTest;
         TextureRect _preview;
+        AudioStreamPlayer _audio;
+        Button _playSound;
+        PcmSample _sample;
         VBoxContainer _root;
         double _accum;
 
@@ -53,6 +56,12 @@ namespace TPWGodot
             };
             _root.AddChild(_preview);
 
+            _audio = new AudioStreamPlayer();
+            AddChild(_audio);
+            _playSound = new Button { Text = "Play a sound from your disc", Disabled = true };
+            _playSound.Pressed += PlaySample;
+            _root.AddChild(_playSound);
+
             GD.Print($"[tpw] data: {_data.Message}");
             GD.Print($"[tpw] launcher said variant={variant}, we identified {_data.Variant?.Id ?? "(none)"}");
 
@@ -83,6 +92,7 @@ namespace TPWGodot
             {
                 SelfTestReport report;
                 TpwImage legal = null;
+                PcmSample sample = null;
                 try
                 {
                     using var disc = DiscReader.Open(path);
@@ -90,6 +100,7 @@ namespace TPWGodot
 
                     var f = disc.Find(AssetSelfTest.LegalScreen);
                     if (f != null && Tga.TryDecode(disc.ReadFile(f), out var img, out _)) legal = img;
+                    sample = FirstSound(disc);
                 }
                 catch (System.Exception e)
                 {
@@ -99,6 +110,7 @@ namespace TPWGodot
                 // ⚠ An empty array, never null: these arguments cross into Godot as Variants, and a null
                 // byte[] does not round-trip the way a managed null would -- it arrives as an empty
                 // PackedByteArray anyway, so say so here rather than relying on that.
+                _sample = sample;   // read back on the main thread once ApplySelfTest runs
                 CallDeferred(nameof(ApplySelfTest), ReportToText(report), report.AllOk,
                     legal?.Rgba ?? System.Array.Empty<byte>(), legal?.Width ?? 0, legal?.Height ?? 0);
             });
@@ -126,7 +138,65 @@ namespace TPWGodot
             var image = Image.CreateFromData(w, h, false, Image.Format.Rgba8, rgba);
             _preview.Texture = ImageTexture.CreateFromImage(image);
             GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
+
+            if (_sample != null && _sample.SampleCount > 0)
+            {
+                _playSound.Disabled = false;
+                _playSound.Text = $"Play a sound from your disc ({_sample.SampleCount:n0} samples)";
+                GD.Print($"[tpw] decoded {_sample.SampleCount:n0} PCM samples from {_sample.Source}");
+            }
+            else _playSound.Text = "No sound decoded";
         }
+
+        /// <summary>First non-empty waveform out of the first sound bank, decoded to PCM.</summary>
+        static PcmSample FirstSound(DiscReader disc)
+        {
+            var f = disc.Find(AssetSelfTest.AssetArchive);
+            if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return null;
+
+            foreach (var e in gaz.Entries)
+            {
+                if (e.Size != VabHeader.SplitHeaderSize) continue;
+                if (!VabHeader.TryParse(gaz.Read(e), out var vab, out _)) continue;
+                int bodyIndex = e.Index - 1;   // ⚠ BEFORE, not after — see VabHeader
+                if (bodyIndex < 0 || gaz.Entries[bodyIndex].Size != vab.BodyBytes) continue;
+                foreach (var wave in vab.SliceBody(gaz.Read(gaz.Entries[bodyIndex])))
+                {
+                    if (wave.Length == 0) continue;
+                    var pcm = Vag.Decode(wave, $"bank #{e.Index}");
+                    if (pcm.SampleCount > 0) return pcm;
+                }
+            }
+            return null;
+        }
+
+        void PlaySample()
+        {
+            if (_sample == null || _sample.SampleCount == 0) return;
+
+            // PCM16 little-endian, which is what AudioStreamWav.Format16Bits expects.
+            var bytes = new byte[_sample.SampleCount * 2];
+            System.Buffer.BlockCopy(_sample.Samples, 0, bytes, 0, bytes.Length);
+
+            _audio.Stream = new AudioStreamWav
+            {
+                Format = AudioStreamWav.FormatEnum.Format16Bits,
+                MixRate = SampleRateHz,
+                Stereo = false,
+                Data = bytes,
+            };
+            _audio.Play();
+        }
+
+        /// <summary>⚠⚠ OPEN — THE SAMPLE RATE IS NOT IN THE WAVEFORM AND HAS NOT BEEN MEASURED. VAG ADPCM
+        /// carries no rate; on hardware the pitch comes from the SPU register the tone attributes set, and
+        /// those attributes are in the VAB header's tone table, which is not parsed yet. 22,050 Hz is a common
+        /// PSX choice and is a PLACEHOLDER.
+        ///
+        /// It is a safe placeholder for one specific reason: getting it wrong makes the sound play at the
+        /// wrong pitch and speed, which is immediately obvious to anyone who hears it. A wrong value that
+        /// sounded fine would be the dangerous kind. Do not treat this as established.</summary>
+        const int SampleRateHz = 22050;
 
         public override void _Process(double delta)
         {
