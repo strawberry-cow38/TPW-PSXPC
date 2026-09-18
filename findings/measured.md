@@ -1215,9 +1215,26 @@ have reported the same zero for an entirely different reason. Redone on a cold b
 with the upload log from the same run.
 
 **So the null is real: what lands in those 40 slots is not a verbatim slice of the
-twelve entries.** Decompression on the way in is the obvious candidate and fits the
-rest — `tpage (960,256)`'s rows were not in the archive either, and two of the 47
-palettes were not verbatim.
+twelve entries.**
+
+⚠ **I proposed compression as the cause and it is wrong.** catboy killed it with one
+observation from their side of the wall: reading entry #7's raw bytes as 4bpp with
+**no decoding at all** yields *legible lettering* — "Gary Liddon / Lead
+Programmer". You cannot get readable text out of compressed bytes with a naive
+nibble read. Those twelve entries are definitively uncompressed.
+
+**The better explanation is theirs: those 40 VRAM slots are not fed by those 12
+entries at all.** The content is the clue — a credits card has no business being
+resident while a park is running. Zero matches is *different pictures*, not a
+different encoding.
+
+⚠ **But one of my own captures argues against that too, and I said so rather than
+letting a tidy theory stand:** my **cold boot** capture also matched zero. If the
+twelve were intro/credits art, the cold-boot blocks should hit. They do not. So
+"wrong moment" does not cover it either unless the credits load somewhere neither
+capture reached. My instrument cannot separate those cases; scanning all 422
+entries at every alignment can, which is why the hashes went over rather than a
+guess about timing.
 
 ⚠ **This leaves the 1024×256 sheet layout UNRESOLVED, not disproved.** If bytes are
 decompressed before upload, the layout question concerns the *decompressed* form,
