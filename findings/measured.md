@@ -416,3 +416,59 @@ population, not a rate of arrival. Sampling it mid-month reads last month's valu
 live guest count at `*(u32*)(*(u32*)0x80103884 + 0xC)`, sampled on the bus phase
 edge `[0x80103964]: 1 -> 2`, which is exactly the spawn event. Arrivals per bus is
 the jump in that word on that edge — direct, rather than inferred from money.
+
+## The debug menu: removed at compile time — but its sliders survive
+
+fable's answer to the `STR_MAINMENU_DEBUG_MENU` lead is a **confident negative**,
+and it is worth more than a hedge would have been:
+
+- The three suspicious string ids (0x214, 0xAB, 0x12) are **used as string ids
+  nowhere** in TPW.BIN or any of the 12 decompressed overlays. Every raw hit of
+  those values is accounted for as something else. `PURCHASE`, `LOAD_SAVE` and
+  `MAIN_MENU` are equally dead — **the string table is a PC superset**, shipped
+  whole.
+- The laptop menu is **15 static rows**, and the builder adds them by literal
+  index. No debug row, no index, no handler. **Compile-time absence: there is
+  nothing to write.** That is a real answer and it stops the hunt.
+
+**The window half-survived, which is why the strings are there.** Its vtable
+(0x800E32B8), tick, draw and label pool are all in the image — I confirmed
+"Debug Menu", "Vomit" and "Prank" are literal strings in TPW.BIN at 0xD3210,
+0xD23AC and 0xD32A8. No instruction anywhere forms that vtable address. The
+constructor was removed and the rest was left behind.
+
+**⭐ The sliders it would have shown are plain globals, and nothing else writes
+them. All nine defaults verified live, 9/9 exact:**
+
+| address | label | default |
+|---|---|---|
+| `0x801031FC` | Vomit / Ride Inc | 1212 |
+| `0x8010322C` | Min Litter Increase | 30 |
+| `0x80103208` / `0C` / `10` | Ride OK / Good / Excellent Inc | 5 / 10 / 15 |
+| `0x8010321C` / `20` / `18` | Vomit / Toilet / Boredom -> Happiness | 85 / 90 / 95 |
+| `0x80103230` | Prank Chance | 10 |
+
+So the menu is gone and **its contents are still reachable** — poke the global
+instead of moving the slider.
+
+## Sandbox mode is real, and I have been in it all along
+
+`0x80102D34` is the sandbox flag (parkopen.md called it "restricted mode"). The
+front end titles saves `[TPW Sandbox] name` exactly when it is set. Its **only**
+writer is the memory-card loader, and the saver writes the inverse, so a fresh
+game can never reach it — the ENTER/EXIT toggle UI was never built.
+
+⚠ **It reads 1 in `park_ride.state`.** Every measurement I have taken today was
+in sandbox mode. It suppresses litter, needs checks, bubbles, goals and advisor
+windows, and restricts the menu to Build/Options/Leave. **Anything I have
+measured about guest happiness, litter or needs is therefore measured with those
+systems switched off**, and I had not known that until now. It does *not* load a
+prebuilt park.
+
+## The "bovine" cheat does not exist in this build
+
+Confident negative, and the argument is better than absence-of-string: **the only
+text entry in the game is the save-filename keyboard — A-Z plus space, seven
+characters, uppercase.** "bovine" is not typeable. The buffer is only `strcmp`'d
+against existing card titles; no pad-mask test for Square+Cross+Circle exists
+anywhere. Published TPW cheats are for the 1994 *Theme Park*, a different game.
