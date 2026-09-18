@@ -136,9 +136,28 @@ independent numbers called before the run and hit**.
 ⚠ **Trap:** a phase-4 target ≤ 25 (`0x800E0F18 = 17`) shortens the cycle to 411 but
 **freezes admissions permanently**. Use 26 or more.
 
-⚠ **Not reproduced:** my earlier "120 guests in 3000 frames on an empty field".
-fable got 60 spawned on the same pokes. My number is suspect and I have not
-re-run it.
+⚠ **RETRACTED: my "120 guests in 3000 frames on an empty field" was wrong.** fable
+could not reproduce it, so I re-ran the exact configuration:
+
+| state + held words | admissions in 3000 frames |
+|---|---|
+| park (empty), nothing held | 0 |
+| park + `0x80102D30 = 1` (open) | **0** |
+| park + open + `0x80102E60 = 1` | **39** (I published 120) |
+| park_ride + `0x80102E60 = 1` | 21 |
+
+Out by a factor of three, and fable's 60 *spawned* against 39 *admitted* is the
+consistent pair. I do not know where 120 came from -- most likely a stored-units
+figure divided by the wrong denominator, the same class of error as the GBP 60
+shop price. It stood in a published file for two hours because nothing checked it
+until a second method disagreed.
+
+Two things the re-run establishes that the wrong number obscured:
+- **An open but empty park admits exactly zero**, even with the park-open word
+  held. The step at zero is real and survives.
+- **`0x80102E60` bypasses that gate**, admitting 39 to a park with nothing in it.
+  So it is not simply a score multiplier -- it overrides the empty-park refusal
+  as well.
 
 ## Shop revenue — first measured, via fable's pathfinder switch
 
