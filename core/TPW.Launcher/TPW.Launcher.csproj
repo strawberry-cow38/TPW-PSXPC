@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The launcher's DECISIONS, with no Avalonia and no Godot in sight. A launcher window cannot be driven
+       headlessly on a build box, so anything left inside it is only ever verified by a human clicking it.
+       That is exactly how two bugs shipped in the unturnedGD launcher this project is modelled on: a debug
+       console toggle that could only turn ON, and a branch dropdown that recorded the user's choice after
+       deciding whether to act on it. Logic lives here so a test can run it. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>TPW.Launcher</RootNamespace>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+</Project>
