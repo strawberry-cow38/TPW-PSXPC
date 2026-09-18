@@ -148,11 +148,35 @@ read the shop's own counters instead of the park totals:
   addresses agreeing arithmetically is a check on the *instrument*, not just the
   finding.
 
-⚠ **UNMEASURED: whether a guest buys more than once.** I wrote that they "buy
-repeatedly". The counts above are 2 guests / 0 sales, 4 / 2, 5 / 5 -- that is one
-purchase per guest with a lag, not repeat buying. The 16-sales-from-8-guests
-figure came from a different run whose guest count was derived from the GBP 40
-assumption. Answering it needs `served` against guests-admitted in the *same* run.
+**Guests DO buy more than once -- about twice each.** Measured properly, `served`
+against guests-admitted in the *same* run, 24000 frames:
+
+```
+frame   1000   3000   5000   6000   7000  10000  15000  19000  23000
+guests     2      3      5      5      6      8     12     14     17
+served     0      0      3      5      7     16     20     31     34
+```
+
+Sales cross above admissions at about frame 6500 and end at **34 sales for 17
+guests, exactly 2.0 each**. `GBP 20` per sale holds at **every one of the twelve
+samples** where there is a sale -- that number is as solid as anything here.
+
+⚠ **This retracts a retraction, and the reason matters more than the answer.** I
+first wrote "guests buy repeatedly", then withdrew it as unmeasured when a
+6000-frame run showed 2 guests/0 sales, 4/2, 5/5 -- which reads exactly like one
+purchase each with a lag. It is not. **The crossover simply had not happened yet.**
+A guest has to arrive, walk, and buy, so for the first several thousand frames
+sales necessarily trail admissions no matter how many times each guest eventually
+buys.
+
+So the short window did not merely fail to show repeat buying -- **it actively
+produced the appearance of the opposite**, and both cow tools and I read it that
+way. Third time today that a claim was true inside the window I measured and
+false just outside it (determinism at 1300 vs 12000 frames; arrival periodicity at
+three gaps vs fourteen). The correction is not "be more sceptical" -- scepticism
+is what produced the wrong retraction here. It is: **derive the window from the
+mechanism before concluding in EITHER direction.** A process with a built-in lag
+cannot be measured over a window comparable to the lag.
 
 ⚠ **This is a cheat, not the game.** It makes grass universally walkable, so
 guests cut straight lines and path capacity stops mattering. Good for unblocking
