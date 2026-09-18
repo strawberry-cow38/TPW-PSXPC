@@ -24,7 +24,8 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 5;   // v5: branch dropdown, Godot auto-download, current-vs-latest commit, Options panel, settings persisted beside the exe
+    const int LauncherVersion = 6;   // v6: Install/Update/Play merged into ONE mode-driven button; build marker
+    // v5: branch dropdown, Godot auto-download, current-vs-latest commit, Options panel, settings persisted beside the exe
     // v4: no functional change -- published to prove v3 self-updates, which is only testable against a HIGHER published version
     // v3: self-update -- downloads the published exe, verifies shape AND sha256, swaps via a shim that waits on this PID
     // v2: fixed a null-Text crash on the first log line; startup probe moved off the UI thread; unhandled exceptions now reach the panel and launcher-crash.log
@@ -61,11 +62,19 @@ public class MainWindow : Window
         Text = "",   // see Log(): a default TextBox carries null here, and every append would dereference it
     };
     readonly TextBlock _dataStatus = new() { Foreground = TextDim, FontSize = 13, TextWrapping = TextWrapping.Wrap };
-    readonly Button _play = new() { Content = "Play", IsEnabled = false, MinWidth = 110 };
-    readonly Button _update = new() { Content = "Update", MinWidth = 110 };
+    // ⭐ ONE BUTTON. Its label and what it does come from _mode, so the user is never asked to work out
+    // whether this install needs a clone, a rebuild, a disc or nothing. Install/Update/Play are STAGES OF
+    // ONE INTENT ("I want to play"), not three choices -- and a launcher that offers Play next to Update
+    // invites clicking Play on a stale build, which is the one combination that produces a confusing crash
+    // rather than an honest refusal.
+    enum Mode { Busy, NeedData, Build, Play, Broken }
+    readonly Button _action = new() { MinWidth = 168, MinHeight = 40, FontSize = 15, IsEnabled = false };
+    readonly TextBlock _status = new() { Foreground = TextDim, FontSize = 13, VerticalAlignment = VerticalAlignment.Center };
+    Mode _mode = Mode.Busy;
     readonly CheckBox _console = new() { Content = "Debug console", Foreground = TextBody };
     readonly ComboBox _branches = new() { MinWidth = 180 };
     readonly TextBlock _buildState = new() { Foreground = TextDim, FontSize = 12, TextWrapping = TextWrapping.Wrap };
+    readonly TextBlock _latestState = new() { Foreground = TextDim, FontSize = 12, TextWrapping = TextWrapping.Wrap };
     string _branch = DefaultBranch;
 
     readonly string _baseDir = AppContext.BaseDirectory;
@@ -77,6 +86,12 @@ public class MainWindow : Window
     string BranchFile => Path.Combine(_baseDir, "branch.txt");
     string ConsoleFile => Path.Combine(_baseDir, "debug_console.txt");
     string DataPathFile => Path.Combine(_baseDir, "game_data_path.txt");
+    // ⚠ "BUILT" MEANS *WE* BUILT THIS EXACT COMMIT -- nothing else is evidence. Do not infer it from
+    // game/.godot or a bin/ folder existing: a repo can ship a committed, machine-specific .godot with stale
+    // assemblies, and then a fresh clone looks "ready" and Plays a mismatched dll. Only our own marker counts.
+    // It also makes a branch switch self-correcting: the marker still holds the OLD commit, which no longer
+    // matches HEAD, so a rebuild is forced without anyone having to detect "the branch changed".
+    string BuiltMarker => Path.Combine(_baseDir, "built_commit.txt");
 
     string _gameDataPath;          // what the user pointed us at (file or folder)
     GameDataResult _gameData;      // the result of identifying it
@@ -94,8 +109,7 @@ public class MainWindow : Window
         var locate = new Button { Content = "Locate…", MinWidth = 90 };
         locate.Click += async (_, _) => await PickGameDataAsync();
 
-        _update.Click += async (_, _) => await WithBusy(UpdateAsync);
-        _play.Click += async (_, _) => await WithBusy(PlayAsync);
+        _action.Click += async (_, _) => await WithBusy(OnActionAsync);
 
         var dataCard = Card(new StackPanel
         {
@@ -118,14 +132,14 @@ public class MainWindow : Window
             _branch = b;
             TryWrite(BranchFile, b);
             Log($"Branch set to {b}.");
-            await WithBusy(RefreshBuildStateAsync);
+            await WithBusy(RefreshAsync);
         };
 
         var checkUpdate = new Button { Content = "Check for update", MinWidth = 130 };
         checkUpdate.Click += async (_, _) => await WithBusy(async () =>
         {
             if (!await CheckSelfUpdateAsync()) Log($"Launcher is up to date (v{LauncherVersion}).");
-            await RefreshBuildStateAsync();
+            await RefreshAsync();
         });
 
         var options = new Expander
@@ -141,7 +155,7 @@ public class MainWindow : Window
             Children =
             {
                 new TextBlock { Text = "Branch", Foreground = TextDim, FontSize = 13, VerticalAlignment = VerticalAlignment.Center },
-                _branches, _update, _play,
+                _branches, _action, _status,
             },
         };
 
@@ -150,7 +164,7 @@ public class MainWindow : Window
             Content = new StackPanel
             {
                 Margin = new Thickness(18), Spacing = 12,
-                Children = { head, sub, dataCard, actions, _buildState, options, Card(_log) },
+                Children = { head, sub, dataCard, actions, _buildState, _latestState, options, Card(_log) },
             },
         };
 
@@ -203,7 +217,7 @@ public class MainWindow : Window
         RefreshGameData(found);
 
         await PopulateBranchesAsync();
-        await RefreshBuildStateAsync();
+        await RefreshAsync();
     }
 
     // ---- game data ----------------------------------------------------------------------------------
@@ -232,6 +246,7 @@ public class MainWindow : Window
         // Hashing a 500 MB image takes a moment; keep the UI alive.
         var r = await Task.Run(() => GameDataLocator.Identify(picked));
         RefreshGameData(r);
+        await RefreshAsync();
     }
 
     void RefreshGameData(GameDataResult r)
@@ -240,7 +255,6 @@ public class MainWindow : Window
         _dataStatus.Text = r.Message;
         _dataStatus.Foreground = r.CanPlay ? Good : Bad;
         Log(r.Message);
-        UpdateButtons();
     }
 
     // ---- flow ---------------------------------------------------------------------------------------
@@ -252,23 +266,48 @@ public class MainWindow : Window
         // dropdown showed one branch while the file held another and the update fetched the old one. The
         // visible half was the wrong half.
         if (_busy) { Log("Busy — wait for the current step to finish."); return; }
-        _busy = true; UpdateButtons();
+        _busy = true;
         try { await op(); }
-        catch (Exception e) { Log("ERROR: " + e.Message); }
-        finally { _busy = false; UpdateButtons(); }
+        catch (Exception e) { Log("ERROR: " + e.Message); SetMode(Mode.Broken, "—", e.Message); }
+        finally { _busy = false; }
     }
 
-    void UpdateButtons()
+    void SetMode(Mode m, string label, string status)
     {
-        _update.IsEnabled = !_busy;
-        // ⚠ Play stays OFF without identified game data. That refusal IS the bring-your-own-assets promise:
-        // a port that half-runs on an unrecognised copy produces plausible nonsense, which is worse than not
-        // starting. See GameData.Identify.
-        _play.IsEnabled = !_busy && _gameData.CanPlay && Directory.Exists(_repoDir);
+        Dispatcher.UIThread.Post(() =>
+        {
+            _mode = m;
+            _action.Content = label;
+            _action.IsEnabled = m is Mode.NeedData or Mode.Build or Mode.Play;
+            _action.Background = m == Mode.Play ? B("#3E6B45") : m == Mode.NeedData ? B("#7A5A2E") : B("#3A5A78");
+            _action.Foreground = TextBody;
+            _status.Text = status;
+        });
     }
 
-    async Task UpdateAsync()
+    void SetBusy(string status) => Dispatcher.UIThread.Post(() =>
+        { _mode = Mode.Busy; _action.IsEnabled = false; _action.Content = "…"; _status.Text = status; });
+
+    async Task OnActionAsync()
     {
+        switch (_mode)
+        {
+            case Mode.NeedData: await PickGameDataAsync(); break;
+            // "& Play" is a promise: build, then go straight in. Stopping at a second click after a
+            // multi-minute build is the launcher asking permission for something already decided.
+            // Chain Play only if it can actually succeed. Installing without a disc present is a perfectly
+            // good outcome -- the button becomes "Locate game data…" -- and firing Play at it just to watch
+            // it refuse would print an error for a state that is not an error.
+            case Mode.Build: if (await UpdateAsync() && _gameData.CanPlay) await PlayAsync(); break;
+            case Mode.Play: await PlayAsync(); break;
+        }
+    }
+
+    /// <summary>Clone-or-update, build, import. Returns true only if the build actually succeeded -- the
+    /// caller chains Play onto that, so a failed build must never read as "ready".</summary>
+    async Task<bool> UpdateAsync()
+    {
+        SetBusy("Updating…");
         string git = Which("git") ?? throw new Exception("git not found on PATH.");
         if (!Directory.Exists(_repoDir))
         {
@@ -287,11 +326,32 @@ public class MainWindow : Window
         }
 
         string dotnet = Which("dotnet") ?? throw new Exception("dotnet SDK not found on PATH.");
+        SetBusy("Building…");
         Log("Building …");
         int rc = await RunAsync(dotnet, new[] { "build", Solution, "-c", BuildConfig, "--nologo" }, _repoDir);
-        Log(rc == 0 ? "Build OK." : $"Build FAILED (exit {rc}).");
-        await RefreshBuildStateAsync();
-        UpdateButtons();
+        if (rc != 0)
+        {
+            Log($"Build FAILED (exit {rc}).");
+            SetMode(Mode.Build, "Retry", "Build failed — see the log.");
+            return false;
+        }
+        Log("Build OK.");
+
+        // Godot imports assets on first run. Doing it here, headless, means the first thing the user sees is
+        // the game rather than an import bar -- and it surfaces an import error in THIS log, next to its cause.
+        string godot = await EnsureGodotAsync();
+        if (godot != null)
+        {
+            SetBusy("Importing assets…");
+            await RunAsync(godot, new[] { "--path", Path.Combine(_repoDir, "game"), "--headless", "--import" }, _repoDir);
+        }
+
+        // Stamp the marker with the commit we just built -- not with what we asked to fetch. If the reset
+        // silently landed somewhere else, the marker must record where we ACTUALLY are or it certifies a lie.
+        string head = (await Capture(git, new[] { "-C", _repoDir, "rev-parse", "HEAD" })).Trim();
+        TryWrite(BuiltMarker, head);
+        await RefreshAsync();
+        return true;
     }
 
     async Task PlayAsync()
@@ -345,25 +405,50 @@ public class MainWindow : Window
         });
     }
 
-    /// <summary>Show the checked-out commit against the newest one on the selected branch, so "am I current?"
-    /// is answerable without running an update and watching what happens.</summary>
-    async Task RefreshBuildStateAsync()
+    /// <summary>The single place that decides what the button is. Everything else calls this and lets it
+    /// choose: one decision site means the label, the enabled state and the action can never disagree.</summary>
+    async Task RefreshAsync()
     {
         string git = Which("git");
-        if (git == null) { Set("git not found — install it to clone and build."); return; }
+        if (git == null || Which("dotnet") == null)
+        {
+            var broke = LauncherState.Decide("", "", "", false, _branch, git != null, Which("dotnet") != null);
+            SetMode(Mode.Broken, broke.Label, broke.Status);
+            return;
+        }
 
         string remote = (await Capture(git, new[] { "ls-remote", RepoUrl, _branch })).Split('\t')[0].Trim();
         string local = Directory.Exists(_repoDir)
-            ? (await Capture(git, new[] { "-C", _repoDir, "rev-parse", "HEAD" })).Trim()
-            : "";
+            ? (await Capture(git, new[] { "-C", _repoDir, "rev-parse", "HEAD" })).Trim() : "";
+        string subject = local.Length > 0
+            ? (await Capture(git, new[] { "-C", _repoDir, "log", "-1", "--format=%h · %cr · %s" })).Trim() : "";
 
-        string Short(string h) => h.Length >= 7 ? h[..7] : h;
-        if (local.Length == 0) Set($"Not cloned yet. Latest on {_branch}: {Short(remote)}");
-        else if (remote.Length > 0 && !remote.StartsWith(local[..Math.Min(7, local.Length)], StringComparison.Ordinal))
-            Set($"Update available on {_branch}: {Short(local)} -> {Short(remote)}");
-        else Set($"Up to date on {_branch} ({Short(local)})");
+        string built = TryRead(BuiltMarker) ?? "";
 
-        void Set(string t) => Dispatcher.UIThread.Post(() => _buildState.Text = t);
+        static string Short(string h) => h.Length >= 7 ? h[..7] : (h.Length > 0 ? h : "—");
+        Dispatcher.UIThread.Post(() =>
+        {
+            _buildState.Text = local.Length == 0 ? "Installed build:   none yet" : $"Installed build:   {subject}";
+            _latestState.Text = $"Latest on {_branch}:   {Short(remote)}"
+                + (remote.Length == 0 ? "   (couldn't reach the remote)" : "");
+        });
+
+        // ⭐ ONE DECISION SITE, AND IT IS IN CORE. This window cannot be run on the build machine, so every
+        // branch of this choice would otherwise ship unexercised -- and the button's caption IS the feature.
+        // LauncherState.Decide is a pure function of the world state with tests that name the wrong answer
+        // each one rejects. Keeping a second copy here to "save a call" is how the two drift apart.
+        var st = LauncherState.Decide(local, remote, built, _gameData.CanPlay, _branch);
+        var kind = st.Kind switch
+        {
+            ActionKind.Play => Mode.Play,
+            ActionKind.NeedData => Mode.NeedData,
+            ActionKind.Build => Mode.Build,
+            _ => Mode.Broken,
+        };
+        // Only the Play status gains anything from the window's own state: which copy of the game it matched.
+        string status = st.Kind == ActionKind.Play && _gameData.Variant != null
+            ? $"Up to date · {_gameData.Variant.Id}" : st.Status;
+        SetMode(kind, st.Label, status);
     }
 
     /// <summary>Find Godot, or fetch it. A user should need git and the dotnet SDK and nothing else.</summary>
