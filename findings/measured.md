@@ -1123,14 +1123,34 @@ Neither coherence nor size can separate them. Only evidence from **outside the
 file** can: the GPU's draw commands step page origins by 64 halfwords — exactly 256
 texels at 4bpp — and run UVs 0..255.
 
-| error class | caught by |
-|---|---|
-| wrong orientation, wrong channel order, garbage | **looking** — instantly, better than any metric |
-| wrong width by a multiple, wrong tiling, transposed pages | **never by looking** — needs external truth |
+⚠ **I first wrote this as "beyond eyes". catboy corrected it and the correction is
+better: it is beyond the QUESTION.**
 
-So "render it and see" is necessary and nowhere near sufficient, and its failure
-mode is the dangerous one: a confident, coherent, wrong picture. That is the visual
-equivalent of a test that passes on anything.
+```
+"does this look like a picture?"       -> useless, both layouts do
+"does anything cross the cut at 256?"  -> instant, decisive, still just looking
+```
+
+Rendering the four tiles stacked and checking that no sprite straddles a boundary
+settles it by eye in seconds. The evidence was visible all along — it lived at the
+**seams**, while I was looking at the whole sheet.
+
+> **A global question only catches global faults.** A multiple-of-width error is a
+> seam fault, so it needs a seam question. The instrument was never the problem.
+
+**And that is the single thread through every error in this file:** *the aggregate
+was consulted where the information was in the structure.*
+
+- a **peak** instead of a distribution — two stray pixels set it, and I published it
+  as an invariant for someone else to test against
+- a **match count** instead of the marginals — nine "matches" that were all zeros
+- **"does it look right"** instead of "what happens at the join"
+- a **pass** instead of asking what the check could possibly fail on
+- a **repeated null** instead of asking what each null could not have contained
+
+Four or five different shapes; one mistake. So "render it and see" is necessary and
+nowhere near sufficient, and its failure mode is the dangerous one: a confident,
+coherent, wrong picture — the visual equivalent of a test that passes on anything.
 
 **Three layout corrections between us today, each needing the other's instrument.**
 The GPU-side observations could not have found the file format, and the file-side
