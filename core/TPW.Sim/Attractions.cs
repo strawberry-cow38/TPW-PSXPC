@@ -26,9 +26,9 @@ namespace TPW.Sim
         /// N=15, PoolOfShops 0x80103854 N=20, PoolOfFeatures 0x80103858 N=45, and so on).
         ///
         /// ⚠⚠ NOT FROM THE PURCHASE SCREEN, AND IT IS WORSE THAN A SIMPLE OFFSET. That screen is headed
-        /// "Stock" and shows what is AVAILABLE TO BUY — which master points out is gated by RESEARCH, not
-        /// only by what is already placed. Two readings of it in different parks gave Rides 14 / Shops 20 and
-        /// Rides 15 / Shops 19, and research is why they disagree.
+        /// "Stock" and shows what is AVAILABLE TO BUY — which master points out is gated by RESEARCH, and
+        /// not only for rides: **features and shops are researched too**. Three readings of that screen
+        /// across three parks gave rides 15 / 14 / 15 and shops 20 / 20 / 19 while capacity never moved.
         ///
         /// So the screen conflates three separate things — pool capacity, items placed, and research
         /// progress — and no arithmetic recovers capacity from it without knowing the other two. My first
