@@ -332,7 +332,51 @@ gradient, not a uniform pulse. Reproducing it as a single time-varying brightnes
 taking the CLUT from `2($a0)` the same way. The ABR bits (tpage 5-6) therefore come straight out of
 **each sprite's own 12-byte record**, so "half" vs "additive" is a value to be read per sprite.
 
-**NOT ESTABLISHED: the actual ABR for sprites 165/168/169/170/171/173/175.** It is runtime data and I
-did not read it out of a dump. Do not assume 50/50 — on this disc `abr=1` (additive) is common, and
-additive dark red over grass brightens toward olive where half-blend darkens toward brown. That
-mistake was already made once in this port on the language-screen text.
+**RESOLVED (cow tools, 2026-09-19): the markers' tpage is `0x01E` → ABR 0, i.e. half (B/2+F/2).**
+Bits 5-6 of `0x01E` are clear; the rest decodes as tpage X base 14 (=896), Y base 256, 4-bit CLUT.
+So "50/50 see-through" was right. The defect the reading found was different and real: the port had
+the blend *hardcoded* rather than taken from the sprite record, which this section's point stands on —
+the draw code does not choose a blend, the sprite's own tpage does. It now reads per-sprite.
+
+Worth keeping anyway: `abr=1` (additive) is also used on this disc, and additive dark red over grass
+brightens toward olive where half-blend darkens toward brown, so the two are visually distinguishable
+and the value is always worth reading rather than assuming — that mistake was already made once here
+on the language-screen text.
+
+## 9. The path tool's sounds — one dispatch, and where the sample rate comes from (READ)
+
+`PlaySfx(group, index)` is `0x800B8E08`. Group 7 is the build tools. The four path-tool sounds are all
+emitted by **one function, `0x8001D5C0`** — the click handler — not by four separate events:
+
+| when | sound | evidence |
+|---|---|---|
+| state word `0x14(obj)` is 0, **or** `0x8001D21C` returns 0 | **g7_2** (refused) | `0x8001D700` / `0x8001D704` |
+| first click (run not started, `0x18(obj)` == 0) — stores the start point, sets the flag | **g7_0** | `0x8001D648` |
+| second click — the run is laid | **g7_4** | `0x8001D69C` |
+| immediately after g7_4, when `0x8001B5D4` returns 0 | **g7_3** | `0x8001D6D0` |
+
+**g7_3 is not a tool-close sound.** There is no RMB/teardown path here at all — it is a second sound
+layered on top of g7_4 within the same second-click branch, on separate voices so neither cuts the
+other. strawberry called this from memory ("plays when a path is connected to another one
+successfully") before the code was read, and the code agrees: it is the success sub-case of laying a
+run, and it is the same event the ghost markers give a dedicated verdict and green ring to (§8).
+That branch also calls `0x8001C328` and shows message 5, where the other branch shows message 4.
+`0x8001B5D4` itself is just `return gp[0xB8]`.
+
+### 9.1 Sample rate is archive data, not a code constant (READ, cow tools)
+
+`0x800B84AC` is the real play routine. Its **5th argument is a pitch override**, read at `0x88($sp)`:
+
+    800b859c  lw   $t2, 0x88($sp)     ; arg5 = pitch override
+    800b85bc  beqz $t2, 0x800b85cc    ; zero -> use the sample's own
+    800b85c8  sh   $t2, 0x24($sp)     ; else the caller's value
+    800b85cc  lhu  $v0, 2($a2)        ; record+2  ($a2 = index*8 + table)
+    800b85d4  sh   $v0, 0x24($sp)
+
+`0x24($sp)` sits at **+0x14** inside the block copied to the voice-attr struct at `0x800B8644`, which is
+`SpuVoiceAttr.pitch`. **`PlaySfx` always passes 0**, so every sound plays at the rate stored in its own
+8-byte record at +2. Group 7's records hold `0x0400`; PSX pitch `0x1000` == 44100 Hz, so
+`0x400` == **11025 Hz exactly**.
+
+⚠ A .wav exported from the port proves nothing about this — the exporter chose that header. The rate
+is `record+2`, and that is the only thing worth quoting.
