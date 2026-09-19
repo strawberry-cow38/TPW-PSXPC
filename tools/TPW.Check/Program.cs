@@ -316,6 +316,29 @@ static class Program
         return bad;
     }
 
+    static int Music(DiscReader disc, string outDir)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        System.IO.Directory.CreateDirectory(outDir);
+        int bad = 0;
+        foreach (var e in g.Entries)
+        {
+            if (e.Size != VabHeader.SplitHeaderSize || !VabHeader.TryParse(g.Read(e), out var vab, out _)) continue;
+            int bodyIndex = e.Index - 1, modIndex = e.Index + 1;
+            if (bodyIndex < 0 || modIndex >= g.Entries.Count) continue;
+            var waves = new List<PcmSample>();
+            foreach (var w in vab.SliceBody(g.Read(g.Entries[bodyIndex]))) waves.Add(Vag.Decode(w));
+            if (!TrackerModule.TryParse(g.Read(g.Entries[modIndex]), out var m, out string err)) { Console.WriteLine($"#{modIndex}: {err}"); bad++; continue; }
+            var xm = m.ToStandardXm(waves);
+            string path = System.IO.Path.Combine(outDir, $"module_{modIndex}.xm");
+            System.IO.File.WriteAllBytes(path, xm);
+            Console.WriteLine($"#{modIndex}: version {m.Version:x4}, {m.Channels} channels, {m.Patterns.Count} patterns, {m.Instruments.Count} instruments, " +
+                              $"{waves.Count} waves, speed {m.Speed} tempo {m.Tempo} -> {path} ({xm.Length:n0} bytes)");
+        }
+        return bad;
+    }
+
     static int Names(DiscReader disc)
     {
         var g = Archive(disc);
@@ -640,6 +663,9 @@ static class Program
             // count the faces whose palette is one a sheet's own sprite table lists, on a page of that same sheet.
             if (Array.IndexOf(args, "--model-textures") >= 0) return ModelTextures(disc);
             if (Array.IndexOf(args, "--names") >= 0) return Names(disc);
+            // --music DIR: every module rebuilt as a standard .xm with its bank's waveforms, for any tracker.
+            int musicAt = Array.IndexOf(args, "--music");
+            if (musicAt >= 0 && musicAt + 1 < args.Length) return Music(disc, args[musicAt + 1]);
 
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.

@@ -278,6 +278,24 @@ namespace TPW.Data
                 (emptyWaves > 0 ? $", {emptyWaves} empty slots" : "") +
                 (firstProblem.Length > 0 ? "; " + firstProblem : ""));
 
+            // ⭐ The game's own pattern packing: every pattern of every module must decode to exactly its row
+            // count in exactly its byte count. See TrackerModule for why a standard XM reader plays nonsense.
+            int mods = 0, patterns = 0;
+            string modProblem = null;
+            foreach (var (entry, _) in headers)
+            {
+                int mi = entry.Index + 1;
+                if (mi >= gaz.Entries.Count) continue;
+                var mb = gaz.Read(gaz.Entries[mi]);
+                if (!XmModule.TryReadCounts(mb, out _, out _, out _)) continue;
+                mods++;
+                if (TrackerModule.TryParse(mb, out var tm, out string terr)) patterns += tm.Patterns.Count;
+                else modProblem ??= $"module #{mi}: {terr}";
+            }
+            if (mods > 0)
+                r.Add("music patterns", modProblem == null, modProblem ??
+                    $"{mods} modules in the game's own packing, {patterns} patterns each decoding to exactly its declared rows and bytes");
+
             // Music. The XM header declares how many instruments it uses, and the VAB declares how many
             // waveforms it holds. Nothing makes those agree except being the matching pair -- so agreement
             // across every bank is evidence the grouping is right, from a direction the parser cannot fake.
