@@ -1169,12 +1169,13 @@ namespace TPWGodot
             }
             // ⭐ THE PATH TOOL, master's way. A left click on a path or an unoccupied tile (buildable or not) opens the
             // tool -- and only opens it. With the tool open, one click fixes the ghost's start and the next lays the
-            // run (no dragging, master's call). The right button cancels the ghost, or closes the tool when there is
-            // no ghost.
+            // run (no dragging, master's call). The right button cancels a ghost of two tiles or more; with no ghost,
+            // or a ghost of just its start tile, it closes the tool (master's call).
             if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _pathMode)
             {
-                if (_runStart != null) _runStart = null;
-                else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; }
+                bool longGhost = _runStart is { } st && _cursorTile is { } cur && PathTool.Run(st.X, st.Z, cur.X, cur.Z).Count > 1;
+                if (longGhost) _runStart = null;
+                else { _pathMode = false; _runStart = null; _cursorPinned = false; _cursorMesh.Mesh = null; }
                 RefreshInfo();
                 return;
             }
