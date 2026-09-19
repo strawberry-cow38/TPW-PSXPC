@@ -317,13 +317,24 @@ Both get `code |= 2` (`0x80055C2C` / `0x800561F8`) — **setSemiTrans, so both a
 The underlay's shade is `0x40` where `0x80` is 1.0, so the "dim quad the game lays under the markers"
 is dim *because of a half-brightness shade*, not because of the blend.
 
-### 8.2 The pulse is a gouraud gradient, not a flash (READ)
+### 8.2 The ripple: a gouraud gradient AND moving geometry (READ)
 
 The GT4's four vertex colours are computed separately (`$s0/$s1/$s2/$s3` → prim +4/+0x10/+0x1C/+0x28)
 and each is driven by **`rsin`** (`0x800C4AD4`, confirmed against `psyq-named-functions.json` as
 LIBGTE `rsin`/GEO.OBJ), angle masked to `0xFFF` (4096 = full circle), result `>>8` and added to a base,
 `andi 0xFF`. Four *different* vertex values means the brightness **travels across the tile** — a moving
 gradient, not a uniform pulse. Reproducing it as a single time-varying brightness will look wrong.
+
+⚠ **That was only half of it — I traced the colour path and stopped there.** cow tools read the
+same routine further (2026-09-19) and found the same sines also move the GEOMETRY: the marker quad
+floats **64 to 192 units above the ground** and every corner rides two diagonal waves at different
+speeds (one forward, one back; amplitudes 32+32, phase speeds 128 and −64 per frame time), with the
+sprite-171 underlay wobbling on the same wave beneath it. So the blueprint **rolls like a wave** rather
+than merely brightening — which is what strawberry meant by "ripple". Shipped in 43dc1b8.
+
+The lesson worth keeping: finding one consumer of `rsin` here did not mean finding them all. I wrote the
+effect up as a brightness because the colour stores were the first thing I hit; asking what ELSE the same
+angle fed would have found the vertex displacement in the same function.
 
 ### 8.3 ⚠ The blend mode is per-sprite DATA, not a constant in the draw code
 
