@@ -25,10 +25,15 @@ namespace TPW.Sim
         /// `N` column of fable's pool table, beside each pool's pointer and stride (PoolOfRides 0x80103844
         /// N=15, PoolOfShops 0x80103854 N=20, PoolOfFeatures 0x80103858 N=45, and so on).
         ///
-        /// ⚠⚠ NOT FROM THE PURCHASE SCREEN, AND THE DIFFERENCE MATTERS. That screen is headed "Stock" and
-        /// prints REMAINING, not capacity: it read Shops 19 in a park with one shop placed, against the
-        /// pool's 20. Taking those figures as limits would make every cap one short per item already built,
-        /// which looks right in an empty park and drifts as the park fills — the worst kind of wrong.
+        /// ⚠⚠ NOT FROM THE PURCHASE SCREEN, AND IT IS WORSE THAN A SIMPLE OFFSET. That screen is headed
+        /// "Stock" and shows what is AVAILABLE TO BUY — which master points out is gated by RESEARCH, not
+        /// only by what is already placed. Two readings of it in different parks gave Rides 14 / Shops 20 and
+        /// Rides 15 / Shops 19, and research is why they disagree.
+        ///
+        /// So the screen conflates three separate things — pool capacity, items placed, and research
+        /// progress — and no arithmetic recovers capacity from it without knowing the other two. My first
+        /// reading, "it prints capacity minus placed", was a tidier rule than the game has. The pool table is
+        /// the only source that states capacity alone.
         ///
         /// ⚠ TourRide has three slots and appears on no purchase screen we have seen, so the UI is not even
         /// a complete list of the types. Reading capacity off the interface would have lost one entirely.</summary>

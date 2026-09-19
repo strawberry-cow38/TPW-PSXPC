@@ -19,10 +19,10 @@ namespace TPW.Sim.Tests
             Assert.Equal(7, (int)AttractionType.TourRide);
         }
 
-        // ⭐ CAPACITY, from the pool table in code -- NOT from the purchase screen, which is headed "Stock"
-        // and prints REMAINING (it showed Shops 19 with one shop placed, against the pool's 20). Using the
-        // screen's figures would make every cap one short per item already built: correct in an empty park,
-        // drifting as it fills.
+        // ⭐ CAPACITY, from the pool table in code -- NOT from the purchase screen. That screen shows what
+        // is AVAILABLE TO BUY, which is gated by RESEARCH as well as by what is already placed, so it
+        // conflates three things and no arithmetic recovers capacity from it. Two readings of it disagreed
+        // (Rides 14/Shops 20 versus Rides 15/Shops 19) for exactly that reason.
         [Theory]
         [InlineData(AttractionType.Ride, 15)]
         [InlineData(AttractionType.TrackRide, 2)]
