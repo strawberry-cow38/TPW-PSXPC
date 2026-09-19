@@ -313,6 +313,39 @@ positive evidence that the twelve `0x54` sheets are intro/credits art rather tha
 `findings/vram_block_hashes.json` holds the console-side hashes; `texture_clut_map.json` the
 (rect -> palette) mapping. Neither contains pixels or colours.
 
+## 5j. Palettes: three pages hold them all, and the per-draw CLUT is NOT a lookup
+
+✅ **Every palette is readable from the archive today.** Only **three** pages hold palettes —
+`512,0`, `704,0`, `896,0` — and the other nine borrow from those three; all 50 palette references in
+the capture resolve to them. tinyclaw's raw-disc search gives file offsets for all three: entries
+`0x102 +0x1324`, `0xA9 +0x524`, `0x1A0 +0x2A00`. No VRAM, no emulator, no capture in the path.
+
+⭐ **Palettes live INSIDE the texture page, in its rows** — which is why a page and its palettes share
+an archive entry, and why "the palettes are somewhere else" led nowhere for an hour. The rows are a
+LOOKUP, not a measurement: `clut_y` minus the page's `y` IS the row, and that reproduces the measured
+rows exactly on all four pages checked ([0,1,2,3] / [20,21,26,68] / [19,25,43,45] / [10,17,22,23,80]).
+⚠ Do not hardcode rows 1 and 3 — that is true of `704,0` and no other page.
+
+⚠ **"Every palette sits inside the page it colours" was a selection effect** — true of exactly the
+three pages that were sampled, which are the three palette-holders. The counterexample was already in
+the capture file; it was never queried, because the query went to the pages already judged
+interesting. **A space you hold is not a space you have searched.**
+
+## ⚠⚠ 5k. BEFORE WIRING THE (rect → clut) MAP: it is a CAPTURE, not the source
+
+The obvious next step is to drive colouring from `texture_clut_map.json`. **Think before doing that.**
+That file is one park's draws: 12 pages, 177 rectangles, one camera, mostly build-mode terrain. It
+colours what happened to be drawn and nothing else, so anything it does not cover comes out untinted
+with no signal that it was missed.
+
+**The game does not use a lookup.** fable's report on the `0x96` containers describes 14-byte faces
+**carrying their own CLUT** — so the palette is chosen per face, from the model data, which is on the
+disc and complete. That is the real source and it needs no capture at all.
+
+So the map's proper use is as an **oracle** — check a face's CLUT against what the GPU actually bound
+for that rectangle — rather than as the mechanism. Building it as the mechanism produces something
+that works for one park, looks finished, and quietly has no answer for any asset nobody photographed.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
