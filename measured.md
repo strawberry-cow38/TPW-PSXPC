@@ -2130,3 +2130,45 @@ Consequences worth knowing before drawing anything:
   is happening, which is exactly what happened here.
 
 Posed at t=0, e0067 has zero vertices left at the origin and renders as a coherent solid.
+
+## ⭐ THE BONES→VERTICES LINK — FOUND (2026-09-19). Everything above that calls it open is superseded.
+
+**Each bone record's first two fields are a count and a start into the skin table** — the `+0`/`+2` I
+catalogued as "unidentified" while naming every other field in that same 40-byte record.
+
+The loop at **0x8002e1a4**:
+```
+for each bone b:
+    load bone b's 32-byte matrix from ARS + rec[0x24] into the GTE      ; 8x ctc2 at 0x8002e1c4..
+    count = u16 at bone[b] + 0 ;  start = u16 at bone[b] + 2
+    for k in 0..count-1:
+        rec = skin[start + k]                                            ; 12 bytes
+        p   = GTE transform of rec's bytes 4..11                         ; 0x4a480012
+        vertexbuf[rec.vertex] += p * rec.weight >> 14                    ; ARS + rec[0x1c]
+```
+So a skin entry is **{u16 vertex, u16 weight, s16 x,y,z in BONE SPACE, pad}**, and the "bytes 4..11, not
+identified" from the binding work were the bone-space position all along.
+
+### Why this is certain
+- **Every vertex's weights across its bones sum to exactly 16384. All 14,531 of them, not one off by a
+  single unit.** (The scatter path's weights needed a tolerance of 3; these need none.)
+- Bone ranges tile the skin table exactly on 209 of 232 meshes.
+- The bone path and the scatter path share one table and **never overlap**: 0 collisions across the 30
+  meshes that have both. The table is partitioned between two consumers.
+
+### How it was found, and why it took so long
+Searching the whole binary for the `>>14` weight scale: **ten `sra ,14` instructions in the entire
+executable**, six in the scatter path I already had and three in this one — 200 bytes earlier in the same
+function, before a branch I had read past a dozen times. Every file-side probe had failed because I was
+looking for a bone index stored per vertex; there isn't one. The bone owns a RANGE, and the range lives
+in the bone record, not the vertex record.
+
+⚠ **A track gives a bone's LOCAL transform, not its world one.** Overwriting the composed world transform
+with the keyframe's values detaches that bone from its parents; its translation becomes a small local
+offset and everything it skins collapses toward the origin. Caught by a bounded check (99 vertices on 3
+meshes) rather than by reading it back.
+
+### What this overturns
+The "bones position sub-meshes, all bending is vertex animation" hypothesis is dead — correctly withdrawn
+earlier for failing its own predictions, and now replaced. TPW **does** do per-vertex weighted skinning on
+PS1 hardware, through the GTE, at 1/16384 weights.
