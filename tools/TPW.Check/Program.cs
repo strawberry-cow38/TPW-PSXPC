@@ -863,6 +863,49 @@ static class Program
         return bad;
     }
 
+    /// <summary>--model-faces ENTRY: every textured face of one model entry with the texture the port gives it --
+    /// page, palette, UV box, and which sheets hold a sprite with that page and palette, whether the UV box fits
+    /// inside it, and by how much it overshoots when it does not. For chasing a wrong or stretched texture.</summary>
+    static int ModelFaces(DiscReader disc, int wantEntry)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        var sheets = TextureSheet.FindAll(g);
+        var e = g.Entries[wantEntry];
+        var bytes = g.Read(e);
+        if (!MeshContainer.IsContainer(bytes)) { Console.WriteLine($"#{wantEntry}: not a mesh container"); return 1; }
+        if (!MeshContainer.TryParse(bytes, out var c, out string ce)) { Console.WriteLine($"#{wantEntry}: {ce}"); return 1; }
+        for (int i = 0; i < c.SubCount; i++)
+        {
+            if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
+            var t = ModelTexturing.Build(m, sheets);
+            Console.WriteLine($"#{wantEntry} sub {i}: {m.Faces.Count} faces; {t.Unique} by sprite, {t.Ambiguous} shared, {t.Loose} loose, {t.Unmatched} untextured; main sheet #{t.MainSheetEntry}");
+            var groups = new SortedDictionary<(ushort, ushort), (int n, int umin, int vmin, int umax, int vmax)>();
+            foreach (var f in m.Faces)
+            {
+                var k = ((ushort)(f.TPage & 0x1FF), f.Clut);
+                int umin = Math.Min(f.U0, Math.Min(f.U1, f.U2)), umax = Math.Max(f.U0, Math.Max(f.U1, f.U2));
+                int vmin = Math.Min(f.V0, Math.Min(f.V1, f.V2)), vmax = Math.Max(f.V0, Math.Max(f.V1, f.V2));
+                groups[k] = groups.TryGetValue(k, out var gv)
+                    ? (gv.n + 1, Math.Min(gv.umin, umin), Math.Min(gv.vmin, vmin), Math.Max(gv.umax, umax), Math.Max(gv.vmax, vmax))
+                    : (1, umin, vmin, umax, vmax);
+            }
+            foreach (var ((tp, cl), gv) in groups)
+            {
+                var hits = new List<string>();
+                foreach (var (se, sh) in sheets)
+                    foreach (var sp in sh.Sprites)
+                        if (sp.Clut == cl && (sp.TPage & 0x1F) == (tp & 0x1F))
+                        {
+                            bool fits = gv.umin >= sp.U && gv.umax <= sp.U + sp.W && gv.vmin >= sp.V && gv.vmax <= sp.V + sp.H;
+                            hits.Add($"#{se.Index}:{sp.U},{sp.V} {sp.W}x{sp.H}{(fits ? "" : " (UVs overshoot)")}");
+                        }
+                Console.WriteLine($"   tpage {tp:x3} clut {cl:x4}: {gv.n,3} faces, UVs {gv.umin},{gv.vmin}..{gv.umax},{gv.vmax}  sprites: {(hits.Count > 0 ? string.Join("; ", hits) : "NONE")}");
+            }
+        }
+        return 0;
+    }
+
     static int ModelTextures(DiscReader disc)
     {
         var g = Archive(disc);
@@ -1197,6 +1240,8 @@ static class Program
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
             if (Array.IndexOf(args, "--scenery") >= 0) return Scenery(disc);
+            int facesAt = Array.IndexOf(args, "--model-faces");
+            if (facesAt >= 0 && facesAt + 1 < args.Length) return ModelFaces(disc, int.Parse(args[facesAt + 1]));
             // --extract NAME OUT: one file off the disc, byte for byte (e.g. TPW.OVL, the code overlays).
             int extractAt = Array.IndexOf(args, "--extract");
             if (extractAt >= 0 && extractAt + 2 < args.Length)
