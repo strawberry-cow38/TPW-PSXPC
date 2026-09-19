@@ -56,6 +56,8 @@ namespace TPWGodot
         /// <summary>The build tools' sound-effect group (SoundGroup 7), for the park view's path tool, and group 8, with
         /// the placement tools' sounds.</summary>
         SoundGroup _toolSounds, _parkSounds;
+        /// <summary>The language's strings (English), for the park HUD's labels.</summary>
+        StringTable _strings;
         /// <summary>Each world's attractions (AttractionCatalog) with their English names, for the park view's picker.</summary>
         readonly System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<(AttractionDefinition, string)>> _attractionsByWorld = new();
         /// <summary>The game's executable (TPW.BIN), for the data tables the port reads out of it (particle templates).</summary>
@@ -223,11 +225,10 @@ namespace TPWGodot
                 : GameDataLocator.Identify(dataPath);
 
             _clock = new ParkClock();
-            // ⚠ OPENING BALANCE IS NOT ESTABLISHED and is very likely per-level, so this starts at
-            // zero rather than at an invented figure. With no staff and no loans nothing charges it, so
-            // zero is inert here -- but it is a placeholder, not a reading, and the moment wages or a
-            // loan exist the real number has to come from the level record.
-            _finances = new ParkFinances(Money.Zero);
+            // The opening balance: the park's game-mode init sets the bank to Money(50000, 0) (0x800588D0, at
+            // 0x80058A94..0x80058AB8 through 0x800868B0; economy.md §1.2), what the HUD shows at the start. Whether a
+            // level record overrides it later is not read.
+            _finances = new ParkFinances(Money.FromPounds(50000));
 
             // ⚠ INSET FROM THE EDGES. Anchored full-rect with no offsets, the first label sits ON the top
             // edge and is clipped by it -- which looked like a missing widget rather than a margin bug.
@@ -567,6 +568,7 @@ namespace TPWGodot
                         StringTable english = null;
                         int enEntry = StringTable.EntryByLanguage[0];
                         if (enEntry < gz.Entries.Count && StringTable.TryParse(gz.Read(gz.Entries[enEntry]), enEntry, out var en, out _)) english = en;
+                        _strings = english;
                         for (int w = 0; w < 4; w++)
                         {
                             var list = new System.Collections.Generic.List<(AttractionDefinition, string)>();
@@ -865,6 +867,7 @@ namespace TPWGodot
                                      ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
                 _park.SetToolSounds(_toolSounds, _parkSounds);
+                _park.SetHud(_commonSheet, _exe, _strings);
                 if (_autoOpen) _park.ParkOpen = true;
                 if (_autoBuildable) _park.ShowBuildable = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
@@ -1220,6 +1223,9 @@ namespace TPWGodot
             // inside this loop and not outside it because spending several ticks in one frame must roll
             // several days, and a check after the loop would see only the last one.
             while (_accum >= tickSeconds) { _accum -= tickSeconds; _clock.Advance(); _finances.OnTick(_clock); }
+            // The park HUD's balance and date (0x800390C8 / 0x80039008: the day and month shown 1-based, the year 2000 on).
+            _park?.SetHudStatus(_finances.Bank.Balance.Pounds, _finances.Calendar.Day + 1, _finances.Calendar.Month + 1,
+                                _finances.Calendar.Year + 2000);
 
             if (_tourPos >= 0 && ++_tourFrames >= _tourHold)
             {

@@ -125,6 +125,10 @@ namespace TPWGodot
             AddChild(_ghostMarks);
             _selectionMesh = new MeshInstance3D();
             AddChild(_selectionMesh);
+            _hudLayer = new CanvasLayer { Layer = 3 };
+            AddChild(_hudLayer);
+            _hud = new ParkHud();
+            _hudLayer.AddChild(_hud);
             _pickerLayer = new CanvasLayer { Layer = 5 };
             AddChild(_pickerLayer);
             _picker = new PanelContainer { Visible = false, AnchorLeft = 1, AnchorRight = 1, AnchorBottom = 1,
@@ -230,7 +234,7 @@ namespace TPWGodot
                 _gateRect = (gx, gz, gw, gd);
                 _gateBox = new BoxSite
                 {
-                    X0 = gx * u, Z0 = gz * u, W = gw * u, D = gd * u, Height = gh,
+                    X0 = gx * u, Z0 = gz * u, W = gw * u, D = gd * u, Height = gh, Type = GateType,
                     Y0 = ParkCamera.GroundHeight(map, gx * u, gz * u), Cx = gx * u + gw * u / 2, Cz = gz * u + gd * u / 2,
                 };
             }
@@ -1003,8 +1007,10 @@ namespace TPWGodot
 
         /// <summary>What the hover box needs to know of one object (SelectionBox): footprint corner and size and base
         /// height in world units, its height in tiles, its footprint's centre.</summary>
-        sealed class BoxSite { public int X0, Z0, W, D, Y0, Height, Cx, Cz; }
+        sealed class BoxSite { public int X0, Z0, W, D, Y0, Height, Cx, Cz, Type; }
         const uint GateHoverRects = 0x800F2398;
+        /// <summary>The park gate's type (its slot 0x84, 0x8006238C).</summary>
+        const int GateType = 0x12;
 
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
@@ -1039,7 +1045,7 @@ namespace TPWGodot
             var box = new BoxSite
             {
                 X0 = ox * u, Z0 = oz * u, W = w * u, D = d * u, Y0 = BaseHeight(rec, ox, oz, rot),
-                Height = _attractionHeights.TryGetValue(rec.Entry, out int h) ? h : 0,
+                Height = _attractionHeights.TryGetValue(rec.Entry, out int h) ? h : 0, Type = rec.Type,
             };
             box.Cx = box.X0 + box.W / 2; box.Cz = box.Z0 + box.D / 2;
             _placedBoxes.Add((rec, ox, oz, rot, box));
@@ -1115,6 +1121,45 @@ void fragment() {
     ALPHA = 1.0;
 }
 ";
+
+        CanvasLayer _hudLayer;
+        ParkHud _hud;
+
+        /// <summary>Give the HUD the common sheet, the executable's tables and the language's strings.</summary>
+        public void SetHud(TextureSheet common, byte[] exe, StringTable strings) => _hud?.Setup(common, exe, strings);
+
+        /// <summary>What the HUD shows of the park: the balance in pounds and the date (day and month 1-based).</summary>
+        public void SetHudStatus(long pounds, int day, int month, int year)
+        {
+            if (_hud == null) return;
+            _hud.Pounds = pounds; _hud.Day = day; _hud.Month = month; _hud.Year = year;
+        }
+
+        /// <summary>The game's number for the tool open (0x800EFD5C), for its prompts: 2 the path tool, 3 the queue
+        /// tool, the placement tools by what they place (5 flat ride, 6 tour ride, 7 track ride, 11 coaster, 14 shop,
+        /// 15 feature, 16 sideshow), 0 none.</summary>
+        int CurrentTool()
+        {
+            if (_queue != null) return 3;
+            if (_pathMode) return 2;
+            if (_placing >= 0)
+                return _attractions[_placing].Rec.Type switch { 3 => 5, 7 => 6, 6 => 7, 1 => 11, 4 => 14, 2 => 15, 5 => 16, _ => 0 };
+            return 0;
+        }
+
+        /// <summary>The prompts with no tool open, set every frame from what the cursor is over (0x800396FC): Build,
+        /// Laptop, Path, Hire; over an attraction, Info and OK; over the park gate, OK. (Build and Hire show only while
+        /// something can still be built or hired, which in the port is always so far.)</summary>
+        static int[] IdlePrompts(BoxSite hovered)
+        {
+            int top = HudPrompts.Build, right = HudPrompts.Laptop, bottom = HudPrompts.Path, left = HudPrompts.Hire;
+            if (hovered != null)
+            {
+                bottom = HudPrompts.Ok;
+                if (hovered.Type != GateType) right = HudPrompts.Info;
+            }
+            return new[] { top, right, bottom, left };
+        }
 
         /// <summary>The queue tool's ghost: from the queue's end toward the tile under the mouse, each tile wearing the
         /// marker for its verdict (0x8001D9D0 with kind 4, drawn as every marker is).</summary>
@@ -1383,6 +1428,8 @@ void fragment() {
             }
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
             _selectionMesh.Mesh = SelectionMesh();
+            _hudLayer.Visible = Visible && _hud.Ready;
+            if (_hud.Ready) _hud.SetPrompts(CurrentTool() is int tool && tool != 0 ? _hud.ToolPrompts(tool) : IdlePrompts(hovered));
             _fxMesh.Mesh = FxMesh();
             if (_pathMode)
             {
