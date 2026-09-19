@@ -18,6 +18,49 @@ static class Program
     /// unknown, and printing all of them says WHICH one the hardware uses rather than just pass/fail.</summary>
     /// <summary>Parse every plain sub-entry and report. ⭐ THE FALSIFIER: a wrong layout does not fail
     /// gracefully on a few, it fails on most, because every field feeds the walk that finds the next one.</summary>
+    /// <summary>Which texture page draws with palettes held in which page, read off the FILE.
+    ///
+    /// ⭐ THE TEST WITH TEETH. tinyclaw logged the same mapping off the live GPU. Twelve pages each landing
+    /// on the right one of three has many ways to be wrong and one to be right, and the two methods share
+    /// no code, no file and no assumption.</summary>
+    static void Mapping(DiscReader disc)
+    {
+        var f = disc.Find(AssetSelfTest.AssetArchive);
+        if (f == null) { Console.WriteLine("no archive"); return; }
+        if (!GazArchive.TryParse(disc.ReadFile(f), out var gaz, out string gerr))
+        { Console.WriteLine("archive: " + gerr); return; }
+
+        var map = new SortedDictionary<string, SortedDictionary<string, int>>();
+        foreach (var e in gaz.Entries)
+        {
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes)) continue;
+            if (!MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                if (c.IsCompressed(i)) continue;
+                if (!c.TryParseMesh(bytes, i, out var mesh, out _)) continue;
+                foreach (var face in mesh.Faces)
+                {
+                    var (px, py) = face.TPageOrigin;
+                    var (cx, cy) = face.ClutOrigin;
+                    // CLUT and tpage coordinates are both in 16-bit VRAM cells, so they compare directly.
+                    string page = $"{px},{py}";
+                    string holder = $"{(cx / 64) * 64},{(cy >= 256 ? 256 : 0)}";
+                    if (!map.TryGetValue(page, out var inner)) map[page] = inner = new SortedDictionary<string, int>();
+                    inner.TryGetValue(holder, out int n); inner[holder] = n + 1;
+                }
+            }
+        }
+        Console.WriteLine("texture page -> palette-holder page (from the FILE, via 531 parsed meshes):");
+        foreach (var kv in map)
+        {
+            var parts = new List<string>();
+            foreach (var h in kv.Value) parts.Add($"{h.Key} ({h.Value:n0})");
+            Console.WriteLine($"   {kv.Key,-10} -> {string.Join("  ", parts)}");
+        }
+    }
+
     static void Meshes(DiscReader disc)
     {
         var f = disc.Find(AssetSelfTest.AssetArchive);
@@ -171,6 +214,7 @@ static class Program
         // ⚠ THIS GOES THROUGH THE REAL DECODER ON PURPOSE. Re-implementing the conversion in a script to
         // "check the format" would test the script, which is the mistake that just shipped a broken launcher:
         // a harness that builds its own input is not testing the product.
+        bool mapping = Array.IndexOf(args, "--mapping") >= 0;
         bool meshes = Array.IndexOf(args, "--meshes") >= 0;
         bool vramHash = Array.IndexOf(args, "--vramhash") >= 0;
         int texAt = Array.IndexOf(args, "--tex");
@@ -215,6 +259,7 @@ static class Program
                 Console.WriteLine($"wrote {limg.Width}x{limg.Height} RGBA to {rawOut}");
                 return 0;
             }
+            if (mapping) { Mapping(disc); return 0; }
             if (meshes) { Meshes(disc); return 0; }
             if (vramHash) { VramHash(disc); return 0; }
 
