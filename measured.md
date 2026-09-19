@@ -2047,3 +2047,26 @@ What would settle it, cheapest first:
 0x246) and returned 78 hits inside functions that set no matrix at all. The corrected pattern gives 304,
 and the disassembler cross-check is what caught it — capstone does not decode GTE control ops, so it
 prints them as raw bytes, which is itself the tell that a hit is real.
+
+### Update: my "bones place sub-meshes" hypothesis is NOT supported (2026-09-19)
+
+I floated it above and it is attractive — per-vertex skinning would be expensive on this hardware, and
+the vertex path is complete without bones. It has now failed two of its own predictions, and one
+measurement points the other way:
+
+- **291 meshes (54.8%) have bone tracks and NO position tracks**, and in those the bone track count
+  equals the bone count exactly — every bone driven. If bones never reached vertices, over half the
+  animated content on the disc would be completely static. That is not credible for a game of animated
+  rides, and it is evidence against the hypothesis rather than for it.
+- **The trailing bone list does not name sub-entries.** If bones placed sub-meshes, the list length
+  should track the container's sub-entry count. It does on 4 of 74 containers (5.4%).
+- **No field of the binding record is a bone index**, tested again on the run-less meshes across all six
+  s16 and all twelve bytes. The only fields scoring high are constant 0 or near-constant, which is the
+  same vacuous pass caught earlier with the shuffled control.
+
+So the position is: the vertex path is fully decoded, the bone path is fully decoded, and **what joins
+them is still unknown** — with no working hypothesis, rather than a hypothesis awaiting confirmation.
+The honest next step is the hardware experiment: pose a model on the console with a bone track running
+and diff the ARS vertex buffer between frames. If the vertices move while only bone matrices changed,
+the link exists and is in code I have not read; if they do not, something outside this mesh consumes
+those matrices.
