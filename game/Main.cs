@@ -184,6 +184,8 @@ namespace TPWGodot
             var texBtn = new Button { Text = "Textures on/off" };
             var animBtn = new Button { Text = "Play animation" };
             animBtn.Pressed += () => _models.TogglePlay();
+            var nextAnimBtn = new Button { Text = "Next animated >" };
+            nextAnimBtn.Pressed += () => _models.NextAnimated();
             cullBtn.Pressed += () => _models.ToggleCull();
             windBtn.Pressed += () => _models.ToggleWinding();
             texBtn.Pressed += () => _models.ToggleTextures();
@@ -207,6 +209,7 @@ namespace TPWGodot
             row.AddChild(windBtn);
             row.AddChild(texBtn);
             row.AddChild(animBtn);
+            row.AddChild(nextAnimBtn);
             row.AddChild(_parkButton);
             row.AddChild(_parkChoice);
             _root.AddChild(row);

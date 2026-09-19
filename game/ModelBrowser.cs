@@ -72,23 +72,47 @@ namespace TPWGodot
         /// indistinguishable on screen and the wrong one of them sends someone debugging working code.</summary>
         public void TogglePlay() { _playing = !_playing; _clock = 0; if (!_playing) { _posed = null; Show(_index); } }
 
-        /// <summary>Whether the model on screen has anything to play.</summary>
-        public bool HasAnimation
+        /// <summary>What this player can do with the model on screen.
+        ///
+        /// ⚠ THREE STATES, NOT TWO, AND CONFLATING THE LAST TWO IS A LIE THE USER CATCHES FIRST. Most
+        /// models on the disc animate through BONES only, and nothing yet connects a bone to a vertex —
+        /// so they have real animation data, this player poses their skeleton, and not one vertex moves.
+        /// An "animation available" label on those promises motion that cannot happen, which is exactly
+        /// how this was first reported: "nothing happens, the model stays the same".</summary>
+        public enum PlayState { None, BonesOnly, Playable }
+
+        public PlayState Playability
         {
             get
             {
-                if (_index < 0 || _index >= _meshes.Count) return false;
+                if (_index < 0 || _index >= _meshes.Count) return PlayState.None;
                 var m = _meshes[_index].Mesh;
-                if (m.Tracks == null) return false;
-                foreach (var t in m.Tracks) if (t.Positions.Length > 0 || t.Keys.Length > 0) return true;
-                return false;
+                if (m.Tracks == null) return PlayState.None;
+                bool bones = false;
+                foreach (var t in m.Tracks)
+                {
+                    // Only a track that reaches vertices can move anything: a scatter source with a
+                    // binding behind it, or a direct vertex write.
+                    if (t.Positions.Length > 0 &&
+                        (t.Target == TrackTarget.Vertex ||
+                         (t.Target == TrackTarget.ScatterSource && m.Binding != null && m.Binding.SourceCount > 0)))
+                        return PlayState.Playable;
+                    if (t.Keys.Length > 0) bones = true;
+                }
+                return bones ? PlayState.BonesOnly : PlayState.None;
             }
         }
 
+        public bool HasAnimation => Playability == PlayState.Playable;
+
         public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "flipped" : "correct")} · " +
                                     $"textures {(_textured ? "ON" : "off")} · " +
-                                    (!HasAnimation ? "no animation in this model"
-                                     : _playing ? $"playing, t={(int)_clock}" : "animation available, paused");
+                                    Playability switch
+                                    {
+                                        PlayState.None      => "no animation in this model",
+                                        PlayState.BonesOnly => "bone animation only — not playable yet",
+                                        _ => _playing ? $"playing, t={(int)_clock}" : "animation available, paused",
+                                    };
 
         public int Count => _meshes.Count;
 
@@ -295,6 +319,24 @@ namespace TPWGodot
         static Vector3 ToGodot(TpwMesh m, int vi) =>
             new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], -m.Vertices[vi * 3 + 2]);
 
+
+        /// <summary>Jump to the next model this player can actually move.
+        ///
+        /// ⚠ Only 29 of the 556 models on the disc have animation that reaches vertices. Stepping through
+        /// with Next and pressing Play lands on a bone-only model 19 times out of 20, which reads as a
+        /// broken player rather than as a rare feature -- and that is precisely how it was first reported.
+        /// A direct jump is the difference between the feature being visible and being effectively absent.</summary>
+        public void NextAnimated()
+        {
+            for (int step = 1; step <= _meshes.Count; step++)
+            {
+                int at = ((_index + step) % _meshes.Count + _meshes.Count) % _meshes.Count;
+                int save = _index;
+                _index = at;
+                if (Playability == PlayState.Playable) { Show(at); return; }
+                _index = save;
+            }
+        }
 
         public void Next() => Show(_index + 1);
         public void Prev() => Show(_index - 1);
