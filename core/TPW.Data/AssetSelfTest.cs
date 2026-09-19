@@ -81,6 +81,7 @@ namespace TPW.Data
             CheckSpeechIsStreaming(disc, r);
             CheckAdvisor(disc, r);
             CheckMovies(disc, r);
+            CheckText(disc, r);
 
             r.ElapsedMs = sw.ElapsedMilliseconds;
             return r;
@@ -355,6 +356,49 @@ namespace TPW.Data
             r.Add("advisor index", agree == first.Count && first.Count > 0,
                 $"{lines.Count} lines in the game's index (FOLIO #{AdvisorSpeech.IndexEntry}); in the first block, " +
                 $"{agree}/{first.Count} line starts agree with where the scan found them");
+        }
+
+        /// <summary>The game's text: eight language tables and the ID table, and the executable's map from
+        /// language to table checked against the constant the port uses.
+        ///
+        /// ⭐ WHAT CAN FAIL: every table must hold the same number of strings (they are one table translated),
+        /// the map in TPW.BIN must equal <see cref="StringTable.EntryByLanguage"/> (so a disc laid out
+        /// differently is caught rather than shown in the wrong language), and every attraction record's name
+        /// must resolve to a non-empty English string.</summary>
+        static void CheckText(DiscReader disc, SelfTestReport r)
+        {
+            var af = disc.Find(AssetArchive);
+            if (af == null || !GazArchive.TryParse(disc.ReadFile(af), out var gaz, out _)) return;
+            int count = -1, parsed = 0;
+            string problem = null;
+            for (int lang = 0; lang < StringTable.EntryByLanguage.Length; lang++)
+            {
+                if (!StringTable.TryRead(gaz, lang, out var t, out string err)) { problem ??= $"{StringTable.LanguageNames[lang]}: {err}"; continue; }
+                parsed++;
+                if (count < 0) count = t.Strings.Length;
+                else if (t.Strings.Length != count) problem ??= $"{StringTable.LanguageNames[lang]} has {t.Strings.Length} strings, English {count}";
+            }
+            var exe = disc.Find(GameExecutable);
+            var map = exe == null ? null : StringTable.ReadEntryMap(disc.ReadFile(exe), GameExecutableBase);
+            bool mapOk = map != null && System.Linq.Enumerable.SequenceEqual(map, StringTable.EntryByLanguage);
+            if (!mapOk) problem ??= map == null ? "no language map in the executable" : $"the executable maps languages to entries {string.Join(",", map)}";
+
+            // Attraction names, through the records.
+            int records = 0, named = 0;
+            if (StringTable.TryRead(gaz, 0, out var english, out _))
+                foreach (var e in gaz.Entries)
+                {
+                    var bytes = gaz.Read(e);
+                    if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+                    if (!AttractionRecord.TryRead(bytes, c, out var rec)) continue;
+                    records++;
+                    if (!string.IsNullOrWhiteSpace(english[rec.TextId])) named++;
+                }
+            if (records > 0 && named != records) problem ??= $"{records - named} of {records} attraction records name an empty string";
+
+            r.Add("text", problem == null,
+                problem ?? $"{parsed} language tables of {count:n0} strings each; the executable's language map matches; " +
+                           $"{named}/{records} attraction records named");
         }
 
         /// <summary>Every movie, demuxed in full.

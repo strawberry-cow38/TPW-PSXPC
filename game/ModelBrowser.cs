@@ -22,6 +22,8 @@ namespace TPWGodot
     public partial class ModelBrowser : Node3D
     {
         readonly List<(int Entry, int Sub, TpwMesh Mesh)> _meshes = new();
+        /// <summary>Entry → what the model is, from the attraction record in the same entry, named in English.</summary>
+        readonly Dictionary<int, string> _names = new();
         MeshInstance3D _instance;
         Camera3D _camera;
         Label _info;
@@ -95,12 +97,17 @@ namespace TPWGodot
             var f = disc.Find(AssetSelfTest.AssetArchive);
             if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return;
             _sheets = TextureSheet.FindAll(gaz);
+            StringTable.TryRead(gaz, 0, out var english, out _);
 
             foreach (var e in gaz.Entries)
             {
                 var bytes = gaz.Read(e);
                 if (!MeshContainer.IsContainer(bytes)) continue;
                 if (!MeshContainer.TryParse(bytes, out var c, out _)) continue;
+                // ⭐ THE NAME COMES FROM THE GAME, NOT A GUESS: the attraction record sits in the same entry as
+                // the model, and its text id indexes the English table.
+                if (english != null && AttractionRecord.TryRead(bytes, c, out var rec) && !string.IsNullOrWhiteSpace(english[rec.TextId]))
+                    _names[e.Index] = $"{english[rec.TextId]} ({rec.TypeName}, {rec.Width}x{rec.Depth} tiles)";
                 for (int i = 0; i < c.SubCount; i++)
                 {
                     // Compressed sub-entries (the model packs in entries 0 and 3) are expanded inside
@@ -217,7 +224,8 @@ namespace TPWGodot
                     pages.Add($"{px},{py}");
                 }
                 _info.Text =
-                    $"model {_index + 1} of {_meshes.Count}   entry #{entry} sub {sub}\n" +
+                    $"model {_index + 1} of {_meshes.Count}   entry #{entry} sub {sub}" +
+                    (_names.TryGetValue(entry, out var name) ? $"   —   {name}" : "") + "\n" +
                     $"{m.VertexCount:n0} vertices   {m.Faces.Count:n0} faces   {m.BoneCount} bones   {m.TrackCount} anim tracks\n" +
                     $"texture pages: {(pages.Count > 0 ? string.Join("  ", pages) : "none")}   [{StateLabel}]" + _texInfo;
             }

@@ -59,7 +59,7 @@ namespace TPW.Data
     /// by FOLIO entry 405; channel = lang + 8·(clip &amp; 3)". This scan, which knows nothing of that, finds
     /// 3,616 = 452 × 8 lines in 113 = 452 / 4 blocks: the two agree to the unit, from opposite directions.
     /// So a block holds four lines, each recorded in eight languages side by side, and the game picks one
-    /// language's channel. Which language is which number is not yet known.
+    /// language's channel. Which number is which language: see <see cref="LanguageNames"/>.
     ///
     /// ⭐ THE GAME'S INDEX IS FOLIO ENTRY 405, and it agrees with the scan completely. 452 records of 12 bytes:
     /// a u32 sector where the line starts in language 0, then eight bytes, one per language (meaning unknown).
@@ -81,21 +81,16 @@ namespace TPW.Data
         public const int Channels = 32;
         public const int Languages = 8;
 
-        /// <summary>What each language channel is.
+        /// <summary>What each language channel is: the same index as the game's text tables.
         ///
-        /// ⭐ 0 IS ENGLISH AND 7 IS JAPANESE, BOTH BY MASTER'S EAR (and so are 1 and 4, below). The disc is sold as seven languages
-        /// (En, Fr, De, Es, It, Nl, Sv) and there are eight channels; the eighth is a Japanese voice actor, a
-        /// localisation the PAL release never advertised. The front-end texture sheet carries hiragana and
-        /// katakana too. tinyclaw had already measured it without ears: a voice an octave above the others,
-        /// slow, 43% pauses (Japanese takes more syllables to say the same thing).
+        /// ⭐ 0 ENGLISH, 1 FRENCH, 4 SPANISH AND 7 JAPANESE WERE IDENTIFIED BY MASTER'S EAR. The eighth is a
+        /// Japanese voice actor, a localisation the PAL release never advertised; the front-end sheet has
+        /// hiragana and katakana too, and END.STR's game-over text is げーむおーばー. tinyclaw had measured it
+        /// without ears: a voice an octave above the others, slow, 43% pauses.
         ///
-        /// ✅ 1 = French and 4 = Spanish, BY EAR too. fable's game-over movie table predicted them (0 ENGLISH,
-        /// 1 FRENCH, 4 SPANISH, 7 END), and it IS indexed by language: tinyclaw decoded END.STR and it says
-        /// げーむおーばー, so its 7 is Japanese exactly as this channel 7 is. Four of eight now heard.
-        /// ⚠ 2, 3, 5 and 6 are GUESSED from the usual EFIGS order, German, Italian, Dutch, Swedish; nobody has
-        /// listened to them yet.</summary>
-        public static readonly string[] LanguageNames =
-            { "English", "French", "German?", "Italian?", "Spanish", "Dutch?", "Swedish?", "Japanese" };
+        /// ✅ THE OTHER FOUR COME FROM THE GAME'S OWN LANGUAGE MAP (TPW.BIN 0x800E1BEC, see StringTable), which
+        /// matches all four heard languages and names the rest: 2 German, 3 Italian, 5 Dutch, 6 Swedish.</summary>
+        public static readonly string[] LanguageNames = StringTable.LanguageNames;
         /// <summary>The FOLIO.GAZ entry holding the game's index of lines.</summary>
         public const int IndexEntry = 405;
         public const int IndexRecordBytes = 12;

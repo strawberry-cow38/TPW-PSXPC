@@ -33,10 +33,17 @@ namespace TPW.Data
     ///   game over  the GAME OVER movie in the player's language (0x800BCD00: 1 French, 4 Spanish, 7 END =
     ///              Japanese, anything else English), then back to the boot sequence.
     /// tinyclaw then cold-booted the console and caught "a blue machine interior with joysticks" before the
-    /// language select: GRAV's frame 60 exactly. So the world movies are not tied to worlds at all. Both
-    /// earlier readings were partly right: master's second memory ("after the bullfrog logo at startup") and
-    /// fable's "attract cycle" (a rotation from the title). tinyclaw's 9,000-frame idle with no movie says
-    /// result 6 is not a short timeout, if it is one at all.
+    /// language select: GRAV's frame 5. So the world movies are not tied to worlds at all. Both earlier
+    /// readings were partly right: master's second memory ("after the bullfrog logo at startup") and fable's
+    /// "attract cycle" (a rotation from the title).
+    ///
+    /// ✅ AND A FORCED GAME OVER MATCHES THE CODE STEP FOR STEP (tinyclaw, bank held at -£435,000):
+    /// GAME OVER → GRAV → title → MIR. The counter reset puts GRAV first and the rotation carries on to MIR,
+    /// and the title handed over to MIR within 2,000 frames, so result 6 does behave like an idle timeout.
+    ///
+    /// ⚠ BUT BF.STR NEVER PLAYS. Not at cold boot, not after the game over, though the code path above plays
+    /// it before GRAV both times. Something skips it (the play routine has a CD-check guard; which condition
+    /// fails is not known). The port does not play it at boot either, because the console does not.
     ///
     /// ⭐ THE DECODER HAS FOUR POSITIVE CONTROLS, NOT ONE — from master, who has played it:
     ///     BF     the Bullfrog logo        (publicly known)
@@ -257,7 +264,7 @@ namespace TPW.Data
         /// are exactly eight .STR files.</summary>
         public static readonly (string File, string What)[] Catalogue =
         {
-            ("BF.STR", "Bullfrog logo, at boot"),
+            ("BF.STR", "Bullfrog logo (in the boot code path, never seen playing)"),
             ("GRAV.STR", "space: gravity bounce-house, at boot and in rotation"),
             ("MIR.STR", "halloween: the freaky mirror, in rotation"),
             ("JUG.STR", "jungle, in rotation"),

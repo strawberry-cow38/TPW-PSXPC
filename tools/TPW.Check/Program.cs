@@ -316,6 +316,29 @@ static class Program
         return bad;
     }
 
+    static int Names(DiscReader disc)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        for (int lang = 0; lang < StringTable.EntryByLanguage.Length; lang++)
+            if (StringTable.TryRead(g, lang, out var t, out string err))
+                Console.WriteLine($"{StringTable.LanguageNames[lang],-9} #{t.Entry}: {t.Strings.Length} strings: {t[0]} | {t[2]} | {t[4]}");
+            else Console.WriteLine($"{StringTable.LanguageNames[lang]}: {err}");
+        StringTable.TryRead(g, 0, out var en, out _);
+        StringTable.TryParse(g.Read(g.Entries[StringTable.IdEntry]), StringTable.IdEntry, out var ids, out _);
+        int n = 0;
+        foreach (var e in g.Entries)
+        {
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            if (!AttractionRecord.TryRead(bytes, c, out var rec)) continue;
+            n++;
+            Console.WriteLine($"  #{e.Index,-4} {rec.TypeName,-13} {rec.Width}x{rec.Depth}  {en?[rec.TextId],-28} {ids?[rec.TextId]}");
+        }
+        Console.WriteLine($"{n} attraction records");
+        return 0;
+    }
+
     static int ModelAtlas(DiscReader disc, int want, string outPath)
     {
         var g = Archive(disc);
@@ -616,6 +639,7 @@ static class Program
             // --model-textures: do the meshes draw from the texture sheets? A face names a page and a palette;
             // count the faces whose palette is one a sheet's own sprite table lists, on a page of that same sheet.
             if (Array.IndexOf(args, "--model-textures") >= 0) return ModelTextures(disc);
+            if (Array.IndexOf(args, "--names") >= 0) return Names(disc);
 
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
