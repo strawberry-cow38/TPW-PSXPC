@@ -32,7 +32,10 @@ namespace TPWGodot
         /// kept to rebuild the ground after laying.</summary>
         PathTool _paths;
         bool _pathMode;
-        (int X, int Z)? _cursorTile, _runStart;
+        (int X, int Z)? _cursorTile, _runStart, _pressTile;
+        /// <summary>A run started with a click (press and release on one tile): its start stays put and the next
+        /// click finishes it. A press dragged to another tile lays on release instead (master's two ways).</summary>
+        bool _runSticky;
         TextureSheet _groundSheet;
         Scrolling _scroll;
         /// <summary>The flag sprite (EntranceFlags) as its own texture, and its size in texels.</summary>
@@ -649,7 +652,7 @@ namespace TPWGodot
             if (_info != null && _map != null)
                 _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
-                           + (_pathMode ? "\nPATH TOOL: left button press, drag, release to lay a straight run; right button to put it away" : "");
+                           + (_pathMode ? "\nPATH TOOL: click the start then click the end, or press at the start and drag to the end; Esc drops a run, right button puts the tool away" : "");
         }
 
         /// <summary>The tile under the mouse: march the ray from the camera through the pointer until it drops below
@@ -706,6 +709,11 @@ namespace TPWGodot
                 CullMode = BaseMaterial3D.CullModeEnum.Disabled,
             });
             return mesh;
+        }
+
+        void LayPath((int X, int Z) start, (int X, int Z) end)
+        {
+            if (_paths.Lay(_map, PathTool.Run(start.X, start.Z, end.X, end.Z)) > 0) RebuildGround();
         }
 
         /// <summary>Lay a run of path as the tool would, from tile (x0, z0) toward (x1, z1). For captures: the mouse
@@ -852,21 +860,37 @@ namespace TPWGodot
             { GameCamera = !GameCamera; return; }
             if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _paths != null)
             {
-                _pathMode = !_pathMode; _runStart = null; _cursorPinned = false;
+                _pathMode = !_pathMode; _runStart = null; _runSticky = false; _cursorPinned = false;
                 if (!_pathMode) _cursorMesh.Mesh = null;
                 RefreshInfo();
                 return;
             }
             if (_pathMode && e is InputEventMouseButton { ButtonIndex: MouseButton.Left } lmb)
             {
-                if (lmb.Pressed) _runStart = _cursorTile;
+                if (lmb.Pressed)
+                {
+                    // A press starts a run, unless a clicked run is waiting for its finishing click.
+                    if (!_runSticky) { _runStart = _cursorTile; _pressTile = _cursorTile; }
+                }
+                else if (_runSticky)
+                {
+                    // The finishing click of a clicked run.
+                    if (_runStart is { } s0 && _cursorTile is { } e0) LayPath(s0, e0);
+                    _runStart = null; _runSticky = false;
+                }
                 else if (_runStart is { } start && _cursorTile is { } end)
                 {
-                    int laid = _paths.Lay(_map, PathTool.Run(start.X, start.Z, end.X, end.Z));
-                    _runStart = null;
-                    if (laid > 0) RebuildGround();
+                    // Released where it was pressed: a click, so the start sticks and the next click finishes the run.
+                    // Released elsewhere: a drag, laid now.
+                    if (end == _pressTile) _runSticky = true;
+                    else { LayPath(start, end); _runStart = null; }
                 }
                 else _runStart = null;
+                return;
+            }
+            if (_pathMode && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape } && _runStart != null)
+            {
+                _runStart = null; _runSticky = false;   // drop the run, keep the tool
                 return;
             }
             if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Q }) { _gcam.Turn(-1); return; }
