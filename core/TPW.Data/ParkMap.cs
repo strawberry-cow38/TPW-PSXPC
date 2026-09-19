@@ -22,10 +22,16 @@ namespace TPW.Data
 
     /// <summary>One 8-byte map tile.
     ///
-    /// ⚠ THERE IS NO HEIGHT FIELD. Every byte is accounted for — type, link bits, facing, a model index, an
-    /// appearance variant and flags — and none of them is elevation. Byte +1 has no reader anywhere in the
-    /// game. So a port must not expect the map to carry a heightmap; whatever shapes the landscape is not
-    /// in here.</summary>
+    /// ⭐⭐ BYTE +1 IS THE HEIGHT, AND THIS COMMENT USED TO SAY THE OPPOSITE: "there is no height field; byte +1
+    /// has no reader anywhere in the game". It has one. 0x800620B8 returns `tile[+1] << 2`, and 0x800590A0 uses
+    /// it as the Y of a tile's world position, (column << 8, tile[+1] << 2, row << 8). So a tile is 256 world
+    /// units across and the height is byte +1 × 4, 0..1020. On the maps it is anything but flat: map #203 has
+    /// a plateau at 64, a dip at 60 and hills above 94, in smooth regions, which noise would not make. The
+    /// "no reader" claim came from a search that did not find this accessor, and was repeated here as fact;
+    /// a negative is only as strong as the search behind it.
+    ///
+    /// tinyclaw measured the terrain as GENERATED (~185 triangles a frame, not a mesh in the archive): generated
+    /// FROM this field.</summary>
     public readonly struct MapTile
     {
         public readonly byte Raw0, Raw1, Links, Facing;
@@ -36,6 +42,12 @@ namespace TPW.Data
         { Raw0 = t; Raw1 = r1; Links = links; Facing = facing; ModelIndex = model; Appearance = appearance; Flags = flags; }
 
         public TileType Type => (TileType)Raw0;
+
+        /// <summary>The raw height byte (+1).</summary>
+        public byte Height => Raw1;
+
+        /// <summary>Height in the game's world units, as 0x800620B8 computes it: byte +1 × 4. A tile is 256 units across.</summary>
+        public int HeightUnits => Raw1 << 2;
 
         /// <summary>True for anything a guest walks on. ⚠ PathQueueOverlap counts: the game's own walk-in
         /// and wander code treat 13 as path, so excluding it silently breaks connectivity at crossings.</summary>

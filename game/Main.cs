@@ -38,6 +38,8 @@ namespace TPWGodot
         System.Collections.Generic.List<(int Entry, ParkMap Map)> _maps = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
         int _autoPark = -1;
+        /// <summary>From <c>--park-view=x,z,yaw,pitch,distance</c>: where the park camera starts.</summary>
+        float[] _parkView;
         OptionButton _movieChoice;
         Button _playMovie;
         System.Collections.Generic.List<string> _movieFiles = new();
@@ -263,6 +265,9 @@ namespace TPWGodot
                     _modelTourSpec = arg.Substring("--models=".Length).Split(',');
                 else if (arg == "--cull-on") _tourCull = true;
                 else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
+                else if (arg.StartsWith("--park-view="))
+                    _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
+                        v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
             }
 
             GD.Print($"[tpw] data: {_data.Message}");
@@ -402,7 +407,11 @@ namespace TPWGodot
             if (_autoPark >= 0)
             {
                 int i = _maps.FindIndex(m => m.Entry == _autoPark);
-                if (i >= 0) { _parkChoice.Selected = i; _root.Visible = false; ShowPark(true); }
+                if (i >= 0)
+                {
+                    _parkChoice.Selected = i; _root.Visible = false; ShowPark(true);
+                    if (_parkView != null && _parkView.Length == 5) _park.SetView(_parkView[0], _parkView[1], _parkView[2], _parkView[3], _parkView[4]);
+                }
             }
 
             _playAdvisor.Disabled = !_hasAdvisor;

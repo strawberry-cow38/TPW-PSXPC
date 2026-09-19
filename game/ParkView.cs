@@ -7,7 +7,7 @@ namespace TPWGodot
 {
     /// <summary>A park, from its map: the first step toward drawing a park the way the game does.
     ///
-    /// ⚠ WHAT THIS DRAWS TODAY IS THE TILE TYPES, NOT THE GROUND. Every tile is a flat square coloured by its type
+    /// ⚠ WHAT THIS DRAWS TODAY IS THE TILE TYPES, NOT THE GROUND'S TEXTURES. Every tile is coloured by its type
     /// (grass, path, queue, footprint, entrance, exit, track, gate), which is an inspection view of the map
     /// data, deliberately not dressed up as terrain. The real ground is being read out of the game's own
     /// drawing code: the obvious reading of the tile's +4 field ("a sprite number in the world's sheet") was
@@ -63,22 +63,27 @@ namespace TPWGodot
             _name = name;
             var verts = new List<Vector3>(map.Width * map.Height * 6);
             var cols = new List<Color>(map.Width * map.Height * 6);
-            // One unit per tile, x along the map's width, z along its height. A thin gap between tiles keeps
-            // the grid readable, since this is an inspection view.
-            const float gap = 0.04f;
-            for (int y = 0; y < map.Height; y++)
-                for (int x = 0; x < map.Width; x++)
+            // ⭐ THE SHAPE IS REAL: byte +1 × 4 is the height in world units, where a tile is 256 (0x800620B8,
+            // 0x800590A0). The height belongs to the tile's CORNER, so quad (x, z) spans the heights of tiles
+            // (x, z), (x+1, z), (x, z+1) and (x+1, z+1), and the last row and column are corners only, which is
+            // why the game's in-bounds test stops one short of the width and height.
+            float H(int x, int y) => map[x, y].HeightUnits / 256f;
+            for (int y = 0; y < map.Height - 1; y++)
+                for (int x = 0; x < map.Width - 1; x++)
                 {
                     var t = map[x, y];
                     var c = TypeColour(t.Type);
                     // The +6 variant (1..5 on the starting maps) nudges the shade, so the map's own variation shows.
                     float v = 1f + (t.Appearance - 3) * 0.04f;
                     c = new Color(c.R * v, c.G * v, c.B * v);
-                    float x0 = x + gap, x1 = x + 1 - gap, z0 = y + gap, z1 = y + 1 - gap;
-                    var a = new Vector3(x0, 0, z0); var b = new Vector3(x1, 0, z0);
-                    var d = new Vector3(x0, 0, z1); var e = new Vector3(x1, 0, z1);
+                    var a = new Vector3(x, H(x, y), y); var b = new Vector3(x + 1, H(x + 1, y), y);
+                    var d = new Vector3(x, H(x, y + 1), y + 1); var e = new Vector3(x + 1, H(x + 1, y + 1), y + 1);
                     verts.AddRange(new[] { a, b, e, a, e, d });
-                    for (int k = 0; k < 6; k++) cols.Add(c);
+                    // A darker edge line would need a second pass; shade the second triangle a touch instead so
+                    // the grid still reads on slopes.
+                    for (int k = 0; k < 3; k++) cols.Add(c);
+                    var c2 = new Color(c.R * 0.93f, c.G * 0.93f, c.B * 0.93f);
+                    for (int k = 0; k < 3; k++) cols.Add(c2);
                 }
             var arrays = new Godot.Collections.Array();
             arrays.Resize((int)Godot.Mesh.ArrayType.Max);
@@ -98,9 +103,22 @@ namespace TPWGodot
             _ground.Mesh = mesh;
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
-            _focus = new Vector3(map.Width / 2f, 0, map.Height / 2f);
+            _focus = new Vector3(map.Width / 2f, 1, map.Height / 2f);
             for (int i = 0; i < map.Tiles.Length; i++)
-                if (map.Tiles[i].IsWalkable) { _focus = new Vector3(i % map.Width + 0.5f, 0, i / map.Width + 0.5f); break; }
+                if (map.Tiles[i].IsWalkable) { _focus = new Vector3(i % map.Width + 0.5f, map.Tiles[i].HeightUnits / 256f, i / map.Width + 0.5f); break; }
+            UpdateCamera();
+        }
+
+        /// <summary>Set the camera outright: focus tile (x, z), yaw and pitch in radians, distance in tiles. For
+        /// captures; the keys do the same thing interactively.</summary>
+        public void SetView(float x, float z, float yaw, float pitch, float distance)
+        {
+            if (_map != null)
+            {
+                int ix = Math.Clamp((int)x, 0, _map.Width - 1), iz = Math.Clamp((int)z, 0, _map.Height - 1);
+                _focus = new Vector3(x, _map[ix, iz].HeightUnits / 256f, z);
+            }
+            _yaw = yaw; _pitch = pitch; _distance = distance;
             UpdateCamera();
         }
 
