@@ -41,6 +41,26 @@ namespace TPW.Data
     /// ⚠ Loop HERE, not at some round number. A fixed window either cuts the animation off partway or
     /// holds the last pose for the remainder, and both read as a broken loop rather than a wrong length.
     /// Untimed tracks are one sample per tick, so their length is simply their sample count.</summary>
+        /// <summary>⚠ THE LOOP SNAP ON 200 OF THE DISC'S 251 ANIMATED SUB-MESHES IS STILL OPEN, and the
+        /// obvious fix is RULED OUT. I proposed that the game interpolates across the wrap to cover the
+        /// head of the timeline, since clips' keys start late (t=25 for the language advisor). It does
+        /// not. The type-0 handler at 0x8002ccfc reads key[0]'s time, and when the current time is not
+        /// past it, copies KEY[0]'S OWN BLOCK and applies it -- a clamp, exactly like this evaluator.
+        ///
+        /// ⚠ Which leaves a contradiction nobody should build on until it is resolved:
+        ///   - the game clamps below the first key, as we do;
+        ///   - our last-key pose is 2,781 from our first-key pose, against a mean step of 237;
+        ///   - so a cycle that ends at the last key and restarts at key[0] MUST visibly snap;
+        ///   - and the console does not. Twenty-two consecutive frames across the loop point move 59 to
+        ///     74 pixels each, with no spike anywhere.
+        ///
+        /// The flag and the advisor's body repeat on the SAME 104-frame period (both match frame 30 at
+        /// frames 134 and 238), so this is not a case of the cloth being driven by something else while
+        /// the body animates. One clock, smooth, and we cannot reproduce it yet.
+        ///
+        /// So something in the model above is wrong -- most likely how the LAST key is evaluated, or a
+        /// per-key duration doing work this reader has not accounted for. Whoever picks it up: the
+        /// contradiction is the lead, and "interpolate across the wrap" is already excluded.</summary>
         public static int AnimationLength(Mesh mesh)
         {
             int end = 0;
