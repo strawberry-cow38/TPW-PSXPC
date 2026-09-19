@@ -229,12 +229,23 @@ namespace TPWGodot
             MenuRenderer.DrawBackdrop(_menuArt, frame);
             // The glow goes under the selected row, BEFORE the text -- it is the selection indicator,
             // and the text sits inside it.
-            // ⚠ THE ROW SPACING IS SET BY THE GLOW, NOT PICKED. The highlight cap is 44 pixels tall
-            // (findings/menu-art.md), so rows closer together than that put one item's highlight over
-            // its neighbour -- which is exactly what 22 did. These positions are still mine rather
-            // than measured, but the spacing is now derived from the art instead of guessed.
-            const int Row0 = 138, RowStep = 44;
-            MenuRenderer.DrawHighlight(_menuArt, frame, Row0 + _menu.Index * RowStep - MenuRenderer.GlowY - 4);
+            // ⭐ MEASURED OFF THE CONSOLE, not chosen. In the emulator capture of the real menu
+            // (fable/b/png/12_main_menu_f5100.png, 512x240) "Play Game" occupies rows 113-133, and the
+            // three rows are 31 apart. Row0 is the BASELINE of the first item, so it sits just under
+            // that band. My earlier 138/44 was invented and both numbers were wrong.
+            // ⭐ TAKEN FROM THE CONSOLE'S OWN DISPLAY LIST, not from measuring pixels in a screenshot.
+            // The captured frame's font quads span y 139..224 in three rows 31 apart, and its highlight
+            // glow sits at y 130..174 -- bracketing the first row exactly. A cap is 21 tall and its
+            // OffsetY is -21, so the first BASELINE is 139 + 21 = 160.
+            //
+            // ⚠ I ARRIVED HERE AFTER TWO WRONG ANSWERS FROM PIXEL-BAND MEASUREMENTS of the emulator
+            // screenshot: the first caught the WORLD logo instead of the menu text, the second was
+            // tuned against bands that turned out to be different features in the two images. Both
+            // produced real numbers and both were ~28 rows out. The display list was in the repo the
+            // whole time and is the console's own answer -- measure the ARTEFACT, not a picture of it.
+            const int Row0 = 160, RowStep = 31;
+            // The captured glow already sits on the first row, so row 0 needs no shift at all.
+            MenuRenderer.DrawHighlight(_menuArt, frame, _menu.Index * RowStep);
 
             // The item list, centred, below the logo. ⚠ The Y positions are MINE, not measured: the
             // captured frame's own text primitives were left out on purpose (they spell one menu with
@@ -253,7 +264,7 @@ namespace TPWGodot
                 // yellow glow erased it -- white on yellow. The console draws the items opaque and
                 // lets the glow behind them mark the selection; additive is the GLOW's blend, not the
                 // text's, and I had borrowed it for the wrong thing.
-                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label);
+                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label);   // y is the baseline
                 y += RowStep;
             }
 
@@ -292,7 +303,7 @@ namespace TPWGodot
             }
             string name = LanguageRing.NameAt(_ring);
             int w = MenuRenderer.MeasureText(_menuArt, name);
-            MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, 110, name);
+            MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, 130, name);
 
             var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);
             _menuView.Texture = ImageTexture.CreateFromImage(img);

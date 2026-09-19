@@ -149,7 +149,15 @@ namespace TPW.Data
             return p.Sheet.Sprites[i].W + 1;
         }
 
-        /// <summary>Draw a string in the game's own font, top-left at (x, y). Returns the x it ended at.
+        /// <summary>Draw a string in the game's own font. <paramref name="y"/> is the BASELINE, not the
+        /// top.
+        ///
+        /// ⚠ EVERY SPRITE CARRIES ITS OWN OffsetX/OffsetY AND THEY ARE NOT DECORATION -- they are what
+        /// puts a glyph on the baseline. Ignoring them top-aligns the whole font, so 'a' and 'c' ride
+        /// up level with 'b' and 'h', and 'g', 'p', 'q' and 'y' lose their descenders entirely. The
+        /// text stays perfectly legible while being wrong in a way that is obvious the moment it is
+        /// put beside the real game -- which is how it was caught.
+        ///
         /// Characters with no glyph advance as a space rather than being dropped, so a missing
         /// punctuation mark shows as a gap instead of silently closing up the text.</summary>
         public static int DrawText(Prepared p, byte[] dst, int x, int y, string text, bool additive = false)
@@ -196,13 +204,14 @@ namespace TPW.Data
                         // The sprite still DRAWS W x H; what rotation changes is where the pixels are
                         // read from -- the stored rect is H wide and W tall, turned a quarter turn.
                         bool rot = (sp.Flags & 1) != 0;
+                        int gx0 = x + sp.OffsetX, gy0 = y + sp.OffsetY;
                         for (int gy = 0; gy < sp.H; gy++)
                         {
-                            int dy = y + gy;
+                            int dy = gy0 + gy;
                             if (dy < 0 || dy >= H) continue;
                             for (int gx = 0; gx < sp.W; gx++)
                             {
-                                int dx = x + gx;
+                                int dx = gx0 + gx;
                                 if (dx < 0 || dx >= W) continue;
                                 int su = rot ? sp.U + gy : sp.U + gx;
                                 int sv = rot ? sp.V + (sp.W - 1 - gx) : sp.V + gy;
