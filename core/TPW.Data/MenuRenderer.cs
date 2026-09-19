@@ -271,6 +271,18 @@ namespace TPW.Data
             }
         }
 
+        /// <summary>Which language occupies a given ring SLOT when <paramref name="sel"/> is chosen.
+        /// Slot 0 is the far left, slot 2 the selected one.
+        ///
+        /// ⚠ Public so the tests can assert the order the RENDERER uses. A test that recomputes this
+        /// expression itself passes when the renderer's copy is reversed -- which is exactly what
+        /// happened: flipping the sign here left 254 tests green until they called this instead.</summary>
+        public static int SlotLanguage(int sel, int slot)
+        {
+            int n = LanguageRing.Count;
+            return (((sel + slot - RingSlots.Length / 2) % n) + n) % n;
+        }
+
         /// <summary>The whole language-select screen, composed. Lives HERE rather than in the Godot
         /// layer so that the offline render and the running game are the SAME code -- a harness that
         /// re-composes the screen itself would be testing the harness.</summary>
@@ -306,7 +318,7 @@ namespace TPW.Data
                 // gradient is also why the dim slots tint lavender instead of showing a black outline:
                 // the font's outline pixels add nothing and simply stay background.
                 var (dx, baseline, shade) = RingSlots[i];
-                int idx = (((sel + i - 2) % n) + n) % n;
+                int idx = SlotLanguage(sel, i);
                 string name = LanguageRing.NativeNameAt(idx);
                 int w = MeasureText(p, name);
                 DrawText(p, dst, (int)MathF.Round(RingCentreX + dx - w / 2f), baseline, name, additive: true, shade: shade);

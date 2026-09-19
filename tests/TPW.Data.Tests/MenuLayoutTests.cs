@@ -136,5 +136,35 @@ namespace TPW.Data.Tests
             // the DRAWING area, not the visible one, or the coordinates stop matching the console.
             Assert.All(MenuRenderer.RingSlots, s2 => Assert.True(s2.Baseline < MenuLayout.ScreenHeight));
         }
+
+        /// <summary>The five names the ring shows, left to right, for a selected position -- exactly what
+        /// the renderer lays into <see cref="MenuRenderer.RingSlots"/>.</summary>
+        static string[] SlotNames(int sel)
+        {
+            var outp = new string[MenuRenderer.RingSlots.Length];
+            for (int i = 0; i < outp.Length; i++)
+                outp[i] = LanguageRing.NativeNameAt(MenuRenderer.SlotLanguage(sel, i));
+            return outp;
+        }
+
+        [Theory]
+        // ⭐ Each row is a photograph of the console, not a restatement of the table above: the emulator
+        // was put on the language screen and the pad pressed, and these are the five names that came up.
+        // At rest (English) and after ONE press each way -- which is what pins the TURN DIRECTION, the
+        // part a table of names alone cannot check.
+        [InlineData(3, "Español", "Nederlands", "English", "Svenska", "Français")]         // at rest
+        [InlineData(2, "Deutsch", "Español", "Nederlands", "English", "Svenska")]          // after LEFT
+        [InlineData(4, "Nederlands", "English", "Svenska", "Français", "Italiano")]        // after RIGHT
+        public void TheRingShowsWhatTheConsoleShowed(int sel, string a, string b, string c, string d, string e)
+            => Assert.Equal(new[] { a, b, c, d, e }, SlotNames(sel));
+
+        [Fact]
+        public void LeftAndRightTurnTheRingTheWayTheConsoleDid()
+        {
+            int rest = LanguageRing.RestPosition;
+            Assert.Equal("English", LanguageRing.NativeNameAt(rest));
+            Assert.Equal("Nederlands", LanguageRing.NativeNameAt(LanguageRing.Turn(rest, -1)));
+            Assert.Equal("Svenska", LanguageRing.NativeNameAt(LanguageRing.Turn(rest, 1)));
+        }
 }
 }
