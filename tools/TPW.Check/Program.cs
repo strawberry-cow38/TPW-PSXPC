@@ -1360,7 +1360,8 @@ static class Program
     static int LoopSurvey(GazArchive g)
     {
         int animated = 0, lateStart = 0, jumpy = 0, flat = 0, jumpyCycleDiffers = 0;
-        int atCycleMeasured = 0, atCycleJumpy = 0, cleanHdrAgrees = 0, quietButDisagrees = 0;
+        int atCycleMeasured = 0, atCycleJumpy = 0, cleanHdrAgrees = 0, quietButDisagrees = 0, jumpyFewVerts = 0;
+        int jumpyTiny = 0, jumpyVisible = 0;
         var worst = new List<(double Ratio, int Entry, int Sub, int Start, int Len)>();
         foreach (var e in g.Entries)
         {
@@ -1464,6 +1465,40 @@ static class Program
                     //    its own wrap, so a "no jump detected" reading on that clip is a null from a
                     //    window that excludes the event.
                     if (hdrDisagrees) jumpyCycleDiffers++;
+
+                    // HOW MANY VERTICES actually jump at the wrap? `d` above is a MAX over vertices,
+                    // so one stray vertex scores the whole clip as snapping while the visible body is
+                    // continuous. Count the vertices within 25% of the worst one: a handful means a
+                    // stray, most of the mesh means a real discontinuity.
+                    var pa = MeshPose.Evaluate(m, len - 1).Vertices;
+                    var pb = MeshPose.Evaluate(m, 0).Vertices;
+                    if (pa != null && pb != null && pa.Length == pb.Length && pa.Length > 0)
+                    {
+                        double vWorst = 0;
+                        for (int i = 0; i < pa.Length; i++)
+                            vWorst = Math.Max(vWorst, Math.Abs(pa[i].X - pb[i].X) + Math.Abs(pa[i].Y - pb[i].Y) + Math.Abs(pa[i].Z - pb[i].Z));
+                        int movers = 0;
+                        for (int i = 0; i < pa.Length; i++)
+                            if (Math.Abs(pa[i].X - pb[i].X) + Math.Abs(pa[i].Y - pb[i].Y) + Math.Abs(pa[i].Z - pb[i].Z) > vWorst * 0.25) movers++;
+                        if (movers * 20 <= pa.Length) jumpyFewVerts++;   // 5% or fewer of the mesh
+
+                        // ⚠ THE RATIO HAS NO ABSOLUTE FLOOR. A long slow clip moves very little per
+                        // unit, so a physically tiny discontinuity divides into a huge ratio. Measure
+                        // the jump against the mesh's OWN size: anything under a percent or so of the
+                        // bounding box cannot be seen and is not worth calling a defect.
+                        double lo = double.MaxValue, hi = double.MinValue;
+                        for (int i = 0; i < pa.Length; i++)
+                        {
+                            lo = Math.Min(lo, Math.Min(pa[i].X, Math.Min(pa[i].Y, pa[i].Z)));
+                            hi = Math.Max(hi, Math.Max(pa[i].X, Math.Max(pa[i].Y, pa[i].Z)));
+                        }
+                        double span = hi - lo;
+                        if (span > 0)
+                        {
+                            double frac = vWorst / span;
+                            if (frac < 0.01) jumpyTiny++; else jumpyVisible++;
+                        }
+                    }
                 }
             }
         }
@@ -1471,6 +1506,8 @@ static class Program
         Console.WriteLine($"  {lateStart} whose first key is NOT at time 0");
         Console.WriteLine($"  {jumpy} whose last-to-first step is more than 4x a typical step");
         Console.WriteLine($"    of those, {jumpyCycleDiffers} whose header word does NOT equal the animation length");
+        Console.WriteLine($"    of those, {jumpyFewVerts} where 5% or fewer of the vertices jump (a stray, not the body)");
+        Console.WriteLine($"    of those, {jumpyTiny} whose jump is under 1% of the mesh's own size (invisible), {jumpyVisible} bigger");
         Console.WriteLine($"  {flat} that never move (skipped)");
         Console.WriteLine($"  wrapped at the GAME's cycle instead: {atCycleJumpy} of {atCycleMeasured} still snap");
         Console.WriteLine($"  separation test -- smooth AND header agrees with keys: {cleanHdrAgrees};  smooth BUT header disagrees: {quietButDisagrees}");
