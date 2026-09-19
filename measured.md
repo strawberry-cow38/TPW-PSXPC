@@ -1983,3 +1983,32 @@ Two things worth carrying into any port:
 The port's own tests missed the renormalisation entirely until mutation testing: every quaternion case
 blended a rotation with itself or with identity, and both are already unit length after the sign fix.
 Two rotations 90° apart have a componentwise average of length 0.924, and that is the case that bites.
+
+## All eight track types, structurally — timed vs untimed (2026-09-19)
+
+Applying the type-6 duration test to every type splits them cleanly:
+
+| type | stride | time+dur chains | reading |
+|---|---|---|---|
+| 0 | 36 | **100.0%** (646 pairs) | timed: 2+2 timing, 32 bytes payload |
+| 1 | 32 | 0.0% | untimed. 1 track on the whole disc |
+| 2 | 8 | 0.0% | untimed: 8 bytes, **indexed by the clock directly** |
+| 3 | 12 | **100.0%** (2,379) | timed: 2+2 timing + the same 8 bytes |
+| 4 | 8 | 0.0% | untimed: 8 bytes, clock-indexed |
+| 5 | 12 | **100.0%** (1,079) | timed: 2+2 timing + 8 bytes |
+| 6 | 20 | **100.0%** (12,334) | timed: 2+2 timing + 16 (translation + quaternion) |
+| 7 | 16 | 6.4% | untimed — 6.4% is chance for a field of that width |
+
+So the strides are not arbitrary and the pairs that share a size row are the same idea twice:
+
+- **2 and 4 are untimed, 8 bytes = one position per tick.** The evaluator indexes the record array by
+  the clock itself (`sll $v0, $s6, 3` with $s6 the current time, the same register type 6 compares its
+  key times against). One sample per tick, no interpolation needed or possible.
+- **3 and 5 are the timed versions of exactly those**, 12 bytes = 4 bytes of timing in front of the same
+  8-byte payload, interpolated between keys like type 6.
+- The difference WITHIN each pair stays the destination: 2/3 to the scatter sources, 4/5 to the vertex
+  buffer. So the four types are a 2x2 — {timed, untimed} x {source, vertex}.
+
+Type 6 is the same idea again with a 16-byte payload (translation + quaternion) aimed at a bone, and
+type 0 the same with 32 bytes. Types 1 and 7 are bone-shaped but untimed, and their record layout is
+NOT established — 1 track and 34 tracks respectively, too few to read a property off.
