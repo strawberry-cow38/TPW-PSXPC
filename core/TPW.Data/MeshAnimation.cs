@@ -160,6 +160,20 @@ namespace TPW.Data
         }
     }
 
+    /// <summary>What a track drives. Read off the evaluators: the types differ far more in their
+    /// DESTINATION than in their record shape.</summary>
+    public enum TrackTarget
+    {
+        /// <summary>Not established.</summary>
+        Unknown = 0,
+        /// <summary>A bone in the skeleton.</summary>
+        Bone,
+        /// <summary>A scatter source point, which reaches vertices through <see cref="VertexBinding"/>.</summary>
+        ScatterSource,
+        /// <summary>A vertex in the work buffer, written directly, bypassing the scatter.</summary>
+        Vertex,
+    }
+
     /// <summary>
     /// One animation track. Two of the eight types are decoded:
     ///
@@ -191,7 +205,33 @@ namespace TPW.Data
         /// the sample is 85 tracks; they are treated as unproven. Types 6 and 8 are proven by
         /// content: the type-8 matrix for index i reproduces bone i's own quaternion, 2,295 for
         /// 2,295, which a wrong index could not do.</summary>
-        public int BoneIndex => Type == 6 || Type == 8 ? Header4 : -1;
+        public int BoneIndex => Target == TrackTarget.Bone ? Header4 : -1;
+
+        /// <summary>What <see cref="Header4"/> addresses, from the evaluator each type dispatches to.
+        ///
+        /// ⚠ A SHARED ROW IN THE SIZE TABLE IS NOT A SHARED MEANING, and this is the second place that
+        /// bites. Types 2 and 4 have identical strides AND identical headers; so do 3 and 5. They write
+        /// to DIFFERENT arrays -- 2/3 to the scatter sources at ARS+rec[0x30], 4/5 straight into the
+        /// vertex buffer at ARS+rec[0x1c]. Treating a shared size as a shared target drives the wrong
+        /// buffer and still looks plausible. (The first instance was types 1 and 8.)
+        ///
+        /// The index ranges corroborate in both directions rather than one loose bound: types 2 and 3
+        /// land inside the source count 100% of the time and types 4 and 5 only 11.8% and 0.6%, while
+        /// 4 and 5 land inside the vertex count 100%.
+        ///
+        /// Types 0, 1 and 7 index a bone on every track on the disc, but that is 85 tracks and
+        /// consistency rather than proof; 6 and 8 are proven by the quaternion/matrix cross-check.</summary>
+        public TrackTarget Target => Type switch
+        {
+            0 or 1 or 6 or 7 or 8 => TrackTarget.Bone,
+            2 or 3                => TrackTarget.ScatterSource,
+            4 or 5                => TrackTarget.Vertex,
+            _                     => TrackTarget.Unknown,
+        };
+
+        /// <summary>The index <see cref="Header4"/> holds, or -1 when the target is unknown. Read it
+        /// together with <see cref="Target"/> -- the number alone does not say which array it is in.</summary>
+        public int TargetIndex => Target == TrackTarget.Unknown ? -1 : Header4;
         public BoneRest Rest;                              // Type == 8
         public AnimKey[] Keys = Array.Empty<AnimKey>();    // Type == 6
         public byte[] Raw = Array.Empty<byte>();           // everything else

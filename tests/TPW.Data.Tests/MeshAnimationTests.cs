@@ -278,5 +278,42 @@ namespace TPW.Data.Tests
             Assert.True(r.IsOrthonormal());
         }
 
+        // ⚠ THE PAIRS THAT SHARE A SIZE ROW MUST NOT SHARE A TARGET. 2 and 4 have the same stride and
+        // header, as do 3 and 5, and they write to different arrays. This is the test that stops a
+        // future simplification from collapsing them.
+        [Theory]
+        [InlineData(0, TrackTarget.Bone)]
+        [InlineData(1, TrackTarget.Bone)]
+        [InlineData(2, TrackTarget.ScatterSource)]
+        [InlineData(3, TrackTarget.ScatterSource)]
+        [InlineData(4, TrackTarget.Vertex)]
+        [InlineData(5, TrackTarget.Vertex)]
+        [InlineData(6, TrackTarget.Bone)]
+        [InlineData(7, TrackTarget.Bone)]
+        [InlineData(8, TrackTarget.Bone)]
+        public void EachTypeDrivesItsOwnKindOfThing(int type, TrackTarget expected)
+        {
+            var b = new List<byte>();
+            Header(b, type, bone: 2, count: 0);
+            b.AddRange(new byte[64]);
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tr, out _, out _, out _, out _));
+            Assert.Equal(expected, tr[0].Target);
+            Assert.Equal(2, tr[0].TargetIndex);
+            Assert.Equal(expected == TrackTarget.Bone ? 2 : -1, tr[0].BoneIndex);
+        }
+
+        [Fact]
+        public void TypesThatShareASizeRowDoNotShareATarget()
+        {
+            Assert.Equal(MeshAnimation.TrackSize(2, 5), MeshAnimation.TrackSize(4, 5));
+            Assert.Equal(MeshAnimation.TrackSize(3, 5), MeshAnimation.TrackSize(5, 5));
+            var b = new List<byte>(); Header(b, 2, 0, 0); b.AddRange(new byte[32]);
+            var c = new List<byte>(); Header(c, 4, 0, 0); c.AddRange(new byte[32]);
+            MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var t2, out _, out _, out _, out _);
+            MeshAnimation.TryParse(c.ToArray(), 0, 0, 0, 1, 0, 0, out var t4, out _, out _, out _, out _);
+            Assert.NotEqual(t2[0].Target, t4[0].Target);
+        }
+
     }
 }
