@@ -473,7 +473,15 @@ namespace TPW.Data
         /// loops seamlessly. Without it the clip appeared to start at t=25 with nothing covering the
         /// head of the timeline, which is why 200 of the disc's 251 animated sub-meshes snapped at their
         /// loop and the console -- measured across 22 consecutive frames -- does not.</summary>
-        const int KeyBase = 8;   // NOT USED BY THE PARSE -- see the note above; the reading is not adopted yet.
+        /// ⭐ CONFIRMED FOR ALL NINE TYPES, not just the two I had measured. Every handler in the jump
+        /// table at 0x800DDDA0 computes its record base as $s4 + 8:
+        ///   type 0 0x8002ccfc, 1 0x8002d248, 2 0x8002d4a8, 3 0x8002d4e8, 4 0x8002d6f8,
+        ///   5 0x8002d738, 6 0x8002d8ec, 7 0x8002dd24, 8 0x8002df5c.
+        /// And the first halfword each one reads splits exactly along the timed/untimed line this
+        /// project derived independently: types 0, 3, 5 and 6 read the record's TIME at 8($s4); types
+        /// 2, 4, 7 and 8 read 4($s4) instead, having no time field to read. That agreement was not
+        /// designed for -- it is two separate decodes landing on the same partition.
+        const int KeyBase = 8;   // still NOT used by the parse: adopting it is a reviewed change.
 
         static readonly (int Stride, int Header)[] Sizes =
         {
