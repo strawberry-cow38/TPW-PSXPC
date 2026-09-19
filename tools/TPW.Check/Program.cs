@@ -226,8 +226,15 @@ static class Program
                 // property above can hold while the pipeline as a whole moves nothing -- a pose that runs
                 // and outputs the rest position is indistinguishable from a correct one field by field.
                 // So: pose each animated mesh at two times and require the vertices to actually DIFFER.
-                if (mesh.Tracks != null && mesh.Binding != null && mesh.Binding.SourceCount > 0
-                    && mesh.VertexCount > 0)
+                // ⚠ COVER EVERYTHING THAT CAN MOVE, not just the scatter path. This gated on
+                // SourceCount, which was every animated mesh until bone skinning landed and then was 30
+                // of 233 -- the 203 newly-working models went unverified by the one check that poses
+                // anything. A check's SCOPE goes stale the same way a capability flag does.
+                bool canMove = mesh.Binding != null && mesh.Binding.SourceCount > 0;
+                if (!canMove && mesh.Skeleton != null)
+                    foreach (var bb in mesh.Skeleton.Bones) if (bb.SkinCount > 0) { canMove = true; break; }
+
+                if (mesh.Tracks != null && canMove && mesh.VertexCount > 0)
                 {
                     posable++;
                     var a0 = MeshPose.Evaluate(mesh, 0);
@@ -274,10 +281,13 @@ static class Program
                             var (x, y, z) = pose.Vertices[v];
                             long d2 = (long)(x - rx) * (x - rx) + (long)(y - ry) * (y - ry) + (long)(z - rz) * (z - rz);
                             if (d2 > (long)span * span * 4) wild++;
-                                bool restNear = Math.Abs(rx) + Math.Abs(ry) + Math.Abs(rz) < span / 8;
-                            bool poseNear = Math.Abs(x) + Math.Abs(y) + Math.Abs(z) < span / 8;
-                            if (poseNear && !restNear) toOrigin++;
-                            _ = restNear;
+    
+                            // ⚠ EXACT zero, not "near the origin". A fractional threshold flagged two
+                            // perfectly good poses once the check covered 253 meshes instead of 30 --
+                            // a vertex legitimately moving toward the model's centre trips it. The bug
+                            // this exists to catch writes an UNCOMPUTED zero, so exact zero against a
+                            // non-zero rest is the signature, and it cannot false-positive on a pose.
+                            if (x == 0 && y == 0 && z == 0 && (rx != 0 || ry != 0 || rz != 0)) toOrigin++;
                         }
                     // ⭐ THE ASSERTION WITH TEETH, and it took three tries to find one that had any.
                     // "Collapsed to the origin" cannot fire here: 104 of entry #43's 364 rest vertices are
