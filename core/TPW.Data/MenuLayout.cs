@@ -108,7 +108,23 @@ namespace TPW.Data
         ///     toward zero across 230 frames -- so the pattern does not repeat inside the capture.
         /// Pixel data is the wrong instrument here: the signal is a 12 px centroid shift buried in a
         /// static backdrop. The fan's arc endpoints are named explicitly in the GPU display list, so
-        /// dumping THAT per frame gives the motion directly instead of inferring it.</summary>
+        /// dumping THAT per frame gives the motion directly instead of inferring it.
+        ///
+        /// READING THE EXECUTABLE WAS TRIED NEXT AND THE ENTRY POINT IS NOT THERE. The fan's constants
+        /// are not literal anywhere: the ray colour 0x1818 occurs ONCE in TPW.BIN, in data, referenced
+        /// by no instruction, and not at all in any of the twelve decompressed overlays. The apex
+        /// (-103,-64) "hits" were false positives -- `j 0x8007fe64` encodes as 0x0801FF99, whose low
+        /// halfword is -103. Searching for a 16-bit value in MIPS code finds jump targets. So the
+        /// geometry is computed, and locating the routine needs a write-watchpoint that reports the PC,
+        /// which this harness does not have.
+        ///
+        /// ⚠ AND A RAM SWEEP NEARLY PRODUCED A FALSE ANSWER. Diffing console RAM across menu frames
+        /// gives 43 words advancing at a constant rate; correlating them against the measured ray
+        /// motion scored 0.80-0.84, which reads as an identification. A control of 200 sines with
+        /// RANDOM period and phase scores a median of 0.788 and a maximum of 0.856 against the same
+        /// signal. The candidates are inside the chance band and identify nothing -- they are all
+        /// simply frame counters. A smooth 230-sample signal will correlate with almost any slow
+        /// periodic function; without the control that number would have gone in as a finding.</summary>
         public static readonly ScreenTri[] Spotlight =
         {
             new(-103,-64,-103,-64,588,187, 0,0,0, 24,24,0, 0,0,0),
