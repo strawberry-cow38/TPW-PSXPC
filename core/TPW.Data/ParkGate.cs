@@ -45,6 +45,11 @@ namespace TPW.Data
         /// <summary>Effect emitters the gate starts with: offset from the base and the emitter template's address in
         /// the executable (EmitterTemplate). The jungle's torch flames (0x8006E4A0: 0x80089E38 with 0x800F7918).</summary>
         public (int X, int Y, int Z, uint Template)[] Effects { get; init; } = Array.Empty<(int, int, int, uint)>();
+        /// <summary>Effects the gate sets off as it opens, each once, in the frame its angle first passes the mark:
+        /// offset from the base, emitter template, mark. The space hatch's (0x8006EC8C, offsets at 0x80102F10 and
+        /// 0x80102F18): 0x800F7958 at (500, 0, 240) once the angle is above 0 and 0x800F7998 at (1024, 0, 240) once
+        /// it is above 0x40, two short bursts (32 ticks) of grey additive puffs rising and drifting apart.</summary>
+        public (int X, int Y, int Z, uint Template, int AfterAngle)[] OpeningEffects { get; init; } = Array.Empty<(int, int, int, uint, int)>();
 
         public static readonly ParkGate[] All =
         {
@@ -52,7 +57,8 @@ namespace TPW.Data
                            Effects = new[] { (440, 440, 200, 0x800F7918u), (1130, 440, 200, 0x800F7918u) } },
             new ParkGate { World = 1, PackEntry = 86, TileX = 19, TileZ = 17, Parts = new[] { new GatePart(260, 0, 280, 0, 0, 0), new GatePart(750, 0, 280, 0, 0x800, 0) } },
             new ParkGate { World = 2, PackEntry = 85, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(1100, 600, 190, 0, 0, 0) } },
-            new ParkGate { World = 3, PackEntry = 88, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(800, 570, 300, 0, 0, 0) } },
+            new ParkGate { World = 3, PackEntry = 88, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(800, 570, 300, 0, 0, 0) },
+                           OpeningEffects = new[] { (500, 0, 240, 0x800F7958u, 0), (1024, 0, 240, 0x800F7998u, 0x40) } },
         };
 
         public static ParkGate ForWorld(int world) => world >= 0 && world < All.Length ? All[world] : null;
@@ -64,10 +70,22 @@ namespace TPW.Data
             public readonly ParkGate Gate;
             /// <summary>The swinging angle (y for the doors, z for the drawbridge, x for the hatch) and its speed.</summary>
             public int Angle, Speed;
+            readonly bool[] _fired;
             public State(ParkGate gate)
             {
                 Gate = gate;
                 Speed = gate.World switch { 2 => unchecked((int)0xFFFFF000), 3 => 0x100, _ => 0x400 };
+                _fired = new bool[gate.OpeningEffects.Length];
+            }
+
+            /// <summary>The opening effects due now: those whose mark the angle has passed and that have not gone off
+            /// yet. Each is returned once.</summary>
+            public System.Collections.Generic.List<int> TakeDueEffects()
+            {
+                var due = new System.Collections.Generic.List<int>();
+                for (int i = 0; i < _fired.Length; i++)
+                    if (!_fired[i] && (short)Angle > Gate.OpeningEffects[i].AfterAngle) { _fired[i] = true; due.Add(i); }
+                return due;
             }
 
             /// <summary>One frame, frameTime in the game's time units (EntranceFlags.TimeUnitsPerSecond; the game

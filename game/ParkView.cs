@@ -38,6 +38,8 @@ namespace TPWGodot
         (int X, int Y, int Z) _gateBase;
         PageAtlas _atlas;
         ParticleSystem _fx;
+        /// <summary>The gate's opening effects (ParkGate.OpeningEffects), read at load, placed when they go off.</summary>
+        readonly List<(EmitterTemplate T, int X, int Y, int Z)> _openingFx = new();
         readonly Dictionary<int, (ImageTexture Tex, int W, int H)> _fxSprites = new();
         TextureSheet _common;
         double _frameClock;
@@ -116,6 +118,7 @@ namespace TPWGodot
             _common = common;
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _fx = new ParticleSystem();
+            _openingFx.Clear();
             _fxMesh.Mesh = null;
             ParkOpen = false;
             _flagMat = null;
@@ -158,11 +161,15 @@ namespace TPWGodot
                     _gateModel = gatePack.Models[0];
                     _gateBase = (gate.TileX * ParkTerrain.TileUnits, map[gate.TileX, gate.TileZ].HeightUnits, gate.TileZ * ParkTerrain.TileUnits);
                     if (exe != null)
+                    {
                         foreach (var (ex, ey, ez, addr) in gate.Effects)
                         {
                             var t = EmitterTemplate.Read(exe, AssetSelfTest.GameExecutableBase, addr);
                             if (t != null) _fx.Add(t, _gateBase.X + ex, _gateBase.Y + ey, _gateBase.Z + ez);
                         }
+                        foreach (var (ex, ey, ez, addr, _) in gate.OpeningEffects)
+                            _openingFx.Add((EmitterTemplate.Read(exe, AssetSelfTest.GameExecutableBase, addr), _gateBase.X + ex, _gateBase.Y + ey, _gateBase.Z + ez));
+                    }
                 }
             }
             foreach (var t in map.Tiles) if (t.NoGround) open++;
@@ -499,6 +506,10 @@ namespace TPWGodot
                 _frameClock -= 1.0 / ParticleSystem.FramesPerSecond;
                 frames++;
                 _gate?.Update(frameTime, ParkOpen);
+                if (_gate != null)
+                    foreach (int i in _gate.TakeDueEffects())
+                        if (i < _openingFx.Count && _openingFx[i].T != null)
+                            _fx?.Add(_openingFx[i].T, _openingFx[i].X, _openingFx[i].Y, _openingFx[i].Z);
                 _fx?.Step();
             }
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
