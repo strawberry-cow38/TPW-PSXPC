@@ -83,8 +83,20 @@ namespace TPW.Data
             {
                 var scattered = new (int X, int Y, int Z)[mesh.VertexCount];
                 bind.Scatter(sources, scattered);
-                foreach (var r in bind.Records)
-                    if (r.Vertex < verts.Length) verts[r.Vertex] = scattered[r.Vertex];
+
+                // ⚠ ONLY THE RECORDS A RUN ACTUALLY COVERS. The runs do not start at record 0 -- on 16 of
+                // the 30 scattering meshes the first run begins partway in, leaving a leading block of
+                // records that no run reads. Overwriting their vertices from the scatter buffer sets them
+                // to an uncomputed zero and collapses them onto the origin. (The earlier "runs cover the
+                // table, 1.000" measured where the chain ENDS and never checked where it starts.)
+                foreach (var run in bind.Runs)
+                    for (int k = 0; k < run.Count; k++)
+                    {
+                        int at = run.Start + k;
+                        if (at < 0 || at >= bind.Records.Length) continue;
+                        int vtx = bind.Records[at].Vertex;
+                        if (vtx < verts.Length) verts[vtx] = scattered[vtx];
+                    }
             }
 
             // Direct vertex writes land after the scatter, as they do on the console.

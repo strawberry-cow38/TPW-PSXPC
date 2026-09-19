@@ -175,6 +175,7 @@ static class Program
         int spans = 0, spansMeet = 0;
         int posTracks = 0, posKeys = 0, posSpans = 0, posMeet = 0, empty = 0;
         int posable = 0, moved = 0; long movedVerts = 0;
+        int wildMeshes = 0, originMeshes = 0, unplacedMeshes = 0; long wildVerts = 0, originVerts = 0, unplacedVerts = 0;
         double worstAgree = 0;
         var undecoded = new SortedDictionary<int, int>();
         string firstFail = "";
@@ -235,6 +236,70 @@ static class Program
                     for (int v = 0; v < a0.Vertices.Length && v < a1.Vertices.Length; v++)
                         if (a0.Vertices[v] != a1.Vertices[v]) diff++;
                     if (diff > 0) { moved++; movedVerts += diff; }
+
+                    // ⚠ "IT CHANGED" IS NOT "IT IS RIGHT". An earlier version of this check stopped at the
+                    // line above and passed at 80% while half of every model's vertices were being dragged
+                    // to the origin -- because those differ between two times too. So bound the change:
+                    //   * nothing may move further than the model is wide;
+                    //   * nothing may arrive at the origin that did not start near it.
+                    // Both are values a broken pipeline produces and a correct one does not.
+                    // ⚠ THE REFERENCE IS THE FILE'S REST POSE, NOT ANOTHER POSE. Comparing two poses
+                    // against each other cannot see a fault both of them share: the first version of this
+                    // bound compared t=0 against t=64, and when the seeding bug was reintroduced it still
+                    // reported zero, because the affected vertices sat at the origin in BOTH poses. A
+                    // control computed by the same broken code is not a control.
+                    // ⚠ The scale is the larger of the rest and posed extents. Some meshes ship with
+                    // ALL-ZERO rest vertices -- entry #67 is 58 vertices at the origin driven by 51
+                    // sources -- so a rest-only span is 1 there and every real motion trips the bound.
+                    // That is the metric being wrong for a legitimate mesh, not the mesh being wrong.
+                    int span = 1;
+                    for (int v = 0; v * 3 + 2 < mesh.Vertices.Length; v++)
+                    {
+                        span = Math.Max(span, (int)Math.Abs(mesh.Vertices[v * 3]));
+                        span = Math.Max(span, (int)Math.Abs(mesh.Vertices[v * 3 + 1]));
+                        span = Math.Max(span, (int)Math.Abs(mesh.Vertices[v * 3 + 2]));
+                    }
+                    foreach (var pose in new[] { a0, a1 })
+                        foreach (var p in pose.Vertices)
+                        {
+                            span = Math.Max(span, Math.Abs(p.X));
+                            span = Math.Max(span, Math.Abs(p.Y));
+                            span = Math.Max(span, Math.Abs(p.Z));
+                        }
+                    int wild = 0, toOrigin = 0;
+                    foreach (var pose in new[] { a0, a1 })
+                        for (int v = 0; v < pose.Vertices.Length && v * 3 + 2 < mesh.Vertices.Length; v++)
+                        {
+                            int rx = (int)mesh.Vertices[v * 3], ry = (int)mesh.Vertices[v * 3 + 1], rz = (int)mesh.Vertices[v * 3 + 2];
+                            var (x, y, z) = pose.Vertices[v];
+                            long d2 = (long)(x - rx) * (x - rx) + (long)(y - ry) * (y - ry) + (long)(z - rz) * (z - rz);
+                            if (d2 > (long)span * span * 4) wild++;
+                                bool restNear = Math.Abs(rx) + Math.Abs(ry) + Math.Abs(rz) < span / 8;
+                            bool poseNear = Math.Abs(x) + Math.Abs(y) + Math.Abs(z) < span / 8;
+                            if (poseNear && !restNear) toOrigin++;
+                            _ = restNear;
+                        }
+                    // ⭐ THE ASSERTION WITH TEETH, and it took three tries to find one that had any.
+                    // "Collapsed to the origin" cannot fire here: 104 of entry #43's 364 rest vertices are
+                    // exactly (0,0,0) in the FILE, because the animation is what places them. So a wrongly
+                    // zeroed vertex is indistinguishable from a legitimately unplaced one by position alone.
+                    // What IS distinguishable: a vertex the animation covers must come out PLACED. Any
+                    // covered vertex still sitting exactly at (0,0,0) after posing means its source never
+                    // got a value -- which is exactly the seeding bug, and it fails nothing else.
+                    int unplaced = 0;
+                    if (mesh.Binding != null)
+                        foreach (var run in mesh.Binding.Runs)
+                            for (int k = 0; k < run.Count; k++)
+                            {
+                                int rec = run.Start + k;
+                                if (rec < 0 || rec >= mesh.Binding.Records.Length) continue;
+                                int vtx = mesh.Binding.Records[rec].Vertex;
+                                if (vtx < a0.Vertices.Length && a0.Vertices[vtx] == (0, 0, 0)) unplaced++;
+                            }
+                    if (unplaced > 0) { unplacedMeshes++; unplacedVerts += unplaced; }
+
+                    if (wild > 0) { wildMeshes++; wildVerts += wild; }
+                    if (toOrigin > 0) { originMeshes++; originVerts += toOrigin; }
                 }
 
                 var sk = mesh.Skeleton;
@@ -319,15 +384,20 @@ static class Program
         Console.WriteLine($"binding records    : {bindRecs}, destination is a real vertex {destOk} ({pc(destOk, bindRecs)})");
         Console.WriteLine($"quaternion vs type-8 matrix, where a bone states both: {agree}/{bothEncodings} agree ({pc(agree, bothEncodings)}), worst {worstAgree:0.000}");
         Console.WriteLine($"posed end to end   : {posable} meshes evaluated at two times, {moved} ({pc(moved, posable)}) actually move, {movedVerts:n0} vertex differences");
+        Console.WriteLine($"                     bounded: {wildVerts} moved further than the model is wide ({wildMeshes} meshes), {originVerts} collapsed to the origin ({originMeshes} meshes), {unplacedVerts} covered-but-unplaced ({unplacedMeshes} meshes)");
         Console.WriteLine($"position tracks    : {posTracks} (types 2/3/4/5), {posKeys} samples; timed spans meet on {posMeet}/{posSpans} ({pc(posMeet, posSpans)}); {empty} more parse to zero records");
         if (undecoded.Count > 0)
         {
             Console.WriteLine("still undecoded (kept as raw bytes, not skipped):");
             foreach (var kv in undecoded) Console.WriteLine($"   type {kv.Key}: {kv.Value} tracks");
         }
+        // Exit code is the number of failed checks, so this is usable as a gate. ⚠ Two earlier edits to
+        // this line silently did not match and the new bounds were never counted -- the report showed the
+        // fault while the exit code stayed 0. Anything added above belongs here too.
         return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
              + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree)
-             + (binds - tiled) + sumBad + (bindRecs - destOk) + (spans - spansMeet);
+             + (binds - tiled) + sumBad + (bindRecs - destOk) + (spans - spansMeet)
+             + (posSpans - posMeet) + wildMeshes + originMeshes + unplacedMeshes;
     }
 
     static GazArchive Archive(DiscReader disc)
