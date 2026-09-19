@@ -86,7 +86,8 @@ namespace TPWGodot
         /// <summary>From <c>--models=A,B,C</c>: hide the UI and show each model for two seconds, then quit. For
         /// capturing models unattended.</summary>
         int[] _modelTour;
-        /// <summary>The tour as given: browser indices, or "e133" for the first model of archive entry 133.</summary>
+        /// <summary>The tour as given: browser indices, "e133" for the first model of archive entry 133, or "e83.10" for
+        /// entry 83's sub-model 10.</summary>
         string[] _modelTourSpec;
         /// <summary>From <c>--cull-on</c>: tour with back-face culling on, the view that shows winding faults.</summary>
         bool _tourCull;
@@ -562,7 +563,9 @@ namespace TPWGodot
             if (_models != null && _models.Count > 0) _models.Show(0);
             if (_modelTourSpec != null && _models != null)
                 _modelTour = System.Array.ConvertAll(_modelTourSpec,
-                    t => t.StartsWith("e") ? System.Math.Max(0, _models.IndexOfEntry(int.Parse(t.Substring(1)))) : int.Parse(t));
+                    t => !t.StartsWith("e") ? int.Parse(t)
+                        : t.Contains('.') ? System.Math.Max(0, _models.IndexOf(int.Parse(t.Substring(1, t.IndexOf('.') - 1)), int.Parse(t.Substring(t.IndexOf('.') + 1))))
+                        : System.Math.Max(0, _models.IndexOfEntry(int.Parse(t.Substring(1)))));
             if (_modelTour != null && _models != null && _models.Count > 0)
             {
                 if (_tourCull) _models.ToggleCull();

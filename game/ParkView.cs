@@ -48,6 +48,12 @@ namespace TPWGodot
         public bool ParkOpen { get; set; }
         /// <summary>The material ground and scenery share; its scroll_rows advances one row per park frame.</summary>
         ShaderMaterial _mat;
+        /// <summary>The same for the polygons the game draws from one side only (<see cref="SingleSidedCull"/>).</summary>
+        ShaderMaterial _matCull;
+        /// <summary>⭐ THE GAME DROPS A SCENERY POLYGON THAT FACES AWAY unless its texture's flags say both sides
+        /// (SceneryTexture.DoubleSided; 0x80035548 tests the GTE's NCLIP), so the port does too: Godot's cull mode
+        /// for those polygons, in the port's winding (z negated).</summary>
+        const string SingleSidedCull = "front";
         double _scrollClock;
         Camera3D _camera;
         ParkMap _map;
@@ -149,12 +155,15 @@ namespace TPWGodot
                 else gate = null;
                 var atlas = PageAtlas.Build(ground, uses);
                 var scroll = new Scrolling(ground.ScrollRects(), atlas);
+                var atlasTex = ImageTexture.CreateFromImage(
+                    Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false, Image.Format.Rgba8, atlas.Image.Rgba));
                 _mat = new ShaderMaterial { Shader = PsxShading.ScrollingShader() };
-                _mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(
-                    Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false, Image.Format.Rgba8, atlas.Image.Rgba)));
+                _mat.SetShaderParameter("atlas", atlasTex);
+                _matCull = new ShaderMaterial { Shader = PsxShading.ScrollingShader(SingleSidedCull) };
+                _matCull.SetShaderParameter("atlas", atlasTex);
                 _ground.Mesh = GroundMesh(quads, atlas, scroll, _mat);
                 _atlas = atlas;
-                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, out placed, out skipped);
+                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, _matCull, out placed, out skipped);
                 if (gate != null)
                 {
                     _gate = new ParkGate.State(gate);
@@ -221,12 +230,10 @@ namespace TPWGodot
         /// <summary>The scenery: each placement's model, scaled, turned and moved as 0x80057AF0 does, in the world's
         /// frame and then into Godot's (z negated, like everything else). Faces are drawn from both sides, as master
         /// asked of every model; the game itself drops a single-sided face that looks away.</summary>
-        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, out int placed, out int skipped)
+        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, Material matCull,
+                                     out int placed, out int skipped)
         {
-            var verts = new List<Vector3>();
-            var cols = new List<Color>();
-            var uvs = new List<Vector2>();
-            var rects = new List<float>();
+            var both = new Buffers(); var single = new Buffers();
             float aw = atlas.Image.Width, ah = atlas.Image.Height;
             int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
             placed = skipped = 0;
@@ -246,21 +253,22 @@ namespace TPWGodot
                         u0 = Math.Min(u0, w & 0xFF); u1 = Math.Max(u1, w & 0xFF); v0 = Math.Min(v0, w >> 8); v1 = Math.Max(v1, w >> 8);
                     }
                     var r = scroll.RectFor(tex.TPage, tex.Clut, u0, v0, u1, v1);
+                    var b = tex.DoubleSided ? both : single;
                     foreach (int k in poly.IsQuad ? quad : tri)
                     {
-                        rects.Add(r.X); rects.Add(r.Y); rects.Add(r.Z); rects.Add(r.W);
+                        b.R.Add(r.X); b.R.Add(r.Y); b.R.Add(r.Z); b.R.Add(r.W);
                         int vi = poly.Corner(k);
                         var (x, y, z) = m.Position(vi);
                         var (wx, wy, wz) = pl.Place(x, y, z);
-                        verts.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
+                        b.V.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
                         byte g = m.Vertices[vi].Shade;
-                        cols.Add(new Color(g / 255f, g / 255f, g / 255f));
+                        b.C.Add(new Color(g / 255f, g / 255f, g / 255f));
                         ushort uv = poly.Uv(k);
-                        uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
+                        b.UV.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
                     }
                 }
             }
-            return Surface(verts, cols, uvs, rects, mat);
+            return Surfaces(both, mat, single, matCull);
         }
 
         /// <summary>Which scrolling rectangle, if any, a polygon's texels lie in, as an atlas rectangle for CUSTOM0.
@@ -326,7 +334,7 @@ namespace TPWGodot
         /// <summary>The gate's moving parts at the gate state's angle (ParkGate.State.Part), textured from the park atlas.</summary>
         ArrayMesh GateMesh()
         {
-            var verts = new List<Vector3>(); var cols = new List<Color>(); var uvs = new List<Vector2>(); var rects = new List<float>();
+            var both = new Buffers(); var single = new Buffers();
             float aw = _atlas.Image.Width, ah = _atlas.Image.Height;
             int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
             for (int i = 0; i < _gate.Gate.Parts.Length; i++)
@@ -335,21 +343,52 @@ namespace TPWGodot
                 foreach (var poly in _gateModel.Polygons)
                 {
                     var tex = _gateModel.Textures[poly.Texture];
+                    var b = tex.DoubleSided ? both : single;
                     _atlas.TryOrigin(tex.TPage, tex.Clut, out int ox, out int oy);
                     foreach (int k in poly.IsQuad ? quad : tri)
                     {
                         int vi = poly.Corner(k);
                         var (wx, wy, wz) = ParkGate.Place(part, _gateBase, _gateModel.Position(vi));
-                        verts.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
+                        b.V.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
                         byte g = _gateModel.Vertices[vi].Shade;
-                        cols.Add(new Color(g / 255f, g / 255f, g / 255f));
+                        b.C.Add(new Color(g / 255f, g / 255f, g / 255f));
                         ushort uv = poly.Uv(k);
-                        uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
-                        rects.Add(0); rects.Add(0); rects.Add(0); rects.Add(0);
+                        b.UV.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
+                        b.R.Add(0); b.R.Add(0); b.R.Add(0); b.R.Add(0);
                     }
                 }
             }
-            return Surface(verts, cols, uvs, rects, _mat);
+            return Surfaces(both, _mat, single, _matCull);
+        }
+
+        /// <summary>Vertex streams for one surface: positions, shades, UVs and the scroll rectangle (CUSTOM0).</summary>
+        sealed class Buffers
+        {
+            public readonly List<Vector3> V = new();
+            public readonly List<Color> C = new();
+            public readonly List<Vector2> UV = new();
+            public readonly List<float> R = new();
+        }
+
+        /// <summary>A mesh of the polygons drawn from both sides and those drawn from the front only, each with its
+        /// material.</summary>
+        static ArrayMesh Surfaces(Buffers both, Material bothMat, Buffers single, Material singleMat)
+        {
+            var mesh = new ArrayMesh();
+            foreach (var (b, mat) in new[] { (both, bothMat), (single, singleMat) })
+            {
+                if (b.V.Count == 0) continue;
+                var arrays = new Godot.Collections.Array();
+                arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
+                arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
+                arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
+                arrays[(int)Godot.Mesh.ArrayType.Custom0] = b.R.ToArray();
+                var format = (Godot.Mesh.ArrayFormat)((long)Godot.Mesh.ArrayCustomFormat.RgbaFloat << (int)Godot.Mesh.ArrayFormat.FormatCustom0Shift);
+                mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays, null, null, format);
+                mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, mat);
+            }
+            return mesh;
         }
 
         /// <summary>The live particles as billboards facing the camera, sized as 0x80034BDC sizes them: half-extents
@@ -494,7 +533,9 @@ namespace TPWGodot
             // One texel row per park frame. A park frame is one clock tick (2 vsyncs), so this is 25 rows a second at
             // PAL's 50 Hz: derived, like ParkClock.TickSeconds, whose assumption it shares.
             _scrollClock += delta;
-            _mat?.SetShaderParameter("scroll_rows", (float)Math.Floor(_scrollClock / TPW.Sim.ParkClock.TickSeconds));
+            float rows = (float)Math.Floor(_scrollClock / TPW.Sim.ParkClock.TickSeconds);
+            _mat?.SetShaderParameter("scroll_rows", rows);
+            _matCull?.SetShaderParameter("scroll_rows", rows);
             _parkTime += delta * EntranceFlags.TimeUnitsPerSecond;
             if (_flagMat != null) _flags.Mesh = FlagMesh((long)_parkTime);
             // Park frames: 25 a second (a frame per clock tick at PAL's 50 Hz), each worth 1/25 s of the game's time.

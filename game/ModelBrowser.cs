@@ -35,13 +35,14 @@ namespace TPWGodot
         float _clock;                                   // in the file's own time units
         (int X, int Y, int Z)[] _posed;                 // null = draw the file's rest vertices
         Vector3 _fitCentre; float _fitScale = 1f;       // fixed at the REST pose, see Show()
-        // ⭐ CULLING OFF BY DEFAULT, BY MASTER'S CALL, and the reason is fidelity rather than taste: "in this era
-        // the devs would have manually removed faces". The PS1 GPU has no back-face culling at all; a game culls
-        // in software per polygon if it chooses to, and tinyclaw measured this one's park geometry at 88-90% one
-        // handedness, so it does not cull everything. Culling everything here breaks the double-sided details
-        // (fringes, flags, thin fins) that were modelled as single faces meant to be seen from both sides.
-        // The toggle stays: culling ON is still the right instrument for checking winding, which is how the
-        // inside-out models were caught.
+        // ⭐ CULLED AS THE GAME CULLS, PER GROUP. The PS1 GPU has no back-face culling; the game does it in
+        // software, and now we know exactly where: the model drawer's emitters (jump table 0x80011F34, picked by the
+        // group's flags) test the GTE's NCLIP and drop a face that faces away UNLESS the group has flag bit 1
+        // (MeshFace.DoubleSided), whose emitters skip the test. So by default single-sided groups are culled and
+        // double-sided ones (fringes, flags, thin fins) drawn from both sides. This replaces "culling off by default",
+        // master's call for fidelity when the game's rule was not known: with it off, the browser showed faces the
+        // game never draws (the flag pole's end caps, the backs of single-sided parts).
+        // The toggle culls EVERY face, the instrument for checking winding, which is how the inside-out models were caught.
         bool _cull = false;
         // ⭐ _reverse = false IS THE CORRECT ORDER. Its history: file order was settled by looking, with culling
         // ON (master reported every model inside out under the reversed order I had assumed). Then master saw
@@ -55,7 +56,8 @@ namespace TPWGodot
         List<(GazEntry Entry, TextureSheet Sheet)> _sheets = new();
         string _texInfo = "";
 
-        /// <summary>Toggle back-face culling. Off hides winding faults; on exposes them.</summary>
+        /// <summary>Toggle between the game's culling (single-sided groups only) and culling every face, which
+        /// exposes winding faults.</summary>
         public void ToggleCull() { _cull = !_cull; Show(_index); }
 
         /// <summary>Toggle triangle order, so both windings can be compared against the same model rather
@@ -133,7 +135,7 @@ namespace TPWGodot
 
         public bool HasAnimation => Playability == PlayState.Playable;
 
-        public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "flipped" : "correct")} · " +
+        public string StateLabel => $"cull {(_cull ? "ALL" : "as the game")} · order {(_reverse ? "flipped" : "correct")} · " +
                                     $"textures {(_textured ? "ON" : "off")} · " +
                                     Playability switch
                                     {
@@ -155,6 +157,7 @@ namespace TPWGodot
 
         /// <summary>The browser index of the first model in archive entry <paramref name="entry"/>, or -1.</summary>
         public int IndexOfEntry(int entry) => _meshes.FindIndex(x => x.Entry == entry);
+        public int IndexOf(int entry, int sub) => _meshes.FindIndex(x => x.Entry == entry && x.Sub == sub);
 
         public override void _Ready()
         {
@@ -268,7 +271,8 @@ namespace TPWGodot
                         : new Color(0.5f, 0.5f, 0.5f);
                     if (tile >= 0)
                     {
-                        int key = face.SemiTransparent ? face.BlendMode : -1;
+                        // Bucket by how the GPU blends it and whether the game culls it: (blend + 1) * 2 + both sides.
+                        int key = ((face.SemiTransparent ? face.BlendMode : -1) + 1) * 2 + (face.DoubleSided ? 1 : 0);
                         if (!buckets.TryGetValue(key, out var b)) buckets[key] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
                         b.V.Add(pos);
                         // A flat face's builder writes 0x808080, the neutral colour: the texel unshaded.
@@ -303,9 +307,11 @@ namespace TPWGodot
                 // the blend bit solid and blends only the ones with it, so each such bucket is drawn twice.
                 foreach (var (key, b) in buckets)
                 {
-                    if (key < 0) { AddSurface(b, PsxShading.Shader(_cull)); continue; }
-                    AddSurface(b, PsxShading.SemiTransparentShader(key, false, _cull));
-                    AddSurface(b, PsxShading.SemiTransparentShader(key, true, _cull));
+                    int blend = key / 2 - 1;
+                    bool culled = _cull || (key & 1) == 0;
+                    if (blend < 0) { AddSurface(b, PsxShading.Shader(culled)); continue; }
+                    AddSurface(b, PsxShading.SemiTransparentShader(blend, false, culled));
+                    AddSurface(b, PsxShading.SemiTransparentShader(blend, true, culled));
                 }
             }
             if (pv.Count >= 3)
@@ -323,9 +329,9 @@ namespace TPWGodot
                 });
             }
             _instance.Mesh = mesh;
-            // ⭐ CULLING ON BY DEFAULT, BECAUSE IT IS WHAT MAKES WINDING FALSIFIABLE AT ALL. With back faces
-            // drawn, a reversed triangle renders identically to a correct one. Culling on turned an
-            // unfalsifiable impression into an observation, and master caught the inside-out models that way.
+            // ⭐ CULLING IS WHAT MAKES WINDING FALSIFIABLE AT ALL. With back faces drawn, a reversed triangle
+            // renders identically to a correct one. Culling turned an unfalsifiable impression into an
+            // observation, and master caught the inside-out models that way (see _cull for the default).
             _instance.MaterialOverride = null;
 
             _texInfo = tex == null ? "" :

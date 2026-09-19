@@ -76,15 +76,16 @@ void fragment() {{
         /// texels lie in a scrolling rectangle carries that rectangle in CUSTOM0 (x, y, width, height in atlas
         /// pixels; width 0 for everything else), and the shader fetches row (r - scroll_rows) mod height where the
         /// GPU would fetch row r. That is exactly what the game's rewrite of those texels in VRAM makes the GPU
-        /// see (0x80034194), without rewriting a texture every frame. Drawn from both sides.</summary>
-        public static Shader ScrollingShader()
+        /// see (0x80034194), without rewriting a texture every frame. <paramref name="cull"/> is Godot's cull mode:
+        /// "disabled" draws from both sides; the game's single-sided polygons use ParkView.SingleSidedCull.</summary>
+        public static Shader ScrollingShader(string cull = "disabled")
         {
-            const string key = "scroll";
+            string key = "scroll_" + cull;
             if (_shaders.TryGetValue(key, out var sh)) return sh;
             sh = new Shader
             {
                 Code = @"shader_type spatial;
-render_mode unshaded, cull_disabled;
+render_mode unshaded, cull_" + cull + @";
 uniform sampler2D atlas : filter_nearest;
 uniform float scroll_rows = 0.0;
 varying flat vec4 rect;
