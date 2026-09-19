@@ -26,6 +26,12 @@ namespace TPW.Data
         /// <summary>Vertex positions after scatter and direct writes, in the file's frame.</summary>
         public (int X, int Y, int Z)[] Vertices = Array.Empty<(int, int, int)>();
 
+        /// <summary>Vertex positions from the bone skin, before the scatter path is applied.</summary>
+        public (int X, int Y, int Z)[] Skinned = Array.Empty<(int, int, int)>();
+
+        /// <summary>Which vertices any bone reached.</summary>
+        public bool[] SkinnedMask = Array.Empty<bool>();
+
         /// <summary>The scatter sources this time produced, before they reach vertices.</summary>
         public (short X, short Y, short Z)[] Sources = Array.Empty<(short, short, short)>();
 
@@ -36,19 +42,84 @@ namespace TPW.Data
             if (mesh == null) return pose;
 
             // --- bones: rest pose, then any bone track that names them -------------------------
+            // ⚠ A TRACK GIVES A BONE'S **LOCAL** TRANSFORM, NOT ITS WORLD ONE. Overwriting the composed
+            // world transform with the keyframe's values detaches that bone from its parents: its
+            // translation becomes a small local offset and everything it skins collapses toward the
+            // origin. So pose locally first, then compose the whole hierarchy in one forward pass --
+            // which is exactly what the rest pose already does, and for the same reason.
             var skel = mesh.Skeleton;
             if (skel != null && skel.Count > 0)
             {
-                pose.Bones = skel.RestWorld();
+                int n = skel.Count;
+                var localR = new BoneRest[n];
+                var localT = new (float X, float Y, float Z)[n];
+                for (int b = 0; b < n; b++)
+                {
+                    localR[b] = skel.Bones[b].ToMatrix();
+                    localT[b] = (skel.Bones[b].Tx, skel.Bones[b].Ty, skel.Bones[b].Tz);
+                }
                 if (mesh.Tracks != null)
                     foreach (var t in mesh.Tracks)
                     {
                         if (t.Type != 6 || t.Keys.Length == 0) continue;
                         int b = t.BoneIndex;
-                        if (b < 0 || b >= pose.Bones.Length) continue;
+                        if (b < 0 || b >= n) continue;
                         var k = t.Sample(time);
-                        pose.Bones[b] = (QuatToMatrix(k.Qx, k.Qy, k.Qz, k.Qw), k.Tx, k.Ty, k.Tz);
+                        localR[b] = QuatToMatrix(k.Qx, k.Qy, k.Qz, k.Qw);
+                        localT[b] = (k.Tx, k.Ty, k.Tz);
                     }
+
+                var world = new (BoneRest R, float X, float Y, float Z)[n];
+                for (int b = 0; b < n; b++)
+                {
+                    int par = skel.Bones[b].Parent;
+                    if (par < 0 || par >= b) { world[b] = (localR[b], localT[b].X, localT[b].Y, localT[b].Z); continue; }
+                    var (pr, px, py, pz) = world[par];
+                    var (lx, ly, lz) = localT[b];
+                    world[b] = (BoneRest.Multiply(pr, localR[b]),
+                                px + pr.M00 * lx + pr.M01 * ly + pr.M02 * lz,
+                                py + pr.M10 * lx + pr.M11 * ly + pr.M12 * lz,
+                                pz + pr.M20 * lx + pr.M21 * ly + pr.M22 * lz);
+                }
+                pose.Bones = world;
+            }
+
+            // --- bone skinning ------------------------------------------------------------------
+            // ⭐ THE LINK FROM BONES TO GEOMETRY, from 0x8002e1a4. Each bone names a slice of the skin
+            // table; the game loads that bone's matrix into the GTE, and for every entry in its slice
+            // transforms the entry's BONE-SPACE position by the matrix and accumulates it into the
+            // entry's vertex, scaled by the weight.
+            //
+            // What makes this the binding rather than a plausible reading: every vertex's weights across
+            // all its bones sum to EXACTLY 16384 -- all 14,531 of them, no exceptions, not one off by a
+            // single unit. The bone ranges also tile the skin table on 209 of 232 meshes.
+            var skinned = new bool[mesh.VertexCount];
+            if (skel != null && skel.Count > 0 && mesh.Binding != null && mesh.Binding.Records.Length > 0)
+            {
+                var recs = mesh.Binding.Records;
+                var acc = new (int X, int Y, int Z)[mesh.VertexCount];
+                for (int b = 0; b < skel.Count && b < pose.Bones.Length; b++)
+                {
+                    var bone = skel.Bones[b];
+                    var (R, tx, ty, tz) = pose.Bones[b];
+                    for (int k = 0; k < bone.SkinCount; k++)
+                    {
+                        int at = bone.SkinStart + k;
+                        if (at < 0 || at >= recs.Length) continue;
+                        var r = recs[at];
+                        if (r.Vertex >= acc.Length) continue;
+                        // bone-space position through the bone's world transform
+                        float px = tx + R.M00 * r.X + R.M01 * r.Y + R.M02 * r.Z;
+                        float py = ty + R.M10 * r.X + R.M11 * r.Y + R.M12 * r.Z;
+                        float pz = tz + R.M20 * r.X + R.M21 * r.Y + R.M22 * r.Z;
+                        acc[r.Vertex].X += (int)(px * r.Weight) >> 14;
+                        acc[r.Vertex].Y += (int)(py * r.Weight) >> 14;
+                        acc[r.Vertex].Z += (int)(pz * r.Weight) >> 14;
+                        skinned[r.Vertex] = true;
+                    }
+                }
+                pose.Skinned = acc;
+                pose.SkinnedMask = skinned;
             }
 
             // --- scatter sources, then the vertices they reach ---------------------------------
@@ -109,6 +180,11 @@ namespace TPW.Data
                     var p = SampleAt(t, time);
                     verts[v] = (p.X, p.Y, p.Z);
                 }
+            // Skinned vertices take the bone result. Weights summing to 1 make this a replacement,
+            // not an addition on top of the rest pose.
+            for (int v = 0; v < verts.Length; v++)
+                if (v < skinned.Length && skinned[v]) verts[v] = pose.Skinned[v];
+
             pose.Vertices = verts;
             return pose;
         }

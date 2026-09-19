@@ -106,6 +106,14 @@ namespace TPW.Data
     /// </summary>
     public readonly struct Bone
     {
+        /// <summary>This bone's slice of the skin table: how many entries, and where they start.
+        ///
+        /// ⚠ Catalogued as "unidentified" until the code was read. The game loads this bone's matrix into
+        /// the GTE and walks exactly this range, transforming each entry's bone-space position by the
+        /// matrix and accumulating it into the entry's vertex. It is the link from bones to geometry, and
+        /// it was sitting in the first four bytes of a record whose other fields I had already named.</summary>
+        public readonly ushort SkinCount, SkinStart;
+
         public readonly short Parent;               // -1 at the root; always < own index
         public readonly float Qx, Qy, Qz, Qw;       // rest rotation
         public readonly short Tx, Ty, Tz;           // rest translation, file units
@@ -115,6 +123,8 @@ namespace TPW.Data
         {
             const float S = 1f / 4096f;
             static short H(ReadOnlySpan<byte> b, int i) => BitConverter.ToInt16(b.Slice(i * 2, 2));
+            SkinCount = (ushort)H(d, 0);
+            SkinStart = (ushort)H(d, 1);
             Parent = H(d, 3);
             Qx = H(d, 4) * S; Qy = H(d, 5) * S; Qz = H(d, 6) * S; Qw = H(d, 7) * S;
             Tx = H(d, 12); Ty = H(d, 13); Tz = H(d, 14);

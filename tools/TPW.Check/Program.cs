@@ -1040,7 +1040,9 @@ static class Program
             for (int i = 0; i < c.SubCount; i++)
             {
                 if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
-                if (m.Binding == null || m.Binding.SourceCount == 0) continue;
+                bool anySkin = false;
+                if (m.Skeleton != null) foreach (var bb in m.Skeleton.Bones) if (bb.SkinCount > 0) anySkin = true;
+                if (m.Binding == null || (m.Binding.SourceCount == 0 && !anySkin)) continue;
                 if (seen++ != want) continue;
                 System.IO.Directory.CreateDirectory(dir);
                 foreach (int t in new[] { 0, 16, 32, 48, 64, 96 })

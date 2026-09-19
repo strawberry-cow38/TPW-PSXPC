@@ -10,11 +10,18 @@ namespace TPW.Data
         public readonly ushort Vertex;
         public readonly ushort Weight;              // 16384 == 1.0
 
+        /// <summary>The vertex's position in the BONE's own space, transformed by that bone's matrix
+        /// before being weighted in. Formerly "bytes 4..11, not identified".</summary>
+        public readonly short X, Y, Z;
+
         public BindingRecord(ReadOnlySpan<byte> d)
         {
             Vertex = BitConverter.ToUInt16(d.Slice(0, 2));
             Weight = BitConverter.ToUInt16(d.Slice(2, 2));
-            // bytes 4..11 are not identified.
+            X = BitConverter.ToInt16(d.Slice(4, 2));
+            Y = BitConverter.ToInt16(d.Slice(6, 2));
+            Z = BitConverter.ToInt16(d.Slice(8, 2));
+            // d[10..11] is the 8-byte vertex's pad, zero on every record on the disc.
         }
         public float WeightF => Weight / (float)Scale;
     }
