@@ -26,6 +26,8 @@ namespace TPWGodot
         System.Collections.Generic.List<TpwImage> _views = new();
         int _view;
         Button _next;
+        ModelBrowser _models;
+        Label _modelInfo;
         readonly System.Random _rng = new();
         OptionButton _rate;
 
@@ -86,7 +88,27 @@ namespace TPWGodot
             // someone rebuild to see the next asset.
             _next = new Button { Text = "Next image", Disabled = true };
             _next.Pressed += ShowNext;
-            _root.AddChild(_next);
+
+            // ⭐ THE MODEL BROWSER. 531 meshes parsing with zero failures says the layout is
+            // self-consistent; it does not say one of them is shaped like a rollercoaster. Only looking
+            // says that, and looking is the instrument that has caught every asset fault so far.
+            _models = new ModelBrowser();
+            AddChild(_models);
+            _modelInfo = new Label { Text = "Models: loading…" };
+            _models.SetInfoLabel(_modelInfo);
+
+            var prevModel = new Button { Text = "< Prev model" };
+            var nextModel = new Button { Text = "Next model >" };
+            prevModel.Pressed += () => _models.Prev();
+            nextModel.Pressed += () => _models.Next();
+
+            var row = new HBoxContainer();
+            row.AddThemeConstantOverride("separation", 8);
+            row.AddChild(_next);
+            row.AddChild(prevModel);
+            row.AddChild(nextModel);
+            _root.AddChild(row);
+            _root.AddChild(_modelInfo);
 
             _audio = new AudioStreamPlayer();
             AddChild(_audio);
@@ -148,6 +170,7 @@ namespace TPWGodot
                     if (f != null && Tga.TryDecodeVramBlock(disc.ReadFile(f), out var img, out _))
                     { legal = img; legal.Source = "LEGAL.GFX"; views.Add(legal); }
                     views.AddRange(SpriteBlocks(disc));
+                    _models.Load(disc);   // parses 531 meshes; far too slow for the main thread
                     sounds = AllSounds(disc);
                 }
                 catch (System.Exception e)
@@ -191,6 +214,10 @@ namespace TPWGodot
             var image = Image.CreateFromData(w, h, false, Image.Format.Rgba8, rgba);
             _preview.Texture = ImageTexture.CreateFromImage(image);
             GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
+
+            // Show the first model as soon as the parse is done, so the window is never empty.
+            if (_models != null && _models.Count > 0) _models.Show(0);
+            else if (_modelInfo != null) _modelInfo.Text = "Models: none parsed.";
 
             if (_views.Count > 0)
             {

@@ -358,6 +358,28 @@ behaviour rather than against itself — which is the difference between a decod
 one that is merely self-consistent. **177 ready-made fixtures.** That is the right relationship
 between the two artefacts, and it is the opposite of using the map to produce the colours.
 
+## 5l. The mesh parser, and a corroboration I overstated
+
+531 of 531 plain sub-entries parse, 0 failures: 38,680 vertices, 53,382 faces across 268 containers.
+25 are LZSS-compressed and skipped (all in entries 0 and 3). The count is the falsifier — every field
+feeds the walk that finds the next, so a wrong layout fails on most sub-entries, not a few.
+
+⭐ **Reading `tpage` off the file reproduces the GPU's own page list**: `512/576/640/704/896/960` at
+y=0 and y=256. Two methods sharing no code, no file and no assumption reaching the same twelve.
+
+⚠ **BUT I ALSO CLAIMED THE "THREE STRAYS AT 0,0" AGREED, AND THAT IS COINCIDENCE.** tinyclaw checked:
+their three come from a single capture where a misfire opened the purchase menu, and are large rects
+of **menu art**, not geometry. Mine are three strays in mesh files. Two unrelated things that both
+happen to number three. **The twelve is the finding and is strong enough alone**; quoting the strays
+alongside it dressed one real result up as two.
+
+⚠ **AND A CONSTANT I TRANSCRIBED RATHER THAN CHECKED.** fable's report gives the tpage X decode as
+`(t & 0x1F) * 64`. Bit 4 is the Y select and `0x1F * 64 = 1984` exceeds VRAM's 1024-pixel width, so it
+cannot be right — but I copied it and got pages at x = 1536..1920, addresses that do not exist.
+Corrected to bits 0-3, which is what makes the twelve line up. tinyclaw's logger has used bits 0-3
+since it was written, making that a third independent read agreeing with the correction rather than
+the report. **A source being reliable does not make a line right.**
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
