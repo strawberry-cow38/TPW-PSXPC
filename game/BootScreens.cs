@@ -45,6 +45,16 @@ namespace TPWGodot
         Label _big, _small, _note;
         Texture2D _legalArt;
 
+        // The language screen's advisor: a real 3D model in a viewport stacked over the 2D frame.
+        SubViewport _advisorView;
+        MeshInstance3D _advisorMesh;
+        TextureRect _advisorRect;
+        TPW.Data.Mesh _advisor;
+        System.Collections.Generic.List<(GazEntry Entry, TextureSheet Sheet)> _advisorSheets;
+        Vector3 _advisorCentre; float _advisorScale = 1f;
+        int _advisorSheetIndex = -1, _advisorFlagDrawn = -1;
+        float _advisorClock; int _advisorLength;
+
         bool _waitingForMovie;
         int _menuFrame = -1;
         bool _musicStarted;
@@ -94,6 +104,8 @@ namespace TPWGodot
             };
             AddChild(_menuView);
 
+            BuildAdvisorViewport();
+
             var box = new VBoxContainer { AnchorRight = 1, AnchorBottom = 1, Alignment = BoxContainer.AlignmentMode.Center };
             box.AddThemeConstantOverride("separation", 10);
             AddChild(box);
@@ -104,6 +116,121 @@ namespace TPWGodot
             box.AddChild(_big); box.AddChild(_small); box.AddChild(_note);
         }
 
+        /// <summary>The advisor is a MODEL, so he gets a real 3D viewport stacked over the 2D frame
+        /// rather than being faked with sprites.
+        ///
+        /// ⭐ The viewport is exactly the frame's own size and carries the SAME anchors and stretch mode
+        /// as <see cref="_menuView"/>, so the two scale together. Aligning a separately-sized overlay
+        /// against a KeepAspectCentered image means re-deriving its letterboxing, and getting that
+        /// subtly wrong looks exactly like a wrong model position.</summary>
+        void BuildAdvisorViewport()
+        {
+            _advisorView = new SubViewport
+            {
+                Size = new Vector2I(MenuRenderer.W, MenuLayout.VisibleHeight),
+                TransparentBg = true,
+                RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
+                Disable3D = false,
+            };
+            AddChild(_advisorView);
+
+            // ⚠ ORTHOGONAL, and sized to the frame in PIXELS. A perspective camera would need the game's
+            // own field of view and eye distance, neither of which has been read; orthogonal with
+            // Size = the frame height makes one world unit one framebuffer pixel, so every number below
+            // is a measurement off the console rather than a value tuned until it looked right.
+            var cam = new Camera3D
+            {
+                Projection = Camera3D.ProjectionType.Orthogonal,
+                Size = MenuLayout.VisibleHeight,
+                Position = new Vector3(0, 0, 600),
+                Near = 1, Far = 2000,
+            };
+            _advisorView.AddChild(cam);
+
+            _advisorMesh = new MeshInstance3D();
+            _advisorView.AddChild(_advisorMesh);
+
+            _advisorRect = new TextureRect
+            {
+                AnchorRight = 1, AnchorBottom = 1,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
+                Texture = _advisorView.GetTexture(),
+                Visible = false,
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+            };
+            AddChild(_advisorRect);
+        }
+
+        /// <summary>Give the boot screens the language-screen advisor: FOLIO entry 83 sub-mesh 10.
+        ///
+        /// ⭐ WHICH MESH IS MEASURED, NOT PICKED. Six of the eight palettes that sub-mesh uses are the
+        /// ones the console's display list draws on this screen, and 192 of its 319 faces carry CLUT
+        /// 0x40e0 over u 1..149, v 88..173 -- exactly the flag geometry measured from the same dump. So
+        /// the waving flag is part of HIM, posed by his 29 bones, not a separate cloth.</summary>
+        public void SetAdvisor(TPW.Data.Mesh mesh, System.Collections.Generic.List<(GazEntry Entry, TextureSheet Sheet)> sheets)
+        {
+            _advisor = mesh;
+            _advisorSheets = sheets;
+            if (_advisor == null) return;
+            // Each language's flag is copied into the slot from the DISC's sheet, not from whatever the
+            // last language left there -- copying over a copy would be fine for the texels but would
+            // quietly become a chain nobody can reason about the first time one of the copies refuses.
+            _advisorSheetIndex = -1;
+            for (int i = 0; i < sheets.Count; i++)
+                if (sheets[i].Entry.Index == MenuLayout.Sheet) { _advisorSheetIndex = i; break; }
+            _advisorFlagDrawn = -1;
+            // ⚠ Fit on the REST pose and hold it, or a waving flag rescales the whole advisor each frame.
+            ModelMesh.Fit(_advisor, out _advisorCentre, out _advisorScale, AdvisorScreenHeight);
+            _advisorLength = MeshPose.AnimationLength(_advisor);
+            _advisorClock = 0;
+            RebuildAdvisor();
+        }
+
+        /// <summary>Where the console puts him, measured off the display list: the advisor's own
+        /// triangles span x 229..320 and y 132..187, and his flag spans x 172..283, y 26..118, so the
+        /// whole model occupies x 172..320, y 26..187 of the 512x240 frame.
+        ///
+        /// ⚠ THIS IS A FIT TO THE MODEL'S ON-SCREEN BOUNDING BOX, NOT THE GAME'S CAMERA. The console
+        /// projects him with its own transform, which has not been read; this places and scales the
+        /// model so its silhouette lands where the console's does. It will be right in position and
+        /// size and can still be wrong in ROTATION, and that difference is not visible in a bounding
+        /// box -- so it stays labelled rather than quietly presented as the real placement.</summary>
+        public const int AdvisorLeft = 172, AdvisorRight = 320, AdvisorTop = 26, AdvisorBottom = 187;
+        public const int AdvisorScreenHeight = AdvisorBottom - AdvisorTop;      // 161 px
+
+        /// <summary>Put the ring's current flag into the slot sprite the mesh samples, the way the
+        /// console does. Works on a COPY of the sheet, so the model browser and the park keep seeing
+        /// the disc's own texels.</summary>
+        void PutFlagInSlot()
+        {
+            if (_advisorSheets == null || _advisorSheetIndex < 0) return;
+            int want = LanguageRing.FlagSprite[((_ring % LanguageRing.Count) + LanguageRing.Count) % LanguageRing.Count];
+            if (want == _advisorFlagDrawn) return;
+            var fresh = _menuSheetPristine?.CloneTexels();
+            if (fresh == null) return;
+            if (!fresh.CopySpriteInto(want, LanguageRing.FlagSlotSprite))
+            { GD.PushWarning($"[tpw] flag sprite {want} would not copy into slot {LanguageRing.FlagSlotSprite}"); return; }
+            var e = _advisorSheets[_advisorSheetIndex].Entry;
+            _advisorSheets[_advisorSheetIndex] = (e, fresh);
+            _advisorFlagDrawn = want;
+        }
+
+        void RebuildAdvisor()
+        {
+            if (_advisor == null || _advisorMesh == null) return;
+            PutFlagInSlot();
+            var posed = MeshPose.Evaluate(_advisor, (int)_advisorClock).Vertices;
+            if (posed != null && posed.Length != _advisor.VertexCount) posed = null;
+            _advisorMesh.Mesh = ModelMesh.Build(_advisor, posed, _advisorSheets,
+                                                textured: true, reverse: false, cull: true,
+                                                _advisorCentre, _advisorScale, out _);
+            // Frame pixels -> camera units: x right from the centre, y UP from the centre.
+            float cx = (AdvisorLeft + AdvisorRight) / 2f - MenuRenderer.W / 2f;
+            float cy = MenuLayout.VisibleHeight / 2f - (AdvisorTop + AdvisorBottom) / 2f;
+            _advisorMesh.Position = new Vector3(cx, cy, 0);
+        }
+
         /// <summary>Hand over the decoded LEGAL.GFX. Optional: without it the legal screen still runs
         /// for its measured 313 frames, as black, rather than being skipped -- a missing asset must not
         /// silently change the timing.</summary>
@@ -112,7 +239,13 @@ namespace TPWGodot
         /// <summary>Hand over FOLIO entry 84. Without it the menu falls back to the labelled
         /// placeholder rather than drawing nothing -- a disc we cannot read the sheet from must still
         /// reach a usable menu.</summary>
-        public void SetMenuSheet(TextureSheet sheet) => _menuArt = MenuRenderer.Prepare(sheet);
+        public void SetMenuSheet(TextureSheet sheet)
+        {
+            _menuArt = MenuRenderer.Prepare(sheet);
+            _menuSheetPristine = sheet;      // kept unmodified; every flag copy starts from the disc's own texels
+        }
+
+        TextureSheet _menuSheetPristine;
 
         /// <summary>The movie finished or was skipped. The FILE decides its own length, so this is what
         /// advances the chain, not the frame count in the table.</summary>
@@ -152,6 +285,16 @@ namespace TPWGodot
             var before = _boot.Screen;
             for (int i = 0; i < ticks && _boot.Screen == before; i++)
                 _boot.Tick(_anyEdge && i == 0, _confirmEdge && i == 0);
+
+            // The advisor animates on the SAME console tick as the rest of the chain, not on the
+            // renderer's frame rate -- his flag would wave at a different speed on a 144 Hz monitor
+            // otherwise, and that is the sort of wrong that only shows up on somebody else's machine.
+            if (_boot.Screen == BootScreen.LanguageSelect && _advisor != null && _advisorLength > 0)
+            {
+                _advisorClock += ticks;
+                if (_advisorClock >= _advisorLength) _advisorClock %= _advisorLength;
+                RebuildAdvisor();
+            }
 
             if (_boot.Screen == BootScreen.MainMenu)
             {
@@ -287,17 +430,19 @@ namespace TPWGodot
         {
             _legal.Visible = false;
             _menuView.Visible = true;
-            string key = "lang" + _ring;
+            string key = "lang" + _ring + (_advisor != null ? "m" : "");
             if (key == _menuDrawn) return;
             _menuDrawn = key;
 
             var frame = MenuRenderer.NewFrame();
-            MenuRenderer.DrawLanguageScreen(_menuArt, frame, _ring);
+            MenuRenderer.DrawLanguageScreen(_menuArt, frame, _ring, flatFlag: _advisor == null);
 
             var img = Image.CreateFromData(MenuRenderer.W, MenuLayout.VisibleHeight, false, Image.Format.Rgba8, MenuRenderer.Visible(frame));
             _menuView.Texture = ImageTexture.CreateFromImage(img);
             _big.Text = _small.Text = "";
-            _note.Text = "real flag art, drawn flat — the console waves it on a mesh the advisor holds";
+            _note.Text = _advisor != null
+                ? "advisor + flag: the real model, waved by its own bones; placement fitted, not the game's camera"
+                : "advisor and flag not loaded — the 2D flag below is the right art in the wrong form";
         }
 
         static string Bar(int level)
@@ -309,6 +454,10 @@ namespace TPWGodot
             _legal.Visible = s == BootScreen.Legal && _legalArt != null;
             if (s != BootScreen.MainMenu && s != BootScreen.LanguageSelect)
             { _menuView.Visible = false; _menuDrawn = null; }
+            // He belongs to the language screen only. The viewport keeps rendering either way, so the
+            // flag is mid-wave rather than snapped to frame 0 when the screen comes back.
+            if (_advisorRect != null)
+                _advisorRect.Visible = s == BootScreen.LanguageSelect && _advisor != null;
             _bg.Color = Colors.Black;
             _big.Text = _small.Text = _note.Text = "";
 

@@ -286,7 +286,7 @@ namespace TPW.Data
         /// <summary>The whole language-select screen, composed. Lives HERE rather than in the Godot
         /// layer so that the offline render and the running game are the SAME code -- a harness that
         /// re-composes the screen itself would be testing the harness.</summary>
-        public static void DrawLanguageScreen(Prepared p, byte[] dst, int ring)
+        public static void DrawLanguageScreen(Prepared p, byte[] dst, int ring, bool flatFlag = true)
         {
             // ⭐ MEASURED: one Gouraud quad, RGB(153,163,254) at the top to RGB(42,32,87) at the bottom.
             for (int yy = 0; yy < H; yy++)
@@ -302,10 +302,10 @@ namespace TPW.Data
             int n = LanguageRing.Count;
             int sel = ((ring % n) + n) % n;
 
-            // The real flag for this language, drawn flat. ⚠ Its POSITION is mine and its FORM is wrong:
-            // the console draws the flag as a waving cloth mesh on a pole the advisor holds -- 100-odd
-            // textured triangles in the same dump these slot positions came from. Right art, wrong form.
-            DrawSprite(p, dst, LanguageRing.FlagSprite[sel], 181, 40);
+            // ⚠ A STAND-IN, drawn only when the advisor's MODEL is not available. The console has no 2D
+            // flag at all: it hangs the cloth on a pole the advisor holds and waves it with his bones.
+            // Drawing both would put two flags on screen, which is worse than either alone.
+            if (flatFlag) DrawSprite(p, dst, LanguageRing.FlagSprite[sel], 181, 40);
 
             Chevrons(dst);
 

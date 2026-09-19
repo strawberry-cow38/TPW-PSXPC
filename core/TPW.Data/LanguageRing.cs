@@ -70,6 +70,11 @@ namespace TPW.Data
         public static readonly string[] NativeName =
             { "Deutsch", "Español", "Nederlands", "English", "Svenska", "Français", "Italiano" };
 
+        /// <summary>The sprite the language screen's flag MESH always samples. The game copies the
+        /// chosen language's flag into it; on the disc it holds "TPW Boot Boys", which is what a port
+        /// that skips the copy puts on screen.</summary>
+        public const int FlagSlotSprite = 126;
+
         /// <summary>TPW.BIN address of the pointer array above. File offset is this minus 0x80010000.</summary>
         public const uint NameTableAddress = 0x801024F4;
 

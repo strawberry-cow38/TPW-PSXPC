@@ -1333,7 +1333,8 @@ static class Program
             var bytes = g.Read(e);
             if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
             if (!c.TryParseMesh(bytes, sub, out var m2, out string err)) { Console.WriteLine(err); return 1; }
-            Console.WriteLine($"entry {entry} sub {sub}: {m2.VertexCount} verts, {m2.Faces.Count} faces, {m2.BoneCount} bones");
+            Console.WriteLine($"entry {entry} sub {sub}: {m2.VertexCount} verts, {m2.Faces.Count} faces, {m2.BoneCount} bones, "
+                            + $"{m2.TrackCount} tracks, animation length {MeshPose.AnimationLength(m2)}");
             var byClut = new SortedDictionary<ushort, int>();
             var uByClut = new Dictionary<ushort, (int u0, int u1, int v0, int v1)>();
             foreach (var f in m2.Faces)

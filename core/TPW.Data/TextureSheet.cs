@@ -92,6 +92,67 @@ namespace TPW.Data
             return (ushort)(Pixels[o] | (Pixels[o + 1] << 8));
         }
 
+        public void SetHalfword(int vramX, int vramY, ushort value)
+        {
+            int o = (vramY - VramY) * StrideBytes + (vramX - VramX) * 2;
+            Pixels[o] = (byte)(value & 0xFF);
+            Pixels[o + 1] = (byte)(value >> 8);
+        }
+
+        /// <summary>A copy that owns its own texels, so a caller can overwrite them without disturbing
+        /// anybody else's view of the same sheet. Sprites are immutable records and are shared.</summary>
+        public TextureSheet CloneTexels()
+        {
+            var c = (TextureSheet)MemberwiseClone();
+            c.Pixels = (byte[])Pixels.Clone();
+            return c;
+        }
+
+        /// <summary>Copy one sprite's texels AND its palette row over another sprite, which is what the
+        /// console does to put the chosen language's flag into the flag SLOT.
+        ///
+        /// ⭐ The slot mechanism is the game's, not an invention: the language screen's flag mesh always
+        /// samples one fixed sprite, and the game overwrites that sprite's texels with the selected
+        /// flag's. The sprite shipped on the disc reads "TPW Boot Boys" -- a developer joke nobody was
+        /// ever meant to see, and exactly what a port shows if it skips the copy.
+        ///
+        /// ⚠ REFUSES rather than approximates. At 4bpp a halfword holds four texels, so a copy between
+        /// sprites whose U differs modulo four would shift the image sideways by a texel or three --
+        /// which looks like a sloppy decode, not like a missing guard. Same for a size or depth
+        /// mismatch. Returns false and changes nothing.</summary>
+        public bool CopySpriteInto(int source, int dest)
+        {
+            if (source < 0 || source >= Sprites.Count || dest < 0 || dest >= Sprites.Count) return false;
+            var s = Sprites[source];
+            var d = Sprites[dest];
+            if (s.W != d.W || s.H != d.H || s.EightBit != d.EightBit || s.Flags != d.Flags) return false;
+            int per = s.EightBit ? 2 : 4;                 // texels per halfword
+            if (s.U % per != d.U % per) return false;
+            int words = (s.U % per + s.W + per - 1) / per;
+
+            for (int y = 0; y < s.H; y++)
+            {
+                int sy = s.PageY + ((s.V + y) & 0xFF), dy = d.PageY + ((d.V + y) & 0xFF);
+                int sx = s.PageX + (s.U & 0xFF) / per, dx = d.PageX + (d.U & 0xFF) / per;
+                for (int i = 0; i < words; i++)
+                    if (!Contains(sx + i, sy) || !Contains(dx + i, dy)) return false;
+            }
+            int colours = s.EightBit ? 256 : 16;
+            for (int i = 0; i < colours; i++)
+                if (!Contains(s.ClutX + i, s.ClutY) || !Contains(d.ClutX + i, d.ClutY)) return false;
+
+            // Checked everything first, so a refusal cannot leave the sheet half-copied.
+            for (int y = 0; y < s.H; y++)
+            {
+                int sy = s.PageY + ((s.V + y) & 0xFF), dy = d.PageY + ((d.V + y) & 0xFF);
+                int sx = s.PageX + (s.U & 0xFF) / per, dx = d.PageX + (d.U & 0xFF) / per;
+                for (int i = 0; i < words; i++) SetHalfword(dx + i, dy, Halfword(sx + i, sy));
+            }
+            for (int i = 0; i < colours; i++)
+                SetHalfword(d.ClutX + i, d.ClutY, Halfword(s.ClutX + i, s.ClutY));
+            return true;
+        }
+
         public bool Contains(int vramX, int vramY) =>
             vramX >= VramX && vramX < VramX + Columns * 64 && vramY >= VramY && vramY < VramY + Rows * 256;
 

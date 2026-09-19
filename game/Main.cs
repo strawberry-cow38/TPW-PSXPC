@@ -72,6 +72,11 @@ namespace TPWGodot
         /// be made unattended.</summary>
         string _autoMovie;
         bool _quitAfterMovie;
+
+        /// <summary>--shot=PATH[:FRAME]: render until FRAME, write the window to PATH and quit. Exists so
+        /// a change to something DRAWN can be looked at, in a repo whose whole discipline is that a
+        /// green build is not a picture. Needs a display; xvfb-run supplies one on a headless box.</summary>
+        string _shotPath; int _shotFrame = 150; int _shotClock;
         Button _playAdvisor;
         OptionButton _advisorLanguage;
         bool _hasAdvisor;
@@ -397,6 +402,12 @@ namespace TPWGodot
             {
                 if (arg.StartsWith("--movie=")) _autoMovie = arg.Substring("--movie=".Length).ToUpperInvariant();
                 else if (arg == "--quit-after-movie") _quitAfterMovie = true;
+                else if (arg.StartsWith("--shot="))
+                {
+                    var spec = arg.Substring("--shot=".Length).Split(':');
+                    _shotPath = spec[0];
+                    if (spec.Length > 1 && int.TryParse(spec[1], out int f)) _shotFrame = f;
+                }
                 else if (arg.StartsWith("--advisor-line="))
                 {
                     var parts = arg.Substring("--advisor-line=".Length).Split(':');
@@ -553,6 +564,13 @@ namespace TPWGodot
             {
                 if (_preview.Texture != null) _boot.SetLegalArt(_preview.Texture);
                 _boot.SetMenuSheet(_menuSheet);
+                // The language screen's advisor, with his pole and flag: entry 83 sub 10. Taken from the
+                // models the browser already parsed rather than re-read, so there is one answer about
+                // what is in the archive instead of two that can disagree.
+                if (_models != null && _models.TryGet(AdvisorModel.Entry, AdvisorModel.SubMesh, out var advisor))
+                    _boot.SetAdvisor(advisor, _models.Sheets);
+                else
+                    GD.PushWarning($"[tpw] advisor model (entry {AdvisorModel.Entry} sub {AdvisorModel.SubMesh}) not found among {_models?.MeshCount ?? -1} parsed meshes; the language screen falls back to the flat flag");
                 if (_bootFrom != null && !_boot.StartAt(_bootFrom))
                     GD.PushWarning($"[tpw] --boot-from={_bootFrom} is not a boot screen; starting from the beginning");
                 _boot.Visible = true;
@@ -987,8 +1005,31 @@ namespace TPWGodot
             GetViewport().SetInputAsHandled();
         }
 
+        string _shotTarget;
+        void TakeShot()
+        {
+            RenderingServer.ForceDraw();
+            var img = GetViewport().GetTexture().GetImage();
+            string path = _shotTarget;
+            if (path != null && img != null)
+            {
+                img.SavePng(path);
+                GD.Print($"[tpw] wrote {path} ({img.GetWidth()}x{img.GetHeight()})");
+            }
+            GetTree().Quit();
+        }
+
         public override void _Process(double delta)
         {
+            if (_shotPath != null && ++_shotClock >= _shotFrame)
+            {
+                // ⚠ Wait for the frame to be DRAWN before reading it back. Grabbing the texture inside
+                // _Process reads the previous frame at best and an empty one at worst, which looks
+                // exactly like the thing you were checking having failed to render.
+                _shotTarget = _shotPath; _shotPath = null;
+                CallDeferred(nameof(TakeShot));
+            }
+
             // ⚠ NOT frame-delta driven. The sim advances in whole ticks -- see ParkClock -- because a sim that
             // integrates on frame time inherits the frame rate into its economy, which is a bug unturnedGD
             // still carries in its weather. Accumulate real time and spend it in whole ticks.

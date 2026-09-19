@@ -213,6 +213,23 @@ namespace TPWGodot
             }
         }
 
+        /// <summary>One parsed mesh by archive entry and sub-index, for a view that wants a SPECIFIC
+        /// model rather than the browsing order. Reuses what Load already parsed; parsing the archive a
+        /// second time would be a second chance to disagree with this one about what is in it.</summary>
+        public bool TryGet(int entry, int sub, out TpwMesh mesh)
+        {
+            foreach (var (e, s2, m) in _meshes)
+                if (e == entry && s2 == sub) { mesh = m; return true; }
+            mesh = null;
+            return false;
+        }
+
+        /// <summary>The texture sheets the models are cut from, for the same reason.</summary>
+        public List<(GazEntry Entry, TextureSheet Sheet)> Sheets => _sheets;
+
+        /// <summary>How many sub-meshes Load parsed, for diagnosing an empty browser.</summary>
+        public int MeshCount => _meshes.Count;
+
         public void Show(int index)
         {
             if (_meshes.Count == 0) return;
