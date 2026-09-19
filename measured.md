@@ -2070,3 +2070,22 @@ The honest next step is the hardware experiment: pose a model on the console wit
 and diff the ARS vertex buffer between frames. If the vertices move while only bone matrices changed,
 the link exists and is in code I have not read; if they do not, something outside this mesh consumes
 those matrices.
+
+### The hardware experiment, first attempt: the anchor did not hold
+
+Plan was to find a bone-only model's vertex buffer in RAM by searching for its own rest geometry, then
+diff it across frames. It did not work, and the way it failed is worth recording:
+
+- A **96-byte signature (12 vertices) produced 71 "hits"**, most of them at the SAME address, 0x000156.
+  Those meshes' first vertices are zeros, so the signature was 96 zero bytes and matched the first long
+  run of zeros in RAM. A signature has to be checked for content before it is trusted as an anchor.
+- The surviving high-address hits did not hold either. e0047 sub2 matched for **14 of its 22 vertices**
+  and then diverged into (16191, 63, 16191, 63), which is not geometry. Its first 14 vertices are simple
+  values like (100, 0, -100) that occur by chance; the match was a coincidence of trivial geometry, not a
+  loaded model.
+- Requiring the FULL vertex array as the signature returns zero hits for all three candidates, which is
+  the correct answer: those models are not resident in a park save state. Ride models load on demand.
+
+So the experiment needs a state with the target model actually on screen, and an anchor that is unique
+and non-trivial by construction rather than by luck. Both are checkable up front:
+`count(signature) == 1` and a non-zero byte fraction well above half.
