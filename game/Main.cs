@@ -26,6 +26,11 @@ namespace TPWGodot
         System.Collections.Generic.List<TpwImage> _views = new();
         int _view;
         Button _next;
+        /// <summary>Starts the boot chain (legal screen, intro movies, language, menu). ⭐ THE GAME WAITS FOR IT:
+        /// master's call, so the debug menu is what a launch shows and the intro only runs when asked for.
+        /// <c>--boot</c> or <c>--boot-from=</c> start it at once, as a launch used to.</summary>
+        Button _startGame;
+        bool _bootStarted, _bootNow;
         ModelBrowser _models;
         Label _modelInfo;
         readonly System.Random _rng = new();
@@ -227,6 +232,9 @@ namespace TPWGodot
             _root.AddChild(_debugPanel);
 
             _debugPanel.AddChild(new Label { Text = "Theme Park World — Godot" });
+            _startGame = new Button { Text = "▶  Start the game (intro, then the menu)", Disabled = true };
+            _startGame.Pressed += StartGame;
+            _debugPanel.AddChild(_startGame);
             _status = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
             _debugPanel.AddChild(_status);
             _selfTest = new Label { Text = "Asset self-test: running…", AutowrapMode = TextServer.AutowrapMode.WordSmart };
@@ -372,7 +380,7 @@ namespace TPWGodot
 
             // ⭐ THE BOOT CHAIN. Built here but not started until the self-test has run, so the legal
             // screen has its art and the movie list is known.
-            _boot = new BootScreens { Visible = false };
+            _boot = new BootScreens { Visible = false, ProcessMode = ProcessModeEnum.Disabled };
             AddChild(_boot);
             _boot.WantMovie += PlayMovieNamed;
             _boot.WantMenuMusic += PlayFrontEndMusic;
@@ -424,6 +432,7 @@ namespace TPWGodot
                     _modelTourSpec = arg.Substring("--models=".Length).Split(',');
                 else if (arg == "--cull-on") _tourCull = true;
                 else if (arg == "--no-boot") _skipBoot = true;
+                else if (arg == "--boot") _bootNow = true;
                 else if (arg.StartsWith("--boot-from=")) _bootFrom = arg.Substring("--boot-from=".Length);
                 else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
                 else if (arg.StartsWith("--music=")) _autoMusic = int.Parse(arg.Substring("--music=".Length));
@@ -578,10 +587,9 @@ namespace TPWGodot
                     _boot.SetAdvisor(advisor, _models.Sheets);
                 else
                     GD.PushWarning($"[tpw] advisor model (entry {AdvisorModel.Entry} sub {AdvisorModel.SubMesh}) not found among {_models?.MeshCount ?? -1} parsed meshes; the language screen falls back to the flat flag");
-                if (_bootFrom != null && !_boot.StartAt(_bootFrom))
-                    GD.PushWarning($"[tpw] --boot-from={_bootFrom} is not a boot screen; starting from the beginning");
-                _boot.Visible = true;
-                _debugLayer.Visible = false;       // the debug chrome stays available on F3
+                // Ready, but waiting for the Start button unless the command line asked for the boot outright.
+                if (_bootNow || _bootFrom != null) StartGame();
+                else _startGame.Disabled = false;
             }
 
             // Show the first model as soon as the parse is done, so the window is never empty.
@@ -996,6 +1004,20 @@ namespace TPWGodot
 
         int CurrentRate => _rate != null && _rate.Selected >= 0 && _rate.Selected < RateChoices.Length
             ? RateChoices[_rate.Selected] : ConfirmedRateHz;
+
+        /// <summary>Run the boot chain from the start (or from <c>--boot-from=</c>'s screen), over the debug menu.</summary>
+        void StartGame()
+        {
+            if (_skipBoot || _bootStarted) return;
+            _bootStarted = true;
+            _startGame.Disabled = true;
+            _startGame.Text = "The game is running (F3 hides this menu)";
+            _boot.ProcessMode = ProcessModeEnum.Inherit;
+            if (_bootFrom != null && !_boot.StartAt(_bootFrom))
+                GD.PushWarning($"[tpw] --boot-from={_bootFrom} is not a boot screen; starting from the beginning");
+            _boot.Visible = true;
+            _debugLayer.Visible = false;       // the debug chrome stays available on F3
+        }
 
         /// <summary>F3 opens and closes the debug menu.
         ///
