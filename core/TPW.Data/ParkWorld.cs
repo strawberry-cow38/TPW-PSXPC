@@ -23,6 +23,9 @@ namespace TPW.Data
         /// <summary>Records +0xA4 and +0xA8: two more sheets, of which the park loader loads one, picked by an
         /// index it gets from 0x80053FF4.</summary>
         public int[] ExtraSheets { get; init; } = Array.Empty<int>();
+        /// <summary>The park's music module (archive entry). Not in the record: 0x80058694 picks it by world index
+        /// and hands 0x800B7A90 the bank header, bank body and module (module - 1, module - 2, module).</summary>
+        public int Music { get; init; }
     }
 
     /// <summary>The world table.
@@ -40,11 +43,15 @@ namespace TPW.Data
     {
         public static readonly IReadOnlyList<ParkWorld> All = new[]
         {
-            new ParkWorld { Index = 0, Name = "jungle", Maps = new[] { 203, 204 }, SceneryEntry = 205, GroundSheet = 258, ExtraSheets = new[] { 169, 170 } },
-            new ParkWorld { Index = 1, Maps = new[] { 116, 117 }, SceneryEntry = 118, GroundSheet = 168, ExtraSheets = new[] { 91, 92 } },
-            new ParkWorld { Index = 2, Maps = new[] { 34, 35 }, SceneryEntry = 36, GroundSheet = 82, ExtraSheets = new[] { 17, 18 } },
-            new ParkWorld { Index = 3, Maps = new[] { 355, 356 }, SceneryEntry = 359, GroundSheet = 400, ExtraSheets = new[] { 332, 333 } },
+            new ParkWorld { Index = 0, Name = "jungle", Maps = new[] { 203, 204 }, SceneryEntry = 205, GroundSheet = 258, ExtraSheets = new[] { 169, 170 }, Music = 305 },
+            new ParkWorld { Index = 1, Maps = new[] { 116, 117 }, SceneryEntry = 118, GroundSheet = 168, ExtraSheets = new[] { 91, 92 }, Music = 302 },
+            new ParkWorld { Index = 2, Maps = new[] { 34, 35 }, SceneryEntry = 36, GroundSheet = 82, ExtraSheets = new[] { 17, 18 }, Music = 296 },
+            new ParkWorld { Index = 3, Maps = new[] { 355, 356 }, SceneryEntry = 359, GroundSheet = 400, ExtraSheets = new[] { 332, 333 }, Music = 317 },
         };
+
+        /// <summary>The front end's music: 0x800BCE44, beside the front-end state machine, is the only other place
+        /// that starts a module by number. Modules #293, #308, #311 and #314 are started some other way.</summary>
+        public const int FrontEndMusic = 299;
 
         /// <summary>The world a map belongs to, or null for an entry no world lists.</summary>
         public static ParkWorld ForMap(int mapEntry)

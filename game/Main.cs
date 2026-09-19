@@ -41,6 +41,8 @@ namespace TPWGodot
         /// <summary>The game's music: every tracker module with the waveforms it plays.</summary>
         System.Collections.Generic.List<(int Entry, TrackerModule Module, System.Collections.Generic.List<PcmSample> Waves)> _modules = new();
         MusicPlayer _music;
+        /// <summary>True while the music playing is the park's own (started by opening the park view).</summary>
+        bool _parkStartedMusic;
         Button _musicButton;
         OptionButton _musicChoice;
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -257,9 +259,9 @@ namespace TPWGodot
             _music = new MusicPlayer();
             AddChild(_music);
             _musicButton = new Button { Text = "Music", ToggleMode = true, Disabled = true };
-            _musicButton.Toggled += on => PlayMusic(on);
+            _musicButton.Toggled += on => { _parkStartedMusic = false; PlayMusic(on); };
             _musicChoice = new OptionButton { Disabled = true };
-            _musicChoice.ItemSelected += _ => { if (_musicButton.ButtonPressed) PlayMusic(true); };
+            _musicChoice.ItemSelected += _ => { _parkStartedMusic = false; if (_musicButton.ButtonPressed) PlayMusic(true); };
             soundRow.AddChild(_musicButton);
             soundRow.AddChild(_musicChoice);
             _root.AddChild(soundRow);
@@ -444,7 +446,11 @@ namespace TPWGodot
 
             _musicChoice.Clear();
             foreach (var (entry, module, _) in _modules)
-                _musicChoice.AddItem($"module #{entry} ({module.Channels} channels)");
+            {
+                string use = entry == ParkWorlds.FrontEndMusic ? ", front end" : "";
+                foreach (var pw in ParkWorlds.All) if (pw.Music == entry) use = $", {ParkWorlds.Describe(pw)} parks";
+                _musicChoice.AddItem($"module #{entry} ({module.Channels} channels{use})");
+            }
             _musicChoice.Disabled = _musicButton.Disabled = _modules.Count == 0;
             if (_autoMusic >= 0)
             {
@@ -534,10 +540,24 @@ namespace TPWGodot
                 SceneryPack scenery = null;
                 if (world != null) { _groundSheets.TryGetValue(world.GroundSheet, out ground); _sceneryPacks.TryGetValue(world.SceneryEntry, out scenery); }
                 _park.Load(map, $"map #{entry}", ground, world, scenery);
+                // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
+                int mi = world != null ? _modules.FindIndex(m => m.Entry == world.Music) : -1;
+                if (mi >= 0 && _autoMusic < 0)
+                {
+                    _musicChoice.Selected = mi;
+                    _musicButton.SetPressedNoSignal(true);
+                    PlayMusic(true);
+                    _parkStartedMusic = true;
+                }
             }
             _park.Activate(on && _park.HasMap);
             _models.Activate(!(on && _park.HasMap));
-            if (!on) _parkInfo.Text = "";
+            if (!on)
+            {
+                _parkInfo.Text = "";
+                // Leaving takes the park's music with it; music picked by hand is left alone.
+                if (_parkStartedMusic) { _music.Stop(); _musicButton.SetPressedNoSignal(false); _parkStartedMusic = false; }
+            }
         }
 
         void PlayAdvisorLine() => PlayAdvisorLine(-1, _advisorLanguage.Selected);
