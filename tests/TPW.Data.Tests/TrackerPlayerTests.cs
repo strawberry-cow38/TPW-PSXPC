@@ -176,8 +176,10 @@ namespace TPW.Data.Tests
         {
             // FT2 quantises finetune to steps of 8 (= 4 period units = 6.25 cents): +42 acts as +40 = 31.25 cents,
             // 1045.4 Hz * 2^(31.25/1200) = 1064.5 Hz -> 2129 crossings/s; the full 42/128 semitone would give 2131.
-            var p = new TrackerPlayer(Module(Rows(64, (0, Cell(C6, 1))), 6, 125, 0, Instr(finetune: 42)), new[] { Sine() });
-            var pcm = RenderAll(p);
+            // The song is 64 rows = 7.68 s, shorter than the ten seconds measured, so it loops (the note retriggers
+            // at the restart, which moves the count by one at most).
+            var p = new TrackerPlayer(Module(Rows(64, (0, Cell(C6, 1))), 6, 125, 0, Instr(finetune: 42)), new[] { Sine() }) { Loop = true };
+            var pcm = RenderAll(p, 11 * Rate);
             int zc = ZeroCrossings(pcm, Rate, 11 * Rate);           // ten seconds: 21,290 expected, 21,309 unquantised
             Assert.InRange(zc, 21280, 21300);
         }
@@ -298,9 +300,13 @@ namespace TPW.Data.Tests
         public void RenderReturnsFewerFramesOnlyAtTheEnd()
         {
             var p = new TrackerPlayer(Module(Rows(4, (0, Cell(C6, 1))), 6, 125, 0, Instr()), new[] { Sine() });
+            // 4 rows x 6 ticks x 882 = 21,168 frames: two full buffers of 10,000, then the last 1,168.
+            // (It asserted 11,168 from the second call, which a 10,000-frame buffer cannot hold: tinyclaw's catch.)
             var buf = new short[10000 * 2];
             Assert.Equal(10000, p.Render(buf, 10000));
-            Assert.Equal(4 * 6 * Tick - 10000, p.Render(buf, 10000));
+            Assert.Equal(10000, p.Render(buf, 10000));
+            Assert.False(p.Finished);
+            Assert.Equal(4 * 6 * Tick - 20000, p.Render(buf, 10000));
             Assert.True(p.Finished);
             Assert.Equal(0, p.Render(buf, 10000));
         }
