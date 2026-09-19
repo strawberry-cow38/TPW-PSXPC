@@ -268,6 +268,7 @@ namespace TPWGodot
                     if (f != null && Tga.TryDecodeVramBlock(disc.ReadFile(f), out var img, out _))
                     { legal = img; legal.Source = "LEGAL.GFX"; views.Add(legal); }
                     views.AddRange(SpriteBlocks(disc));
+                    views.AddRange(TextureSheets(disc));
                     _models.Load(disc);   // parses 531 meshes; far too slow for the main thread
                     sounds = AllSounds(disc);
                     foreach (var df in disc.Files)
@@ -533,6 +534,22 @@ namespace TPWGodot
                     var blk = SpriteBank.Block(bank, b);
                     if (blk != null) outp.Add(blk);
                 }
+            return outp;
+        }
+
+        /// <summary>Every texture sheet, in colour: each sprite drawn with the palette its own table names.
+        ///
+        /// ⭐ THE FIRST TEXTURES IN THIS PORT WITH THEIR REAL COLOURS. Everything before was a grey ramp over
+        /// palette indices, because nothing said which palette went with which rectangle. The sheets say it
+        /// themselves: every sprite record names its CLUT, and the CLUT is inside the sheet's own pixels.</summary>
+        static System.Collections.Generic.List<TpwImage> TextureSheets(DiscReader disc)
+        {
+            var outp = new System.Collections.Generic.List<TpwImage>();
+            var f = disc.Find(AssetSelfTest.AssetArchive);
+            if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return outp;
+            foreach (var (entry, sheet) in TextureSheet.FindAll(gaz))
+                outp.Add(sheet.RenderSprites($"texture sheet #{entry.Index} ({sheet.Columns}x{sheet.Rows} pages, " +
+                                             $"{sheet.Sprites.Count} sprites{(sheet.Compressed ? ", compressed" : "")})"));
             return outp;
         }
 

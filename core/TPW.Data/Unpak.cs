@@ -23,12 +23,60 @@ namespace TPW.Data
 
         /// <summary>Entries fable identified as UNPAK'd texture pages (`compressed=1` in their header).
         ///
+        /// ⚠ SUPERSEDED BY THE HEADER RULE: <see cref="TextureSheet.FindAll"/> finds 17 compressed sheets, these
+        /// 13 plus #332, #333, #400 and #416, each expanding to exactly its entry's last byte. Kept for the
+        /// warning below, which still applies to anyone reading the report.
+        ///
         /// ⚠ THESE ARE DECIMAL. The report writes them zero-padded — 0005, 0082, 0258 — which reads as hex
         /// at a glance and is not. Taken as hex, 0x258 is 600 in a 422-entry archive (an index error, so at
         /// least it fails loudly) while 0x0082 and 0x0084 land on real entries that are MESH CONTAINERS, and
         /// those fail quietly as "UNPAK did not expand this", which looks like a decompressor bug.</summary>
         public static readonly int[] CompressedTextureEntries =
             { 5, 17, 18, 82, 84, 91, 92, 168, 169, 170, 258, 269, 278 };
+
+        /// <summary>The game's routine exactly (0x80018EF0): expand one HEADERLESS stream into
+        /// <paramref name="dst"/> until its terminator, reporting how many bytes it wrote and how many it
+        /// consumed. <paramref name="consumed"/> INCLUDES the two-byte terminator, as the game's own counter
+        /// (gp+0x1110, read back by 0x80018F74) does, because the texture loader advances to the next block's
+        /// stream by exactly that much.
+        ///
+        /// ⚠ THIS IS THE FORM THE TEXTURE SHEETS USE, NOT THE 8-BYTE-HEADER FORM ABOVE. The loader (0x800280F8)
+        /// calls it once per 64x64-halfword block with no header and no size: the stream runs to its terminator,
+        /// and "the block came out at 0x2000 bytes" is then a check the caller makes, not a limit the stream
+        /// knows about. <paramref name="dst"/> bounds the output; a stream that would pass it is refused.</summary>
+        public static bool TryDecompressBlock(byte[] src, int offset, byte[] dst, out int produced, out int consumed, out string error)
+        {
+            produced = 0; consumed = 0; error = null;
+            if (src == null || dst == null || offset < 0 || offset >= src.Length) { error = "offset outside the buffer"; return false; }
+            int i = offset, n = 0;
+            for (;;)
+            {
+                if (i >= src.Length) { error = $"stream ran off the end of the entry after {n:n0} bytes"; return false; }
+                int c = src[i++];
+                if (c < 0x80)
+                {
+                    int run = c + 1;
+                    if (i + run > src.Length) { error = $"literal run of {run} past the end at {i}"; return false; }
+                    if (n + run > dst.Length) { error = $"block would pass {dst.Length:n0} bytes"; return false; }
+                    Buffer.BlockCopy(src, i, dst, n, run);
+                    i += run; n += run;
+                }
+                else
+                {
+                    if (i >= src.Length) { error = "back-reference length byte past the end"; return false; }
+                    int len = src[i++];
+                    if (len == 0) break;                      // the terminator: counted in `consumed`
+                    int from = n + (c - 256);
+                    if (from < 0) { error = $"back-reference before the start at {n}"; return false; }
+                    if (n + len > dst.Length) { error = $"block would pass {dst.Length:n0} bytes"; return false; }
+                    for (int k = 0; k < len; k++) dst[n + k] = dst[from + k];
+                    n += len;
+                }
+            }
+            produced = n;
+            consumed = i - offset;
+            return true;
+        }
 
         /// <summary>Expand a stream that begins with its own 8-byte header.</summary>
         public static bool TryDecompress(byte[] d, int offset, out byte[] dst, out string error)

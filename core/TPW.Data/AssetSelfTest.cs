@@ -176,22 +176,31 @@ namespace TPW.Data
                     : $"{expanded}/{packed} LZSS sub-entries expand to exactly their declared size, {walked} walk as meshes" +
                       (firstLz != null ? "; first failure " + firstLz : ""));
 
-            // ⚠ THIS IS A COUNT, NOT A VALIDATION, AND IT SAYS SO. An earlier version read "12/12 texture
-            // pages decoded" while the output was coloured noise, because decoding only fails on a short
-            // buffer -- so it restated "12 entries are 131,156 bytes" and dressed it as a decode. Whether the
-            // pixels are right was settled by rendering one and reading the text in it, which nothing here
-            // can do. Word a check for what it actually tests.
-            int pageEntries = 0;
-            foreach (var e in gaz.Entries) if (VramTexture.LooksLikeTexturePage(e)) pageEntries++;
-            if (pageEntries > 0)
-                r.Add("texture pages", true,
-                    $"{pageEntries} entries sized for a {VramTexture.Width}x{VramTexture.Height} " +
-                    $"{VramTexture.BitsPerPixel}bpp page (size only — pixel correctness is not checked here)");
+            // ⭐ THE TEXTURE SHEETS, AND THIS IS NOW A REAL CHECK. It used to be a count ("12 entries sized for
+            // a page, size only"), worded as one because decoding a raw page cannot fail on wrong pixels. The
+            // sheet format now carries three things that can each fail: a raw sheet's pixels must fill its entry
+            // EXACTLY; a compressed sheet's blocks must each expand to exactly 0x2000 and the last stream must end
+            // on the entry's last byte; and every sprite's palette must lie inside its own sheet, which a random
+            // CLUT word does 6-40% of the time. See TextureSheet for the VRAM hashes that settled the rest.
+            var sheets = TextureSheet.FindAll(gaz);
+            if (sheets.Count > 0)
+            {
+                int raw = 0, packedSheets = 0, sprites = 0, inside = 0;
+                foreach (var (_, sh) in sheets)
+                {
+                    if (sh.Compressed) packedSheets++; else raw++;
+                    sprites += sh.Sprites.Count;
+                    inside += sh.SpritesWithPaletteInside();
+                }
+                r.Add("texture sheets", inside == sprites,
+                    $"{sheets.Count} sheets ({raw} raw filling their entries exactly, {packedSheets} compressed expanding block " +
+                    $"by block to exactly each entry's last byte); {inside:n0}/{sprites:n0} sprites' palettes inside their own sheet");
+            }
 
-            // ⚠ NO PALETTE CHECK. An earlier version reported "2 strips, 65 of 8,192 well-formed
+            // ⚠ NO STANDALONE PALETTE CHECK. An earlier version reported "2 strips, 65 of 8,192 well-formed
             // 16-colour tables" and was measuring the wrong entries with a signature the real palettes do not
-            // carry. Palettes are 32 bytes of arbitrary colour and cannot be told from any other 32 bytes, so
-            // there is nothing here that could fail on a wrong answer. See Clut.
+            // carry. Palettes are 32 bytes of arbitrary colour and cannot be told from any other 32 bytes. The
+            // palette check that CAN fail is the one above: each sprite names its palette, and it must be there.
             // ⭐ THIS ONE CAN FAIL, unlike the sheet count: it asserts WHICH entries are banks, not just how
             // many. The two indices were established by content-hash binding against live hardware, so a disc
             // that disagrees is telling us something rather than passing quietly.

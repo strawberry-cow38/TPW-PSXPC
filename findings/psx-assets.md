@@ -472,6 +472,48 @@ entries. Feeding one to the other yields garbage of exactly the right length, so
 entries that are mesh containers, failing quietly as "UNPAK did not expand this" and looking like a
 decompressor bug.
 
+## 5p. ✅ The texture sheets, solved: layout, compression, and the palettes (2026-09-19)
+
+Read off the game's loader, `0x800280F8`, the only caller of UNPAK besides the generic resource path.
+The "0x54-byte header" was never a fixed size. It is:
+
+```
++0x00 u16 sprites      +0x02 u16 pages (= cols*rows)   +0x04 u16 texpage of the top-left page
++0x06 u16 cols         +0x08 u16 rows                  +0x0A u16 free rectangles
++0x0C u16 compressed   +0x0E u16 0
++0x10 sprites x 12 bytes: u16 texpage, u16 CLUT, s8 ox, s8 oy, u8 w, u8 h, u8 u, u8 v, u8 flags, u8 ?
+      free rects x 8 bytes: u16 x, y, w, h (sheet texels; the packer's unused space)
+      pixels
+```
+
+The raw sheets all have 3 sprites and 4 free rects, and 0x10 + 36 + 32 = 0x54. That coincidence is where
+the fixed size came from. The compressed sheets have hundreds of sprites, so UNPAK run from +0x54 started in
+the middle of the sprite table.
+
+**Compressed sheets** are uploaded in 64x64-halfword blocks (0x2000 bytes = 256x64 texels at 4bpp), four per
+page: **block 0 is stored raw** (the loader's buffer doubles as its scratch), and every later block is its own
+**headerless** UNPAK stream straight after the previous one. The loader advances by UNPAK's consumed count,
+which includes the 2-byte terminator. Block i lands at page `i/4` (across `cols`), strip `i%4`.
+
+Checks, all of which a wrong reading fails:
+- all 17 compressed sheets: every block expands to exactly 0x2000, and the last stream ends **on the entry's
+  last byte** (13 in fable's list, plus #332, #333, #400, #416);
+- all 12 raw sheets: pixels = pages x 32 KB, filling the entry exactly;
+- against tinyclaw's live VRAM hashes (`vram_block_hashes.json`), decoded blocks match **hash-exactly at the
+  position the header predicts**: park_ride 55/58 non-blank (was 17), cold_boot 33/36. The 6 left match
+  nothing on the disc at any position. tinyclaw: the park three are per-frame scratch (they change between
+  frames 10 and 20 of one capture); the boot three are written once at load and then frozen.
+
+⭐⭐ **THE PALETTES ARE INSIDE THE SHEETS.** Every sprite record names its CLUT, and for **4,409 of 4,409**
+sprites across all 29 sheets, that CLUT lies inside the sprite's own sheet. By chance a CLUT word would land
+inside a sheet 6-40% of the time, depending on its size. So the "(rect -> clut) per page" mapping this whole
+search was missing is the sprite table. Rendered with it, the front-end sheet shows seven flags in their
+true colours: UK, France, Germany, Spain, Italy, Netherlands, Sweden, the disc's seven languages.
+45 sprites are 8-bit (texpage bits 7-8 = 1).
+
+Code: `core/TPW.Data/TextureSheet.cs`, `Unpak.TryDecompressBlock`. `tpwcheck --sheets vram_block_hashes.json`
+reproduces the VRAM numbers through the C# path.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is

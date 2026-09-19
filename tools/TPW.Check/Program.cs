@@ -315,6 +315,52 @@ static class Program
         return bad;
     }
 
+    static int Sheets(DiscReader disc, string hashFile)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        var sheets = TextureSheet.FindAll(g);
+        int sprites = 0, inside = 0;
+        var predicted = new Dictionary<string, HashSet<string>>();
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        foreach (var (entry, sh) in sheets)
+        {
+            sprites += sh.Sprites.Count;
+            inside += sh.SpritesWithPaletteInside();
+            Console.WriteLine($"#{entry.Index,-4} {(sh.Compressed ? "compressed" : "raw       ")} texpage {sh.TPage:x2} " +
+                              $"{sh.Columns}x{sh.Rows} pages, {sh.Sprites.Count,3} sprites, {sh.FreeRects.Count,2} free rects, " +
+                              $"pixels at +{sh.DataOffset:x}");
+            for (int i = 0; i < sh.PageCount * 4; i++)
+            {
+                var b = sh.Block(i, out int vx, out int vy);
+                string h = Convert.ToHexString(sha.ComputeHash(b)).ToLowerInvariant();
+                string key = $"{vx},{vy}";
+                if (!predicted.TryGetValue(key, out var set)) predicted[key] = set = new HashSet<string>();
+                set.Add(h);
+            }
+        }
+        Console.WriteLine($"{sheets.Count} sheets, {sprites:n0} sprites, {inside:n0} with their palette inside their own sheet");
+        if (hashFile == null) return inside == sprites ? 0 : 1;
+
+        string blank = Convert.ToHexString(sha.ComputeHash(new byte[TextureSheet.BlockBytes])).ToLowerInvariant();
+        using var doc = System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText(hashFile));
+        foreach (var cap in doc.RootElement.GetProperty("captures").EnumerateObject())
+        {
+            int blanks = 0, hit = 0, miss = 0;
+            var missed = new List<string>();
+            foreach (var blk in cap.Value.EnumerateObject())
+            {
+                string h = blk.Value.GetString();
+                if (h == blank) { blanks++; continue; }
+                if (predicted.TryGetValue(blk.Name, out var set) && set.Contains(h)) hit++;
+                else { miss++; missed.Add(blk.Name); }
+            }
+            Console.WriteLine($"capture {cap.Name}: {hit} of {hit + miss} non-blank blocks match a decoded block at the " +
+                              $"predicted position ({blanks} blank); unmatched: {string.Join(" ", missed)}");
+        }
+        return inside == sprites ? 0 : 1;
+    }
+
     static int Advisor(DiscReader disc, string outDir, string want)
     {
         var f = disc.Find(AdvisorSpeech.File);
@@ -413,6 +459,17 @@ static class Program
 
         using (disc)
         {
+            // --sheets [vram_block_hashes.json]: every texture sheet through the real decoder; with a file of live
+            // VRAM block hashes, count how many decoded blocks match the console hash-exactly AT THE POSITION the
+            // sheet header predicts. The hashes come from the running game, so this is the one test here whose
+            // answer the decoder cannot have shaped.
+            int sheetsAt = Array.IndexOf(args, "--sheets");
+            if (sheetsAt >= 0)
+            {
+                string json = sheetsAt + 1 < args.Length && !args[sheetsAt + 1].StartsWith("--") ? args[sheetsAt + 1] : null;
+                return Sheets(disc, json);
+            }
+
             // --advisor [dir] [--clip B:C,...]: find every clip in the advisor's speech file, print what was found,
             // and write the named clips (block:channel) as WAVs for a human to listen to.
             int advAt = Array.IndexOf(args, "--advisor");
