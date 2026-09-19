@@ -88,6 +88,14 @@ namespace TPWGodot
             // gp+0x700) about the centre of its 512x256 PAL screen (0x800BA6A4 → 0x800BB3B4 sets 512x256 and puts
             // the projection centre at half of it), so the vertical view is 2·atan(128 / 256) = 53.13°.
             _camera = new Camera3D { Fov = 53.13f, Current = false };
+            // A plain light blue sky, master's call: the game's camera stays in a range of angles that never shows
+            // the sky, so there is nothing of the game's to copy up there, and the port's freer camera needs
+            // something better than the void.
+            _camera.Environment = new Godot.Environment
+            {
+                BackgroundMode = Godot.Environment.BGMode.Color,
+                BackgroundColor = new Color(0.56f, 0.78f, 0.95f),
+            };
             AddChild(_camera);
             Visible = false;
         }
