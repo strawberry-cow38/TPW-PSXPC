@@ -563,6 +563,31 @@ stands**: the jungle's river and waterfall, world 2's brick retaining walls (512
 whose corners run 256 → 768: exactly the drop). The park's perimeter hedge, palms and volcanoes are scenery too,
 matching the console screenshot.
 
+## 5s. ✅ Parks come alive: music per world, scrolling water, names, and the code overlays (2026-09-19)
+
+**Music.** 0x80058694 (on entering a park) picks the module by world and hands 0x800B7A90 the bank header, bank
+body and module (module−1, module−2, module): jungle #305, halloween #302, fantasy #296, space #317. The only other
+by-number start is 0x800BCE44 beside the front-end state machine: #299, the main menu/opening theme (master).
+#293/#308/#311/#314 start some other way; master: #308 is halloween's map-screen tune. The port's FT2 player
+(TrackerPlayer, rules from ft2-clone) matches libopenmpt on all nine and records bit-exact through Godot.
+
+**Scrolling water.** Sprite byte +11 (was "unnamed") flags a sprite for the park's texture animator: 0x80034268
+registers every flagged sprite of the ground and extra sheets (test 0x800344C4), StoreImage-ing its texels to RAM;
+every park frame 0x80034464 advances a counter mod the sprite height and re-uploads the copy in two strips
+(0x80034194) so VRAM row y+r shows row (r − counter) mod h. Rect per 0x80033E74 (whole halfwords). Found from
+tinyclaw's VRAM diff of the running jungle park: only page 0x08, local x 4–239, y 98–194 changed — the nine
+flagged sprites, all water. Not palette cycling (the four water palettes never change) and not mesh morphing.
+(0x800574A4, which looked like it, animates four waving meshes at the park entrance: the flags.)
+
+**World names.** 0 jungle, 1 halloween (master), 2 fantasy, 3 space: the archive groups each world's resources,
+and the rides beside world 2's are STR_GRAPHICS_FANTASY_* (#40–#43), beside world 3's STR_GRAPHICS_SPACE_*.
+
+**Code overlays.** TPW.OVL = `u32 count (12), u32 0, (u32 offset, u32 size) × 12`, each an LZ stream the game
+unpacks with 0x800BFD9C (flag byte LSB-first; bit 1 = match: b < 0x60 → offset ((b&15)<<8)|next, length
+(b>>4)+3 or next+8 when b>>4 == 5, offset 0 ends; b ≥ 0x60 → offset 0x100−b, length 2) to 0x80114158, right after
+TPW.BIN. All twelve consume exactly their stored size. FUN_800BE63C(n) loads overlay n: the front-end screens
+are in 2 and 11, the park uses 3. Front-end screens are C++ objects whose methods live there (GCC-2 vtables).
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
