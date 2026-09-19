@@ -51,6 +51,8 @@ namespace TPWGodot
         byte[] _exe;
         /// <summary>From <c>--park-open</c>: open the park as soon as it shows (captures of the gates opening).</summary>
         bool _autoOpen;
+        /// <summary>From <c>--park-buildable</c>: show where a ride or shop may stand (the park view's B key).</summary>
+        bool _autoBuildable;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -423,6 +425,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
                 else if (arg.StartsWith("--music=")) _autoMusic = int.Parse(arg.Substring("--music=".Length));
                 else if (arg == "--park-open") _autoOpen = true;
+                else if (arg == "--park-buildable") _autoBuildable = true;
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
@@ -728,6 +731,7 @@ namespace TPWGodot
                 if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
                 if (_autoOpen) _park.ParkOpen = true;
+                if (_autoBuildable) _park.ShowBuildable = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
                 int mi = world != null ? _modules.FindIndex(m => m.Entry == world.Music) : -1;
                 if (mi >= 0 && _autoMusic < 0)

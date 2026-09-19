@@ -1382,6 +1382,37 @@ static class Program
         return 0;
     }
 
+    static int Buildable(DiscReader disc, GazArchive g, int onlyMap)
+    {
+        var exeFile = disc.Find(AssetSelfTest.GameExecutable);
+        if (exeFile == null) { Console.WriteLine("no game executable on the disc"); return 1; }
+        var exe = disc.ReadFile(exeFile);
+        const string marks = "#^XS=P.";   // buildable, too steep, ruled out, scenery, entrance, path, edge
+        foreach (var (entry, raw) in ParkMap.FindAll(g))
+        {
+            if (onlyMap >= 0 && entry.Index != onlyMap) continue;
+            ParkWorld world = null;
+            foreach (var w in ParkWorlds.All) if (System.Array.IndexOf(w.Maps, entry.Index) >= 0) world = w;
+            var map = world != null ? ParkPaths.LayStartingPaths(raw, exe, AssetSelfTest.GameExecutableBase, world.Index) : raw;
+            var n = new int[7];
+            var grid = new System.Text.StringBuilder();
+            for (int z = 0; z < map.Height; z++)
+            {
+                for (int x = 0; x < map.Width; x++)
+                {
+                    var v = ParkBuild.Classify(map, x, z);
+                    n[(int)v]++;
+                    grid.Append(marks[(int)v]);
+                }
+                grid.Append('\n');
+            }
+            Console.WriteLine($"map {entry.Index,4} ({world?.Name ?? "?"}): {n[0]} buildable, {n[1]} too steep, {n[2]} ruled out by the map, " +
+                              $"{n[3]} under scenery, {n[4]} entrance, {n[5]} path, {n[6]} edge");
+            if (onlyMap >= 0) Console.Write("# buildable  ^ too steep  X ruled out  S scenery  = entrance  P path  . edge\n" + grid);
+        }
+        return 0;
+    }
+
     static int MapHeights(GazArchive g)
     {
         foreach (var (entry, map) in ParkMap.FindAll(g))
@@ -1566,6 +1597,17 @@ static class Program
 
         using (disc)
         {
+            // --buildable [MAP]: where a ride or shop may stand on each park map (ParkBuild, the game's placement
+            // test), on the map as loaded (ParkPaths, which needs the executable's tables); with a map entry, the
+            // grid itself.
+            int bdAt = Array.IndexOf(args, "--buildable");
+            if (bdAt >= 0)
+            {
+                var bg = Archive(disc);
+                if (bg == null) { Console.WriteLine("no archive"); return 1; }
+                return Buildable(disc, bg, bdAt + 1 < args.Length && int.TryParse(args[bdAt + 1], out int bm) ? bm : -1);
+            }
+
             // --sheets [vram_block_hashes.json]: every texture sheet through the real decoder; with a file of live
             // VRAM block hashes, count how many decoded blocks match the console hash-exactly AT THE POSITION the
             // sheet header predicts. The hashes come from the running game, so this is the one test here whose

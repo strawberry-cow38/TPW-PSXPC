@@ -26,7 +26,7 @@ namespace TPWGodot
     /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types, O scenery.</summary>
     public partial class ParkView : Node3D
     {
-        MeshInstance3D _ground, _types, _scenery, _flags;
+        MeshInstance3D _ground, _types, _scenery, _flags, _build;
         /// <summary>The flag sprite (EntranceFlags) as its own texture, and its size in texels.</summary>
         ShaderMaterial _flagMat;
         int _flagW, _flagH;
@@ -76,6 +76,8 @@ namespace TPWGodot
             AddChild(_ground);
             _types = new MeshInstance3D { Visible = false };
             AddChild(_types);
+            _build = new MeshInstance3D { Visible = false };
+            AddChild(_build);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
             _flags = new MeshInstance3D();
@@ -192,12 +194,14 @@ namespace TPWGodot
             foreach (var t in map.Tiles) if (t.NoGround) open++;
             _types.Mesh = TypeMesh(map);
             _types.Visible = ground == null;
+            _build.Mesh = BuildMesh(map, out string buildCounts);
 
             _infoText = $"{name}, {ParkWorlds.Describe(world)}: {map.Width}x{map.Height} tiles, " +
                         (ground != null ? $"ground from sheet #{world?.GroundSheet}, {quads.Count:n0} quads (with {GroundBorder} tiles past each edge), {open} tiles left to the scenery" +
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, O scenery, P open the park";
+                        "\n" + buildCounts +
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -508,6 +512,62 @@ namespace TPWGodot
             return mesh;
         }
 
+        /// <summary>Show or hide where a ride or shop may stand (the B key; for captures).</summary>
+        public bool ShowBuildable { get => _build.Visible; set => _build.Visible = value; }
+
+        static Color VerdictColour(ParkBuild.Verdict v) => v switch
+        {
+            ParkBuild.Verdict.Buildable => new Color(0.20f, 0.85f, 0.30f, 0.55f),
+            ParkBuild.Verdict.TooSteep => new Color(1.00f, 0.60f, 0.10f, 0.65f),
+            ParkBuild.Verdict.Unbuildable => new Color(0.90f, 0.15f, 0.15f, 0.65f),
+            ParkBuild.Verdict.NoGround => new Color(0.60f, 0.25f, 0.85f, 0.65f),
+            ParkBuild.Verdict.Entrance => new Color(1.00f, 0.90f, 0.20f, 0.65f),
+            ParkBuild.Verdict.Occupied => new Color(0.25f, 0.50f, 1.00f, 0.65f),
+            _ => new Color(0.30f, 0.30f, 0.33f, 0.65f),
+        };
+
+        /// <summary>Every tile coloured by whether a ride or shop may stand on it (ParkBuild, the game's placement
+        /// test): green yes, orange too steep, red ruled out by the map, purple where scenery stands, yellow the
+        /// entrance, blue path, grey the edge. Drawn just above the ground and see-through, over the scenery's feet.</summary>
+        static ArrayMesh BuildMesh(ParkMap map, out string counts)
+        {
+            var verts = new List<Vector3>(map.Width * map.Height * 6);
+            var cols = new List<Color>(map.Width * map.Height * 6);
+            var n = new int[System.Enum.GetValues(typeof(ParkBuild.Verdict)).Length];
+            const int lift = 10;
+            for (int z = 0; z < map.Height - 1; z++)
+                for (int x = 0; x < map.Width - 1; x++)
+                {
+                    var v = ParkBuild.Classify(map, x, z);
+                    n[(int)v]++;
+                    var c = VerdictColour(v);
+                    var a = At(x, z, map[x, z].HeightUnits + lift);
+                    var b = At(x + 1, z, map[x + 1, z].HeightUnits + lift);
+                    var d = At(x, z + 1, map[x, z + 1].HeightUnits + lift);
+                    var e = At(x + 1, z + 1, map[x + 1, z + 1].HeightUnits + lift);
+                    verts.AddRange(new[] { a, b, d, d, b, e });
+                    for (int k = 0; k < 6; k++) cols.Add(c);
+                }
+            counts = $"build: {n[(int)ParkBuild.Verdict.Buildable]} tiles buildable, {n[(int)ParkBuild.Verdict.TooSteep]} too steep, " +
+                     $"{n[(int)ParkBuild.Verdict.Unbuildable]} ruled out by the map, {n[(int)ParkBuild.Verdict.NoGround]} under scenery, " +
+                     $"{n[(int)ParkBuild.Verdict.Entrance]} entrance, {n[(int)ParkBuild.Verdict.Occupied]} path, {n[(int)ParkBuild.Verdict.Edge]} edge";
+            var arrays = new Godot.Collections.Array();
+            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
+            var mesh = new ArrayMesh();
+            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            mesh.SurfaceSetMaterial(0, new StandardMaterial3D
+            {
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                VertexColorUseAsAlbedo = true,
+                VertexColorIsSrgb = true,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+            });
+            return mesh;
+        }
+
         /// <summary>Set the camera outright: focus tile (x, z), yaw and pitch in radians, distance in tiles. For
         /// captures; the keys do the same thing interactively.</summary>
         public void SetView(float x, float z, float yaw, float pitch, float distance)
@@ -597,6 +657,8 @@ namespace TPWGodot
             }
             else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.T } && _ground.Mesh != null)
                 _types.Visible = !_types.Visible;
+            else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.B })
+                _build.Visible = !_build.Visible;
             else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.O })
                 _scenery.Visible = !_scenery.Visible;
             else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.P })
