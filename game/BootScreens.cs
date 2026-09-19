@@ -243,7 +243,9 @@ namespace TPWGodot
             // tuned against bands that turned out to be different features in the two images. Both
             // produced real numbers and both were ~28 rows out. The display list was in the repo the
             // whole time and is the console's own answer -- measure the ARTEFACT, not a picture of it.
-            const int Row0 = 160, RowStep = 31;
+            // Row baselines 160, 190, 220: the captured rows start at y 140, 170 and 200, and a cap is
+            // 20 tall with OffsetY -20.
+            const int Row0 = 160, RowStep = 30;
             // The captured glow already sits on the first row, so row 0 needs no shift at all.
             MenuRenderer.DrawHighlight(_menuArt, frame, _menu.Index * RowStep);
 

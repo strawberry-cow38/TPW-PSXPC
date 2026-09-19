@@ -50,6 +50,11 @@ namespace TPW.Data
         /// <summary>The FOLIO entry every one of these quads samples.</summary>
         public const int Sheet = 84;
 
+        /// <summary>⚠ THE CAPTURED LIST IS PALINDROMIC -- it holds the scene TWICE, once forward
+        /// and once reversed -- and these are the DEDUPLICATED quads. Replaying it whole drew
+        /// every piece twice: the additive highlight glow came out at double brightness, and the
+        /// floor, appearing in both halves, ended up painted over the curtains whichever way the
+        /// list was walked. Both were reported as separate art faults; they were one duplicate.
         public static readonly ScreenQuad[] Backdrop =
         {
             new(87,66,253,66,87,136,253,136, 151,166,151,0,221,166,221,0, 16480, 25, false),
@@ -67,19 +72,6 @@ namespace TPW.Data
             new(392,5,514,5,392,129,514,129, 1,11,1,133,125,11,125,133, 16739, 24, false),
             new(270,5,405,5,270,58,405,58, 135,175,0,175,135,228,0,228, 16800, 27, false),
             new(423,129,514,129,423,245,514,245, 125,11,125,102,241,11,241,102, 16801, 24, false),
-            new(338,130,407,130,338,174,407,174, 219,133,152,133,219,177,152,177, 16611, 56, true),
-            new(105,130,174,130,105,174,174,174, 151,133,218,133,151,177,218,177, 16611, 56, true),
-            new(174,130,338,130,174,174,338,174, 151,177,157,177,151,221,157,221, 16672, 56, true),
-            new(423,129,514,129,423,245,514,245, 125,11,125,102,241,11,241,102, 16801, 24, false),
-            new(270,5,405,5,270,58,405,58, 135,175,0,175,135,228,0,228, 16800, 27, false),
-            new(392,5,514,5,392,129,514,129, 1,11,1,133,125,11,125,133, 16739, 24, false),
-            new(10,129,101,129,10,245,101,245, 125,101,125,10,241,101,241,10, 16801, 24, false),
-            new(132,5,267,5,132,58,267,58, 1,175,136,175,1,228,136,228, 16800, 27, false),
-            new(10,5,132,5,10,129,132,129, 1,132,1,10,125,132,125,10, 16739, 24, false),
-            new(384,213,512,213,384,256,512,256, 1,88,129,88,1,131,129,131, 16736, 28, false),
-            new(256,213,384,213,256,256,384,256, 194,128,194,0,237,128,237,0, 16675, 27, false),
-            new(128,213,256,213,128,256,256,256, 151,128,151,0,194,128,194,0, 16674, 27, false),
-            new(0,213,128,213,0,256,128,256, 207,128,207,0,250,128,250,0, 16673, 26, false),
         };
 
         /// <summary>Character to sprite index in sheet 84.

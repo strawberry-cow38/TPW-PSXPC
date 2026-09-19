@@ -49,6 +49,25 @@ namespace TPW.Data
         /// than baked into the static layer where it would be frozen on the captured frame's row.</summary>
         const ushort GlowPage = 56;
 
+        /// <summary>Back-to-front depth of a backdrop piece.
+        ///
+        /// ⚠ THE CAPTURED LIST'S ORDER IS NOT THE DRAW ORDER, IN EITHER DIRECTION, and this cost three
+        /// attempts to accept. Walked forward it puts the curtains over the logo; walked backward it
+        /// puts the floor over the curtains; and the list is palindromic, so "backward" was partly
+        /// meaningless anyway. The dump followed addresses, which is not the ordering table's chain.
+        ///
+        /// So the depth is stated per PIECE, from the one piece of evidence that settles it -- the
+        /// console screenshot: the curtains overlap the floor at the bottom, and the logo's 't' sits in
+        /// front of the left curtain. Anything not recognised sorts with the curtains, which is the
+        /// middle, so a new piece cannot silently land on top of everything.</summary>
+        static int Depth(in ScreenQuad q) => q.Clut switch
+        {
+            0x4121 or 0x4122 or 0x4123 or 0x4160 => 0,   // stage floor
+            0x4060 or 0x4061                     => 3,   // THEME PARK WORLD logo, frontmost
+            _ when q.TPage == GlowPage           => 2,   // highlight glow
+            _                                    => 1,   // curtains, valance, side drapes
+        };
+
         /// <summary>The captured glow's top edge, so the offset can be measured from it.</summary>
         public static int GlowY
         {
@@ -65,13 +84,14 @@ namespace TPW.Data
         public static void DrawBackdrop(Prepared p, byte[] dst)
         {
             if (p == null) return;
-            // ⚠ BACK TO FRONT. A PSX ordering table is built by PREPENDING, so the display list as
-            // walked from its head runs FRONT to BACK -- replaying it in that order paints the floor
-            // over the curtains, the curtains over the logo, and the highlight glow over the text that
-            // is supposed to sit inside it. All three were spotted at a glance by someone who knows
-            // what the screen should look like, and all three are the one reversal.
-            for (int i = MenuLayout.Backdrop.Length - 1; i >= 0; i--)
-                if (MenuLayout.Backdrop[i].TPage != GlowPage) DrawQuad(p, dst, MenuLayout.Backdrop[i], 0);
+            // ⚠ FORWARD, and the reversal that used to be here was treating a symptom. The captured
+            // list is PALINDROMIC -- the same scene twice, once each way -- so whichever direction it
+            // was walked, the second copy of the floor landed on top of the curtains. Reversing made
+            // that look better without fixing it. The duplicate is gone from the table now, and the
+            // order is the console's own.
+            for (int layer = 0; layer <= 3; layer++)
+                foreach (var q in MenuLayout.Backdrop)
+                    if (q.TPage != GlowPage && Depth(q) == layer) DrawQuad(p, dst, q, 0);
         }
 
         /// <summary>One textured quad.
@@ -85,8 +105,8 @@ namespace TPW.Data
         public static void DrawHighlight(Prepared p, byte[] dst, int dy)
         {
             if (p == null) return;
-            for (int i = MenuLayout.Backdrop.Length - 1; i >= 0; i--)
-                if (MenuLayout.Backdrop[i].TPage == GlowPage) DrawQuad(p, dst, MenuLayout.Backdrop[i], dy);
+            foreach (var q in MenuLayout.Backdrop)
+                if (q.TPage == GlowPage) DrawQuad(p, dst, q, dy);
         }
 
         static void DrawQuad(Prepared p, byte[] dst, in ScreenQuad q, int dy)
@@ -152,12 +172,20 @@ namespace TPW.Data
             return w;
         }
 
+        /// <summary>⚠ THE ADVANCE IS W MINUS FOUR, not W, and certainly not W plus a gap. Read off the
+        /// console's own display list: in the captured menu every consecutive pair of glyphs is exactly
+        /// (width - 4) apart -- P 23 -> 19, l 12 -> 8, a 24 -> 20, G 29 -> 25, m 30 -> 26, and the same
+        /// on all seven letters of "Options". The glyph bitmaps evidently carry two columns of padding
+        /// each side. I had used W + 1, which is five pixels too wide PER LETTER, so "Play Game" came
+        /// out 40 pixels over-long -- visible immediately beside the real thing as text that is "much
+        /// more spread out", which is exactly how it was reported.</summary>
+        public const int Advance = -4, SpaceWidth = 8;
+
         static int GlyphWidth(Prepared p, char c)
         {
-            if (c == ' ') return 8;
-            if (p == null || !MenuLayout.Glyph.TryGetValue(c, out int i) || i >= p.SpriteCount) return 8;
-            // W is the DRAWN width whether or not the sprite is stored rotated, so the advance is W.
-            return p.Sheet.Sprites[i].W + 1;
+            if (c == ' ') return SpaceWidth;
+            if (p == null || !MenuLayout.Glyph.TryGetValue(c, out int i) || i >= p.SpriteCount) return SpaceWidth;
+            return Math.Max(1, p.Sheet.Sprites[i].W + Advance);
         }
 
         /// <summary>Draw a string in the game's own font. <paramref name="y"/> is the BASELINE, not the
