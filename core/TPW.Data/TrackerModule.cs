@@ -41,8 +41,13 @@ namespace TPW.Data
     ///
     /// ⚠ THE SAMPLES ARE ELSEWHERE. Each module's sample headers survive with their lengths ZEROED; the
     /// waveforms are the VAB bank in the entry before it (see VabHeader), one waveform per instrument, and
-    /// the instrument count always equals the bank's waveform count (9 of 9). Which waveform goes with which
-    /// instrument is taken as N with N; that pairing is under test by ear.</summary>
+    /// the instrument count always equals the bank's waveform count (9 of 9).
+    ///
+    /// ✅ WAVEFORM N IS INSTRUMENT N, CONFIRMED BY EAR. Rebuilt that way and played through libopenmpt, master's
+    /// verdict on the set was "the rest of the music sounds 1:1" (module 296 has a rhythmic tick that may be
+    /// genuine). The first render, before the pattern packing was understood, had sounded like "chunks of all
+    /// different music mashed together", which is why the pairing was never really tested until the patterns
+    /// were right.</summary>
     public sealed class TrackerModule
     {
         public const string Signature = "Extended Module: ";
