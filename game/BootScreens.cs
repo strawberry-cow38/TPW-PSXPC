@@ -299,6 +299,19 @@ namespace TPWGodot
             // The advisor animates on the SAME console tick as the rest of the chain, not on the
             // renderer's frame rate -- his flag would wave at a different speed on a 144 Hz monitor
             // otherwise, and that is the sort of wrong that only shows up on somebody else's machine.
+            // ⚠ ONE ANIMATION UNIT PER CONSOLE TICK IS A CHOICE, NOT A MEASUREMENT, AND IT IS TOO SLOW.
+            // Measured off the console's display list (the flag's own primitives, CLUT 0x40e0): the pose
+            // changes on EVERY frame -- 0 of 29 consecutive frames repeat, so it is not half rate -- and
+            // the whole wave repeats exactly every 104 frames (frames 30, 134 and 238 are identical
+            // point-for-point). A fine 30-frame scan rules out 13 and 26, so the true period is 52 or
+            // 104; an 8-frame sampling grid cannot separate those two.
+            //
+            // ⚠ NEITHER IS THE CLIP'S LENGTH. Sub-mesh 10's tracks run 128 units, so the game is not
+            // stepping one unit per frame the way this does -- it covers 128 units in 104 frames or
+            // fewer. So the port's flag waves roughly a fifth too slowly, and the mechanism (a
+            // fixed-point step? a partial clip?) is NOT identified. Left at 1:1 deliberately rather
+            // than dividing by a ratio that happens to fit, which is how a wrong constant gets a
+            // comment claiming it was measured.
             if (_boot.Screen == BootScreen.LanguageSelect && _advisor != null && _advisorLength > 0)
             {
                 _advisorClock += ticks;
