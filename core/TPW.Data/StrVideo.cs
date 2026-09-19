@@ -23,14 +23,22 @@ namespace TPW.Data
     /// ⭐ WHAT THESE FILES ARE. Five of them, 12-14 MB each, and everyone including me assumed they were the
     /// music — they are 320x176 VIDEO. The actual music was the XM tracker in the archive all along.
     ///
-    /// ⚠ THEY ARE NOT THE TITLE-SCREEN ATTRACT CYCLE, which is what fable's report calls GRAV/MIR/JUG. They
-    /// play ON ENTERING A WORLD, one per world. Master remembers it that way, and tinyclaw's failed capture
-    /// turned into the control: 9,000 frames idling the title screen with ZERO vram uploads, and a playing
-    /// movie uploads a frame at a time. The absence carries information because something was predicted to
-    /// be there. It also fits the rest of that same report better than the report's own label does — it
-    /// found the music picks its module by WORLD INDEX. Four worlds, four modules, one intro movie each.
+    /// ⭐ WHEN THEY PLAY, READ OFF THE GAME'S OWN FRONT END (0x800BCEEC, a state machine), and it overturned
+    /// what this comment said before, which was "on entering a world":
+    ///   boot       BF.STR (the Bullfrog logo), then a counter is reset to 0 and the world movie table's entry
+    ///              0 plays: GRAV.STR, every boot. Then the language select and the title.
+    ///   title      one of the menu's results (6) plays the NEXT world movie in rotation, GRAV → MIR → JUG →
+    ///              GRAV… (0x800BCD7C: table[counter], counter = (counter + 1) % 3). Whether result 6 is an
+    ///              idle timeout or a menu item is in the overlay, not read yet.
+    ///   game over  the GAME OVER movie in the player's language (0x800BCD00: 1 French, 4 Spanish, 7 END =
+    ///              Japanese, anything else English), then back to the boot sequence.
+    /// tinyclaw then cold-booted the console and caught "a blue machine interior with joysticks" before the
+    /// language select: GRAV's frame 60 exactly. So the world movies are not tied to worlds at all. Both
+    /// earlier readings were partly right: master's second memory ("after the bullfrog logo at startup") and
+    /// fable's "attract cycle" (a rotation from the title). tinyclaw's 9,000-frame idle with no movie says
+    /// result 6 is not a short timeout, if it is one at all.
     ///
-    /// ⭐ SO THE DECODER HAS FOUR POSITIVE CONTROLS, NOT ONE — from master, who has played it:
+    /// ⭐ THE DECODER HAS FOUR POSITIVE CONTROLS, NOT ONE — from master, who has played it:
     ///     BF     the Bullfrog logo        (publicly known)
     ///     GRAV   a gravity bounce-house   (space)
     ///     MIR    a freaky mirror thing    (halloween)
@@ -194,6 +202,26 @@ namespace TPW.Data
         /// <summary>Null when the whole soundtrack decoded.</summary>
         public string AudioError;
 
+        /// <summary>True when the soundtrack is filler rather than sound: at least 90% of its samples exactly zero.
+        ///
+        /// ⚠ THE FOUR GAME-OVER MOVIES SHIP AN EMPTY AUDIO TRACK. Decoded, it is 96% exact zeros with two clicks
+        /// per audio sector, locked to the disc clock, at -52 dB. ffmpeg's decoder produces the identical
+        /// samples, 612,864 of 612,864, and tinyclaw found the raw sector bytes 99.6% zero with three distinct
+        /// values, so it is the data and not a decoder fault. Master heard it in the port as "a series of
+        /// clicks". The game plays these through the same routine as the world movies, so a real console
+        /// reproduces the same near-silent clicks; the player skips a track like this instead. Real
+        /// soundtracks here are under 1% exact zeros, so the threshold is nowhere near a borderline case.</summary>
+        public bool AudioIsEmpty
+        {
+            get
+            {
+                if (Audio.Length == 0) return true;
+                int zeros = 0;
+                foreach (var v in Audio) if (v == 0) zeros++;
+                return zeros >= Audio.Length * 9L / 10;
+            }
+        }
+
         public int Width => Frames.Count > 0 ? Frames[0].Width : 0;
         public int Height => Frames.Count > 0 ? Frames[0].Height : 0;
         public double DurationSeconds => Sectors / (double)SectorsPerSecond;
@@ -221,21 +249,18 @@ namespace TPW.Data
             return best;
         }
 
-        /// <summary>What each file is, and when the game plays it.
-        ///
-        /// ⭐ FROM MASTER, WHO HAS PLAYED IT. The world movies play on entering that world, not on the title
-        /// screen. tinyclaw idled the title screen for 9,000 frames and saw zero VRAM uploads, where a playing
-        /// movie uploads one frame at a time. The contents were confirmed against decoded frames: the frog
+        /// <summary>What each file is, and when the game plays it (see the class comment for the code this
+        /// comes from). The contents were confirmed against decoded frames by master, who has played it: the frog
         /// kite, the kid in the ride car, the dark corridor, the purple dinosaur on a unicycle.
         ///
-        /// ⚠ THREE WORLD MOVIES, AND NO FOURTH ON THE DISC. There are exactly eight .STR files and this is
-        /// all of them, so if a fourth world has an intro movie, it is not a .STR.</summary>
+        /// ⚠ THREE WORLD MOVIES, AND NO FOURTH ON THE DISC. The game's own table has three entries, and there
+        /// are exactly eight .STR files.</summary>
         public static readonly (string File, string What)[] Catalogue =
         {
-            ("BF.STR", "Bullfrog logo"),
-            ("GRAV.STR", "space world: gravity bounce-house"),
-            ("MIR.STR", "halloween world: the freaky mirror"),
-            ("JUG.STR", "jungle world"),
+            ("BF.STR", "Bullfrog logo, at boot"),
+            ("GRAV.STR", "space: gravity bounce-house, at boot and in rotation"),
+            ("MIR.STR", "halloween: the freaky mirror, in rotation"),
+            ("JUG.STR", "jungle, in rotation"),
             ("ENGLISH.STR", "game over, English"),
             ("FRENCH.STR", "game over, French"),
             ("SPANISH.STR", "game over, Spanish"),

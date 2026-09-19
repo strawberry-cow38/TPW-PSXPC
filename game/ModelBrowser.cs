@@ -27,7 +27,14 @@ namespace TPWGodot
         Label _info;
         int _index = -1;
         float _spin;
-        bool _cull = true;
+        // ⭐ CULLING OFF BY DEFAULT, BY MASTER'S CALL, and the reason is fidelity rather than taste: "in this era
+        // the devs would have manually removed faces". The PS1 GPU has no back-face culling at all; a game culls
+        // in software per polygon if it chooses to, and tinyclaw measured this one's park geometry at 88-90% one
+        // handedness, so it does not cull everything. Culling everything here breaks the double-sided details
+        // (fringes, flags, thin fins) that were modelled as single faces meant to be seen from both sides.
+        // The toggle stays: culling ON is still the right instrument for checking winding, which is how the
+        // inside-out models were caught.
+        bool _cull = false;
         // ⭐ FILE ORDER IS ALREADY CORRECT FOR GODOT — settled by looking, with culling ON. I had reversed
         // the triangle order assuming PSX and Godot wind oppositely; master turned culling on and reported
         // every model inside out, which is what a reversed winding looks like and what nothing could show

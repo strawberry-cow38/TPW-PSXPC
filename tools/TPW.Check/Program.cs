@@ -266,7 +266,7 @@ static class Program
             if (!StrMovie.TryLoad(disc, f, out var m, out string err)) { Console.WriteLine($"{f.Name}: {err}"); bad++; continue; }
 
             Console.WriteLine($"{f.Name,-12} {m.Frames.Count,4} frames {m.Width}x{m.Height}, {m.DurationSeconds:0.00} s, {m.FramesPerSecond:0.00} fps  [{StrMovie.Describe(f.Name)}]");
-            Console.WriteLine($"             audio {m.AudioCoding}, {m.AudioSeconds:0.00} s, {m.AudioSectors} sectors from #{m.FirstAudioSector}" +
+            Console.WriteLine($"             audio {m.AudioCoding}, {m.AudioSeconds:0.00} s{(m.AudioIsEmpty ? " (EMPTY: skipped by the player)" : "")}, {m.AudioSectors} sectors from #{m.FirstAudioSector}" +
                               $"; xa groups {m.XaGroups:n0}, bad copies {m.XaBadCopies}, reserved params {m.XaReservedParams}" +
                               $"; empty {m.EmptySectors}, foreign {m.ForeignAudioSectors}, misassembled {m.Misassembled}" +
                               (m.AudioError != null ? $"; AUDIO ERROR {m.AudioError}" : ""));
@@ -314,6 +314,62 @@ static class Program
             }
         }
         return bad;
+    }
+
+    static int ModelAtlas(DiscReader disc, int want, string outPath)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        var sheets = TextureSheet.FindAll(g);
+        int index = 0;
+        foreach (var e in g.Entries)
+        {
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
+                if (index++ != want) continue;
+                var t = ModelTexturing.Build(m, sheets);
+                // Keep only the texels some face actually samples (inside its UV triangle); everything else is
+                // greyed out. Transparent texels that faces DO sample stay transparent, so they show as holes.
+                var used = new bool[t.Atlas.Width * t.Atlas.Height];
+                long sampled = 0, holes = 0;
+                for (int fi = 0; fi < m.Faces.Count; fi++)
+                {
+                    int tile = t.FaceTile[fi];
+                    if (tile < 0) continue;
+                    var f = m.Faces[fi];
+                    int ox = (tile % t.TilesX) * ModelTexturing.Tile, oy = (tile / t.TilesX) * ModelTexturing.Tile;
+                    int x0 = ox + f.U0, y0 = oy + f.V0, x1 = ox + f.U1, y1 = oy + f.V1, x2 = ox + f.U2, y2 = oy + f.V2;
+                    int minx = Math.Min(x0, Math.Min(x1, x2)), maxx = Math.Max(x0, Math.Max(x1, x2));
+                    int miny = Math.Min(y0, Math.Min(y1, y2)), maxy = Math.Max(y0, Math.Max(y1, y2));
+                    long area = (long)(x1 - x0) * (y2 - y0) - (long)(x2 - x0) * (y1 - y0);
+                    for (int y = miny; y <= maxy; y++)
+                        for (int x = minx; x <= maxx; x++)
+                        {
+                            long w0 = (long)(x1 - x) * (y2 - y) - (long)(x2 - x) * (y1 - y);
+                            long w1 = (long)(x2 - x) * (y0 - y) - (long)(x0 - x) * (y2 - y);
+                            long w2 = (long)(x0 - x) * (y1 - y) - (long)(x1 - x) * (y0 - y);
+                            bool inside = area >= 0 ? (w0 >= 0 && w1 >= 0 && w2 >= 0) : (w0 <= 0 && w1 <= 0 && w2 <= 0);
+                            if (!inside || used[y * t.Atlas.Width + x]) continue;
+                            used[y * t.Atlas.Width + x] = true;
+                            sampled++;
+                            if (t.Atlas.Rgba[(y * t.Atlas.Width + x) * 4 + 3] == 0) holes++;
+                        }
+                }
+                var outRgba = (byte[])t.Atlas.Rgba.Clone();
+                for (int k = 0; k < used.Length; k++)
+                    if (!used[k]) { outRgba[k * 4] = 60; outRgba[k * 4 + 1] = 60; outRgba[k * 4 + 2] = 60; outRgba[k * 4 + 3] = 255; }
+                System.IO.File.WriteAllBytes(outPath, outRgba);
+                Console.WriteLine($"texels the faces sample: {sampled:n0}, of which transparent (palette colour 0): {holes:n0} ({100.0 * holes / Math.Max(1, sampled):0.0}%)");
+                Console.WriteLine($"model {want}: entry #{e.Index} sub {i}; atlas {t.Atlas.Width}x{t.Atlas.Height} ({t.TilesX}x{t.TilesY} tiles, {t.Atlas.Source}), " +
+                                  $"main sheet #{t.MainSheetEntry}; faces {t.Unique} by sprite, {t.Ambiguous} shared, {t.Loose} loose, {t.Unmatched} untextured -> {outPath}");
+                return 0;
+            }
+        }
+        Console.WriteLine($"no model {want}");
+        return 1;
     }
 
     static int ModelTextures(DiscReader disc)
@@ -560,6 +616,11 @@ static class Program
             // --model-textures: do the meshes draw from the texture sheets? A face names a page and a palette;
             // count the faces whose palette is one a sheet's own sprite table lists, on a page of that same sheet.
             if (Array.IndexOf(args, "--model-textures") >= 0) return ModelTextures(disc);
+
+            // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
+            // the texels a face samples can be looked at directly rather than through a render.
+            int atlasAt = Array.IndexOf(args, "--model-atlas");
+            if (atlasAt >= 0 && atlasAt + 2 < args.Length) return ModelAtlas(disc, int.Parse(args[atlasAt + 1]), args[atlasAt + 2]);
 
             // --advisor [dir] [--clip B:C,...]: find every clip in the advisor's speech file, print what was found,
             // and write the named clips (block:channel) as WAVs for a human to listen to.

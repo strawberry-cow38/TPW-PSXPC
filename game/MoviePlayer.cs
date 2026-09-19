@@ -90,7 +90,8 @@ namespace TPWGodot
             _t = 0; _shown = -1; _decoded = 0; _failures = 0; _firstFailure = null;
             _audioStarted = false;
 
-            if (m.Audio.Length > 0)
+            // ⚠ An empty soundtrack (the game-over movies) is skipped, not played: see StrMovie.AudioIsEmpty.
+            if (m.Audio.Length > 0 && !m.AudioIsEmpty)
             {
                 // PCM16 little-endian, interleaved, which is what AudioStreamWav expects when Stereo is set.
                 var bytes = new byte[m.Audio.Length * 2];
@@ -107,7 +108,8 @@ namespace TPWGodot
 
             Visible = true;
             GD.Print($"[tpw] movie {m.Name}: {m.Frames.Count} frames {m.Width}x{m.Height}, {m.DurationSeconds:0.00}s " +
-                     $"at {m.FramesPerSecond:0.00} fps; audio {m.AudioCoding}, {m.AudioSeconds:0.00}s");
+                     $"at {m.FramesPerSecond:0.00} fps; audio {m.AudioCoding}, {m.AudioSeconds:0.00}s" +
+                     (m.AudioIsEmpty ? " (an empty track, skipped)" : ""));
         }
 
         public override void _Process(double delta)
