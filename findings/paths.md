@@ -286,3 +286,53 @@ Let **V** = the address of the word holding the shop vtable 0x800E6A8C (stored b
 - The link-bit code for the west and south neighbours in 0x8004E20C was not read line by line
   (0x8004E794..0x8004ECC8); the encoding is fixed by the two directions that were and by the
   overlay's direction table.
+
+## 8. The path tool's ghost markers — how the game actually draws them (READ)
+
+Entry point `0x8001D9D0` (the L-shaped run walker). For each tile in the run it calls the validator
+`0x8004F360`, uses the returned verdict as an index into a **sprite table at 0x800DBEFC**, and draws via
+`0x800553B0(x, y, sprite, 0, 1, 1)`.
+
+**Verdict → sprite id** (READ, the six words at 0x800DBEFC):
+
+| idx | 0 | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|
+| sprite | 165 | 175 | 168 | 169 | 170 | 173 |
+
+Which index means ok / blocked / ends-on-path is **not established here** — it was determined
+empirically (blue = will lay, dark red = refused, green ring = run ends on existing path).
+
+### 8.1 Two primitives per tile, both semi-transparent
+
+`0x800553B0` emits **two** quads, and this is the part worth having:
+
+| | primitive | code | sprite | shade |
+|---|---|---|---|---|
+| underlay | POLY_FT4 | 0x2C | **fixed 171** (`gp[0x12ac] + 0x804`, stride 12) | flat **0x40** on r/g/b |
+| marker | POLY_GT4 | 0x3C | the verdict sprite | **four different per-vertex shades** |
+
+Both get `code |= 2` (`0x80055C2C` / `0x800561F8`) — **setSemiTrans, so both are see-through** — and
+`code &= ~1` right after, i.e. texture blending stays ON.
+
+The underlay's shade is `0x40` where `0x80` is 1.0, so the "dim quad the game lays under the markers"
+is dim *because of a half-brightness shade*, not because of the blend.
+
+### 8.2 The pulse is a gouraud gradient, not a flash (READ)
+
+The GT4's four vertex colours are computed separately (`$s0/$s1/$s2/$s3` → prim +4/+0x10/+0x1C/+0x28)
+and each is driven by **`rsin`** (`0x800C4AD4`, confirmed against `psyq-named-functions.json` as
+LIBGTE `rsin`/GEO.OBJ), angle masked to `0xFFF` (4096 = full circle), result `>>8` and added to a base,
+`andi 0xFF`. Four *different* vertex values means the brightness **travels across the tile** — a moving
+gradient, not a uniform pulse. Reproducing it as a single time-varying brightness will look wrong.
+
+### 8.3 ⚠ The blend mode is per-sprite DATA, not a constant in the draw code
+
+`0x800553B0` never chooses a blend. Both texture setup helpers — `0x80061F10` (FT4) and `0x80061EB0`
+(GT4) — do `lhu $s2, ($a0)` and store it to the primitive's **tpage** field (+0x16 FT4 / +0x1A GT4),
+taking the CLUT from `2($a0)` the same way. The ABR bits (tpage 5-6) therefore come straight out of
+**each sprite's own 12-byte record**, so "half" vs "additive" is a value to be read per sprite.
+
+**NOT ESTABLISHED: the actual ABR for sprites 165/168/169/170/171/173/175.** It is runtime data and I
+did not read it out of a dump. Do not assume 50/50 — on this disc `abr=1` (additive) is common, and
+additive dark red over grass brightens toward olive where half-blend darkens toward brown. That
+mistake was already made once in this port on the language-screen text.
