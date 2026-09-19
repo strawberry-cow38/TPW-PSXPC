@@ -38,7 +38,17 @@ namespace TPW.Data
     /// </summary>
     public sealed class VertexBinding
     {
-        public (int Start, int Count)[] Runs = Array.Empty<(int, int)>();
+        /// <summary>One per animated source: which binding records it feeds, and where the source sits
+        /// when no track drives it.
+        ///
+        /// ⚠ THE DEFAULT IS NOT ZERO AND ASSUMING IT IS SHREDS THE MODEL. Tracks address only the ODD
+        /// source slots — every animated mesh on the disc drives exactly half its sources, indices
+        /// 1,3,5,...  The even ones are never written by a track; the builder seeds the whole region from
+        /// bytes 4..11 of these records (0x8002cab0 copies from record+4), which is an 8-byte PSX vertex
+        /// with the pad zero on all 560 records. Seeding zero instead drags every vertex an undriven
+        /// source reaches toward the origin, which is visible as parts stretching out of the model.</summary>
+        public (int Start, int Count, short X, short Y, short Z)[] Runs =
+            Array.Empty<(int, int, short, short, short)>();
         public BindingRecord[] Records = Array.Empty<BindingRecord>();
 
         public int SourceCount => Runs.Length;
@@ -49,10 +59,10 @@ namespace TPW.Data
         {
             if (Runs.Length == 0) return Records.Length == 0;
             int at = Runs[0].Start;
-            foreach (var (start, count) in Runs)
+            foreach (var r in Runs)
             {
-                if (start != at) return false;
-                at += count;
+                if (r.Start != at) return false;
+                at += r.Count;
             }
             return at == Records.Length;
         }
@@ -86,7 +96,7 @@ namespace TPW.Data
             int n = Math.Min(sources.Length, Runs.Length);
             for (int i = 0; i < n; i++)
             {
-                var (start, count) = Runs[i];
+                var (start, count, _, _, _) = Runs[i];
                 var s = sources[i];
                 for (int k = 0; k < count; k++)
                 {
@@ -109,11 +119,13 @@ namespace TPW.Data
             if (at + (runCount + recordCount) * 12 > d.Length)
             { error = "binding tables past the end"; return false; }
 
-            var runs = new (int, int)[runCount];
+            var runs = new (int, int, short, short, short)[runCount];
             for (int i = 0; i < runCount; i++)
             {
                 int o = at + i * 12;
-                runs[i] = (BitConverter.ToUInt16(d.Slice(o + 2, 2)), BitConverter.ToUInt16(d.Slice(o, 2)));
+                runs[i] = (BitConverter.ToUInt16(d.Slice(o + 2, 2)), BitConverter.ToUInt16(d.Slice(o, 2)),
+                           BitConverter.ToInt16(d.Slice(o + 4, 2)), BitConverter.ToInt16(d.Slice(o + 6, 2)),
+                           BitConverter.ToInt16(d.Slice(o + 8, 2)));
             }
             var recs = new BindingRecord[recordCount];
             int rb = at + runCount * 12;

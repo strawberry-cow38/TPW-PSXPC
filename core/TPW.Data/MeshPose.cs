@@ -54,7 +54,12 @@ namespace TPW.Data
             // --- scatter sources, then the vertices they reach ---------------------------------
             var bind = mesh.Binding;
             int nSrc = bind?.SourceCount ?? 0;
+            // ⚠ SEED FROM THE RECORD'S OWN DEFAULT, NOT ZERO. Tracks drive only the odd source slots
+            // (every animated mesh on the disc drives exactly half), and the console seeds the whole
+            // region from the run records. Zeroing the undriven half pulls the vertices they reach to
+            // the origin -- reported from the browser as "the animated parts are stretching from 0,0".
             var sources = new (short X, short Y, short Z)[nSrc];
+            for (int i = 0; i < nSrc; i++) sources[i] = (bind.Runs[i].X, bind.Runs[i].Y, bind.Runs[i].Z);
             if (mesh.Tracks != null)
                 foreach (var t in mesh.Tracks)
                 {

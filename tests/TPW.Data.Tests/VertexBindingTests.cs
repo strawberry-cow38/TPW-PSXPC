@@ -9,10 +9,11 @@ namespace TPW.Data.Tests
     public class VertexBindingTests
     {
         static void U16(List<byte> b, int v) { b.Add((byte)v); b.Add((byte)(v >> 8)); }
+        static void S16(List<byte> b, int v) => U16(b, v & 0xFFFF);
 
         // ⚠ count is at +0 and start at +2 -- the opposite order to how the pair reads aloud.
-        static void Run(List<byte> b, int start, int count)
-        { U16(b, count); U16(b, start); b.AddRange(new byte[8]); }
+        static void Run(List<byte> b, int start, int count, int x = 0, int y = 0, int z = 0)
+        { U16(b, count); U16(b, start); S16(b, x); S16(b, y); S16(b, z); U16(b, 0); }
 
         static void Rec(List<byte> b, int vertex, int weight)
         { U16(b, vertex); U16(b, weight); b.AddRange(new byte[8]); }
@@ -32,8 +33,8 @@ namespace TPW.Data.Tests
 
             var b = Parse(runs, recs, 2, 3);
             Assert.Equal(2, b.SourceCount);
-            Assert.Equal((0, 2), b.Runs[0]);
-            Assert.Equal((2, 1), b.Runs[1]);
+            Assert.Equal(0, b.Runs[0].Start); Assert.Equal(2, b.Runs[0].Count);
+            Assert.Equal(2, b.Runs[1].Start); Assert.Equal(1, b.Runs[1].Count);
             Assert.Equal(5, b.Records[0].Vertex);
             Assert.Equal(16384, b.Records[0].Weight);
             Assert.Equal(1f, b.Records[0].WeightF, 4);
@@ -115,5 +116,21 @@ namespace TPW.Data.Tests
             Assert.False(VertexBinding.TryParse(new byte[12], 0, 1, 5, out _, out string e));
             Assert.Contains("past the end", e);
         }
+        // ⚠ A SOURCE NO TRACK DRIVES IS NOT AT THE ORIGIN. Tracks address only the odd slots -- every
+        // animated mesh on the disc drives exactly half its sources -- and the console seeds the whole
+        // region from these records. Zeroing the undriven half drags the vertices they reach toward 0,0,
+        // which is how this was reported: "the animated parts are stretching from 0,0 of the model".
+        // REJECTS a run parsed without its default position.
+        [Fact]
+        public void ARunCarriesTheSourcePositionToUseWhenNoTrackDrivesIt()
+        {
+            var runs = new List<byte>(); Run(runs, 0, 1, 81, -1, 660);
+            var recs = new List<byte>(); Rec(recs, 0, 16384);
+            var b = Parse(runs, recs, 1, 1);
+            Assert.Equal(81, b.Runs[0].X);
+            Assert.Equal(-1, b.Runs[0].Y);
+            Assert.Equal(660, b.Runs[0].Z);
+        }
+
     }
 }
