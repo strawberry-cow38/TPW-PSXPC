@@ -23,6 +23,55 @@ static class Program
     /// ⭐ THE TEST WITH TEETH. tinyclaw logged the same mapping off the live GPU. Twelve pages each landing
     /// on the right one of three has many ways to be wrong and one to be right, and the two methods share
     /// no code, no file and no assumption.</summary>
+    /// <summary>Model-space face-normal handedness per texture page, under the FILE's vertex order.
+    ///
+    /// ⭐ THE PRE-CULL ANALOGUE OF tinyclaw's MEASUREMENT. Theirs is screen-space signed area AFTER the
+    /// game's software cull, which this cannot reproduce. But a cull cannot MAKE a set one-handed that was
+    /// not already — it only removes the half pointing away. So if terrain really is 100.0% one way over
+    /// 213,000 triangles, the file's own vertex order should say so too, and that IS measurable here.
+    ///
+    /// A closed object should land near 50/50; a heightmap, overwhelmingly one way.</summary>
+    static void Winding(GazArchive gaz)
+    {
+        var up = new SortedDictionary<string, int>();
+        var down = new SortedDictionary<string, int>();
+        foreach (var e in gaz.Entries)
+        {
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes)) continue;
+            if (!MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                if (!c.TryParseMesh(bytes, i, out var mesh, out _)) continue;
+                foreach (var face in mesh.Faces)
+                {
+                    if (face.I0 >= mesh.VertexCount || face.I1 >= mesh.VertexCount || face.I2 >= mesh.VertexCount) continue;
+                    var (px, py) = face.TPageOrigin;
+                    string page = $"{px},{py}";
+                    long ax = mesh.Vertices[face.I1 * 3] - mesh.Vertices[face.I0 * 3];
+                    long az = mesh.Vertices[face.I1 * 3 + 2] - mesh.Vertices[face.I0 * 3 + 2];
+                    long bx = mesh.Vertices[face.I2 * 3] - mesh.Vertices[face.I0 * 3];
+                    long bz = mesh.Vertices[face.I2 * 3 + 2] - mesh.Vertices[face.I0 * 3 + 2];
+                    long ny = az * bx - ax * bz;      // Y component of (v1-v0) x (v2-v0)
+                    if (ny == 0) continue;            // edge-on: carries no handedness
+                    var t = ny > 0 ? up : down;
+                    t.TryGetValue(page, out int n); t[page] = n + 1;
+                }
+            }
+        }
+        Console.WriteLine("face-normal Y sign per texture page, under the FILE's own vertex order:");
+        var pages = new SortedSet<string>();
+        foreach (var k in up.Keys) pages.Add(k);
+        foreach (var k in down.Keys) pages.Add(k);
+        foreach (var p in pages)
+        {
+            up.TryGetValue(p, out int u); down.TryGetValue(p, out int d);
+            int tot = u + d;
+            string pct = tot > 0 ? $"{100.0 * Math.Max(u, d) / tot:0.0}% {(u >= d ? "+Y" : "-Y")}" : "-";
+            Console.WriteLine($"   {p,-10} +Y {u,7:n0}   -Y {d,7:n0}   {pct}");
+        }
+    }
+
     static void Mapping(GazArchive gaz)
     {
         var map = new SortedDictionary<string, SortedDictionary<string, int>>();
@@ -238,6 +287,7 @@ static class Program
         // ⚠ THIS GOES THROUGH THE REAL DECODER ON PURPOSE. Re-implementing the conversion in a script to
         // "check the format" would test the script, which is the mistake that just shipped a broken launcher:
         // a harness that builds its own input is not testing the product.
+        bool winding = Array.IndexOf(args, "--winding") >= 0;
         bool mapping = Array.IndexOf(args, "--mapping") >= 0;
         bool meshes = Array.IndexOf(args, "--meshes") >= 0;
         bool vramHash = Array.IndexOf(args, "--vramhash") >= 0;
@@ -283,10 +333,11 @@ static class Program
                 Console.WriteLine($"wrote {limg.Width}x{limg.Height} RGBA to {rawOut}");
                 return 0;
             }
-            if (mapping || meshes)
+            if (mapping || meshes || winding)
             {
                 var g = Archive(disc);
                 if (g == null) return 1;
+                if (winding) { Winding(g); return 0; }
                 if (mapping) { Mapping(g); return 0; }
                 return Meshes(g);
             }
