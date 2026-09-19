@@ -47,6 +47,17 @@ namespace TPW.Data.Tests
             Assert.Equal(v.Length, v.Distinct().Count());
         }
 
+        /// <summary>⚠ 0x80 IS 1.0 ON PSX HARDWARE. A primitive's colour is a multiplier where 128 means
+        /// "leave the texture alone", so the measured 0x808080 on every menu item is FULL brightness.
+        /// Reading it as 50% would dim the entire menu and look like a palette bug. The disabled row's
+        /// 0x202020 is a quarter of it.</summary>
+        [Fact]
+        public void TheNormalShadeIsFullBrightnessAndDisabledIsAQuarter()
+        {
+            Assert.Equal(1f, MenuRenderer.NormalShade);
+            Assert.Equal(0.25f, MenuRenderer.DisabledShade, 3);
+        }
+
         /// <summary>Prepare must tolerate a disc whose sheet did not parse, because the menu still has to
         /// come up -- as the labelled placeholder -- rather than crash the boot.</summary>
         [Fact]

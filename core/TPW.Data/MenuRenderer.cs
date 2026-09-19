@@ -117,21 +117,32 @@ namespace TPW.Data
         /// <summary>⚠ INDEX 0 OF A PSX PALETTE IS TRANSPARENT, not black, and every one of these sprites
         /// relies on it -- the curtains are cut-outs. RenderPage already writes alpha 0 there; this just
         /// has to honour it instead of copying the pixel regardless.</summary>
-        static void Blend(byte[] dst, int d, TpwImage src, int s, bool additive)
+        static void Blend(byte[] dst, int d, TpwImage src, int s, bool additive, float shade = 1f)
         {
             if (s < 0 || s + 3 >= src.Rgba.Length || d + 3 >= dst.Length) return;
             byte a = src.Rgba[s + 3];
             if (a == 0) return;
+            byte R = Shade(src.Rgba[s], shade), G = Shade(src.Rgba[s + 1], shade), B = Shade(src.Rgba[s + 2], shade);
             if (additive)
             {
-                dst[d]     = (byte)Math.Min(255, dst[d]     + src.Rgba[s]);
-                dst[d + 1] = (byte)Math.Min(255, dst[d + 1] + src.Rgba[s + 1]);
-                dst[d + 2] = (byte)Math.Min(255, dst[d + 2] + src.Rgba[s + 2]);
+                dst[d]     = (byte)Math.Min(255, dst[d]     + R);
+                dst[d + 1] = (byte)Math.Min(255, dst[d + 1] + G);
+                dst[d + 2] = (byte)Math.Min(255, dst[d + 2] + B);
                 dst[d + 3] = 255;
                 return;
             }
-            dst[d] = src.Rgba[s]; dst[d + 1] = src.Rgba[s + 1]; dst[d + 2] = src.Rgba[s + 2]; dst[d + 3] = 255;
+            dst[d] = R; dst[d + 1] = G; dst[d + 2] = B; dst[d + 3] = 255;
         }
+
+        static byte Shade(byte v, float f) => f >= 1f ? v : (byte)Math.Clamp((int)(v * f + 0.5f), 0, 255);
+
+        /// <summary>The GPU shade the console applies to a normal menu item and to a disabled one.
+        ///
+        /// ⚠ 0x80 IS 1.0 ON THIS HARDWARE, NOT A HALF. A PSX primitive's colour is a multiplier where
+        /// 128 means "leave the texture alone", so the measured 0x808080 on every menu item is FULL
+        /// brightness and reading it as 50% would dim the whole menu. The disabled row's 0x202020 is
+        /// 0x20/0x80 = a quarter.</summary>
+        public const float NormalShade = 1f, DisabledShade = 0x20 / (float)0x80;
 
         /// <summary>Width of a string in the menu font, for centring.</summary>
         public static int MeasureText(Prepared p, string text)
@@ -160,7 +171,8 @@ namespace TPW.Data
         ///
         /// Characters with no glyph advance as a space rather than being dropped, so a missing
         /// punctuation mark shows as a gap instead of silently closing up the text.</summary>
-        public static int DrawText(Prepared p, byte[] dst, int x, int y, string text, bool additive = false)
+        public static int DrawText(Prepared p, byte[] dst, int x, int y, string text, bool additive = false,
+                                   float shade = NormalShade)
         {
             if (p == null) return x;
             foreach (char c in text)
@@ -215,7 +227,7 @@ namespace TPW.Data
                                 if (dx < 0 || dx >= W) continue;
                                 int su = rot ? sp.U + gy : sp.U + gx;
                                 int sv = rot ? sp.V + (sp.W - 1 - gx) : sp.V + gy;
-                                Blend(dst, (dy * W + dx) * 4, src, ((ay + sv) * src.Width + ax + su) * 4, additive);
+                                Blend(dst, (dy * W + dx) * 4, src, ((ay + sv) * src.Width + ax + su) * 4, additive, shade);
                             }
                         }
                     }

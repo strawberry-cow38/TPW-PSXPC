@@ -130,6 +130,22 @@ namespace TPW.Sim.Tests
                 Assert.Equal(MainMenu.OptionKind.Unmeasured, MainMenu.OptionKinds[i]);
         }
 
+        /// <summary>Only "Load Game" is dimmed, and only on the root page. Asserted because "dim the
+        /// thing that does nothing" is a tempting generalisation -- "Main Game" also did nothing when
+        /// measured, and it is NOT drawn dim, so doing-nothing and being-disabled are different states
+        /// on this menu.</summary>
+        [Fact]
+        public void OnlyLoadGameIsDrawnDisabled()
+        {
+            var m = new MainMenu();
+            Assert.False(m.IsDisabled(0));                 // Play Game
+            Assert.False(m.IsDisabled(1));                 // Options
+            Assert.True(m.IsDisabled(2));                  // Load Game
+            m.Confirm();                                   // into Play Game
+            for (int i = 0; i < m.Items.Length; i++)
+                Assert.False(m.IsDisabled(i));             // Main Game does nothing but is NOT dim
+        }
+
         /// <summary>⚠ There is no back button: triangle and circle were both pressed on both submenus
         /// and both were byte-identical to no press. Adding one is a deliberate departure, not a fix.</summary>
         [Fact]

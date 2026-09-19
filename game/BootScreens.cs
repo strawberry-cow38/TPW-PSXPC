@@ -264,7 +264,8 @@ namespace TPWGodot
                 // yellow glow erased it -- white on yellow. The console draws the items opaque and
                 // lets the glow behind them mark the selection; additive is the GLOW's blend, not the
                 // text's, and I had borrowed it for the wrong thing.
-                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label);   // y is the baseline
+                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label,   // y is the baseline
+                    shade: _menu.IsDisabled(i) ? MenuRenderer.DisabledShade : MenuRenderer.NormalShade);
                 y += RowStep;
             }
 

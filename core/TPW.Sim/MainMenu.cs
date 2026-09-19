@@ -123,6 +123,16 @@ namespace TPW.Sim
             }
         }
 
+        /// <summary>Whether a row is drawn as DISABLED (dimmed).
+        ///
+        /// ⚠ MEASURED, AND ONLY FOR THE ONE ROW IT WAS MEASURED ON. The console draws every menu item
+        /// shaded 0x808080 and "Load Game" at 0x202020 -- a quarter -- in the captured frame, which was
+        /// taken with NO MEMORY CARD SAVE PRESENT. So this records "Load Game is dim in that state",
+        /// not "Load Game is always dim". If a save is ever loadable, this is the thing that should
+        /// stop returning true, and that is a behaviour to measure rather than assume.</summary>
+        public bool IsDisabled(int index) =>
+            Page == MenuPage.Root && index < RootItems.Length && RootItems[index] == "Load Game";
+
         /// <summary>⚠ THERE IS NO BACK BUTTON, and this is the measurement that would be easiest to
         /// "fix" by accident. Triangle and circle were both pressed on both submenus and both were
         /// byte-identical to no press. A port that helpfully adds a back button has stopped matching the
