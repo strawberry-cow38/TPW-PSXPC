@@ -1448,6 +1448,21 @@ static class Program
                     //
                     // So the cause of the 58 is still unknown, and these two are spent. Do not re-run
                     // either expecting the number to fall.
+                    //
+                    // 3. LOOKED AT SIX OF THEM ON A GPU BOX (cow tools captured, 2026-09-19). The
+                    //    flagged set is not one phenomenon. Entry 75 sub 7 is a rigid lava slab that
+                    //    sweeps at the camera and is small and far again one frame later -- its two
+                    //    ends are nowhere near each other, so it is a ONE-SHOT, not a loop that fails
+                    //    to close, and this metric has no business scoring it. 397 sub 4 is the same
+                    //    shape of thing, a rocket translating and resetting, and shows no visible jump
+                    //    at all. So "ratio > 4" is measuring at least two different things, only some
+                    //    of which are faults. Separating one-way clips from looping ones is the next
+                    //    move, not hunting a single cause.
+                    //
+                    // ⚠ And mind the capture window: 389 sub 0 has a 601-unit cycle, which at the
+                    //    model browser's 30 units/s is 20.0s against a 16.7s capture. It never reaches
+                    //    its own wrap, so a "no jump detected" reading on that clip is a null from a
+                    //    window that excludes the event.
                     if (hdrDisagrees) jumpyCycleDiffers++;
                 }
             }
