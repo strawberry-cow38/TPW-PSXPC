@@ -61,6 +61,13 @@ namespace TPW.Data
         /// <summary>Flags bit 0: the terrain routine draws no ground here at all. On map #203 that is one patch
         /// of 63 grass tiles (x 5-20, z 48-68), drawn by something else.</summary>
         public bool NoGround => (Flags & 1) != 0;
+        /// <summary>Flags bit 1: nothing may be built here. The can-build tests (0x8004D718 and its siblings) refuse
+        /// a tile with it; on map #203 it marks the border rows and columns, the river banks and the entrance road.</summary>
+        public bool Unbuildable => (Flags & 2) != 0;
+        /// <summary>Flags bit 3: the entrance path the park starts with. The map loader (0x800541B8) lays path on
+        /// every tile that has it (12 on map #203, x 18-23, z 18-19). Bits 4 and 6 are not map data: the game sets
+        /// them at run time for occupancy and clears them in 0x800A4C70.</summary>
+        public bool EntrancePath => (Flags & 8) != 0;
 
         public TileType Type => (TileType)Raw0;
 
@@ -110,6 +117,11 @@ namespace TPW.Data
         /// u16 y, u16 z, u16 quarter turns`. The loader (0x800544E0) keeps the count at gp+0x12D8 and the records
         /// at gp+0x12DC, and loads the scenery pack only when the count is not zero.</summary>
         public List<SceneryPlacement> Scenery { get; private set; } = new();
+        /// <summary>After the build list: `u32 n; n × (u8 x, u8 z)`, the tiles guests arrive on (0x800540B8 puts a
+        /// guest at x·256 + 128, z·256 + 128). Every shipped map has two, beside the entrance road: (18, 5) and
+        /// (23, 5) on the jungle's, (17, 5) and (24, 5) on the rest. The loader keeps the count at gp+0x12E4 and the
+        /// pairs at gp+0x12E8. ✅ All eight maps end exactly after them: every byte of the format is accounted for.</summary>
+        public List<(int X, int Z)> SpawnTiles { get; private set; } = new();
 
         public MapTile this[int x, int y] => Tiles[y * Width + x];
 
@@ -144,11 +156,18 @@ namespace TPW.Data
             {
                 int count = BitConverter.ToInt32(d, p);
                 if (count < 0 || p + 4 + (long)count * 12 > d.Length) { error = $"build list of {count} runs past the end"; return false; }
-                for (int i = 0, r = p + 4; i < count; i++, r += 12)
+                int r = p + 4;
+                for (int i = 0; i < count; i++, r += 12)
                 {
                     uint w0 = BitConverter.ToUInt32(d, r);
                     m.Scenery.Add(new SceneryPlacement((int)(w0 & 0xFFFFFF), (byte)(w0 >> 24), BitConverter.ToUInt16(d, r + 4),
                         BitConverter.ToUInt16(d, r + 6), BitConverter.ToUInt16(d, r + 8), BitConverter.ToUInt16(d, r + 10)));
+                }
+                if (r + 4 <= d.Length)
+                {
+                    int spawns = BitConverter.ToInt32(d, r);
+                    if (spawns >= 0 && r + 4 + (long)spawns * 2 <= d.Length)
+                        for (int i = 0; i < spawns; i++) m.SpawnTiles.Add((d[r + 4 + i * 2], d[r + 5 + i * 2]));
                 }
             }
 
