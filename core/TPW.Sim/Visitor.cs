@@ -103,6 +103,11 @@ namespace TPW.Sim
                 Tiredness = rng.Next(50),
                 WalkSpeed = rng.Next(15) + 15,
                 ArrivedOnDay = nowTick,
+                // ⚠ ROLL ORDER HERE IS A GUESS. The report gives V+0x50 as `now + rand(300)` at
+                // spawn but not WHERE in the constructor it is drawn, and the position matters to
+                // anything trying to reproduce the original's RNG stream tick for tick. Placed last
+                // so it cannot disturb the fields whose order IS known.
+                EntertainerNotBefore = nowTick + rng.Next(300),
             };
         }
 
@@ -177,6 +182,11 @@ namespace TPW.Sim
             for (int i = _history.Length - 1; i > 0; i--) _history[i] = _history[i - 1];
             _history[0] = id;
         }
+
+        /// <summary>V+0x50: `now + rand(300)` at spawn. The needs update refuses to stop a guest for an
+        /// entertainer until the clock passes it, so a guest that has just walked in does not immediately
+        /// stand and watch a show. Its meaning beyond that gate is unknown.</summary>
+        public long EntertainerNotBefore { get; set; }
 
         /// <summary>V+0x28: whether the guest currently has something it is heading for.</summary>
         public bool HasTarget { get; set; }
