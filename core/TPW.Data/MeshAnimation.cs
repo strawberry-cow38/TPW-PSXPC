@@ -66,6 +66,19 @@ namespace TPW.Data
                 float qx, float qy, float qz, float qw)
         { Time = time; Duration = dur; Tx = tx; Ty = ty; Tz = tz; Qx = qx; Qy = qy; Qz = qz; Qw = qw; }
 
+        /// <summary>A keyframe from a bare 16-byte {vector, pad, quaternion} block, with the timing
+        /// supplied by the caller. The untimed types (1 and 7) store exactly this block and nothing
+        /// else -- their evaluator indexes the record array by the clock, so key k IS tick k, and
+        /// giving it Time=k, Duration=1 makes the shared <see cref="Sample"/> path reproduce that
+        /// indexing without a second code path.</summary>
+        public static AnimKey FromBlock(ReadOnlySpan<byte> d, short time, short dur)
+        {
+            const float S = 1f / 4096f;
+            static short H(ReadOnlySpan<byte> b, int i) => BitConverter.ToInt16(b.Slice(i * 2, 2));
+            return new AnimKey(time, dur, H(d, 0), H(d, 1), H(d, 2),
+                               H(d, 4) * S, H(d, 5) * S, H(d, 6) * S, H(d, 7) * S);
+        }
+
         /// <summary>Blend a toward b by w/4096. Translation is linear; rotation is a normalised linear
         /// blend, with b negated when the two quaternions point opposite ways so the blend takes the
         /// short way round -- without that, a pair more than 180 degrees apart sweeps the long arc.</summary>
@@ -211,18 +224,35 @@ namespace TPW.Data
     /// (4096,4096,4096) in the vector, which is exactly 1.0 and reads beautifully as a scale -- but
     /// across all 696 records that value appears on only 15.7%, and the commonest is
     /// (24945,-23673,24945) on over half. One sample told a tidy story the population does not support.
-    /// The quaternion is unit length on 100% of records, though a column-shuffled control also passes at
-    /// 72%, so that alone would not have been enough either; the code is what settles it.</summary>
+    ///
+    /// ⚠ AND THE CONTROL'S TOLERANCE WAS DOING THE DAMAGE. Scoring "is this quadruple unit length" at
+    /// +-41 of 4096, this block passed on 100% of real records and 73% of a column-shuffled control --
+    /// which reads as a decode that does not hold, and I said so. It is an artefact of the tolerance:
+    /// 191 of the 696 records carry a literal identity quaternion and most of the rest are near it, and
+    /// a loose band cannot tell a near-identity quadruple from a shuffle of near-identity columns.
+    /// Tightened to +-1 -- where a genuine normalisation lands, since the file normalises to exactly
+    /// 4096 -- the real records still score 100% and the shuffle drops to 27%. Every first block scores
+    /// 100% against 4-6%. So the block IS a quaternion, and the lesson is that a control with a band
+    /// wide enough to admit the degenerate case is not a control.</summary>
     public readonly struct AnimPairB
     {
         public readonly short Vx, Vy, Vz;
+
+        /// <summary>The 4th slot, which in the FIRST block of every type is a zero pad -- 20,350
+        /// records, no exceptions -- and in this second block is not.
+        ///
+        /// ⚠ THIS SHIPPED DOCUMENTED AS "the pad, zero as in every other 8-byte vector on the disc".
+        /// It is zero on 689 of 696 type-0 records, so every sample I looked at agreed with that, but
+        /// the other 7 hold 30707 and all 108 type-1 records hold 30706 -- 0x77F3 and 0x77F2, two
+        /// consecutive values, which is the shape of an id or a handle rather than padding. Kept
+        /// rather than dropped, because a field discarded as padding cannot later be found to matter.</summary>
+        public readonly short Slot3;
         public readonly float Qx, Qy, Qz, Qw;
         public AnimPairB(ReadOnlySpan<byte> d)
         {
             const float S = 1f / 4096f;
             static short H(ReadOnlySpan<byte> b, int i) => BitConverter.ToInt16(b.Slice(i * 2, 2));
-            Vx = H(d, 0); Vy = H(d, 1); Vz = H(d, 2);
-            // H(d,3) is the pad, zero as in every other 8-byte vector on the disc.
+            Vx = H(d, 0); Vy = H(d, 1); Vz = H(d, 2); Slot3 = H(d, 3);
             Qx = H(d, 4) * S; Qy = H(d, 5) * S; Qz = H(d, 6) * S; Qw = H(d, 7) * S;
         }
         public float QuatLength() => MathF.Sqrt(Qx * Qx + Qy * Qy + Qz * Qz + Qw * Qw);
@@ -254,13 +284,23 @@ namespace TPW.Data
     }
 
     /// <summary>
-    /// One animation track. Two of the eight types are decoded:
+    /// One animation track. All nine types are now decoded, and they form one small family rather
+    /// than nine unrelated formats. The unit of the format is a 16-byte {vector, pad, unit quaternion}
+    /// BLOCK; a type is then just how many blocks it carries and whether a 4-byte {time, duration}
+    /// header sits in front:
     ///
-    ///   type 8 — 2,295 tracks, always zero keyframes: a bone REST POSE, 3x3 GTE matrix.
-    ///   type 6 — 1,091 tracks, 13,425 keyframes: time + translation + unit quaternion.
+    ///              | 1 block                  | 2 blocks
+    ///     timed    | type 6  (20B, 1,091 trk) | type 0  (36B, 48 trk)
+    ///     untimed  | type 7  (16B, 35 trk)    | type 1  (32B, 1 trk)
     ///
-    /// The other six (836 tracks) are sized correctly from the game's jump table but their
-    /// contents are not decoded; they arrive as <see cref="Raw"/> rather than being dropped.
+    /// with the position types the same idea over an 8-byte {x,y,z,pad} payload -- timed 3 and 5,
+    /// untimed 2 and 4 -- and type 8 the odd one out: a bone REST POSE as a 3x3 GTE matrix, 2,295
+    /// tracks and always zero keyframes.
+    ///
+    /// ⚠ THE TABLE ABOVE IS A SHAPE, NOT A MEANING. It says where the bytes are, and for the first
+    /// block of each type that reading is earned (see <see cref="AnimPairB"/> for the test). What the
+    /// SECOND block is FOR is still unknown, and type 1's second block cannot be tested at all: the
+    /// disc holds one type-1 track, and in it that block is near-constant.
     /// </summary>
     public sealed class AnimTrack
     {
@@ -326,7 +366,7 @@ namespace TPW.Data
         /// An untimed type is one sample per tick: the evaluator indexes the record array by the clock
         /// directly, so there is nothing to interpolate and nothing to look up.</summary>
         public bool IsTimed => Type is 0 or 3 or 5 or 6;
-        public bool IsDecoded => Type is 0 or 2 or 3 or 4 or 5 or 6 or 8;
+        public bool IsDecoded => Type is 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8;
 
         /// <summary>The game's own blend weight for time <paramref name="t"/>: 0..4096 across the key
         /// that contains it. Straight from 0x8002da8c, integer division included, so it matches the
@@ -376,7 +416,10 @@ namespace TPW.Data
     {
         /// <summary>Per-track size = Stride*count + Header, from the jump table at 0x800DDD78.
         /// ⚠ Types 1 and 8 share a SIZE but not a FORMAT: the archive's single type-1 track has
-        /// non-orthonormal records. A shared row in a size table is not a shared layout.</summary>
+        /// non-orthonormal records -- it is two 16-byte blocks, where type 8 is a 3x3 matrix.
+        /// A shared row in a size table is not a shared layout. (Types 2/4 and 3/5 are the same
+        /// trap again, and there the shared size hides a different TARGET rather than a different
+        /// layout -- see <see cref="AnimTrack.Target"/>.)</summary>
         static readonly (int Stride, int Header)[] Sizes =
         {
             (36, 0x2C), (32, 0x28), (8, 0x10), (12, 0x14),
@@ -473,6 +516,29 @@ namespace TPW.Data
                         int o = p + hdr + k * stride;
                         keys[k] = new AnimKey(d.Slice(o, 20));
                         pb[k] = new AnimPairB(d.Slice(o + 20, 16));
+                    }
+                    tr.Keys = keys;
+                    tr.PairB = pb;
+                }
+                else if (type == 7)
+                {
+                    // Untimed, one 16-byte {vector, pad, quaternion} block per tick -- a type-6
+                    // keyframe with the 4-byte timing header removed.
+                    var keys = new AnimKey[count];
+                    for (int k = 0; k < count; k++)
+                        keys[k] = AnimKey.FromBlock(d.Slice(p + hdr + k * stride, 16), (short)k, 1);
+                    tr.Keys = keys;
+                }
+                else if (type == 1)
+                {
+                    // Untimed, TWO blocks per tick: type 0 is to type 6 as type 1 is to type 7.
+                    var keys = new AnimKey[count];
+                    var pb = new AnimPairB[count];
+                    for (int k = 0; k < count; k++)
+                    {
+                        int o = p + hdr + k * stride;
+                        keys[k] = AnimKey.FromBlock(d.Slice(o, 16), (short)k, 1);
+                        pb[k] = new AnimPairB(d.Slice(o + 16, 16));
                     }
                     tr.Keys = keys;
                     tr.PairB = pb;

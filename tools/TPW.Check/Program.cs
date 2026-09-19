@@ -173,6 +173,7 @@ static class Program
         int skels = 0, wellFormed = 0, maxDepth = 0, bothEncodings = 0, agree = 0, boneUnit = 0, bonesTot = 0;
         int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
         int spans = 0, spansMeet = 0, t0keys = 0, t0a = 0, t0b = 0, t0tracks = 0;
+        int blkTot = 0, blkTight = 0, untimedTracks = 0, untimedKeys = 0;
         int posTracks = 0, posKeys = 0, posSpans = 0, posMeet = 0, empty = 0;
         int posable = 0, moved = 0; long movedVerts = 0;
         int wildMeshes = 0, originMeshes = 0, unplacedMeshes = 0; long wildVerts = 0, originVerts = 0, unplacedVerts = 0;
@@ -340,6 +341,22 @@ static class Program
                 }
                 foreach (var t in mesh.Tracks)
                 {
+                    // ⭐ THE TIGHT ONE. Every 16-byte block on the disc, types 0/1/6/7, first and
+                    // second. The file normalises to EXACTLY 4096, so the real invariant is +-1 of
+                    // 4096, not the +-123 that a 0.03 tolerance allows. That width is not pedantry:
+                    // at +-41 a column-shuffled control PASSES this test on 73% of type-0 second
+                    // blocks, because most of them are near-identity and a loose band cannot tell a
+                    // near-identity quadruple from a shuffle of near-identity columns. At +-1 the
+                    // shuffle drops to 27% and the first blocks to 4-6%, while the real records stay
+                    // at 100%. A check whose band admits the degenerate case is not a check.
+                    const float Tight = 1.5f / 4096f;
+                    if (t.Type is 0 or 1 or 6 or 7)
+                    {
+                        for (int k = 0; k < t.Keys.Length; k++)
+                        { blkTot++; if (Math.Abs(t.Keys[k].QuatLength() - 1f) <= Tight) blkTight++; }
+                        for (int k = 0; k < t.PairB.Length; k++)
+                        { blkTot++; if (Math.Abs(t.PairB[k].QuatLength() - 1f) <= Tight) blkTight++; }
+                    }
                     if (t.Type == 0 && t.PairB.Length > 0)
                     {
                         // Type 0 carries TWO quaternions per key; both must be unit length.
@@ -372,6 +389,13 @@ static class Program
                         if (up) monotonic++;
                     }
                     else if (t.Type == 0 && t.Keys.Length > 0) { t0tracks++; }
+                    // Types 1 and 7, the untimed bone tracks. ⚠ NOT checked for spans meeting, and
+                    // that omission is the point: their Time and Duration are SYNTHESISED by the
+                    // parser (k and 1), so "spans meet" would be a property of my own arithmetic and
+                    // would score 100% no matter what the file said. A check on a field the checker
+                    // wrote is not a check on the file.
+                    else if (t.Type is 1 or 7 && t.Keys.Length > 0)
+                    { untimedTracks++; untimedKeys += t.Keys.Length; }
                     else if (t.Positions.Length > 0)
                     {
                         posTracks++; posKeys += t.Positions.Length;
@@ -397,6 +421,8 @@ static class Program
         Console.WriteLine($"type 8 rest poses  : {rests}, orthonormal {orthonormal} ({pc(orthonormal, rests)})");
         Console.WriteLine($"type 6 keyframes   : {keys}, unit quaternion {unit} ({pc(unit, keys)})");
         Console.WriteLine($"type 0 tracks      : {t0tracks}, {t0keys} keyframes; first quaternion unit {t0a} ({pc(t0a, t0keys)}), second unit {t0b} ({pc(t0b, t0keys)})");
+        Console.WriteLine($"untimed bone tracks: {untimedTracks} (types 1/7), {untimedKeys} samples, one per tick -- no timing to verify");
+        Console.WriteLine($"quaternion blocks  : {blkTot} across types 0/1/6/7, normalised to 4096 within +-1.5 on {blkTight} ({pc(blkTight, blkTot)})");
         Console.WriteLine($"keyframe spans     : {spans} consecutive pairs, key.Time+key.Duration == next.Time on {spansMeet} ({pc(spansMeet, spans)})");
         Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
         Console.WriteLine($"skeletons          : {skels}, single-rooted and parent-before-child {wellFormed} ({pc(wellFormed, skels)}), deepest chain {maxDepth}");
@@ -416,11 +442,17 @@ static class Program
         // Exit code is the number of failed checks, so this is usable as a gate. ⚠ Two earlier edits to
         // this line silently did not match and the new bounds were never counted -- the report showed the
         // fault while the exit code stayed 0. Anything added above belongs here too.
-        return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
+        //
+        // ⚠ AND THE COUNT IS CLAMPED, because a process exit code is one byte. A mutation test that
+        // broke 6,195 records exited 51 -- 6195 mod 256 -- which is still non-zero and still failed the
+        // gate, but 6,144 of them would have exited 0 and PASSED. A gate whose failure value can wrap
+        // onto its success value is not a gate; the report above carries the real number.
+        int failures = animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
              + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree)
              + (binds - tiled) + sumBad + (bindRecs - destOk) + (spans - spansMeet)
              + (posSpans - posMeet) + wildMeshes + originMeshes + unplacedMeshes
-             + (t0keys - t0a) + (t0keys - t0b);
+             + (t0keys - t0a) + (t0keys - t0b) + (blkTot - blkTight);
+        return failures == 0 ? 0 : Math.Clamp(failures, 1, 255);
     }
 
     static GazArchive Archive(DiscReader disc)

@@ -101,23 +101,85 @@ namespace TPW.Data.Tests
             Assert.Equal(200, t.SampleNearest(999).Tx);   // after the last
         }
 
-        // ⚠ Types 1 and 8 share a SIZE row in the game's jump table but not a format: the archive's
-        // single type-1 track has non-orthonormal records. A reader that treats them alike will read
-        // nine arbitrary s16 as a rotation and produce a silently wrong pose.
-        // REJECTS merging them: a type-1 track must not come back claiming a decoded rest pose.
+        // ⭐ Type 7 is a type-6 keyframe with the 4-byte {time, duration} header removed: one bare
+        // 16-byte {vector, pad, quaternion} block per tick, the evaluator indexing by the clock.
+        //
+        // The vector is deliberately NOT symmetric and the quaternion is deliberately NOT the
+        // identity, because both of those are invariant under the mistake this test exists to catch.
+        // A half-word slip reads the pad into the quaternion and the quaternion's w out of it, which
+        // an identity block (0,0,0,4096) would survive looking plausible and a symmetric vector would
+        // hide entirely. Here a slip in either direction breaks the norm and the translation at once.
+        [Fact]
+        public void ATypeSevenTrackIsAnUntimedBoneBlock()
+        {
+            var b = new List<byte>();
+            Header(b, 7, bone: 4, count: 2);
+            b.AddRange(new byte[16]);            // rest of the 0x18 track header
+            foreach (var v in new[] { -5, 6, 7, 0, 2048, 2048, 2048, 2048 }) S16(b, v);
+            foreach (var v in new[] { 11, 12, 13, 0, 0, 0, -2048, 3547 }) S16(b, v);
+
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tracks, out _, out _, out int end, out string err), err);
+            var t = Assert.Single(tracks);
+            Assert.Equal(7, t.Type);
+            Assert.Equal(2, t.Keys.Length);
+            Assert.False(t.IsTimed);
+
+            Assert.Equal(-5, t.Keys[0].Tx);
+            Assert.Equal(6, t.Keys[0].Ty);
+            Assert.Equal(7, t.Keys[0].Tz);
+            Assert.Equal(0.5f, t.Keys[0].Qx, 4);
+            Assert.Equal(11, t.Keys[1].Tx);
+            Assert.Equal(-0.5f, t.Keys[1].Qz, 4);
+
+            // The file normalises to exactly 4096, so this is the tight bound, not a friendly one.
+            foreach (var k in t.Keys) Assert.Equal(1f, k.QuatLength(), 3);
+
+            // Timing is SYNTHESISED, one sample per tick -- key k is tick k. Asserted because the
+            // shared Sample() path depends on it and nothing in the file states it.
+            Assert.Equal(0, t.Keys[0].Time);
+            Assert.Equal(1, t.Keys[1].Time);
+            Assert.Equal(11, t.Sample(1).Tx);
+            Assert.Equal(16 * 2 + 0x18, end);
+        }
+
+        // ⚠ Types 1 and 8 share a SIZE row in the game's jump table but not a format: type 1 is two
+        // 16-byte {vector, pad, quaternion} blocks where type 8 is a 3x3 rotation matrix. A reader
+        // that treats them alike will read nine arbitrary s16 as a rotation and produce a silently
+        // wrong pose.
+        //
+        // ⚠ THIS TEST USED TO ASSERT `IsDecoded == false`, which passed for the whole time type 1 was
+        // undecoded and stopped meaning anything the moment it was decoded -- it would have failed on
+        // a CORRECT change, which is the signature of a test that encodes the current state instead of
+        // the requirement. The requirement is that the two types are read DIFFERENTLY, so that is what
+        // is asserted now: the same 32 bytes must yield a keyframe and no rest pose.
         [Fact]
         public void TypeOneIsNotTreatedAsTypeEightDespiteTheSharedSize()
         {
             Assert.Equal(MeshAnimation.TrackSize(8, 3), MeshAnimation.TrackSize(1, 3));
 
             var b = new List<byte>();
-            Header(b, 1, bone: 0, count: 0);
-            b.AddRange(new byte[32]);
+            Header(b, 1, bone: 0, count: 1);
+            b.AddRange(new byte[32]);            // rest of the 0x28 track header
+            // Block A: vector (10,20,30), zero pad, identity quaternion. Block B: zeroed.
+            S16(b, 10); S16(b, 20); S16(b, 30); S16(b, 0);
+            S16(b, 0); S16(b, 0); S16(b, 0); S16(b, 4096);
+            b.AddRange(new byte[16]);
 
             Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _, out _));
-            Assert.Equal(1, tracks[0].Type);
-            Assert.False(tracks[0].IsDecoded);
-            Assert.Equal(32 + 8, tracks[0].Raw.Length);     // handed back whole, not dropped
+            var t = tracks[0];
+            Assert.Equal(1, t.Type);
+
+            // Read as type 1: a keyframe at the type-1 offsets.
+            Assert.Single(t.Keys);
+            Assert.Equal(10, t.Keys[0].Tx);
+            Assert.Equal(1f, t.Keys[0].Qw, 3);
+            Assert.Single(t.PairB);
+
+            // NOT read as type 8: the rest pose is never populated. Were these bytes run through the
+            // type-8 reader, M00 would be the 10 above.
+            Assert.Equal(0, t.Rest.M00);
+            Assert.False(t.Rest.IsOrthonormal());
         }
 
         // Sizes come from the jump table at 0x800DDD78. Checked by hand so a typo in the table fails here
