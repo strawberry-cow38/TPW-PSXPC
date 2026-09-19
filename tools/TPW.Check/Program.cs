@@ -1904,6 +1904,30 @@ static class Program
 
         using (disc)
         {
+            // --model-bounds E: sub-model 0 of entry E, its vertices' extent at rest and posed at time 0, and its
+            // definition record -- where a model's origin sits relative to its footprint.
+            int mbAt = Array.IndexOf(args, "--model-bounds");
+            if (mbAt >= 0 && mbAt + 1 < args.Length)
+            {
+                var ag = Archive(disc);
+                int me = int.Parse(args[mbAt + 1]);
+                var bytes = ag.Read(ag.Entries[me]);
+                if (!MeshContainer.TryParse(bytes, out var mc, out string mce) || !mc.TryParseMesh(bytes, 0, out var mm, out mce))
+                { Console.WriteLine($"entry {me}: {mce}"); return 1; }
+                void Report(string what, Func<int, (int X, int Y, int Z)> v, int n)
+                {
+                    int x0 = int.MaxValue, x1 = int.MinValue, y0 = int.MaxValue, y1 = int.MinValue, z0 = int.MaxValue, z1 = int.MinValue;
+                    for (int i = 0; i < n; i++) { var (x, y, z) = v(i); x0 = Math.Min(x0, x); x1 = Math.Max(x1, x); y0 = Math.Min(y0, y); y1 = Math.Max(y1, y); z0 = Math.Min(z0, z); z1 = Math.Max(z1, z); }
+                    Console.WriteLine($"  {what}: x {x0}..{x1}  y {y0}..{y1}  z {z0}..{z1}");
+                }
+                Console.WriteLine($"entry {me}: {mm.VertexCount} vertices");
+                Report("rest", i => ((int)mm.Vertices[i * 3], (int)mm.Vertices[i * 3 + 1], (int)mm.Vertices[i * 3 + 2]), mm.VertexCount);
+                if (mm.Tracks != null) { var pv = MeshPose.Evaluate(mm, 0).Vertices; Report("posed t=0", i => pv[i], pv.Length); }
+                var def = AttractionDefinition.Read(me, bytes);
+                if (def != null) Console.WriteLine($"  record: type {def.Type} footprint {def.Width}x{def.Depth} entrance {def.Entrance} exit {def.Exit} facing {def.EntranceFacing}/{def.ExitFacing}");
+                return 0;
+            }
+
             // --sfx GROUP [DIR]: a sound-effect group (SoundGroup: the pair of entries at 0x800F91D0), every sound's
             // record, length and rate, and with a directory each one as a WAV to listen to.
             int sfxAt = Array.IndexOf(args, "--sfx");

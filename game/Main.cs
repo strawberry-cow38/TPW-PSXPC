@@ -54,6 +54,8 @@ namespace TPWGodot
         TextureSheet _commonSheet;
         /// <summary>The build tools' sound-effect group (SoundGroup 7), for the park view's path tool.</summary>
         SoundGroup _toolSounds;
+        /// <summary>Each world's attractions (AttractionCatalog) with their English names, for the park view's picker.</summary>
+        readonly System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<(AttractionDefinition, string)>> _attractionsByWorld = new();
         /// <summary>The game's executable (TPW.BIN), for the data tables the port reads out of it (particle templates).</summary>
         byte[] _exe;
         /// <summary>From <c>--park-open</c>: open the park as soon as it shows (captures of the gates opening).</summary>
@@ -66,6 +68,9 @@ namespace TPWGodot
         /// <summary>From <c>--park-lay=x0,z0,x1,z1;...</c>: runs of path laid as the path tool would, and from
         /// <c>--park-pathcursor=x,z[,sx,sz]</c> its cursor pinned there. For captures of path building.</summary>
         string _autoLay, _autoPathCursor;
+        /// <summary>From <c>--park-place=entry,x,z,rot;...</c>: attractions placed at load (footprint corner, quarter
+        /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
+        string _autoPlace, _autoGhost;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -466,6 +471,8 @@ namespace TPWGodot
                 else if (arg == "--park-buildable") _autoBuildable = true;
                 else if (arg == "--park-gamecam") _autoGameCam = true;
                 else if (arg.StartsWith("--park-lay=")) _autoLay = arg.Substring("--park-lay=".Length);
+                else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
+                else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
@@ -534,6 +541,21 @@ namespace TPWGodot
                             _commonSheet = common;
                         // The build tools' sounds: group 7 of the game's effect groups (entries 320/321).
                         _toolSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 7);
+                        // Each world's attractions for the park view's picker, named from the English table.
+                        StringTable english = null;
+                        int enEntry = StringTable.EntryByLanguage[0];
+                        if (enEntry < gz.Entries.Count && StringTable.TryParse(gz.Read(gz.Entries[enEntry]), enEntry, out var en, out _)) english = en;
+                        for (int w = 0; w < 4; w++)
+                        {
+                            var list = new System.Collections.Generic.List<(AttractionDefinition, string)>();
+                            foreach (int ae in AttractionCatalog.ForWorld(w))
+                            {
+                                if (ae >= gz.Entries.Count) continue;
+                                var rec = AttractionDefinition.Read(ae, gz.Read(gz.Entries[ae]));
+                                if (rec != null) list.Add((rec, english?[rec.NameId] ?? $"entry {ae}"));
+                            }
+                            _attractionsByWorld[w] = list;
+                        }
                         if (MenuLayout.Sheet < gz.Entries.Count &&
                             TextureSheet.TryParse(gz.Read(gz.Entries[MenuLayout.Sheet]), out var ms, out _))
                             _menuSheet = ms;
@@ -685,6 +707,17 @@ namespace TPWGodot
                             var v = System.Array.ConvertAll(run.Split(','), int.Parse);
                             if (v.Length == 4) GD.Print($"[tpw] --park-lay {run}: {_park.LayRun(v[0], v[1], v[2], v[3])} tiles took path");
                         }
+                    if (_autoPlace != null)
+                        foreach (var pl in _autoPlace.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
+                            if (v.Length == 4) GD.Print($"[tpw] --park-place {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
+                        }
+                    if (_autoGhost != null)
+                    {
+                        var v = System.Array.ConvertAll(_autoGhost.Split(','), int.Parse);
+                        if (v.Length == 4) _park.PinGhost(v[0], v[1], v[2], v[3]);
+                    }
                     if (_autoPathCursor != null)
                     {
                         var v = System.Array.ConvertAll(_autoPathCursor.Split(','), int.Parse);
@@ -783,6 +816,8 @@ namespace TPWGodot
                 SceneryPack gateModels = null;
                 var gateInfo = world != null ? ParkGate.ForWorld(world.Index) : null;
                 if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
+                _park.SetAttractions(world != null && _attractionsByWorld.TryGetValue(world.Index, out var al) ? al : null,
+                                     ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
                 _park.SetToolSounds(_toolSounds);
                 if (_autoOpen) _park.ParkOpen = true;

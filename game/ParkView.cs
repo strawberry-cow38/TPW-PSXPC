@@ -32,6 +32,18 @@ namespace TPWGodot
         /// kept to rebuild the ground after laying.</summary>
         PathTool _paths;
         bool _pathMode;
+        /// <summary>Attraction placement (Tab opens the picker): the world's attractions with their names, where their
+        /// models come from, and the one being placed, turned by , . or R. Placed ones stay as model instances.</summary>
+        List<(AttractionDefinition Rec, string Name)> _attractions = new();
+        Func<int, TPW.Data.Mesh> _attractionMesh;
+        List<(GazEntry Entry, TextureSheet Sheet)> _modelSheets;
+        readonly Dictionary<int, ArrayMesh> _attractionMeshes = new();
+        int _placing = -1, _placeRot;
+        MeshInstance3D _ghostModel, _ghostMarks;
+        readonly List<MeshInstance3D> _placed = new();
+        CanvasLayer _pickerLayer;
+        PanelContainer _picker;
+        VBoxContainer _pickerList;
         /// <summary>The build tools' sound group (SoundGroup 7) and a player for it: the path tool's own sounds.</summary>
         SoundGroup _toolSounds;
         /// <summary>A few voices, so two sounds the game starts together (lay, then connected) both play, as the
@@ -106,6 +118,19 @@ namespace TPWGodot
             _cursorMesh = new MeshInstance3D();
             AddChild(_cursorMesh);
             for (int i = 0; i < _sfx.Length; i++) { _sfx[i] = new AudioStreamPlayer(); AddChild(_sfx[i]); }
+            _ghostModel = new MeshInstance3D();
+            AddChild(_ghostModel);
+            _ghostMarks = new MeshInstance3D();
+            AddChild(_ghostMarks);
+            _pickerLayer = new CanvasLayer { Layer = 5 };
+            AddChild(_pickerLayer);
+            _picker = new PanelContainer { Visible = false, AnchorLeft = 1, AnchorRight = 1, AnchorBottom = 1,
+                                           OffsetLeft = -300, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8 };
+            _pickerLayer.AddChild(_picker);
+            var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
+            _picker.AddChild(scroll);
+            _pickerList = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+            scroll.AddChild(_pickerList);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
             _flags = new MeshInstance3D();
@@ -149,6 +174,27 @@ namespace TPWGodot
             _ => new Color(1, 0, 1),
         };
 
+        /// <summary>The world's attractions for the picker, their models and the sheets that texture them. Call before
+        /// <see cref="Load"/>, which puts their ground pads' textures in the park atlas.</summary>
+        public void SetAttractions(List<(AttractionDefinition Rec, string Name)> list, Func<int, TPW.Data.Mesh> meshFor,
+                                   List<(GazEntry Entry, TextureSheet Sheet)> sheets)
+        {
+            _attractions = list ?? new();
+            _attractionMesh = meshFor;
+            _modelSheets = sheets;
+            _attractionMeshes.Clear();
+            foreach (var c in _pickerList.GetChildren()) c.QueueFree();
+            for (int i = 0; i < _attractions.Count; i++)
+            {
+                int k = i;
+                var (rec, name) = _attractions[i];
+                string kind = rec.Type switch { 3 => "ride", 4 => "shop", 5 => "sideshow", 2 => "feature", 1 => "coaster", 6 => "track ride", 7 => "tour ride", _ => "?" };
+                var b = new Button { Text = $"{name}  ({kind}, {rec.Width}x{rec.Depth}, £{rec.Price:n0})", Alignment = HorizontalAlignment.Left };
+                b.Pressed += () => StartPlacing(k);
+                _pickerList.AddChild(b);
+            }
+        }
+
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
         /// <param name="scenery">The world's scenery pack, or null for bare ground.</param>
         /// <param name="common">The common sheet (#416), for the entrance flags; null leaves them out.</param>
@@ -164,6 +210,9 @@ namespace TPWGodot
             _fx = new ParticleSystem();
             _openingFx.Clear();
             _pathMode = false; _runStart = null; _cursorTile = null; _cursorMesh.Mesh = null; _paths = null; _cursorPinned = false;
+            StopPlacing();
+            foreach (var m in _placed) m.QueueFree();
+            _placed.Clear();
             _fxMesh.Mesh = null;
             ParkOpen = false;
             _flagMat = null;
@@ -188,6 +237,10 @@ namespace TPWGodot
                     foreach (var pl in map.Scenery)
                         if (pl.Model < scenery.Models.Count)
                             foreach (var t in scenery.Models[pl.Model].Textures) uses.Add((t.TPage, t.Clut));
+                // Every attraction's ground pad, so a ride placed later has its paving in the atlas.
+                foreach (var (rec, _) in _attractions)
+                    foreach (var (ps, _) in rec.Pad)
+                        if (ps >= 0 && ps < ground.Sprites.Count) uses.Add((ground.Sprites[ps].TPage, ground.Sprites[ps].Clut));
                 // Every path piece the tool can lay, so a path laid later has its texture in the atlas.
                 _paths = exe != null && world != null ? PathTool.Create(exe, AssetSelfTest.GameExecutableBase, world.Index) : null;
                 if (_paths != null)
@@ -237,7 +290,7 @@ namespace TPWGodot
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
                         "\n" + buildCounts +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, left-click the ground to lay path";
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, left-click the ground to lay path, Tab to place attractions";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -657,7 +710,8 @@ namespace TPWGodot
             if (_info != null && _map != null)
                 _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
-                           + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "");
+                           + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "")
+                           + (_placing >= 0 ? $"\nPLACING {_attractions[_placing].Name}: , . or R to turn, left button to place, right button to stop" : "");
         }
 
         /// <summary>The tile under the mouse: march the ray from the camera through the pointer until it drops below
@@ -731,6 +785,178 @@ namespace TPWGodot
             return mesh;
         }
         readonly Dictionary<int, ImageTexture> _markerTex = new();
+
+        /// <summary>Start placing attraction k of the picker's list: the path tool closes, the ghost follows the mouse.</summary>
+        void StartPlacing(int k)
+        {
+            if (k < 0 || k >= _attractions.Count) return;
+            _placing = k; _placeRot = 0;
+            _pathMode = false; _runStart = null; _cursorMesh.Mesh = null;
+            _picker.Visible = false;
+            _ghostModel.Mesh = AttractionMesh(_attractions[k].Rec.Entry);
+            _ghostModel.Visible = true;
+            RefreshInfo();
+        }
+
+        /// <summary>Place attraction <paramref name="entry"/> with its footprint's corner at (x, z), turned. For captures.</summary>
+        public bool PlaceAt(int entry, int x, int z, int rot)
+        {
+            int k = _attractions.FindIndex(a => a.Rec.Entry == entry);
+            if (k < 0) return false;
+            var rec = _attractions[k].Rec;
+            AttractionPlacement.Ghost(_map, rec, x, z, rot & 3, out bool ok);
+            if (!ok) return false;
+            AttractionPlacement.Place(_map, rec, x, z, rot & 3);
+            var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
+            AddChild(inst);
+            _placed.Add(inst);
+            RebuildGround();
+            return true;
+        }
+
+        /// <summary>Show attraction <paramref name="entry"/> as the placement ghost with its footprint's corner at
+        /// (x, z), turned, instead of following the mouse. For captures.</summary>
+        public void PinGhost(int entry, int x, int z, int rot)
+        {
+            int k = _attractions.FindIndex(a => a.Rec.Entry == entry);
+            if (k < 0) return;
+            StartPlacing(k);
+            _placeRot = rot & 3;
+            var (w, d) = _attractions[k].Rec.Footprint(_placeRot);
+            _cursorTile = (x + (w - 1) / 2, z + (d - 1) / 2);
+            _ghostPinned = true;
+        }
+        bool _ghostPinned;
+
+        void StopPlacing()
+        {
+            _ghostPinned = false;
+            _placing = -1;
+            if (_ghostModel != null) { _ghostModel.Mesh = null; _ghostModel.Visible = false; }
+            if (_ghostMarks != null) _ghostMarks.Mesh = null;
+        }
+
+        /// <summary>An attraction's model (sub-model 0 of its entry, posed at time 0), in tiles, z negated, and moved so
+        /// its footprint's centre is the origin. ⭐ THE MODELS ARE BUILT FROM THEIR FOOTPRINT'S CORNER: every vertex of
+        /// a w x d attraction lies in x 0..w·256, z 0..d·256 (Crazy Ape 57..968 by 60..965 on its 4x4; the Fries shop
+        /// within 512 on its 2x2), so turning one about its centre keeps it on its turned footprint.</summary>
+        ArrayMesh AttractionMesh(int entry)
+        {
+            if (_attractionMeshes.TryGetValue(entry, out var m)) return m;
+            var def = _attractions.Find(a => a.Rec.Entry == entry).Rec;
+            var mesh = _attractionMesh?.Invoke(entry);
+            var centre = def == null ? Vector3.Zero : new Vector3(def.Width * ParkTerrain.TileUnits / 2f, 0, -def.Depth * ParkTerrain.TileUnits / 2f);
+            // ⚠ POSED AT TIME 0, NOT THE FILE'S REST: an animated model's moving parts sit at (0, 0, 0) in the file and
+            // only get their places from the animation, so the rest pose scatters them (MeshPose).
+            (int X, int Y, int Z)[] posed = null;
+            if (mesh?.Tracks != null) { try { posed = MeshPose.Evaluate(mesh, 0).Vertices; } catch { posed = null; } }
+            m = mesh == null ? null : ModelMesh.Build(mesh, posed, _modelSheets, true, false, false, centre, 1f / ParkTerrain.TileUnits, out _);
+            _attractionMeshes[entry] = m;
+            return m;
+        }
+
+        /// <summary>The footprint's corner for the attraction under the mouse: the footprint centred on the cursor.</summary>
+        (int X, int Z)? PlacementCorner()
+        {
+            if (_placing < 0 || _cursorTile is not { } c) return null;
+            var (w, d) = _attractions[_placing].Rec.Footprint(_placeRot);
+            return (c.X - (w - 1) / 2, c.Z - (d - 1) / 2);
+        }
+
+        /// <summary>Where an attraction with its footprint's corner at (ox, oz) stands: the footprint's centre on the
+        /// ground, turned a quarter per rotation step (the game's y turn, negated with z).</summary>
+        Transform3D AttractionTransform(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var (w, d) = rec.Footprint(rot);
+            int cx = ox * ParkTerrain.TileUnits + w * ParkTerrain.TileUnits / 2, cz = oz * ParkTerrain.TileUnits + d * ParkTerrain.TileUnits / 2;
+            float y = ParkCamera.GroundHeight(_map, cx, cz) / (float)ParkTerrain.TileUnits;
+            var basis = new Basis(Vector3.Up, -rot * Mathf.Pi / 2);
+            return new Transform3D(basis, new Vector3(cx / (float)ParkTerrain.TileUnits, y, -cz / (float)ParkTerrain.TileUnits));
+        }
+
+        void UpdatePlacementGhost()
+        {
+            if (!_ghostPinned) _cursorTile = TileUnderMouse();
+            if (PlacementCorner() is not { } o) { _ghostMarks.Mesh = null; _ghostModel.Visible = false; return; }
+            var rec = _attractions[_placing].Rec;
+            var marks = AttractionPlacement.Ghost(_map, rec, o.X, o.Z, _placeRot, out _);
+            _ghostMarks.Mesh = MarkerMesh(marks);
+            _ghostModel.Visible = true;
+            _ghostModel.Transform = AttractionTransform(rec, o.X, o.Z, _placeRot);
+        }
+
+        void PlaceAttraction()
+        {
+            if (PlacementCorner() is not { } o) return;
+            var rec = _attractions[_placing].Rec;
+            AttractionPlacement.Ghost(_map, rec, o.X, o.Z, _placeRot, out bool ok);
+            if (!ok) { PlaySfx(ToolSound.Refused); return; }
+            AttractionPlacement.Place(_map, rec, o.X, o.Z, _placeRot);
+            var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
+            AddChild(inst);
+            _placed.Add(inst);
+            RebuildGround();
+            PlaySfx(ToolSound.Lay);
+        }
+
+        /// <summary>Ground markers from the common sheet, each on its tile, turned a quarter per step (0 north, 1 west,
+        /// 2 south, 3 east: the sprite's top edge on that side), drawn half and half as 0x800553B0 draws them.</summary>
+        ArrayMesh MarkerMesh(IEnumerable<AttractionPlacement.Marker> marks)
+        {
+            var mesh = new ArrayMesh();
+            if (_common == null) return mesh;
+            var byMarker = new Dictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
+            const int lift = 12;
+            var grey = new Color(0.5f, 0.5f, 0.5f);
+            var uvs = new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) };
+            foreach (var mk in marks)
+            {
+                int x = mk.X, z = mk.Z;
+                if (x < 0 || z < 0 || x >= _map.Width - 1 || z >= _map.Height - 1) continue;
+                if (!byMarker.TryGetValue(mk.Sprite, out var b)) byMarker[mk.Sprite] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
+                var c0 = At(x, z, _map[x, z].HeightUnits + lift);
+                var c1 = At(x + 1, z, _map[x + 1, z].HeightUnits + lift);
+                var c2 = At(x, z + 1, _map[x, z + 1].HeightUnits + lift);
+                var c3 = At(x + 1, z + 1, _map[x + 1, z + 1].HeightUnits + lift);
+                // The UV each corner takes for the turn: the sprite's top edge (v = 0) lies on the north, west, south
+                // or east side of the tile.
+                Vector2 u0, u1, u2, u3;
+                switch (mk.Turns & 3)
+                {
+                    case 1: u2 = uvs[0]; u0 = uvs[1]; u3 = uvs[2]; u1 = uvs[3]; break;
+                    case 2: u3 = uvs[0]; u2 = uvs[1]; u1 = uvs[2]; u0 = uvs[3]; break;
+                    case 3: u1 = uvs[0]; u3 = uvs[1]; u0 = uvs[2]; u2 = uvs[3]; break;
+                    default: u0 = uvs[0]; u1 = uvs[1]; u2 = uvs[2]; u3 = uvs[3]; break;
+                }
+                b.V.AddRange(new[] { c0, c1, c2, c2, c1, c3 });
+                b.UV.AddRange(new[] { u0, u1, u2, u2, u1, u3 });
+                for (int k = 0; k < 6; k++) b.C.Add(grey);
+            }
+            foreach (var (sprite, b) in byMarker)
+            {
+                if (!_markerTex.TryGetValue(sprite, out var tex))
+                {
+                    var img = sprite < _common.Sprites.Count ? _common.RenderSprite(sprite) : null;
+                    tex = img == null ? null : ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, img.Rgba));
+                    _markerTex[sprite] = tex;
+                }
+                if (tex == null) continue;
+                int mode = (_common.Sprites[sprite].TPage >> 5) & 3;
+                foreach (bool blended in new[] { false, true })
+                {
+                    var arrays = new Godot.Collections.Array();
+                    arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                    arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
+                    mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+                    var mat = new ShaderMaterial { Shader = PsxShading.SemiTransparentShader(mode, blended, false) };
+                    mat.SetShaderParameter("atlas", tex);
+                    mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, mat);
+                }
+            }
+            return mesh;
+        }
 
         void LayPath((int X, int Z) start, (int X, int Z) end)
         {
@@ -876,6 +1102,7 @@ namespace TPWGodot
                 if (!_cursorPinned) _cursorTile = TileUnderMouse();
                 _cursorMesh.Mesh = CursorMesh();
             }
+            if (_placing >= 0) UpdatePlacementGhost();
             float dt = (float)delta;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
@@ -908,7 +1135,7 @@ namespace TPWGodot
             }
             if (Input.IsKeyPressed(Key.Q)) { _yaw += dt * 1.5f; changed = true; }
             if (Input.IsKeyPressed(Key.E)) { _yaw -= dt * 1.5f; changed = true; }
-            if (Input.IsKeyPressed(Key.R)) { _pitch = Mathf.Clamp(_pitch - dt, -1.5f, -0.2f); changed = true; }
+            if (Input.IsKeyPressed(Key.R) && _placing < 0) { _pitch = Mathf.Clamp(_pitch - dt, -1.5f, -0.2f); changed = true; }
             if (Input.IsKeyPressed(Key.F)) { _pitch = Mathf.Clamp(_pitch + dt, -1.5f, -0.2f); changed = true; }
             if (Input.IsKeyPressed(Key.Equal) || Input.IsKeyPressed(Key.KpAdd)) { _distance = Mathf.Max(3, _distance - dt * 20); changed = true; }
             if (Input.IsKeyPressed(Key.Minus) || Input.IsKeyPressed(Key.KpSubtract)) { _distance = Mathf.Min(120, _distance + dt * 20); changed = true; }
@@ -920,6 +1147,20 @@ namespace TPWGodot
             if (!Visible || _map == null) return;
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
             { GameCamera = !GameCamera; return; }
+            // Attraction placement: Tab opens the picker; while placing, , and . turn it a quarter each way and R turns
+            // it on (master's keys), the left button places it and the right button puts it away.
+            if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Tab } && _attractions.Count > 0)
+            { _picker.Visible = !_picker.Visible; return; }
+            if (_placing >= 0)
+            {
+                if (e is InputEventKey { Pressed: true, Echo: false } key && key.Keycode is Key.Comma or Key.Period or Key.R)
+                {
+                    _placeRot = (_placeRot + (key.Keycode == Key.Comma ? 3 : 1)) & 3;
+                    return;
+                }
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true }) { PlaceAttraction(); return; }
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }) { StopPlacing(); RefreshInfo(); return; }
+            }
             // ⭐ THE PATH TOOL, master's way. A left click on a path or an unoccupied tile (buildable or not) opens the
             // tool -- and only opens it. With the tool open, one click fixes the ghost's start and the next lays the
             // run (no dragging, master's call). The right button cancels the ghost, or closes the tool when there is
