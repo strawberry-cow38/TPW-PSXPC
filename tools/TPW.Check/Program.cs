@@ -23,14 +23,10 @@ static class Program
     /// ⭐ THE TEST WITH TEETH. tinyclaw logged the same mapping off the live GPU. Twelve pages each landing
     /// on the right one of three has many ways to be wrong and one to be right, and the two methods share
     /// no code, no file and no assumption.</summary>
-    static void Mapping(DiscReader disc)
+    static void Mapping(GazArchive gaz)
     {
-        var f = disc.Find(AssetSelfTest.AssetArchive);
-        if (f == null) { Console.WriteLine("no archive"); return; }
-        if (!GazArchive.TryParse(disc.ReadFile(f), out var gaz, out string gerr))
-        { Console.WriteLine("archive: " + gerr); return; }
-
         var map = new SortedDictionary<string, SortedDictionary<string, int>>();
+        int parsed = 0;
         foreach (var e in gaz.Entries)
         {
             var bytes = gaz.Read(e);
@@ -38,8 +34,8 @@ static class Program
             if (!MeshContainer.TryParse(bytes, out var c, out _)) continue;
             for (int i = 0; i < c.SubCount; i++)
             {
-                if (c.IsCompressed(i)) continue;
                 if (!c.TryParseMesh(bytes, i, out var mesh, out _)) continue;
+                parsed++;
                 foreach (var face in mesh.Faces)
                 {
                     var (px, py) = face.TPageOrigin;
@@ -52,7 +48,7 @@ static class Program
                 }
             }
         }
-        Console.WriteLine("texture page -> palette-holder page (from the FILE, via 531 parsed meshes):");
+        Console.WriteLine($"texture page -> palette-holder page (from the FILE, via {parsed} parsed meshes):");
         foreach (var kv in map)
         {
             var parts = new List<string>();
@@ -61,14 +57,9 @@ static class Program
         }
     }
 
-    static void Meshes(DiscReader disc)
+    static int Meshes(GazArchive gaz)
     {
-        var f = disc.Find(AssetSelfTest.AssetArchive);
-        if (f == null) { Console.WriteLine("no archive"); return; }
-        if (!GazArchive.TryParse(disc.ReadFile(f), out var gaz, out string gerr))
-        { Console.WriteLine("archive: " + gerr); return; }
-
-        int containers = 0, subs = 0, compressed = 0, ok = 0, failed = 0;
+        int containers = 0, subs = 0, compressed = 0, expanded = 0, expandedParsed = 0, ok = 0, failed = 0;
         long faces = 0, verts = 0;
         var pages = new SortedDictionary<int, int>();
         string firstFail = "";
@@ -82,10 +73,19 @@ static class Program
             for (int i = 0; i < c.SubCount; i++)
             {
                 subs++;
-                if (c.IsCompressed(i)) { compressed++; continue; }
-                if (c.TryParseMesh(bytes, i, out var mesh, out string merr))
+                bool packed = c.IsCompressed(i);
+                if (packed) compressed++;
+                // ⭐ THE HARD ORACLE FOR THE LZSS PORT. A compressed stream must reach its terminator at
+                // exactly the size the container table declares, and the bytes must then walk as a mesh.
+                // Expansion and parse are counted apart from the plain meshes so a decoder fault cannot hide
+                // inside a healthy-looking total.
+                if (!c.TryExpand(bytes, i, out var data, out int start, out string xerr))
+                { failed++; if (firstFail.Length == 0) firstFail = $"entry #{e.Index} sub {i}: {xerr}"; continue; }
+                if (packed) expanded++;
+                if (MeshContainer.TryParseMeshAt(data, start, out var mesh, out string merr))
                 {
                     ok++; faces += mesh.Faces.Count; verts += mesh.VertexCount;
+                    if (packed) expandedParsed++;
                     foreach (var tp in mesh.TPages)
                     {
                         int key = ((tp & 0x0F) * 64) | (((tp & 0x10) != 0 ? 256 : 0) << 16);
@@ -96,13 +96,23 @@ static class Program
             }
         }
         Console.WriteLine($"containers     : {containers}");
-        Console.WriteLine($"sub-entries    : {subs}  ({compressed} LZSS-compressed, skipped)");
+        Console.WriteLine($"sub-entries    : {subs}  ({compressed} LZSS-compressed: {expanded} expanded to their declared size, {expandedParsed} of those parsed as meshes)");
         Console.WriteLine($"meshes parsed  : {ok} ok, {failed} failed" + (firstFail.Length > 0 ? $"  first: {firstFail}" : ""));
         Console.WriteLine($"geometry       : {verts:n0} vertices, {faces:n0} faces");
         Console.WriteLine();
         Console.WriteLine("texture pages referenced by meshes (x,y -> how many meshes):");
         foreach (var kv in pages)
             Console.WriteLine($"   {kv.Key & 0xFFFF},{(kv.Key >> 16) & 0xFFFF}  used by {kv.Value} meshes");
+        return failed;
+    }
+
+    static GazArchive Archive(DiscReader disc)
+    {
+        var f = disc.Find(AssetSelfTest.AssetArchive);
+        if (f == null) { Console.WriteLine("no archive"); return null; }
+        if (!GazArchive.TryParse(disc.ReadFile(f), out var gaz, out string gerr))
+        { Console.WriteLine("archive: " + gerr); return null; }
+        return gaz;
     }
 
     static void VramHash(DiscReader disc)
@@ -195,6 +205,20 @@ static class Program
 
     static int Main(string[] args)
     {
+        // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
+        // machine that holds the archive but not the image. Same code from the archive down as the disc
+        // route, so a pass here is a pass on the real thing. Exit code is the number of failed meshes.
+        int gazAt = Array.IndexOf(args, "--gaz");
+        if (gazAt >= 0 && gazAt + 1 < args.Length)
+        {
+            byte[] gb;
+            try { gb = System.IO.File.ReadAllBytes(args[gazAt + 1]); }
+            catch (Exception e) { Console.WriteLine("could not read: " + e.Message); return 1; }
+            if (!GazArchive.TryParse(gb, out var g, out string ge)) { Console.WriteLine("archive: " + ge); return 1; }
+            if (Array.IndexOf(args, "--mapping") >= 0) { Mapping(g); return 0; }
+            return Meshes(g);
+        }
+
         string path = args.Length > 0 ? args[0] : null;
         if (path == null)
         {
@@ -259,8 +283,13 @@ static class Program
                 Console.WriteLine($"wrote {limg.Width}x{limg.Height} RGBA to {rawOut}");
                 return 0;
             }
-            if (mapping) { Mapping(disc); return 0; }
-            if (meshes) { Meshes(disc); return 0; }
+            if (mapping || meshes)
+            {
+                var g = Archive(disc);
+                if (g == null) return 1;
+                if (mapping) { Mapping(g); return 0; }
+                return Meshes(g);
+            }
             if (vramHash) { VramHash(disc); return 0; }
 
             var r = AssetSelfTest.Run(disc);

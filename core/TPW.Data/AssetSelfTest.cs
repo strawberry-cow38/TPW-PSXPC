@@ -142,6 +142,34 @@ namespace TPW.Data
                     : $"{agree}/{containers} containers agree with the table on their own size" +
                       (mismatches.Count > 0 ? "; " + string.Join(", ", mismatches) : ""));
 
+            // ⭐ THE LZSS PORT IS CHECKED HERE BECAUSE THE CHECK CAN FAIL. A compressed sub-entry states its
+            // unpacked size in the container table and its stream carries its own terminator; the two meet
+            // only if the decoder is right to the last byte, and the buffer then has to walk as a mesh. A
+            // wrong bit order or length bias does not fail one of the 25, it fails nearly all of them.
+            int packed = 0, expanded = 0, walked = 0;
+            string firstLz = null;
+            foreach (var e in gaz.Entries)
+            {
+                if (!e.IsContainer) continue;
+                var cb = gaz.Read(e);
+                if (!MeshContainer.TryParse(cb, out var c, out _)) continue;
+                for (int i = 0; i < c.SubCount; i++)
+                {
+                    if (!c.IsCompressed(i)) continue;
+                    packed++;
+                    if (!c.TryExpand(cb, i, out var data, out int start, out string lz))
+                    { firstLz ??= $"#{e.Index} sub {i}: {lz}"; continue; }
+                    expanded++;
+                    if (MeshContainer.TryParseMeshAt(data, start, out _, out string me)) walked++;
+                    else firstLz ??= $"#{e.Index} sub {i}: expanded but did not walk as a mesh: {me}";
+                }
+            }
+            r.Add("compressed meshes", packed > 0 && expanded == packed && walked == packed,
+                packed == 0
+                    ? "no LZSS sub-entries found — the containers parsed but every sub-entry table reads as plain"
+                    : $"{expanded}/{packed} LZSS sub-entries expand to exactly their declared size, {walked} walk as meshes" +
+                      (firstLz != null ? "; first failure " + firstLz : ""));
+
             // ⚠ THIS IS A COUNT, NOT A VALIDATION, AND IT SAYS SO. An earlier version read "12/12 texture
             // pages decoded" while the output was coloured noise, because decoding only fails on a short
             // buffer -- so it restated "12 entries are 131,156 bytes" and dressed it as a decode. Whether the

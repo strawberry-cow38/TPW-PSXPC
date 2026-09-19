@@ -69,8 +69,8 @@ namespace TPWGodot
                 if (!MeshContainer.TryParse(bytes, out var c, out _)) continue;
                 for (int i = 0; i < c.SubCount; i++)
                 {
-                    // Compressed sub-entries need LZSS, which is not ported. Skipped by name, not silently.
-                    if (c.IsCompressed(i)) continue;
+                    // Compressed sub-entries (the model packs in entries 0 and 3) are expanded inside
+                    // TryParseMesh by SubLz, so they show here like any other.
                     if (c.TryParseMesh(bytes, i, out var m, out _) && m.Faces.Count > 0)
                         _meshes.Add((e.Index, i, m));
                 }

@@ -43,8 +43,12 @@ namespace TPW.Data
         public List<MeshFace> Faces = new();
         /// <summary>Distinct texture pages this mesh draws from.</summary>
         public SortedSet<ushort> TPages = new();
-        /// <summary>Bytes the face walk consumed. A parse that does not land inside the sub-entry is wrong.</summary>
+        /// <summary>Bytes the face walk consumed. A parse that does not land inside the sub-entry is wrong.
+        /// For a compressed sub-entry this is an offset into the EXPANDED buffer (MeshContainer.TryExpand),
+        /// not into the entry.</summary>
         public int FaceBytesEnd;
+        /// <summary>True when the sub-entry was LZSS-expanded (SubLz) before the walk.</summary>
+        public bool WasCompressed;
     }
 
     /// <summary>A `0x96` archive entry: a container of skinned meshes.
@@ -61,11 +65,11 @@ namespace TPW.Data
     ///                {u32 off, u32 unpackedSize} sub[nsub]
     ///
     /// ⚠ `unpackedSize != 0` MEANS COMPRESSED, and it is easy to read as "size". Those sub-entries are LZSS
-    /// and must be expanded before parsing. There are **25 of them and they live entirely in entries 0 and
-    /// 3**; the other 531 are plain. That is why this class parses what it can and reports the rest rather
-    /// than refusing the archive — and it is also the explanation for something that puzzled me for hours:
-    /// the sub-entry "sizes" that overlapped their neighbours were UNPACKED sizes, roughly 1.7 to 2.2 times
-    /// the packed gap.
+    /// (SubLz, the port of 0x800BFD9C) and TryParseMesh expands them before the walk. There are **25 of
+    /// them and they live entirely in entries 0 and 3**; the other 531 are plain. All 25 reach their stream
+    /// terminator at exactly the declared size and then walk as meshes to the byte — which is also the
+    /// explanation for something that puzzled me for hours: the sub-entry "sizes" that overlapped their
+    /// neighbours were UNPACKED sizes, 1.45 to 2.48 times the packed gap.
     ///
     /// ⚠ AND `f4 01 00 30` IS NOT A GPU OPCODE. I read it as a gouraud-triangle command and built a whole
     /// theory on it; fable identifies it as an LZ stream's flag byte and first literals. A plausible reading
@@ -113,16 +117,38 @@ namespace TPW.Data
 
         public bool IsCompressed(int sub) => sub >= 0 && sub < Subs.Count && Subs[sub].UnpackedSize != 0;
 
-        /// <summary>Parse one PLAIN sub-entry as a skinned mesh. Compressed ones need LZSS first and are
-        /// refused by name rather than parsed into nonsense.</summary>
+        /// <summary>The bytes of one sub-entry as the loader sees them. A plain sub-entry is a view into the
+        /// entry, beginning at <paramref name="start"/>; a compressed one is expanded through
+        /// <see cref="SubLz"/> into a buffer of its own, beginning at 0. Expansion fails by name if the
+        /// stream does not reach its terminator at exactly the declared size.</summary>
+        public bool TryExpand(byte[] d, int sub, out byte[] data, out int start, out string error)
+        {
+            data = null; start = 0; error = null;
+            if (d == null) { error = "no entry bytes"; return false; }
+            if (sub < 0 || sub >= Subs.Count) { error = "no such sub-entry"; return false; }
+            var (off, unpacked) = Subs[sub];
+            if (unpacked == 0) { data = d; start = off; return true; }
+            if (!SubLz.TryDecompress(d, off, unpacked, out data, out string lz))
+            { error = $"sub-entry {sub} did not expand ({unpacked:n0} declared): {lz}"; return false; }
+            return true;
+        }
+
+        /// <summary>Parse one sub-entry as a skinned mesh, expanding it first if it is compressed.</summary>
         public bool TryParseMesh(byte[] d, int sub, out Mesh mesh, out string error)
         {
-            mesh = null; error = null;
-            if (sub < 0 || sub >= Subs.Count) { error = "no such sub-entry"; return false; }
-            if (IsCompressed(sub)) { error = $"sub-entry {sub} is LZSS-compressed ({Subs[sub].UnpackedSize:n0} unpacked)"; return false; }
+            mesh = null;
+            if (!TryExpand(d, sub, out var data, out int start, out error)) return false;
+            if (!TryParseMeshAt(data, start, out mesh, out error)) return false;
+            mesh.WasCompressed = IsCompressed(sub);
+            return true;
+        }
 
-            int b = Subs[sub].Offset;
-            if (b < 0 || b + MeshHeaderBytes > d.Length) { error = "sub-entry offset is outside the entry"; return false; }
+        /// <summary>Walk the mesh that begins at <paramref name="b"/> in <paramref name="d"/>: the entry for
+        /// a plain sub-entry, an expanded buffer (b = 0) for a compressed one.</summary>
+        public static bool TryParseMeshAt(byte[] d, int b, out Mesh mesh, out string error)
+        {
+            mesh = null; error = null;
+            if (d == null || b < 0 || b + MeshHeaderBytes > d.Length) { error = "sub-entry offset is outside the entry"; return false; }
 
             int n0 = BitConverter.ToInt32(d, b + 0x00);
             var m = new Mesh
