@@ -213,33 +213,57 @@ namespace TPW.Data
         }
     }
 
-    /// <summary>The second (vector, quaternion) pair a type-0 keyframe carries beyond a type-6 one.
+    /// <summary>A bone's SCALE and the rotation that orients the scale axes -- the second 16-byte block
+    /// that types 0 and 1 carry beyond types 6 and 7.
     ///
-    /// Type 0 is type 6's keyframe with a whole extra pair bolted on: the evaluator interpolates +0x04
-    /// and +0x14 identically with the GTE's GPF/GPL, and passes +0x0c and +0x1c to the same quaternion
-    /// helper (0x8002c59c). Then it reads the bone's parent at +6 and composes through the parent's
-    /// matrix, exactly as a type-6 track does.
+    /// ⭐ READ OFF THE CODE, NOT THE VALUES. The evaluator hands the whole block to 0x8002be58 with
+    /// flags 7, and that routine switches on the bits:
+    ///   bit 2 -> load the GTE identity from 0x800DDD58 (4096 down the diagonal), then overwrite the
+    ///            DIAGONAL -- stores at +0x00, +0x08, +0x10 of a 3x3 of s16 -- with the three halfwords
+    ///            at this block's +0x00. That is what makes them a SCALE: they are written onto a
+    ///            diagonal, not multiplied as a vector.
+    ///   bit 1 -> this block's quaternion becomes a rotation matrix (0x80011400), multiplied with it.
+    ///   and the FIRST block's quaternion becomes a rotation matrix the same way.
+    /// The bone's matrix is then R(quatA) * R(quatB) * diag(scale), composed through the parent's matrix
+    /// at bone+6 and stored to the bone's own 32-byte slot.
     ///
-    /// ⚠ WHAT THE SECOND PAIR MEANS IS NOT ESTABLISHED. The first record I looked at held
-    /// (4096,4096,4096) in the vector, which is exactly 1.0 and reads beautifully as a scale -- but
-    /// across all 696 records that value appears on only 15.7%, and the commonest is
-    /// (24945,-23673,24945) on over half. One sample told a tidy story the population does not support.
+    /// So the second block exists to express what ONE quaternion cannot: a scale with its own
+    /// orientation, i.e. a general transform with shear. A single rotation plus a diagonal can only
+    /// scale along the bone's own axes.
     ///
-    /// ⚠ AND THE CONTROL'S TOLERANCE WAS DOING THE DAMAGE. Scoring "is this quadruple unit length" at
-    /// +-41 of 4096, this block passed on 100% of real records and 73% of a column-shuffled control --
-    /// which reads as a decode that does not hold, and I said so. It is an artefact of the tolerance:
-    /// 191 of the 696 records carry a literal identity quaternion and most of the rest are near it, and
-    /// a loose band cannot tell a near-identity quadruple from a shuffle of near-identity columns.
-    /// Tightened to +-1 -- where a genuine normalisation lands, since the file normalises to exactly
-    /// 4096 -- the real records still score 100% and the shuffle drops to 27%. Every first block scores
-    /// 100% against 4-6%. So the block IS a quaternion, and the lesson is that a control with a band
-    /// wide enough to admit the degenerate case is not a control.</summary>
-    public readonly struct AnimPairB
+    /// The file agrees, independently of the disassembly. Across the 696 type-0 records:
+    ///   - the three components are EXACTLY EQUAL on 26.4%, against 0.6% for a column-shuffled control.
+    ///     A uniform scale is the commonest thing anyone animates; a translation with x==y==z is a
+    ///     coincidence, and the first block is uniform on 0.0%.
+    ///   - no component is ever exactly 0 -- a zero scale collapses the bone -- while the first block's
+    ///     vector is 0 on 9.3% of components, which is an ordinary translation.
+    ///   - magnitudes cluster on 4096 (=1.0) and never come near the first block's range: median |v| is
+    ///     23673 here and 36 there.
+    /// Whole tracks read as scale animations once seen this way: one sub-entry runs (3576,3576,3576),
+    /// (3371,3371,3371), (2841,2841,2841) -- something shrinking.
+    ///
+    /// ⚠ I NEARLY TALKED MYSELF OUT OF THIS WITH A REAL NUMBER. The first record I read held
+    /// (4096,4096,4096), exactly 1.0, which reads beautifully as a scale -- and I then measured that
+    /// value on only 15.7% of records with "the commonest" being (24945,-23673,24945), wrote that one
+    /// sample had told a tidy story the population did not support, and left the field unnamed. Both
+    /// numbers were correct and the conclusion was wrong: (24945,-23673,24945) occurs in exactly ONE
+    /// sub-entry of the 32 that carry type-0 tracks, and dominates the RECORD count only because that
+    /// one mesh has hundreds of keyframes. 23 of the 32 carry the unit scale. **Counting records
+    /// weighted my statistic by keyframe count, so one long animation outvoted twenty-two meshes.**
+    /// Count the population you are actually generalising over.
+    ///
+    /// The degenerate cases now read as what they are: 37 records carry unit scale AND an identity
+    /// quaternion here, making the block a no-op and the keyframe equivalent to a type-6 one; 191 more
+    /// carry the identity quaternion alone, i.e. scale along the bone's own axes.</summary>
+    public readonly struct BoneScale
     {
-        public readonly short Vx, Vy, Vz;
+        /// <summary>The scale, in the GTE's 1.12 fixed point: 4096 is 1.0. Written onto a matrix
+        /// diagonal by the evaluator, which is what identifies it.</summary>
+        public readonly short Sx, Sy, Sz;
 
         /// <summary>The 4th slot, which in the FIRST block of every type is a zero pad -- 20,350
-        /// records, no exceptions -- and in this second block is not.
+        /// records, no exceptions -- and in this second block is not. Note the evaluator reads only
+        /// THREE halfwords for the diagonal, so whatever this is, it is not part of the scale.
         ///
         /// ⚠ THIS SHIPPED DOCUMENTED AS "the pad, zero as in every other 8-byte vector on the disc".
         /// It is zero on 689 of 696 type-0 records, so every sample I looked at agreed with that, but
@@ -248,11 +272,11 @@ namespace TPW.Data
         /// rather than dropped, because a field discarded as padding cannot later be found to matter.</summary>
         public readonly short Slot3;
         public readonly float Qx, Qy, Qz, Qw;
-        public AnimPairB(ReadOnlySpan<byte> d)
+        public BoneScale(ReadOnlySpan<byte> d)
         {
             const float S = 1f / 4096f;
             static short H(ReadOnlySpan<byte> b, int i) => BitConverter.ToInt16(b.Slice(i * 2, 2));
-            Vx = H(d, 0); Vy = H(d, 1); Vz = H(d, 2); Slot3 = H(d, 3);
+            Sx = H(d, 0); Sy = H(d, 1); Sz = H(d, 2); Slot3 = H(d, 3);
             Qx = H(d, 4) * S; Qy = H(d, 5) * S; Qz = H(d, 6) * S; Qw = H(d, 7) * S;
         }
         public float QuatLength() => MathF.Sqrt(Qx * Qx + Qy * Qy + Qz * Qz + Qw * Qw);
@@ -298,7 +322,7 @@ namespace TPW.Data
     /// tracks and always zero keyframes.
     ///
     /// ⚠ THE TABLE ABOVE IS A SHAPE, NOT A MEANING. It says where the bytes are, and for the first
-    /// block of each type that reading is earned (see <see cref="AnimPairB"/> for the test). What the
+    /// block of each type that reading is earned (see <see cref="BoneScale"/> for the test). What the
     /// SECOND block is FOR is still unknown, and type 1's second block cannot be tested at all: the
     /// disc holds one type-1 track, and in it that block is near-constant.
     /// </summary>
@@ -354,7 +378,8 @@ namespace TPW.Data
         public BoneRest Rest;                              // Type == 8
         public AnimKey[] Keys = Array.Empty<AnimKey>();    // Type == 6
         public PositionKey[] Positions = Array.Empty<PositionKey>();   // Types 2,3,4,5
-        public AnimPairB[] PairB = Array.Empty<AnimPairB>();            // Type 0's second pair
+        /// <summary>Per-keyframe scale + scale-axis rotation. Types 0 and 1 only.</summary>
+        public BoneScale[] Scales = Array.Empty<BoneScale>();
         public byte[] Raw = Array.Empty<byte>();           // everything else
 
         /// <summary>Whether the records carry their own timing.
@@ -510,15 +535,15 @@ namespace TPW.Data
                     // {time, dur, vecA, pad, quatA, vecB, pad, quatB} -- the first 20 bytes are exactly a
                     // type-6 keyframe, so AnimKey reads them unchanged.
                     var keys = new AnimKey[count];
-                    var pb = new AnimPairB[count];
+                    var pb = new BoneScale[count];
                     for (int k = 0; k < count; k++)
                     {
                         int o = p + hdr + k * stride;
                         keys[k] = new AnimKey(d.Slice(o, 20));
-                        pb[k] = new AnimPairB(d.Slice(o + 20, 16));
+                        pb[k] = new BoneScale(d.Slice(o + 20, 16));
                     }
                     tr.Keys = keys;
-                    tr.PairB = pb;
+                    tr.Scales = pb;
                 }
                 else if (type == 7)
                 {
@@ -533,15 +558,15 @@ namespace TPW.Data
                 {
                     // Untimed, TWO blocks per tick: type 0 is to type 6 as type 1 is to type 7.
                     var keys = new AnimKey[count];
-                    var pb = new AnimPairB[count];
+                    var pb = new BoneScale[count];
                     for (int k = 0; k < count; k++)
                     {
                         int o = p + hdr + k * stride;
                         keys[k] = AnimKey.FromBlock(d.Slice(o, 16), (short)k, 1);
-                        pb[k] = new AnimPairB(d.Slice(o + 16, 16));
+                        pb[k] = new BoneScale(d.Slice(o + 16, 16));
                     }
                     tr.Keys = keys;
-                    tr.PairB = pb;
+                    tr.Scales = pb;
                 }
                 else if (type == 6)
                 {

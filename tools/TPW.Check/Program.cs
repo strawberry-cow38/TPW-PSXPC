@@ -174,6 +174,7 @@ static class Program
         int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
         int spans = 0, spansMeet = 0, t0keys = 0, t0a = 0, t0b = 0, t0tracks = 0;
         int blkTot = 0, blkTight = 0, untimedTracks = 0, untimedKeys = 0;
+        int scaleRecs = 0, scaleZero = 0, scaleUniform = 0;
         int posTracks = 0, posKeys = 0, posSpans = 0, posMeet = 0, empty = 0;
         int posable = 0, moved = 0; long movedVerts = 0;
         int wildMeshes = 0, originMeshes = 0, unplacedMeshes = 0; long wildVerts = 0, originVerts = 0, unplacedVerts = 0;
@@ -354,17 +355,27 @@ static class Program
                     {
                         for (int k = 0; k < t.Keys.Length; k++)
                         { blkTot++; if (Math.Abs(t.Keys[k].QuatLength() - 1f) <= Tight) blkTight++; }
-                        for (int k = 0; k < t.PairB.Length; k++)
-                        { blkTot++; if (Math.Abs(t.PairB[k].QuatLength() - 1f) <= Tight) blkTight++; }
+                        for (int k = 0; k < t.Scales.Length; k++)
+                        {
+                            blkTot++; if (Math.Abs(t.Scales[k].QuatLength() - 1f) <= Tight) blkTight++;
+                            // ⭐ A SCALE IS NEVER ZERO -- a zero component collapses the bone to a plane.
+                            // This is the check that would fail if these three halfwords were something
+                            // else read at this offset: the FIRST block's vector, an ordinary
+                            // translation, is exactly 0 on 9.3% of its components.
+                            var sc = t.Scales[k];
+                            scaleRecs++;
+                            if (sc.Sx == 0 || sc.Sy == 0 || sc.Sz == 0) scaleZero++;
+                            if (sc.Sx == sc.Sy && sc.Sy == sc.Sz) scaleUniform++;
+                        }
                     }
-                    if (t.Type == 0 && t.PairB.Length > 0)
+                    if (t.Type == 0 && t.Scales.Length > 0)
                     {
                         // Type 0 carries TWO quaternions per key; both must be unit length.
                         for (int k = 0; k < t.Keys.Length; k++)
                         {
                             t0keys++;
                             if (Math.Abs(t.Keys[k].QuatLength() - 1f) < 0.03f) t0a++;
-                            if (k < t.PairB.Length && Math.Abs(t.PairB[k].QuatLength() - 1f) < 0.03f) t0b++;
+                            if (k < t.Scales.Length && Math.Abs(t.Scales[k].QuatLength() - 1f) < 0.03f) t0b++;
                         }
                     }
                     if (t.Type == 8) { rests++; if (t.Rest.IsOrthonormal()) orthonormal++; }
@@ -422,6 +433,7 @@ static class Program
         Console.WriteLine($"type 6 keyframes   : {keys}, unit quaternion {unit} ({pc(unit, keys)})");
         Console.WriteLine($"type 0 tracks      : {t0tracks}, {t0keys} keyframes; first quaternion unit {t0a} ({pc(t0a, t0keys)}), second unit {t0b} ({pc(t0b, t0keys)})");
         Console.WriteLine($"untimed bone tracks: {untimedTracks} (types 1/7), {untimedKeys} samples, one per tick -- no timing to verify");
+        Console.WriteLine($"bone scales        : {scaleRecs} (types 0/1), none zero on {scaleRecs - scaleZero} ({pc(scaleRecs - scaleZero, scaleRecs)}); uniform x==y==z on {scaleUniform} ({pc(scaleUniform, scaleRecs)}, shuffled control 0.6%)");
         Console.WriteLine($"quaternion blocks  : {blkTot} across types 0/1/6/7, normalised to 4096 within +-1.5 on {blkTight} ({pc(blkTight, blkTot)})");
         Console.WriteLine($"keyframe spans     : {spans} consecutive pairs, key.Time+key.Duration == next.Time on {spansMeet} ({pc(spansMeet, spans)})");
         Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
@@ -451,7 +463,7 @@ static class Program
              + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree)
              + (binds - tiled) + sumBad + (bindRecs - destOk) + (spans - spansMeet)
              + (posSpans - posMeet) + wildMeshes + originMeshes + unplacedMeshes
-             + (t0keys - t0a) + (t0keys - t0b) + (blkTot - blkTight);
+             + (t0keys - t0a) + (t0keys - t0b) + (blkTot - blkTight) + scaleZero;
         return failures == 0 ? 0 : Math.Clamp(failures, 1, 255);
     }
 

@@ -174,7 +174,7 @@ namespace TPW.Data.Tests
             Assert.Single(t.Keys);
             Assert.Equal(10, t.Keys[0].Tx);
             Assert.Equal(1f, t.Keys[0].Qw, 3);
-            Assert.Single(t.PairB);
+            Assert.Single(t.Scales);
 
             // NOT read as type 8: the rest pose is never populated. Were these bytes run through the
             // type-8 reader, M00 would be the 10 above.
