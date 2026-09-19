@@ -1957,3 +1957,29 @@ bug than it was:
 
 Also confirmed visually in passing: the HUD reads **$48.080**, which is the figure the port's money test
 now asserts. The earlier 48,040 was a transcription error of mine, and here is the screen saying so.
+
+## The type-6 keyframe's second field is a DURATION, and the interpolation is linear (2026-09-19)
+
+`animtracks.py` documents s16[1] as "unidentified, 0..380". It is the keyframe's **duration**, and two
+independent things say so:
+
+- **The code.** The type-6 evaluator at 0x8002da60 reads `start = u16[key+0]` and `dur = u16[key+2]`,
+  skips the key unless `start <= now < start + dur`, then computes
+  `t = ((now - start) << 12) / dur` and `4096 - t`, feeds both to the GTE and blends the three halfwords
+  at key+4 with GPF (0x3D) and GPL (0x3E). Same shape as the type-0 evaluator.
+- **The file, with no code at all.** Across every pair of consecutive keyframes on the disc,
+  `key.Time + key.Duration == next.Time` — 12,680 of 12,680, residual exactly zero on every pair. A
+  bounded unnamed number does not do that; a duration does.
+
+**The interpolation is LINEAR.** GPF and GPL are the GTE's general-purpose interpolation opcodes and
+there is no slerp on this hardware, so matching the console means an nlerp — blend the components, then
+renormalise. Being cleverer than the hardware is being wrong.
+
+Two things worth carrying into any port:
+- **q and -q are the same rotation.** Blending an opposite-signed pair componentwise collapses toward
+  zero instead of rotating between them, so negate one side when the dot product is negative.
+- **The span is half-open**, `[start, start + dur)`. At exactly `start + dur` the NEXT key owns the time.
+
+The port's own tests missed the renormalisation entirely until mutation testing: every quaternion case
+blended a rotation with itself or with identity, and both are already unit length after the sign fix.
+Two rotations 90° apart have a componentwise average of length 0.924, and that is the case that bites.
