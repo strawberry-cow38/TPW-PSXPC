@@ -220,114 +220,10 @@ namespace TPWGodot
             var (entry, sub, m) = _meshes[_index];
             if (_posed == null || _posed.Length != m.VertexCount) RefreshPose();
 
-            // ⚠ AUTO-FIT RATHER THAN A GUESSED SCALE. Vertices are s16 in the game's own units and nobody has
-            // established what one unit is. Fitting to the model's own bounds shows every mesh at a usable
-            // size without inventing a conversion factor and then believing it.
-            float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
-            float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
-            for (int i = 0; i < m.VertexCount; i++)
-            {
-                float x = m.Vertices[i * 3], y = m.Vertices[i * 3 + 1], z = -m.Vertices[i * 3 + 2];   // see ToGodot
-                if (x < minX) minX = x; if (x > maxX) maxX = x;
-                if (y < minY) minY = y; if (y > maxY) maxY = y;
-                if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
-            }
-            var centre = new Vector3((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2);
-            float span = Mathf.Max(maxX - minX, Mathf.Max(maxY - minY, maxZ - minZ));
-            // ⚠ The fit is taken from the REST pose and then held. Refitting each animated frame would
-            // rescale the model as it moves, so a limb swinging out would shrink the whole thing -- motion
-            // would be partly cancelled by the view, which is the opposite of what a browser is for.
-            float scale = span > 0.0001f ? 1.6f / span : 1f;
-
-            MeshTextures tex = _textured && _sheets.Count > 0 ? ModelTexturing.Build(m, _sheets) : null;
-
-            // Two surfaces: faces with a texture, and faces without one (vertex colour only). Keeping them apart
-            // means an untextured face can never pick up a stray texel from somebody else's tile.
-            // Textured faces go to one bucket per way the GPU draws them: -1 solid, 0-3 semi-transparent by the
-            // page's blend mode (MeshFace.SemiTransparent / BlendMode).
-            var buckets = new SortedDictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
-            var pv = new List<Vector3>(); var pc = new List<Color>();
-            for (int fi = 0; fi < m.Faces.Count; fi++)
-            {
-                var face = m.Faces[fi];
-                // ⚠ A FACE INDEX OUT OF RANGE MUST SKIP THE FACE, NOT CRASH THE BROWSER. This is an
-                // inspection tool for data we are still learning; it has to survive being wrong.
-                if (face.I0 >= m.VertexCount || face.I1 >= m.VertexCount || face.I2 >= m.VertexCount) continue;
-                int tile = tex != null ? tex.FaceTile[fi] : -1;
-                // ⚠ NO Y FLIP. I assumed PSX vertices were Y-down and negated Y; master ran it and reported
-                // every model upside down. They are already in Godot's sense.
-                // The corners' UVs travel with them whichever order they are emitted in.
-                // ⚠ THE Z NEGATION IN ToGodot IS A REFLECTION, AND A REFLECTION REVERSES EVERY TRIANGLE. So the
-                // file's corner order, which faced outward before the fix, faces inward after it, and the order is
-                // reversed here to keep the same faces front-facing. _reverse still flips it for comparison.
-                var corners = !_reverse
-                    ? new[] { (face.I2, face.U2, face.V2), (face.I1, face.U1, face.V1), (face.I0, face.U0, face.V0) }
-                    : new[] { (face.I0, face.U0, face.V0), (face.I1, face.U1, face.V1), (face.I2, face.U2, face.V2) };
-                foreach (var (vi, u, v) in corners)
-                {
-                    var pos = (Vert(m, vi) - centre) * scale;
-                    var col = m.VertexColours.Length >= (vi + 1) * 3
-                        ? Color.Color8(m.VertexColours[vi * 3], m.VertexColours[vi * 3 + 1], m.VertexColours[vi * 3 + 2])
-                        : new Color(0.5f, 0.5f, 0.5f);
-                    if (tile >= 0)
-                    {
-                        // Bucket by how the GPU blends it and whether the game culls it: (blend + 1) * 2 + both sides.
-                        int key = ((face.SemiTransparent ? face.BlendMode : -1) + 1) * 2 + (face.DoubleSided ? 1 : 0);
-                        if (!buckets.TryGetValue(key, out var b)) buckets[key] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
-                        b.V.Add(pos);
-                        // A flat face's builder writes 0x808080, the neutral colour: the texel unshaded.
-                        b.C.Add(face.Flat ? new Color(128 / 255f, 128 / 255f, 128 / 255f) : col);
-                        int ox = (tile % tex.TilesX) * ModelTexturing.Tile, oy = (tile / tex.TilesX) * ModelTexturing.Tile;
-                        b.UV.Add(new Vector2((ox + u) / (float)tex.Atlas.Width, (oy + v) / (float)tex.Atlas.Height));
-                    }
-                    else { pv.Add(pos); pc.Add(col); }
-                }
-            }
-
-            var mesh = new ArrayMesh();
-            var cull = _cull ? BaseMaterial3D.CullModeEnum.Back : BaseMaterial3D.CullModeEnum.Disabled;
-            if (buckets.Count > 0)
-            {
-                var atlas = ImageTexture.CreateFromImage(Image.CreateFromData(tex.Atlas.Width, tex.Atlas.Height, false,
-                                                                              Image.Format.Rgba8, tex.Atlas.Rgba));
-                void AddSurface((List<Vector3> V, List<Color> C, List<Vector2> UV) b, Shader shader)
-                {
-                    if (b.V.Count < 3) return;
-                    var arrays = new Godot.Collections.Array();
-                    arrays.Resize((int)Godot.Mesh.ArrayType.Max);
-                    arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
-                    arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
-                    arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
-                    mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
-                    var mat = new ShaderMaterial { Shader = shader };
-                    mat.SetShaderParameter("atlas", atlas);
-                    mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, mat);
-                }
-                // ⭐ SEMI-TRANSPARENCY IS THE GPU'S, PER TEXEL. A semi-transparent face draws its texels without
-                // the blend bit solid and blends only the ones with it, so each such bucket is drawn twice.
-                foreach (var (key, b) in buckets)
-                {
-                    int blend = key / 2 - 1;
-                    bool culled = _cull || (key & 1) == 0;
-                    if (blend < 0) { AddSurface(b, PsxShading.Shader(culled)); continue; }
-                    AddSurface(b, PsxShading.SemiTransparentShader(blend, false, culled));
-                    AddSurface(b, PsxShading.SemiTransparentShader(blend, true, culled));
-                }
-            }
-            if (pv.Count >= 3)
-            {
-                var arrays = new Godot.Collections.Array();
-                arrays.Resize((int)Godot.Mesh.ArrayType.Max);
-                arrays[(int)Godot.Mesh.ArrayType.Vertex] = pv.ToArray();
-                arrays[(int)Godot.Mesh.ArrayType.Color] = pc.ToArray();
-                mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
-                mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, new StandardMaterial3D
-                {
-                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-                    VertexColorUseAsAlbedo = true,
-                    CullMode = cull,
-                });
-            }
+            // Fit and build live in ModelMesh, so the browser, the advisor and anything else that puts
+            // a model on screen share ONE path. ⚠ Extracted, not reimplemented -- see the note there.
+            ModelMesh.Fit(m, out var centre, out float scale);
+            var mesh = ModelMesh.Build(m, _posed, _sheets, _textured, _reverse, _cull, centre, scale, out var tex);
             _instance.Mesh = mesh;
             // ⭐ CULLING IS WHAT MAKES WINDING FALSIFIABLE AT ALL. With back faces drawn, a reversed triangle
             // renders identically to a correct one. Culling turned an unfalsifiable impression into an
@@ -362,17 +258,9 @@ namespace TPWGodot
         /// (negating it turned them upside down, an earlier round of the same argument), so the file's frame is
         /// x right, y up, z INTO the screen, which is left-handed, and Godot's is right-handed. Negating z
         /// converts. That makes it a reflection, which is why the corner order is reversed with it.</summary>
-        /// <summary>The vertex to draw: the posed one while an animation is playing, the file's otherwise.
-        /// Both go through the same z negation, so playing cannot silently change the handedness.</summary>
-        Vector3 Vert(TpwMesh m, int vi)
-        {
-            if (_posed != null && vi < _posed.Length)
-                return new Vector3(_posed[vi].X, _posed[vi].Y, -_posed[vi].Z);
-            return ToGodot(m, vi);
-        }
-
-        static Vector3 ToGodot(TpwMesh m, int vi) =>
-            new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], -m.Vertices[vi * 3 + 2]);
+        /// (The vertex accessor these notes describe now lives in ModelMesh.Vert, so there is exactly one
+        /// copy of the z negation. Two copies of a reflection is two chances to un-mirror only half the
+        /// models.)
 
 
         /// <summary>Jump to the next model this player can actually move.
