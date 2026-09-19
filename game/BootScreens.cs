@@ -299,23 +299,25 @@ namespace TPWGodot
             // The advisor animates on the SAME console tick as the rest of the chain, not on the
             // renderer's frame rate -- his flag would wave at a different speed on a 144 Hz monitor
             // otherwise, and that is the sort of wrong that only shows up on somebody else's machine.
-            // ⚠ ONE ANIMATION UNIT PER CONSOLE TICK IS A CHOICE, NOT A MEASUREMENT, AND IT IS TOO SLOW.
-            // Measured off the console's display list (the flag's own primitives, CLUT 0x40e0): the pose
-            // changes on EVERY frame -- 0 of 29 consecutive frames repeat, so it is not half rate -- and
-            // the whole wave repeats exactly every 104 frames (frames 30, 134 and 238 are identical
-            // point-for-point). A fine 30-frame scan rules out 13 and 26, so the true period is 52 or
-            // 104; an 8-frame sampling grid cannot separate those two.
+            // ⭐ THE GAME'S OWN TIME BASE, not one unit per frame. Animations step by frameTime >> 12,
+            // and frameTime is root counter 2's interrupt count x 128 -- the same clock the bus-stop
+            // flags already use, so the constant is EntranceFlags.TimeUnitsPerSecond rather than a new
+            // one. That works out to 61.54 units per second of wall clock, independent of frame rate.
             //
-            // ⚠ NEITHER IS THE CLIP'S LENGTH. Sub-mesh 10's tracks run 128 units, so the game is not
-            // stepping one unit per frame the way this does -- it covers 128 units in 104 frames or
-            // fewer. So the port's flag waves roughly a fifth too slowly, and the mechanism (a
-            // fixed-point step? a partial clip?) is NOT identified. Left at 1:1 deliberately rather
-            // than dividing by a ratio that happens to fit, which is how a wrong constant gets a
-            // comment claiming it was measured.
+            // ⭐ It PREDICTS the measurement instead of being fitted to it: 128 units / 61.54 = 2.080 s
+            // = 104.01 frames at 50 Hz, and the console's flag returns exactly to its frame-30 pose at
+            // frames 134 and 238 -- 104 apart, point for point. That agreement to a hundredth of a frame
+            // is why this ships where a bare 128/104 ratio did not. Mechanism found by cow tools; the
+            // arithmetic and the period are checked here.
+            //
+            // ⚠ The cycle is 128, which is AnimationLength + 1: the tracks' end time is 127, and a loop
+            // that wraps AT 127 drops a unit and lands the repeat a frame early. 128 is what makes the
+            // measured 104 come out exact.
             if (_boot.Screen == BootScreen.LanguageSelect && _advisor != null && _advisorLength > 0)
             {
-                _advisorClock += ticks;
-                if (_advisorClock >= _advisorLength) _advisorClock %= _advisorLength;
+                _advisorClock += (float)(ticks * (EntranceFlags.TimeUnitsPerSecond / 4096.0) / BootSequence.Hz);
+                float cycle = _advisorLength + 1;
+                if (_advisorClock >= cycle) _advisorClock -= cycle * (float)Math.Floor(_advisorClock / cycle);
                 RebuildAdvisor();
             }
 

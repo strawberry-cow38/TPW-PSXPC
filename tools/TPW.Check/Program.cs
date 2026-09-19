@@ -1351,6 +1351,63 @@ static class Program
         return 0;
     }
 
+    /// <summary>How far vertices move between consecutive animation units, across one cycle. A loop
+    /// that is smooth in the DATA has a last-to-first step like any other; a big one there means the
+    /// clip does not loop, or the cycle length is wrong.</summary>
+    static int PoseDelta(GazArchive g, int entry, int sub)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            if (!c.TryParseMesh(bytes, sub, out var m, out _)) return 1;
+            int len = MeshPose.AnimationLength(m);
+            if (len <= 0) { Console.WriteLine("no animation"); return 1; }
+            var deltas = new List<(int At, double D)>();
+            for (int cycle = len; cycle <= len + 1; cycle++)
+            {
+                double worst = 0; int worstAt = -1; double sum = 0;
+                for (int t = 0; t < cycle; t++)
+                {
+                    var a = MeshPose.Evaluate(m, t).Vertices;
+                    var b = MeshPose.Evaluate(m, (t + 1) % cycle).Vertices;
+                    if (a == null || b == null || a.Length != b.Length) continue;
+                    double d = 0;
+                    for (int i = 0; i < a.Length; i++)
+                        d = Math.Max(d, Math.Abs(a[i].X - b[i].X) + Math.Abs(a[i].Y - b[i].Y) + Math.Abs(a[i].Z - b[i].Z));
+                    sum += d;
+                    if (d > worst) { worst = d; worstAt = t; }
+                    if (t == cycle - 1) deltas.Add((cycle, d));
+                }
+                Console.WriteLine($"cycle {cycle}: mean step {sum / cycle:F1}, worst {worst:F0} at unit {worstAt} -> {(worstAt + 1) % cycle}");
+            }
+            foreach (var (at, d) in deltas)
+                Console.WriteLine($"  wrapping at {at}: the last-to-first step is {d:F0}");
+            Console.WriteLine("  track key times (first track with timed keys):");
+            foreach (var tr in m.Tracks)
+            {
+                if (!tr.IsTimed || tr.Keys == null || tr.Keys.Length == 0) continue;
+                var ks = tr.Keys;
+                Console.WriteLine($"    {ks.Length} keys; first {{t={ks[0].Time},d={ks[0].Duration}}} " +
+                                  $"last {{t={ks[^1].Time},d={ks[^1].Duration}}} -> ends {ks[^1].Time + ks[^1].Duration}");
+                break;
+            }
+            Console.WriteLine("  tail profile (step from each unit to the next):");
+            for (int t = len - 8; t <= len; t++)
+            {
+                var a = MeshPose.Evaluate(m, t).Vertices;
+                var b = MeshPose.Evaluate(m, t + 1).Vertices;
+                double d2 = 0;
+                for (int i = 0; i < a.Length; i++)
+                    d2 = Math.Max(d2, Math.Abs(a[i].X - b[i].X) + Math.Abs(a[i].Y - b[i].Y) + Math.Abs(a[i].Z - b[i].Z));
+                Console.WriteLine($"    {t,3} -> {t + 1,3}: {d2:F0}");
+            }
+            return 0;
+        }
+        return 1;
+    }
+
     static int FaceGroup(GazArchive g, int entry, int sub, ushort clut)
     {
         foreach (var e in g.Entries)
@@ -1583,6 +1640,9 @@ static class Program
                 return TexelScan(g, int.Parse(args[tsAt + 1]), Convert.ToUInt16(args[tsAt + 2], 16),
                                  Convert.ToUInt16(args[tsAt + 3], 16), int.Parse(args[tsAt + 4]),
                                  int.Parse(args[tsAt + 5]), int.Parse(args[tsAt + 6]), int.Parse(args[tsAt + 7]));
+            int pdAt = Array.IndexOf(args, "--posedelta");
+            if (pdAt >= 0 && pdAt + 2 < args.Length)
+                return PoseDelta(g, int.Parse(args[pdAt + 1]), int.Parse(args[pdAt + 2]));
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
