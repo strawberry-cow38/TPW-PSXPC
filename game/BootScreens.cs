@@ -223,7 +223,13 @@ namespace TPWGodot
             var posed = MeshPose.Evaluate(_advisor, (int)_advisorClock).Vertices;
             if (posed != null && posed.Length != _advisor.VertexCount) posed = null;
             _advisorMesh.Mesh = ModelMesh.Build(_advisor, posed, _advisorSheets,
-                                                textured: true, reverse: false, cull: true,
+                                                // ⚠ cull: false IS the game's rule, not "no culling".
+                                                // ModelMesh drops every single-sided face that turns
+                                                // away and draws double-sided groups from both sides,
+                                                // which is what the console does. true means cull
+                                                // EVERYTHING -- the winding instrument, not fidelity,
+                                                // and it would show the flag from one side only.
+                                                textured: true, reverse: false, cull: false,
                                                 _advisorCentre, _advisorScale, out _);
             // Frame pixels -> camera units: x right from the centre, y UP from the centre.
             float cx = (AdvisorLeft + AdvisorRight) / 2f - MenuRenderer.W / 2f;
