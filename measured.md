@@ -2233,3 +2233,28 @@ bit 3 9.2%, bit 4 0.1%.
 
 ⚠ I had just told the channel these three bits were unexplained and were a plausible place for a hide
 flag. They were unexplained only in fable's notes, which named the two the primitive choice made obvious.
+
+## Texture sheet ambiguity: one face, several valid sheets, different pixels (2026-09-19)
+
+Sheets for different worlds are uploaded to the SAME VRAM and reuse palettes, so "the sheet holding this
+face's page with this face's palette" often has more than one answer.
+
+On entry #43 (Bugs TV), measured through the port's own `TextureSheet`:
+- **all 417 faces** sit inside a valid sprite in **two or more** sheets;
+- for **80 of them the candidate sheets disagree on the rendered pixels**.
+
+So the choice is material for 19% of that model's faces, and a wrong choice yields real texels from the
+wrong world — which is worse than a missing texture, because the result still looks like a texture and
+nobody notices unless they know what it should be.
+
+`tpwcheck --gaz FOLIO.GAZ --coverage <entry>` reports both this and per-tile texel coverage.
+
+⚠ This is NOT the cause of the reported streaking. The disagreeing faces are on tiles 11, 14, 17, 21 and
+22; the mushroom cap is tile 15 and is unambiguous. Recorded because it is a real defect found while
+hunting a different one, and those are the easiest findings to lose.
+
+### What the streaking is NOT (all measured, cap clean on every one)
+geometry (posed edges 77-196, none over 300) · UV parse order (interleaved u,v per corner, as the file
+stores them) · tile resolved per face · atlas tile is a full 256 page so page-relative UVs land right ·
+colour depth (53,378 of 53,382 faces are 4bpp) · page origin `(tpage & 0x0F) * 64` · CLUT address ·
+4bpp nibble order · sheet texel coverage (all 23 tiles 100%, cap 550/550) · sheet ambiguity.
