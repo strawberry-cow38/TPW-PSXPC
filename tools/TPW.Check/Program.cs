@@ -1327,6 +1327,30 @@ static class Program
 
     /// <summary>Faces of one sub-mesh using one CLUT, with their vertex indices and UVs -- for asking
     /// whether a suspicious group is a FAN (all sharing a vertex) and what it samples.</summary>
+    /// <summary>How many texels in a rectangle of a sheet are palette index 0 -- transparent on this
+    /// GPU. Answers "is this area see-through in the DATA" without involving any renderer.</summary>
+    static int TexelScan(GazArchive g, int sheetEntry, ushort tpage, ushort clut, int u0, int v0, int u1, int v1)
+    {
+        if (sheetEntry >= g.Entries.Count) { Console.WriteLine("no such sheet entry"); return 1; }
+        if (!TextureSheet.TryParse(g.Read(g.Entries[sheetEntry]), out var sh, out string err))
+        { Console.WriteLine("sheet: " + err); return 1; }
+        int total = 0, clear = 0, oob = 0;
+        var hist = new SortedDictionary<int,int>();
+        for (int v = v0; v <= v1; v++)
+            for (int u = u0; u <= u1; u++)
+            {
+                total++;
+                int c = sh.Texel(tpage, clut, u, v);
+                if (c < 0) { oob++; continue; }
+                if (c == 0) clear++;
+                hist.TryGetValue(c, out int n); hist[c] = n + 1;
+            }
+        Console.WriteLine($"sheet #{sheetEntry} tpage 0x{tpage:x4} clut 0x{clut:x4}  u {u0}..{u1}  v {v0}..{v1}");
+        Console.WriteLine($"  {total} texels: {clear} transparent ({100.0 * clear / Math.Max(1,total):F1}%), " +
+                          $"{oob} out of the sheet, {hist.Count} distinct colours");
+        return 0;
+    }
+
     static int FaceGroup(GazArchive g, int entry, int sub, ushort clut)
     {
         foreach (var e in g.Entries)
@@ -1342,7 +1366,7 @@ static class Program
                 if (f.Clut != clut) continue;
                 n++;
                 Console.WriteLine($"  v({f.I0},{f.I1},{f.I2})  uv({f.U0},{f.V0}) ({f.U1},{f.V1}) ({f.U2},{f.V2})  " +
-                                  $"kind=0x{f.Kind:x2} {(f.DoubleSided ? "double" : "single")}-sided");
+                                  $"tpage=0x{f.TPage:x4} kind=0x{f.Kind:x2} {(f.DoubleSided ? "double" : "single")}-sided");
                 foreach (int vi in new[]{ (int)f.I0, f.I1, f.I2 })
                 { shared.TryGetValue(vi, out int k); shared[vi] = k + 1; }
             }
@@ -1554,6 +1578,11 @@ static class Program
             // Use --faceclut to ask the other question.
             // --faceclut E S: the face CLUT histogram of one sub-mesh. Answers "is this group of faces a
             // PART of a bigger mesh", which a whole-mesh fingerprint search cannot see.
+            int tsAt = Array.IndexOf(args, "--texelscan");
+            if (tsAt >= 0 && tsAt + 7 < args.Length)
+                return TexelScan(g, int.Parse(args[tsAt + 1]), Convert.ToUInt16(args[tsAt + 2], 16),
+                                 Convert.ToUInt16(args[tsAt + 3], 16), int.Parse(args[tsAt + 4]),
+                                 int.Parse(args[tsAt + 5]), int.Parse(args[tsAt + 6]), int.Parse(args[tsAt + 7]));
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
