@@ -2089,3 +2089,28 @@ diff it across frames. It did not work, and the way it failed is worth recording
 So the experiment needs a state with the target model actually on screen, and an anchor that is unique
 and non-trivial by construction rather than by luck. Both are checkable up front:
 `count(signature) == 1` and a non-zero byte fraction well above half.
+
+## The r12 record's 8 unnamed bytes are the source's DEFAULT POSITION (2026-09-19)
+
+Left open in the binding work as "bytes 4..11, not identified". They are the position an animated source
+holds when no track drives it, and the thing that identified them was a bug report from the port, not a
+measurement I set out to take.
+
+**Tracks address only the ODD source slots.** Every animated mesh on the disc drives exactly half of its
+sources: 32 sources with indices 1,3,5..31; 24 with 1..23; 8 with 1,3,5,7; 2 with just 1. Never an even
+index, on any mesh. 24 of the 30 scattering meshes have "undriven" sources by that reckoning.
+
+They are not undriven, they are **pre-seeded**. The builder copies bytes 4..11 of each r12 record into the
+ARS source region (`addiu $a0, $s1, 4` at 0x8002cab0, then an 8-byte copy). Those eight bytes are an
+8-byte PSX vertex: three s16 in the same coordinate range as the mesh's own vertices (medians 418/359/459
+against the vertex median of 262) and a pad that is zero on **all 560 records**.
+
+So the region holds a default position per source; tracks overwrite the odd half; the blend loop reads all
+of them. A port that seeds zero instead drags every vertex an undriven source reaches toward the origin.
+
+⚠ **The symptom was reported before the cause was visible to me.** strawberry saw "the animated parts are
+stretching from what i assume is 0,0 of the model" in the browser. My own end-to-end check — pose at two
+times, require the vertices to differ — passed the whole way through, because vertices being dragged to
+the origin DO differ between two times. A check that the pose CHANGES cannot see a pose that changes
+wrongly. The rendered contact sheet showed it immediately once I looked, and I had looked at it before
+the fix and not registered the spikes as a fault.
