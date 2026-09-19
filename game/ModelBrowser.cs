@@ -240,7 +240,9 @@ namespace TPWGodot
 
             // Two surfaces: faces with a texture, and faces without one (vertex colour only). Keeping them apart
             // means an untextured face can never pick up a stray texel from somebody else's tile.
-            var tv = new List<Vector3>(); var tc = new List<Color>(); var tuv = new List<Vector2>();
+            // Textured faces go to one bucket per way the GPU draws them: -1 solid, 0-3 semi-transparent by the
+            // page's blend mode (MeshFace.SemiTransparent / BlendMode).
+            var buckets = new SortedDictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
             var pv = new List<Vector3>(); var pc = new List<Color>();
             for (int fi = 0; fi < m.Faces.Count; fi++)
             {
@@ -266,9 +268,13 @@ namespace TPWGodot
                         : new Color(0.5f, 0.5f, 0.5f);
                     if (tile >= 0)
                     {
-                        tv.Add(pos); tc.Add(col);
+                        int key = face.SemiTransparent ? face.BlendMode : -1;
+                        if (!buckets.TryGetValue(key, out var b)) buckets[key] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
+                        b.V.Add(pos);
+                        // A flat face's builder writes 0x808080, the neutral colour: the texel unshaded.
+                        b.C.Add(face.Flat ? new Color(128 / 255f, 128 / 255f, 128 / 255f) : col);
                         int ox = (tile % tex.TilesX) * ModelTexturing.Tile, oy = (tile / tex.TilesX) * ModelTexturing.Tile;
-                        tuv.Add(new Vector2((ox + u) / (float)tex.Atlas.Width, (oy + v) / (float)tex.Atlas.Height));
+                        b.UV.Add(new Vector2((ox + u) / (float)tex.Atlas.Width, (oy + v) / (float)tex.Atlas.Height));
                     }
                     else { pv.Add(pos); pc.Add(col); }
                 }
@@ -276,19 +282,31 @@ namespace TPWGodot
 
             var mesh = new ArrayMesh();
             var cull = _cull ? BaseMaterial3D.CullModeEnum.Back : BaseMaterial3D.CullModeEnum.Disabled;
-            if (tv.Count >= 3)
+            if (buckets.Count > 0)
             {
-                var arrays = new Godot.Collections.Array();
-                arrays.Resize((int)Godot.Mesh.ArrayType.Max);
-                arrays[(int)Godot.Mesh.ArrayType.Vertex] = tv.ToArray();
-                arrays[(int)Godot.Mesh.ArrayType.Color] = tc.ToArray();
-                arrays[(int)Godot.Mesh.ArrayType.TexUV] = tuv.ToArray();
-                mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
                 var atlas = ImageTexture.CreateFromImage(Image.CreateFromData(tex.Atlas.Width, tex.Atlas.Height, false,
                                                                               Image.Format.Rgba8, tex.Atlas.Rgba));
-                var mat = new ShaderMaterial { Shader = PsxShading.Shader(_cull) };
-                mat.SetShaderParameter("atlas", atlas);
-                mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, mat);
+                void AddSurface((List<Vector3> V, List<Color> C, List<Vector2> UV) b, Shader shader)
+                {
+                    if (b.V.Count < 3) return;
+                    var arrays = new Godot.Collections.Array();
+                    arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                    arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
+                    mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+                    var mat = new ShaderMaterial { Shader = shader };
+                    mat.SetShaderParameter("atlas", atlas);
+                    mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, mat);
+                }
+                // ⭐ SEMI-TRANSPARENCY IS THE GPU'S, PER TEXEL. A semi-transparent face draws its texels without
+                // the blend bit solid and blends only the ones with it, so each such bucket is drawn twice.
+                foreach (var (key, b) in buckets)
+                {
+                    if (key < 0) { AddSurface(b, PsxShading.Shader(_cull)); continue; }
+                    AddSurface(b, PsxShading.SemiTransparentShader(key, false, _cull));
+                    AddSurface(b, PsxShading.SemiTransparentShader(key, true, _cull));
+                }
             }
             if (pv.Count >= 3)
             {

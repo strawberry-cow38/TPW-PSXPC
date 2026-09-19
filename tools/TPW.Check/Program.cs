@@ -866,7 +866,7 @@ static class Program
     /// <summary>--model-faces ENTRY: every textured face of one model entry with the texture the port gives it --
     /// page, palette, UV box, and which sheets hold a sprite with that page and palette, whether the UV box fits
     /// inside it, and by how much it overshoots when it does not. For chasing a wrong or stretched texture.</summary>
-    static int ModelFaces(DiscReader disc, int wantEntry)
+    static int ModelFaces(DiscReader disc, int wantEntry, int onlyClut = -1)
     {
         var g = Archive(disc);
         if (g == null) return 1;
@@ -902,6 +902,13 @@ static class Program
                         }
                 Console.WriteLine($"   tpage {tp:x3} clut {cl:x4}: {gv.n,3} faces, UVs {gv.umin},{gv.vmin}..{gv.umax},{gv.vmax}  sprites: {(hits.Count > 0 ? string.Join("; ", hits) : "NONE")}");
             }
+            if (onlyClut >= 0)
+                foreach (var f in m.Faces)
+                {
+                    if (f.Clut != onlyClut) continue;
+                    string V(int vi) => vi < m.VertexCount ? $"({m.Vertices[vi * 3]},{m.Vertices[vi * 3 + 1]},{m.Vertices[vi * 3 + 2]})" : "(?)";
+                    Console.WriteLine($"      kind {f.Kind:x2}  uv ({f.U0},{f.V0}) ({f.U1},{f.V1}) ({f.U2},{f.V2})  v {f.I0}{V(f.I0)} {f.I1}{V(f.I1)} {f.I2}{V(f.I2)}");
+                }
         }
         return 0;
     }
@@ -1240,8 +1247,34 @@ static class Program
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
             if (Array.IndexOf(args, "--scenery") >= 0) return Scenery(disc);
+            // --semi-list: models with semi-transparent faces (MeshFace.SemiTransparent), and their blend modes.
+            if (Array.IndexOf(args, "--semi-list") >= 0)
+            {
+                var ga = Archive(disc);
+                if (ga == null) return 1;
+                int models = 0, withSemi = 0;
+                foreach (var e in ga.Entries)
+                {
+                    var bytes = ga.Read(e);
+                    if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+                    for (int i = 0; i < c.SubCount; i++)
+                    {
+                        if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
+                        models++;
+                        var modes = new SortedDictionary<int, int>();
+                        foreach (var f in m.Faces) if (f.SemiTransparent) modes[f.BlendMode] = modes.GetValueOrDefault(f.BlendMode) + 1;
+                        if (modes.Count == 0) continue;
+                        withSemi++;
+                        Console.WriteLine($"#{e.Index} sub {i}: {string.Join(", ", System.Linq.Enumerable.Select(modes, kv => $"{kv.Value} faces mode {kv.Key}"))} of {m.Faces.Count}");
+                    }
+                }
+                Console.WriteLine($"{withSemi} of {models} models have semi-transparent faces");
+                return 0;
+            }
             int facesAt = Array.IndexOf(args, "--model-faces");
-            if (facesAt >= 0 && facesAt + 1 < args.Length) return ModelFaces(disc, int.Parse(args[facesAt + 1]));
+            if (facesAt >= 0 && facesAt + 1 < args.Length)
+                return ModelFaces(disc, int.Parse(args[facesAt + 1]),
+                                  facesAt + 2 < args.Length && !args[facesAt + 2].StartsWith("-") ? Convert.ToInt32(args[facesAt + 2], 16) : -1);
             // --extract NAME OUT: one file off the disc, byte for byte (e.g. TPW.OVL, the code overlays).
             int extractAt = Array.IndexOf(args, "--extract");
             if (extractAt >= 0 && extractAt + 2 < args.Length)

@@ -13,9 +13,28 @@ namespace TPW.Data
         /// <summary>The subgroup's texture page, carried down so a face is self-describing.</summary>
         public readonly ushort TPage;
 
+        /// <summary>The low five bits of the face's group flags: which primitive the game draws it with. The draw
+        /// loop 0x800115FC indexes a 32-entry table at 0x80011F34 with them; each entry is a two-instruction stub
+        /// that loads the GPU command and jumps to one of four builders (read off the stubs and the builders):
+        /// bit 0 textured (clear: the one untextured routine), bit 1 double-sided (its builders skip the NCLIP
+        /// back-face test), bit 2 flat 0x24 instead of gouraud 0x34, bit 3 semi-transparent (ORs 2 into the
+        /// command), bit 4 unused.</summary>
+        public readonly byte Kind;
+
         public MeshFace(ushort i0, ushort i1, ushort i2, byte u0, byte v0, byte u1, byte v1, byte u2, byte v2,
-                        ushort clut, ushort tpage)
-        { I0 = i0; I1 = i1; I2 = i2; U0 = u0; V0 = v0; U1 = u1; V1 = v1; U2 = u2; V2 = v2; Clut = clut; TPage = tpage; }
+                        ushort clut, ushort tpage, byte kind = 0)
+        { I0 = i0; I1 = i1; I2 = i2; U0 = u0; V0 = v0; U1 = u1; V1 = v1; U2 = u2; V2 = v2; Clut = clut; TPage = tpage; Kind = kind; }
+
+        public bool Textured => (Kind & 1) != 0;
+        public bool DoubleSided => (Kind & 2) != 0;
+        /// <summary>Drawn flat (0x24): the builder writes the colour 0x808080, so the texel is not shaded at all.</summary>
+        public bool Flat => (Kind & 4) != 0;
+        /// <summary>Drawn semi-transparent: texels whose palette colour has bit 15 set blend with what is behind by
+        /// the page's mode (<see cref="BlendMode"/>); the rest draw solid, and colour 0 not at all, as ever.</summary>
+        public bool SemiTransparent => (Kind & 8) != 0;
+        /// <summary>The page's blend mode, tpage bits 5-6: 0 = (behind + face) / 2, 1 = behind + face,
+        /// 2 = behind - face, 3 = behind + face / 4.</summary>
+        public int BlendMode => (TPage >> 5) & 3;
 
         /// <summary>VRAM pixel origin of this face's palette.</summary>
         public (int X, int Y) ClutOrigin => ((Clut & 0x3F) * 16, Clut >> 6);
@@ -217,7 +236,11 @@ namespace TPW.Data
                     for (int g = 0; g < ngroups; g++)
                     {
                         if (p + 8 > d.Length) { error = $"group header past the end in block {blk}"; return false; }
-                        int nsub = BitConverter.ToUInt16(d, p); p += 8;      // flags + one u32 unidentified
+                        int nsub = BitConverter.ToUInt16(d, p);
+                        // ⭐ +2 is the group's flags word: its low five bits choose the primitive (MeshFace.Kind).
+                        // The draw loop reads it there (0x800116D4: lh t0,2(s2); andi t0,t0,0x1f).
+                        byte kind = (byte)(BitConverter.ToUInt16(d, p + 2) & 0x1F);
+                        p += 8;                                               // + one u32 unidentified
                         for (int sg = 0; sg < nsub; sg++)
                         {
                             if (p + 4 > d.Length) { error = $"subgroup header past the end in block {blk}"; return false; }
@@ -232,7 +255,7 @@ namespace TPW.Data
                                 m.Faces.Add(new MeshFace(
                                     BitConverter.ToUInt16(d, q), BitConverter.ToUInt16(d, q + 2), BitConverter.ToUInt16(d, q + 4),
                                     d[q + 6], d[q + 7], d[q + 8], d[q + 9], d[q + 10], d[q + 11],
-                                    BitConverter.ToUInt16(d, q + 12), tpage));
+                                    BitConverter.ToUInt16(d, q + 12), tpage, kind));
                             }
                             p += nfaces * 14;
                         }

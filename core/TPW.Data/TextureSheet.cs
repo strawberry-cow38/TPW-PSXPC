@@ -241,7 +241,9 @@ namespace TPW.Data
                     rgba[o] = (byte)((c & 31) << 3);
                     rgba[o + 1] = (byte)(((c >> 5) & 31) << 3);
                     rgba[o + 2] = (byte)(((c >> 10) & 31) << 3);
-                    rgba[o + 3] = 255;
+                    // Alpha carries the GPU's bit 15: 255 solid, 128 "blends when the primitive is semi-transparent".
+                    // An opaque primitive draws both the same, so shaders treat anything over 0.25 as there.
+                    rgba[o + 3] = (c & 0x8000) != 0 ? (byte)128 : (byte)255;
                 }
         }
 
