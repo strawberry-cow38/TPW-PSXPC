@@ -380,6 +380,42 @@ Corrected to bits 0-3, which is what makes the twelve line up. tinyclaw's logger
 since it was written, making that a third independent read agreeing with the correction rather than
 the report. **A source being reliable does not make a line right.**
 
+## 5m. Palette residency, proven by its own reversal
+
+The mesh parse says some faces reference palettes in pages beyond the three "holders". tinyclaw first
+checked one park's VRAM, found 26/41/91 palette-shaped rows in the three known holders and **exactly
+zero** in all three of mine, and called them parse artefacts. It is a good control with three known
+positives calibrating it.
+
+⚠ **I nearly accepted that, and it would have sent me re-reading a correct parser.** What the tails
+actually are: entry #83 is **ten identical 72-vertex, 12-bone, 12-track sub-meshes plus a 205-vertex
+structure** — a ride with ten animated cars, the most coherent thing in the archive. #236/#241/#242
+are the same shape. And **0 of 531 face-walks end past the next sub-entry**, while the tails sit in 14
+meshes with 68% in one entry. A broken minority path overruns or scatters; this does neither.
+
+⭐ **Then the population was widened from one park to twelve captures and the answer flipped in
+seconds:**
+
+    capture     512,0  704,0  896,0 | 512,256
+    9x park     91     26     41    | 0
+    menus       0      0      41    | 10
+
+**The same pages hold palettes or not according to what is resident** — 512,0 and 704,0 carry 91 and
+26 rows in a park and **zero in every menu**, while 512,256 does the exact opposite. That is the
+mechanism demonstrated in both directions at once, which no single observation could do, and it
+confirms `640,256 -> 512,256` (192 faces) as real. `576,0` and `960,0` remain
+**unconfirmed-for-coverage, not refuted** — `960,0` is entry #83's ride, which appears in neither a
+menu nor that one park.
+
+⚠⚠ **THE LESSON IS NOT "CHECK YOUR CONTROLS", IT IS "CHECK WHAT YOUR CONTROL COULD SEE".** The
+measurement was well-built, well-calibrated and pointed at one park. **A well-controlled measurement
+of the wrong population is still the wrong population.** It was caught only because the result stated
+its own scope — bare numbers would have cost an hour of re-reading working code. Across two days the
+recoveries came from stated limits, not from stated findings.
+
+(Also settled: the nine "parks" are byte-identical, so they were always one park. A caveat that had
+been flagged in prose is now a measurement.)
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
