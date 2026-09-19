@@ -227,13 +227,21 @@ namespace TPWGodot
 
             var frame = MenuRenderer.NewFrame();
             MenuRenderer.DrawBackdrop(_menuArt, frame);
+            // The glow goes under the selected row, BEFORE the text -- it is the selection indicator,
+            // and the text sits inside it.
+            // ⚠ THE ROW SPACING IS SET BY THE GLOW, NOT PICKED. The highlight cap is 44 pixels tall
+            // (findings/menu-art.md), so rows closer together than that put one item's highlight over
+            // its neighbour -- which is exactly what 22 did. These positions are still mine rather
+            // than measured, but the spacing is now derived from the art instead of guessed.
+            const int Row0 = 138, RowStep = 44;
+            MenuRenderer.DrawHighlight(_menuArt, frame, Row0 + _menu.Index * RowStep - MenuRenderer.GlowY - 4);
 
             // The item list, centred, below the logo. ⚠ The Y positions are MINE, not measured: the
             // captured frame's own text primitives were left out on purpose (they spell one menu with
             // the highlight on one item), so where the rows sit is the one part of this screen not
             // taken from the console. It is a placeholder with real art on top of it, and should be
             // replaced by the real row geometry if anyone measures it.
-            int y = 150;
+            int y = Row0;
             for (int i = 0; i < _menu.Items.Length; i++)
             {
                 string label = _menu.Items[i];
@@ -241,8 +249,12 @@ namespace TPWGodot
                     && MainMenu.OptionKinds[i] == MainMenu.OptionKind.Slider)
                     label += "  " + Bar(i == 0 ? _menu.MusicLevel : _menu.SfxLevel);
                 int w = MenuRenderer.MeasureText(_menuArt, label);
-                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label, additive: i == _menu.Index);
-                y += 22;
+                // ⚠ OPAQUE, NOT ADDITIVE. Drawing the selected item additively over its own bright
+                // yellow glow erased it -- white on yellow. The console draws the items opaque and
+                // lets the glow behind them mark the selection; additive is the GLOW's blend, not the
+                // text's, and I had borrowed it for the wrong thing.
+                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label);
+                y += RowStep;
             }
 
             var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);

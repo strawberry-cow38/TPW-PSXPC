@@ -12,6 +12,7 @@ namespace TPW.Data
     /// screenshot shows and a "does it run" test does not.</summary>
     public static class MenuRenderer
     {
+
         public const int W = MenuLayout.ScreenWidth, H = MenuLayout.ScreenHeight;
 
         /// <summary>Everything the renderer needs, built once.</summary>
@@ -42,11 +43,34 @@ namespace TPW.Data
         /// <summary>A fresh transparent frame.</summary>
         public static byte[] NewFrame() => new byte[W * H * 4];
 
-        /// <summary>Draw the static backdrop: curtains, valance, floor, logo, highlight glow.</summary>
+        /// <summary>The highlight glow's own texture page. It is the one backdrop piece that MOVES --
+        /// it sits under whichever item is selected -- so it is drawn separately, at an offset, rather
+        /// than baked into the static layer where it would be frozen on the captured frame's row.</summary>
+        const ushort GlowPage = 56;
+
+        /// <summary>The captured glow's top edge, so the offset can be measured from it.</summary>
+        public static int GlowY
+        {
+            get
+            {
+                int y = int.MaxValue;
+                foreach (var q in MenuLayout.Backdrop)
+                    if (q.TPage == GlowPage) y = Math.Min(y, Math.Min(Math.Min(q.Y0, q.Y1), Math.Min(q.Y2, q.Y3)));
+                return y == int.MaxValue ? 0 : y;
+            }
+        }
+
+        /// <summary>Draw the static backdrop: curtains, valance, floor, logo. NOT the glow.</summary>
         public static void DrawBackdrop(Prepared p, byte[] dst)
         {
             if (p == null) return;
-            foreach (var q in MenuLayout.Backdrop) DrawQuad(p, dst, q);
+            // ⚠ BACK TO FRONT. A PSX ordering table is built by PREPENDING, so the display list as
+            // walked from its head runs FRONT to BACK -- replaying it in that order paints the floor
+            // over the curtains, the curtains over the logo, and the highlight glow over the text that
+            // is supposed to sit inside it. All three were spotted at a glance by someone who knows
+            // what the screen should look like, and all three are the one reversal.
+            for (int i = MenuLayout.Backdrop.Length - 1; i >= 0; i--)
+                if (MenuLayout.Backdrop[i].TPage != GlowPage) DrawQuad(p, dst, MenuLayout.Backdrop[i], 0);
         }
 
         /// <summary>One textured quad.
@@ -56,13 +80,21 @@ namespace TPW.Data
         /// other -- so the mapping has to interpolate the corner UVs bilinearly rather than assume
         /// u tracks x. Assuming it does produces a picture that is recognisably the right art in the
         /// right place and subtly wrong, which is the hardest kind to notice.</summary>
-        static void DrawQuad(Prepared p, byte[] dst, in ScreenQuad q)
+        /// <summary>The glow, shifted <paramref name="dy"/> rows down from where it was captured.</summary>
+        public static void DrawHighlight(Prepared p, byte[] dst, int dy)
+        {
+            if (p == null) return;
+            for (int i = MenuLayout.Backdrop.Length - 1; i >= 0; i--)
+                if (MenuLayout.Backdrop[i].TPage == GlowPage) DrawQuad(p, dst, MenuLayout.Backdrop[i], dy);
+        }
+
+        static void DrawQuad(Prepared p, byte[] dst, in ScreenQuad q, int dy)
         {
             if (!p.Atlas.TryOrigin(q.TPage, q.Clut, out int ax, out int ay)) return;
             int x0 = Math.Min(Math.Min(q.X0, q.X1), Math.Min(q.X2, q.X3));
             int x1 = Math.Max(Math.Max(q.X0, q.X1), Math.Max(q.X2, q.X3));
-            int y0 = Math.Min(Math.Min(q.Y0, q.Y1), Math.Min(q.Y2, q.Y3));
-            int y1 = Math.Max(Math.Max(q.Y0, q.Y1), Math.Max(q.Y2, q.Y3));
+            int y0 = Math.Min(Math.Min(q.Y0, q.Y1), Math.Min(q.Y2, q.Y3)) + dy;
+            int y1 = Math.Max(Math.Max(q.Y0, q.Y1), Math.Max(q.Y2, q.Y3)) + dy;
             if (x1 <= x0 || y1 <= y0) return;
 
             var src = p.Atlas.Image;
@@ -113,6 +145,8 @@ namespace TPW.Data
             if (c == ' ') return 8;
             if (p == null || !MenuLayout.Glyph.TryGetValue(c, out int i) || i >= p.SpriteCount) return 8;
             var sp = p.Sheet.Sprites[i];
+            // ⚠ A ROTATED GLYPH'S ADVANCE IS ITS H, not its W -- the stored rect is the turned image,
+            // so the drawn width is the stored height. Using W regardless overlaps the next letter.
             return ((sp.Flags & 1) != 0 ? sp.H : sp.W) + 1;
         }
 
@@ -135,6 +169,21 @@ namespace TPW.Data
                         // LETTER, because the neighbouring sheet pixels are other glyphs. The probe
                         // that found it rendered A-Z and got A..L right and then nonsense, and the
                         // wrong ones were exactly the five with this bit set: I, M, O, P, Q.
+                        // ⚠ W AND H ARE THE DISPLAY SIZE; ROTATION TRANSPOSES THE SAMPLING, NOT THE
+                        // OUTPUT. I had it the other way round first, which made the widest lowercase
+                        // letter -- 'm', stored 30x17 -- draw 17 wide and 30 tall. The aspect ratios
+                        // are what settle it: every glyph's stored H matches the font's line height,
+                        // so H cannot be a width. A rotated sprite occupies H x W on the SHEET and
+                        // still draws W x H on screen.
+                        // ⚠ BIT 0 OF Flags MEANS THE SPRITE IS STORED TURNED 90 DEGREES, and ignoring
+                        // it does not draw a broken glyph -- it draws a DIFFERENT LETTER, because what
+                        // sits beside a glyph in the sheet is other glyphs. Found by rendering A-Z:
+                        // correct through L, then nonsense, and the wrong ones were exactly the five
+                        // with the bit set (I, M, O, P, Q).
+                        //
+                        // ⚠ THE ORIENTATION BELOW WAS CHOSEN BY RENDERING ALL FOUR READINGS SIDE BY
+                        // SIDE, not by reasoning about it -- I argued myself into a different one from
+                        // the stored W/H aspect ratios and it was wrong. The picture decided.
                         bool rot = (sp.Flags & 1) != 0;
                         int outW = rot ? sp.H : sp.W, outH = rot ? sp.W : sp.H;
                         for (int gy = 0; gy < outH; gy++)
