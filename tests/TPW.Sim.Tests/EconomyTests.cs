@@ -71,6 +71,15 @@ namespace TPW.Sim.Tests
         public void ProRataFloorsThePercentageBeforeTheWage(int days, int monthLen, int expectedPounds)
             => Assert.Equal(Money.FromPounds(expectedPounds), Wages.Monthly(0, StaffKind.Mechanic, days, monthLen));
 
+        // ⭐⭐ MEASURED ON HARDWARE, and the measurement is one the other formula cannot produce. tinyclaw
+        // hired a mechanic (card: Monthly Wage £150) and read the bank: 240 tenths for the first, part month,
+        // then +1500 a month. With one division the wage is 150*d/30 = 5d pounds, always a multiple of 5, so £24
+        // is out of reach for ANY whole number of days. With two floors, floor(100*5/30) = 16 and
+        // floor(16*150/100) = 24. Nothing else fits.
+        [Fact]
+        public void AMechanicsFirstPartMonthIs24PoundsAsMeasured()
+            => Assert.Equal(Money.FromRaw(240), Wages.Monthly(0, StaffKind.Mechanic, daysWorked: 5, monthLength: 30));
+
         [Fact]
         public void AFullMonthIsNeverProRated()
         {
