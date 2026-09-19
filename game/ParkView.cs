@@ -44,13 +44,14 @@ namespace TPWGodot
         CanvasLayer _pickerLayer;
         PanelContainer _picker;
         VBoxContainer _pickerList;
-        /// <summary>The build tools' sound group (SoundGroup 7) and a player for it: the path tool's own sounds.</summary>
-        SoundGroup _toolSounds;
+        /// <summary>The build tools' sound group (SoundGroup 7): the path tool's own sounds, and the placement tools'
+        /// refusal. Group 8 holds the placement tools' other sounds (placed, cancelled, turned).</summary>
+        SoundGroup _toolSounds, _parkSounds;
         /// <summary>A few voices, so two sounds the game starts together (lay, then connected) both play, as the
         /// game's voice allocator (0x800B8300) gives each its own SPU voice.</summary>
         readonly AudioStreamPlayer[] _sfx = new AudioStreamPlayer[4];
         int _sfxNext;
-        readonly Dictionary<int, AudioStreamWav> _sfxStreams = new();
+        readonly Dictionary<(int Group, int Sound), AudioStreamWav> _sfxStreams = new();
         (int X, int Z)? _cursorTile, _runStart;
         TextureSheet _groundSheet;
         Scrolling _scroll;
@@ -784,7 +785,7 @@ namespace TPWGodot
             StartPlacing(k);
             _placeRot = rot & 3;
             var (w, d) = _attractions[k].Rec.Footprint(_placeRot);
-            _cursorTile = (x + (w - 1) / 2, z + (d - 1) / 2);
+            _cursorTile = (x + (w >> 1), z + (d >> 1));
             _ghostPinned = true;
         }
         bool _ghostPinned;
@@ -816,12 +817,14 @@ namespace TPWGodot
             return m;
         }
 
-        /// <summary>The footprint's corner for the attraction under the mouse: the footprint centred on the cursor.</summary>
+        /// <summary>The footprint's corner for the attraction under the mouse. 0x8001C454, run every frame with the
+        /// cursor's tile, puts the corner at the cursor less half the turned footprint, rounded down (w >> 1, d >> 1):
+        /// an even side has the cursor just past its middle.</summary>
         (int X, int Z)? PlacementCorner()
         {
             if (_placing < 0 || _cursorTile is not { } c) return null;
             var (w, d) = _attractions[_placing].Rec.Footprint(_placeRot);
-            return (c.X - (w - 1) / 2, c.Z - (d - 1) / 2);
+            return (c.X - (w >> 1), c.Z - (d >> 1));
         }
 
         /// <summary>Where an attraction with its footprint's corner at (ox, oz) stands: the footprint's centre on the
@@ -855,7 +858,11 @@ namespace TPWGodot
             AddChild(inst);
             _placed.Add(inst);
             RebuildGround();
-            PlaySfx(ToolSound.Lay);
+            // 0x8001C5C8: the placed sound, then the tool closes (it switches to tool 0). Only the features' tool (15)
+            // reopens itself while the park may take more features; the picker has none of those yet.
+            PlaySfx(PlaceSound.Placed);
+            StopPlacing();
+            RefreshInfo();
         }
 
         /// <summary>The underlay every marker has (0x800553B0: common-sheet sprite 171 at shade 0x40).</summary>
@@ -983,25 +990,33 @@ namespace TPWGodot
             else PlaySfx(ToolSound.Refused);
         }
 
-        /// <summary>The path tool's sounds in group 7, as 0x8001D5C0 plays them.</summary>
+        /// <summary>The path tool's sounds in group 7, as 0x8001D5C0 plays them. The placement tools refuse with the
+        /// same sound 2 (0x8001C5C8).</summary>
         public enum ToolSound { Start = 0, Refused = 2, Connected = 3, Lay = 4 }
 
-        /// <summary>Give the park view the build tools' sound group (SoundGroup.Load(…, 7)).</summary>
-        public void SetToolSounds(SoundGroup group) { _toolSounds = group; _sfxStreams.Clear(); }
+        /// <summary>The placement tools' sounds in group 8, shared by every placement tool (rides, shops, sideshows,
+        /// features): placed by 0x8001C5C8, cancelled by 0x8001C7E4, turned by 0x8001C6BC / 0x8001C750.</summary>
+        public enum PlaceSound { Placed = 3, Cancelled = 6, Turned = 9 }
 
-        /// <summary>Play one of the tools' sounds, at the rate its record's pitch gives, full volume, centred (0x800B84AC).</summary>
-        void PlaySfx(ToolSound which)
+        /// <summary>Give the park view the build tools' sound group (SoundGroup.Load(…, 7)) and the group with the
+        /// placement tools' sounds (SoundGroup.Load(…, 8)).</summary>
+        public void SetToolSounds(SoundGroup tools, SoundGroup park = null) { _toolSounds = tools; _parkSounds = park; _sfxStreams.Clear(); }
+
+        void PlaySfx(ToolSound which) => PlaySfx(_toolSounds, 7, (int)which);
+        void PlaySfx(PlaceSound which) => PlaySfx(_parkSounds, 8, (int)which);
+
+        /// <summary>Play sound n of a group, at the rate its record's pitch gives, full volume, centred (0x800B84AC).</summary>
+        void PlaySfx(SoundGroup group, int g, int n)
         {
-            int n = (int)which;
-            if (_toolSounds == null) return;
-            if (!_sfxStreams.TryGetValue(n, out var stream))
+            if (group == null) return;
+            if (!_sfxStreams.TryGetValue((g, n), out var stream))
             {
-                var pcm = _toolSounds.Decode(n);
-                if (pcm == null || pcm.SampleCount == 0) { _sfxStreams[n] = null; return; }
+                var pcm = group.Decode(n);
+                if (pcm == null || pcm.SampleCount == 0) { _sfxStreams[(g, n)] = null; return; }
                 var bytes = new byte[pcm.SampleCount * 2];
                 Buffer.BlockCopy(pcm.Samples, 0, bytes, 0, bytes.Length);
-                stream = new AudioStreamWav { Format = AudioStreamWav.FormatEnum.Format16Bits, MixRate = _toolSounds.Sounds[n].SampleRate, Stereo = false, Data = bytes };
-                _sfxStreams[n] = stream;
+                stream = new AudioStreamWav { Format = AudioStreamWav.FormatEnum.Format16Bits, MixRate = group.Sounds[n].SampleRate, Stereo = false, Data = bytes };
+                _sfxStreams[(g, n)] = stream;
             }
             if (stream == null) return;
             var voice = _sfx[_sfxNext];
@@ -1155,6 +1170,10 @@ namespace TPWGodot
             { GameCamera = !GameCamera; return; }
             // Attraction placement: Tab opens the picker; while placing, , and . turn it a quarter each way and R turns
             // it on (master's keys), the left button places it and the right button puts it away.
+            // ⭐ THE GAME'S TURN IS INSTANT: no tween, no wobble. Its turn button (0x8001C6BC / 0x8001C750) adds one to
+            // the tool's quarter count (3 wraps to 0), hands it straight to the attraction (0x80063294, one byte
+            // store) and plays group 8 sound 9; the blueprint is drawn from that byte the same frame (0x80064558).
+            // The game only turns one way, the way . and R do; , is master's.
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Tab } && _attractions.Count > 0)
             { _picker.Visible = !_picker.Visible; return; }
             if (_placing >= 0)
@@ -1162,10 +1181,16 @@ namespace TPWGodot
                 if (e is InputEventKey { Pressed: true, Echo: false } key && key.Keycode is Key.Comma or Key.Period or Key.R)
                 {
                     _placeRot = (_placeRot + (key.Keycode == Key.Comma ? 3 : 1)) & 3;
+                    PlaySfx(PlaceSound.Turned);
                     return;
                 }
                 if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true }) { PlaceAttraction(); return; }
-                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }) { StopPlacing(); RefreshInfo(); return; }
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
+                {
+                    PlaySfx(PlaceSound.Cancelled);   // 0x8001C7E4: the attraction is dropped, the tool closes
+                    StopPlacing(); RefreshInfo();
+                    return;
+                }
             }
             // ⭐ THE PATH TOOL, master's way. A left click on a path or an unoccupied tile (buildable or not) opens the
             // tool -- and only opens it. With the tool open, one click fixes the ghost's start and the next lays the

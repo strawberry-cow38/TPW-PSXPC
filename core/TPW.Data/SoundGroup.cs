@@ -12,7 +12,9 @@ namespace TPW.Data
     /// (a per-voice switch, 0x801033D0), u16 pitch (0x1000 = 44,100 Hz), u32 offset` into the group's samples, at
     /// volume 0x3FFF of the master effects volume and centre pan. Group 7 is entries 320/321, the park's build
     /// tools: the path tool plays 0 when a run is started, 4 when it is laid, 3 as well when the run ends on path
-    /// already there (connected; master confirmed it by ear) and 2 when it refuses (0x8001D5C0).</summary>
+    /// already there (connected; master confirmed it by ear) and 2 when it refuses (0x8001D5C0). Group 8 is entries
+    /// 322/323, 29 sounds; the placement tools play 3 when an attraction is placed (0x8001C5C8), 6 when placing is
+    /// cancelled (0x8001C7E4) and 9 at each quarter turn (0x8001C6BC / 0x8001C750), and refuse with group 7's 2.</summary>
     public sealed class SoundGroup
     {
         public readonly struct Sound

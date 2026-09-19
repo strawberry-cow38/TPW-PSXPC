@@ -52,8 +52,9 @@ namespace TPWGodot
         OptionButton _musicChoice;
         /// <summary>The common sheet (#416): guests, the flags by the bus stops, the loading font.</summary>
         TextureSheet _commonSheet;
-        /// <summary>The build tools' sound-effect group (SoundGroup 7), for the park view's path tool.</summary>
-        SoundGroup _toolSounds;
+        /// <summary>The build tools' sound-effect group (SoundGroup 7), for the park view's path tool, and group 8, with
+        /// the placement tools' sounds.</summary>
+        SoundGroup _toolSounds, _parkSounds;
         /// <summary>Each world's attractions (AttractionCatalog) with their English names, for the park view's picker.</summary>
         readonly System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<(AttractionDefinition, string)>> _attractionsByWorld = new();
         /// <summary>The game's executable (TPW.BIN), for the data tables the port reads out of it (particle templates).</summary>
@@ -541,6 +542,7 @@ namespace TPWGodot
                             _commonSheet = common;
                         // The build tools' sounds: group 7 of the game's effect groups (entries 320/321).
                         _toolSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 7);
+                        _parkSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 8);
                         // Each world's attractions for the park view's picker, named from the English table.
                         StringTable english = null;
                         int enEntry = StringTable.EntryByLanguage[0];
@@ -819,7 +821,7 @@ namespace TPWGodot
                 _park.SetAttractions(world != null && _attractionsByWorld.TryGetValue(world.Index, out var al) ? al : null,
                                      ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
-                _park.SetToolSounds(_toolSounds);
+                _park.SetToolSounds(_toolSounds, _parkSounds);
                 if (_autoOpen) _park.ParkOpen = true;
                 if (_autoBuildable) _park.ShowBuildable = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
