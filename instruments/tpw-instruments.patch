@@ -1,0 +1,358 @@
+diff --git a/frontend/libretro.c b/frontend/libretro.c
+index 4005e37..ab11dc5 100644
+--- a/frontend/libretro.c
++++ b/frontend/libretro.c
+@@ -51,6 +51,9 @@
+ 
+ #include <libretro.h>
+ #include "libretro_core_options.h"
++extern unsigned short *gpulib_get_vram(void);
++extern unsigned short *spu_get_regarea(void);   /* tinyclaw */
++#define TPW_MEMORY_SPU_REGS 0x1000
+ 
+ #ifdef USE_LIBRETRO_VFS
+ #include <streams/file_stream_transforms.h>
+@@ -1211,6 +1214,14 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
+       break;
+    }
+ 
++   /* A real DualShock boots with the sticks OFF until the ANALOG button is
++    * pressed, and this core faithfully reports a DIGITAL pad until then. So a
++    * headless harness must toggle it explicitly or every analog test is blind. */
++   if (in_type[port] == PSE_PAD_TYPE_ANALOGPAD && getenv("TPW_ANALOG_ON")) {
++      int st = padToggleAnalog(port);
++      fprintf(stderr, "[fe] forced pad %u ANALOG %s\n", port, st ? "ON" : "OFF");
++   }
++
+    if (in_type[port] != in_type_old) {
+        SysPrintf("port: %u  device: %s\n", port + 1, get_pse_pad_label[in_type[port]]);
+        padChanged();
+@@ -2230,6 +2241,10 @@ void *retro_get_memory_data(unsigned id)
+    case RETRO_MEMORY_SAVE_RAM:
+       if (memcard_type[0] == MEMCARDTYPE_LIBRETRO)
+          return Mcd1Data;
++   case RETRO_MEMORY_VIDEO_RAM:
++      return gpulib_get_vram();     /* 1024x512x16bpp: CLUTs + textures */
++   case TPW_MEMORY_SPU_REGS:
++      return spu_get_regarea();     /* tinyclaw: 0x400 halfwords of SPU registers */
+    }
+    return NULL;
+ }
+@@ -2243,6 +2258,10 @@ size_t retro_get_memory_size(unsigned id)
+    case RETRO_MEMORY_SAVE_RAM:
+       if (memcard_type[0] == MEMCARDTYPE_LIBRETRO)
+          return MCD_SIZE;
++   case RETRO_MEMORY_VIDEO_RAM:
++      return 1024 * 512 * 2;
++   case TPW_MEMORY_SPU_REGS:
++      return 0x400 * 2;
+    }
+    return 0;
+ }
+diff --git a/libpcsxcore/pad.c b/libpcsxcore/pad.c
+index 6d95f50..fe81ed4 100644
+--- a/libpcsxcore/pad.c
++++ b/libpcsxcore/pad.c
+@@ -13,6 +13,7 @@
+ #include <stdio.h> // SEEK_CUR
+ #include "psxcommon.h"
+ #include "psxcounters.h"
++#include <stdlib.h>
+ #include "plugins.h"
+ 
+ #define REPLUG_FRAMES 32u
+@@ -349,6 +350,22 @@ static void PADstartPoll_(PadDataS *pad)
+ 			pad->respSize = 4;
+ 			break;
+ 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
++			/* TPW probe: log what the CONSOLE actually receives, so a null
++			 * result can be told apart from "the sticks never got here". */
++			if (getenv("TPW_PADLOG")) {
++				/* log TRANSITIONS, not the first N polls -- the first N are all
++				 * boot-time and say nothing about what the game does in play. */
++				static int last = -1;
++				int cur = (pad->ds.padMode << 1) | pad->ds.configMode;
++				static int n = 0;
++				if (cur != last) { last = cur; n = 0; }
++				if (n < 1) {
++					fprintf(stderr, "[pad] mode=%d cfg=%d  LX=%02X LY=%02X RX=%02X RY=%02X\n",
++						pad->ds.padMode, pad->ds.configMode,
++						pad->leftJoyX, pad->leftJoyY, pad->rightJoyX, pad->rightJoyY);
++					n++;
++				}
++			}
+ 			if ((pad->ds.padMode | pad->ds.configMode) == 0)
+ 				goto standard;
+ 			pad->rxData[0] = 0x73;
+diff --git a/plugins/dfsound/spu.c b/plugins/dfsound/spu.c
+index 76f76af..f315dee 100644
+--- a/plugins/dfsound/spu.c
++++ b/plugins/dfsound/spu.c
+@@ -53,6 +53,12 @@
+ 
+ __attribute__((aligned(32)))
+ SPUInfo         spu;
++
++/* tinyclaw: expose the SPU register file so a headless frontend can read per-voice
++ * pitch. Voice n pitch is regArea[((n<<4)|4)>>1]; rate = pitch/0x1000 * 44100.
++ * Ears can settle ONE sample's rate; only this can show that voices differ. */
++unsigned short *spu_get_regarea(void) { return spu.regArea; }
++
+ SPUConfig       spu_config;
+ 
+ static int iFMod[NSSIZE];
+diff --git a/plugins/gpulib/gpu.c b/plugins/gpulib/gpu.c
+index f04e3a5..10ddeb8 100644
+--- a/plugins/gpulib/gpu.c
++++ b/plugins/gpulib/gpu.c
+@@ -28,6 +28,8 @@
+ 
+ struct psx_gpu gpu;
+ 
++unsigned short *gpulib_get_vram(void) { return gpu.vram; }
++
+ static noinline int do_cmd_buffer(struct psx_gpu *gpu, uint32_t *data, int count,
+     int *cycles_sum, int *cycles_last);
+ static noinline void finish_vram_transfer(struct psx_gpu *gpu, int is_read, int is_async);
+@@ -489,6 +491,159 @@ const unsigned char cmd_lengths[256] =
+ 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ };
+ 
++/* --- TPW: record which CLUT (palette) the game actually selects ---------
++ * Guessing a palette out of VRAM cannot work: one texture page is shared by
++ * many palettes, so any single guess is wrong for almost everything on it.
++ * But every textured primitive carries its CLUT address, so the game tells us
++ * outright. Record each distinct one the first time it is seen. */
++static unsigned int tpw_seen[8192];
++static int tpw_nseen = 0;
++static FILE *tpw_fp = NULL;
++
++extern unsigned long tpw_path_used[3];
++static void tpw_report_paths(void)
++{
++  fprintf(stderr, "[tpw] cmd-list paths carried work: frameskip=%lu async=%lu plain=%lu\n",
++          tpw_path_used[0], tpw_path_used[1], tpw_path_used[2]);
++}
++
++static void tpw_note_clut(unsigned short clut, unsigned short tpage,
++                          int u0, int v0, int u1, int v1)
++{
++  /* One texture page carries MANY sprites, each with its own palette, so a
++   * per-page mapping is wrong for nearly all of it. Key on the sprite's
++   * position inside the page (quantised to 16px) to get a per-sprite map. */
++  unsigned int key = ((unsigned int)clut << 16) ^ ((unsigned int)tpage << 8)
++                   ^ ((unsigned int)u0 << 4) ^ (unsigned int)v0
++                   ^ ((unsigned int)u1 << 12) ^ ((unsigned int)v1 << 20);
++  int i;
++  for (i = 0; i < tpw_nseen; i++)
++    if (tpw_seen[i] == key) return;
++  if (tpw_nseen >= 8192) return;
++  tpw_seen[tpw_nseen++] = key;
++  if (!tpw_fp) {
++    const char *p = getenv("TPW_CLUTLOG");
++    if (!p) return;
++    tpw_fp = fopen(p, "w");
++    if (!tpw_fp) return;
++    fprintf(tpw_fp, "# clut_x clut_y tpage_x tpage_y bpp umin vmin umax vmax\n");
++    atexit(tpw_report_paths);
++  }
++  /* CLUT word: bits0-5 = X/16, bits6-14 = Y. TPAGE: bits0-3 = X/64,
++   * bit4 = Y/256, bits7-8 = colour mode (0=4bpp,1=8bpp,2=15bpp). */
++  fprintf(tpw_fp, "%d %d %d %d %d %d %d %d %d\n",
++          (clut & 0x3f) * 16, (clut >> 6) & 0x1ff,
++          (tpage & 0xf) * 64, ((tpage >> 4) & 1) * 256,
++          (tpage >> 7) & 3, u0, v0, u1, v1);
++  fflush(tpw_fp);
++}
++
++/* TPW: VRAM->VRAM copies (GP0 0x80). A texture page can be RESIDENT in VRAM and
++ * never sampled -- entry 0x10C lands at (768..895, 0..511) and 3000 frames of a
++ * park drew from it zero times. If that region is a staging area feeding the
++ * pages that ARE drawn from, the moves must show up here. Records each distinct
++ * (src, dst, size) once; env var TPW_COPYLOG. */
++static unsigned int tpw_cseen[4096];
++static int tpw_ncseen = 0;
++static FILE *tpw_cfp = NULL;
++static unsigned long tpw_ncopy = 0;
++
++/* which of the three command-list paths actually carried work */
++unsigned long tpw_path_used[3] = {0,0,0};
++
++static void tpw_note_copy(unsigned int sx, unsigned int sy,
++                          unsigned int dx, unsigned int dy,
++                          unsigned int w, unsigned int h)
++{
++  unsigned int key = (sx << 22) ^ (sy << 13) ^ (dx << 4) ^ (dy >> 5)
++                   ^ (w << 17) ^ (h << 9) ^ (dy << 27);
++  int i;
++  tpw_ncopy++;
++  for (i = 0; i < tpw_ncseen; i++)
++    if (tpw_cseen[i] == key) return;
++  if (tpw_ncseen >= 4096) return;
++  tpw_cseen[tpw_ncseen++] = key;
++  if (!tpw_cfp) {
++    const char *p = getenv("TPW_COPYLOG");
++    if (!p) return;
++    tpw_cfp = fopen(p, "w");
++    if (!tpw_cfp) return;
++    fprintf(tpw_cfp, "# nth sx sy dx dy w h\n");
++  }
++  fprintf(tpw_cfp, "%lu %u %u %u %u %u %u\n", tpw_ncopy, sx, sy, dx, dy, w, h);
++  fflush(tpw_cfp);
++}
++
++static void tpw_scan_list(struct psx_gpu *gpu, const uint32_t *list, int count)
++{
++  int pos = 0;
++  /* This scan runs BEFORE the renderer executes the list, so ex_regs[1] still
++   * holds the page from the PREVIOUS list: any texpage set inside this one has
++   * not been applied yet. Sprites then get paired with a stale page (usually
++   * 0), which is what dumped a thousand primitives onto a bogus page(0,0).
++   * So track the page myself as I walk, exactly as the GPU will. */
++  unsigned short cur_tpage = (unsigned short)(gpu->ex_regs[1] & 0xffff);
++  while (pos < count) {
++    int op = list[pos] >> 24;
++    int len = 1 + cmd_lengths[op];
++    if (pos + len > count) break;
++    if (op == 0xe1)
++      cur_tpage = (unsigned short)(list[pos] & 0xffff);
++    /* Bit 2 means "textured" for POLYGONS (0x20-0x3f) and RECTS (0x60-0x7f)
++     * only. 0x40-0x5f are LINES, which carry no texture and no CLUT -- and
++     * including them reads two unrelated words as a clut/texpage pair, which
++     * is what parked a thousand bogus primitives on page(0,0).
++     * CLUT is word 2's high half. TEXPAGE is carried IN the primitive for
++     * polygons (word 4 flat, word 5 gouraud); rects use the latched page. */
++    if (((op >= 0x20 && op < 0x40) || (op >= 0x60 && op < 0x80))
++        && (op & 0x04) && len >= 3) {
++      unsigned short tp;
++      if (op < 0x40) {                 /* polygon: page is IN the primitive */
++        int ti = (op & 0x10) ? 5 : 4;  /* bit4 = gouraud */
++        if (pos + ti < count) {
++          tp = (unsigned short)(list[pos + ti] >> 16);
++          cur_tpage = tp;              /* the GPU latches it too */
++        } else tp = cur_tpage;
++      } else {                         /* sprite/rect: uses the latched page */
++        tp = cur_tpage;
++      }
++      {
++        /* One UV cannot identify a sprite, so take the bounding box over ALL
++         * of the primitive's UVs. Flat polys carry uv at words 2,4,6,8;
++         * gouraud at 2,5,8,11; sprites carry uv at word 2 plus a size word. */
++        int uo[4], n = 0, k, umin = 255, vmin = 255, umax = 0, vmax = 0;
++        if (op < 0x40) {
++          int nv = (op & 0x08) ? 4 : 3;
++          int step = (op & 0x10) ? 3 : 2;
++          for (k = 0; k < nv; k++) uo[n++] = 2 + k * step;
++        } else {
++          uo[n++] = 2;
++        }
++        for (k = 0; k < n; k++) {
++          int u, v;
++          if (pos + uo[k] >= count) break;
++          u = list[pos + uo[k]] & 0xff;
++          v = (list[pos + uo[k]] >> 8) & 0xff;
++          if (u < umin) umin = u;
++          if (u > umax) umax = u;
++          if (v < vmin) vmin = v;
++          if (v > vmax) vmax = v;
++        }
++        if (op >= 0x40 && len >= 4) {   /* textured rect: word 3 is w,h */
++          int ww = list[pos + 3] & 0xffff, hh = (list[pos + 3] >> 16) & 0xffff;
++          if (ww > 0 && ww < 256) umax = umin + ww - 1;
++          if (hh > 0 && hh < 256) vmax = vmin + hh - 1;
++        }
++        if (umin <= umax)
++          tpw_note_clut((unsigned short)(list[pos + 2] >> 16), tp,
++                        umin, vmin, umax, vmax);
++      }
++    }
++    pos += len;
++  }
++}
++
++
+ // this isn't very useful so should be rare
+ void cpy_mask(uint16_t *dst, const uint16_t *src, int l, uint32_t r6)
+ {
+@@ -604,11 +759,40 @@ static noinline void start_vram_transfer(struct psx_gpu *gpu, uint32_t pos_word,
+     gpu->gpu_state_change(PGS_VRAM_TRANSFER_START, 0);
+ }
+ 
++/* tinyclaw: log every CPU->VRAM upload as (destination rect, content hash).
++ * The hash is FNV-1a over the halfwords actually landed, so a consumer can match
++ * an archive entry to a VRAM slot WITHOUT any pixels crossing between us.
++ * Needed because 12 texture sheets share 4 VRAM slots, so the binding is dynamic
++ * and a static page->entry map cannot exist. */
++static FILE *tpw_up_fp;
++static void tpw_log_upload(struct psx_gpu *gpu, int x, int y, int w, int h)
++{
++  const char *p;
++  unsigned int hash = 2166136261u;
++  int r, c;
++  if (!tpw_up_fp) {
++    p = getenv("TPW_UPLOADLOG");
++    if (!p) { tpw_up_fp = (FILE *)-1; return; }
++    tpw_up_fp = fopen(p, "w");
++    if (!tpw_up_fp) { tpw_up_fp = (FILE *)-1; return; }
++    fprintf(tpw_up_fp, "# x y w h halfwords fnv1a\n");
++  }
++  if (tpw_up_fp == (FILE *)-1) return;
++  for (r = 0; r < h; r++) {
++    const uint16_t *m = VRAM_MEM_XY(gpu->vram, x, (y + r) & 0x1ff);
++    for (c = 0; c < w; c++) { hash ^= m[c]; hash *= 16777619u; }
++  }
++  fprintf(tpw_up_fp, "%d %d %d %d %d %08x\n", x, y, w, h, w * h, hash);
++  fflush(tpw_up_fp);
++}
++
+ static void finish_vram_transfer(struct psx_gpu *gpu, int is_read, int is_async)
+ {
+   if (is_read)
+     gpu->status &= ~PSX_GPU_STATUS_IMG;
+   else {
++    tpw_log_upload(gpu, gpu->dma_start.x, gpu->dma_start.y,
++                        gpu->dma_start.w, gpu->dma_start.h);
+     int intersect = check_screen_intersect(gpu, gpu->dma_start.x, gpu->dma_start.y,
+                       gpu->dma_start.w, gpu->dma_start.h);
+     log_io(gpu, "dma %3d,%3d %dx%d scr %3d,%3d %3dx%3d -> dirty %d\n",
+@@ -869,6 +1053,12 @@ static noinline int do_cmd_buffer(struct psx_gpu *gpu, uint32_t *data, int count
+         cmd = -1; // incomplete cmd, can't consume yet
+         break;
+       }
++      tpw_note_copy(LE32TOH(data[pos + 1]) & 0x3ff,
++                    (LE32TOH(data[pos + 1]) >> 16) & 0x1ff,
++                    LE32TOH(data[pos + 2]) & 0x3ff,
++                    (LE32TOH(data[pos + 2]) >> 16) & 0x1ff,
++                    ((LE32TOH(data[pos + 3]) - 1) & 0x3ff) + 1,
++                    (((LE32TOH(data[pos + 3]) >> 16) - 1) & 0x1ff) + 1);
+       if (gpu_async_enabled(gpu))
+         break;
+       *cycles_sum += *cycles_last;
+@@ -886,14 +1076,26 @@ static noinline int do_cmd_buffer(struct psx_gpu *gpu, uint32_t *data, int count
+       continue;
+     }
+ 
+-    if (gpu->frameskip.active && gpu->frameskip.allow)
++    /* TPW: the scan MUST sit on all three paths. It was on the plain renderer
++     * path only, so anything submitted while frameskip was active or with the
++     * async GPU enabled (this core builds with -DUSE_ASYNC_GPU) was never
++     * looked at -- an instrument that is blind on two of three branches and
++     * silent about it. */
++    if (gpu->frameskip.active && gpu->frameskip.allow) {
++      tpw_scan_list(gpu, data + pos, count - pos);
++      tpw_path_used[0]++;
+       pos += do_cmd_list_skip(gpu, data + pos, count - pos,
+                cycles_sum, cycles_last, &cmd);
++    }
+     else if (gpu_async_enabled(gpu)) {
++      tpw_scan_list(gpu, data + pos, count - pos);
++      tpw_path_used[1]++;
+       pos += gpu_async_do_cmd_list(gpu, data + pos, count - pos,
+                cycles_sum, cycles_last, &cmd, &vram_dirty);
+     }
+     else {
++      tpw_path_used[2]++;
++      tpw_scan_list(gpu, data + pos, count - pos);
+       pos += renderer_do_cmd_list(data + pos, count - pos, gpu->ex_regs,
+                cycles_sum, cycles_last, &cmd);
+       vram_dirty = 1;

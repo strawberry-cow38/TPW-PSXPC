@@ -1,0 +1,1535 @@
+{
+"800375C4": [
+"SsStart2",
+"LIBSND",
+32,
+"SSINIT.OBJ",
+"260"
+],
+"8006189C": [
+"StSetMask",
+"LIBCD",
+32,
+"CDROM.OBJ",
+"260"
+],
+"800695E4": [
+"GsSetLsMatrix",
+"LIBGS",
+44,
+"MATRIX.OBJ",
+"410"
+],
+"800BE038": [
+"SpuSetVoiceAttr",
+"LIBSPU",
+32,
+"S_SVA.OBJ",
+"260"
+],
+"800C0498": [
+"__SN_ENTRY_POINT",
+"LIBSN",
+164,
+"SNMAIN.OBJ",
+"350"
+],
+"800C05B0": [
+"RotMatrixZ",
+"LIBGTE",
+416,
+"FGO_06.OBJ",
+"330"
+],
+"800C0750": [
+"CompMatrix",
+"LIBGTE",
+352,
+"MTX_00.OBJ",
+"330"
+],
+"800C08B0": [
+"SetGeomOffset",
+"LIBGTE",
+32,
+"REG12.OBJ",
+"350"
+],
+"800C26A8": [
+"__builtin_delete",
+"LIBSN",
+36,
+"op_delete.obj",
+"470"
+],
+"800C26CC": [
+"CdInit",
+"LIBCD",
+336,
+"EVENT.OBJ",
+"430"
+],
+"800C2798": [
+"def_cbsync",
+"LIBCD",
+40,
+"EVENT.OBJ",
+"370"
+],
+"800C28D0": [
+"CdControl",
+"LIBCD",
+316,
+"SYS.OBJ",
+"410"
+],
+"800C2A0C": [
+"CdControlF",
+"LIBCD",
+308,
+"SYS.OBJ",
+"410"
+],
+"800C2B40": [
+"CdControlB",
+"LIBCD",
+332,
+"SYS.OBJ",
+"410"
+],
+"800C2C8C": [
+"CdMix",
+"LIBCD",
+32,
+"SYS.OBJ",
+"370"
+],
+"800C2D30": [
+"CdIntToPos",
+"LIBCD",
+260,
+"SYS.OBJ",
+"370"
+],
+"800C2E34": [
+"CdPosToInt",
+"LIBCD",
+128,
+"SYS.OBJ",
+"330"
+],
+"800C2EB4": [
+"CdSearchFile",
+"LIBCD",
+2416,
+"ISO9660.OBJ",
+"410"
+],
+"800C318C": [
+"_cmp",
+"LIBCD",
+32,
+"ISO9660.OBJ",
+"370"
+],
+"800C41E4": [
+"sprintf",
+"LIBC",
+2192,
+"SPRINTF.OBJ",
+"410"
+],
+"800C4A74": [
+"RotTransPers3",
+"LIBGTE",
+96,
+"SMP_03.OBJ",
+"350"
+],
+"800C4AD4": [
+"rsin",
+"LIBGTE",
+60,
+"GEO.OBJ",
+"330"
+],
+"800C4B10": [
+"sin_1",
+"LIBGTE",
+148,
+"GEO_00.OBJ",
+"410"
+],
+"800C4BA4": [
+"RotTransPers",
+"LIBGTE",
+48,
+"SMP_02.OBJ",
+"350"
+],
+"800C4BD4": [
+"NormalClip",
+"LIBGTE",
+48,
+"SMP_05.OBJ",
+"350"
+],
+"800C4C04": [
+"SetTransMatrix",
+"LIBGTE",
+32,
+"MTX.OBJ",
+"260"
+],
+"800C4C24": [
+"SetRotMatrix",
+"LIBGTE",
+48,
+"MTX.OBJ",
+"260"
+],
+"800C4C54": [
+"RotMatrixX",
+"LIBGTE",
+416,
+"FGO_04.OBJ",
+"330"
+],
+"800C4DF4": [
+"RotMatrixY",
+"LIBGTE",
+416,
+"FGO_05.OBJ",
+"330"
+],
+"800C4F94": [
+"ApplyMatrix",
+"LIBGTE",
+80,
+"MTX.OBJ",
+"260"
+],
+"800C5544": [
+"CdRead",
+"LIBCD",
+412,
+"CDREAD.OBJ",
+"440"
+],
+"800C56E0": [
+"CdReadSync",
+"LIBCD",
+260,
+"CDREAD.OBJ",
+"440"
+],
+"800C57E4": [
+"CdRead2",
+"LIBCD",
+176,
+"CDREAD2.OBJ",
+"410"
+],
+"800C5868": [
+"PadStop",
+"LIBETC",
+44,
+"PAD.OBJ",
+"410"
+],
+"800C5D28": [
+"_SsTrapIntrVSync",
+"LIBSND",
+52,
+"SSINIT.OBJ",
+"330"
+],
+"800C5E2C": [
+"PCopen",
+"LIBSN",
+32,
+"OPEN.OBJ",
+"260"
+],
+"800C5E58": [
+"PCcreat",
+"LIBSN",
+32,
+"CREAT.OBJ",
+"260"
+],
+"800C5E78": [
+"PClseek",
+"LIBSN",
+36,
+"LSEEK.OBJ",
+"260"
+],
+"800C5F6C": [
+"ResetGraph",
+"LIBGPU",
+372,
+"SYS.OBJ",
+"410"
+],
+"800C60E0": [
+"SetGraphDebug",
+"LIBGPU",
+92,
+"SYS.OBJ",
+"410"
+],
+"800C613C": [
+"DrawSyncCallback",
+"LIBGPU",
+96,
+"SYS.OBJ",
+"410"
+],
+"800C619C": [
+"SetDispMask",
+"LIBGPU",
+152,
+"SYS.OBJ",
+"410"
+],
+"800C6234": [
+"DrawSync",
+"LIBGPU",
+388,
+"SYS.OBJ",
+"410"
+],
+"800C63B8": [
+"ClearImage",
+"LIBGPU",
+144,
+"SYS.OBJ",
+"410"
+],
+"800C6448": [
+"LoadImage",
+"LIBGPU",
+96,
+"SYS.OBJ",
+"410"
+],
+"800C64A8": [
+"StoreImage",
+"LIBGPU",
+96,
+"SYS.OBJ",
+"410"
+],
+"800C6508": [
+"MoveImage",
+"LIBGPU",
+184,
+"SYS.OBJ",
+"410"
+],
+"800C65C0": [
+"ClearOTag",
+"LIBGPU",
+200,
+"SYS.OBJ",
+"410"
+],
+"800C6688": [
+"ClearOTagR",
+"LIBGPU",
+172,
+"SYS.OBJ",
+"410"
+],
+"800C6734": [
+"DrawOTag",
+"LIBGPU",
+112,
+"SYS.OBJ",
+"410"
+],
+"800C67A4": [
+"PutDrawEnv",
+"LIBGPU",
+192,
+"SYS.OBJ",
+"410"
+],
+"800C6864": [
+"PutDispEnv",
+"LIBGPU",
+1272,
+"SYS.OBJ",
+"420"
+],
+"800C6D5C": [
+"SetDrawArea",
+"LIBGPU",
+128,
+"SYS.OBJ",
+"410"
+],
+"800C6DDC": [
+"SetDrawEnv",
+"LIBGPU",
+6400,
+"SYS.OBJ",
+"410"
+],
+"800C7CD4": [
+"_param",
+"LIBGPU",
+48,
+"SYS.OBJ",
+"330"
+],
+"800C7D04": [
+"_addque",
+"LIBGPU",
+36,
+"SYS.OBJ",
+"330"
+],
+"800C84C4": [
+"set_alarm",
+"LIBGPU",
+52,
+"SYS.OBJ",
+"330"
+],
+"800C86DC": [
+"_GPU_ResetCallback",
+"LIBGPU",
+80,
+"SYS.OBJ",
+"440"
+],
+"800C8F60": [
+"ApplyMatrixLV",
+"LIBGTE",
+352,
+"MTX_004.OBJ",
+"410"
+],
+"800C90C0": [
+"OuterProduct12",
+"LIBGTE",
+88,
+"SMP.OBJ",
+"260"
+],
+"800C9148": [
+"VectorNormal",
+"LIBGTE",
+48,
+"MSC02.OBJ",
+"410"
+],
+"800C9178": [
+"VectorNormalSS",
+"LIBGTE",
+240,
+"MSC02.OBJ",
+"410"
+],
+"800C9268": [
+"TransposeMatrix",
+"LIBGTE",
+64,
+"FGO_00.OBJ",
+"400"
+],
+"800C92A8": [
+"LoadAverageShort12",
+"LIBGTE",
+136,
+"MSC.OBJ",
+"260"
+],
+"800C9340": [
+"ratan2",
+"LIBGTE",
+384,
+"RATAN.OBJ",
+"410"
+],
+"800C94D0": [
+"rcos",
+"LIBGTE",
+160,
+"GEO_01.OBJ",
+"370"
+],
+"800C9570": [
+"SetFogNearFar",
+"LIBGTE",
+272,
+"FOG_02.OBJ",
+"410"
+],
+"800C9680": [
+"DecDCTvlcBuild",
+"LIBPRESS",
+240,
+"BUILD.OBJ",
+"410"
+],
+"800C9770": [
+"StCdInterrupt",
+"LIBCD",
+2800,
+"C_011.OBJ",
+"410"
+],
+"800CA260": [
+"StUnSetRing",
+"LIBCD",
+128,
+"C_003.OBJ",
+"410"
+],
+"800CA2E0": [
+"DecDCTvlc2",
+"LIBPRESS",
+848,
+"VLC_C.OBJ",
+"430"
+],
+"800CA630": [
+"StSetStream",
+"LIBCD",
+144,
+"C_005.OBJ",
+"410"
+],
+"800CA6C0": [
+"StSetRing",
+"LIBCD",
+48,
+"CDROM.OBJ",
+"410"
+],
+"800CA6F0": [
+"StGetNext",
+"LIBCD",
+192,
+"C_009.OBJ",
+"410"
+],
+"800CA7B0": [
+"StFreeRing",
+"LIBCD",
+176,
+"C_007.OBJ",
+"410"
+],
+"800CA860": [
+"SetDefDrawEnv",
+"LIBGPU",
+192,
+"E03.OBJ",
+"440"
+],
+"800CA920": [
+"VSync",
+"LIBETC",
+528,
+"VSYNC.OBJ",
+"410"
+],
+"800CAB30": [
+"SetDefDispEnv",
+"LIBGPU",
+64,
+"E04.OBJ",
+"440"
+],
+"800CAB90": [
+"ccos",
+"LIBGTE",
+208,
+"COR_02.OBJ",
+"410"
+],
+"800CAC60": [
+"csin",
+"LIBGTE",
+320,
+"COR_03.OBJ",
+"410"
+],
+"800CADA0": [
+"ApplyMatrixSV",
+"LIBGTE",
+96,
+"MTX_06.OBJ",
+"350"
+],
+"800CAE00": [
+"ScaleMatrix",
+"LIBGTE",
+320,
+"MTX_08.OBJ",
+"410"
+],
+"800CAF40": [
+"SetFarColor",
+"LIBGTE",
+32,
+"REG.OBJ",
+"260"
+],
+"800CAF60": [
+"RotMatrix_gte",
+"LIBGTE",
+528,
+"RMAT_01.OBJ",
+"410"
+],
+"800CB170": [
+"SetBackColor",
+"LIBGTE",
+32,
+"REG.OBJ",
+"260"
+],
+"800CB190": [
+"RotMatrix",
+"LIBGTE",
+656,
+"FGO_01.OBJ",
+"330"
+],
+"800CB430": [
+"memmove",
+"LIBC",
+112,
+"MEMMOVE.OBJ",
+"410"
+],
+"800CB4A0": [
+"MemCardStart",
+"LIBMCRD",
+112,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CB510": [
+"MemCardStop",
+"LIBMCRD",
+64,
+"LIBMCRD.OBJ",
+"400"
+],
+"800CB550": [
+"MemCardExist",
+"LIBMCRD",
+872,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CB8B8": [
+"MemCardAccept",
+"LIBMCRD",
+784,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CBBC8": [
+"MemCardClose",
+"LIBMCRD",
+68,
+"LIBMCRD.OBJ",
+"410"
+],
+"800CBC0C": [
+"MemCardReadData",
+"LIBMCRD",
+500,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CBE00": [
+"MemCardWriteData",
+"LIBMCRD",
+500,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CBFF4": [
+"MemCardReadFile",
+"LIBMCRD",
+600,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CC24C": [
+"MemCardWriteFile",
+"LIBMCRD",
+600,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CC4A4": [
+"MemCardGetDirentry",
+"LIBMCRD",
+608,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CC718": [
+"MemCardSync",
+"LIBMCRD",
+284,
+"LIBMCRD.OBJ",
+"410"
+],
+"800CC834": [
+"MemCardCreateFile",
+"LIBMCRD",
+508,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CCA30": [
+"MemCardDeleteFile",
+"LIBMCRD",
+436,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CCBE4": [
+"MemCardFormat",
+"LIBMCRD",
+188,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CCCA0": [
+"MemCardUnformat",
+"LIBMCRD",
+536,
+"LIBMCRD.OBJ",
+"440"
+],
+"800CCE54": [
+"_make_file_discrpt",
+"LIBMCRD",
+92,
+"LIBMCRD.OBJ",
+"400"
+],
+"800CCED8": [
+"PadInitDirect",
+"LIBPAD",
+1632,
+"PADPORTD.OBJ",
+"440"
+],
+"800CD558": [
+"PadGetState",
+"LIBPAD",
+204,
+"PADENTRY.OBJ",
+"440"
+],
+"800CD624": [
+"PadInfoMode",
+"LIBPAD",
+248,
+"PADENTRY.OBJ",
+"420"
+],
+"800CD71C": [
+"PadInfoAct",
+"LIBPAD",
+212,
+"PADENTRY.OBJ",
+"420"
+],
+"800CD7F0": [
+"PadSetActAlign",
+"LIBPAD",
+56,
+"PADENTRY.OBJ",
+"420"
+],
+"800CD828": [
+"PadSetAct",
+"LIBPAD",
+84,
+"PADENTRY.OBJ",
+"440"
+],
+"800CD87C": [
+"SquareRoot0",
+"LIBGTE",
+144,
+"MSC01.OBJ",
+"410"
+],
+"800CD90C": [
+"catan",
+"LIBGTE",
+208,
+"COR_06.OBJ",
+"410"
+],
+"800CD9DC": [
+"RotTransPers4",
+"LIBGTE",
+128,
+"CMB_00.OBJ",
+"330"
+],
+"800CDA5C": [
+"RotTransSV",
+"LIBGTE",
+48,
+"SMP_01.OBJ",
+"330"
+],
+"800CDA8C": [
+"SpuInitMalloc",
+"LIBSPU",
+96,
+"S_M_INIT.OBJ",
+"410"
+],
+"800CDAEC": [
+"SpuSetTransferMode",
+"LIBSPU",
+48,
+"S_STM.OBJ",
+"410"
+],
+"800CDB1C": [
+"SpuSetTransferStartAddr",
+"LIBSPU",
+96,
+"S_STSA.OBJ",
+"410"
+],
+"800D2328": [
+"SpuFlush",
+"LIBSPU",
+512,
+"S_F.OBJ",
+"410"
+],
+"800D2528": [
+"SpuSetReverbModeParam",
+"LIBSPU",
+1248,
+"S_SRMP.OBJ",
+"410"
+],
+"800D2A08": [
+"SpuRead",
+"LIBSPU",
+96,
+"S_R.OBJ",
+"410"
+],
+"800D2A68": [
+"SpuWrite0",
+"LIBSPU",
+352,
+"S_W0.OBJ",
+"410"
+],
+"800D2BC8": [
+"SpuGetVoiceEnvelope",
+"LIBSPU",
+32,
+"S_GVEX.OBJ",
+"410"
+],
+"800D2BE8": [
+"SpuSetKey",
+"LIBSPU",
+448,
+"S_SK.OBJ",
+"410"
+],
+"800D2DA8": [
+"SpuSetEnv",
+"LIBSPU",
+112,
+"S_SE.OBJ",
+"410"
+],
+"800D2E18": [
+"SpuMalloc",
+"LIBSPU",
+720,
+"S_M_M.OBJ",
+"410"
+],
+"800D30E8": [
+"SpuReserveReverbWorkArea",
+"LIBSPU",
+80,
+"S_RRWA.OBJ",
+"410"
+],
+"800D3138": [
+"SpuSetCommonMasterVolume",
+"LIBSPU",
+32,
+"S_SCMV.OBJ",
+"410"
+],
+"800D3158": [
+"SpuFree",
+"LIBSPU",
+128,
+"S_M_F.OBJ",
+"410"
+],
+"800D31D8": [
+"SpuSetReverbDepth",
+"LIBSPU",
+128,
+"S_SRD.OBJ",
+"410"
+],
+"800D3258": [
+"SpuSetReverbVoice",
+"LIBSPU",
+48,
+"S_SRV.OBJ",
+"410"
+],
+"800D3288": [
+"SpuSetReverb",
+"LIBSPU",
+208,
+"S_SR.OBJ",
+"410"
+],
+"800D3378": [
+"SpuIsTransferCompleted",
+"LIBSPU",
+176,
+"S_ITC.OBJ",
+"410"
+],
+"800D3428": [
+"SpuSetVoiceAttr",
+"LIBSPU",
+1536,
+"S_SVA.OBJ",
+"410"
+],
+"800D3A28": [
+"SsInit",
+"LIBSND",
+48,
+"SSINIT_C.OBJ",
+"350"
+],
+"800D3AA8": [
+"ResetCallback",
+"LIBETC",
+48,
+"INTR.OBJ",
+"330"
+],
+"800D3AD8": [
+"InterruptCallback",
+"LIBETC",
+48,
+"INTR.OBJ",
+"330"
+],
+"800D3B08": [
+"DMACallback",
+"LIBETC",
+48,
+"INTR.OBJ",
+"330"
+],
+"800D3B38": [
+"VSyncCallback",
+"LIBETC",
+52,
+"INTR.OBJ",
+"370"
+],
+"800D3B6C": [
+"VSyncCallbacks",
+"LIBETC",
+48,
+"INTR.OBJ",
+"330"
+],
+"800D3BAC": [
+"SetIntrMask",
+"LIBETC",
+1348,
+"INTR.OBJ",
+"410"
+],
+"800D41FC": [
+"AddPrim",
+"LIBGPU",
+64,
+"P06.OBJ",
+"420"
+],
+"800D4244": [
+"InitGeom",
+"LIBGTE",
+136,
+"MSC00.OBJ",
+"3610"
+],
+"800D425C": [
+"InitGeom",
+"LIBGTE",
+104,
+"MSC.OBJ",
+"260"
+],
+"800D430C": [
+"SetRCnt",
+"LIBAPI",
+156,
+"COUNTER.OBJ",
+"370"
+],
+"800D43A8": [
+"GetRCnt",
+"LIBETC",
+56,
+"COUNTER.OBJ",
+"260"
+],
+"800D43E0": [
+"StartRCnt",
+"LIBAPI",
+48,
+"COUNTER.OBJ",
+"410"
+],
+"800D4410": [
+"ResetRCnt",
+"LIBAPI",
+56,
+"COUNTER.OBJ",
+"330"
+],
+"800D49E4": [
+"CD_sync",
+"LIBCD",
+640,
+"BIOS.OBJ",
+"410"
+],
+"800D4C64": [
+"CD_ready",
+"LIBCD",
+712,
+"BIOS.OBJ",
+"410"
+],
+"800D4F2C": [
+"CD_cw",
+"LIBCD",
+1036,
+"BIOS.OBJ",
+"410"
+],
+"800D5338": [
+"CD_vol",
+"LIBCD",
+136,
+"BIOS.OBJ",
+"370"
+],
+"800D53C0": [
+"CD_flush",
+"LIBCD",
+212,
+"BIOS.OBJ",
+"410"
+],
+"800D5494": [
+"CD_initvol",
+"LIBCD",
+240,
+"BIOS.OBJ",
+"410"
+],
+"800D5584": [
+"CD_init",
+"LIBCD",
+480,
+"BIOS.OBJ",
+"410"
+],
+"800D5764": [
+"CD_datasync",
+"LIBCD",
+360,
+"BIOS.OBJ",
+"410"
+],
+"800D58CC": [
+"CD_getsector",
+"LIBCD",
+256,
+"BIOS.OBJ",
+"410"
+],
+"800D59CC": [
+"CD_getsector2",
+"LIBCD",
+236,
+"BIOS.OBJ",
+"410"
+],
+"800D5AB8": [
+"CD_set_test_parmnum",
+"LIBCD",
+228,
+"BIOS.OBJ",
+"410"
+],
+"800D5EA8": [
+"cln",
+"LIBGTE",
+236,
+"COR_04.OBJ",
+"410"
+],
+"800D5FF4": [
+"__sn_cpp_structors",
+"LIBSN",
+92,
+"snctors.obj",
+"470"
+],
+"800D6158": [
+"data_ready_callback",
+"LIBCD",
+140,
+"C_004.OBJ",
+"410"
+],
+"800D624C": [
+"init_ring_status",
+"LIBCD",
+64,
+"C_008.OBJ",
+"410"
+],
+"800D62E4": [
+"StClearRing",
+"LIBCD",
+96,
+"C_002.OBJ",
+"330"
+],
+"800D6344": [
+"startIntrVSync",
+"LIBETC",
+288,
+"INTR_VB.OBJ",
+"430"
+],
+"800D6408": [
+"setIntrVSync",
+"LIBETC",
+44,
+"INTR_VB.OBJ",
+"330"
+],
+"800D6484": [
+"csincos",
+"LIBGTE",
+288,
+"COR_01.OBJ",
+"410"
+],
+"800D65B4": [
+"UserFuncOpen",
+"LIBMCRD",
+124,
+"USERFUNC.OBJ",
+"410"
+],
+"800D6630": [
+"UserFuncExecute",
+"LIBMCRD",
+108,
+"USERFUNC.OBJ",
+"400"
+],
+"800D6754": [
+"_card_start",
+"LIBMCRD",
+476,
+"BIOS.OBJ",
+"420"
+],
+"800D6930": [
+"_card_stop",
+"LIBMCRD",
+180,
+"BIOS.OBJ",
+"420"
+],
+"800D69E4": [
+"_clr_card_event",
+"LIBMCRD",
+264,
+"LIBMCRD.OBJ",
+"400"
+],
+"800D6D24": [
+"_card_clear",
+"LIBCARD",
+64,
+"CARD.OBJ",
+"410"
+],
+"800D6DC4": [
+"firstfile",
+"LIBAPI",
+672,
+"FIRST.OBJ",
+"420"
+],
+"800D71C8": [
+"_card_format",
+"LIBCARD",
+524,
+"FORMAT.OBJ",
+"410"
+],
+"800D73F4": [
+"_padSetVsyncParam",
+"LIBPAD",
+548,
+"PADMAIN.OBJ",
+"440"
+],
+"800D7420": [
+"_padIsVsync",
+"LIBPAD",
+104,
+"PDRESRES.OBJ",
+"460"
+],
+"800D7488": [
+"_padIntPad",
+"LIBPAD",
+400,
+"PDRESRES.OBJ",
+"460"
+],
+"800D7618": [
+"_padStartCom",
+"LIBPAD",
+204,
+"PADMAIN.OBJ",
+"420"
+],
+"800D76E4": [
+"_padInitSioMode",
+"LIBPAD",
+1060,
+"PADMAIN.OBJ",
+"440"
+],
+"800D7B08": [
+"_padSioRW",
+"LIBPAD",
+528,
+"PADMAIN.OBJ",
+"440"
+],
+"800D7D18": [
+"_padSioRW2",
+"LIBPAD",
+632,
+"PADMAIN.OBJ",
+"440"
+],
+"800D7F90": [
+"_padClrIntSio0",
+"LIBPAD",
+144,
+"PADMAIN.OBJ",
+"420"
+],
+"800D8020": [
+"_padWaitRXready",
+"LIBPAD",
+52,
+"PADMAIN.OBJ",
+"440"
+],
+"800D8054": [
+"_padInitDirSeq",
+"LIBPAD",
+936,
+"PADSEQD.OBJ",
+"440"
+],
+"800D83FC": [
+"_dirFailAuto",
+"LIBPAD",
+280,
+"PADSEQD.OBJ",
+"440"
+],
+"800D8530": [
+"_padSendAtLoadInfo",
+"LIBPAD",
+132,
+"PADCMD.OBJ",
+"420"
+],
+"800D85B4": [
+"_padRecvAtLoadInfo",
+"LIBPAD",
+624,
+"PADCMD.OBJ",
+"440"
+],
+"800D8824": [
+"_padGetActSize",
+"LIBPAD",
+56,
+"PADCMD.OBJ",
+"440"
+],
+"800D885C": [
+"_padLoadActInfo",
+"LIBPAD",
+1396,
+"PADCMD.OBJ",
+"440"
+],
+"800D8DD0": [
+"_padSetActAlign",
+"LIBPAD",
+332,
+"PADCMD.OBJ",
+"440"
+],
+"800D8F1C": [
+"_padCmdParaMode",
+"LIBPAD",
+172,
+"PADCMD.OBJ",
+"440"
+],
+"800D8FC8": [
+"_spu_init",
+"LIBSPU",
+1088,
+"SPU.OBJ",
+"410"
+],
+"800D9408": [
+"_spu_FiDMA",
+"LIBSPU",
+188,
+"SPU.OBJ",
+"410"
+],
+"800D94C4": [
+"_spu_t",
+"LIBSPU",
+640,
+"SPU.OBJ",
+"410"
+],
+"800D9744": [
+"_spu_Fw",
+"LIBSPU",
+132,
+"SPU.OBJ",
+"410"
+],
+"800D97C8": [
+"_spu_FsetRXX",
+"LIBSPU",
+68,
+"SPU.OBJ",
+"410"
+],
+"800D980C": [
+"_spu_FsetRXXa",
+"LIBSPU",
+164,
+"SPU.OBJ",
+"410"
+],
+"800D98B0": [
+"_spu_FsetPCR",
+"LIBSPU",
+168,
+"SPU.OBJ",
+"410"
+],
+"800D9958": [
+"_spu_Fw1ts",
+"LIBSPU",
+104,
+"SPU.OBJ",
+"410"
+],
+"800D99C0": [
+"_SpuInit",
+"LIBSPU",
+232,
+"S_INI.OBJ",
+"410"
+],
+"800D9AA8": [
+"SpuStart",
+"LIBSPU",
+120,
+"S_INI.OBJ",
+"410"
+],
+"800D9B20": [
+"SpuSetVoicePitch",
+"LIBSPU",
+112,
+"S_SVP.OBJ",
+"410"
+],
+"800D9B90": [
+"SpuGetAllKeysStatus",
+"LIBSPU",
+140,
+"SR_GAKS.OBJ",
+"410"
+],
+"800D9C1C": [
+"SpuSetVoiceVolume",
+"LIBSPU",
+128,
+"S_SVV.OBJ",
+"410"
+],
+"800D9C9C": [
+"_SpuIsInAllocateArea_",
+"LIBSPU",
+144,
+"S_M_UTIL.OBJ",
+"410"
+],
+"800D9D2C": [
+"_spu_setReverbAttr",
+"LIBSPU",
+1232,
+"S_SRMP.OBJ",
+"330"
+],
+"800DA1FC": [
+"SpuClearReverbWorkArea",
+"LIBSPU",
+416,
+"S_CRWA.OBJ",
+"410"
+],
+"800DA3AC": [
+"_spu_gcSPU",
+"LIBSPU",
+768,
+"S_M_INT.OBJ",
+"410"
+],
+"800DA6AC": [
+"_SpuSetAnyVoice",
+"LIBSPU",
+704,
+"S_SAV.OBJ",
+"410"
+],
+"800DA97C": [
+"_spu_note2pitch",
+"LIBSPU",
+208,
+"S_N2P.OBJ",
+"430"
+],
+"800DAA4C": [
+"InitCARD",
+"LIBCARD",
+108,
+"INIT.OBJ",
+"410"
+],
+"800DAAB8": [
+"StartCARD",
+"LIBCARD",
+56,
+"INIT.OBJ",
+"3610"
+],
+"800DAB10": [
+"startIntrDMA",
+"LIBETC",
+672,
+"INTR_DMA.OBJ",
+"410"
+],
+"800DADF0": [
+"_patch_gte",
+"LIBGTE",
+224,
+"PATCHGTE.OBJ",
+"410"
+],
+"800DAF30": [
+"setRC2wait",
+"LIBPAD",
+32,
+"WAITRC2.OBJ",
+"430"
+],
+"800DAF50": [
+"chkRC2wait",
+"LIBPAD",
+160,
+"WAITRC2.OBJ",
+"430"
+],
+"800DB620": [
+"_SpuDataCallback",
+"LIBSPU",
+48,
+"S_DCB.OBJ",
+"410"
+],
+"800DB708": [
+"_patch_card",
+"LIBCARD",
+148,
+"PATCH.OBJ",
+"410"
+],
+"800DB79C": [
+"_patch_card2",
+"LIBCARD",
+112,
+"PATCH.OBJ",
+"410"
+],
+"800DB80C": [
+"_copy_memcard_patch",
+"LIBCARD",
+52,
+"PATCH.OBJ",
+"410"
+]
+}
