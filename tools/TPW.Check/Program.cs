@@ -1151,6 +1151,61 @@ static class Program
         return n == 0 ? 1 : 0;
     }
 
+    /// <summary>For each textured face group of one mesh, how much of the page region its UVs cover is
+    /// actually HELD by the sheet the port picked. A texel the sheet does not hold is skipped by
+    /// RenderPage and left transparent, so partial coverage shows up as a smeared band rather than a
+    /// missing texture -- which is the shape of the reported streaking.</summary>
+    static int Coverage(GazArchive gaz, int entry)
+    {
+        var sheets = TextureSheet.FindAll(gaz);
+        foreach (var e in gaz.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            if (!c.TryParseMesh(bytes, 0, out var m, out _)) return 1;
+            var tex = ModelTexturing.Build(m, sheets);
+            var seen = new SortedDictionary<int, (int held, int total, int uw, int vh, ushort tp, ushort cl)>();
+            for (int fi = 0; fi < m.Faces.Count; fi++)
+            {
+                int t = tex.FaceTile[fi];
+                if (t < 0 || seen.ContainsKey(t)) continue;
+                var f = m.Faces[fi];
+                int u0 = Math.Min(f.U0, Math.Min(f.U1, f.U2)), u1 = Math.Max(f.U0, Math.Max(f.U1, f.U2));
+                int v0 = Math.Min(f.V0, Math.Min(f.V1, f.V2)), v1 = Math.Max(f.V0, Math.Max(f.V1, f.V2));
+                // widen to the whole group's UV box
+                for (int g = 0; g < m.Faces.Count; g++)
+                {
+                    if (tex.FaceTile[g] != t) continue;
+                    var q = m.Faces[g];
+                    u0 = Math.Min(u0, Math.Min(q.U0, Math.Min(q.U1, q.U2))); u1 = Math.Max(u1, Math.Max(q.U0, Math.Max(q.U1, q.U2)));
+                    v0 = Math.Min(v0, Math.Min(q.V0, Math.Min(q.V1, q.V2))); v1 = Math.Max(v1, Math.Max(q.V0, Math.Max(q.V1, q.V2)));
+                }
+                var sh = sheets[0].Sheet;
+                foreach (var cand in sheets) { sh = cand.Sheet; break; }
+                int px = (f.TPage & 0x0F) * 64, py = ((f.TPage >> 4) & 1) * 256;
+                int held = 0, total = 0;
+                foreach (var cand in sheets)
+                {
+                    held = 0; total = 0;
+                    for (int v = v0; v <= v1; v++)
+                        for (int u = u0; u <= u1; u++)
+                        { total++; if (cand.Sheet.Contains(px + (u >> 2), py + v)) held++; }
+                    if (held > 0) break;
+                }
+                seen[t] = (held, total, u1 - u0 + 1, v1 - v0 + 1, f.TPage, f.Clut);
+            }
+            Console.WriteLine($"entry #{entry}: {seen.Count} tiles");
+            foreach (var kv in seen)
+            {
+                var (held, total, uw, vh, tp, cl) = kv.Value;
+                Console.WriteLine($"   tile {kv.Key,2}  tpage {tp:x4} clut {cl:x4}  UV box {uw}x{vh}  sheet holds {held}/{total} ({(total == 0 ? 0 : 100.0 * held / total):0.0}%)");
+            }
+            return 0;
+        }
+        return 1;
+    }
+
     static int Main(string[] args)
     {
         // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
@@ -1168,6 +1223,8 @@ static class Program
             // --attractions [text]: find a model by WHAT IT IS. ⚠ Not --names, which already exists on the
             // disc route and dumps the string tables by language; two different jobs, and one name for
             // both is how someone runs the wrong one and believes the output.
+            int cv = Array.IndexOf(args, "--coverage");
+            if (cv >= 0 && cv + 1 < args.Length) return Coverage(g, int.Parse(args[cv + 1]));
             int nm = Array.IndexOf(args, "--attractions");
             if (nm >= 0) return Attractions(g, nm + 1 < args.Length && !args[nm + 1].StartsWith("--") ? args[nm + 1] : null);
             // --posedump <entry> <sub> <dir>
