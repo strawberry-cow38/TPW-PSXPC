@@ -1,0 +1,123 @@
+{
+  "report": "folio.md",
+  "image": {"file": "ext/TPW.BIN", "base": "0x80010000", "psyq": "0x800C0498..0x800DB838"},
+  "tags": {"SOURCED": "read off instructions/data at the address", "DERIVED": "inferred, basis stated", "MEASURED": "checked against every entry by f/x96parse.py or f/sublz.py", "UNMEASURED": "guess"},
+
+  "reader": {
+    "strings": [
+      {"addr": "0x800DFF84", "text": "FOLIO.GAZ", "used_by": "0x80032A5C (streamer), site 0x80032ABC", "tag": "SOURCED"},
+      {"addr": "0x800E7174", "text": "folio.gaz", "used_by": "0x800BBF2C (generic entry loader), site 0x800BBF68", "tag": "SOURCED"},
+      {"addr": "0x800DCEAC", "text": "folio.gaz", "used_by": "none found (xref + data-word scan)", "tag": "SOURCED"}
+    ],
+    "open": {"fn": "0x80024624", "cache": {"addr": "0x800F023C", "entries": 10, "stride": "0x1C", "lba_at": "+20"}, "search": {"fn": "0x800249B0", "format": "\\%s;1 at 0x801027AC", "psyq": "CdSearchFile 0x800C2EB4 -> CdPosToInt 0x800C2E34"}, "hardcoded_lba": false, "tag": "SOURCED"},
+    "read_whole": {"fn": "0x80024538", "args": "(name, byteOffset, buf, byteCount)", "sequence": "CdIntToPos(lba+(off>>11)); CdControlB(9); CdControlB(0x15); CdRead(count>>11, buf, 0x80); CdReadSync loop", "callers": "0x80025650 -> 0x800252D0 (heap tag LOADF, size rounded to 0x800)", "tag": "SOURCED"},
+    "read_stream": {"fn": "0x80024DA4", "request": {"+0": "name", "+4": "byteOffset", "+8": "length", "+12": "buf", "+16": "chunk", "+20": "callback(buf, offsetInRequest, bytes, 0)"}, "sequence": "CdRead2(0x80) + CdGetSector(buf, 0x200 words) per chunk", "only_user": "0x80032A5C", "tag": "SOURCED"},
+    "table": {"ram_ptr": "[0x8010346C]", "offset_of_entry_i": "u32 [[0x8010346C] + 8 + 8*i] (0x800BBFA0)", "disk_layout": "u32 n=422; u32 0x17; {u32 offset, u32 size}[n]", "note": "pairs start at +8, not +4", "tag": "SOURCED"},
+    "entry_loader": {"fn": "0x800BBF2C", "args": "(obj, entryIndex, flags)", "wrappers": ["0x800351BC(ctx, entry)", "0x800282D0(obj, entry)"], "in_ram": "byte-exact copy of the entry, consumers use file offsets", "tag": "SOURCED/DERIVED"}
+  },
+
+  "container_0x96": {
+    "readers": {"lock_and_subtable": "0x8003084C", "sub_entry": "0x800308C4", "phase_table": "0x80030364", "record": "0x800307DC"},
+    "magic_compared_anywhere": false,
+    "header": {
+      "+0x00": "u32 0x96",
+      "+0x04": "u32 nsub",
+      "+0x08": "u32[3] zero (unread)",
+      "+0x14": "u32 recOff (definition record offset, 0 = none)",
+      "+0x18": "u32 size (== table size, MEASURED 268/268)",
+      "+0x1C": "u32 ntab",
+      "+0x20": "s32 tab[ntab]  phase -> sub-entry index, -1 = none",
+      "then": "{u32 off, u32 unpackedSize} sub[nsub]; unpackedSize != 0 -> LZ (0x800BFD9C)"
+    },
+    "families": {
+      "record_bearing": {"count": 261, "ntab": 4, "nsub": 1, "sub0": "(0x38, 0)", "tab_sample": [-1, 0, -1, -1]},
+      "model_packs": {"count": 7, "entries": [0, 3, 4, 83, 89, 277, 417], "ntab": 0, "recOff": 0}
+    },
+    "compressed_sub_entries": {"count": 25, "entries": [0, 3], "decompressor": "0x800BFD9C", "port": "f/sublz.py", "verified_exact": "25/25", "tag": "SOURCED+MEASURED"},
+    "tag": "SOURCED"
+  },
+
+  "mesh_sub_entry": {
+    "sources": {"builder": "0x8002C5CC", "relocator": "0x8002E574", "emitter": "0x800115FC", "pose": "0x8002CBC4", "draw": "0x8002FE14"},
+    "validated": {"raw": "531/531", "decompressed": "25/25", "script": "f/x96parse.py"},
+    "header": {
+      "+0x00": "u32 n0 (bit-array coverage; bytes = ceil(n0/8) rounded to 2)",
+      "+0x04": "u32 n32 bones (40-byte file records, 32-byte GTE matrices in ARS)",
+      "+0x08": "u32 nvc vertices+colours",
+      "+0x0C": "u32 m12 (12-byte records)",
+      "+0x10": "u32 n8 (vertices copied to ARS)",
+      "+0x18": "u32 nblocks",
+      "+0x1C": "u32 ntracks",
+      "+0x20": "u32 n8b (12-byte records)",
+      "+0x24": "u32 nvA (8-byte records placed first)",
+      "+0x28": "u32 trailing u32 list length",
+      "+0x38": "s16[4] x2 bounds-like (x,z match vertex extents; y unexplained)"
+    },
+    "layout": ["+0x48 vertA[nvA]*8", "vert[nvc] {s16 x,y,z,pad}", "rgb[nvc] {u8 r,g,b,0}", "block[nblocks]: u16 nsections; u8 bits[ceil(n0/8) even]; section{u16 ngroups,u16 ?; group{u16 nsub,u16 flags,u32 ?; subgroup{u16 nfaces,u16 tpage; face[nfaces]}}}", "align4", "bone[n32]*40", "r12[n8b]*12", "r12b[m12]*12", "align4", "track[ntracks]", "u32 list[hdr+0x28]", "record at recOff"],
+    "face": {"size": 14, "+0": "u16 i0", "+2": "u16 i1", "+4": "u16 i2", "+6": "u8 u0,v0", "+8": "u8 u1,v1", "+10": "u8 u2,v2", "+12": "u16 clut"},
+    "primitive_mapping": {"clut": "prim+0xE", "tpage": "prim+0x16 (FT3) / +0x1A (GT3)", "uv": "+0xC,+0x14,+0x1C (FT3) / +0xC,+0x18,+0x24 (GT3)", "len": {"F3": 4, "FT3": 7, "GT3": 9}, "flags": "group bit0 textured, bit1 gouraud"},
+    "tpage_decode": {"x": "(t & 0x1F) * 64", "y": "(t & 0x10 ? 256 : 0) + (t & 0x800 ? 512 : 0)", "site": "0x8002E688"},
+    "clut_decode": {"x": "(c & 0x3F) * 16", "y": "c >> 6", "site": "0x8002E7B4"},
+    "track_sizes": {"0": "36*count+0x2C", "1": "32*count+0x28", "2": "8*count+0x10", "3": "12*count+0x14", "4": "8*count+0x10", "5": "12*count+0x14", "6": "20*count+0x1C", "7": "16*count+0x18", "8": "32*count+0x28", "jump_table": "0x800DDD78"},
+    "verdict": "geometry; no pixels in any 0x96 entry",
+    "f4010030": "LZ stream head of entry 0 sub-entry 6 (compressed mesh), not a GPU opcode",
+    "tag": "SOURCED+MEASURED"
+  },
+
+  "pixels": {
+    "page_id_decode": {"x": "(id & 0xF) * 64", "y": "(id >> 4) * 256", "sites": ["0x80029A04", "0x8002FAD8", "0x800314EC"]},
+    "banks_uncompressed": {
+      "entries": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 418, 419],
+      "size": "0x20054",
+      "loader": "0x800282D0 (vtable 0x800DD038) -> 0x800280F8",
+      "header_u16": {"+0": "n12=3", "+2": "4", "+4": "page=0x18", "+6": "cols=4", "+8": "rows=1", "+10": "n8=4", "+12": "compressed=0", "+14": "0", "+0x10": "12-byte records x3 (first u16 = tpage words 0x98/0x9A/0x19; rest UNMEASURED)", "+0x34": "8-byte {s16 x,y,w,h} 4bpp-pixel rects x4, converted in place at 0x80028444"},
+      "pixels_at": "+0x54, 0x20000 bytes, 256 halfwords x 256 rows, 512 bytes per row",
+      "vram": {"x": 512, "y": 256, "w": 256, "h": 256, "tpages": ["0x18", "0x19", "0x1A", "0x1B"]},
+      "upload": "single LoadImage via 0x80027E70/0x80027C98 from sub-handle 0x800C08E0(handle, 0x54)",
+      "which_when": "UNMEASURED (vtable call, theme-dependent)",
+      "tag": "SOURCED"
+    },
+    "banks_compressed": {
+      "same_header_with": "compressed=1",
+      "entries": {"page8_4x1": [5, 82, 84, 168, 258], "pageB_1x2": [17, 18, 91, 92, 169, 170], "pageC_2x2": [269], "page8_6x2": [278]},
+      "blocks": "cols*rows*4 blocks of 64x64 halfwords, UNPAK 0x80018EF0 (unpak.py) each, LoadImage at (pagex + 64*((k>>2)%cols), pagey + 256*((k>>2)/cols) + 64*(k&3))",
+      "site": "0x80028170..0x80028234",
+      "tag": "SOURCED loop; block stream boundaries UNMEASURED"
+    },
+    "streamed_strips": {
+      "entries": {"0x104": "mode 0", "0x10C": "mode 1 (unless previous mode 2/3)"},
+      "selector": "0x80053C90(newMode); mode word [0x80103840]",
+      "request": "0x80032A5C: {FOLIO.GAZ, mgr, 0x20000, offset(entry), 0x800, cb 0x80032978}",
+      "callback": "each 2048-byte sector -> 64x16 halfword LoadImage",
+      "vram_final": {"g0": "(768, 0..255)", "g1": "(832, 0..255)", "g2": "(768, 256..511)", "g3": "(832, 256..511)"},
+      "file_offset_of_xy": "sector = 16*(2*(y>=256) + (x>=832)) + (y&255)/16; byte = sector*2048 + (y&15)*128 + (x - 768 - 64*(x>=832))*2",
+      "wrap_note": "code yields y>511 for groups 1-3; relies on GPU 9-bit y wrap (DERIVED)",
+      "tag": "SOURCED (positions DERIVED via wrap)"
+    },
+    "paging_slots": {
+      "fn": "0x8002F7E4 (vtable 0x800DDEC8, no direct caller)",
+      "table": "0x800F10B4, 10 x {u32 page, u32 yOffset, u32 inUse}",
+      "slots": [[27, 0], [27, 128], [28, 0], [28, 128], [29, 0], [29, 128], [30, 0], [30, 128], [31, 0], [31, 128]],
+      "block": "64x128 halfwords",
+      "vram": "(704..1023, 256..511)",
+      "then": "relocates faces via 0x8002E574",
+      "feed": "UNMEASURED",
+      "tag": "SOURCED mechanism"
+    },
+    "sprites": {"fn": "0x80032118 (vtable 0x800DFFB8)", "image": "0x8002B63C: 4bpp record, w/4 halfwords, h at +7", "clut": "0x8002B6D8: u16 count + colours, count x 1 rect", "entries": "UNMEASURED"},
+    "compact_meshes": {"renderer": "0x80035D04", "entry": "0x80035358", "container": "{u8, u8 count, u16 off[count]}", "material": "{u16 tpage, u16 clut, u16 flags} 6 bytes at mesh+0xC", "tri": "{u8 i0,i1,i2, u8 mat, u16 uv x3} 10 bytes", "quad": "14 bytes", "vertex": "s8 x,y,z,pad (x4)", "entries": [36, 118, 205, 85, 86, 87, 88, 90], "tag": "SOURCED"}
+  },
+
+  "falsifiers": [
+    {"id": "bank", "check": "VRAM (512..527,256) == 16 halfwords at file +0x54 of one of the 12 banks", "entry6_row0": "8c64 992a a18d 8971 a5f1 b254 91f5 cab6 9a57 a278 aed9 a6ba bb1b b2fb bf3c c35d", "entry6_row1_head": "8422 8618 b210 80f0", "if_header_seen": "0003 0004 0018 ... at (512,256) means the header is uploaded too"},
+    {"id": "strip", "entry_0x10C": {"(768..771,0)": "0000 8885 c1ef 8133", "(768..771,15)": "0000 8001 c5ec 8d64", "(832..835,336)": "6c30 ccc6 f60c f361"}, "entry_0x104": {"(768..771,0)": "0000 8001 a1f3 bcc3", "(832..835,272)": "5000 bccc bbbb 00bb"}},
+    {"id": "geometry", "entry": 19, "ram_signature": "96 00 00 00 01 00 00 00 ... 00 03 00 00 34 03 00 00", "vertices": "+0x80, 19 x 8, first 54 00 00 01 8e 00 00 00", "colours": "+0x118", "block": "+0x164", "subgroup": "+0x174 = 1c 00 19 00", "face0": "+0x178 = 00 00 01 00 06 00 43 57 48 57 47 4d e1 14", "end": "+0x300 == recOff", "tpage_word": "+0x176 = 0x0019", "clut_word": "+0x184 = 0x14E1"},
+    {"id": "reader", "check": "first CdSearchFile with \\FOLIO.GAZ;1 or \\folio.gaz;1 from 0x800249D8; cache entry +20 == 174726"}
+  ],
+
+  "corrections": [
+    "rides.md 1.3: FOLIO table pairs start at +8 (word 1 = 0x17)",
+    "rides.md 2: handle +0x34 = tab[phase] (sub-entry index), +0x38 = frame counter; mesh pointer recomputed per draw",
+    "prompt: FOLIO.GAZ string is present in TPW.BIN at 0x800DFF84 (+2 lowercase copies)"
+  ]
+}

@@ -1,0 +1,615 @@
+{
+ "_about": "Theme Park World PSX (PAL, SLES-026.88) save format. Machine-readable companion to fable/save.md. Every entry carries a 'src' tag: SOURCED (address in TPW.BIN, loaded at 0x80010000) or INFERRED. Numbers in this file are DECIMAL unless prefixed 0x.",
+ "card_file": {
+  "src": "SOURCED 0x8006C0E8 (composer), 0x8006C524 (loader), 0x8007046C (MemCardCreateFile(port<<4, name, 5)), 0x8006F9B0 (title frame), 0x8006F50C (file name)",
+  "blocks": 5,
+  "bytes": 40960,
+  "file_name": "'B' + region ('ESLES-02688' PAL, 'ISLPS-02643' JP, 'ASLUS-01069' US; 0x800BE730 selects) + up to 8 chars of the park name overlaid on '00000000' (lower-case for Sandbox, upper-case for FullSim; 0x80073484)",
+  "title_frame": {
+   "0x000": "'S','C'",
+   "0x002": "icon flag 0x11 (one icon frame)",
+   "0x003": "block count 5",
+   "0x004": "title, 32 full-width Shift-JIS chars big-endian (0x8006F440), '[TPW Sandbox] name' or '[TPW FullSim] name' ('STP' instead of 'TPW' when region == 2)",
+   "0x044": "zeros",
+   "0x060": "16-entry CLUT (32 bytes) from template 0x800F300C",
+   "0x080": "16x16 4bpp icon (128 bytes) from template 0x800F300C",
+   "0x100": "zeros to 0x200"
+  },
+  "header": {
+   "0x200": {
+    "type": "u32",
+    "name": "checksum",
+    "note": "sum of u32 words over [0x204, 0x204+length), zero-padded to 4; duplicate at 0x9FFC; loader requires both equal and matching (0x8006C55C, 0x800708EC)"
+   },
+   "0x204": {
+    "type": "u32",
+    "name": "length",
+    "note": "end offset of the payload measured from the file start (composer's running offset). Because the sum starts at 0x204 the summed range overruns the payload by 0x204 bytes"
+   },
+   "0x208": {
+    "type": "u32",
+    "name": "magic",
+    "value": "0x47415901",
+    "note": "rejected if different (0x8006C5A0)"
+   },
+   "0x20C": {
+    "type": "u16",
+    "name": "version",
+    "value": "0xAC",
+    "note": "172 decimal; rejected if different (0x8006C5B0)"
+   },
+   "0x20E": {
+    "type": "u16",
+    "name": "pad"
+   },
+   "0x210": {
+    "type": "u32",
+    "name": "gendata_off",
+    "value": "0x26A"
+   },
+   "0x214": {
+    "type": "u16",
+    "name": "gendata_len",
+    "note": "0 = none; length of the PAKDATA container"
+   },
+   "0x218": {
+    "type": "u32[3]",
+    "name": "stream_off",
+    "note": "only 3 park streams fit"
+   },
+   "0x224": {
+    "type": "u16[3]",
+    "name": "stream_len"
+   },
+   "0x22A": {
+    "type": "u8",
+    "name": "fullsim",
+    "note": "composer stores !sandbox (0x80059A9C ^ 1); loader stores 0x80102D34 := (byte == 0) and auto-opens the park when sandbox"
+   },
+   "0x22B": {
+    "type": "u8[4][2]",
+    "name": "slot_status",
+    "note": "index park*2+sub; low nibble = SVEDLEV flag (0 open/current, 1 finished, 2 never entered); |0xF0 when a stream is present. Loader loads a stream only when the byte == 0xF0 exactly"
+   },
+   "0x233": {
+    "type": "u8[3]",
+    "name": "progress",
+    "note": "0x8010398C, 0x80103984, 0x80103988 (campaign counters; 0x80103984 forced to 0xFF by 0x8006BE1C when the static 0x80102EC0 is nonzero)"
+   },
+   "0x236": {
+    "type": "u16",
+    "name": "pad"
+   },
+   "0x238": {
+    "type": "u32",
+    "name": "progress_mask",
+    "note": "0x80103990, 5 bits counted by 0x8006BE60"
+   },
+   "0x23C": {
+    "type": "u32[4][2]",
+    "name": "progress_words",
+    "note": "0x80109B18[park][sub], 15-bit masks counted by 0x8006BEF0 (INFERRED: golden-ticket / objective completion per park)"
+   },
+   "0x25C": {
+    "type": "u8",
+    "name": "not_option0",
+    "note": "= !0x8010399C[0] (0x8006C0B8); default option value is 1 so a fresh save writes 0"
+   },
+   "0x25D": {
+    "type": "u8[3]",
+    "name": "pad"
+   },
+   "0x260": {
+    "type": "u8[4]",
+    "name": "volumes",
+    "note": "0x800B7D7C(0),(1),(3),(4) -> restored by 0x800B7CE4"
+   },
+   "0x264": {
+    "type": "u8",
+    "name": "tutorial",
+    "note": "0x80102EB4 (Tutorial On/Off)"
+   },
+   "0x265": {
+    "type": "u8",
+    "name": "zero"
+   },
+   "0x266": {
+    "type": "i16",
+    "name": "screen_x",
+    "note": "0x800BB39C -> 0x800BB38C (screen position)"
+   },
+   "0x268": {
+    "type": "i16",
+    "name": "screen_y",
+    "note": "0x800BB3A8"
+   },
+   "0x26A": {
+    "name": "payload",
+    "note": "GENDATA container (if gendata_len) then park stream containers in slot order; everything up to 0x9FFC zero-filled; max payload end 0x9DF8"
+   }
+  }
+ },
+ "pakdata_container": {
+  "src": "SOURCED 0x8006C994 (pack), 0x8006CA44 (unpack), 0x80018C08/0x80018A94 (PAK), 0x80018EF0 (UNPAK)",
+  "layout": {
+   "0x0": "u32 unpacked_len",
+   "0x4": "u32 total_len = packed_len + 8",
+   "0x8": "packed bytes"
+  },
+  "grammar": "token c: c < 0x80 -> c+1 literal bytes follow; c >= 0x80 -> back-reference offset c-256 (-128..-1), next byte = length 1..255; length 0 = end of stream (emitted as 80 00). Encoder: first two bytes literal, greedy longest match (first found wins on ties), min match 3, max 255, literal runs flushed at 128.",
+  "verified": "fable/sv/pak.py reproduces the game's 1993-byte container for the captured 4596-byte stream byte-for-byte"
+ },
+ "svedlev": {
+  "src": "SOURCED 0x8006BA3C (create), 0x8006BC00 (entry address), 0x8006C89C (snapshot), 0x8006C850 (restore), 0x8006C524/0x8006C0E8",
+  "heap_block": "0x40 bytes tagged SVEDLEV, handle at 0x80102EAC",
+  "entry": {
+   "size": 8,
+   "index": "(park*2 + sub)",
+   "0x0": "u32 heap handle of the PAKDATA container, 0xFFFFFFFF = none",
+   "0x4": "u8 flag: 2 = never entered (ctor), 0 = playable (create sets (0,0); loader status nibble 0), 1 = finished (loader status nibble 1; frees the stream)"
+  },
+  "counter_0x80103980": "number of entries with flag 0",
+  "written_by": "0x80057EFC (leave park / quit current game) -> 0x8006B8E8(park, sub): serialise the live park with 0x80070A48, PAK it, store the handle",
+  "read_by": "0x800588D0 (game start) -> 0x8006B92C(park, sub): if the entry has data, UNPAK and run the 21 section readers (0x80071D0C)"
+ },
+ "park_stream": {
+  "src": "SOURCED writer 0x80070948 (order and sizes), reader 0x80071D0C; primitive 0x80071E48(size, align4) / 0x80070AF0",
+  "note": "record sizes are exact; every record marked align=4 is followed by padding to a 4-byte boundary. Counts in the header are u8. All multi-byte ints little-endian.",
+  "sections": [
+   {
+    "n": 0,
+    "name": "header",
+    "size": 18,
+    "align": 4,
+    "fields": {
+     "0": "u16 magic 0x3039 (12345 decimal), not checked by the loader",
+     "2": "u8 park (loader rejects the stream if != 0x801038A0)",
+     "3": "u8 sub (must == 0x801038A4)",
+     "4": "u8 n_rides",
+     "5": "u8 n_track_rides",
+     "6": "u8 n_tour_rides",
+     "7": "u8 n_coasters",
+     "8": "u8 n_features",
+     "9": "u8 n_shops",
+     "10": "u8 n_sideshows",
+     "11": "u8 n_guards",
+     "12": "u8 n_researchers",
+     "13": "u8 n_mechanics",
+     "14": "u8 n_handymen",
+     "15": "u8 n_entertainers",
+     "16": "u8 n_visitors",
+     "17": "u8 uninitialised"
+    }
+   },
+   {
+    "n": 1,
+    "name": "open_fee",
+    "size": 4,
+    "align": 4,
+    "fields": {
+     "0": "u8 park_open (0x800541AC); loader calls OpenPark when nonzero",
+     "1": "u8 pad",
+     "2": "u16 entry fee in pounds (BANK+0 / 10); loader stores fee*10"
+    }
+   },
+   {
+    "n": 2,
+    "name": "paths",
+    "size": "w*h bytes (0x801038AC * 0x801038B0)",
+    "align": 4,
+    "fields": {
+     "bitmap": "bit i (byte i>>3, bit i&7) for tile (x = i % w, y = i / w) set when the tile type is 2 or 13 (0x8004D4EC / 0x8004D558 = path / queue path); only ceil(w*h/8) bytes carry bits, the rest is uninitialised heap (block LSVE). Loader lays each set tile with the path tool (0x8001B5A0(2), 0x8001BD30(x,y,0,0) twice)"
+    }
+   },
+   {
+    "n": 3,
+    "name": "rides",
+    "size": 152,
+    "count": "n_rides",
+    "align": 4,
+    "record": "ride"
+   },
+   {
+    "n": 4,
+    "name": "track_rides",
+    "size": 240,
+    "count": "n_track_rides",
+    "align": 4,
+    "record": "track_ride"
+   },
+   {
+    "n": 5,
+    "name": "tour_rides",
+    "size": 152,
+    "count": "n_tour_rides",
+    "align": 4,
+    "record": "tour_ride"
+   },
+   {
+    "n": 6,
+    "name": "coasters",
+    "size": 1048,
+    "count": "n_coasters",
+    "align": 4,
+    "record": "coaster"
+   },
+   {
+    "n": 7,
+    "name": "features",
+    "size": 16,
+    "count": "n_features",
+    "align": 4,
+    "record": "feature"
+   },
+   {
+    "n": 8,
+    "name": "shops",
+    "size": 28,
+    "count": "n_shops",
+    "align": 4,
+    "record": "shop"
+   },
+   {
+    "n": 9,
+    "name": "sideshows",
+    "size": 28,
+    "count": "n_sideshows",
+    "align": 4,
+    "record": "sideshow"
+   },
+   {
+    "n": 10,
+    "name": "visitor_template",
+    "size": 26,
+    "count": 1,
+    "align": 4,
+    "record": "visitor_template",
+    "note": "ALWAYS one record, never per guest"
+   },
+   {
+    "n": 11,
+    "name": "guards",
+    "size": 16,
+    "count": "n_guards",
+    "align": 4,
+    "record": "person"
+   },
+   {
+    "n": 12,
+    "name": "researchers",
+    "size": 16,
+    "count": "n_researchers",
+    "align": 4,
+    "record": "person"
+   },
+   {
+    "n": 13,
+    "name": "mechanics",
+    "size": 16,
+    "count": "n_mechanics",
+    "align": 4,
+    "record": "person"
+   },
+   {
+    "n": 14,
+    "name": "handymen",
+    "size": 16,
+    "count": "n_handymen",
+    "align": 4,
+    "record": "person"
+   },
+   {
+    "n": 15,
+    "name": "entertainers",
+    "size": 16,
+    "count": "n_entertainers",
+    "align": 4,
+    "record": "person"
+   },
+   {
+    "n": 16,
+    "name": "litter",
+    "size": 2,
+    "align": 4,
+    "fields": {
+     "0": "u8 count of litter objects for which 0x80066958 is false",
+     "1": "u8 count for which it is true (INFERRED: vomit)"
+    },
+    "note": "restored at random free tiles (0x80053A98); positions are not saved"
+   },
+   {
+    "n": 17,
+    "name": "bank",
+    "size": 808,
+    "align": 4,
+    "record": "bank"
+   },
+   {
+    "n": 18,
+    "name": "mcai",
+    "size": 220,
+    "align": 4,
+    "record": "mcai"
+   },
+   {
+    "n": 19,
+    "name": "research",
+    "size": "2 * sum(counts) + 16",
+    "align": "none for the pairs, 4 after the 16-byte block",
+    "note": "ABSENT ENTIRELY when the game is in Sandbox (0x80059A9C != 0, both writer 0x800715F0 and reader 0x80072B54)",
+    "fields": {
+     "pairs": "for category in [3,7,6,1,2,4,5,8]: count(category) x {u8 progress 0..99, u8 level}; counts come from the level tables (0x800DDDC4[park] + 4*sub, offsets +16,+32,+48,+80,+96,+112,+128,+64), NOT from the stream. Park 0 sub 0 live: 8,0,1,1,13,6,3,2",
+     "tail_16": "u8 [research-object+4]; 5 x {u8 active, u8 category, i8 index} = the research slots (0x8009B28C / 0x8009B2EC / 0x8009B448)"
+    }
+   },
+   {
+    "n": 20,
+    "name": "messages",
+    "size": "variable",
+    "align": "none",
+    "fields": {
+     "0": "u8 count (entries whose kind != 4)",
+     "each": "align 2; i16 id; if id == -1: u8 len, len bytes text; u8 kind; i8 subject_type (-1 none); if subject_type != -1: u8 subject_index"
+    },
+    "note": "INFERRED: pending advisor/message-window queue (manager 0x8010988C, ctor 0x8003A7BC, append 0x800385AC)"
+   }
+  ],
+  "trailer": "the SAVE heap block is rounded up to 4 bytes, so 0..3 undefined bytes may follow the last section",
+  "after_load": "0x800505A8 is called once all sections are read (0x80071DE0)"
+ },
+ "records": {
+  "building_base": {
+   "src": "SOURCED 0x80062AE8",
+   "size": 12,
+   "fields": {
+    "0": "u32 -> A+0x14 guests served, all time",
+    "4": "u8 type (slot 16 value; 0x80063208) 1/3/6/7 rides, shops/features/sideshows their own",
+    "5": "u8 x tile",
+    "6": "u8 y tile",
+    "7": "u8 rotation 0..3 (slot 18)",
+    "8": "subclass fields"
+   },
+   "note": "after the fields the loader calls slot 39 with arg 1 (commit placement)"
+  },
+  "ride": {
+   "src": "SOURCED 0x8009CEFC, allocator 0x80050B5C(variant)",
+   "size": 152,
+   "fields": {
+    "0": "building_base",
+    "8": "i16 queue_x[32]/i16 queue_y[32] interleaved (4 bytes per point)",
+    "136": "u16 -> A+0xF4 day built",
+    "138": "u16 speed slider (slot 92)",
+    "140": "u8 capacity slider (slot 93)",
+    "141": "u8 duration slider (slot 94)",
+    "142": "u8 remaining lifetime (slot 83)",
+    "143": "u8 reliability 0..100 (-> A+0xB4 = v<<12)",
+    "144": "u8 status (slot 57 SetStatus); if 4..6 the loader also spawns the breakdown effect and sets status 4",
+    "145": "u8 queue point count (<=32)",
+    "146": "u8 upgrade level (A+0xF6)",
+    "147": "u8 pad",
+    "148": "u8 variant (catalogue index, used to allocate)"
+   }
+  },
+  "track_ride": {
+   "src": "SOURCED 0x800A6E6C, allocator 0x80050C34",
+   "size": 240,
+   "fields": {
+    "0": "ride (152)",
+    "149": "u8 piece count",
+    "150": "u16 pairs (rec[0x96+4i], rec[0x98+4i]) per piece -> 0x800A7CC8",
+    "236": "u8 extra count",
+    "230": "i8 pairs at 0xE6+2i (count from byte 236) -> A+0x1CF2"
+   },
+   "note": "field semantics INFERRED (track piece x/y); sizes SOURCED"
+  },
+  "tour_ride": {
+   "src": "SOURCED 0x800A1090, allocator 0x80050BC8",
+   "size": 152,
+   "fields": {
+    "0": "ride",
+    "149": "u8 flag -> 0x800A22A0 when nonzero"
+   }
+  },
+  "coaster": {
+   "src": "SOURCED 0x800ADCD8, allocator 0x80050F10",
+   "size": 1048,
+   "fields": {
+    "0": "ride",
+    "148": "u32: bits 0-7 variant, bits 8-13 element count (<=63), bits 14-15 flags -> 0x800ADEA0 when set",
+    "150": "14-byte elements: u16 a, u16 b, u16 c, i16 f156, i16 s158, i16 s160, u8 b162, u8 b163 -> 0x800AF73C / 0x800B6728"
+   },
+   "note": "element semantics INFERRED (track segment geometry); layout SOURCED"
+  },
+  "feature": {
+   "src": "SOURCED 0x80023DB8, allocator 0x80050FE8(rec[12])",
+   "size": 16,
+   "fields": {
+    "0": "building_base",
+    "8": "u32 -> A+0x78 day built",
+    "12": "u8 variant",
+    "13": "u8 status (slot 57)",
+    "14": "u8 capacity 0..100 (A+0x80)",
+    "15": "u8 pad"
+   }
+  },
+  "shop": {
+   "src": "SOURCED 0x800B6BB8, allocator 0x80050F7C(rec[20])",
+   "size": 28,
+   "fields": {
+    "0": "building_base",
+    "8": "u32 -> A+0x84",
+    "12": "u16 sale price (0x800B7140)",
+    "14": "u16 -> A+0x8C takings",
+    "16": "i16 -> A+0x90 profit",
+    "18": "u16 -> A+0x78 day built",
+    "20": "u8 variant (A+0x6B)",
+    "21": "u8 status (slot 57)",
+    "22": "u8 -> A+0x7C panel modifier",
+    "23": "u8, A+0x80 := rec[23] * rec[8..11]",
+    "24": "u8 -> 0x800B706C (A+0x8A modifier)",
+    "25": "pad"
+   }
+  },
+  "sideshow": {
+   "src": "SOURCED 0x800B7410, allocator 0x80051054(rec[25])",
+   "size": 28,
+   "fields": {
+    "0": "building_base",
+    "8": "u32 -> A+0x7C",
+    "12": "u16 play price (0x800B773C, A+0x84)",
+    "14": "u16 win chance % (0x800B7770, A+0x86)",
+    "16": "u16 -> A+0x88 wins",
+    "18": "u16 -> A+0x8C prizes paid",
+    "20": "u16 -> A+0x90 takings",
+    "22": "u16 -> A+0x94",
+    "24": "u8 prize pounds (0x800B7750, A+0x78)",
+    "25": "u8 variant",
+    "26": "u8, A+0x80 := rec[26] * rec[8..11]",
+    "27": "u8 status (slot 57)"
+   }
+  },
+  "visitor_template": {
+   "src": "SOURCED writer 0x80070FA4 (min/max over all guests), reader 0x80091A3C",
+   "size": 26,
+   "fields": {
+    "0": "u8 base, u8 range : rubbish V+0x58",
+    "2": "happiness V+0x59",
+    "4": "nausea V+0x5A (written, NOT restored)",
+    "6": "need V+0x5B",
+    "8": "boredom V+0x5C (written, NOT restored)",
+    "10": "desire V+0x5D",
+    "12": "need V+0x5E",
+    "14": "tiredness V+0x5F",
+    "16": "u16 base, u16 range : money V+0x48 (tenths of a pound)",
+    "20": "u8,u8 : walk speed V+0x60",
+    "22": "u8,u8 : V+0x62",
+    "24": "u8,u8 : V+0x63"
+   },
+   "restore": "for each of header.n_visitors: new guest (0x80051480), position := exit point 1 (0x800599A4(1)), state 45, each attribute := base + D(range+1) where D = (rand(n)+rand(n))/2 for offsets 0,2,16,20,22,24 (0x8009197C) and n - rand(n)*rand(n)/n for offsets 6,10,12,14 (0x800919C4); type := rand(8)"
+  },
+  "person": {
+   "src": "SOURCED writer 0x80094BBC, reader 0x80094C64; allocators 0x80051640 guard, 0x80051850 researcher, 0x800516F0 mechanic, 0x800517A0 handyman, 0x80051900 entertainer, all (variant)",
+   "size": 16,
+   "fields": {
+    "0": "u32 never written / never read",
+    "4": "u32 hire day (P+0x34, McAi total days)",
+    "8": "u8 variant (slot 53 get / slot 52 set); the name comes from the catalogue, it is not stored",
+    "9": "u8 bits 0-2 level (P+0x3C & 7), bit 7 = was striking (state 15)",
+    "10": "u16 never written / never read",
+    "12": "u8[4] patrol rectangle x0,y0,x1,y1 (S+0x38..0x3B)"
+   },
+   "note": "position is not saved; 0x8009386C re-places the person"
+  },
+  "bank": {
+   "src": "SOURCED writer 0x80087DEC, reader 0x80088A0C",
+   "size": 808,
+   "fields": {
+    "0": "8 x money_history(80): month-end balance, income, entry fees, shop profit, sideshow takings, spend, wages, park value (BANK+0xBC..+0x107C order)",
+    "640": "4 x loan(28)",
+    "752": "i32 balance (tenths of a pound)",
+    "756": "i32 month index (BANK+0x12BC)",
+    "760": "i32 income last year (+0x12E0)",
+    "764": "i32 spend last year (+0x12E8)",
+    "768": "i32 income this year (+0x12DC)",
+    "772": "i32 spend this year (+0x12E4)",
+    "776": "i32 sideshow takings all time (+0x12C4)",
+    "780": "i32 entry fees all time (+0x12C8)",
+    "784": "i32 shop profit all time (+0x12CC)",
+    "788": "i32 wages all time (+0x12D0)",
+    "792": "i32 spend all time (+0x12D4)",
+    "796": "i32 income all time (+0x12D8)",
+    "800": "i32 park value snapshot (+0x12EC)",
+    "804": "i32 balance snapshot (+0x12F0)"
+   },
+   "note": "all-time and yearly figures are stored via 0x80088E18 = value/10 (pounds) and restored x10 (0x80088E50); the balance and history values are stored raw (tenths). Entry fee is NOT here (it is in open_fee). Captured: 780 = 80 = two GBP 40 admissions."
+  },
+  "money_history": {
+   "src": "SOURCED writer 0x800879DC, reader 0x80087F90",
+   "size": 80,
+   "fields": {
+    "0": "i32 min over months 13..N",
+    "4": "i32 max over months 13..N",
+    "8": "i32[12] months 1..12 back, exact (tenths)",
+    "56": "u8[6] months 13..24 as pair averages, quantised: byte = (v-min)*255/(max-min)",
+    "62": "u8[8] months 25..72 as six-month averages, quantised",
+    "70": "u8[9] months 73..144 as eight-month averages, quantised",
+    "79": "u8 pad"
+   },
+   "note": "tiers 62..79 INFERRED by structure of the reader loops (constants /6, /8, x0x80808081 = /255); the 12 exact months and the pair tier are read"
+  },
+  "loan": {
+   "src": "SOURCED 0x80086470 / 0x800864C4",
+   "size": 28,
+   "fields": {
+    "0": "i32 principal (loan+4)",
+    "4": "i32 term months (loan+8)",
+    "8": "i32 months remaining (loan+16)",
+    "12": "i32 amount remaining (loan+20)",
+    "16": "i32 monthly payment (loan+24)",
+    "20": "i32 total to repay (loan+36)",
+    "24": "u8 available (loan+40; 0 = taken)",
+    "25": "pad"
+   }
+  },
+  "mcai": {
+   "src": "SOURCED writer 0x8006892C, reader 0x80069034",
+   "size": 220,
+   "fields": {
+    "0": "u32[5] -> McAi+0x300+8i",
+    "20": "u32 total days (McAi+0x10)",
+    "24": "u32 admissions counter (McAi+0x1C)",
+    "28": "u16 year (McAi+8)",
+    "30": "u16 McAi+0x18",
+    "32": "u8 McAi+0x2F8",
+    "33": "u8[5] -> McAi+0x304+8i",
+    "38": "u8 bitmask, bit i -> McAi+0x305+8i",
+    "39": "u8 months in debt (McAi+0x14)",
+    "40": "u8 month 0..11 (McAi+4)",
+    "41": "u8 day of month (McAi+0xC)",
+    "42": "u8 pad",
+    "43": "5 x u8_history(35) -> McAi+0x28+0x90*i (144 monthly bytes each)"
+   },
+   "note": "the five (u32,u8,bit) triples and the five histories are INFERRED to be objective/park-rating tracks; the calendar fields are SOURCED via economy.md/wages.md offsets"
+  },
+  "u8_history": {
+   "src": "SOURCED 0x80068740 / 0x80068A54",
+   "size": 35,
+   "fields": {
+    "0": "u8[12] months 1..12 back exact",
+    "12": "u8[6] pair averages months 13..24",
+    "18": "u8[8] six-month averages months 25..72",
+    "26": "u8[9] eight-month averages months 73..144"
+   }
+  }
+ },
+ "gendata": {
+  "src": "SOURCED 0x80070A9C (writer), 0x80071E04 (reader), 0x80013A60/0x80013A9C thunks -> vtable 0x800DBB3C slots 2/3 = 0x8001758C / 0x80017594 which are 'jr ra'",
+  "unpacked_size": 32,
+  "layout": "25 bytes written from an UNINITIALISED stack buffer (the serialise virtual is a no-op in this build), pad to 28, 1 more uninitialised byte, pad to 32",
+  "effect_on_load": "none (the load virtual is also a no-op)",
+  "live_sample": "0001000100000001000000000000000000000000000000000100e70201320000"
+ },
+ "flow": {
+  "save": "Laptop > Game Options > Save Game -> 0x80073484(port, name, fullsim): sprintf title, compose (0x8006C0E4), nblocks = ceil(size/8192) = 5, suffix = 8 chars of name case-toggled, card op 6 (create+write, 0x8007046C) with up to 5 retries; 0x80073678 overwrites an existing slot",
+  "load": "Main menu > Load Game -> directory listing op (0x8006FEF0, wildcard '*') -> per file with 12-char prefix match and 'SC' title (0x80070080) -> 0x80073378: read the whole file (op 5, 0x800702BC) into a LOADING buffer of nblocks*8192, then 0x8006C524 validates and installs SVEDLEV/GENDATA/options; up to 5 retries",
+  "park_enter": "0x800588D0 -> 0x8006B9F8 (apply GENDATA: no-op) and 0x8006B92C (restore park if SVEDLEV entry has data), otherwise the level starts fresh",
+  "park_leave": "0x80057EFC -> 0x8006B980 (GENDATA snapshot) + 0x8006B8E8 (park snapshot into SVEDLEV)"
+ },
+ "loader_rejects": [
+  "file shorter than 5 blocks (0x9FFC word unreadable)",
+  "word 0x200 != word 0x9FFC",
+  "checksum mismatch",
+  "magic != 0x47415901",
+  "version != 0xAC",
+  "a stream whose header park/sub != current park/sub (stream silently skipped, park starts fresh)",
+  "a slot status byte with a stream but flag != 0 (byte != 0xF0): stream ignored"
+ ],
+ "not_located": [
+  "terrain heightmap: NOT in the save; it comes from the level (park id). Only the path bitmap is saved",
+  "scenery/trees placed by the player: no section exists for them (if the build allows placing them they are lost on save)",
+  "per-guest state: not saved (template only)",
+  "staff names: derived from variant",
+  "shop record fields at +8 and +23 (A+0x84, A+0x80): purpose unknown",
+  "coaster/track element field meanings"
+ ]
+}

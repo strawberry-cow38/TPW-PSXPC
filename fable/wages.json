@@ -1,0 +1,108 @@
+{
+  "_legend": "SOURCED = read off instructions at the quoted address; MEASURED = read off .oracle_park_idle/ram_000600.bin with fable/w/staffdump.py; DERIVED = inferred; UNMEASURED = guess. Money units are pounds*10.",
+  "binary": {"file": "/home/ec2-user/tpw/ext/TPW.BIN", "load": "0x80010000"},
+  "corrections_to_economy_json": {
+    "hire.fn 0x80085728": "is the TRAINING purchase (Staff Information -> employee -> Training). Raises level by 1 (0x8009563C) then charges hireBase[newLevel]*hmult[kind] via 0x80094DC0. Real hiring charges TrySpend(0).",
+    "wages.type_index_mapping": "rec+0x10 is the staff KIND: 0 Mechanic, 1 Entertainer, 2 Cleaner(Handyman), 3 Guard, 4 Researcher (SOURCED: placer switch 0x800DC5A4, message switch 0x800DC5BC, per-pool init kinds 0x80096408=0 0x80095BAC=1 0x800989C4=2 0x80097784=3 0x800998C4=4)",
+    "bank.address_settlement": "MEASURED: BANK = 0x801D5658, McAi = 0x801E8B50"
+  },
+  "wage_formula": {
+    "fn": "0x80094E3C",
+    "pounds": "state==15 ? 0 : floor(pct * base[level] * mult[kind] / 100)",
+    "pct": "days < monthLen ? floor(100*days/monthLen) : 100; days = McAi+0x10 - P+0x34; monthLen = length of the month just ended (0x80069314)",
+    "base_by_level": [50, 55, 65, 80, 100],
+    "mult_by_kind": {"0_Mechanic": 3, "1_Entertainer": 1, "2_Cleaner": 1, "3_Guard": 2, "4_Researcher": 3},
+    "training_mult_by_kind": {"0_Mechanic": 3, "1_Entertainer": 1, "2_Cleaner": 1, "3_Guard": 2, "4_Researcher": 6},
+    "training_base_by_level": [250, 275, 325, 400, 500],
+    "sum": "0x80086B60 walks pool+8 of all five pools, person = node+8; Money(wage) is x10; rollover 0x80086D70 adds it to BANK+0x12D0 and hist_wages[idx] before TrySpend"
+  },
+  "screens": {
+    "hire_offer": {
+      "path": "laptop row 6 Build & Hire (0x80075354) -> Hire -> type -> recruit",
+      "type_list_number": "remaining hireable = 0x8006A394(mgr,kind)=5 minus pool+0xC (0x80052EA0 case 0xA); 'Guards 5' means 0 employed",
+      "draw": "0x8007E37C",
+      "pay_grade": "rec+0x14 + 1 (0x8007E704)",
+      "monthly_wage": "0x8006A874(rec,-1) = base[rec+0x14] * mult[rec+0x10]; not pro-rated; no person exists yet",
+      "motivation": "rec+0x18",
+      "gary_liddon": {"rec": "0x800F2CD0", "kind": 3, "default_level": 0, "wage": 100, "pay_grade_shown": 1, "tag": "MEASURED"}
+    },
+    "staff_information": {"path": "laptop row 5 (0x80074DA8), lists only types with pool+0xC != 0", "draw": "0x8007BA74", "time_employed": "McAi+0x10 - P+0x34", "monthly_wage": "base[P+0x3C&7]*mult[kind] at current level, not pro-rated", "skill_bar": "25*level"},
+    "training": {"draw": "0x80085908", "purchase": "0x80085728", "training_cost_shown": "hireBase[L]*hmult (current level)", "charged": "hireBase[L+1]*hmult", "monthly_wage_shown": "base[min(L+1,5)]*mult (next level)", "slider_text": "0x800E3498[L+1] = 'Level (L+2)'", "bug_L4": "index 5 reads 0x800E1640[0]=3"}
+  },
+  "hire_flow": {
+    "offer_confirm": "0x8007D554 -> 0x800193A4(tool 0x8010972C, state 1, variant=rec+2, kind=rec+0x10); afford check prices the attraction widget, not the recruit",
+    "tool": {"addr": "0x8010972C", "state": "+0x20 (0x8010974C)", "current_placer": "+0xC (0x80109738)"},
+    "staff_placer": {"addr": "0x80104A98", "vtable": "0x800DC524", "held_person": "+0x14 (0x80104AAC)", "kind": "+0x18 (0x80104AB0)", "price": "+8 (0x80104AA0)"},
+    "placer_slots": {"create": "0x8001E508 (kind switch 0x800DC5A4 -> pool creator -> alloc 0x8005D8C8 + init; stamps P+0x34=McAi+0x10)", "move": "0x8001E5E8 (sets ghost bit P+0x2B|=0x40, zeroes placer+8)", "confirm": "0x8001E720 (0x8004D800 tile check, then commit 0x8001E6BC: ghost off, setState 0, TrySpend(placer+8)=0)", "cancel": "0x8001E870 (0x80051B2C -> node back to free list)"},
+    "hire_cost_pounds": 0,
+    "employed_from": "creation (X on the offer); simulated from the in-world confirm",
+    "verify_after_offer_X": {"0x8010974C": 1, "0x80104AAC": "person P != 0", "P+0x34": "== McAi+0x10", "pool+0xC": 1}
+  },
+  "pools": {
+    "layout": {"+4": "free head", "+8": "employed head", "+0xC": "employed count", "+0x10": "5 slots", "node+0": "next", "node+4": "prev", "person": "node+8", "capacity": 5, "first_hire_takes": "slot 4"},
+    "ptr_globals": {"guards": "0x80103864", "mechanics": "0x80103868", "cleaners": "0x8010386C", "researchers": "0x80103870", "entertainers": "0x80103874"},
+    "measured_idle_park": {
+      "guards": {"pool": "0x801DA8B0", "stride": 76, "first_free_node": "0x801DA9F0", "person": "0x801DA9F8"},
+      "mechanics": {"pool": "0x801DA724", "stride": 76, "first_free_node": "0x801DA864", "person": "0x801DA86C"},
+      "cleaners": {"pool": "0x801DA598", "stride": 76, "first_free_node": "0x801DA6D8", "person": "0x801DA6E0"},
+      "researchers": {"pool": "0x801DA40C", "stride": 80, "first_free_node": "0x801DA54C", "person": "0x801DA554"},
+      "entertainers": {"pool": "0x801DA26C", "stride": 288, "first_free_node": "0x801DA3BC", "person": "0x801DA3C4"}
+    },
+    "person_fields": {"+0x2B": "flags, bit 0x40 held/ghost", "+0x2D": "state (15 striking)", "+0x30": "record ptr", "+0x34": "hire day", "+0x3C": "bits0-2 level, bits3-7 field=15", "+0x3F,+0x40": "bars (0,100 at hire)"}
+  },
+  "staff_records": {
+    "table": "0x800F2AF0", "count_at": "0x800F2AEC", "stride": 32, "count": 25,
+    "layout": {"+2": "u16 variant", "+4": "name text id", "+0x10": "kind", "+0x14": "default level", "+0x18": "motivation"},
+    "records": [
+      {"rec": "0x800F2AF0", "kind": 0, "variant": 0, "name": "Mike Armstrong", "level": 0, "motiv": 36, "offer_wage": 150},
+      {"rec": "0x800F2B10", "kind": 0, "variant": 1, "name": "Karl Jeffery", "level": 1, "motiv": 51, "offer_wage": 165},
+      {"rec": "0x800F2B30", "kind": 0, "variant": 2, "name": "Richard Edwards", "level": 1, "motiv": 44, "offer_wage": 165},
+      {"rec": "0x800F2B50", "kind": 0, "variant": 3, "name": "Caroline Miller", "level": 1, "motiv": 40, "offer_wage": 165},
+      {"rec": "0x800F2B70", "kind": 0, "variant": 4, "name": "James Parham", "level": 0, "motiv": 58, "offer_wage": 150},
+      {"rec": "0x800F2B90", "kind": 1, "variant": 0, "name": "Tim Swann", "level": 0, "motiv": 23, "offer_wage": 50},
+      {"rec": "0x800F2BB0", "kind": 1, "variant": 1, "name": "Andy Nuttall", "level": 1, "motiv": 76, "offer_wage": 55},
+      {"rec": "0x800F2BD0", "kind": 1, "variant": 2, "name": "Simon Harris", "level": 0, "motiv": 48, "offer_wage": 50},
+      {"rec": "0x800F2BF0", "kind": 1, "variant": 3, "name": "Phil Williams", "level": 1, "motiv": 48, "offer_wage": 55},
+      {"rec": "0x800F2C10", "kind": 1, "variant": 4, "name": "Emma Barrett", "level": 1, "motiv": 27, "offer_wage": 55},
+      {"rec": "0x800F2C30", "kind": 2, "variant": 0, "name": "Chris Eden", "level": 1, "motiv": 73, "offer_wage": 55},
+      {"rec": "0x800F2C50", "kind": 2, "variant": 1, "name": "Elco Vossers", "level": 1, "motiv": 60, "offer_wage": 55},
+      {"rec": "0x800F2C70", "kind": 2, "variant": 2, "name": "Stuart Thomson", "level": 1, "motiv": 79, "offer_wage": 55},
+      {"rec": "0x800F2C90", "kind": 2, "variant": 3, "name": "Debi Fearn", "level": 1, "motiv": 33, "offer_wage": 55},
+      {"rec": "0x800F2CB0", "kind": 2, "variant": 4, "name": "Nick Dry", "level": 1, "motiv": 39, "offer_wage": 55},
+      {"rec": "0x800F2CD0", "kind": 3, "variant": 0, "name": "Gary Liddon", "level": 0, "motiv": 26, "offer_wage": 100},
+      {"rec": "0x800F2CF0", "kind": 3, "variant": 1, "name": "Mike Baxter", "level": 1, "motiv": 51, "offer_wage": 110},
+      {"rec": "0x800F2D10", "kind": 3, "variant": 2, "name": "Dave Owens", "level": 1, "motiv": 21, "offer_wage": 110},
+      {"rec": "0x800F2D30", "kind": 3, "variant": 3, "name": "Sarah Burfoot", "level": 1, "motiv": 50, "offer_wage": 110},
+      {"rec": "0x800F2D50", "kind": 3, "variant": 4, "name": "Michael Archer", "level": 1, "motiv": 47, "offer_wage": 110},
+      {"rec": "0x800F2D70", "kind": 4, "variant": 0, "name": "Paul Grenfell", "level": 0, "motiv": 62, "offer_wage": 150},
+      {"rec": "0x800F2D90", "kind": 4, "variant": 1, "name": "Chris Hadley", "level": 0, "motiv": 41, "offer_wage": 150},
+      {"rec": "0x800F2DB0", "kind": 4, "variant": 2, "name": "Thor Hayton", "level": 0, "motiv": 51, "offer_wage": 150},
+      {"rec": "0x800F2DD0", "kind": 4, "variant": 3, "name": "Niki Broughton", "level": 1, "motiv": 67, "offer_wage": 165},
+      {"rec": "0x800F2DF0", "kind": 4, "variant": 4, "name": "Leigh Bird", "level": 1, "motiv": 58, "offer_wage": 165}
+    ],
+    "tag": "MEASURED (values) / SOURCED (layout via 0x8007E37C, 0x80069EF4, 0x8006A874)"
+  },
+  "poke": {
+    "recommended": {"addr": "0x8001E754", "old": "0x10400040", "new": "0x00000000", "effect": "nops the tile-validity branch in the placer confirm 0x8001E720; after X on the offer, one X in the world commits the hire at any tile", "tag": "SOURCED, effect UNMEASURED"},
+    "full_first_month": {"addr": "P+0x34", "value": 0, "effect": "pct=100 at the first rollover"},
+    "pure_data_relink": {"tag": "UNMEASURED, not recommended", "words_guards_idle_park": {"0x801DA8B4": "[0x801DA9F0]", "0x801DA9F0": "[0x801DA8B8]", "0x801DA8B8": "0x801DA9F0", "0x801DA8BC": 1, "0x801DA9F8+0x30": "0x800F2CD0", "0x801DA9F8+0x34": "hire day", "0x801DA9F8+0x3C": "0x78"}, "risk": "free-slot persons carry only the class pointer; the AI tick runs their state machine"}
+  },
+  "gating": {
+    "sandbox_0x80102D34": "not read by tick 0x80066C50, rollover 0x80086D70 or wage 0x80094E3C; only needed at 0 to reach Build & Hire (0x80075D74)",
+    "free_money_0x801031CC": "skips the balance change only; BANK+0x12D0 and hist_wages still accumulate",
+    "pause": "tick skipped while [0x80103940] != 0 (laptop) or 0x800617D4; placement tool does not pause",
+    "unplaced_recruit": "paid (in pool+8, state != 15)",
+    "cancelled_recruit": "freed, not paid",
+    "rollover_only_caller": "0x80066C50, which is also the calendar's only caller; days advancing implies rollovers ran"
+  },
+  "falsifiers": {
+    "definitions": "T = McAi+0x10 at rollover, D = P+0x34, ML = month just ended; pct = T-D<ML ? floor(100(T-D)/ML) : 100; BANK+0x12D0 += 10*floor(pct*base[L]*mult/100)",
+    "idle_park_gary_liddon": {"state": "month 4 (May, 31d), day 3, totalDays 123", "D": 123, "T_first": 151, "pct_first": 90, "bank_12D0_after_first_rollover": 900, "hist_wages_idx4": 900, "balance_after_first_rollover": 499100, "per_month_after": 1000, "after_second_rollover": 1900},
+    "first_day_of_31_day_month": 1000,
+    "P34_poked_to_0": 1000,
+    "train_gary_once": {"balance_delta": -5500, "level": 1, "next_month_wage_units": 1100, "card_showed": {"training_cost": 500, "monthly_wage": 110}},
+    "hire_itself": {"spend_total_delta": 0, "balance_delta": 0}
+  },
+  "why_the_run_read_zero": "X on the recruit card created the staffer on the cursor (count 1); the first triangle ran the placer cancel 0x8001E870 and freed him; four rollovers summed an empty list.",
+  "unmeasured": ["in-world confirm button identity (assumed X, same path as ride placement)", "whether the offer's misdirected afford check can fail for staff", "behaviour of a staffer committed on an invalid tile"]
+}

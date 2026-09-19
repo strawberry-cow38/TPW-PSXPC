@@ -1,0 +1,10213 @@
+[
+ {
+  "folio": 44,
+  "file": "0044.bin",
+  "rec_off": 13156,
+  "type": 1,
+  "text_id": 152,
+  "fp_w": 4,
+  "b9": 1,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 750,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 24,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 30,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2000
+   }
+  ],
+  "name": "Big Dripper"
+ },
+ {
+  "folio": 46,
+  "file": "0046.bin",
+  "rec_off": 9808,
+  "type": 1,
+  "text_id": 727,
+  "fp_w": 6,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   3,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 2,
+    "f4C": 800,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 2,
+    "f4C": 350,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 2,
+    "f4C": 350,
+    "price": 2000
+   }
+  ],
+  "name": "Caterpillar Coaster"
+ },
+ {
+  "folio": 47,
+  "file": "0047.bin",
+  "rec_off": 9556,
+  "type": 1,
+  "text_id": 887,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 95,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 750,
+    "price": 12500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 400,
+    "price": 5250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 20,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 400,
+    "price": 2500
+   }
+  ],
+  "name": "Candy Coaster"
+ },
+ {
+  "folio": 125,
+  "file": "0125.bin",
+  "rec_off": 7816,
+  "type": 1,
+  "text_id": 27,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 650,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 24,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 30,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2000
+   }
+  ],
+  "name": "Hades"
+ },
+ {
+  "folio": 126,
+  "file": "0126.bin",
+  "rec_off": 16016,
+  "type": 1,
+  "text_id": 165,
+  "fp_w": 4,
+  "b9": 5,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 95,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 800,
+    "price": 12500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 5250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 15,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2500
+   }
+  ],
+  "name": "Scatty Batty"
+ },
+ {
+  "folio": 127,
+  "file": "0127.bin",
+  "rec_off": 8276,
+  "type": 1,
+  "text_id": 280,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 750,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 350,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 18,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 350,
+    "price": 2000
+   }
+  ],
+  "name": "Ghosta Coasta"
+ },
+ {
+  "folio": 212,
+  "file": "0212.bin",
+  "rec_off": 21280,
+  "type": 1,
+  "text_id": 69,
+  "fp_w": 2,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   1,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 700,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 24,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 30,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2000
+   }
+  ],
+  "name": "Chac Atak"
+ },
+ {
+  "folio": 213,
+  "file": "0213.bin",
+  "rec_off": 10636,
+  "type": 1,
+  "text_id": 199,
+  "fp_w": 4,
+  "b9": 5,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 95,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 750,
+    "price": 12500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 400,
+    "price": 5250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 400,
+    "price": 2500
+   }
+  ],
+  "name": "Gorilla Thrilla"
+ },
+ {
+  "folio": 219,
+  "file": "0219.bin",
+  "rec_off": 12652,
+  "type": 1,
+  "text_id": 993,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 650,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 450,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 450,
+    "price": 2000
+   }
+  ],
+  "name": "Temple of Gloom"
+ },
+ {
+  "folio": 367,
+  "file": "0367.bin",
+  "rec_off": 9152,
+  "type": 1,
+  "text_id": 330,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 700,
+    "price": 12500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 500,
+    "price": 5500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 20,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 500,
+    "price": 2500
+   }
+  ],
+  "name": "Escape Velocity"
+ },
+ {
+  "folio": 368,
+  "file": "0368.bin",
+  "rec_off": 13156,
+  "type": 1,
+  "text_id": 138,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   0,
+   2
+  ],
+  "exit": [
+   0,
+   0
+  ],
+  "b14": 1,
+  "b15": 1,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 90,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 700,
+    "price": 10000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 450,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 15,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 450,
+    "price": 2000
+   }
+  ],
+  "name": "Moonshot"
+ },
+ {
+  "folio": 373,
+  "file": "0373.bin",
+  "rec_off": 11516,
+  "type": 1,
+  "text_id": 715,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 95,
+  "body_len": 180,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 750,
+    "price": 12500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 24,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 500,
+    "price": 5500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 30,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 500,
+    "price": 2500
+   }
+  ],
+  "name": "The Shocker"
+ },
+ {
+  "folio": 20,
+  "file": "0020.bin",
+  "rec_off": 3544,
+  "type": 2,
+  "text_id": 669,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 125,
+  "price": 125,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Bricks"
+ },
+ {
+  "folio": 21,
+  "file": "0021.bin",
+  "rec_off": 4356,
+  "type": 2,
+  "text_id": 543,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   200,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Card Statue"
+ },
+ {
+  "folio": 28,
+  "file": "0028.bin",
+  "rec_off": 3756,
+  "type": 2,
+  "text_id": 1029,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 125,
+  "price": 125,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Plant Pot"
+ },
+ {
+  "folio": 29,
+  "file": "0029.bin",
+  "rec_off": 3556,
+  "type": 2,
+  "text_id": 662,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   400,
+   0,
+   3,
+   0,
+   61456,
+   1
+  ],
+  "name": "Super Toilet"
+ },
+ {
+  "folio": 32,
+  "file": "0032.bin",
+  "rec_off": 2116,
+  "type": 2,
+  "text_id": 745,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 500,
+  "price": 500,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   2
+  ],
+  "name": "Staff Room"
+ },
+ {
+  "folio": 33,
+  "file": "0033.bin",
+  "rec_off": 3724,
+  "type": 2,
+  "text_id": 207,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   200,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Teapot"
+ },
+ {
+  "folio": 95,
+  "file": "0095.bin",
+  "rec_off": 3688,
+  "type": 2,
+  "text_id": 665,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 175,
+  "price": 175,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   256
+  ],
+  "name": "Large Rock Pillar"
+ },
+ {
+  "folio": 96,
+  "file": "0096.bin",
+  "rec_off": 2768,
+  "type": 2,
+  "text_id": 149,
+  "fp_w": 5,
+  "b9": 3,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   100,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Huge Rock"
+ },
+ {
+  "folio": 97,
+  "file": "0097.bin",
+  "rec_off": 5208,
+  "type": 2,
+  "text_id": 175,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   200,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "bellt-unconfirmed"
+ },
+ {
+  "folio": 101,
+  "file": "0101.bin",
+  "rec_off": 3460,
+  "type": 2,
+  "text_id": 141,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   100,
+   0,
+   3,
+   0,
+   61456,
+   0
+  ],
+  "name": "Demon Statue"
+ },
+ {
+  "folio": 103,
+  "file": "0103.bin",
+  "rec_off": 1676,
+  "type": 2,
+  "text_id": 238,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 175,
+  "price": 175,
+  "u16s": [
+   100,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Gargoyle"
+ },
+ {
+  "folio": 108,
+  "file": "0108.bin",
+  "rec_off": 1900,
+  "type": 2,
+  "text_id": 988,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 100,
+  "price": 100,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Loudspeaker"
+ },
+ {
+  "folio": 109,
+  "file": "0109.bin",
+  "rec_off": 1512,
+  "type": 2,
+  "text_id": 834,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 500,
+  "price": 500,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   2
+  ],
+  "name": "Staff Room"
+ },
+ {
+  "folio": 110,
+  "file": "0110.bin",
+  "rec_off": 2048,
+  "type": 2,
+  "text_id": 124,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   100,
+   0,
+   3,
+   0,
+   61456,
+   1
+  ],
+  "name": "Super Toilet"
+ },
+ {
+  "folio": 112,
+  "file": "0112.bin",
+  "rec_off": 3592,
+  "type": 2,
+  "text_id": 696,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   200,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "skull - unconfirmed"
+ },
+ {
+  "folio": 114,
+  "file": "0114.bin",
+  "rec_off": 1832,
+  "type": 2,
+  "text_id": 228,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Haunted Tower"
+ },
+ {
+  "folio": 115,
+  "file": "0115.bin",
+  "rec_off": 1488,
+  "type": 2,
+  "text_id": 531,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Medium Tree"
+ },
+ {
+  "folio": 175,
+  "file": "0175.bin",
+  "rec_off": 972,
+  "type": 2,
+  "text_id": 290,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   256
+  ],
+  "name": "Small Rock Pillar"
+ },
+ {
+  "folio": 176,
+  "file": "0176.bin",
+  "rec_off": 2328,
+  "type": 2,
+  "text_id": 496,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   256
+  ],
+  "name": "Large Rock Pillar"
+ },
+ {
+  "folio": 177,
+  "file": "0177.bin",
+  "rec_off": 4736,
+  "type": 2,
+  "text_id": 933,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   256
+  ],
+  "name": "Huge Leafy Rock"
+ },
+ {
+  "folio": 178,
+  "file": "0178.bin",
+  "rec_off": 3532,
+  "type": 2,
+  "text_id": 720,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   256
+  ],
+  "name": "Huge Hollow Rock"
+ },
+ {
+  "folio": 179,
+  "file": "0179.bin",
+  "rec_off": 1976,
+  "type": 2,
+  "text_id": 304,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 100,
+  "price": 100,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   1
+  ],
+  "name": "Toilet"
+ },
+ {
+  "folio": 180,
+  "file": "0180.bin",
+  "rec_off": 1336,
+  "type": 2,
+  "text_id": 699,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   200,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Big Palm"
+ },
+ {
+  "folio": 181,
+  "file": "0181.bin",
+  "rec_off": 840,
+  "type": 2,
+  "text_id": 22,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Large Tree"
+ },
+ {
+  "folio": 186,
+  "file": "0186.bin",
+  "rec_off": 4180,
+  "type": 2,
+  "text_id": 204,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   2
+  ],
+  "name": "Control-unconfirmed"
+ },
+ {
+  "folio": 187,
+  "file": "0187.bin",
+  "rec_off": 972,
+  "type": 2,
+  "text_id": 672,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 0,
+  "price": 0,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Should be removed"
+ },
+ {
+  "folio": 188,
+  "file": "0188.bin",
+  "rec_off": 2988,
+  "type": 2,
+  "text_id": 763,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Fountain"
+ },
+ {
+  "folio": 189,
+  "file": "0189.bin",
+  "rec_off": 2992,
+  "type": 2,
+  "text_id": 495,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "lfountain-unconfirmed"
+ },
+ {
+  "folio": 191,
+  "file": "0191.bin",
+  "rec_off": 3380,
+  "type": 2,
+  "text_id": 345,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   150,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Mammoth Fountain"
+ },
+ {
+  "folio": 196,
+  "file": "0196.bin",
+  "rec_off": 2368,
+  "type": 2,
+  "text_id": 953,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 100,
+  "price": 100,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Loudspeaker"
+ },
+ {
+  "folio": 197,
+  "file": "0197.bin",
+  "rec_off": 2052,
+  "type": 2,
+  "text_id": 790,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 500,
+  "price": 500,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   2
+  ],
+  "name": "Staff Room"
+ },
+ {
+  "folio": 200,
+  "file": "0200.bin",
+  "rec_off": 2852,
+  "type": 2,
+  "text_id": 285,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   100,
+   0,
+   3,
+   0,
+   61456,
+   1
+  ],
+  "name": "Super Toilet"
+ },
+ {
+  "folio": 334,
+  "file": "0334.bin",
+  "rec_off": 4332,
+  "type": 2,
+  "text_id": 480,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   150,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Alien Bubbler"
+ },
+ {
+  "folio": 335,
+  "file": "0335.bin",
+  "rec_off": 1916,
+  "type": 2,
+  "text_id": 139,
+  "fp_w": 2,
+  "b9": 4,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 100,
+  "price": 100,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   259
+  ],
+  "name": "Antenna"
+ },
+ {
+  "folio": 339,
+  "file": "0339.bin",
+  "rec_off": 1900,
+  "type": 2,
+  "text_id": 747,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   61456,
+   259
+  ],
+  "name": "Large Crystals"
+ },
+ {
+  "folio": 340,
+  "file": "0340.bin",
+  "rec_off": 1968,
+  "type": 2,
+  "text_id": 558,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 125,
+  "price": 125,
+  "u16s": [
+   100,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Strange Growth"
+ },
+ {
+  "folio": 341,
+  "file": "0341.bin",
+  "rec_off": 3040,
+  "type": 2,
+  "text_id": 950,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   125,
+   0,
+   2,
+   0,
+   61456,
+   0
+  ],
+  "name": "Gyrotron"
+ },
+ {
+  "folio": 342,
+  "file": "0342.bin",
+  "rec_off": 744,
+  "type": 2,
+  "text_id": 969,
+  "fp_w": 2,
+  "b9": 1,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Large Crater-unconfirmed"
+ },
+ {
+  "folio": 344,
+  "file": "0344.bin",
+  "rec_off": 2344,
+  "type": 2,
+  "text_id": 43,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   400,
+   0,
+   3,
+   0,
+   61456,
+   1
+  ],
+  "name": "Super Toilet"
+ },
+ {
+  "folio": 345,
+  "file": "0345.bin",
+  "rec_off": 3348,
+  "type": 2,
+  "text_id": 465,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   61456,
+   0
+  ],
+  "name": "Large Tree"
+ },
+ {
+  "folio": 346,
+  "file": "0346.bin",
+  "rec_off": 1588,
+  "type": 2,
+  "text_id": 743,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   200,
+   0,
+   3,
+   0,
+   61456,
+   0
+  ],
+  "name": "Plasmatrope"
+ },
+ {
+  "folio": 347,
+  "file": "0347.bin",
+  "rec_off": 1656,
+  "type": 2,
+  "text_id": 565,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 75,
+  "price": 75,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Golden Rocks"
+ },
+ {
+  "folio": 353,
+  "file": "0353.bin",
+  "rec_off": 1904,
+  "type": 2,
+  "text_id": 547,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 500,
+  "price": 500,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   2
+  ],
+  "name": "Staff Room"
+ },
+ {
+  "folio": 354,
+  "file": "0354.bin",
+  "rec_off": 1960,
+  "type": 2,
+  "text_id": 8,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 16,
+  "w20": 100,
+  "price": 100,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   61456,
+   0
+  ],
+  "name": "Medium Tree"
+ },
+ {
+  "folio": 39,
+  "file": "0039.bin",
+  "rec_off": 16480,
+  "type": 3,
+  "text_id": 959,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "The Dizzy Tree"
+ },
+ {
+  "folio": 40,
+  "file": "0040.bin",
+  "rec_off": 14536,
+  "type": 3,
+  "text_id": 15,
+  "fp_w": 5,
+  "b9": 3,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 2,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 5,
+    "f48": 2,
+    "f4C": 500,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 5,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 5,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Bumper Bugs"
+ },
+ {
+  "folio": 42,
+  "file": "0042.bin",
+  "rec_off": 20584,
+  "type": 3,
+  "text_id": 997,
+  "fp_w": 5,
+  "b9": 3,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 45,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Caterpillar Capers"
+ },
+ {
+  "folio": 43,
+  "file": "0043.bin",
+  "rec_off": 20976,
+  "type": 3,
+  "text_id": 275,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 55,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Bugs TV "
+ },
+ {
+  "folio": 45,
+  "file": "0045.bin",
+  "rec_off": 12552,
+  "type": 3,
+  "text_id": 198,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 2,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Woodland Racers"
+ },
+ {
+  "folio": 48,
+  "file": "0048.bin",
+  "rec_off": 17820,
+  "type": 3,
+  "text_id": 792,
+  "fp_w": 4,
+  "b9": 1,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 2,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 3,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Dragon Fliers"
+ },
+ {
+  "folio": 49,
+  "file": "0049.bin",
+  "rec_off": 11868,
+  "type": 3,
+  "text_id": 296,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 2,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Flamingo Fling"
+ },
+ {
+  "folio": 50,
+  "file": "0050.bin",
+  "rec_off": 11856,
+  "type": 3,
+  "text_id": 120,
+  "fp_w": 4,
+  "b9": 1,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 700,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Flower Power"
+ },
+ {
+  "folio": 51,
+  "file": "0051.bin",
+  "rec_off": 10704,
+  "type": 3,
+  "text_id": 53,
+  "fp_w": 4,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Flying Fishes"
+ },
+ {
+  "folio": 52,
+  "file": "0052.bin",
+  "rec_off": 10864,
+  "type": 3,
+  "text_id": 190,
+  "fp_w": 4,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 750,
+    "price": 3000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 500,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 500,
+    "price": 500
+   }
+  ],
+  "name": "Flying Fountain"
+ },
+ {
+  "folio": 53,
+  "file": "0053.bin",
+  "rec_off": 16920,
+  "type": 3,
+  "text_id": 377,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 450,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Spore Spinner"
+ },
+ {
+  "folio": 54,
+  "file": "0054.bin",
+  "rec_off": 14924,
+  "type": 3,
+  "text_id": 607,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 40,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 3,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 60,
+    "f48": 0,
+    "f4C": 0,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 60,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 60,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Jelly Bounce"
+ },
+ {
+  "folio": 55,
+  "file": "0055.bin",
+  "rec_off": 10484,
+  "type": 3,
+  "text_id": 437,
+  "fp_w": 4,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 1,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 1,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 1,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Escargot A-Go Go"
+ },
+ {
+  "folio": 121,
+  "file": "0121.bin",
+  "rec_off": 16064,
+  "type": 3,
+  "text_id": 336,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 40,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 500,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 7,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Brain Buster"
+ },
+ {
+  "folio": 122,
+  "file": "0122.bin",
+  "rec_off": 21272,
+  "type": 3,
+  "text_id": 756,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   3,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 55,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 14,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Insecticide "
+ },
+ {
+  "folio": 123,
+  "file": "0123.bin",
+  "rec_off": 11400,
+  "type": 3,
+  "text_id": 170,
+  "fp_w": 5,
+  "b9": 3,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 1,
+    "f4C": 900,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1500
+   }
+  ],
+  "name": "Pumpkin Castle"
+ },
+ {
+  "folio": 124,
+  "file": "0124.bin",
+  "rec_off": 12952,
+  "type": 3,
+  "text_id": 934,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   0,
+   1
+  ],
+  "exit": [
+   3,
+   2
+  ],
+  "b14": 1,
+  "b15": 3,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 55,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 20,
+    "lifetime": 50,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 26,
+    "lifetime": 50,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 32,
+    "lifetime": 50,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Hocus Pocus"
+ },
+ {
+  "folio": 128,
+  "file": "0128.bin",
+  "rec_off": 12908,
+  "type": 3,
+  "text_id": 535,
+  "fp_w": 4,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 11,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Jaw Dropper"
+ },
+ {
+  "folio": 129,
+  "file": "0129.bin",
+  "rec_off": 20564,
+  "type": 3,
+  "text_id": 741,
+  "fp_w": 5,
+  "b9": 1,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 18,
+    "lifetime": 55,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 500,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 24,
+    "lifetime": 55,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 30,
+    "lifetime": 55,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "Thrill Grill"
+ },
+ {
+  "folio": 131,
+  "file": "0131.bin",
+  "rec_off": 10568,
+  "type": 3,
+  "text_id": 830,
+  "fp_w": 5,
+  "b9": 6,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   4,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 17,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 22,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Tentacle Terror"
+ },
+ {
+  "folio": 132,
+  "file": "0132.bin",
+  "rec_off": 10116,
+  "type": 3,
+  "text_id": 941,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   1,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 500,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "Devils Disc"
+ },
+ {
+  "folio": 133,
+  "file": "0133.bin",
+  "rec_off": 23820,
+  "type": 3,
+  "text_id": 822,
+  "fp_w": 4,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 600,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Crazy Clown"
+ },
+ {
+  "folio": 134,
+  "file": "0134.bin",
+  "rec_off": 13476,
+  "type": 3,
+  "text_id": 277,
+  "fp_w": 4,
+  "b9": 5,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 600,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Jumping Skulls"
+ },
+ {
+  "folio": 135,
+  "file": "0135.bin",
+  "rec_off": 4344,
+  "type": 3,
+  "text_id": 354,
+  "fp_w": 3,
+  "b9": 6,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 900,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 200
+   }
+  ],
+  "name": "Tower-unconfirmed"
+ },
+ {
+  "folio": 136,
+  "file": "0136.bin",
+  "rec_off": 7952,
+  "type": 3,
+  "text_id": 118,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   2
+  ],
+  "b14": 0,
+  "b15": 3,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 700,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 12,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 17,
+    "lifetime": 65,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Phantom"
+ },
+ {
+  "folio": 137,
+  "file": "0137.bin",
+  "rec_off": 12504,
+  "type": 3,
+  "text_id": 717,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   3,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 45,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Putrid Pumpkins"
+ },
+ {
+  "folio": 138,
+  "file": "0138.bin",
+  "rec_off": 13988,
+  "type": 3,
+  "text_id": 955,
+  "fp_w": 4,
+  "b9": 1,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 550,
+    "price": 1200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 7,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Rat Race"
+ },
+ {
+  "folio": 139,
+  "file": "0139.bin",
+  "rec_off": 11948,
+  "type": 3,
+  "text_id": 873,
+  "fp_w": 5,
+  "b9": 1,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 45,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 300,
+    "price": 300
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 20,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 300,
+    "price": 300
+   }
+  ],
+  "name": "Ghost Ship"
+ },
+ {
+  "folio": 140,
+  "file": "0140.bin",
+  "rec_off": 8892,
+  "type": 3,
+  "text_id": 222,
+  "fp_w": 4,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   3,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Eye Slide"
+ },
+ {
+  "folio": 141,
+  "file": "0141.bin",
+  "rec_off": 29876,
+  "type": 3,
+  "text_id": 134,
+  "fp_w": 5,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 2750,
+    "price": 2750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 20,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2750
+   }
+  ],
+  "name": "Spooky Spider"
+ },
+ {
+  "folio": 209,
+  "file": "0209.bin",
+  "rec_off": 11344,
+  "type": 3,
+  "text_id": 189,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 40,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 60,
+    "f48": 0,
+    "f4C": 0,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 7,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 60,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 60,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Belly Bounce"
+ },
+ {
+  "folio": 210,
+  "file": "0210.bin",
+  "rec_off": 21448,
+  "type": 3,
+  "text_id": 322,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 3,
+    "f4C": 650,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "The Hot Pot"
+ },
+ {
+  "folio": 211,
+  "file": "0211.bin",
+  "rec_off": 19644,
+  "type": 3,
+  "text_id": 119,
+  "fp_w": 6,
+  "b9": 1,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   3,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Aztec Bounce"
+ },
+ {
+  "folio": 214,
+  "file": "0214.bin",
+  "rec_off": 14252,
+  "type": 3,
+  "text_id": 500,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 550,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Diplo-Dip"
+ },
+ {
+  "folio": 216,
+  "file": "0216.bin",
+  "rec_off": 12828,
+  "type": 3,
+  "text_id": 801,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   1,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 16,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 22,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 300,
+    "price": 300
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 28,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 300,
+    "price": 300
+   }
+  ],
+  "name": "Sun God"
+ },
+ {
+  "folio": 217,
+  "file": "0217.bin",
+  "rec_off": 9736,
+  "type": 3,
+  "text_id": 489,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   3,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 550,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Inca Pot"
+ },
+ {
+  "folio": 218,
+  "file": "0218.bin",
+  "rec_off": 12696,
+  "type": 3,
+  "text_id": 671,
+  "fp_w": 4,
+  "b9": 5,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 55,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 500,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 9,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Mayan Spinner"
+ },
+ {
+  "folio": 220,
+  "file": "0220.bin",
+  "rec_off": 9672,
+  "type": 3,
+  "text_id": 992,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 45,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 11,
+    "lifetime": 45,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 14,
+    "lifetime": 45,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Crazy Ape"
+ },
+ {
+  "folio": 221,
+  "file": "0221.bin",
+  "rec_off": 17760,
+  "type": 3,
+  "text_id": 660,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   3,
+   0
+  ],
+  "exit": [
+   0,
+   3
+  ],
+  "b14": 3,
+  "b15": 1,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 5,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Mumbo"
+ },
+ {
+  "folio": 222,
+  "file": "0222.bin",
+  "rec_off": 8356,
+  "type": 3,
+  "text_id": 102,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Rocky Racers"
+ },
+ {
+  "folio": 223,
+  "file": "0223.bin",
+  "rec_off": 24940,
+  "type": 3,
+  "text_id": 990,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   3,
+   1
+  ],
+  "exit": [
+   1,
+   0
+  ],
+  "b14": 3,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 1,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 0,
+    "f4C": 0,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 1,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 200,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 1,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 1,
+    "f48": 3,
+    "f4C": 250,
+    "price": 750
+   }
+  ],
+  "name": "Slither"
+ },
+ {
+  "folio": 224,
+  "file": "0224.bin",
+  "rec_off": 18228,
+  "type": 3,
+  "text_id": 282,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 20,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 450,
+    "price": 4000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 30,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 400,
+    "price": 400
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 40,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 400,
+    "price": 400
+   }
+  ],
+  "name": "Tom Tom Twister"
+ },
+ {
+  "folio": 225,
+  "file": "0225.bin",
+  "rec_off": 10940,
+  "type": 3,
+  "text_id": 886,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 3250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 350
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 350
+   }
+  ],
+  "name": "Inca Totem"
+ },
+ {
+  "folio": 226,
+  "file": "0226.bin",
+  "rec_off": 11352,
+  "type": 3,
+  "text_id": 530,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   0,
+   1
+  ],
+  "exit": [
+   3,
+   1
+  ],
+  "b14": 1,
+  "b15": 3,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 5,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 400,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 450,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 450,
+    "price": 2500
+   }
+  ],
+  "name": "Aztec Mayhem"
+ },
+ {
+  "folio": 227,
+  "file": "0227.bin",
+  "rec_off": 11992,
+  "type": 3,
+  "text_id": 954,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 550,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 11,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 14,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "Eruption"
+ },
+ {
+  "folio": 360,
+  "file": "0360.bin",
+  "rec_off": 14496,
+  "type": 3,
+  "text_id": 574,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 40,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 1,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 30,
+    "cycles_max": 45,
+    "f48": 0,
+    "f4C": 0,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 1,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 30,
+    "cycles_max": 50,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 1,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 30,
+    "cycles_max": 55,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Bounce on Iggy"
+ },
+ {
+  "folio": 361,
+  "file": "0361.bin",
+  "rec_off": 22180,
+  "type": 3,
+  "text_id": 713,
+  "fp_w": 5,
+  "b9": 2,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 1,
+    "f4C": 900,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 100,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 10,
+    "cycles_max": 50,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2000
+   }
+  ],
+  "name": "Uforia"
+ },
+ {
+  "folio": 362,
+  "file": "0362.bin",
+  "rec_off": 12520,
+  "type": 3,
+  "text_id": 338,
+  "fp_w": 5,
+  "b9": 3,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 45,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 18,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 24,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Crater Creature"
+ },
+ {
+  "folio": 364,
+  "file": "0364.bin",
+  "rec_off": 16276,
+  "type": 3,
+  "text_id": 66,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 55,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 1750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Hover Bot Havoc"
+ },
+ {
+  "folio": 365,
+  "file": "0365.bin",
+  "rec_off": 14512,
+  "type": 3,
+  "text_id": 865,
+  "fp_w": 5,
+  "b9": 7,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 55,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 11,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 450,
+    "price": 3250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 15,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 19,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "Romper Stomper"
+ },
+ {
+  "folio": 366,
+  "file": "0366.bin",
+  "rec_off": 11752,
+  "type": 3,
+  "text_id": 827,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 45,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 450,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Moon Buggies"
+ },
+ {
+  "folio": 369,
+  "file": "0369.bin",
+  "rec_off": 12848,
+  "type": 3,
+  "text_id": 52,
+  "fp_w": 6,
+  "b9": 7,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   3,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 10,
+    "lifetime": 60,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 60,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 22,
+    "lifetime": 60,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "The Orbiter"
+ },
+ {
+  "folio": 370,
+  "file": "0370.bin",
+  "rec_off": 28384,
+  "type": 3,
+  "text_id": 365,
+  "fp_w": 5,
+  "b9": 5,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 12,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "Missile Madness"
+ },
+ {
+  "folio": 371,
+  "file": "0371.bin",
+  "rec_off": 21432,
+  "type": 3,
+  "text_id": 571,
+  "fp_w": 5,
+  "b9": 4,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 650,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 16,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 22,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "The Gravatron"
+ },
+ {
+  "folio": 374,
+  "file": "0374.bin",
+  "rec_off": 6572,
+  "type": 3,
+  "text_id": 129,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 1,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 0,
+    "f4C": 0,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 1,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 1,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Space Balls"
+ },
+ {
+  "folio": 375,
+  "file": "0375.bin",
+  "rec_off": 13196,
+  "type": 3,
+  "text_id": 264,
+  "fp_w": 5,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   3
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 18,
+    "lifetime": 75,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 650,
+    "price": 2000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 24,
+    "lifetime": 75,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 30,
+    "lifetime": 75,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 200,
+    "price": 200
+   }
+  ],
+  "name": "The Areotron"
+ },
+ {
+  "folio": 376,
+  "file": "0376.bin",
+  "rec_off": 10068,
+  "type": 3,
+  "text_id": 31,
+  "fp_w": 4,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 15,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 1250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 20,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 25,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Cyclone Station"
+ },
+ {
+  "folio": 377,
+  "file": "0377.bin",
+  "rec_off": 17256,
+  "type": 3,
+  "text_id": 125,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   2
+  ],
+  "b14": 0,
+  "b15": 3,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 10,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 350,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 14,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 14,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 1,
+    "f4C": 150,
+    "price": 150
+   }
+  ],
+  "name": "Rock 'n Roll"
+ },
+ {
+  "folio": 379,
+  "file": "0379.bin",
+  "rec_off": 20296,
+  "type": 3,
+  "text_id": 321,
+  "fp_w": 5,
+  "b9": 4,
+  "fp_h": 5,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   2,
+   4
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 160,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 4,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 600,
+    "price": 2500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 6,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 250,
+    "price": 250
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 250,
+    "price": 250
+   }
+  ],
+  "name": "Zero G"
+ },
+ {
+  "folio": 60,
+  "file": "0060.bin",
+  "rec_off": 6064,
+  "type": 4,
+  "text_id": 239,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Costume Shop"
+ },
+ {
+  "folio": 61,
+  "file": "0061.bin",
+  "rec_off": 5608,
+  "type": 4,
+  "text_id": 235,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   250,
+   0,
+   1,
+   0,
+   60,
+   40,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Should be removed"
+ },
+ {
+  "folio": 62,
+  "file": "0062.bin",
+  "rec_off": 5456,
+  "type": 4,
+  "text_id": 937,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   1,
+   10240,
+   5,
+   5
+  ],
+  "name": "Drinks Shop"
+ },
+ {
+  "folio": 63,
+  "file": "0063.bin",
+  "rec_off": 3600,
+  "type": 4,
+  "text_id": 938,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   250,
+   0,
+   0,
+   0,
+   60,
+   40,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Cake Shop"
+ },
+ {
+  "folio": 64,
+  "file": "0064.bin",
+  "rec_off": 6192,
+  "type": 4,
+  "text_id": 623,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 750,
+  "price": 750,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   3,
+   0,
+   10,
+   0
+  ],
+  "name": "Balloon Shop"
+ },
+ {
+  "folio": 65,
+  "file": "0065.bin",
+  "rec_off": 3152,
+  "type": 4,
+  "text_id": 413,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   7,
+   20,
+   5,
+   10
+  ],
+  "name": "Fries Shop"
+ },
+ {
+  "folio": 67,
+  "file": "0067.bin",
+  "rec_off": 12712,
+  "type": 4,
+  "text_id": 798,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 1,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   350,
+   0,
+   3,
+   0,
+   90,
+   60,
+   5,
+   1295,
+   5,
+   5
+  ],
+  "name": "Restaurant"
+ },
+ {
+  "folio": 68,
+  "file": "0068.bin",
+  "rec_off": 3248,
+  "type": 4,
+  "text_id": 641,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   60,
+   40,
+   4,
+   2585,
+   5,
+   15
+  ],
+  "name": "Ice Cream Shop"
+ },
+ {
+  "folio": 69,
+  "file": "0069.bin",
+  "rec_off": 7720,
+  "type": 4,
+  "text_id": 56,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   250,
+   0,
+   3,
+   0,
+   150,
+   100,
+   6,
+   0,
+   15,
+   0
+  ],
+  "name": "Gift Shop "
+ },
+ {
+  "folio": 71,
+  "file": "0071.bin",
+  "rec_off": 10536,
+  "type": 4,
+  "text_id": 642,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 1,
+  "body_len": 24,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   200,
+   0,
+   1,
+   0,
+   60,
+   40,
+   0,
+   25,
+   5,
+   10
+  ],
+  "name": "Burger Shop"
+ },
+ {
+  "folio": 146,
+  "file": "0146.bin",
+  "rec_off": 3352,
+  "type": 4,
+  "text_id": 475,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   0,
+   25,
+   5,
+   10
+  ],
+  "name": "Burger Shop"
+ },
+ {
+  "folio": 147,
+  "file": "0147.bin",
+  "rec_off": 5612,
+  "type": 4,
+  "text_id": 200,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 1,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   350,
+   0,
+   3,
+   0,
+   90,
+   60,
+   5,
+   1305,
+   5,
+   5
+  ],
+  "name": "Restaurant"
+ },
+ {
+  "folio": 149,
+  "file": "0149.bin",
+  "rec_off": 3544,
+  "type": 4,
+  "text_id": 61,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 1,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   60,
+   40,
+   7,
+   20,
+   5,
+   10
+  ],
+  "name": "Fries Shop"
+ },
+ {
+  "folio": 150,
+  "file": "0150.bin",
+  "rec_off": 7116,
+  "type": 4,
+  "text_id": 870,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   250,
+   0,
+   3,
+   0,
+   150,
+   100,
+   6,
+   0,
+   15,
+   0
+  ],
+  "name": "Gift Shop"
+ },
+ {
+  "folio": 151,
+  "file": "0151.bin",
+  "rec_off": 3412,
+  "type": 4,
+  "text_id": 233,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   60,
+   40,
+   4,
+   2585,
+   5,
+   15
+  ],
+  "name": "Ice Cream Shop"
+ },
+ {
+  "folio": 152,
+  "file": "0152.bin",
+  "rec_off": 4760,
+  "type": 4,
+  "text_id": 772,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   1,
+   10240,
+   5,
+   5
+  ],
+  "name": "Drinks Shop"
+ },
+ {
+  "folio": 158,
+  "file": "0158.bin",
+  "rec_off": 6084,
+  "type": 4,
+  "text_id": 924,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 1,
+  "body_len": 24,
+  "w20": 750,
+  "price": 750,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   3,
+   0,
+   10,
+   0
+  ],
+  "name": "Balloon Shop"
+ },
+ {
+  "folio": 160,
+  "file": "0160.bin",
+  "rec_off": 7768,
+  "type": 4,
+  "text_id": 103,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Costume Shop"
+ },
+ {
+  "folio": 232,
+  "file": "0232.bin",
+  "rec_off": 6740,
+  "type": 4,
+  "text_id": 384,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 750,
+  "price": 750,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   3,
+   0,
+   10,
+   0
+  ],
+  "name": "Balloon Shop"
+ },
+ {
+  "folio": 233,
+  "file": "0233.bin",
+  "rec_off": 4824,
+  "type": 4,
+  "text_id": 90,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   250,
+   0,
+   0,
+   0,
+   60,
+   40,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Beef & Chips"
+ },
+ {
+  "folio": 234,
+  "file": "0234.bin",
+  "rec_off": 8024,
+  "type": 4,
+  "text_id": 647,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   200,
+   0,
+   1,
+   0,
+   60,
+   40,
+   0,
+   25,
+   5,
+   10
+  ],
+  "name": "Burger Shop"
+ },
+ {
+  "folio": 235,
+  "file": "0235.bin",
+  "rec_off": 4344,
+  "type": 4,
+  "text_id": 77,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Costume Shop"
+ },
+ {
+  "folio": 236,
+  "file": "0236.bin",
+  "rec_off": 8636,
+  "type": 4,
+  "text_id": 576,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   1,
+   10240,
+   5,
+   5
+  ],
+  "name": "Drinks Shop"
+ },
+ {
+  "folio": 237,
+  "file": "0237.bin",
+  "rec_off": 2988,
+  "type": 4,
+  "text_id": 879,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 20,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   7,
+   25,
+   5,
+   10
+  ],
+  "name": "Fries"
+ },
+ {
+  "folio": 238,
+  "file": "0238.bin",
+  "rec_off": 5188,
+  "type": 4,
+  "text_id": 742,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   250,
+   0,
+   3,
+   0,
+   150,
+   100,
+   6,
+   0,
+   15,
+   0
+  ],
+  "name": "Gift Shop"
+ },
+ {
+  "folio": 239,
+  "file": "0239.bin",
+  "rec_off": 3708,
+  "type": 4,
+  "text_id": 1015,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   60,
+   40,
+   4,
+   2585,
+   5,
+   15
+  ],
+  "name": "Ice Cream Shop"
+ },
+ {
+  "folio": 241,
+  "file": "0241.bin",
+  "rec_off": 3724,
+  "type": 4,
+  "text_id": 502,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   250,
+   0,
+   0,
+   0,
+   60,
+   40,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Drinks Shops"
+ },
+ {
+  "folio": 242,
+  "file": "0242.bin",
+  "rec_off": 10100,
+  "type": 4,
+  "text_id": 705,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   250,
+   0,
+   0,
+   0,
+   60,
+   40,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Drinks Shops"
+ },
+ {
+  "folio": 247,
+  "file": "0247.bin",
+  "rec_off": 4256,
+  "type": 4,
+  "text_id": 775,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 1,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   350,
+   0,
+   3,
+   0,
+   90,
+   60,
+   5,
+   1305,
+   5,
+   5
+  ],
+  "name": "Restaurant"
+ },
+ {
+  "folio": 381,
+  "file": "0381.bin",
+  "rec_off": 4284,
+  "type": 4,
+  "text_id": 47,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 300,
+  "price": 300,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   0,
+   25,
+   5,
+   10
+  ],
+  "name": "Burger Shop"
+ },
+ {
+  "folio": 382,
+  "file": "0382.bin",
+  "rec_off": 6088,
+  "type": 4,
+  "text_id": 986,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   2,
+   0,
+   15,
+   0
+  ],
+  "name": "Costume Shop"
+ },
+ {
+  "folio": 383,
+  "file": "0383.bin",
+  "rec_off": 3704,
+  "type": 4,
+  "text_id": 686,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   60,
+   40,
+   1,
+   10240,
+   5,
+   5
+  ],
+  "name": "Drinks Shop"
+ },
+ {
+  "folio": 384,
+  "file": "0384.bin",
+  "rec_off": 5872,
+  "type": 4,
+  "text_id": 601,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 750,
+  "price": 750,
+  "u16s": [
+   300,
+   0,
+   2,
+   0,
+   90,
+   60,
+   3,
+   0,
+   10,
+   0
+  ],
+  "name": "Balloon Shop"
+ },
+ {
+  "folio": 385,
+  "file": "0385.bin",
+  "rec_off": 3872,
+  "type": 4,
+  "text_id": 521,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 250,
+  "price": 250,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   60,
+   40,
+   7,
+   20,
+   5,
+   10
+  ],
+  "name": "Fries Shop"
+ },
+ {
+  "folio": 386,
+  "file": "0386.bin",
+  "rec_off": 4460,
+  "type": 4,
+  "text_id": 572,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   250,
+   0,
+   3,
+   0,
+   150,
+   100,
+   6,
+   0,
+   15,
+   0
+  ],
+  "name": "Gift Shop"
+ },
+ {
+  "folio": 387,
+  "file": "0387.bin",
+  "rec_off": 3700,
+  "type": 4,
+  "text_id": 482,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 200,
+  "price": 200,
+  "u16s": [
+   150,
+   0,
+   1,
+   0,
+   60,
+   40,
+   4,
+   2585,
+   5,
+   15
+  ],
+  "name": "Ice Cream Shop"
+ },
+ {
+  "folio": 390,
+  "file": "0390.bin",
+  "rec_off": 5572,
+  "type": 4,
+  "text_id": 888,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 24,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   350,
+   0,
+   3,
+   0,
+   90,
+   60,
+   5,
+   1305,
+   5,
+   5
+  ],
+  "name": "Restaurant"
+ },
+ {
+  "folio": 58,
+  "file": "0058.bin",
+  "rec_off": 2600,
+  "type": 5,
+  "text_id": 603,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Arcade"
+ },
+ {
+  "folio": 59,
+  "file": "0059.bin",
+  "rec_off": 3892,
+  "type": 5,
+  "text_id": 826,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 6,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Should be removed"
+ },
+ {
+  "folio": 66,
+  "file": "0066.bin",
+  "rec_off": 5320,
+  "type": 5,
+  "text_id": 498,
+  "fp_w": 2,
+  "b9": 2,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 9,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2500,
+  "price": 2500,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Fruit Shy"
+ },
+ {
+  "folio": 70,
+  "file": "0070.bin",
+  "rec_off": 7840,
+  "type": 5,
+  "text_id": 458,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 5,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 20,
+  "w20": 1000,
+  "price": 1000,
+  "u16s": [
+   550,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Giant Puzzle"
+ },
+ {
+  "folio": 72,
+  "file": "0072.bin",
+  "rec_off": 9656,
+  "type": 5,
+  "text_id": 998,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2000,
+  "price": 2000,
+  "u16s": [
+   500,
+   0,
+   2,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Aqua Spray"
+ },
+ {
+  "folio": 73,
+  "file": "0073.bin",
+  "rec_off": 8404,
+  "type": 5,
+  "text_id": 270,
+  "fp_w": 2,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 2,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2000,
+  "price": 2000,
+  "u16s": [
+   400,
+   0,
+   2,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Strength Flower"
+ },
+ {
+  "folio": 74,
+  "file": "0074.bin",
+  "rec_off": 9484,
+  "type": 5,
+  "text_id": 516,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 1,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Worm Bash"
+ },
+ {
+  "folio": 144,
+  "file": "0144.bin",
+  "rec_off": 4356,
+  "type": 5,
+  "text_id": 851,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2500,
+  "price": 2500,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Arcade"
+ },
+ {
+  "folio": 145,
+  "file": "0145.bin",
+  "rec_off": 3888,
+  "type": 5,
+  "text_id": 994,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 6,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 20,
+  "w20": 1500,
+  "price": 1500,
+  "u16s": [
+   500,
+   0,
+   2,
+   0,
+   10,
+   0,
+   0,
+   0
+  ],
+  "name": "Fortune Teller"
+ },
+ {
+  "folio": 148,
+  "file": "0148.bin",
+  "rec_off": 10388,
+  "type": 5,
+  "text_id": 838,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Crusher-unconfirmed"
+ },
+ {
+  "folio": 153,
+  "file": "0153.bin",
+  "rec_off": 6368,
+  "type": 5,
+  "text_id": 557,
+  "fp_w": 2,
+  "b9": 1,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 9,
+  "b17": 0,
+  "base_intensity": 65,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Pumpkin Shy"
+ },
+ {
+  "folio": 154,
+  "file": "0154.bin",
+  "rec_off": 9300,
+  "type": 5,
+  "text_id": 679,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 5,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2000,
+  "price": 2000,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Giant Puzzle"
+ },
+ {
+  "folio": 155,
+  "file": "0155.bin",
+  "rec_off": 25380,
+  "type": 5,
+  "text_id": 910,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Shooter"
+ },
+ {
+  "folio": 156,
+  "file": "0156.bin",
+  "rec_off": 6156,
+  "type": 5,
+  "text_id": 302,
+  "fp_w": 2,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 2,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Strength Skull"
+ },
+ {
+  "folio": 157,
+  "file": "0157.bin",
+  "rec_off": 9796,
+  "type": 5,
+  "text_id": 371,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Tombs-unconfirmed"
+ },
+ {
+  "folio": 159,
+  "file": "0159.bin",
+  "rec_off": 11064,
+  "type": 5,
+  "text_id": 707,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 1,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Bone Crusher"
+ },
+ {
+  "folio": 229,
+  "file": "0229.bin",
+  "rec_off": 1936,
+  "type": 5,
+  "text_id": 159,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 20,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   450,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Arcade"
+ },
+ {
+  "folio": 230,
+  "file": "0230.bin",
+  "rec_off": 2572,
+  "type": 5,
+  "text_id": 769,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 30,
+  "body_len": 20,
+  "w20": 2500,
+  "price": 2500,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Arcade"
+ },
+ {
+  "folio": 231,
+  "file": "0231.bin",
+  "rec_off": 4020,
+  "type": 5,
+  "text_id": 419,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 40,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Large Arcade"
+ },
+ {
+  "folio": 240,
+  "file": "0240.bin",
+  "rec_off": 11224,
+  "type": 5,
+  "text_id": 100,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Jungle Spray"
+ },
+ {
+  "folio": 243,
+  "file": "0243.bin",
+  "rec_off": 7984,
+  "type": 5,
+  "text_id": 881,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 5,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2500,
+  "price": 2500,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Giant Puzzle"
+ },
+ {
+  "folio": 244,
+  "file": "0244.bin",
+  "rec_off": 13276,
+  "type": 5,
+  "text_id": 1023,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 4,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Dino Racing"
+ },
+ {
+  "folio": 245,
+  "file": "0245.bin",
+  "rec_off": 31532,
+  "type": 5,
+  "text_id": 135,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 8,
+  "b17": 0,
+  "base_intensity": 60,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Sun Shooter"
+ },
+ {
+  "folio": 246,
+  "file": "0246.bin",
+  "rec_off": 8964,
+  "type": 5,
+  "text_id": 374,
+  "fp_w": 2,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 3,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 2000,
+  "price": 2000,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Strength Bird"
+ },
+ {
+  "folio": 248,
+  "file": "0248.bin",
+  "rec_off": 9440,
+  "type": 5,
+  "text_id": 958,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 1,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Idol Smash"
+ },
+ {
+  "folio": 249,
+  "file": "0249.bin",
+  "rec_off": 3392,
+  "type": 5,
+  "text_id": 400,
+  "fp_w": 2,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   0,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 50,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "DuckShoot"
+ },
+ {
+  "folio": 380,
+  "file": "0380.bin",
+  "rec_off": 4000,
+  "type": 5,
+  "text_id": 368,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 2,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   400,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Arcade"
+ },
+ {
+  "folio": 388,
+  "file": "0388.bin",
+  "rec_off": 9148,
+  "type": 5,
+  "text_id": 94,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "UFO Blaster"
+ },
+ {
+  "folio": 389,
+  "file": "0389.bin",
+  "rec_off": 30352,
+  "type": 5,
+  "text_id": 155,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Martian Mooners"
+ },
+ {
+  "folio": 391,
+  "file": "0391.bin",
+  "rec_off": 10796,
+  "type": 5,
+  "text_id": 915,
+  "fp_w": 3,
+  "b9": 2,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 5,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   2,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Giant Puzzle"
+ },
+ {
+  "folio": 392,
+  "file": "0392.bin",
+  "rec_off": 36212,
+  "type": 5,
+  "text_id": 810,
+  "fp_w": 3,
+  "b9": 4,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   -1,
+   -1
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 8,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 150,
+  "price": 150,
+  "u16s": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "name": "shoot- unconfirmed"
+ },
+ {
+  "folio": 393,
+  "file": "0393.bin",
+  "rec_off": 6552,
+  "type": 5,
+  "text_id": 436,
+  "fp_w": 2,
+  "b9": 6,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 2,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Strength Rocket"
+ },
+ {
+  "folio": 394,
+  "file": "0394.bin",
+  "rec_off": 12956,
+  "type": 5,
+  "text_id": 595,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   -1,
+   -1
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 1,
+  "b17": 0,
+  "base_intensity": 0,
+  "body_len": 20,
+  "w20": 1750,
+  "price": 1750,
+  "u16s": [
+   500,
+   0,
+   1,
+   0,
+   10,
+   30,
+   25,
+   0
+  ],
+  "name": "Martian Mash"
+ },
+ {
+  "folio": 41,
+  "file": "0041.bin",
+  "rec_off": 37100,
+  "type": 6,
+  "text_id": 474,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 7,
+  "b17": 0,
+  "base_intensity": 80,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 750,
+    "price": 6500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 400
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 350
+   }
+  ],
+  "name": "Bumble Buggies"
+ },
+ {
+  "folio": 57,
+  "file": "0057.bin",
+  "rec_off": 35224,
+  "type": 6,
+  "text_id": 510,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 750,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 400,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 400,
+    "price": 400
+   }
+  ],
+  "name": "Taptastic Rapids"
+ },
+ {
+  "folio": 130,
+  "file": "0130.bin",
+  "rec_off": 44816,
+  "type": 6,
+  "text_id": 88,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   2,
+   0
+  ],
+  "exit": [
+   1,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 7,
+  "b17": 0,
+  "base_intensity": 80,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 750,
+    "price": 4000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 450
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 450
+   }
+  ],
+  "name": "Crypt Karts"
+ },
+ {
+  "folio": 143,
+  "file": "0143.bin",
+  "rec_off": 39132,
+  "type": 6,
+  "text_id": 816,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 600,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 400,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 400,
+    "price": 750
+   }
+  ],
+  "name": "Ooze Crooz"
+ },
+ {
+  "folio": 215,
+  "file": "0215.bin",
+  "rec_off": 44108,
+  "type": 6,
+  "text_id": 186,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 7,
+  "b17": 0,
+  "base_intensity": 80,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 600,
+    "price": 6500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 500
+   }
+  ],
+  "name": "Dino Karts"
+ },
+ {
+  "folio": 228,
+  "file": "0228.bin",
+  "rec_off": 28928,
+  "type": 6,
+  "text_id": 344,
+  "fp_w": 4,
+  "b9": 3,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 650,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 500
+   }
+  ],
+  "name": "Splish Splash"
+ },
+ {
+  "folio": 363,
+  "file": "0363.bin",
+  "rec_off": 27924,
+  "type": 6,
+  "text_id": 267,
+  "fp_w": 4,
+  "b9": 4,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 7,
+  "b17": 0,
+  "base_intensity": 80,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 700,
+    "price": 6500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 500
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 500
+   }
+  ],
+  "name": "Space Racers"
+ },
+ {
+  "folio": 378,
+  "file": "0378.bin",
+  "rec_off": 39068,
+  "type": 6,
+  "text_id": 651,
+  "fp_w": 4,
+  "b9": 6,
+  "fp_h": 4,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   2,
+   0
+  ],
+  "b14": 0,
+  "b15": 0,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 232,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 5,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 650,
+    "price": 5000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 3,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 400,
+    "price": 750
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 2,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 1,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 400,
+    "price": 750
+   }
+  ],
+  "name": "The Blobulator"
+ },
+ {
+  "folio": 56,
+  "file": "0056.bin",
+  "rec_off": 8800,
+  "type": 7,
+  "text_id": 863,
+  "fp_w": 3,
+  "b9": 3,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 184,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 550,
+    "price": 3000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 110,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 300,
+    "price": 350
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 125,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 400,
+    "price": 450
+   }
+  ],
+  "name": "Tweety Tours"
+ },
+ {
+  "folio": 142,
+  "file": "0142.bin",
+  "rec_off": 5604,
+  "type": 7,
+  "text_id": 92,
+  "fp_w": 3,
+  "b9": 5,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 184,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 600,
+    "price": 3000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 110,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 300
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 125,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 450,
+    "price": 400
+   }
+  ],
+  "name": "Flightmare Tours"
+ },
+ {
+  "folio": 208,
+  "file": "0208.bin",
+  "rec_off": 7708,
+  "type": 7,
+  "text_id": 544,
+  "fp_w": 4,
+  "b9": 7,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   0,
+   1
+  ],
+  "exit": [
+   3,
+   1
+  ],
+  "b14": 1,
+  "b15": 3,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 75,
+  "body_len": 184,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 600,
+    "price": 3000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 110,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 350,
+    "price": 300
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 80,
+    "b8_min": 80,
+    "b8_max": 125,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 2,
+    "f4C": 450,
+    "price": 400
+   }
+  ],
+  "name": "Jurassic Tours"
+ },
+ {
+  "folio": 372,
+  "file": "0372.bin",
+  "rec_off": 7160,
+  "type": 7,
+  "text_id": 824,
+  "fp_w": 3,
+  "b9": 1,
+  "fp_h": 3,
+  "b11": 255,
+  "entrance": [
+   1,
+   0
+  ],
+  "exit": [
+   1,
+   2
+  ],
+  "b14": 0,
+  "b15": 2,
+  "b16": 0,
+  "b17": 0,
+  "base_intensity": 70,
+  "body_len": 184,
+  "w20": 4,
+  "levels": [
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 70,
+    "b8_min": 80,
+    "b8_max": 100,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 650,
+    "price": 3000
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 70,
+    "b8_min": 80,
+    "b8_max": 110,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 300,
+    "price": 350
+   },
+   {
+    "cap_max": 4,
+    "f28": 4,
+    "f2C": 7,
+    "f30": 8,
+    "lifetime": 70,
+    "b8_min": 80,
+    "b8_max": 125,
+    "f40": 1,
+    "cycles_max": 10,
+    "f48": 3,
+    "f4C": 400,
+    "price": 450
+   }
+  ],
+  "name": "Star Tours"
+ }
+]

@@ -1,0 +1,108 @@
+{
+  "_scope": "Theme Park World SLES-026.88, PAL, image at 0x80010000. Guest arrival interval and head-count. Tags: SOURCED (read off code at the address), MEASURED (observed live via fable/a/wrunner from states/park_ride.state + btn/in_idle.txt, 1 sim tick = 2 frames), DERIVED, UNMEASURED.",
+  "model": {
+    "kind": "fixed real-time bus loop; park contents set head-count per bus only",
+    "no_rate_accumulator": true,
+    "interval_ticks_measured": 694,
+    "interval_ticks_measured_samples": [694, 694, 694, 695, 697, 694, 694],
+    "interval_frames": 1388,
+    "interval_game_days": 7.01,
+    "admission_gap_samples_ticks": [705, 704, 704, 703, 705, 671, 704, 641],
+    "admission_gap_note": "spawn->pay latency 333..372 creeps +10/cycle then snaps back; underlying spawn period is 694",
+    "closed_form": "T = ceil(0xC8000/d) + 3*ceil(0x50000/d) + drive(31,d) + drive(44,d) + 2 + hold; drive(n,d) ~ (n*65536-32768)/d + 11; d = [0x80103A90] per sim tick",
+    "tick_budget_measured": {"A_countdown": 83, "B_countdown": 33, "phase1_drive_31_units": 212, "phase2": 34, "phase3": 1, "phase4_B": 33, "phase4_drive_44_units": 298, "total": 694},
+    "delta_per_tick": {"address": "0x80103A90", "measured_mean": 9947, "measured_min": 9600, "measured_max": 10112, "nominal_hardware": 10082, "unit": "RCnt2 IRQ count << 7; RCnt2 target 0x866 at sysclk/8 = 1969.1 Hz", "predicted_interval_at_nominal": 688, "tag": "SOURCED units, MEASURED values"}
+  },
+  "bus_tick": {
+    "function": "0x80052324", "called_from": "0x80058E34 in game-mode slot 4 0x80058C20", "cadence": "once per sim tick (MEASURED)",
+    "pseudocode": [
+      "if A>0: A-=d; return",
+      "if B>0: B-=d; return",
+      "if phase==2: if batch==0: batch=2 elif batch==1: return (HOLD)",
+      "pos += clamp((tgt-pos)>>3, 0x100, 0x1000) * d >> 12",
+      "if batch==2 and pos>0x190000: batch=0",
+      "if pos<tgt: return",
+      "if phase==1 and IsOpen() and held==0: Arrivals(McAi,0)",
+      "if phase!=2: B=0x50000",
+      "tgt=table[phase]<<16; phase+=1",
+      "if phase>wrap: phase=1; A=0xC8000; pos=table[0]<<16; tgt=table[1]<<16"
+    ],
+    "sites": {"A_test": "0x80052634", "B_test": "0x80052644", "hold": "0x8005265C-0x8005267C", "step": "0x80052680-0x800526CC", "batch2_clear": "0x800526D0-0x800526E4", "arrivals_call": "0x8005273C", "B_set": "0x80052754", "reset": "0x8005278C-0x800527B4"},
+    "constants": {"A_reset": "0xC8000 (immediate at 0x8005278C/0x800527A0)", "B_pause": "0x50000 (immediate at 0x80052750)", "batch2_clear_pos": "0x190000", "step_min": "0x100", "step_max": "0x1000"},
+    "model_validation": "fable/a/bussim.py reproduces phase/pos/A/B bit-exactly for 1499 ticks, 0 mismatches (MEASURED)"
+  },
+  "addresses": {
+    "0x80103964": {"name": "bus_phase", "type": "u32", "values": "1 drive in, 2 at gate, 3 instant, 4 drive off", "tag": "SOURCED"},
+    "0x80103968": {"name": "bus_pos", "type": "s32 16.16", "range": "-0xF0000 .. 0x100000 (arrival) .. 0x3C0000", "tag": "SOURCED+MEASURED"},
+    "0x8010396C": {"name": "bus_target", "type": "s32 16.16", "tag": "SOURCED"},
+    "0x80103960": {"name": "countdown_A", "type": "s32", "reset_value": "0xC8000", "tag": "SOURCED+MEASURED"},
+    "0x8010395C": {"name": "countdown_B", "type": "s32", "set_value": "0x50000", "tag": "SOURCED+MEASURED"},
+    "0x80103A90": {"name": "time_step_delta", "type": "u32", "writer": "0x800BDE6C", "tag": "SOURCED+MEASURED"},
+    "0x80103480": {"name": "rcnt2_irq_count", "type": "u32", "tag": "SOURCED"},
+    "0x80103958": {"name": "gate_batch_state", "values": "0 idle, 1 admitting, 2 bus present no batch", "writers": ["0x80052148 admit", "0x80052324 bus"], "tag": "SOURCED"},
+    "0x80103950": {"name": "waiting_at_gate", "tag": "SOURCED"},
+    "0x80103954": {"name": "admitted_this_batch", "max": 11, "tag": "SOURCED"},
+    "0x80102D40": {"name": "phase_wrap", "static": 4, "writer": "none in TPW.BIN", "reader": "0x80052770", "tag": "SOURCED"},
+    "0x800E0F0C": {"name": "drive_table", "type": "s32[4]", "static": [-15, 16, 16, 60], "writer": "none", "readers": ["0x80052760", "0x80052790", "0x8005084C game start"], "tag": "SOURCED"},
+    "0x80102E54": {"name": "score_offset", "static": 0, "writer": "none", "reader": "0x800672D0", "tag": "SOURCED"},
+    "0x80102E50": {"name": "rate_divisor", "static": "0x14000", "writer": "none", "reader": "0x800672E4", "tag": "SOURCED"},
+    "0x80102E60": {"name": "debug_20_per_bus", "static": 0, "writer": "none", "reader": "0x80067340", "tag": "SOURCED"},
+    "0x80103884": {"name": "PoolOfPeople ptr; +0xC = active guest count", "tag": "SOURCED (parkopen)"},
+    "0x80103844": {"name": "flat-ride list; first node = [+8], object A = node+8", "tag": "SOURCED"},
+    "0x801E8B60": {"name": "McAi+0x10 total days (the fixture 'day' field)", "tag": "MEASURED"}
+  },
+  "headcount": {
+    "function": "0x80067274 Arrivals",
+    "formula": "count = min(cap - guests_now, min(20 - lanes, floor((S + [0x80102E54]) * 0x1333 / [0x80102E50])));  if [0x80102E60]!=0: count = min(20 - lanes, 20)",
+    "score_function": "0x80067400",
+    "score": "0 if no attraction placed, else 10 + sum(terms)",
+    "base_10_site": "0x80067444",
+    "terms": {
+      "ride (types 1,3,6,7)": "(20 + rand(10) + level*intensity + (age<=1 day ? 20 : 0)) / 2   [0x800674C8; level=A+0xF6, intensity=vslot53, age=McAi+0x10 - A+0xF4; bonus ALWAYS added (delay slot 0x80067528), +20 only when (age<<12)/2024 < 4]",
+      "shop (4)": "(20 + rand(10)) / 2",
+      "sideshow (5)": "(20 + rand(10) + intensity) / 2",
+      "feature (2)": "(20 + rand(10)) / 10"
+    },
+    "rate_thresholds_S_plus_E54": [17, 34, 51, 67, 84, 100, 117, 134, 150, 167],
+    "fixture_park": {"ride": "0x801E3A78 flat ride, day built 131, total days 147, age 16, level 0", "term": "10..14", "S": "20..24", "count": 1, "tag": "MEASURED object fields, SOURCED arithmetic"},
+    "cap": {"function": "0x800691F0", "formula": "25 + 75*kinds_built/kinds_in_catalogue (parkopen)", "bound_in_any_run": false, "tag": "UNMEASURED value"}
+  },
+  "gate_coupling": {
+    "hold": "bus waits in phase 2 while batch==1; measured phase-2 durations with 7 guests/bus: [34,34,34,34,222,178,34] ticks -> cycles of 883 and 839",
+    "batch2_clear": "batch 2->0 only when pos > 0x190000 (25.0); a phase-4 target <= 25 freezes admissions (MEASURED with table[3]=17: wait climbed to 2, gate_total froze)"
+  },
+  "knobs_measured": [
+    {"poke": {"0x80102D40": 1}, "spawn_frames": [958, 1614, 2270, 2926], "gap_frames": 656, "gap_ticks": 328, "admissions_continue": true},
+    {"poke": {"0x80102D40": 1, "0x800E0F0C": 15}, "spawn_frames": [564, 826, 1088, 1350, 1612, 1874, 2136, 2398, 2660, 2922], "gap_frames": 262, "gap_ticks": 131, "admissions_continue": true},
+    {"poke": {"0x800E0F18": 26}, "spawn_frames": [958, 1898, 2838], "gap_frames": 940, "gap_ticks": 470, "admissions_continue": true},
+    {"poke": {"0x800E0F18": 17}, "spawn_frames": [958, 1780, 2602], "gap_frames": 822, "gap_ticks": 411, "admissions_continue": false, "why": "bus never passes 25.0, batch stuck at 2"},
+    {"poke": {"0x80102E54": 100}, "spawn_frames": [958, 2346], "gap_frames": 1388, "guests_per_bus": 7, "note": "7 on every bus over 12000 frames"},
+    {"poke": {"0x80102D30": 1, "0x80102E60": 1}, "state": "park.state", "spawn_frames": [201, 1589, 2977], "gap_frames": 1388, "guests_per_bus": 20, "note": "60 spawned in 3000 frames, not 120; gate_total rose 400 per admission on the empty park"}
+  ],
+  "knobs_predicted_only": [
+    {"poke": {"0x800E0F0C": 15}, "spawn_frames": [564, 1558, 2552], "gap_ticks": 497, "tag": "UNMEASURED (model)"},
+    {"poke": {"0x80102E54": 50}, "guests_per_bus": 3, "tag": "UNMEASURED (arithmetic)"},
+    {"poke": {"0x80102E54": 23}, "guests_per_bus": 2, "tag": "UNMEASURED (arithmetic)"},
+    {"poke": {"0x80102E54": 9}, "guests_per_bus": 1, "tag": "UNMEASURED (arithmetic)"}
+  ],
+  "not_a_knob": {"0x80103A90": "rewritten from the root counter every tick before the bus reads it; a held poke is overwritten"},
+  "falsifiers": [
+    "hold [0x80102D40]=1 from park_ride.state: 4th spawn at frame 2926 (clock 16493), spawns 656 frames apart; baseline 4th spawn is frame 5122",
+    "hold [0x80102D40]=1 and [0x800E0F0C]=15: spawns every 262 frames from frame 564",
+    "hold [0x80102E54]=100: guest count 2->9 at frame 958, 9->16 at frame 2346",
+    "read-only: [0x80103960]==0xC8000 and [0x80103968]==-0xF0000 at frames 302 and 1690 only; [0x80103964] 4->1 there"
+  ],
+  "corrections_to_parkopen": [
+    "score has a base of 10 once any attraction exists (0x80067444); without it the fixture park would get 0 guests",
+    "ride bonus level*intensity is always added; the +20 is the young-only term",
+    "countdown units are RCnt2 time (delta ~9947/tick here), not McAi days; cycle is exactly 694 ticks, not 5-8 days",
+    "empty forced-open park with the debug switch: guests paid GBP 40 each (gate_total +400/admission) — contradicts the 'refuses when fee >= 1.5q' reading; not chased here"
+  ],
+  "open": [
+    "user's '120 guests in 3000 frames' not reproduced (60 measured)",
+    "cap value for this theme not evaluated",
+    "real-hardware delta (nominal 10082 -> ~688 ticks) unmeasured",
+    "overlay code not scanned for writers of the knob words"
+  ],
+  "tools": {"watch_runner": "fable/a/wrunner.c (WATCH= list -> watch.csv per frame)", "model": "fable/a/bussim.py", "traces": "fable/a/w_*/watch.csv"}
+}

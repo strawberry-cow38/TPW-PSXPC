@@ -1,0 +1,197 @@
+  44 0x02c t1 'Big Dripper'                      fp=4x3 int= 90 L0:10000 seats18 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=750 | L1:5000 seats24 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=350 | L2:2000 seats30 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=350
+  46 0x02e t1 'Caterpillar Coaster'              fp=6x3 int= 90 L0:10000 seats6 wear5 life80 cyc1-1 b8 1-100 f48=2 f4C=800 | L1:5000 seats8 wear3 life80 cyc1-1 b8 1-100 f48=2 f4C=350 | L2:2000 seats10 wear2 life80 cyc1-1 b8 1-100 f48=2 f4C=350
+  47 0x02f t1 'Candy Coaster'                    fp=4x3 int= 95 L0:12500 seats12 wear5 life80 cyc1-1 b8 1-100 f48=3 f4C=750 | L1:5250 seats16 wear3 life80 cyc1-1 b8 1-100 f48=3 f4C=400 | L2:2500 seats20 wear2 life80 cyc1-1 b8 1-100 f48=3 f4C=400
+ 125 0x07d t1 'Hades'                            fp=3x3 int= 90 L0:10000 seats18 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=650 | L1:5000 seats24 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=350 | L2:2000 seats30 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=350
+ 126 0x07e t1 'Scatty Batty'                     fp=4x4 int= 95 L0:12500 seats9 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=800 | L1:5250 seats12 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=350 | L2:2500 seats15 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=350
+ 127 0x07f t1 'Ghosta Coasta'                    fp=3x3 int= 90 L0:10000 seats12 wear5 life65 cyc1-1 b8 1-100 f48=3 f4C=750 | L1:5000 seats16 wear3 life65 cyc1-1 b8 1-100 f48=3 f4C=350 | L2:2000 seats18 wear2 life65 cyc1-1 b8 1-100 f48=3 f4C=350
+ 212 0x0d4 t1 'Chac Atak'                        fp=2x3 int= 90 L0:10000 seats18 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=700 | L1:5000 seats24 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=350 | L2:2000 seats30 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=350
+ 213 0x0d5 t1 'Gorilla Thrilla'                  fp=4x4 int= 95 L0:12500 seats6 wear5 life80 cyc1-1 b8 1-100 f48=3 f4C=750 | L1:5250 seats8 wear3 life80 cyc1-1 b8 1-100 f48=3 f4C=400 | L2:2500 seats10 wear2 life80 cyc1-1 b8 1-100 f48=3 f4C=400
+ 219 0x0db t1 'Temple of Gloom'                  fp=4x3 int= 90 L0:10000 seats12 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=650 | L1:5000 seats16 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=450 | L2:2000 seats18 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=450
+ 367 0x16f t1 'Escape Velocity'                  fp=4x3 int= 90 L0:12500 seats12 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=700 | L1:5500 seats16 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=500 | L2:2500 seats20 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=500
+ 368 0x170 t1 'Moonshot'                         fp=5x3 int= 90 L0:10000 seats9 wear5 life80 cyc1-1 b8 1-100 f48=1 f4C=700 | L1:5000 seats12 wear3 life80 cyc1-1 b8 1-100 f48=1 f4C=450 | L2:2000 seats15 wear2 life80 cyc1-1 b8 1-100 f48=1 f4C=450
+ 373 0x175 t1 'The Shocker'                      fp=5x3 int= 95 L0:12500 seats18 wear5 life80 cyc1-1 b8 1-100 f48=3 f4C=750 | L1:5500 seats24 wear3 life80 cyc1-1 b8 1-100 f48=3 f4C=500 | L2:2500 seats30 wear2 life80 cyc1-1 b8 1-100 f48=3 f4C=500
+  20 0x014 t2 'Bricks'                           fp=3x3 int=  0 price=125 u16s=[0, 0, 0, 0, 61456, 0]
+  21 0x015 t2 'Card Statue'                      fp=3x2 int=  0 price=250 u16s=[200, 0, 2, 0, 61456, 0]
+  28 0x01c t2 'Plant Pot'                        fp=3x3 int=  0 price=125 u16s=[0, 0, 0, 0, 61456, 0]
+  29 0x01d t2 'Super Toilet'                     fp=3x3 int=  0 price=300 u16s=[400, 0, 3, 0, 61456, 1]
+  32 0x020 t2 'Staff Room'                       fp=2x2 int=  0 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+  33 0x021 t2 'Teapot'                           fp=3x3 int=  0 price=200 u16s=[200, 0, 1, 0, 61456, 0]
+  95 0x05f t2 'Large Rock Pillar'                fp=4x4 int=  0 price=175 u16s=[100, 0, 1, 0, 61456, 256]
+  96 0x060 t2 'Huge Rock'                        fp=5x5 int=  0 price=250 u16s=[100, 0, 2, 0, 61456, 0]
+  97 0x061 t2 'bellt-unconfirmed'                fp=4x4 int=  0 price=250 u16s=[200, 0, 1, 0, 61456, 0]
+ 101 0x065 t2 'Demon Statue'                     fp=3x3 int=  0 price=200 u16s=[100, 0, 3, 0, 61456, 0]
+ 103 0x067 t2 'Gargoyle'                         fp=2x2 int=  0 price=175 u16s=[100, 0, 2, 0, 61456, 0]
+ 108 0x06c t2 'Loudspeaker'                      fp=2x2 int=  0 price=100 u16s=[0, 0, 0, 0, 61456, 0]
+ 109 0x06d t2 'Staff Room'                       fp=2x2 int=  0 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+ 110 0x06e t2 'Super Toilet'                     fp=3x2 int=  0 price=300 u16s=[100, 0, 3, 0, 61456, 1]
+ 112 0x070 t2 'skull - unconfirmed'              fp=3x3 int=  0 price=250 u16s=[200, 0, 1, 0, 61456, 0]
+ 114 0x072 t2 'Haunted Tower'                    fp=3x3 int=  0 price=200 u16s=[150, 0, 1, 0, 61456, 0]
+ 115 0x073 t2 'Medium Tree'                      fp=2x2 int=  0 price=150 u16s=[100, 0, 1, 0, 61456, 0]
+ 175 0x0af t2 'Small Rock Pillar'                fp=2x2 int=  0 price=150 u16s=[100, 0, 1, 0, 61456, 256]
+ 176 0x0b0 t2 'Large Rock Pillar'                fp=4x4 int=  0 price=200 u16s=[100, 0, 1, 0, 61456, 256]
+ 177 0x0b1 t2 'Huge Leafy Rock'                  fp=5x5 int=  0 price=250 u16s=[100, 0, 1, 0, 61456, 256]
+ 178 0x0b2 t2 'Huge Hollow Rock'                 fp=5x5 int=  0 price=250 u16s=[100, 0, 1, 0, 61456, 256]
+ 179 0x0b3 t2 'Toilet'                           fp=2x2 int=  0 price=100 u16s=[0, 0, 0, 0, 61456, 1]
+ 180 0x0b4 t2 'Big Palm'                         fp=2x2 int=  0 price=250 u16s=[200, 0, 2, 0, 61456, 0]
+ 181 0x0b5 t2 'Large Tree'                       fp=2x2 int=  0 price=150 u16s=[150, 0, 1, 0, 61456, 0]
+ 186 0x0ba t2 'Control-unconfirmed'              fp=3x3 int=  0 price=250 u16s=[0, 0, 0, 0, 61456, 2]
+ 187 0x0bb t2 'Should be removed'                fp=2x2 int=  0 price=0 u16s=[0, 0, 0, 0, 61456, 0]
+ 188 0x0bc t2 'Fountain'                         fp=3x3 int=  0 price=150 u16s=[100, 0, 1, 0, 61456, 0]
+ 189 0x0bd t2 'lfountain-unconfirmed'            fp=3x3 int=  0 price=150 u16s=[0, 0, 0, 0, 61456, 0]
+ 191 0x0bf t2 'Mammoth Fountain'                 fp=3x3 int=  0 price=150 u16s=[150, 0, 2, 0, 61456, 0]
+ 196 0x0c4 t2 'Loudspeaker'                      fp=2x2 int=  0 price=100 u16s=[0, 0, 0, 0, 61456, 0]
+ 197 0x0c5 t2 'Staff Room'                       fp=2x2 int=  0 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+ 200 0x0c8 t2 'Super Toilet'                     fp=3x2 int=  0 price=300 u16s=[100, 0, 3, 0, 61456, 1]
+ 334 0x14e t2 'Alien Bubbler'                    fp=3x3 int=  0 price=150 u16s=[150, 0, 2, 0, 61456, 0]
+ 335 0x14f t2 'Antenna'                          fp=2x2 int=  0 price=100 u16s=[0, 0, 0, 0, 61456, 259]
+ 339 0x153 t2 'Large Crystals'                   fp=2x2 int=  0 price=200 u16s=[150, 0, 1, 0, 61456, 259]
+ 340 0x154 t2 'Strange Growth'                   fp=2x2 int=  0 price=125 u16s=[100, 0, 1, 0, 61456, 0]
+ 341 0x155 t2 'Gyrotron'                         fp=3x3 int=  0 price=150 u16s=[125, 0, 2, 0, 61456, 0]
+ 342 0x156 t2 'Large Crater-unconfirmed'         fp=2x2 int=  0 price=150 u16s=[0, 0, 0, 0, 61456, 0]
+ 344 0x158 t2 'Super Toilet'                     fp=3x2 int=  0 price=300 u16s=[400, 0, 3, 0, 61456, 1]
+ 345 0x159 t2 'Large Tree'                       fp=3x3 int=  0 price=150 u16s=[150, 0, 1, 0, 61456, 0]
+ 346 0x15a t2 'Plasmatrope'                      fp=2x2 int=  0 price=200 u16s=[200, 0, 3, 0, 61456, 0]
+ 347 0x15b t2 'Golden Rocks'                     fp=3x3 int=  0 price=75 u16s=[0, 0, 0, 0, 61456, 0]
+ 353 0x161 t2 'Staff Room'                       fp=2x2 int=  0 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+ 354 0x162 t2 'Medium Tree'                      fp=2x2 int=  0 price=100 u16s=[0, 0, 0, 0, 61456, 0]
+  39 0x027 t3 'The Dizzy Tree'                   fp=5x5 int= 70 L0:2500 seats4 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:250 seats8 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=250 | L2:250 seats12 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=250
+  40 0x028 t3 'Bumper Bugs'                      fp=5x5 int= 70 L0:2000 seats2 wear5 life80 cyc1-5 b8 1-100 f48=2 f4C=500 | L1:200 seats4 wear3 life80 cyc1-5 b8 1-100 f48=2 f4C=200 | L2:200 seats6 wear2 life80 cyc1-5 b8 1-100 f48=2 f4C=200
+  42 0x02a t3 'Caterpillar Capers'               fp=5x5 int= 45 L0:1000 seats4 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats6 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats8 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+  43 0x02b t3 'Bugs TV '                         fp=4x4 int= 55 L0:1250 seats4 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:150 seats8 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats12 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+  45 0x02d t3 'Woodland Racers'                  fp=4x4 int= 65 L0:1500 seats2 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:150 seats4 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats6 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+  48 0x030 t3 'Dragon Fliers'                    fp=4x5 int= 75 L0:2000 seats2 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:200 seats3 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats4 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+  49 0x031 t3 'Flamingo Fling'                   fp=3x5 int= 50 L0:750 seats2 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats4 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats6 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+  50 0x032 t3 'Flower Power'                     fp=4x4 int= 65 L0:1500 seats4 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=700 | L1:150 seats6 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=150 | L2:150 seats8 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=150
+  51 0x033 t3 'Flying Fishes'                    fp=4x5 int= 60 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:150 seats5 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats6 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+  52 0x034 t3 'Flying Fountain'                  fp=4x4 int= 75 L0:3000 seats4 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=750 | L1:500 seats6 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=500 | L2:500 seats8 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=500
+  53 0x035 t3 'Spore Spinner'                    fp=5x5 int= 65 L0:1750 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=450 | L1:200 seats10 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=200 | L2:200 seats12 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=200
+  54 0x036 t3 'Jelly Bounce'                     fp=4x4 int= 40 L0:500 seats3 wear5 life80 cyc10-60 b8 1-100 f48=0 f4C=0 | L1:150 seats4 wear3 life80 cyc10-60 b8 1-100 f48=1 f4C=150 | L2:150 seats5 wear2 life80 cyc10-60 b8 1-100 f48=1 f4C=150
+  55 0x037 t3 'Escargot A-Go Go'                 fp=4x5 int= 60 L0:2500 seats1 wear5 life65 cyc1-1 b8 1-100 f48=0 f4C=0 | L1:200 seats1 wear3 life65 cyc1-1 b8 1-100 f48=1 f4C=200 | L2:200 seats1 wear2 life65 cyc1-1 b8 1-100 f48=1 f4C=200
+ 121 0x079 t3 'Brain Buster'                     fp=3x4 int= 40 L0:500 seats5 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=500 | L1:150 seats7 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats9 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 122 0x07a t3 'Insecticide '                     fp=4x4 int= 55 L0:750 seats10 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats14 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats18 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 123 0x07b t3 'Pumpkin Castle'                   fp=5x5 int= 70 L0:1500 seats4 wear5 life100 cyc10-50 b8 1-100 f48=1 f4C=900 | L1:1500 seats6 wear3 life100 cyc10-50 b8 1-100 f48=0 f4C=0 | L2:1500 seats8 wear2 life100 cyc10-50 b8 1-100 f48=0 f4C=0
+ 124 0x07c t3 'Hocus Pocus'                      fp=4x4 int= 55 L0:1250 seats20 wear5 life50 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats26 wear3 life50 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats32 wear2 life50 cyc1-10 b8 1-100 f48=1 f4C=150
+ 128 0x080 t3 'Jaw Dropper'                      fp=4x4 int= 60 L0:2000 seats5 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:200 seats8 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats11 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+ 129 0x081 t3 'Thrill Grill'                     fp=5x4 int= 70 L0:2500 seats18 wear5 life55 cyc1-10 b8 1-100 f48=3 f4C=500 | L1:250 seats24 wear3 life55 cyc1-10 b8 1-100 f48=3 f4C=250 | L2:250 seats30 wear2 life55 cyc1-10 b8 1-100 f48=3 f4C=250
+ 131 0x083 t3 'Tentacle Terror'                  fp=5x5 int= 65 L0:1750 seats12 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:200 seats17 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats22 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+ 132 0x084 t3 'Devils Disc'                      fp=4x4 int= 60 L0:2500 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=500 | L1:250 seats10 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=250 | L2:250 seats12 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=250
+ 133 0x085 t3 'Crazy Clown'                      fp=4x4 int= 75 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=600 | L1:200 seats5 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats6 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+ 134 0x086 t3 'Jumping Skulls'                   fp=4x4 int= 65 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=600 | L1:200 seats5 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=200 | L2:200 seats6 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=200
+ 135 0x087 t3 'Tower-unconfirmed'                fp=3x3 int= 65 L0:1750 seats4 wear5 life100 cyc1-10 b8 1-100 f48=1 f4C=900 | L1:250 seats5 wear3 life100 cyc1-10 b8 1-100 f48=2 f4C=200 | L2:200 seats6 wear2 life100 cyc1-10 b8 1-100 f48=3 f4C=250
+ 136 0x088 t3 'Phantom'                          fp=3x5 int= 75 L0:2000 seats8 wear5 life65 cyc1-10 b8 1-100 f48=3 f4C=700 | L1:200 seats12 wear3 life65 cyc1-10 b8 1-100 f48=3 f4C=200 | L2:200 seats17 wear2 life65 cyc1-10 b8 1-100 f48=3 f4C=200
+ 137 0x089 t3 'Putrid Pumpkins'                  fp=4x4 int= 45 L0:1500 seats6 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats9 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats12 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 138 0x08a t3 'Rat Race'                         fp=4x5 int= 50 L0:1200 seats5 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=550 | L1:150 seats7 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=150 | L2:150 seats9 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=150
+ 139 0x08b t3 'Ghost Ship'                       fp=5x4 int= 45 L0:2750 seats12 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:300 seats16 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=300 | L2:300 seats20 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=300
+ 140 0x08c t3 'Eye Slide'                        fp=4x4 int= 65 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:200 seats5 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats6 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+ 141 0x08d t3 'Spooky Spider'                    fp=5x4 int= 65 L0:2750 seats12 wear5 life100 cyc1-10 b8 1-100 f48=1 f4C=2750 | L1:2750 seats16 wear3 life100 cyc1-10 b8 1-100 f48=0 f4C=0 | L2:2750 seats20 wear2 life100 cyc1-10 b8 1-100 f48=0 f4C=0
+ 209 0x0d1 t3 'Belly Bounce'                     fp=3x4 int= 40 L0:500 seats5 wear5 life80 cyc10-60 b8 1-100 f48=0 f4C=0 | L1:150 seats7 wear3 life80 cyc10-60 b8 1-100 f48=1 f4C=150 | L2:150 seats9 wear2 life80 cyc10-60 b8 1-100 f48=1 f4C=150
+ 210 0x0d2 t3 'The Hot Pot'                      fp=5x5 int= 70 L0:2000 seats4 wear5 life80 cyc10-50 b8 1-100 f48=3 f4C=650 | L1:200 seats6 wear3 life80 cyc10-50 b8 1-100 f48=3 f4C=200 | L2:200 seats8 wear2 life80 cyc10-50 b8 1-100 f48=3 f4C=200
+ 211 0x0d3 t3 'Aztec Bounce'                     fp=6x3 int= 50 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:200 seats5 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats6 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+ 214 0x0d6 t3 'Diplo-Dip'                        fp=5x5 int= 65 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=550 | L1:200 seats5 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=200 | L2:200 seats6 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=200
+ 216 0x0d8 t3 'Sun God'                          fp=5x4 int= 75 L0:1500 seats16 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:300 seats22 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=300 | L2:300 seats28 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=300
+ 217 0x0d9 t3 'Inca Pot'                         fp=4x4 int= 65 L0:1750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=550 | L1:200 seats5 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=200 | L2:200 seats6 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=200
+ 218 0x0da t3 'Mayan Spinner'                    fp=4x4 int= 55 L0:750 seats6 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=500 | L1:150 seats9 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=150 | L2:150 seats12 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=150
+ 220 0x0dc t3 'Crazy Ape'                        fp=4x4 int= 60 L0:2000 seats8 wear5 life45 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:200 seats11 wear3 life45 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats14 wear2 life45 cyc1-10 b8 1-100 f48=1 f4C=200
+ 221 0x0dd t3 'Mumbo'                            fp=4x4 int= 60 L0:1000 seats5 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats5 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats5 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 222 0x0de t3 'Rocky Racers'                     fp=4x4 int= 50 L0:750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats6 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats8 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 223 0x0df t3 'Slither'                          fp=4x3 int= 50 L0:750 seats1 wear5 life100 cyc1-1 b8 1-100 f48=0 f4C=0 | L1:750 seats1 wear3 life100 cyc1-10 b8 1-100 f48=2 f4C=200 | L2:750 seats1 wear2 life100 cyc1-1 b8 1-100 f48=3 f4C=250
+ 224 0x0e0 t3 'Tom Tom Twister'                  fp=5x5 int= 75 L0:4000 seats20 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=450 | L1:400 seats30 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=400 | L2:400 seats40 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=400
+ 225 0x0e1 t3 'Inca Totem'                       fp=3x3 int= 70 L0:3250 seats6 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:350 seats8 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L2:350 seats10 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=350
+ 226 0x0e2 t3 'Aztec Mayhem'                     fp=4x4 int= 70 L0:2500 seats5 wear5 life100 cyc1-10 b8 1-100 f48=1 f4C=400 | L1:2500 seats8 wear3 life100 cyc1-10 b8 1-100 f48=1 f4C=450 | L2:2500 seats12 wear2 life100 cyc1-10 b8 1-100 f48=2 f4C=450
+ 227 0x0e3 t3 'Eruption'                         fp=4x4 int= 70 L0:2500 seats8 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=550 | L1:250 seats11 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=250 | L2:250 seats14 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=250
+ 360 0x168 t3 'Bounce on Iggy'                   fp=4x4 int= 40 L0:500 seats1 wear5 life80 cyc30-45 b8 1-100 f48=0 f4C=0 | L1:150 seats1 wear3 life80 cyc30-50 b8 1-100 f48=1 f4C=150 | L2:150 seats1 wear2 life80 cyc30-55 b8 1-100 f48=1 f4C=150
+ 361 0x169 t3 'Uforia'                           fp=5x5 int= 70 L0:2000 seats4 wear5 life100 cyc10-50 b8 1-100 f48=1 f4C=900 | L1:2000 seats6 wear3 life100 cyc10-50 b8 1-100 f48=0 f4C=0 | L2:2000 seats8 wear2 life100 cyc10-50 b8 1-100 f48=0 f4C=0
+ 362 0x16a t3 'Crater Creature'                  fp=5x5 int= 45 L0:1500 seats12 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats18 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats24 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 364 0x16c t3 'Hover Bot Havoc'                  fp=4x4 int= 55 L0:1750 seats6 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:200 seats8 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats12 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=200
+ 365 0x16d t3 'Romper Stomper'                   fp=5x5 int= 55 L0:3250 seats11 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=450 | L1:200 seats15 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=200 | L2:200 seats19 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=200
+ 366 0x16e t3 'Moon Buggies'                     fp=4x4 int= 45 L0:750 seats4 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=450 | L1:150 seats6 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=150 | L2:150 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=150
+ 369 0x171 t3 'The Orbiter'                      fp=6x3 int= 65 L0:2000 seats10 wear5 life60 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:200 seats16 wear3 life60 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats22 wear2 life60 cyc1-10 b8 1-100 f48=1 f4C=200
+ 370 0x172 t3 'Missile Madness'                  fp=5x5 int= 65 L0:2500 seats6 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:250 seats8 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=250 | L2:250 seats12 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=250
+ 371 0x173 t3 'The Gravatron'                    fp=5x5 int= 60 L0:2500 seats10 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=650 | L1:250 seats16 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=250 | L2:250 seats22 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=250
+ 374 0x176 t3 'Space Balls'                      fp=4x4 int= 50 L0:750 seats1 wear5 life80 cyc1-10 b8 1-100 f48=0 f4C=0 | L1:150 seats1 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats1 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 375 0x177 t3 'The Areotron'                     fp=5x4 int= 75 L0:2000 seats18 wear5 life75 cyc1-10 b8 1-100 f48=1 f4C=650 | L1:200 seats24 wear3 life75 cyc1-10 b8 1-100 f48=1 f4C=200 | L2:200 seats30 wear2 life75 cyc1-10 b8 1-100 f48=1 f4C=200
+ 376 0x178 t3 'Cyclone Station'                  fp=4x4 int= 60 L0:1250 seats15 wear5 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:150 seats20 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats25 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 377 0x179 t3 "Rock 'n Roll"                     fp=3x5 int= 70 L0:2500 seats10 wear7 life80 cyc1-10 b8 1-100 f48=1 f4C=350 | L1:150 seats14 wear3 life80 cyc1-10 b8 1-100 f48=1 f4C=150 | L2:150 seats14 wear2 life80 cyc1-10 b8 1-100 f48=1 f4C=150
+ 379 0x17b t3 'Zero G'                           fp=5x5 int= 65 L0:2500 seats4 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=600 | L1:250 seats6 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=250 | L2:250 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=250
+  60 0x03c t4 'Costume Shop'                     fp=3x3 int= 50 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+  61 0x03d t4 'Should be removed'                fp=2x2 int=  0 price=1500 u16s=[250, 0, 1, 0, 60, 40, 2, 0, 15, 0]
+  62 0x03e t4 'Drinks Shop'                      fp=2x2 int=  0 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+  63 0x03f t4 'Cake Shop'                        fp=3x3 int=  0 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+  64 0x040 t4 'Balloon Shop'                     fp=3x3 int=  0 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+  65 0x041 t4 'Fries Shop'                       fp=2x2 int=  0 price=250 u16s=[0, 0, 0, 0, 60, 40, 7, 20, 5, 10]
+  67 0x043 t4 'Restaurant'                       fp=3x3 int=  1 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1295, 5, 5]
+  68 0x044 t4 'Ice Cream Shop'                   fp=2x2 int=  0 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+  69 0x045 t4 'Gift Shop '                       fp=3x3 int= 50 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+  71 0x047 t4 'Burger Shop'                      fp=2x2 int=  1 price=300 u16s=[200, 0, 1, 0, 60, 40, 0, 25, 5, 10]
+ 146 0x092 t4 'Burger Shop'                      fp=2x2 int=  0 price=300 u16s=[0, 0, 0, 0, 60, 40, 0, 25, 5, 10]
+ 147 0x093 t4 'Restaurant'                       fp=3x3 int=  1 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1305, 5, 5]
+ 149 0x095 t4 'Fries Shop'                       fp=2x2 int=  1 price=250 u16s=[150, 0, 1, 0, 60, 40, 7, 20, 5, 10]
+ 150 0x096 t4 'Gift Shop'                        fp=3x3 int= 50 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+ 151 0x097 t4 'Ice Cream Shop'                   fp=2x2 int=  0 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+ 152 0x098 t4 'Drinks Shop'                      fp=2x2 int=  0 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+ 158 0x09e t4 'Balloon Shop'                     fp=3x3 int=  1 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+ 160 0x0a0 t4 'Costume Shop'                     fp=3x3 int= 50 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+ 232 0x0e8 t4 'Balloon Shop'                     fp=3x3 int=  0 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+ 233 0x0e9 t4 'Beef & Chips'                     fp=2x2 int=  0 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+ 234 0x0ea t4 'Burger Shop'                      fp=2x2 int=  0 price=300 u16s=[200, 0, 1, 0, 60, 40, 0, 25, 5, 10]
+ 235 0x0eb t4 'Costume Shop'                     fp=3x3 int= 50 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+ 236 0x0ec t4 'Drinks Shop'                      fp=2x2 int=  0 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+ 237 0x0ed t4 'Fries'                            fp=2x2 int= 20 price=250 u16s=[0, 0, 0, 0, 60, 40, 7, 25, 5, 10]
+ 238 0x0ee t4 'Gift Shop'                        fp=2x2 int= 50 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+ 239 0x0ef t4 'Ice Cream Shop'                   fp=2x2 int=  0 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+ 241 0x0f1 t4 'Drinks Shops'                     fp=2x2 int=  0 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+ 242 0x0f2 t4 'Drinks Shops'                     fp=2x2 int=  0 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+ 247 0x0f7 t4 'Restaurant'                       fp=3x3 int=  1 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1305, 5, 5]
+ 381 0x17d t4 'Burger Shop'                      fp=2x2 int=  0 price=300 u16s=[0, 0, 0, 0, 60, 40, 0, 25, 5, 10]
+ 382 0x17e t4 'Costume Shop'                     fp=3x3 int= 50 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+ 383 0x17f t4 'Drinks Shop'                      fp=2x2 int=  0 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+ 384 0x180 t4 'Balloon Shop'                     fp=3x3 int=  0 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+ 385 0x181 t4 'Fries Shop'                       fp=2x2 int=  0 price=250 u16s=[150, 0, 1, 0, 60, 40, 7, 20, 5, 10]
+ 386 0x182 t4 'Gift Shop'                        fp=3x3 int= 50 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+ 387 0x183 t4 'Ice Cream Shop'                   fp=2x2 int=  0 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+ 390 0x186 t4 'Restaurant'                       fp=3x3 int=  0 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1305, 5, 5]
+  58 0x03a t5 'Arcade'                           fp=2x2 int=  0 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+  59 0x03b t5 'Should be removed'                fp=3x3 int=  0 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+  66 0x042 t5 'Fruit Shy'                        fp=2x2 int=  0 price=2500 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+  70 0x046 t5 'Giant Puzzle'                     fp=3x3 int= 60 price=1000 u16s=[550, 0, 1, 0, 10, 30, 25, 0]
+  72 0x048 t5 'Aqua Spray'                       fp=3x3 int=  0 price=2000 u16s=[500, 0, 2, 0, 10, 30, 25, 0]
+  73 0x049 t5 'Strength Flower'                  fp=2x3 int=  0 price=2000 u16s=[400, 0, 2, 0, 10, 30, 25, 0]
+  74 0x04a t5 'Worm Bash'                        fp=3x4 int=  0 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 144 0x090 t5 'Arcade'                           fp=3x3 int=  0 price=2500 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 145 0x091 t5 'Fortune Teller'                   fp=3x3 int= 60 price=1500 u16s=[500, 0, 2, 0, 10, 0, 0, 0]
+ 148 0x094 t5 'Crusher-unconfirmed'              fp=3x3 int=  0 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 153 0x099 t5 'Pumpkin Shy'                      fp=2x2 int= 65 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+ 154 0x09a t5 'Giant Puzzle'                     fp=3x3 int=  0 price=2000 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 155 0x09b t5 'Shooter'                          fp=3x3 int=  0 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 156 0x09c t5 'Strength Skull'                   fp=2x3 int=  0 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 157 0x09d t5 'Tombs-unconfirmed'                fp=3x3 int=  0 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 159 0x09f t5 'Bone Crusher'                     fp=3x4 int=  0 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+ 229 0x0e5 t5 'Arcade'                           fp=2x2 int= 20 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 230 0x0e6 t5 'Arcade'                           fp=3x2 int= 30 price=2500 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 231 0x0e7 t5 'Large Arcade'                     fp=3x3 int= 40 price=1750 u16s=[500, 0, 0, 0, 10, 30, 25, 0]
+ 240 0x0f0 t5 'Jungle Spray'                     fp=3x3 int= 60 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 243 0x0f3 t5 'Giant Puzzle'                     fp=3x3 int=  0 price=2500 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 244 0x0f4 t5 'Dino Racing'                      fp=4x4 int= 70 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 245 0x0f5 t5 'Sun Shooter'                      fp=3x4 int= 60 price=1750 u16s=[500, 0, 0, 0, 10, 30, 25, 0]
+ 246 0x0f6 t5 'Strength Bird'                    fp=2x3 int=  0 price=2000 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 248 0x0f8 t5 'Idol Smash'                       fp=3x4 int=  0 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 249 0x0f9 t5 'DuckShoot'                        fp=2x2 int= 50 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 380 0x17c t5 'Arcade'                           fp=3x2 int=  0 price=1750 u16s=[400, 0, 1, 0, 10, 30, 25, 0]
+ 388 0x184 t5 'UFO Blaster'                      fp=3x3 int=  0 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 389 0x185 t5 'Martian Mooners'                  fp=3x3 int=  0 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 391 0x187 t5 'Giant Puzzle'                     fp=3x3 int=  0 price=1750 u16s=[500, 0, 2, 0, 10, 30, 25, 0]
+ 392 0x188 t5 'shoot- unconfirmed'               fp=3x3 int=  0 price=150 u16s=[0, 0, 0, 0, 0, 0, 0, 0]
+ 393 0x189 t5 'Strength Rocket'                  fp=2x3 int=  0 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 394 0x18a t5 'Martian Mash'                     fp=3x4 int=  0 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+  41 0x029 t6 'Bumble Buggies'                   fp=4x4 int= 80 L0:6500 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=750 | L1:400 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=350 | L2:350 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=350
+  57 0x039 t6 'Taptastic Rapids'                 fp=4x4 int= 75 L0:5000 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=750 | L1:500 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=400 | L2:400 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=400
+ 130 0x082 t6 'Crypt Karts'                      fp=4x4 int= 80 L0:4000 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=750 | L1:450 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=350 | L2:450 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=350
+ 143 0x08f t6 'Ooze Crooz'                       fp=4x4 int= 75 L0:5000 seats8 wear5 life80 cyc1-10 b8 1-100 f48=3 f4C=600 | L1:750 seats8 wear3 life80 cyc1-10 b8 1-100 f48=3 f4C=400 | L2:750 seats8 wear2 life80 cyc1-10 b8 1-100 f48=3 f4C=400
+ 215 0x0d7 t6 'Dino Karts'                       fp=4x4 int= 80 L0:6500 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=600 | L1:500 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=350 | L2:500 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=350
+ 228 0x0e4 t6 'Splish Splash'                    fp=4x4 int= 75 L0:5000 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=650 | L1:500 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=350 | L2:500 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=350
+ 363 0x16b t6 'Space Racers'                     fp=4x4 int= 80 L0:6500 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=700 | L1:500 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=350 | L2:500 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=350
+ 378 0x17a t6 'The Blobulator'                   fp=4x4 int= 75 L0:5000 seats8 wear5 life80 cyc1-10 b8 1-100 f48=2 f4C=650 | L1:750 seats8 wear3 life80 cyc1-10 b8 1-100 f48=2 f4C=400 | L2:750 seats8 wear2 life80 cyc1-10 b8 1-100 f48=2 f4C=400
+  56 0x038 t7 'Tweety Tours'                     fp=3x3 int= 70 L0:3000 seats8 wear7 life80 cyc1-10 b8 80-100 f48=3 f4C=550 | L1:350 seats8 wear7 life80 cyc1-10 b8 80-110 f48=3 f4C=300 | L2:450 seats8 wear7 life80 cyc1-10 b8 80-125 f48=3 f4C=400
+ 142 0x08e t7 'Flightmare Tours'                 fp=3x3 int= 75 L0:3000 seats8 wear7 life80 cyc1-10 b8 80-100 f48=2 f4C=600 | L1:300 seats8 wear7 life80 cyc1-10 b8 80-110 f48=2 f4C=350 | L2:400 seats8 wear7 life80 cyc1-10 b8 80-125 f48=2 f4C=450
+ 208 0x0d0 t7 'Jurassic Tours'                   fp=4x3 int= 75 L0:3000 seats8 wear7 life80 cyc1-10 b8 80-100 f48=2 f4C=600 | L1:300 seats8 wear7 life80 cyc1-10 b8 80-110 f48=2 f4C=350 | L2:400 seats8 wear7 life80 cyc1-10 b8 80-125 f48=2 f4C=450
+ 372 0x174 t7 'Star Tours'                       fp=3x3 int= 70 L0:3000 seats8 wear7 life70 cyc1-10 b8 80-100 f48=3 f4C=650 | L1:350 seats8 wear7 life70 cyc1-10 b8 80-110 f48=3 f4C=300 | L2:450 seats8 wear7 life70 cyc1-10 b8 80-125 f48=3 f4C=400

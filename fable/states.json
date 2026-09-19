@@ -1,0 +1,1101 @@
+{
+ "_notes": {
+  "source": "TPW.BIN SLES-026.88, see behaviour.md",
+  "state_byte": "Person+0x2D",
+  "purpose_byte": "Person+0x2C",
+  "exits_key": "to = destination state, 'pop' = PopState, 'despawn' = removed from park"
+ },
+ "states": {
+  "0": {
+   "name_guess": "Idle",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 38,
+     "cond": "visitor: tiredness>=99 | happiness<5 | money<\u00a310 | (time_in_park>=81 & 10%)"
+    },
+    {
+     "to": 6,
+     "cond": "visitor: roll 0 and cooldown V+0x2C+60+rand(300) passed (push)"
+    },
+    {
+     "to": 1,
+     "cond": "visitor: roll 1 (push) -> immediately 5"
+    },
+    {
+     "to": 11,
+     "cond": "visitor: roll 3, rubbish>=90, bin within 6 tiles (purpose 19)"
+    },
+    {
+     "to": 29,
+     "cond": "visitor: roll 4, nausea>92 or 25%"
+    },
+    {
+     "to": 26,
+     "cond": "staff: type on strike (slot 51)"
+    },
+    {
+     "to": 49,
+     "cond": "staff: tiredness>80"
+    },
+    {
+     "to": 13,
+     "cond": "staff: default (patrol)"
+    },
+    {
+     "to": 31,
+     "cond": "researcher: rand(10)<3"
+    },
+    {
+     "to": 12,
+     "cond": "entertainer: rand(3)==0 & guest adjacent"
+    },
+    {
+     "to": 56,
+     "cond": "mechanic: broken ride claimed"
+    },
+    {
+     "to": 57,
+     "cond": "mechanic: service-due ride claimed"
+    },
+    {
+     "to": 11,
+     "cond": "handyman: litter (purpose 7) or bin (purpose 18) found"
+    }
+   ],
+   "reads": [
+    "V+0x5F",
+    "V+0x59",
+    "V+0x48",
+    "V+0x54",
+    "McAi+0x10",
+    "0x80102D34",
+    "0x80103230",
+    "0x80103234",
+    "0x80103260",
+    "entertainer list 0x80053768",
+    "scenery list 0x80053248",
+    "S+0x3F"
+   ],
+   "writes": [
+    "P+0x2A bubble",
+    "V+0x2C",
+    "V+0x58:=0 when littering",
+    "litter object spawn",
+    "entertainer+0x48 -5 (pelt)",
+    "P+0x2E anim"
+   ],
+   "classes": {
+    "visitor": "0x8008D058",
+    "staff": "slot 48 per class"
+   }
+  },
+  "1": {
+   "name_guess": "Set random dest (trampoline)",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 5,
+     "cond": "always"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "2": {
+   "name_guess": "Walk to dest / arrival dispatcher",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "waypoints remain (via 0x8009322C)"
+    },
+    {
+     "to": "purpose-dependent",
+     "cond": "no waypoint left: see behaviour.md 2.3 / 3.x tables"
+    }
+   ],
+   "reads": [
+    "P+0x28 waypoint",
+    "P+0x2C purpose",
+    "V+0x28 target",
+    "ride slot16/54/entrance",
+    "queue lists"
+   ],
+   "writes": [
+    "V+0x5F +1 (10%/tick, visitor)",
+    "S+0x3F +1 (per 4 ticks, staff)",
+    "P+0x2C:=2 after arrival"
+   ]
+  },
+  "3": {
+   "name_guess": "Walk to waypoint",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 2,
+     "cond": "reached waypoint or none"
+    },
+    {
+     "to": 0,
+     "cond": "new tile off map"
+    }
+   ],
+   "reads": [
+    "V+0x60 speed",
+    "0x80103A90 timescale",
+    "waypoint pool 0x800F7A38"
+   ],
+   "writes": [
+    "P+0x18/1A position",
+    "P+0x2E facing"
+   ]
+  },
+  "4": {
+   "name_guess": "On ride",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "never entered in this build: no SetState/PushState(4) and no raw write of the state byte"
+  },
+  "5": {
+   "name_guess": "Walking (random wander)",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "path tile chain built (rand(10) steps)"
+    },
+    {
+     "to": 11,
+     "cond": "not on path: pathfind to random tile near centre (push)"
+    },
+    {
+     "to": 0,
+     "cond": "nothing walkable"
+    }
+   ],
+   "reads": [
+    "tile flags 0x8004D4EC/558",
+    "turn table 0x800E3ECC"
+   ],
+   "writes": [
+    "waypoints",
+    "P+0x2C:=1"
+   ]
+  },
+  "6": {
+   "name_guess": "Make major decision",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "target chosen and path accepted (push)"
+    },
+    {
+     "to": "pop",
+     "cond": "no target or path refused; V+0x2C+=360"
+    },
+    {
+     "to": 0,
+     "cond": "queued ride without entrance point"
+    }
+   ],
+   "reads": [
+    "all attractions (7 typed lists)",
+    "ride slot86 open",
+    "ride slot53/54/55/56/15",
+    "V+0x38..44 history",
+    "V+0x59..5E",
+    "type table 0x800F79E8",
+    "tables 0x800E3820/0x800E3A04"
+   ],
+   "writes": [
+    "V+0x28 target",
+    "V+0x38..44 history (if V+0x5D>98)",
+    "V+0x59 -5/-10",
+    "V+0x5C +5",
+    "bubble"
+   ]
+  },
+  "7": {
+   "name_guess": "unused",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler in any Update table and no writer"
+  },
+  "8": {
+   "name_guess": "unused",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler in any Update table and no writer"
+  },
+  "9": {
+   "name_guess": "unused",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler in any Update table and no writer"
+  },
+  "10": {
+   "name_guess": "unused",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler in any Update table and no writer"
+  },
+  "11": {
+   "name_guess": "Idle / waiting for pathfinder",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "message 1 (path ready)"
+    },
+    {
+     "to": "purpose-dependent",
+     "cond": "message 2 (path failed): 42/36/0/5/... see 2.10"
+    },
+    {
+     "to": 0,
+     "cond": "message 10"
+    }
+   ],
+   "reads": [
+    "P+0x2E anim"
+   ],
+   "writes": [
+    "P+0x2E random idle anim"
+   ]
+  },
+  "12": {
+   "name_guess": "Entertaining",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 0,
+     "cond": "after 600 ticks with no adjacent guest"
+    }
+   ],
+   "reads": [
+    "E+0x2C"
+   ],
+   "writes": [
+    "aura object flag 2"
+   ],
+   "classes": {
+    "entertainer": "0x80095AFC"
+   }
+  },
+  "13": {
+   "name_guess": "Patrolling",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "random tile in patrol rect S+0x38..3B reachable (purpose 1)"
+    },
+    {
+     "to": 5,
+     "cond": "no rect / no path"
+    }
+   ],
+   "reads": [
+    "S+0x38..0x3B"
+   ],
+   "writes": [
+    "P+0x2C:=1"
+   ]
+  },
+  "14": {
+   "name_guess": "Repairing",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 17,
+     "cond": "now > M+0x2C (240/180/120/60/60 ticks by skill)"
+    }
+   ],
+   "reads": [
+    "M+0x2C"
+   ],
+   "writes": [],
+   "classes": {
+    "mechanic": "0x8009682C"
+   }
+  },
+  "15": {
+   "name_guess": "Striking",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 0,
+     "cond": "type no longer on strike (0x80068714)"
+    }
+   ],
+   "reads": [
+    "park+0x305+8*(type-1)"
+   ],
+   "writes": []
+  },
+  "16": {
+   "name_guess": "Closing ride",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 14,
+     "cond": "0x8009C1E8(ride) true (ride stopped)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "ride slot57(6)",
+    "M+0x2C"
+   ],
+   "classes": {
+    "mechanic": "0x8009660C"
+   }
+  },
+  "17": {
+   "name_guess": "Opening ride",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 58,
+     "cond": "ride+0xEC==0"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "ride slot57(7)",
+    "ride+0x54:=0",
+    "S+0x40 +10"
+   ],
+   "classes": {
+    "mechanic": "0x80096710"
+   }
+  },
+  "18": {
+   "name_guess": "Waiting in queue",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 58,
+     "cond": "boredom V+0x5C>80 (leaves queue, message 7)"
+    },
+    {
+     "to": 21,
+     "cond": "ride loads (external)"
+    },
+    {
+     "to": 19,
+     "cond": "message 6 from queue shuffle"
+    },
+    {
+     "to": 0,
+     "cond": "message 10"
+    }
+   ],
+   "reads": [
+    "ride slot53",
+    "ride slot20",
+    "V+0x10 stagger"
+   ],
+   "writes": [
+    "V+0x5C +1",
+    "V+0x5F -1 (10%/8 ticks)",
+    "V+0x2C",
+    "P+0x2E facing"
+   ]
+  },
+  "19": {
+   "name_guess": "Shuffle forward",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "now>V+0x2C and slot found (purpose 10)"
+    },
+    {
+     "to": 0,
+     "cond": "cannot join"
+    }
+   ],
+   "reads": [
+    "queue list ride+0xC4"
+   ],
+   "writes": [
+    "waypoint",
+    "in-queue flag"
+   ]
+  },
+  "20": {
+   "name_guess": "Shuffle queue (name only)",
+   "confidence": "low",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler and no writer found in TPW.BIN"
+  },
+  "21": {
+   "name_guess": "Loading",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 22,
+     "cond": "ride unload code (external)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "flag bit1 clear",
+    "flag bit4 set",
+    "bubble off"
+   ]
+  },
+  "22": {
+   "name_guess": "Unloading (apply ride/shop effect)",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 23,
+     "cond": "rides types 1,3,6,7"
+    },
+    {
+     "to": 0,
+     "cond": "shops/walk-ins 2,4,5"
+    }
+   ],
+   "reads": [
+    "ride slot53 intensity",
+    "type table pref",
+    "shop stock slot54",
+    "0x80103208/0C/10",
+    "0x801031FC",
+    "0x80103200"
+   ],
+   "writes": [
+    "V+0x59 +15/+10/+5",
+    "V+0x5A nausea",
+    "V+0x5C -intensity",
+    "V+0x5F -rand(20)",
+    "V+0x60 speed restore",
+    "V+0x48 money (shops)",
+    "V+0x58 rubbish (shops)",
+    "ride+0x14 guest count"
+   ]
+  },
+  "23": {
+   "name_guess": "Goto entrance",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path to ride entrance accepted (purpose 4)"
+    },
+    {
+     "to": 0,
+     "cond": "no entrance point"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "V+0x60:=15",
+    "P+0x2C:=4"
+   ]
+  },
+  "24": {
+   "name_guess": "Entrance (name only)",
+   "confidence": "low",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler/writer found"
+  },
+  "25": {
+   "name_guess": "I will clear litter (name only)",
+   "confidence": "low",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler/writer found"
+  },
+  "26": {
+   "name_guess": "Walk to strike",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path to strike spot (purpose 5, push)"
+    },
+    {
+     "to": 15,
+     "cond": "no strike building"
+    }
+   ],
+   "reads": [
+    "building table 0x80103930"
+   ],
+   "writes": []
+  },
+  "27": {
+   "name_guess": "Cleaning up litter",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 0,
+     "cond": "now > H+0x2C (120/60/30/20/10 ticks by skill)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "S+0x40 -6 (vomit) / +1",
+    "S+0x3F +5",
+    "litter deleted"
+   ],
+   "classes": {
+    "handyman": "0x80099194"
+   }
+  },
+  "28": {
+   "name_guess": "Watch entertainer",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": "pop",
+     "cond": "entertainer left state 12 or now > V+0x2C"
+    }
+   ],
+   "reads": [
+    "V+0x4C entertainer",
+    "V+0x2C"
+   ],
+   "writes": [
+    "V+0x59 +5",
+    "V+0x50:=now+900",
+    "P+0x2E anim 2 + facing"
+   ]
+  },
+  "29": {
+   "name_guess": "Vomiting",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 0,
+     "cond": "now > V+0x2C (60 ticks)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "V+0x5A:=0",
+    "vomit litter spawned"
+   ]
+  },
+  "30": {
+   "name_guess": "Chase visitor (name only)",
+   "confidence": "low",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler/writer found"
+  },
+  "31": {
+   "name_guess": "Research",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 0,
+     "cond": "always, after one tick"
+    }
+   ],
+   "reads": [
+    "table 0x800E4E44[skill]",
+    "BANK singleton"
+   ],
+   "writes": [
+    "research topic progress",
+    "S+0x47"
+   ]
+  },
+  "32": {
+   "name_guess": "Shocked (pelted)",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": "pop",
+     "cond": "deadline E+0x2C passed; a free guard within 7 tiles is sent to chase"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "S+0x40 -10/tick, -5 if no guard",
+    "guard -> 33"
+   ],
+   "classes": {
+    "entertainer": "0x80095E7C"
+   }
+  },
+  "33": {
+   "name_guess": "Chase",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 39,
+     "cond": "on culprit's tile: message 4 to culprit (despawn), morale +10"
+    },
+    {
+     "to": 11,
+     "cond": "path to culprit (purpose 8, push)"
+    },
+    {
+     "to": 0,
+     "cond": "culprit in queue or 3600-tick deadline; morale -5"
+    }
+   ],
+   "reads": [
+    "G+0x28 culprit",
+    "G+0x2C"
+   ],
+   "writes": [],
+   "classes": {
+    "guard": "0x80097D5C"
+   }
+  },
+  "34": {
+   "name_guess": "In the bag (name only)",
+   "confidence": "low",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler/writer found"
+  },
+  "35": {
+   "name_guess": "At shop / walk-in attraction (wait)",
+   "confidence": "medium",
+   "exits": [
+    {
+     "to": 22,
+     "cond": "now > V+0x2C (120 or 120+rand(300) ticks)"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "36": {
+   "name_guess": "Spawn: walk to entrance gate",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path to spawn point 0x800599A4(0) (purpose 15)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "P+0x2C:=15"
+   ]
+  },
+  "37": {
+   "name_guess": "Pay entry fee",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 45,
+     "cond": "money>fee and verdict>=-1 (set first)"
+    },
+    {
+     "to": 38,
+     "cond": "cannot/will not pay"
+    }
+   ],
+   "reads": [
+    "finance+0 fee",
+    "all ride intensities",
+    "0x80103244..54"
+   ],
+   "writes": [
+    "V+0x48 -fee",
+    "finance income",
+    "McAi+0x1C +1"
+   ]
+  },
+  "38": {
+   "name_guess": "Leave: walk to exit gate",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "every 64 ticks: path to exit point 0x800599A4(1) (purpose 14)"
+    },
+    {
+     "to": "despawn",
+     "cond": "no exits in park"
+    }
+   ],
+   "reads": [
+    "0x80103938 exit count"
+   ],
+   "writes": []
+  },
+  "39": {
+   "name_guess": "Guard: escort to exit point",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path (purpose 14)"
+    },
+    {
+     "to": 0,
+     "cond": "no exits"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "classes": {
+    "guard": "0x80097F8C"
+   }
+  },
+  "40": {
+   "name_guess": "unused",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler in any Update table and no writer"
+  },
+  "41": {
+   "name_guess": "Join ride queue",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "slot found, path (purpose 3)"
+    },
+    {
+     "to": 0,
+     "cond": "cannot join / no path"
+    }
+   ],
+   "reads": [
+    "queue count 0x8009EE98",
+    "ride[0xF6]",
+    "ride slot86"
+   ],
+   "writes": [
+    "in-queue flag",
+    "V+0x60:=15",
+    "P+0x2C:=3"
+   ]
+  },
+  "42": {
+   "name_guess": "Walk to turnstile lane slot",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path to lane slot (purpose 11)"
+    }
+   ],
+   "reads": [
+    "lane lists 0x800F2378",
+    "entrance building"
+   ],
+   "writes": [
+    "lane membership",
+    "V+0x60:=15"
+   ]
+  },
+  "43": {
+   "name_guess": "Shuffle in turnstile lane",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "one waypoint (purpose 12)"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "44": {
+   "name_guess": "Front of turnstile lane",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 37,
+     "cond": "turnstile 0x800592CC admits head every 32 ticks"
+    },
+    {
+     "to": 43,
+     "cond": "message 6 (others in lane)"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "45": {
+   "name_guess": "Walk into park from gate",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "first path tile within 15 tiles +y (purpose 13)"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "46": {
+   "name_guess": "At the gate (outside), waiting",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 47,
+     "cond": "message 9 from 0x800521A0 (0x80103954<11 & 0x80103958==1)"
+    },
+    {
+     "to": 0,
+     "cond": "message 10"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "classes": {
+    "visitor": "no per-tick",
+    "guard": "no per-tick"
+   }
+  },
+  "47": {
+   "name_guess": "Pick a lane / step sideways",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 3,
+     "cond": "one waypoint (purpose 16)"
+    },
+    {
+     "to": 42,
+     "cond": "arrival, visitor entering: lane:=rand(2), flip if lane>=11"
+    },
+    {
+     "to": 48,
+     "cond": "arrival, +0x28!=0 (leaving)"
+    },
+    {
+     "to": 55,
+     "cond": "guard arrival, +0x28==0"
+    }
+   ],
+   "reads": [
+    "0x80059150 lane counts"
+   ],
+   "writes": [
+    "0x80103950/54 counters"
+   ]
+  },
+  "48": {
+   "name_guess": "Walk out to a random exit",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path (purpose 9)"
+    },
+    {
+     "to": "despawn",
+     "cond": "visitor arrival 9"
+    },
+    {
+     "to": 59,
+     "cond": "guard arrival 9"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "49": {
+   "name_guess": "Staff: go to rest spot",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "nearest rest object (purpose 17, push)"
+    },
+    {
+     "to": 13,
+     "cond": "none"
+    }
+   ],
+   "reads": [
+    "list 0x80053248"
+   ],
+   "writes": []
+  },
+  "50": {
+   "name_guess": "Staff: resting",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 13,
+     "cond": "tiredness reaches 0"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "S+0x40 +1 /4 ticks",
+    "S+0x3F -2 /4 ticks"
+   ]
+  },
+  "51": {
+   "name_guess": "Emptying a bin",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 0,
+     "cond": "now > H+0x2C (180/120/60/30/15 by skill)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "S+0x40 -10 or +5",
+    "S+0x3F +5",
+    "bin capacity:=100"
+   ],
+   "classes": {
+    "handyman": "0x80099264"
+   }
+  },
+  "52": {
+   "name_guess": "Mechanic: stop ride for service",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 54,
+     "cond": "ride stopped (0x8009C1E8)"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "ride slot57(6)",
+    "M+0x2C"
+   ]
+  },
+  "53": {
+   "name_guess": "unused",
+   "confidence": "high",
+   "exits": [],
+   "reads": [],
+   "writes": [],
+   "note": "no handler in any Update table and no writer"
+  },
+  "54": {
+   "name_guess": "Mechanic: servicing",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 17,
+     "cond": "now > M+0x2C"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "0x8009C56C(ride,0)",
+    "service list"
+   ]
+  },
+  "55": {
+   "name_guess": "Guard: go to post near entrance",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path (purpose 21, push)"
+    },
+    {
+     "to": 0,
+     "cond": "arrival 21"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "56": {
+   "name_guess": "Mechanic: go to broken ride",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path to ride slot42 pos (purpose 6, push)"
+    },
+    {
+     "to": 16,
+     "cond": "arrival 6"
+    }
+   ],
+   "reads": [],
+   "writes": [
+    "S+0x3F -2/tick, S+0x40 -2/tick while walking"
+   ]
+  },
+  "57": {
+   "name_guess": "Mechanic: go to ride for service",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path (purpose 20, push)"
+    },
+    {
+     "to": 52,
+     "cond": "arrival 20"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  },
+  "58": {
+   "name_guess": "Walk to ride's leave point",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path to ride slot26 (purpose 22, push)"
+    },
+    {
+     "to": 0,
+     "cond": "arrival 22"
+    }
+   ],
+   "reads": [],
+   "writes": [],
+   "classes": {
+    "visitor": "after being removed from a queue (message 7)",
+    "mechanic": "after opening the ride"
+   }
+  },
+  "59": {
+   "name_guess": "Guard: walk to spawn point/gate",
+   "confidence": "high",
+   "exits": [
+    {
+     "to": 11,
+     "cond": "path (purpose 15)"
+    },
+    {
+     "to": 46,
+     "cond": "arrival 15"
+    }
+   ],
+   "reads": [],
+   "writes": []
+  }
+ }
+}

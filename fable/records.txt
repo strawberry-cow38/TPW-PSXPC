@@ -1,0 +1,446 @@
+  44 0x02c t1 txt= 152 fp=4x3 b9=1 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=750 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=24 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=30 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=2000
+  46 0x02e t1 txt= 727 fp=6x3 b9=3 ent=[3, 0] exit=[2, 0] +14=0,0,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=2 f4C=800 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=2 f4C=350 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=2 f4C=350 price=2000
+  47 0x02f t1 txt= 887 fp=4x3 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=95 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=750 price=12500
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=400 price=5250
+     L2: cap_max=4 f28=4 f2C=2 f30=20 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=400 price=2500
+ 125 0x07d t1 txt=  27 fp=3x3 b9=5 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=650 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=24 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=30 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=2000
+ 126 0x07e t1 txt= 165 fp=4x4 b9=5 ent=[1, 0] exit=[1, 3] +14=0,2,0 int=95 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=800 price=12500
+     L1: cap_max=4 f28=4 f2C=3 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=5250
+     L2: cap_max=4 f28=4 f2C=2 f30=15 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=2500
+ 127 0x07f t1 txt= 280 fp=3x3 b9=3 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=750 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=350 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=18 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=350 price=2000
+ 212 0x0d4 t1 txt=  69 fp=2x3 b9=4 ent=[0, 0] exit=[1, 0] +14=0,0,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=700 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=24 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=30 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=350 price=2000
+ 213 0x0d5 t1 txt= 199 fp=4x4 b9=5 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=95 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=750 price=12500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=400 price=5250
+     L2: cap_max=4 f28=4 f2C=2 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=400 price=2500
+ 219 0x0db t1 txt= 993 fp=4x3 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=650 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=450 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=450 price=2000
+ 367 0x16f t1 txt= 330 fp=4x3 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=700 price=12500
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=500 price=5500
+     L2: cap_max=4 f28=4 f2C=2 f30=20 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=500 price=2500
+ 368 0x170 t1 txt= 138 fp=5x3 b9=5 ent=[0, 2] exit=[0, 0] +14=1,1,0 int=90 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=700 price=10000
+     L1: cap_max=4 f28=4 f2C=3 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=450 price=5000
+     L2: cap_max=4 f28=4 f2C=2 f30=15 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=450 price=2000
+ 373 0x175 t1 txt= 715 fp=5x3 b9=5 ent=[2, 0] exit=[2, 2] +14=0,2,0 int=95 body=0xb4
+     L0: cap_max=4 f28=4 f2C=5 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=750 price=12500
+     L1: cap_max=4 f28=4 f2C=3 f30=24 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=500 price=5500
+     L2: cap_max=4 f28=4 f2C=2 f30=30 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=500 price=2500
+  20 0x014 t2 txt= 669 fp=3x3 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=125 u16s=[0, 0, 0, 0, 61456, 0]
+  21 0x015 t2 txt= 543 fp=3x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[200, 0, 2, 0, 61456, 0]
+  28 0x01c t2 txt=1029 fp=3x3 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=125 u16s=[0, 0, 0, 0, 61456, 0]
+  29 0x01d t2 txt= 662 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=300 u16s=[400, 0, 3, 0, 61456, 1]
+  32 0x020 t2 txt= 745 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+  33 0x021 t2 txt= 207 fp=3x3 b9=1 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=200 u16s=[200, 0, 1, 0, 61456, 0]
+  95 0x05f t2 txt= 665 fp=4x4 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=175 u16s=[100, 0, 1, 0, 61456, 256]
+  96 0x060 t2 txt= 149 fp=5x5 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[100, 0, 2, 0, 61456, 0]
+  97 0x061 t2 txt= 175 fp=4x4 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[200, 0, 1, 0, 61456, 0]
+ 101 0x065 t2 txt= 141 fp=3x3 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=200 u16s=[100, 0, 3, 0, 61456, 0]
+ 103 0x067 t2 txt= 238 fp=2x2 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=175 u16s=[100, 0, 2, 0, 61456, 0]
+ 108 0x06c t2 txt= 988 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=100 u16s=[0, 0, 0, 0, 61456, 0]
+ 109 0x06d t2 txt= 834 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+ 110 0x06e t2 txt= 124 fp=3x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=300 u16s=[100, 0, 3, 0, 61456, 1]
+ 112 0x070 t2 txt= 696 fp=3x3 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[200, 0, 1, 0, 61456, 0]
+ 114 0x072 t2 txt= 228 fp=3x3 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=200 u16s=[150, 0, 1, 0, 61456, 0]
+ 115 0x073 t2 txt= 531 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[100, 0, 1, 0, 61456, 0]
+ 175 0x0af t2 txt= 290 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[100, 0, 1, 0, 61456, 256]
+ 176 0x0b0 t2 txt= 496 fp=4x4 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=200 u16s=[100, 0, 1, 0, 61456, 256]
+ 177 0x0b1 t2 txt= 933 fp=5x5 b9=5 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[100, 0, 1, 0, 61456, 256]
+ 178 0x0b2 t2 txt= 720 fp=5x5 b9=5 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[100, 0, 1, 0, 61456, 256]
+ 179 0x0b3 t2 txt= 304 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=100 u16s=[0, 0, 0, 0, 61456, 1]
+ 180 0x0b4 t2 txt= 699 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[200, 0, 2, 0, 61456, 0]
+ 181 0x0b5 t2 txt=  22 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[150, 0, 1, 0, 61456, 0]
+ 186 0x0ba t2 txt= 204 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=250 u16s=[0, 0, 0, 0, 61456, 2]
+ 187 0x0bb t2 txt= 672 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=0 u16s=[0, 0, 0, 0, 61456, 0]
+ 188 0x0bc t2 txt= 763 fp=3x3 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[100, 0, 1, 0, 61456, 0]
+ 189 0x0bd t2 txt= 495 fp=3x3 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[0, 0, 0, 0, 61456, 0]
+ 191 0x0bf t2 txt= 345 fp=3x3 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[150, 0, 2, 0, 61456, 0]
+ 196 0x0c4 t2 txt= 953 fp=2x2 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=100 u16s=[0, 0, 0, 0, 61456, 0]
+ 197 0x0c5 t2 txt= 790 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+ 200 0x0c8 t2 txt= 285 fp=3x2 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=300 u16s=[100, 0, 3, 0, 61456, 1]
+ 334 0x14e t2 txt= 480 fp=3x3 b9=5 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[150, 0, 2, 0, 61456, 0]
+ 335 0x14f t2 txt= 139 fp=2x2 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=100 u16s=[0, 0, 0, 0, 61456, 259]
+ 339 0x153 t2 txt= 747 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=200 u16s=[150, 0, 1, 0, 61456, 259]
+ 340 0x154 t2 txt= 558 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=125 u16s=[100, 0, 1, 0, 61456, 0]
+ 341 0x155 t2 txt= 950 fp=3x3 b9=3 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[125, 0, 2, 0, 61456, 0]
+ 342 0x156 t2 txt= 969 fp=2x2 b9=1 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[0, 0, 0, 0, 61456, 0]
+ 344 0x158 t2 txt=  43 fp=3x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=300 u16s=[400, 0, 3, 0, 61456, 1]
+ 345 0x159 t2 txt= 465 fp=3x3 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=150 u16s=[150, 0, 1, 0, 61456, 0]
+ 346 0x15a t2 txt= 743 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=200 u16s=[200, 0, 3, 0, 61456, 0]
+ 347 0x15b t2 txt= 565 fp=3x3 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=75 u16s=[0, 0, 0, 0, 61456, 0]
+ 353 0x161 t2 txt= 547 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=500 u16s=[0, 0, 0, 0, 61456, 2]
+ 354 0x162 t2 txt=   8 fp=2x2 b9=2 ent=[-1, -1] exit=[-1, -1] +14=0,0,0 int=0 body=0x10 price=100 u16s=[0, 0, 0, 0, 61456, 0]
+  39 0x027 t3 txt= 959 fp=5x5 b9=5 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=250 price=250
+  40 0x028 t3 txt=  15 fp=5x5 b9=3 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=2 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=5 f48=2 f4C=500 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=5 f48=2 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=5 f48=2 f4C=200 price=200
+  42 0x02a t3 txt= 997 fp=5x5 b9=3 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=45 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1000
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+  43 0x02b t3 txt= 275 fp=4x4 b9=3 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=55 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1250
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+  45 0x02d t3 txt= 198 fp=4x4 b9=4 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=2 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1500
+     L1: cap_max=4 f28=4 f2C=3 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+  48 0x030 t3 txt= 792 fp=4x5 b9=1 ent=[1, 0] exit=[2, 4] +14=0,2,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=2 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=3 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+  49 0x031 t3 txt= 296 fp=3x5 b9=5 ent=[1, 0] exit=[1, 4] +14=0,2,0 int=50 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=2 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+  50 0x032 t3 txt= 120 fp=4x4 b9=1 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=700 price=1500
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=150 price=150
+  51 0x033 t3 txt=  53 fp=4x5 b9=5 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+  52 0x034 t3 txt= 190 fp=4x4 b9=6 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=750 price=3000
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=500 price=500
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=500 price=500
+  53 0x035 t3 txt= 377 fp=5x5 b9=5 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=450 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=200
+  54 0x036 t3 txt= 607 fp=4x4 b9=3 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=40 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=3 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=60 f48=0 f4C=0 price=500
+     L1: cap_max=4 f28=4 f2C=3 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=60 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=60 f48=1 f4C=150 price=150
+  55 0x037 t3 txt= 437 fp=4x5 b9=5 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=1 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=0 f4C=0 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=1 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=1 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=1 f4C=200 price=200
+ 121 0x079 t3 txt= 336 fp=3x4 b9=2 ent=[1, 0] exit=[1, 3] +14=0,2,0 int=40 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=500 price=500
+     L1: cap_max=4 f28=4 f2C=3 f30=7 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 122 0x07a t3 txt= 756 fp=4x4 b9=4 ent=[0, 0] exit=[3, 3] +14=0,2,0 int=55 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=14 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 123 0x07b t3 txt= 170 fp=5x5 b9=3 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=100 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=1 f4C=900 price=1500
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=100 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=0 f4C=0 price=1500
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=100 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=0 f4C=0 price=1500
+ 124 0x07c t3 txt= 934 fp=4x4 b9=4 ent=[0, 1] exit=[3, 2] +14=1,3,0 int=55 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=20 lifetime=50 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1250
+     L1: cap_max=4 f28=4 f2C=3 f30=26 lifetime=50 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=32 lifetime=50 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 128 0x080 t3 txt= 535 fp=4x4 b9=6 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=11 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 129 0x081 t3 txt= 741 fp=5x4 b9=1 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=18 lifetime=55 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=500 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=24 lifetime=55 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=30 lifetime=55 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=250
+ 131 0x083 t3 txt= 830 fp=5x5 b9=6 ent=[0, 0] exit=[4, 0] +14=0,0,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=17 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=22 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 132 0x084 t3 txt= 941 fp=4x4 b9=4 ent=[2, 0] exit=[1, 3] +14=0,2,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=500 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=250 price=250
+ 133 0x085 t3 txt= 822 fp=4x4 b9=6 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=600 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 134 0x086 t3 txt= 277 fp=4x4 b9=5 ent=[2, 0] exit=[2, 3] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=600 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=200
+ 135 0x087 t3 txt= 354 fp=3x3 b9=6 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=900 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=200
+ 136 0x088 t3 txt= 118 fp=3x5 b9=1 ent=[1, 0] exit=[2, 2] +14=0,3,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=700 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=12 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=17 lifetime=65 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=200 price=200
+ 137 0x089 t3 txt= 717 fp=4x4 b9=4 ent=[0, 0] exit=[3, 3] +14=0,2,0 int=45 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1500
+     L1: cap_max=4 f28=4 f2C=3 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 138 0x08a t3 txt= 955 fp=4x5 b9=1 ent=[1, 0] exit=[2, 4] +14=0,2,0 int=50 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=550 price=1200
+     L1: cap_max=4 f28=4 f2C=3 f30=7 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=150 price=150
+ 139 0x08b t3 txt= 873 fp=5x4 b9=1 ent=[2, 0] exit=[2, 3] +14=0,2,0 int=45 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=2750
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=300 price=300
+     L2: cap_max=4 f28=4 f2C=2 f30=20 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=300 price=300
+ 140 0x08c t3 txt= 222 fp=4x4 b9=6 ent=[1, 0] exit=[3, 3] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 141 0x08d t3 txt= 134 fp=5x4 b9=6 ent=[2, 0] exit=[2, 3] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=2750 price=2750
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=2750
+     L2: cap_max=4 f28=4 f2C=2 f30=20 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=2750
+ 209 0x0d1 t3 txt= 189 fp=3x4 b9=3 ent=[1, 0] exit=[1, 3] +14=0,2,0 int=40 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=60 f48=0 f4C=0 price=500
+     L1: cap_max=4 f28=4 f2C=3 f30=7 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=60 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=60 f48=1 f4C=150 price=150
+ 210 0x0d2 t3 txt= 322 fp=5x5 b9=5 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=3 f4C=650 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=3 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=3 f4C=200 price=200
+ 211 0x0d3 t3 txt= 119 fp=6x3 b9=1 ent=[2, 0] exit=[3, 2] +14=0,2,0 int=50 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 214 0x0d6 t3 txt= 500 fp=5x5 b9=5 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=550 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=200
+ 216 0x0d8 t3 txt= 801 fp=5x4 b9=5 ent=[2, 0] exit=[1, 3] +14=0,2,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=16 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1500
+     L1: cap_max=4 f28=4 f2C=3 f30=22 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=300 price=300
+     L2: cap_max=4 f28=4 f2C=2 f30=28 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=300 price=300
+ 217 0x0d9 t3 txt= 489 fp=4x4 b9=3 ent=[0, 0] exit=[3, 3] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=550 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=200 price=200
+ 218 0x0da t3 txt= 671 fp=4x4 b9=5 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=55 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=500 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=9 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=150 price=150
+ 220 0x0dc t3 txt= 992 fp=4x4 b9=4 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=45 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=11 lifetime=45 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=14 lifetime=45 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 221 0x0dd t3 txt= 660 fp=4x4 b9=3 ent=[3, 0] exit=[0, 3] +14=3,1,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1000
+     L1: cap_max=4 f28=4 f2C=3 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=5 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 222 0x0de t3 txt= 102 fp=4x4 b9=3 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=50 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 223 0x0df t3 txt= 990 fp=4x3 b9=4 ent=[3, 1] exit=[1, 0] +14=3,0,0 int=50 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=1 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=0 f4C=0 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=1 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=200 price=750
+     L2: cap_max=4 f28=4 f2C=2 f30=1 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=1 f48=3 f4C=250 price=750
+ 224 0x0e0 t3 txt= 282 fp=5x5 b9=5 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=20 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=450 price=4000
+     L1: cap_max=4 f28=4 f2C=3 f30=30 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=400 price=400
+     L2: cap_max=4 f28=4 f2C=2 f30=40 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=400 price=400
+ 225 0x0e1 t3 txt= 886 fp=3x3 b9=4 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=3250
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=350
+     L2: cap_max=4 f28=4 f2C=2 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=350
+ 226 0x0e2 t3 txt= 530 fp=4x4 b9=3 ent=[0, 1] exit=[3, 1] +14=1,3,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=5 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=400 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=450 price=2500
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=100 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=450 price=2500
+ 227 0x0e3 t3 txt= 954 fp=4x4 b9=4 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=550 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=11 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=14 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=250
+ 360 0x168 t3 txt= 574 fp=4x4 b9=4 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=40 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=1 lifetime=80 b8_min=1 b8_max=100 f40=30 cycles_max=45 f48=0 f4C=0 price=500
+     L1: cap_max=4 f28=4 f2C=3 f30=1 lifetime=80 b8_min=1 b8_max=100 f40=30 cycles_max=50 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=1 lifetime=80 b8_min=1 b8_max=100 f40=30 cycles_max=55 f48=1 f4C=150 price=150
+ 361 0x169 t3 txt= 713 fp=5x5 b9=2 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=100 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=1 f4C=900 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=100 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=0 f4C=0 price=2000
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=100 b8_min=1 b8_max=100 f40=10 cycles_max=50 f48=0 f4C=0 price=2000
+ 362 0x16a t3 txt= 338 fp=5x5 b9=3 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=45 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1500
+     L1: cap_max=4 f28=4 f2C=3 f30=18 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=24 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 364 0x16c t3 txt=  66 fp=4x4 b9=3 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=55 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=1750
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 365 0x16d t3 txt= 865 fp=5x5 b9=7 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=55 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=11 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=450 price=3250
+     L1: cap_max=4 f28=4 f2C=3 f30=15 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=19 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=200 price=200
+ 366 0x16e t3 txt= 827 fp=4x4 b9=3 ent=[1, 0] exit=[2, 3] +14=0,2,0 int=45 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=450 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=150 price=150
+ 369 0x171 t3 txt=  52 fp=6x3 b9=7 ent=[2, 0] exit=[3, 0] +14=0,0,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=10 lifetime=60 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=60 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=22 lifetime=60 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 370 0x172 t3 txt= 365 fp=5x5 b9=5 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=12 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=250 price=250
+ 371 0x173 t3 txt= 571 fp=5x5 b9=4 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=650 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=16 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=22 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=250 price=250
+ 374 0x176 t3 txt= 129 fp=4x4 b9=3 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=50 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=1 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=0 f4C=0 price=750
+     L1: cap_max=4 f28=4 f2C=3 f30=1 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=1 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 375 0x177 t3 txt= 264 fp=5x4 b9=4 ent=[2, 0] exit=[2, 3] +14=0,2,0 int=75 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=18 lifetime=75 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=650 price=2000
+     L1: cap_max=4 f28=4 f2C=3 f30=24 lifetime=75 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+     L2: cap_max=4 f28=4 f2C=2 f30=30 lifetime=75 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=200 price=200
+ 376 0x178 t3 txt=  31 fp=4x4 b9=6 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=60 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=15 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=1250
+     L1: cap_max=4 f28=4 f2C=3 f30=20 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=25 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 377 0x179 t3 txt= 125 fp=3x5 b9=1 ent=[1, 0] exit=[2, 2] +14=0,3,0 int=70 body=0xa0
+     L0: cap_max=4 f28=4 f2C=7 f30=10 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=350 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=14 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+     L2: cap_max=4 f28=4 f2C=2 f30=14 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=1 f4C=150 price=150
+ 379 0x17b t3 txt= 321 fp=5x5 b9=4 ent=[2, 0] exit=[2, 4] +14=0,2,0 int=65 body=0xa0
+     L0: cap_max=4 f28=4 f2C=5 f30=4 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=600 price=2500
+     L1: cap_max=4 f28=4 f2C=3 f30=6 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=250 price=250
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=250 price=250
+  60 0x03c t4 txt= 239 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+  61 0x03d t4 txt= 235 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=1500 u16s=[250, 0, 1, 0, 60, 40, 2, 0, 15, 0]
+  62 0x03e t4 txt= 937 fp=2x2 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+  63 0x03f t4 txt= 938 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+  64 0x040 t4 txt= 623 fp=3x3 b9=5 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+  65 0x041 t4 txt= 413 fp=2x2 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=250 u16s=[0, 0, 0, 0, 60, 40, 7, 20, 5, 10]
+  67 0x043 t4 txt= 798 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=1 body=0x18 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1295, 5, 5]
+  68 0x044 t4 txt= 641 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+  69 0x045 t4 txt=  56 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+  71 0x047 t4 txt= 642 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=1 body=0x18 price=300 u16s=[200, 0, 1, 0, 60, 40, 0, 25, 5, 10]
+ 146 0x092 t4 txt= 475 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=300 u16s=[0, 0, 0, 0, 60, 40, 0, 25, 5, 10]
+ 147 0x093 t4 txt= 200 fp=3x3 b9=5 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=1 body=0x18 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1305, 5, 5]
+ 149 0x095 t4 txt=  61 fp=2x2 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=1 body=0x18 price=250 u16s=[150, 0, 1, 0, 60, 40, 7, 20, 5, 10]
+ 150 0x096 t4 txt= 870 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+ 151 0x097 t4 txt= 233 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+ 152 0x098 t4 txt= 772 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+ 158 0x09e t4 txt= 924 fp=3x3 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=1 body=0x18 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+ 160 0x0a0 t4 txt= 103 fp=3x3 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+ 232 0x0e8 t4 txt= 384 fp=3x3 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+ 233 0x0e9 t4 txt=  90 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+ 234 0x0ea t4 txt= 647 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=300 u16s=[200, 0, 1, 0, 60, 40, 0, 25, 5, 10]
+ 235 0x0eb t4 txt=  77 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+ 236 0x0ec t4 txt= 576 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+ 237 0x0ed t4 txt= 879 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=20 body=0x18 price=250 u16s=[0, 0, 0, 0, 60, 40, 7, 25, 5, 10]
+ 238 0x0ee t4 txt= 742 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+ 239 0x0ef t4 txt=1015 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+ 241 0x0f1 t4 txt= 502 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+ 242 0x0f2 t4 txt= 705 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=1500 u16s=[250, 0, 0, 0, 60, 40, 2, 0, 15, 0]
+ 247 0x0f7 t4 txt= 775 fp=3x3 b9=3 ent=[2, 0] exit=[-1, -1] +14=0,0,0 int=1 body=0x18 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1305, 5, 5]
+ 381 0x17d t4 txt=  47 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=300 u16s=[0, 0, 0, 0, 60, 40, 0, 25, 5, 10]
+ 382 0x17e t4 txt= 986 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1500 u16s=[300, 0, 2, 0, 90, 60, 2, 0, 15, 0]
+ 383 0x17f t4 txt= 686 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=250 u16s=[0, 0, 0, 0, 60, 40, 1, 10240, 5, 5]
+ 384 0x180 t4 txt= 601 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=750 u16s=[300, 0, 2, 0, 90, 60, 3, 0, 10, 0]
+ 385 0x181 t4 txt= 521 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=250 u16s=[150, 0, 1, 0, 60, 40, 7, 20, 5, 10]
+ 386 0x182 t4 txt= 572 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x18 price=1000 u16s=[250, 0, 3, 0, 150, 100, 6, 0, 15, 0]
+ 387 0x183 t4 txt= 482 fp=2x2 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=200 u16s=[150, 0, 1, 0, 60, 40, 4, 2585, 5, 15]
+ 390 0x186 t4 txt= 888 fp=3x3 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x18 price=1000 u16s=[350, 0, 3, 0, 90, 60, 5, 1305, 5, 5]
+  58 0x03a t5 txt= 603 fp=2x2 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+  59 0x03b t5 txt= 826 fp=3x3 b9=1 ent=[-1, -1] exit=[-1, -1] +14=0,0,6 int=0 body=0x14 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+  66 0x042 t5 txt= 498 fp=2x2 b9=2 ent=[0, 0] exit=[-1, -1] +14=0,0,9 int=0 body=0x14 price=2500 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+  70 0x046 t5 txt= 458 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,5 int=60 body=0x14 price=1000 u16s=[550, 0, 1, 0, 10, 30, 25, 0]
+  72 0x048 t5 txt= 998 fp=3x3 b9=1 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=2000 u16s=[500, 0, 2, 0, 10, 30, 25, 0]
+  73 0x049 t5 txt= 270 fp=2x3 b9=5 ent=[1, 0] exit=[-1, -1] +14=0,0,2 int=0 body=0x14 price=2000 u16s=[400, 0, 2, 0, 10, 30, 25, 0]
+  74 0x04a t5 txt= 516 fp=3x4 b9=1 ent=[1, 0] exit=[-1, -1] +14=0,0,1 int=0 body=0x14 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 144 0x090 t5 txt= 851 fp=3x3 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=2500 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 145 0x091 t5 txt= 994 fp=3x3 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,6 int=60 body=0x14 price=1500 u16s=[500, 0, 2, 0, 10, 0, 0, 0]
+ 148 0x094 t5 txt= 838 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 153 0x099 t5 txt= 557 fp=2x2 b9=1 ent=[0, 0] exit=[-1, -1] +14=0,0,9 int=65 body=0x14 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+ 154 0x09a t5 txt= 679 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,5 int=0 body=0x14 price=2000 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 155 0x09b t5 txt= 910 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 156 0x09c t5 txt= 302 fp=2x3 b9=4 ent=[0, 0] exit=[-1, -1] +14=0,0,2 int=0 body=0x14 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 157 0x09d t5 txt= 371 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 159 0x09f t5 txt= 707 fp=3x4 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,1 int=0 body=0x14 price=1750 u16s=[450, 0, 1, 0, 10, 30, 25, 0]
+ 229 0x0e5 t5 txt= 159 fp=2x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=20 body=0x14 price=1750 u16s=[450, 0, 0, 0, 10, 30, 25, 0]
+ 230 0x0e6 t5 txt= 769 fp=3x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=30 body=0x14 price=2500 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 231 0x0e7 t5 txt= 419 fp=3x3 b9=5 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=40 body=0x14 price=1750 u16s=[500, 0, 0, 0, 10, 30, 25, 0]
+ 240 0x0f0 t5 txt= 100 fp=3x3 b9=5 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=60 body=0x14 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 243 0x0f3 t5 txt= 881 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,5 int=0 body=0x14 price=2500 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 244 0x0f4 t5 txt=1023 fp=4x4 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,4 int=70 body=0x14 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 245 0x0f5 t5 txt= 135 fp=3x4 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,8 int=60 body=0x14 price=1750 u16s=[500, 0, 0, 0, 10, 30, 25, 0]
+ 246 0x0f6 t5 txt= 374 fp=2x3 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,3 int=0 body=0x14 price=2000 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 248 0x0f8 t5 txt= 958 fp=3x4 b9=4 ent=[1, 0] exit=[-1, -1] +14=0,0,1 int=0 body=0x14 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 249 0x0f9 t5 txt= 400 fp=2x2 b9=3 ent=[0, 0] exit=[-1, -1] +14=0,0,0 int=50 body=0x14 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 380 0x17c t5 txt= 368 fp=3x2 b9=3 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[400, 0, 1, 0, 10, 30, 25, 0]
+ 388 0x184 t5 txt=  94 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 389 0x185 t5 txt= 155 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,0 int=0 body=0x14 price=1750 u16s=[0, 0, 0, 0, 10, 30, 25, 0]
+ 391 0x187 t5 txt= 915 fp=3x3 b9=2 ent=[1, 0] exit=[-1, -1] +14=0,0,5 int=0 body=0x14 price=1750 u16s=[500, 0, 2, 0, 10, 30, 25, 0]
+ 392 0x188 t5 txt= 810 fp=3x3 b9=4 ent=[-1, -1] exit=[-1, -1] +14=0,0,8 int=0 body=0x14 price=150 u16s=[0, 0, 0, 0, 0, 0, 0, 0]
+ 393 0x189 t5 txt= 436 fp=2x3 b9=6 ent=[1, 0] exit=[-1, -1] +14=0,0,2 int=0 body=0x14 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+ 394 0x18a t5 txt= 595 fp=3x4 b9=1 ent=[1, 0] exit=[-1, -1] +14=0,0,1 int=0 body=0x14 price=1750 u16s=[500, 0, 1, 0, 10, 30, 25, 0]
+  41 0x029 t6 txt= 474 fp=4x4 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,7 int=80 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=750 price=6500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=400
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=350
+  57 0x039 t6 txt= 510 fp=4x4 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=75 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=750 price=5000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=400 price=500
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=400 price=400
+ 130 0x082 t6 txt=  88 fp=4x4 b9=3 ent=[2, 0] exit=[1, 0] +14=0,0,7 int=80 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=750 price=4000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=450
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=450
+ 143 0x08f t6 txt= 816 fp=4x4 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=75 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=600 price=5000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=400 price=750
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=400 price=750
+ 215 0x0d7 t6 txt= 186 fp=4x4 b9=3 ent=[1, 0] exit=[2, 0] +14=0,0,7 int=80 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=600 price=6500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=500
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=500
+ 228 0x0e4 t6 txt= 344 fp=4x4 b9=3 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=75 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=650 price=5000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=500
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=500
+ 363 0x16b t6 txt= 267 fp=4x4 b9=4 ent=[1, 0] exit=[2, 0] +14=0,0,7 int=80 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=700 price=6500
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=500
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=350 price=500
+ 378 0x17a t6 txt= 651 fp=4x4 b9=6 ent=[1, 0] exit=[2, 0] +14=0,0,0 int=75 body=0xe8
+     L0: cap_max=4 f28=4 f2C=5 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=650 price=5000
+     L1: cap_max=4 f28=4 f2C=3 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=400 price=750
+     L2: cap_max=4 f28=4 f2C=2 f30=8 lifetime=80 b8_min=1 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=400 price=750
+  56 0x038 t7 txt= 863 fp=3x3 b9=3 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=70 body=0xb8
+     L0: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=550 price=3000
+     L1: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=110 f40=1 cycles_max=10 f48=3 f4C=300 price=350
+     L2: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=125 f40=1 cycles_max=10 f48=3 f4C=400 price=450
+ 142 0x08e t7 txt=  92 fp=3x3 b9=5 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=75 body=0xb8
+     L0: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=600 price=3000
+     L1: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=110 f40=1 cycles_max=10 f48=2 f4C=350 price=300
+     L2: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=125 f40=1 cycles_max=10 f48=2 f4C=450 price=400
+ 208 0x0d0 t7 txt= 544 fp=4x3 b9=7 ent=[0, 1] exit=[3, 1] +14=1,3,0 int=75 body=0xb8
+     L0: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=100 f40=1 cycles_max=10 f48=2 f4C=600 price=3000
+     L1: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=110 f40=1 cycles_max=10 f48=2 f4C=350 price=300
+     L2: cap_max=4 f28=4 f2C=7 f30=8 lifetime=80 b8_min=80 b8_max=125 f40=1 cycles_max=10 f48=2 f4C=450 price=400
+ 372 0x174 t7 txt= 824 fp=3x3 b9=1 ent=[1, 0] exit=[1, 2] +14=0,2,0 int=70 body=0xb8
+     L0: cap_max=4 f28=4 f2C=7 f30=8 lifetime=70 b8_min=80 b8_max=100 f40=1 cycles_max=10 f48=3 f4C=650 price=3000
+     L1: cap_max=4 f28=4 f2C=7 f30=8 lifetime=70 b8_min=80 b8_max=110 f40=1 cycles_max=10 f48=3 f4C=300 price=350
+     L2: cap_max=4 f28=4 f2C=7 f30=8 lifetime=70 b8_min=80 b8_max=125 f40=1 cycles_max=10 f48=3 f4C=400 price=450

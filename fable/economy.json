@@ -1,0 +1,218 @@
+{
+  "_legend": "READ = from instructions at the quoted address; GUESS = interpretation with confidence. Addresses are hex strings. Money values are stored in tenths of a pound (pounds*10).",
+  "binary": {"file": "/home/ec2-user/tpw/ext/TPW.BIN", "load": "0x80010000", "end": "0x8011415C"},
+  "time": {
+    "tick_seconds": 0.04,
+    "ticks_per_second": 25,
+    "day_ticks_measured": 99,
+    "day_seconds": 3.96,
+    "day_formula": "ceil(0xF0000 / timescale) ticks; timescale = word 0x80103A90, accumulated into McAi+0 each unpaused tick at 0x80066EC8, reset to 0 on rollover",
+    "timescale_inferred": {"value": 10000, "range": [9930, 10030], "tag": "GUESS-high", "clamp_max": 16384, "writer": "0x800BDE88/0x800BDE98"},
+    "month_lengths_days": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+    "month_table": "0x800E1554",
+    "month_ticks": [2772, 3069],
+    "month_seconds": [110.9, 122.8],
+    "year_days": 365,
+    "year_ticks": 36135,
+    "year_seconds": 1445.4,
+    "calendar_fn": "0x80066EA8",
+    "tick_fn": "0x80066C50",
+    "tick_caller": "0x80058E24 in game-mode slot 4 0x80058C20, skipped when 0x800617D4 or 0x80059080 return nonzero (pause/menu)"
+  },
+  "mcai": {
+    "pointer_global": "0x80102E48",
+    "size": "0x328",
+    "tag": "McAi",
+    "getter": "0x80066AC8",
+    "fields": {
+      "+0x00": "sub-day accumulator",
+      "+0x04": "month 0..11",
+      "+0x08": "year",
+      "+0x0C": "day of month 0..N-1",
+      "+0x10": "total days elapsed (guest arrival stamp V+0x54, staff hire stamp P+0x34)",
+      "+0x14": "consecutive months ended in debt (reset by Income when balance>=0)",
+      "+0x18": "total months elapsed"
+    },
+    "day_counter_0x801E8B60": "McAi+0xC if McAi==0x801E8B54, McAi+0x10 if McAi==0x801E8B50; verify by reading 0x80102E48"
+  },
+  "money_type": {
+    "units": "tenths of a pound, signed int32",
+    "ctor_pounds_pence": "0x80088E50 -> pounds*10 + pence/10",
+    "ctor_pounds": "0x80088E88 -> pounds*10",
+    "add": "0x80088DFC", "sub": "0x80088DE0", "diff": "0x80088D60", "div": "0x80088CDC",
+    "ge": "0x80088DB8", "gt": "0x80088DD0", "to_pounds": "0x80088E18",
+    "duplicate_copies": ["0x80092740", "0x80069488", "0x8001D348", "0x80021D5C", "0x80022F8C", "0x80085BF0", "0x80065FA8", "0x8009F418", "0x800B7128", "0x800B79F8", "0x80061848", "0x80072F40", "0x80083978"]
+  },
+  "bank": {
+    "get": "0x80086814",
+    "pointer_global": "0x801031BC",
+    "handle_global": "0x801031C0",
+    "free_money_flag_global": {"addr": "0x801031CC", "effect": "TrySpend returns 1 without charging; placement always affordable", "writer": "none in TPW.BIN (GUESS: overlay/cheat)"},
+    "size": "0x12F4",
+    "tag_string": "0x801031C4",
+    "ctor": "0x80086560",
+    "start_balance": {"value_units": 500000, "pounds": 50000, "site": "0x80058AB4 in 0x800588D0", "tag": "READ"},
+    "ctor_default_balance_units": 100000,
+    "fields": {
+      "+0x0000": {"name": "entry_fee", "get": "0x80087248", "set": "0x80087240", "default_units": 400},
+      "+0x0004": {"name": "balance", "get": "0x800868A0", "set": "0x800868B0", "writers": ["0x80086980 Income", "0x800868B8 TrySpend", "0x80088A0C load"]},
+      "+0x0008": {"name": "allow_negative", "ctor_value": 1},
+      "+0x000C": {"name": "loans[4]", "stride": "0x2C"},
+      "+0x00BC": "hist_balance[144]",
+      "+0x02FC": "hist_income[144]",
+      "+0x053C": "hist_entry_fee[144]",
+      "+0x077C": "hist_type4_profit[144]",
+      "+0x09BC": "hist_type5_takings[144]",
+      "+0x0BFC": "hist_spend[144]",
+      "+0x0E3C": "hist_wages[144]",
+      "+0x107C": "hist_park_value[144]",
+      "+0x12BC": "month_index (hist index = idx % 144)",
+      "+0x12C0": "loan_repayments_this_month",
+      "+0x12C4": "type5_takings_total",
+      "+0x12C8": "entry_fee_total",
+      "+0x12CC": "type4_profit_total",
+      "+0x12D0": "wages_total",
+      "+0x12D4": "spend_total",
+      "+0x12D8": "income_total",
+      "+0x12DC": "income_this_year",
+      "+0x12E0": "income_last_year",
+      "+0x12E4": "spend_this_year",
+      "+0x12E8": "spend_last_year",
+      "+0x12EC": "park_value_yearly_snapshot",
+      "+0x12F0": "balance_yearly_snapshot"
+    },
+    "primitives": {
+      "Income": {"addr": "0x80086980", "args": "(bank, &money)", "effect": "balance+=m; +0x12D8+=m; +0x12DC+=m; hist_income[idx]+=m; if balance>=0 McAi+0x14=0"},
+      "TrySpend": {"addr": "0x800868B8", "args": "(bank, &money) -> bool", "effect": "if flag 0x801031CC: return 1; if +8==0 and m>balance: return 0; balance-=m; +0x12E4+=m; +0x12D4+=m; hist_spend[idx]+=m; return 1", "never_refuses_in_this_build": true},
+      "TypedIncome": {"addr": "0x80086A5C", "args": "(bank, attractionType, &money)", "effect": "Income; type4 -> hist_type4[idx], +0x12CC; type5 -> hist_type5[idx], +0x12C4", "jump_table": "0x800E3588"},
+      "PayWageNow": {"addr": "0x8008717C", "effect": "+0x12D0+=m; TrySpend(m)"},
+      "BookEntryFee": {"addr": "0x80087258", "effect": "Income(fee); +0x12C8+=fee; hist_entry_fee[idx]+=fee"},
+      "TakeLoan": {"addr": "0x800871B8", "args": "(bank, slot)"},
+      "OutstandingDebt": {"addr": "0x8008748C", "effect": "sum of loan+0x14 over taken loans"},
+      "YearRotate": {"addr": "0x80087570"},
+      "MonthRollover": {"addr": "0x80086D70"},
+      "WagesSum": {"addr": "0x80086B60"},
+      "ParkValue": {"addr": "0x80087884", "effect": "sum(defPrice(type, variant))/2 over all attractions; recorded only"}
+    },
+    "address_settlement": {
+      "0x801D5694": "GUESS-high: BANK+0x3C = loan[1].principal (raw pounds 50000)",
+      "0x801D56AC": "GUESS-high: BANK+0x54 = loan[1]+0x1C (raw pounds 50000)",
+      "implied_bank": "0x801D5658",
+      "implied_balance_addr": "0x801D565C",
+      "balance_expected_value": 500000,
+      "verify": "read word at 0x801031BC; expect 0x801D5658; poke +4 and watch HUD"
+    }
+  },
+  "month_rollover": {
+    "fn": "0x80086D70",
+    "called_from": "0x80066CC0 when McAi+4 changes",
+    "period_ticks": [2772, 3069],
+    "period_seconds": [110.9, 122.8],
+    "steps": [
+      "hist_balance[idx] = balance",
+      "for each taken loan: pay=min(payment, remaining); remaining-=pay; monthsLeft-=1; +0x12C0+=pay*10; due+=pay*10",
+      "wages = sum over staff of wage()*10; due+=wages; +0x12D0+=wages; hist_wages[idx]=wages",
+      "TrySpend(due)",
+      "Income(0) (side effect: reset McAi+0x14 if balance>=0)",
+      "hist_park_value[idx] = ParkValue() (not charged)",
+      "if idx%12==0 and idx!=0: +0x12EC=park_value; +0x12F0=balance",
+      "idx+=1; zero hist_income/fee/type4/type5/spend/wages at new idx%144"
+    ],
+    "after_in_0x80066C50": "if balance<0: McAi+0x14++ and message 0x89/0x8A at 1 (0x8A if no loans outstanding), 0x8B at 3, 0x8C at 5, 0x8D at 6; else McAi+0x14=0. Also McAi+0x18++; year change -> 0x80087570",
+    "strike_evaluation_0x80067DF0": "runs here too, monthly; touches no money",
+    "no_daily_accounting": true,
+    "weekly_hook": {"fn": "0x80067928", "when": "day-of-month % 7 == 0 (0,7,14,21,28)", "moves_money": false, "purpose": "objectives/awards check, messages 0xAF-0xB6, 0xBC"}
+  },
+  "wages": {
+    "fn": "0x80094E3C",
+    "formula": "striking ? 0 : base[level] * mult[rec+0x10] * min(100, 100*daysEmployed/monthLen[month-1]) / 100  (pounds)",
+    "base_by_level": [50, 55, 65, 80, 100],
+    "base_table": "0x800E162C",
+    "mult_by_type_index": [3, 1, 1, 2, 3],
+    "mult_table": "0x800E1640",
+    "level": "P+0x3C & 7 (0x800956F0), set by 0x8009563C",
+    "record": "P+0x30 (vtable slot 7 = 0x80095744)",
+    "days_employed": "McAi+0x10 - P+0x34 (0x80094FDC)",
+    "month_len_used": "length of the month just ended (0x80069314)",
+    "type_index_mapping": "GUESS-medium: rec+0x10 = slot-17 type - 1"
+  },
+  "hire": {
+    "fn": "0x80085728",
+    "cost_fn": "0x80094DC0",
+    "formula": "hireBase[level] * hireMult[rec+0x10] (pounds)",
+    "hire_base_by_level": [250, 275, 325, 400, 500],
+    "hire_base_table": "0x800E1654",
+    "hire_mult_by_type_index": [3, 1, 1, 2, 6],
+    "hire_mult_table": "0x800E1668",
+    "afford_check": "0x800857B4",
+    "level_table_runtime": "0x8010A1F4"
+  },
+  "sack": {"fn": "0x800952B4", "vtable_slot": 57, "effect": "PayWageNow(wage accrued this month by the wage formula)"},
+  "loans": {
+    "slot_ctor": "0x80086268",
+    "payment_calc": "0x8008634C",
+    "pow": "0x800BEF28 (exp(ln(x)*y), 20.12 fixed)",
+    "fields": {"+0x00": "index", "+0x04": "principal", "+0x08": "term_months", "+0x0C": "annual_rate_pct", "+0x10": "months_left", "+0x14": "remaining", "+0x18": "monthly_payment", "+0x1C": "principal_copy", "+0x24": "total_repayable", "+0x28": "available_flag"},
+    "payment_formula": "total = principal * (1+rate/100)^(term/12); payment = total/term; all pounds",
+    "slots": [
+      {"i": 0, "principal": 100000, "term_months": 3, "rate_pct": 20, "payment_approx": 34888, "total_approx": 104664},
+      {"i": 1, "principal": 50000, "term_months": 2, "rate_pct": 20, "payment_approx": 25771, "total_approx": 51543},
+      {"i": 2, "principal": 25000, "term_months": 2, "rate_pct": 20, "payment_approx": 12886, "total_approx": 25771},
+      {"i": 3, "principal": 10000, "term_months": 2, "rate_pct": 15, "payment_approx": 5118, "total_approx": 10236}
+    ],
+    "take": {"fn": "0x800871B8", "ui": "0x80080380 @ 0x8008055C", "effect": "if flag: flag=0; Income(principal*10)"},
+    "repay": "monthly in rollover step 2 via 0x80088EC0",
+    "reusable": false,
+    "reusable_reason": "flag setter 0x80088EAC only called by ctor (1) and take (0)",
+    "separate_interest_flow": false
+  },
+  "flows": [
+    {"name": "entry_fee", "dir": "in", "fn": "0x80087258", "caller": "0x80090EDC guest state 37", "amount": "BANK+0 (units)", "default_pounds": 40, "scenario_source": "level record u16 +2 via 0x80071F2C", "player_range_pounds": [0, 1000], "slider_site": "0x80081668", "trigger": "event: turnstile, <=1 per 32 ticks per lane", "max_per_day": 6, "guest_side": "money -= fee"},
+    {"name": "shop_sale_type4", "dir": "in_or_out", "fn": "0x800B69E0", "caller": "0x8008E5EC guest state 22", "bank_amount": "(price - unitCost)*10 via TypedIncome(4); if negative TrySpend(|diff|*10)", "guest_pays": "price*10", "price": "shop+0x88 u16 pounds", "unit_cost": "rec+0x2E * (75 + (shop+0x8A>>2) - shop+0x7C/4) / 100 (0x800B6CBC)", "per_shop_totals": {"+0x8C": "takings", "+0x90": "profit"}, "trigger": "event"},
+    {"name": "game_type5", "dir": "in_and_out", "fn": "0x800B7524", "caller": "0x8008EE78 guest state 22", "bank_amount": "price*10 via TypedIncome(5); with chance shop+0x86 % TrySpend(prize*10)", "price": "shop+0x84 u16 pounds", "prize": "shop+0x78 pounds", "guest_pays": "(price - prize)*10", "happiness": "+-10 by sign(price-prize), const 0x8010320C", "trigger": "event"},
+    {"name": "wages", "dir": "out", "fn": "0x80086B60 in 0x80086D70", "trigger": "monthly", "ticks": [2772, 3069], "seconds": [110.9, 122.8]},
+    {"name": "loan_repayment", "dir": "out", "fn": "0x80088EC0 in 0x80086D70", "trigger": "monthly"},
+    {"name": "loan_take", "dir": "in", "fn": "0x800871B8", "trigger": "event, once per slot"},
+    {"name": "build_attraction", "dir": "out", "fn": "0x8001C2E0", "amount": "defPrice*10; defPrice = 0x8006AD58 -> rec+0x50 (types 1,3,6,7) or rec+0x20 (2,4,5,8)", "afford_check": "0x8001C22C", "trigger": "event"},
+    {"name": "demolish_attraction", "dir": "in", "fn": "0x8006292C", "amount": "(defPrice>>1)*10", "trigger": "event"},
+    {"name": "upgrade_ride", "dir": "out", "fn": "0x8009C56C", "amount": "rec[level].+0x50*10 (0x8009F470), level = ++ride+0xF6 up to 3", "callers": ["0x80096AA4 mechanic state 54", "0x8005C388"], "trigger": "event"},
+    {"name": "paths_scenery", "dir": "out_or_in", "fns": {"init": "0x80022B1C", "spend": "0x800229E4 @ 0x80022AF4", "refunds": ["0x80020254", "0x8002037C", "0x800226C8", "0x80022764", "0x80022818", "0x800229E4 @ 0x80022A58"]}, "amount": "count * defPrice(8, kind)*10, defPrice = rec+0x20", "trigger": "event", "tag": "GUESS-high on confirm/cancel branch identity"},
+    {"name": "hire_staff", "dir": "out", "fn": "0x80085728", "trigger": "event"},
+    {"name": "sack_staff", "dir": "out", "fn": "0x800952B4", "trigger": "event"}
+  ],
+  "absent_flows": {
+    "ride_tickets": "none: no ride class calls GetBank; guest money touched only by ctor, 0x8008D058, 0x80090EDC, 0x8008E5EC, 0x8008EE78, 0x800923E0, 0x8009252C",
+    "upkeep": "none: park value recorded monthly, never charged",
+    "research": "none: no GetBank caller in 0x8009B000..0x8009C000; research BANK is points (pointer 0x80103308)",
+    "fines": "none",
+    "interest": "none separate; inside loan payment"
+  },
+  "prices": {
+    "shop_type4": {"field": "shop+0x88", "type": "u16 pounds", "default": "rec+0x2C (0x800B68A0)", "range": [1, 500], "slider_site": "0x8007A82C", "setter": "0x800B7140", "getter": "0x800B7148", "save_field": "+0xC (0x800B6BB8)"},
+    "shop_type5": {"price": "shop+0x84", "prize": "shop+0x78", "chance_pct": "shop+0x86", "setters": "not traced"},
+    "entry_fee": {"field": "BANK+0", "default_pounds": 40, "range": [0, 1000]},
+    "rides": {"ticket": "none", "purchase": "rec+0x50 level 0", "upgrade": "rec+0x50+0x34*level"}
+  },
+  "guest": {
+    "money_field": "V+0x48 (Money)",
+    "start_pounds": [200, 499],
+    "leave_below_pounds": 10,
+    "buy_type4": "want > price and money >= price*10; pays price*10",
+    "play_type5": "money >= price*10; pays (price-prize)*10",
+    "entry": "money > fee and verdict >= -1"
+  },
+  "corrections": [
+    "ai_out.txt: 0x80067DF0 is monthly, not daily (gated on McAi+4 month change at 0x80066C90)",
+    "behaviour.md 3.5: 0x8009C56C is a paid ride upgrade; ride+0xF6 is upgrade level 0..3, not queue length",
+    "behaviour.md 2.5: 0x800B6CBC is unit cost = rec+0x2E*(75+q/4-r/4)/100; slot 25 books price-unitCost, loss if below cost",
+    "behaviour.md: 0x80086814 is GetBank(), the object is heap at *(0x801031BC)",
+    "behaviour.md: McAi+0x10 slow clock = total days"
+  ],
+  "unknowns": [
+    "definition record values (FOLIO.GAZ): attraction prices, upgrade prices, path/scenery prices, shop default price and rec+0x2E unit cost",
+    "rec+0x10 staff type index mapping for the 3/1/1/2/3 and 3/1/1/2/6 multipliers",
+    "writer of free-money flag 0x801031CC; setters of type-5 fields +0x84/+0x86/+0x78",
+    "whether message 0x8D at 6 months in debt ends the game",
+    "heap addresses of BANK/McAi (inferred; verify via 0x801031BC / 0x80102E48)"
+  ]
+}

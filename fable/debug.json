@@ -1,0 +1,88 @@
+{
+  "report": "debug.md",
+  "string_ids": {
+    "STR_MAINMENU_DEBUG_MENU": {"id": 532, "hex": "0x214", "referenced_as_string_id": false, "tag": "SOURCED"},
+    "STR_MAINMENU_ENTER_SANDBOX_MODE": {"id": 171, "hex": "0xab", "referenced_as_string_id": false, "tag": "SOURCED"},
+    "STR_MAINMENU_EXIT_SANDBOX_MODE": {"id": 18, "hex": "0x12", "referenced_as_string_id": false, "tag": "SOURCED"},
+    "symbol_table": "FOLIO entry 0x19a (rip/0410.bin), English text FOLIO 0x197 (rip/0407.bin)",
+    "text_lookup_fn": "0x8006f00c (table gp 0x801039a0); second reader 0x8006f048 via 0x8006efbc",
+    "also_unreferenced_MAINMENU_ids": ["0x62 PURCHASE", "0x91 LOAD_SAVE", "0x3f8 MAIN_MENU"]
+  },
+  "laptop_menu": {
+    "table": "0x800f4884", "entry_size": 8, "entry": ["u32 text_id", "u32 handler"], "count": 15,
+    "entries": {
+      "0": ["0x1fb", "0x00000000"], "1": ["0x192", "0x800744a8"], "2": ["0x3d9", "0x800746e8"], "3": ["0x2cc", "0x80074928"],
+      "4": ["0x199", "0x80074b68"], "5": ["0x3ac", "0x80074da8"], "6": ["0x2c6", "0x80075354"], "7": ["0x3d8", "0x80075260"],
+      "8": ["0x1d3", "0x800758b0"], "9": ["0x1a7", "0x80075750"], "10": ["0x18f", "0x800759a4"], "11": ["0x20b", "0x800743a4"],
+      "12": ["0x242", "0x80075abc"], "13": ["0x31f", "0x80075a98"], "14": ["0x2f5", "0x80075550"]
+    },
+    "builder": "0x80075d74 (adds by literal index; sandbox flag != 0 -> indices 0xe,0xb,0xd only)",
+    "add_item": "0x80075d38: 0x800f48fc[menu+628] = table + idx*8",
+    "live_item_list": "0x800f48fc (pointers into table), count at menu+628",
+    "debug_entry": "absent at compile time; no row, no index, no handler", "tag": "SOURCED"
+  },
+  "debug_window": {
+    "status": "constructor absent; vtable and virtuals present; label literals orphaned",
+    "vtable": "0x800e32b8", "vtable_referenced": false,
+    "tick": "0x800840e0", "draw": "0x8008422c", "close": "0x8008435c",
+    "label_pool": "0x800e3210", "labels": ["Debug Menu", "Vomit/Ride Inc", "Min Litter Increase", "Ride OK Inc", "Ride Good Inc", "Ride Excellent Inc", "Vomit/Happiness", "Toilet/Happiness", "Boredom/Happiness", "Prank Chance"],
+    "labels_referenced": false,
+    "sibling_windows": {"gold_tickets": {"ctor": "0x80083abc", "vtable": "0x800e3138"}, "game_options": {"ctor": "0x800843a0", "vtable": "0x800e3338"}},
+    "what_to_write": "nothing opens it; poke the tunables below instead",
+    "tag": "SOURCED"
+  },
+  "debug_tunables": [
+    {"slider": 0, "addr": "0x801031fc", "default": 1212, "label": "Vomit/Ride Inc", "reader": "0x8008f110", "effect": "nausea += v*(intensity-30)>>12 on unload", "width": "u32 (slider writes (v<<12)*0.01)"},
+    {"slider": 1, "addr": "0x8010322c", "default": 30, "label": "Min Litter Increase", "reader": "0x8008e5ec", "effect": "rubbish += v + rand(25) on shop buy", "width": "u32 read as lbu"},
+    {"slider": 2, "addr": "0x80103208", "default": 5, "label": "Ride OK Inc", "reader": "0x8008f110", "effect": "happiness += v when |pref-intensity| >= 51", "width": "lbu"},
+    {"slider": 3, "addr": "0x8010320c", "default": 10, "label": "Ride Good Inc", "reader": "0x8008f110", "effect": "happiness += v when < 51", "width": "lbu"},
+    {"slider": 4, "addr": "0x80103210", "default": 15, "label": "Ride Excellent Inc", "reader": "0x8008f110", "effect": "happiness += v when < 21", "width": "lbu"},
+    {"slider": 5, "addr": "0x8010321c", "default": 85, "label": "Vomit/Happiness", "reader": "0x8008fe60", "effect": "nausea >= v -> happiness -1 per 64 ticks", "width": "lbu"},
+    {"slider": 6, "addr": "0x80103220", "default": 90, "label": "Toilet/Happiness", "reader": "0x8008fe60", "effect": "toilet need V+0x5d >= v -> happiness -1", "width": "lbu"},
+    {"slider": 7, "addr": "0x80103218", "default": 95, "label": "Boredom/Happiness", "reader": "0x8008fe60", "effect": "boredom V+0x5c >= v -> happiness -1", "width": "lbu"},
+    {"slider": 8, "addr": "0x80103230", "default": 10, "label": "Prank Chance", "reader": "0x8008d058", "effect": "rand(1000) < v -> prank branch 0x80053768 in Idle", "width": "u32"}
+  ],
+  "debug_tunables_tag": "addresses/writer/readers SOURCED; label<->slot mapping DERIVED (pool order == slider order, all nine consistent with reader semantics)",
+  "other_static_levers": {
+    "0x80103200": {"default": 4096, "reader": "0x8008f110", "role": "boredom drop scale"},
+    "0x80103214": 30, "0x80103224": 95, "0x80103228": 85, "0x80103238": 50, "0x8010323c": 40,
+    "0x80103234": {"default": 100, "role": "litter roll (rand(1000) < v)"}, "0x80103260": {"default": 25, "role": "litter happiness threshold"},
+    "0x80103244": 10000, "0x8010324c": 5120, "0x80103250": 6144, "0x80103254": 3072,
+    "0x80103258": 70, "0x8010325c": 75, "0x8010327c": 63, "0x80103280": 11,
+    "0x80102e60": "20 guests per bus (parkopen.md)", "0x80102e54": "arrival score offset", "0x80102e50": "arrival rate divisor", "0x801031cc": "free-money switch (economy.md)"
+  },
+  "sandbox": {
+    "flag": "0x80102d34", "type": "u32", "sandbox": 1, "fullsim": 0,
+    "getter": "0x80059a9c", "setter": "0x80059aa8 (also OpenPark if closed)",
+    "only_setter_caller": "0x8006c524 memcard loader @0x8006c5c8, v = (save[0x22a] == 0)",
+    "saver_writes": "save[0x22a] = !flag (0x8006c0e8 @0x8006c1ec..0x8006c200)",
+    "save_title": {"sandbox": "[TPW Sandbox] %s @0x800e1eec", "fullsim": "[TPW FullSim] %s @0x800e1f00", "us_sku": "[STP ...] when 0x800be730()==2", "builder": "0x80073484", "kind_source": "ovl2 0x8011aee4: kind = (flag == 0)"},
+    "in_game_toggle": "none (ENTER/EXIT strings unreferenced)",
+    "poke": ["u32 [0x80102d34] = 1", "u32 [0x80102d30] = 1 (see parkopen.md 3.1)"],
+    "save_edit": "byte 0x22a := 0, then recompute u32[+0x200] = 0x800708ec(+0x204,len) and mirror at +0x9ffc (DERIVED checksum)",
+    "effects_sites": ["0x80075d98 menu=Build/Options/Leave", "0x800514f0 no litter", "0x8008d228 Idle skips needs", "0x800903e8 no bubbles", "0x800676ec,0x8006795c goals skipped", "0x8003867c,0x8003892c,0x80038e68,0x80038f9c,0x80039608,0x8003980c advisor windows skipped", "0x800a0278,0x800a1ccc,0x800a86b8,0x800b05f8 ride-class routine returns 0", "0x80071604,0x80072b6c save stream block skipped", "0x800b9a6c", "0x80076044", "0x80013230", "0x80017840", "0x80049324", "0x8006a95c", "0x800bd1dc front end: park (0,0), skips world map"],
+    "loads_prebuilt_park": false,
+    "tag": "SOURCED (identification via save title); effect meanings DERIVED"
+  },
+  "name_cheat": {
+    "exists": false, "tag": "SOURCED",
+    "only_text_entry": "save filename keyboard, ovl2 rows 0x80114454/0x80114460/0x8011446c via table 0x801024e8, buffer ovl2 0x80114120, max 7 chars, uppercase A-Z + space",
+    "buffer_consumers": ["0x800730c0 duplicate check (sprintf title + strcmp 0x800ccec8 vs existing card titles)", "0x80073484 title build + save"],
+    "strcmp_family_callsites_in_game_code": ["0x800731a4", "0x80073300", "0x8007391c", "0x80070158"],
+    "pad_mask_e000_test": false,
+    "bovine_in_any_image": false
+  },
+  "overlays": {
+    "loader": "0x800be63c(k): LZ 0x800bfd9c -> 0x80114158, current index at gp hword 0x801034f0",
+    "map": {"2": "FRONT END (main menu, memcard, name entry)", "3": "park data (vtables/tables)", "11": "WORLD MAP", "0,1,4..10": "subgames etc (loaded via 0x800ba45c)"},
+    "front_end_state_table": "0x800e7300 / 0x800e7320; main-menu result jump 0x800e7320",
+    "front_end_main_menu_items": "sprite-based (ovl2 0x801142ac), not string ids"
+  },
+  "falsifiers": [
+    "u32[0x801031fc]==0x4bc, u8[0x80103208]==5, u8[0x8010320c]==10, u8[0x80103210]==15, u8[0x8010321c]==85, u8[0x80103220]==90, u8[0x80103218]==95, u32[0x8010322c]==30, u32[0x80103230]==10 on any park",
+    "after [0x80102d34]=1 and opening the laptop: u32[0x800f48fc..0x800f4907] == {0x800f48f4,0x800f48dc,0x800f48ec}",
+    "save with flag set: card title starts '[TPW Sandbox] ', block byte 0x22a == 0; reload -> [0x80102d34]==1 and [0x80102d30]==1",
+    "no object ever has vptr 0x800e32b8; 0x800e3138 appears while Gold Tickets window is open",
+    "typing on the save keyboard changes only ovl2 0x80114120 (<= 7 uppercase bytes)"
+  ]
+}

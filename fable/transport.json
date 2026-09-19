@@ -1,0 +1,107 @@
+{
+  "report": "transport",
+  "game": "Theme Park World PSX PAL SLES-026.88",
+  "state": "states/park_ride.state",
+  "answer": {
+    "other_transports_in_psx_build": false,
+    "confidence": "SOURCED negative: single vehicle state machine in the per-frame tick, single mesh in the renderer, no second RAM state block, no class pool, no strings in any file or overlay, no overlay code path, all 8 maps carry exactly 2 exit points and the map format ends at the exit list",
+    "exit_points_are": "gate tiles from the map resource (u8 x, u8 y), not transports",
+    "arrivals_index_param": "Arrivals(McAi, exitIdx) accepts an index and -1=random; only caller passes 0 (delay slot 0x80052740); the -1 branch is dead in this build",
+    "gating_on_hidden_transport": "none: Arrivals is gated only on phase-1 edge, IsOpen(), no build item held, exitCount != 0"
+  },
+  "exit_points": {
+    "count_word": "0x80103938",
+    "array_ptr_word": "0x8010393C",
+    "entry": "u8 tile_x, u8 tile_y",
+    "to_position": "0x800540B8(out,i): (x*256+128, y*256+128), height via 0x80050938",
+    "readers": {"count": ["0x800540AC"], "array": ["0x800540B8"]},
+    "writers": ["0x800544E0 map loader (0x800545C0/C4)"],
+    "users_of_0x800540B8": {
+      "spawn": "0x80067274 Arrivals, index from caller",
+      "leave_guest": "0x8009154C state 48, rand(N)",
+      "leave_staff": ["0x80097828", "0x80098680"]
+    },
+    "live_this_state": {"count": 2, "array_at": "0x80181144", "entries": [[18,5],[23,5]], "tile_type_under_both": 12, "gate_footprint": "x 17..24, y 5..6"},
+    "all_maps_on_disc": [
+      {"record": "ext/rip/0034.bin", "w": 44, "h": 74, "nbuild": 157, "exits": [[17,5],[24,5]]},
+      {"record": "ext/rip/0035.bin", "w": 44, "h": 74, "nbuild": 169, "exits": [[17,5],[24,5]]},
+      {"record": "ext/rip/0116.bin", "w": 44, "h": 74, "nbuild": 81, "exits": [[17,5],[24,5]]},
+      {"record": "ext/rip/0117.bin", "w": 44, "h": 74, "nbuild": 81, "exits": [[17,5],[24,5]]},
+      {"record": "ext/rip/0203.bin", "w": 44, "h": 74, "nbuild": 102, "exits": [[18,5],[23,5]], "note": "the live map of park_ride.state"},
+      {"record": "ext/rip/0204.bin", "w": 44, "h": 74, "nbuild": 113, "exits": [[18,5],[23,5]]},
+      {"record": "ext/rip/0355.bin", "w": 44, "h": 74, "nbuild": 98, "exits": [[17,5],[24,5]]},
+      {"record": "ext/rip/0356.bin", "w": 44, "h": 74, "nbuild": 98, "exits": [[17,5],[24,5]]}
+    ],
+    "map_layout": "u32 N; u32 tab[N]; u32 w; u32 h; tile[w*h] (8 bytes); u32 nbuild; build[12*nbuild]; u32 nexit; (u8 x,u8 y)[nexit]; END"
+  },
+  "per_frame_tick_0x80058C20": {
+    "is": "4th entry (index 3) at 0x800E0D60 of the in-game mode vtable 0x800E0D48; a mode method, not a transport table",
+    "other_vtable_entries": {"0x80057EA8": "ctor, sets level index [0x801038A4]", "0x80057EFC": "enter", "0x8005814C": "input", "0x80058E80": "leave", "0x800618BC": "trivial", "0x80061268": "trivial", "0x80099D58": "trivial"},
+    "state3_calls_in_order": [
+      {"fn": "0x800548D8", "what": "weather: sun angle, rain/snow bursts on [0x80103904]"},
+      {"fn": "0x80066C50", "what": "McAi calendar tick (via 0x80066AC8 getter)"},
+      {"fn": "0x800592CC", "what": "two turnstile lanes at 0x800F2378+16*lane"},
+      {"fn": "0x80052324", "what": "cursor pick list (0x8010971C) then THE bus machine at 0x8005262C"},
+      {"fn": "0x80013180", "what": "message box state machine on [0x8010265C]"},
+      {"fn": "0x80089BF0", "what": "guest/staff pool sweep"},
+      {"fn": "0x80034464", "what": "16-byte-stride element update at [0x8010383C]"}
+    ],
+    "vehicle_machines_found": 1
+  },
+  "renderer_0x80057AF0": {
+    "vehicle_meshes_drawn": 1,
+    "mesh_handle_word": "0x80103970",
+    "mesh_resource": {"id": "0x5A", "loaded_by": "0x800351BC at game start 0x800508AC", "record_guess": "ext/rip/0090.bin", "tag": "UNMEASURED"},
+    "world_pos": "(pos>>8, 0x100, 0x76C)", "immediates_at": ["0x80057CB0", "0x80057CB8"],
+    "drawn_while": "[0x80103960] <= 0"
+  },
+  "scans": {
+    "gp_words_0x80103940_0x801039B0": "bus block 0x80103958..6C only; 0x80103974 = gate building object (level init 0x80058BB4); no second {A,B,phase,pos} block",
+    "class_pools": ["PoolOfPeople","PoolOfRides","PoolOfCoasters","PoolOfTrackRides","PoolOfTourRides","PoolOfTourTransports","PoolOfShops","PoolOfSideshows","PoolOfFeatures","PoolOfBalloons","PoolOfLitter","PoolOfCameras","PoolOfEffectors","PoolOfGuards","PoolOfMechanics","PoolOfHandymen","PoolOfEntertainers","PoolOfResearchers"],
+    "strings_all_files_and_overlays": {"pattern": "plane|ferry|boat|ship|heli|coach|airport|harbour|harbor|zeppelin|blimp|balloon|train|shuttle|taxi|monorail|airship|jet", "hits": "only localized 'training'-family UI text, 'DMA bus error', 'PoolOfBalloons'"},
+    "overlays_0x80114158": {"jal_targets_checked": ["0x80067274","0x80052324","0x800540B8","0x800540AC","0x80051480","0x800670D4"], "gp_words_checked": ["0x80103938","0x8010393C","0x80103958..6C","0x80102D40","0x80102E50","0x80102E54","0x80102E60","0x80103974"], "drive_table_0x800E0F0C": "checked", "hits": 0}
+  },
+  "what_to_write": [
+    {"poke": "[0x80103938]=0 (u32, held)", "effect": "bus cycles, zero spawns", "tag": "MEASURED", "run": "fable/t/w_noexit", "evidence": "phase edges 302/958/1690/2346 unchanged; guests 2 at 958 (baseline 3)"},
+    {"poke": "[0x80181144]=0x05170517 (exit entry 0 -> tile 23,5; this state's heap) + [0x80102E60]=1", "effect": "bus load spawns at 8.8 (6016,1408)", "tag": "MEASURED", "run": "fable/t/w_exit1", "evidence": "12 records at (6016,1408) at frame 980; baseline w_exit0 has 12 at (4736,1408)"},
+    {"poke": "code [0x80052740]=0x24050001 (addiu a1,zero,1) + E60", "effect": "same as above via exit index 1", "tag": "MEASURED", "run": "fable/t/w_a1eq1"},
+    {"poke": "code [0x80052740]=0x2405FFFF (addiu a1,zero,-1)", "effect": "rand(exitCount) per bus load", "tag": "SOURCED not run"},
+    {"poke": "[0x80103938]=1", "effect": "leavers always use exit 0", "tag": "SOURCED not run"}
+  ],
+  "arrival_rate_stat": {
+    "string_id": "0x243",
+    "page_table": "0x800E30F4 u16[5] = {0x1E8,0x243,0x36B,0x205,0x2A6}; getters 0x80082964+0x14*row",
+    "accessor": "0x80066FE4(McAi,0) -> (u8) McAi[184 + idx], idx = 0x80066F44(McAi,0) = ((months mod 144) - 1) wrapped",
+    "history": {"slot": "months mod 144", "ring": 144, "people": "+40", "arrival": "+184", "happiness": "+328", "time_in_park": "+472", "overall": "+616", "rating_byte": "+760"},
+    "writer": {"fn": "0x800670D4", "called_from": "McAi tick 0x80066C50 at 0x80066DEC when month (+4) changes", "formula": "arrival[slot] = max(0, guests_now - people[slot-1]); people[slot] = guests_now", "max_fn": "0x800693A4"},
+    "mcai": {"ptr_word": "0x80102E48", "size": "0x328", "layout": {"+0": "day accumulator, wraps at 0xF0000 (99 ticks/day)", "+4": "month 0..11", "+8": "year", "+0xC": "day of month", "+0x10": "total days", "+0x18": "total months (delay-slot store at 0x80066E04)"}, "month_lengths": [31,28,31,30,31,30,31,31,30,31,30,31], "month_table": "0x800E1554", "live_base": "0x801E8B50"},
+    "live_addresses_this_state": {"months": "u32 0x801E8B68", "month": "u32 0x801E8B54", "displayed_arrival_byte_after_first_boundary": "0x801E8C0C", "people_byte_same_month": "0x801E8B7C"},
+    "verdict": "not a rate: month-over-month population delta clamped at 0, sampled every ~30 game days; do not use as an instrument",
+    "measured": [
+      {"run": "fable/t/w_stats", "month_edge_frame": 1270, "clock": 15665, "people_slot4": 3, "arrival_slot4": 3, "guests": 3},
+      {"run": "fable/t/w_stats_e54", "poke": "[0x80102E54]=100", "month_edge_frame": 1270, "people_slot4": 9, "arrival_slot4": 9, "guests": 9}
+    ],
+    "next_boundary_frame_predicted": 7408,
+    "better_instrument": "guest pool count *(u32*)(*(u32*)0x80103884+0xC) sampled on the [0x80103964] 1->2 edge"
+  },
+  "falsifiers": [
+    {"id": 1, "do": "hold [0x80103938]=0", "expect": "[0x80103964] 4->1 at 302, 1->2 at 958; guest pool count flat at 958", "status": "MEASURED"},
+    {"id": 2, "do": "hold [0x80181144]=0x05170517 and [0x80102E60]=1", "expect": "frame 980: 12 person records at (6016,1408), 0 at (4736,1408)", "status": "MEASURED"},
+    {"id": 3, "do": "hold code [0x80052740]=0x24050001 and E60", "expect": "same as 2", "status": "MEASURED"},
+    {"id": 4, "do": "watch u8 0x801E8C0C and u32 0x801E8B68", "expect": "0 through 1269, 3 from 1270; months 4->5 at 1270", "status": "MEASURED"},
+    {"id": 5, "do": "hold [0x80102E54]=100, watch u8 0x801E8C0C", "expect": "9 from frame 1270", "status": "MEASURED"},
+    {"id": 6, "do": "hold code [0x80052740]=0x2405FFFF and E60", "expect": "frame 980: all stationary spawns on ONE tile; tile varies between bus loads", "status": "predicted"},
+    {"id": 7, "do": "hold [0x80102E54]=100 for 8000 frames", "expect": "u8 0x801E8C0D written at frame 7408 = max(0, guests(7408) - 9)", "status": "predicted"}
+  ],
+  "corrections": [
+    "McAi is [0x80102E48], not [0x8010280C]",
+    "'game-mode slot 4' = vtable index 3 (4th entry) at 0x800E0D60 of vtable 0x800E0D48",
+    "ride age in arrivals.md is days (McAi+0x10); stats history is months (McAi+0x18)"
+  ],
+  "method": {
+    "runner": "SYSDIR=sysdir LOADSTATE=states/park_ride.state INSCRIPT=btn/in_idle.txt [POKE=addr:decimal,... POKE_HOLD=1] [WATCH=...] [DUMP_EVERY=n] fable/a/wrunner pcsx_rearmed/pcsx_rearmed_libretro.so disc/tpw.cue <outdir> <frames> <frame_every>",
+    "poke_value_is_decimal": "sscanf %lx:%ld -- a hex value parses as 0 (cost me one run)",
+    "position_search": "every 2-byte-aligned (s16,s16) pair in RAM within +-200 of the tile centres; exact-centre count = guests not yet moved 22 frames after spawn",
+    "map_parse": "walk the loader layout over ext/rip/*.bin raw and unpak'd; accept only parses that end on the record's last byte"
+  }
+}
