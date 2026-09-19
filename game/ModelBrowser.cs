@@ -27,7 +27,14 @@ namespace TPWGodot
         int _index = -1;
         float _spin;
         bool _cull = true;
-        bool _reverse = true;
+        // ⭐ FILE ORDER IS ALREADY CORRECT FOR GODOT — settled by looking, with culling ON. I had reversed
+        // the triangle order assuming PSX and Godot wind oppositely; master turned culling on and reported
+        // every model inside out, which is what a reversed winding looks like and what nothing could show
+        // while back faces were still being drawn.
+        //
+        // ⚠ That assumption survived for hours precisely because the check that would have falsified it was
+        // disabled. It was not defended by evidence, it was defended by being untestable.
+        bool _reverse = false;
 
         /// <summary>Toggle back-face culling. Off hides winding faults; on exposes them.</summary>
         public void ToggleCull() { _cull = !_cull; Show(_index); }
@@ -125,6 +132,7 @@ namespace TPWGodot
                 // ⚠ WINDING IS STILL UNVERIFIED because CullMode is Disabled below: with back faces drawn,
                 // a reversed winding is invisible. Reversed here on the assumption that PSX and Godot differ,
                 // but that has NOT been confirmed and cannot be until culling is switched on.
+                // Default is file order; the toggle exists so the other can be compared, not assumed.
                 foreach (int vi in _reverse ? new[] { face.I2, face.I1, face.I0 } : new[] { face.I0, face.I1, face.I2 })
                 {
                     var v = new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]);
