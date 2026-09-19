@@ -126,7 +126,9 @@ namespace TPWGodot
                                     {
                                         PlayState.None      => "no animation in this model",
                                         PlayState.BonesOnly => "bone animation only — not playable yet",
-                                        _ => _playing ? $"playing, t={(int)_clock}" : "animation available, paused",
+                                        _ => _playing
+                                             ? $"playing, t={(int)_clock} of {MeshPose.AnimationLength(_meshes[_index].Mesh)}"
+                                             : $"animation available ({MeshPose.AnimationLength(_meshes[_index].Mesh)} long), paused",
                                     };
 
         public int Count => _meshes.Count;
@@ -366,7 +368,10 @@ namespace TPWGodot
 
             if (!_playing || _index < 0 || _index >= _meshes.Count) return;
             _clock += (float)delta * 30f;                    // a readable rate; the file's unit is not a second
-            if (_clock > 4096f) _clock = 0;
+            // Loop at the animation's OWN end. A fixed window cuts some animations short and leaves
+            // others holding their last pose, and both look like a broken loop rather than a wrong length.
+            int len = MeshPose.AnimationLength(_meshes[_index].Mesh);
+            if (len > 0 && _clock >= len) _clock -= len; else if (len <= 0) _clock = 0;
             RefreshPose();
             Show(_index);
         }

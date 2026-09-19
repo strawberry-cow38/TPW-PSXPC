@@ -35,6 +35,28 @@ namespace TPW.Data
         /// <summary>The scatter sources this time produced, before they reach vertices.</summary>
         public (short X, short Y, short Z)[] Sources = Array.Empty<(short, short, short)>();
 
+    /// <summary>How long this mesh's animation runs, in the file's own time units: the furthest point any
+    /// timed track reaches, i.e. the last key's start plus its duration. Zero when nothing is timed.
+    ///
+    /// ⚠ Loop HERE, not at some round number. A fixed window either cuts the animation off partway or
+    /// holds the last pose for the remainder, and both read as a broken loop rather than a wrong length.
+    /// Untimed tracks are one sample per tick, so their length is simply their sample count.</summary>
+        public static int AnimationLength(Mesh mesh)
+        {
+            int end = 0;
+            if (mesh?.Tracks == null) return 0;
+            foreach (var t in mesh.Tracks)
+            {
+                if (t.IsTimed)
+                {
+                    foreach (var k in t.Keys) end = Math.Max(end, k.Time + k.Duration);
+                    foreach (var p in t.Positions) end = Math.Max(end, p.Time + p.Duration);
+                }
+                else end = Math.Max(end, t.Positions.Length);
+            }
+            return end;
+        }
+
         /// <summary>Evaluate <paramref name="mesh"/> at <paramref name="time"/>.</summary>
         public static MeshPose Evaluate(Mesh mesh, int time)
         {
