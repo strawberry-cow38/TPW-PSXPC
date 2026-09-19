@@ -2172,3 +2172,32 @@ meshes) rather than by reading it back.
 The "bones position sub-meshes, all bending is vertex animation" hypothesis is dead — correctly withdrawn
 earlier for failing its own predictions, and now replaced. TPW **does** do per-vertex weighted skinning on
 PS1 hardware, through the GTE, at 1/16384 weights.
+
+## Animated water: texels, not palettes, and not where either of us looked (2026-09-19)
+
+Nine VRAM dumps 30 frames apart from `park_ride.state` (jungle park, water visible at the top of frame),
+sandbox off. cow tools' two candidates **both scored zero changed halfwords over 270 frames**: the
+palettes at x512-575 y73, and the texels on page 0x19 at x605-634 y344-373.
+
+What does change, every frame, outside the framebuffer:
+**VRAM halfwords x 513..571, y 98..194** — the texture page at x512. At 4bpp that is local x 4..239,
+y 98..194. Rendered as 4-bit indices the region is plainly a texture atlas (grass noise, striped panels,
+a round object) and the striped panel is the part that differs between frames. Some states recur across
+the nine frames, so it cycles rather than drifting.
+
+So the mechanism is **texel rewriting**, not palette cycling. 4,160 halfword cells change at least once.
+
+## CORRECTION: the 48,040 / 480,800 mismatch was two MOMENTS, not a typo
+
+I claimed the 48,040 figure was mistyped in chat and corrected the port's test on that basis. The
+expectation was right; the explanation was wrong, and both numbers were real all along.
+
+Captured at a single instant from `park_ride.state`: the HUD reads **$48.040** while `money`
+(0x801D565C) reads **480400**. Exactly ten times, no discrepancy — the ×10 rule is clean.
+
+The fixture's 480800 is a different moment: day 27 with `gate_total` 800, i.e. two admissions at GBP 40.
+My capture is day 25 with one. The timeline is 48,000 after the GBP 2,000 ride, then 48,040, then 48,080.
+
+⚠ The original test paired a memory value from day 27 with a screen reading from day 25. That is a
+subtler fault than a mistyped digit and looks identical in a diff, which is why "typo" was such an easy
+and wrong story to reach for. Two real numbers from two moments beat one wrong number every time.
