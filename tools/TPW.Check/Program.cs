@@ -1361,7 +1361,7 @@ static class Program
     {
         int animated = 0, lateStart = 0, jumpy = 0, flat = 0, jumpyCycleDiffers = 0;
         int atCycleMeasured = 0, atCycleJumpy = 0, cleanHdrAgrees = 0, quietButDisagrees = 0, jumpyFewVerts = 0;
-        int jumpyTiny = 0, jumpyVisible = 0;
+        int jumpyTiny = 0, jumpyVisible = 0, jumpyNotRendered = 0;
         var worst = new List<(double Ratio, int Entry, int Sub, int Start, int Len)>();
         foreach (var e in g.Entries)
         {
@@ -1466,6 +1466,27 @@ static class Program
                     //    window that excludes the event.
                     if (hdrDisagrees) jumpyCycleDiffers++;
 
+                    // Would the model browser even RENDER this animation? Its Playability gate treats a
+                    // mesh as playable only if a track writes vertices directly, drives a bound scatter
+                    // source, or poses a bone that actually SKINS vertices. A mesh whose motion is all
+                    // bone keys with no skinned bone renders as a static rest pose there, while
+                    // MeshPose.Evaluate (what this survey calls) poses it regardless. Same data, two
+                    // consumers, different answers -- which is how a capture can show a still model
+                    // while this survey insists its vertices move.
+                    bool skinned = false;
+                    if (m.Skeleton != null)
+                        foreach (var bn in m.Skeleton.Bones) if (bn.SkinCount > 0) { skinned = true; break; }
+                    bool writesVerts = false, boneKeys = false;
+                    foreach (var t3 in m.Tracks)
+                    {
+                        if (t3.Positions.Length > 0 &&
+                            (t3.Target == TrackTarget.Vertex ||
+                             (t3.Target == TrackTarget.ScatterSource && m.Binding != null && m.Binding.SourceCount > 0)))
+                            writesVerts = true;
+                        if (t3.Keys.Length > 0) boneKeys = true;
+                    }
+                    if (!writesVerts && boneKeys && !skinned) jumpyNotRendered++;
+
                     // HOW MANY VERTICES actually jump at the wrap? `d` above is a MAX over vertices,
                     // so one stray vertex scores the whole clip as snapping while the visible body is
                     // continuous. Count the vertices within 25% of the worst one: a handful means a
@@ -1508,6 +1529,7 @@ static class Program
         Console.WriteLine($"    of those, {jumpyCycleDiffers} whose header word does NOT equal the animation length");
         Console.WriteLine($"    of those, {jumpyFewVerts} where 5% or fewer of the vertices jump (a stray, not the body)");
         Console.WriteLine($"    of those, {jumpyTiny} whose jump is under 1% of the mesh's own size (invisible), {jumpyVisible} bigger");
+        Console.WriteLine($"    of those, {jumpyNotRendered} the model browser would NOT animate at all (bone keys, no skinned bone)");
         Console.WriteLine($"  {flat} that never move (skipped)");
         Console.WriteLine($"  wrapped at the GAME's cycle instead: {atCycleJumpy} of {atCycleMeasured} still snap");
         Console.WriteLine($"  separation test -- smooth AND header agrees with keys: {cleanHdrAgrees};  smooth BUT header disagrees: {quietButDisagrees}");
