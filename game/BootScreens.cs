@@ -49,7 +49,11 @@ namespace TPWGodot
         {
             if (!Enum.TryParse<BootScreen>(screenName, ignoreCase: true, out var s)) return false;
             _boot.SkipTo(s);
-            if (s == BootScreen.MainMenu) { _menuFrame = BootSequence.MenuInputDelay; _musicStarted = true; }
+            // ⚠ A JUMP LANDS ON A LIVE SCREEN, NOT A FROZEN ONE. Starting at the menu with its input
+            // delay and its 305-frame music delay still to run gives six seconds of a menu that
+            // ignores you in silence -- which is exactly what "the menu is broken" looks like to
+            // whoever used this flag to go and work on the menu. Both delays are already spent.
+            if (s == BootScreen.MainMenu) _menuFrame = BootSequence.MenuMusicDelay - 1;
             EnterScreen(s);
             Redraw();
             return true;
