@@ -30,6 +30,17 @@ namespace TPWGodot
         Label _modelInfo;
         readonly System.Random _rng = new();
         OptionButton _rate;
+        MoviePlayer _player;
+        OptionButton _movieChoice;
+        Button _playMovie;
+        System.Collections.Generic.List<string> _movieFiles = new();
+        StrMovie _pendingMovie;
+        string _pendingMovieError;
+        /// <summary>From <c>--movie=GRAV.STR</c> after <c>--</c> on the command line: play it as soon as the
+        /// disc has been checked. With <c>--quit-after-movie</c>, exit when it ends, so a capture of it can
+        /// be made unattended.</summary>
+        string _autoMovie;
+        bool _quitAfterMovie;
 
         /// <summary>✅ 22,050 Hz, SETTLED BY LISTENING. Master tried the selector and identified it, and also
         /// worked out what these waveforms are: mostly short chunks of the game's MUSIC, cut up so it can
@@ -170,6 +181,26 @@ namespace TPWGodot
             soundRow.AddChild(_rate);
             _root.AddChild(soundRow);
 
+            // ⭐ THE MOVIES. In the game they play on ENTERING A WORLD (see StrMovie.Catalogue), and there is no
+            // world to enter yet, so for now they play from here: pick one, press play, any key skips.
+            _player = new MoviePlayer();
+            AddChild(_player);
+            _player.Finished += OnMovieFinished;
+            _playMovie = new Button { Text = "Play movie", Disabled = true };
+            _playMovie.Pressed += PlayMovie;
+            _movieChoice = new OptionButton { Disabled = true };
+            var movieRow = new HBoxContainer();
+            movieRow.AddThemeConstantOverride("separation", 8);
+            movieRow.AddChild(_playMovie);
+            movieRow.AddChild(_movieChoice);
+            _root.AddChild(movieRow);
+
+            foreach (var arg in OS.GetCmdlineUserArgs())
+            {
+                if (arg.StartsWith("--movie=")) _autoMovie = arg.Substring("--movie=".Length).ToUpperInvariant();
+                else if (arg == "--quit-after-movie") _quitAfterMovie = true;
+            }
+
             GD.Print($"[tpw] data: {_data.Message}");
             GD.Print($"[tpw] launcher said variant={variant}, we identified {_data.Variant?.Id ?? "(none)"}");
 
@@ -202,6 +233,7 @@ namespace TPWGodot
                 TpwImage legal = null;
                 System.Collections.Generic.List<PcmSample> sounds = new();
                 var views = new System.Collections.Generic.List<TpwImage>();
+                var movies = new System.Collections.Generic.List<string>();
                 try
                 {
                     using var disc = DiscReader.Open(path);
@@ -215,6 +247,9 @@ namespace TPWGodot
                     views.AddRange(SpriteBlocks(disc));
                     _models.Load(disc);   // parses 531 meshes; far too slow for the main thread
                     sounds = AllSounds(disc);
+                    foreach (var df in disc.Files)
+                        if (!df.IsDirectory && df.Name.EndsWith(".STR", System.StringComparison.OrdinalIgnoreCase))
+                            movies.Add(df.Name);
                 }
                 catch (System.Exception e)
                 {
@@ -227,6 +262,7 @@ namespace TPWGodot
                 // Published before CallDeferred, so the main thread sees a fully built list when it runs.
                 _sounds = sounds;
                 _views = views;
+                _movieFiles = movies;
                 _sample = sounds.Count > 0 ? sounds[0] : null;
                 CallDeferred(nameof(ApplySelfTest), ReportToText(report), report.AllOk,
                     legal?.Rgba ?? System.Array.Empty<byte>(), legal?.Width ?? 0, legal?.Height ?? 0);
@@ -251,12 +287,15 @@ namespace TPWGodot
             GD.Print(text);
             if (!ok) GD.PushWarning("[tpw] asset self-test reported failures — see the log above.");
 
-            if (rgba == null || rgba.Length == 0 || w <= 0 || h <= 0) return;
-
-
-            var image = Image.CreateFromData(w, h, false, Image.Format.Rgba8, rgba);
-            _preview.Texture = ImageTexture.CreateFromImage(image);
-            GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
+            // ⚠ NOT AN EARLY RETURN. This used to `return` when the legal screen had not decoded, which
+            // silently skipped everything below it too: models, sounds and movies all stayed disabled because
+            // of one unrelated image. Code under an early return only runs on the happy path.
+            if (rgba != null && rgba.Length > 0 && w > 0 && h > 0)
+            {
+                var image = Image.CreateFromData(w, h, false, Image.Format.Rgba8, rgba);
+                _preview.Texture = ImageTexture.CreateFromImage(image);
+                GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
+            }
 
             // Show the first model as soon as the parse is done, so the window is never empty.
             if (_models != null && _models.Count > 0) _models.Show(0);
@@ -276,6 +315,73 @@ namespace TPWGodot
                          $" ({_sample.SampleCount / (double)ConfirmedRateHz:0.00}s at {ConfirmedRateHz} Hz)");
             }
             else _playSound.Text = "No sound decoded";
+
+            _movieChoice.Clear();
+            foreach (var name in _movieFiles) _movieChoice.AddItem($"{name}  —  {StrMovie.Describe(name)}");
+            _movieChoice.Disabled = _playMovie.Disabled = _movieFiles.Count == 0;
+            if (_movieFiles.Count == 0) _playMovie.Text = "No movies on this disc";
+            else
+            {
+                int auto = _autoMovie == null ? -1 : _movieFiles.IndexOf(_autoMovie);
+                _movieChoice.Selected = auto >= 0 ? auto : 0;
+                if (auto >= 0) PlayMovie();
+                else if (_autoMovie != null) GD.PushWarning($"[tpw] --movie={_autoMovie}: not on this disc");
+            }
+        }
+
+        void PlayMovie()
+        {
+            if (_player.IsPlaying || _movieFiles.Count == 0) return;
+            int sel = _movieChoice.Selected;
+            if (sel < 0 || sel >= _movieFiles.Count) return;
+            string name = _movieFiles[sel];
+            string path = _data.SourcePath;
+            _playMovie.Disabled = true;
+            _playMovie.Text = $"Loading {name}…";
+            _audio.Stop();
+
+            // ⚠ OFF THE MAIN THREAD. A movie is up to 16 MB of raw sectors, and its whole soundtrack is decoded
+            // before the first frame shows. That takes long enough on a cold disc cache to freeze the window.
+            // Its own DiscReader: the reader shares one stream position, so it must not be used from two threads.
+            Task.Run(() =>
+            {
+                StrMovie m = null;
+                string err = null;
+                try
+                {
+                    using var disc = DiscReader.Open(path);
+                    var f = disc.Find(name);
+                    if (f == null) err = $"{name} is not on this disc";
+                    else StrMovie.TryLoad(disc, f, out m, out err);
+                }
+                catch (System.Exception e) { err = e.Message; }
+                _pendingMovie = m;
+                _pendingMovieError = err;
+                CallDeferred(nameof(StartPendingMovie));
+            });
+        }
+
+        void StartPendingMovie()
+        {
+            var m = _pendingMovie;
+            _pendingMovie = null;
+            if (m == null)
+            {
+                _playMovie.Disabled = false;
+                _playMovie.Text = "Play movie";
+                GD.PushWarning($"[tpw] could not load the movie: {_pendingMovieError}");
+                if (_quitAfterMovie) GetTree().Quit(1);
+                return;
+            }
+            if (m.AudioError != null) GD.PushWarning($"[tpw] {m.Name}: soundtrack stopped decoding: {m.AudioError}");
+            _player.Play(m);
+        }
+
+        void OnMovieFinished(bool completed)
+        {
+            _playMovie.Disabled = false;
+            _playMovie.Text = "Play movie";
+            if (_quitAfterMovie) GetTree().Quit();
         }
 
         /// <summary>Every waveform on the disc, decoded to PCM, longest first.

@@ -255,12 +255,13 @@ static class Program
     /// <summary>Every movie on the disc, demuxed and its soundtrack decoded. Exit code is the number of files
     /// with a problem: a frame that did not assemble to its declared size, an XA group whose duplicated
     /// parameters disagree, or audio that failed to decode.</summary>
-    static int Movies(DiscReader disc, string outDir)
+    static int Movies(DiscReader disc, string outDir, bool frames, HashSet<string> only)
     {
         int bad = 0;
         foreach (var f in disc.Files)
         {
             if (f.IsDirectory || !f.Name.EndsWith(".STR", StringComparison.OrdinalIgnoreCase)) continue;
+            if (only != null && !only.Contains(f.Name.ToUpperInvariant())) continue;
             if (!StrMovie.TryLoad(disc, f, out var m, out string err)) { Console.WriteLine($"{f.Name}: {err}"); bad++; continue; }
 
             Console.WriteLine($"{f.Name,-12} {m.Frames.Count,4} frames {m.Width}x{m.Height}, {m.DurationSeconds:0.00} s, {m.FramesPerSecond:0.00} fps  [{StrMovie.Describe(f.Name)}]");
@@ -276,6 +277,39 @@ static class Program
                 string wav = System.IO.Path.Combine(outDir, System.IO.Path.GetFileNameWithoutExtension(f.Name) + ".wav");
                 WriteWav(wav, m.Audio, m.AudioCoding.Channels, m.AudioCoding.SampleRate);
                 Console.WriteLine($"             wrote {wav}");
+            }
+
+            // --frames: every frame through the real decoder, as raw rgb24 in one file, frame after frame, so a
+            // script can compare it with another decoder's output without either side writing images. A frame
+            // that fails is written black and counted, so the file stays aligned frame for frame.
+            if (outDir != null && frames)
+            {
+                string rgb = System.IO.Path.Combine(outDir, System.IO.Path.GetFileNameWithoutExtension(f.Name) + ".rgb");
+                int failed = 0, structural = 0;
+                string first = null;
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                using (var o = System.IO.File.Create(rgb))
+                {
+                    var row = new byte[m.Width * m.Height * 3];
+                    foreach (var fr in m.Frames)
+                    {
+                        Array.Clear(row);
+                        if (Mdec.TryDecodeFrame(fr.Data, fr.Width, fr.Height, null, out var img, out string ferr, out var info)
+                            && img.Width == m.Width && img.Height == m.Height)
+                        {
+                            if (!info.TailPaddingOk || !info.HeaderWordsOk) structural++;
+                            for (int i = 0, j = 0; i < row.Length; i += 3, j += 4)
+                            { row[i] = img.Rgba[j]; row[i + 1] = img.Rgba[j + 1]; row[i + 2] = img.Rgba[j + 2]; }
+                        }
+                        else { failed++; first ??= $"frame {fr.Number}: {ferr ?? "wrong size"}"; }
+                        o.Write(row);
+                    }
+                }
+                Console.WriteLine($"             wrote {rgb}: {m.Frames.Count - failed}/{m.Frames.Count} frames decoded" +
+                                  $" in {sw.ElapsedMilliseconds} ms ({sw.Elapsed.TotalMilliseconds / Math.Max(1, m.Frames.Count):0.00} ms/frame)" +
+                                  $"; {structural} not ending exactly on the end-of-frame padding with the header's code count" +
+                                  (failed > 0 ? $"; first failure {first}" : ""));
+                if (failed > 0 || structural > 0) bad++;
             }
         }
         return bad;
@@ -355,7 +389,11 @@ static class Program
             if (moviesAt >= 0)
             {
                 string outDir = moviesAt + 1 < args.Length && !args[moviesAt + 1].StartsWith("--") ? args[moviesAt + 1] : null;
-                return Movies(disc, outDir);
+                int onlyAt = Array.IndexOf(args, "--only");
+                var only = onlyAt >= 0 && onlyAt + 1 < args.Length
+                    ? new HashSet<string>(args[onlyAt + 1].ToUpperInvariant().Split(','))
+                    : null;
+                return Movies(disc, outDir, Array.IndexOf(args, "--frames") >= 0, only);
             }
             if (rawOut != null && texIndex >= 0)
             {

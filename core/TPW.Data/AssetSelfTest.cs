@@ -320,6 +320,8 @@ namespace TPW.Data
             double seconds = 0;
             string firstProblem = "";
             var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            int pictures = 0, badPictures = 0;
+            string firstPicture = "";
             foreach (var f in disc.Files)
             {
                 if (f.IsDirectory || !f.Name.EndsWith(".STR", StringComparison.OrdinalIgnoreCase)) continue;
@@ -349,6 +351,22 @@ namespace TPW.Data
                     bad++;
                     if (firstProblem.Length == 0) firstProblem = $"{f.Name}: {problem}";
                 }
+
+                // The picture: first, middle and last frame of each movie through the real decoder. Decoding every
+                // frame takes seconds; three per file is enough to catch a disc that is not what the decoder
+                // expects, and the two structural checks are what make a decode worth counting.
+                foreach (int i in new[] { 0, m.Frames.Count / 2, m.Frames.Count - 1 })
+                {
+                    var fr = m.Frames[i];
+                    pictures++;
+                    string why = !Mdec.TryDecodeFrame(fr.Data, fr.Width, fr.Height, null, out _, out string derr, out var info) ? derr
+                               : !info.TailPaddingOk ? "did not end on the encoder's end-of-frame padding"
+                               : !info.HeaderWordsOk ? $"decoded {info.CodeCount} codes, which the header's size ({info.HeaderWords}) disagrees with"
+                               : null;
+                    if (why == null) continue;
+                    badPictures++;
+                    if (firstPicture.Length == 0) firstPicture = $"{f.Name} frame {fr.Number}: {why}";
+                }
             }
             if (files == 0) return;   // a disc without movies is not a broken one
 
@@ -356,6 +374,17 @@ namespace TPW.Data
                 ? $"{files} files, {frames:n0} frames over {seconds:0} s, every frame assembled to its declared size; " +
                   $"{groups:n0} XA sound groups, every one's duplicated parameters agree"
                 : $"{bad} of {files} movies have a problem; first: {firstProblem}");
+
+            // ⭐ A DECODE IS ONLY COUNTED IF THE BITSTREAM CAME OUT EXACTLY. Every frame's variable-length codes
+            // must end precisely on the encoder's 0111111111 padding, and the number of codes decoded must give
+            // back the size the frame's header states. One wrong entry in the code table desynchronises the
+            // reader, and it then fails both, whatever the picture looks like. (The pictures themselves were
+            // checked against ffmpeg outside this test: every frame of five movies within 8 levels, mean 0.3-0.4.)
+            if (pictures > 0)
+                r.Add("movie pictures", badPictures == 0, badPictures == 0
+                    ? $"{pictures} frames decoded (first, middle and last of each movie), every bitstream consumed exactly " +
+                      "to its end-of-frame padding with the code count its header states"
+                    : $"{badPictures} of {pictures} frames failed; first: {firstPicture}");
 
             // The frame counts again, from a source the demuxer never touches: the game's own table.
             var exe = disc.Find(GameExecutable);
