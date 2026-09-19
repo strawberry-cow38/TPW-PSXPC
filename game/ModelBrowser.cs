@@ -106,13 +106,18 @@ namespace TPWGodot
                 // ⚠ A FACE INDEX OUT OF RANGE MUST SKIP THE FACE, NOT CRASH THE BROWSER. This is an
                 // inspection tool for data we are still learning; it has to survive being wrong.
                 if (face.I0 >= m.VertexCount || face.I1 >= m.VertexCount || face.I2 >= m.VertexCount) continue;
-                // ⚠ PSX winds its triangles the other way round from Godot, so the order is reversed here.
-                // Getting it wrong shows every model inside-out, which reads as a broken mesh rather than a
-                // winding problem.
+                // ⚠ NO Y FLIP. I assumed PSX vertices were Y-down and negated Y; master ran it and reported
+                // every model upside down. They are already in Godot's sense. The assumption was reasonable
+                // and wrong, and nothing but a picture could say which — the mesh is equally well-formed
+                // either way, so every count, bound and parse check passes in both.
+                //
+                // ⚠ WINDING IS STILL UNVERIFIED because CullMode is Disabled below: with back faces drawn,
+                // a reversed winding is invisible. Reversed here on the assumption that PSX and Godot differ,
+                // but that has NOT been confirmed and cannot be until culling is switched on.
                 foreach (int vi in new[] { face.I2, face.I1, face.I0 })
                 {
-                    var v = new Vector3(m.Vertices[vi * 3], -m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]);
-                    verts.Add((v - new Vector3(centre.X, -centre.Y, centre.Z)) * scale);
+                    var v = new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]);
+                    verts.Add((v - centre) * scale);
                     cols.Add(m.VertexColours.Length >= (vi + 1) * 3
                         ? Color.Color8(m.VertexColours[vi * 3], m.VertexColours[vi * 3 + 1], m.VertexColours[vi * 3 + 2])
                         : Colors.White);
