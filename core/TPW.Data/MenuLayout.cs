@@ -91,7 +91,13 @@ namespace TPW.Data
         ///
         /// ⚠ CAPTURED AT ONE INSTANT. On the console the arc end moves every frame, so this is the
         /// sweep frozen mid-stroke. Drawing it static is right for the shape and wrong for the motion,
-        /// and the motion is the thing a player actually notices.</summary>
+        /// and the motion is the thing a player actually notices.
+        ///
+        /// ⚠ WHICH ALSO MEANS A SINGLE FRAME CANNOT BE COMPARED FOR BRIGHTNESS. Two captures of a
+        /// moving sweep are at different phases, so whichever areas the rays currently cover read
+        /// brighter. A port frame looking "too strong" beside a console frame is the expected result of
+        /// comparing two instants, not evidence of a blend or depth error -- I drew exactly that wrong
+        /// conclusion and moved the rays behind the curtains because of it.</summary>
         public static readonly ScreenTri[] Spotlight =
         {
             new(-103,-64,-103,-64,588,187, 0,0,0, 24,24,0, 0,0,0),

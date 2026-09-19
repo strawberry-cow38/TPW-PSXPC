@@ -90,16 +90,19 @@ namespace TPW.Data
             // that look better without fixing it. The duplicate is gone from the table now, and the
             // order is the console's own.
             for (int layer = 0; layer <= 3; layer++)
-            {
                 foreach (var q in MenuLayout.Backdrop)
                     if (q.TPage != GlowPage && Depth(q) == layer) DrawQuad(p, dst, q, 0);
-                // ⚠ THE RAYS GO BEHIND THE CURTAINS, over the stage floor only. Drawn on top of
-                // everything they wash the curtains out, which is the difference between the port and
-                // the console frame -- there the drapes are barely lit while the stage is. Additive
-                // light that is never occluded is the giveaway of a fan pasted over the finished image
-                // rather than drawn into the scene.
-                if (layer == 0) DrawSpotlight(dst);
-            }
+
+            // ⚠ THE RAYS GO ON TOP OF THE CURTAINS, and I had them behind.
+            //
+            // I put them behind because the console frame's drapes looked barely lit next to mine, and
+            // reasoned that additive light which is never occluded is the mark of a fan pasted over a
+            // finished image. That reasoning is fine and the premise was false: the two captures are
+            // at different PHASES OF THE SWEEP, so the areas that read brighter in one are simply
+            // where the rays happen to be. Corrected by the person who knows the screen, not by the
+            // comparison -- a single frame of a MOVING effect cannot tell you its depth, because you
+            // cannot tell "this is drawn behind" from "this ray is somewhere else right now".
+            DrawSpotlight(dst);
         }
 
         /// <summary>One textured quad.
