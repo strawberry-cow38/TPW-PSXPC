@@ -1195,6 +1195,46 @@ static class Program
                 }
                 seen[t] = (held, total, u1 - u0 + 1, v1 - v0 + 1, f.TPage, f.Clut);
             }
+            // ⭐ AMBIGUITY, NOT ABSENCE. Coverage says the texels exist; it cannot say they are the RIGHT
+            // texels. Sheets for different worlds are uploaded to the same VRAM and reuse palettes, so a
+            // face can sit inside a valid sprite in more than one sheet. If those sheets disagree at that
+            // page and palette, picking either gives real texels from the wrong world.
+            {
+                int amb = 0, differ = 0, tot = 0;
+                var byTile = new SortedDictionary<int, int>();
+                for (int fi = 0; fi < m.Faces.Count; fi++)
+                {
+                    var f2 = m.Faces[fi];
+                    var hits = new List<int>();
+                    for (int si = 0; si < sheets.Count; si++)
+                    {
+                        int px2 = (f2.TPage & 0x0F) * 64, py2 = ((f2.TPage >> 4) & 1) * 256;
+                        bool all = true;
+                        foreach (var (uu, vv) in new[] { (f2.U0, f2.V0), (f2.U1, f2.V1), (f2.U2, f2.V2) })
+                            if (!sheets[si].Sheet.Contains(px2 + (uu >> 2), py2 + vv)) { all = false; break; }
+                        if (all) hits.Add(si);
+                    }
+                    tot++;
+                    if (hits.Count < 2) continue;
+                    amb++;
+                    // do the candidate sheets actually DISAGREE on those texels?
+                    var a0 = new byte[256 * 256 * 4]; var a1 = new byte[256 * 256 * 4];
+                    sheets[hits[0]].Sheet.RenderPage(f2.TPage, f2.Clut, a0, 256, 0, 0);
+                    sheets[hits[1]].Sheet.RenderPage(f2.TPage, f2.Clut, a1, 256, 0, 0);
+                    bool same = true;
+                    for (int q2 = 0; q2 < a0.Length && same; q2++) if (a0[q2] != a1[q2]) same = false;
+                    if (!same)
+                    {
+                        differ++;
+                        byTile.TryGetValue(tex.FaceTile[fi], out int nn);
+                        byTile[tex.FaceTile[fi]] = nn + 1;
+                        if (differ <= 3)
+                            Console.WriteLine($"      face {fi} tpage {f2.TPage:x4} clut {f2.Clut:x4}: sheets {hits[0]} and {hits[1]} differ; port picked tile {tex.FaceTile[fi]}");
+                    }
+                }
+                Console.WriteLine($"   faces: {tot}, matching 2+ sheets: {amb}, and those sheets DISAGREE on the pixels: {differ}");
+                Console.WriteLine($"   disagreeing faces by tile: {string.Join(", ", byTile.Select(kv => $"tile {kv.Key}:{kv.Value}"))}");
+            }
             Console.WriteLine($"entry #{entry}: {seen.Count} tiles");
             foreach (var kv in seen)
             {
