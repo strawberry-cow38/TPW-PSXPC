@@ -1382,6 +1382,19 @@ static class Program
         return 0;
     }
 
+    static int MapHeights(GazArchive g)
+    {
+        foreach (var (entry, map) in ParkMap.FindAll(g))
+        {
+            int lo = 255, hi = 0;
+            var seen = new SortedSet<int>();
+            foreach (var t in map.Tiles) { int h = t.Height; if (h < lo) lo = h; if (h > hi) hi = h; seen.Add(h); }
+            Console.WriteLine($"map {entry.Index,4}  {map.Width}x{map.Height}  raw height {lo}..{hi}  " +
+                              $"({seen.Count} distinct)  world units {lo * 4}..{hi * 4}");
+        }
+        return 0;
+    }
+
     static int WorldMapDump(GazArchive g)
     {
         int e = StringTable.EntryByLanguage[0];
@@ -1489,6 +1502,9 @@ static class Program
                 return FindMesh(g, int.Parse(args[fmAt + 1]), int.Parse(args[fmAt + 2]));
             // --worldmap: the eight parks with their names resolved through the real string table, which
             // is the end-to-end check that the island table was transcribed at the right offsets.
+            // --mapheights: how much relief each park map actually has, which decides whether a slope
+            // rule can be TESTED on the shipped maps at all.
+            if (Array.IndexOf(args, "--mapheights") >= 0) return MapHeights(g);
             if (Array.IndexOf(args, "--worldmap") >= 0) return WorldMapDump(g);
             if (Array.IndexOf(args, "--langnames") >= 0) return LangNames(g);
             // --grepstr <text>: search the ID table and the English table together, so a hit shows both
