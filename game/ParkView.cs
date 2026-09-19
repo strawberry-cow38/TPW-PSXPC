@@ -110,6 +110,8 @@ namespace TPWGodot
         public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery, TextureSheet common = null,
                          SceneryPack gatePack = null, byte[] exe = null)
         {
+            // The park as the game has it once loaded: road typed, the square inside the gate laid as path (ParkPaths).
+            if (exe != null && world != null) map = ParkPaths.LayStartingPaths(map, exe, AssetSelfTest.GameExecutableBase, world.Index);
             _map = map;
             _common = common;
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;

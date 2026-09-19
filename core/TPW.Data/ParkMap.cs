@@ -125,6 +125,15 @@ namespace TPW.Data
 
         public MapTile this[int x, int y] => Tiles[y * Width + x];
 
+        /// <summary>A copy with its own tiles, for the changes the game makes to a map once it has loaded it
+        /// (<see cref="ParkPaths"/>). The rest is shared.</summary>
+        public ParkMap Clone()
+        {
+            var m = (ParkMap)MemberwiseClone();
+            m.Tiles = (MapTile[])Tiles.Clone();
+            return m;
+        }
+
         public static bool TryParse(byte[] d, out ParkMap map, out string error)
         {
             map = null; error = null;

@@ -200,7 +200,9 @@ What `lay` emits (this is the recipe if you do it by hand):
 Write once after the park is loaded; the tiles are not rewritten unless the player builds there.
 Re-dump after writing and run `paths_tool.py reach DUMP W H GX GY BASE` with a guest's tile
 (`P+0x18>>8`, `P+0x1A>>8`) — it must print REACHABLE (that command is the game's own step test).
-Visuals: type-2 tiles with model index 0 will look wrong; the simulation does not care.
+Visuals: a path tile's look is its ground word (+4), which 0x8004D9DC rewrites from the link bits: see
+`core/TPW.Data/ParkPaths.cs` for the piece table (0x800EFFCC) and the world's path sprites. Write +4 too, or
+the new path shows the grass it was laid on; the simulation does not care.
 
 ### 3.2 One-word switch: make grass walkable for every request (data, not code)
 ```
@@ -275,8 +277,10 @@ Let **V** = the address of the word holding the shop vtable 0x800E6A8C (stored b
 
 ## 7. Not established
 - Tile bytes +1, +4, +6 and flags 0x01/0x02/0x10/0x40 beyond the tests that use them.
-- What 0x800620C4 (the second per-tile lookup used by the map post-load pass) returns; hence which
-  authored tiles become 12/14.
+- ~~What 0x800620C4 returns~~ SETTLED: it is the type byte (+0). The post-load pass (0x800541B8) makes every
+  authored path tile entrance road (12) and the non-path tile after it in z a road end (14), then lays path
+  on the flag-0x08 tiles with the path tool; the two road ends among them stay 14 and wear path sprite 11.
+  Port: `ParkPaths.LayStartingPaths`.
 - Whether the plaza tiles in a fresh map are type 2 or 13, and their authored link bits (read them:
   `paths_tool.py scan`). §3.1 ORs the bit into whatever is there, so the recipe holds either way.
 - The link-bit code for the west and south neighbours in 0x8004E20C was not read line by line
