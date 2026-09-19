@@ -97,7 +97,18 @@ namespace TPW.Data
         /// moving sweep are at different phases, so whichever areas the rays currently cover read
         /// brighter. A port frame looking "too strong" beside a console frame is the expected result of
         /// comparing two instants, not evidence of a blend or depth error -- I drew exactly that wrong
-        /// conclusion and moved the rays behind the curtains because of it.</summary>
+        /// conclusion and moved the rays behind the curtains because of it.
+        ///
+        /// WHAT ANIMATING IT NEEDS, and what was already tried so nobody repeats it. 433 consecutive
+        /// console frames of the menu were captured and measured two ways:
+        ///   - the rays DO move: the brightness centroid over the stage travels about 12 px and
+        ///     reverses direction, so the sweep is an oscillation, not a rotation.
+        ///   - the PERIOD could not be extracted from pixels. Turning points came out 26 to 70 frames
+        ///     apart, which is noise, and the whole-frame difference against a reference never returns
+        ///     toward zero across 230 frames -- so the pattern does not repeat inside the capture.
+        /// Pixel data is the wrong instrument here: the signal is a 12 px centroid shift buried in a
+        /// static backdrop. The fan's arc endpoints are named explicitly in the GPU display list, so
+        /// dumping THAT per frame gives the motion directly instead of inferring it.</summary>
         public static readonly ScreenTri[] Spotlight =
         {
             new(-103,-64,-103,-64,588,187, 0,0,0, 24,24,0, 0,0,0),
