@@ -148,6 +148,14 @@ namespace TPWGodot
         VBoxContainer _debugPanel;
         /// <summary>The one line left on screen when the panel is closed, so the key is discoverable.</summary>
         Label _hint;
+        BootScreens _boot;
+        /// <summary>From <c>--no-boot</c>: go straight to the debug tools. The capture paths set it
+        /// too, since a capture of a model must not have 90 seconds of intro in front of it.</summary>
+        bool _skipBoot;
+        /// <summary>From <c>--boot-from=MainMenu</c>: start the chain partway in.</summary>
+        string _bootFrom;
+        /// <summary>The language the player picked, as the GAME's index -- never the ring position.</summary>
+        int _language = 0;
         double _accum;
 
         public override void _Ready()
@@ -328,6 +336,19 @@ namespace TPWGodot
             _player = new MoviePlayer();
             AddChild(_player);
             _player.Finished += OnMovieFinished;
+
+            // ⭐ THE BOOT CHAIN. Built here but not started until the self-test has run, so the legal
+            // screen has its art and the movie list is known.
+            _boot = new BootScreens { Visible = false };
+            AddChild(_boot);
+            _boot.WantMovie += PlayMovieNamed;
+            _boot.WantMenuMusic += PlayFrontEndMusic;
+            _boot.LanguageChosen += l =>
+            {
+                _language = l;
+                GD.Print($"[tpw] language chosen: {StringTable.LanguageNames[l]} (game index {l})");
+            };
+            _boot.StartPracticePark += () => GD.Print("[tpw] Practice Park requested — not implemented yet");
             _playMovie = new Button { Text = "Play movie", Disabled = true };
             _playMovie.Pressed += PlayMovie;
             _movieChoice = new OptionButton { Disabled = true };
@@ -351,6 +372,8 @@ namespace TPWGodot
                 else if (arg.StartsWith("--models="))
                     _modelTourSpec = arg.Substring("--models=".Length).Split(',');
                 else if (arg == "--cull-on") _tourCull = true;
+                else if (arg == "--no-boot") _skipBoot = true;
+                else if (arg.StartsWith("--boot-from=")) _bootFrom = arg.Substring("--boot-from=".Length);
                 else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
                 else if (arg.StartsWith("--music=")) _autoMusic = int.Parse(arg.Substring("--music=".Length));
                 else if (arg.StartsWith("--park-view="))
@@ -472,6 +495,21 @@ namespace TPWGodot
                 GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
             }
 
+            // ⚠ EVERY CAPTURE PATH SKIPS THE BOOT. A --models= or --park= capture that sat through 90
+            // seconds of legal screen and intro would record the intro, and the failure looks like the
+            // capture being broken rather than being early.
+            if (_modelTourSpec != null || _autoPark >= 0 || _autoMusic >= 0 || _autoMovie != null || _autoLine >= 0)
+                _skipBoot = true;
+
+            if (!_skipBoot)
+            {
+                if (_preview.Texture != null) _boot.SetLegalArt(_preview.Texture);
+                if (_bootFrom != null && !_boot.StartAt(_bootFrom))
+                    GD.PushWarning($"[tpw] --boot-from={_bootFrom} is not a boot screen; starting from the beginning");
+                _boot.Visible = true;
+                _root.Visible = false;       // the debug chrome stays available on F3
+            }
+
             // Show the first model as soon as the parse is done, so the window is never empty.
             if (_models != null && _models.Count > 0) _models.Show(0);
             if (_modelTourSpec != null && _models != null)
@@ -548,10 +586,17 @@ namespace TPWGodot
 
         void PlayMovie()
         {
-            if (_player.IsPlaying || _movieFiles.Count == 0) return;
+            if (_movieFiles.Count == 0) return;
             int sel = _movieChoice.Selected;
             if (sel < 0 || sel >= _movieFiles.Count) return;
-            string name = _movieFiles[sel];
+            PlayMovieNamed(_movieFiles[sel]);
+        }
+
+        /// <summary>Load and play one movie by file name. The boot chain and the debug button go
+        /// through the same loader on purpose -- a second copy is a second thing to keep correct.</summary>
+        void PlayMovieNamed(string name)
+        {
+            if (_player.IsPlaying) return;
             string path = _data.SourcePath;
             _playMovie.Disabled = true;
             _playMovie.Text = $"Loading {name}…";
@@ -576,6 +621,19 @@ namespace TPWGodot
                 _pendingMovieError = err;
                 CallDeferred(nameof(StartPendingMovie));
             });
+        }
+
+        /// <summary>The front-end music: FOLIO entry 299, the module the game plays on its menus.</summary>
+        void PlayFrontEndMusic()
+        {
+            for (int i = 0; i < _modules.Count; i++)
+                if (_modules[i].Entry == ParkWorlds.FrontEndMusic)
+                {
+                    var (entry, module, waves) = _modules[i];
+                    _music.Play(module, waves, $"module #{entry}");
+                    return;
+                }
+            GD.PushWarning("[tpw] front-end music (entry 299) is not on this disc");
         }
 
         void PlayMusic(bool on)
@@ -703,6 +761,7 @@ namespace TPWGodot
                 _playMovie.Text = "Play movie";
                 GD.PushWarning($"[tpw] could not load the movie: {_pendingMovieError}");
                 if (_quitAfterMovie) GetTree().Quit(1);
+                OnMovieUnavailable();
                 return;
             }
             if (m.AudioError != null) GD.PushWarning($"[tpw] {m.Name}: soundtrack stopped decoding: {m.AudioError}");
@@ -714,7 +773,16 @@ namespace TPWGodot
             _playMovie.Disabled = false;
             _playMovie.Text = "Play movie";
             if (_quitAfterMovie) GetTree().Quit();
+            // ⚠ BOTH OUTCOMES. A skipped movie has to advance the boot exactly as a finished one does;
+            // waiting only for `completed` leaves the chain stuck on a black screen the moment anyone
+            // presses a button, which is the common case rather than the edge case.
+            _boot?.MovieEnded();
         }
+
+        /// <summary>A movie that could not be LOADED must not strand the boot either. The disc may be a
+        /// cooked rip, in which case every .STR fails to decode and the chain would sit forever on a
+        /// screen that never starts.</summary>
+        void OnMovieUnavailable() => _boot?.MovieEnded();
 
         /// <summary>Every waveform on the disc, decoded to PCM, longest first.
         ///

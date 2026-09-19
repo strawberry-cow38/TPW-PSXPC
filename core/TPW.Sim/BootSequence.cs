@@ -153,6 +153,20 @@ namespace TPW.Sim
             if (done) { _index++; _frame = 0; }
         }
 
+        /// <summary>Move to the next screen now, whatever the frame count says.
+        ///
+        /// ⭐ THIS IS FOR THE MOVIES, AND IT IS NOT A CHEAT. The table's 444 and 1944 frames are how long
+        /// BF.STR and GRAV.STR ran ON THE CONSOLE; the port plays those same two files, so the FILE is
+        /// the authority on its own length and the table is only a record of what it came to. Ticking
+        /// the table alongside a real decoder would give two clocks that drift apart, and the visible
+        /// symptom would be the intro being cut off or held on its last frame.</summary>
+        public void Advance()
+        {
+            if (Finished) return;
+            _index++;
+            _frame = 0;
+        }
+
         /// <summary>Jump straight to a screen, for anyone working on a later one. Does not run the
         /// screens it passes.</summary>
         public void SkipTo(BootScreen s)
