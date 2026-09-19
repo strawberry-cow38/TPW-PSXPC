@@ -513,6 +513,145 @@ static class Program
         return bad;
     }
 
+    /// <summary>The (module entry, module bytes, bank waveforms) triples, paired as Music() pairs them.</summary>
+    static IEnumerable<(int modIndex, byte[] bytes, List<PcmSample> waves)> MusicEntries(GazArchive g)
+    {
+        // The pairing rule lives in core (TrackerModule.WaveBanks) so the game and this tool cannot drift apart.
+        foreach (var (modIndex, waves) in TrackerModule.WaveBanks(g))
+            yield return (modIndex, g.Read(g.Entries[modIndex]), waves);
+    }
+
+    /// <summary>One module through TrackerPlayer, start to end (not looping), as interleaved stereo.</summary>
+    internal static short[] RenderModule(TrackerModule m, List<PcmSample> waves, int rate, out double renderSeconds, out bool capped)
+    {
+        var player = new TrackerPlayer(m, waves, rate) { Loop = false };
+        var chunks = new List<short[]>();
+        long frames = 0, cap = (long)rate * 60 * 20;   // 20 minutes: a runaway song is a bug, not a render
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        while (!player.Finished && frames < cap)
+        {
+            var buf = new short[4096 * 2];
+            int got = player.Render(buf, 4096);
+            if (got <= 0) break;
+            if (got < 4096) Array.Resize(ref buf, got * 2);
+            chunks.Add(buf);
+            frames += got;
+        }
+        sw.Stop();
+        renderSeconds = sw.Elapsed.TotalSeconds;
+        capped = frames >= cap;
+        var pcm = new short[frames * 2];
+        long at = 0;
+        foreach (var c in chunks) { Array.Copy(c, 0, pcm, at, c.Length); at += c.Length; }
+        return pcm;
+    }
+
+    /// <summary>--music-render DIR: every module played through TrackerPlayer (the port's own player) to a WAV, so
+    /// its output can be compared numerically with libopenmpt's render of the rebuilt .xm from --music. Same
+    /// bank/wave/module pairing as Music(). Prints the render speed as a multiple of real time.</summary>
+    static int MusicRender(DiscReader disc, string outDir, int rate)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        System.IO.Directory.CreateDirectory(outDir);
+        int bad = 0;
+        double audioSeconds = 0, renderSeconds = 0;
+        foreach (var (modIndex, bytes, waves) in MusicEntries(g))
+        {
+            if (!TrackerModule.TryParse(bytes, out var m, out string err)) { Console.WriteLine($"#{modIndex}: {err}"); bad++; continue; }
+            var pcm = RenderModule(m, waves, rate, out double took, out bool capped);
+            string path = System.IO.Path.Combine(outDir, $"module_{modIndex}.wav");
+            WriteWav(path, pcm, 2, rate);
+            double secs = pcm.Length / 2.0 / rate;
+            audioSeconds += secs; renderSeconds += took;
+            Console.WriteLine($"#{modIndex}: {m.Channels} channels, speed {m.Speed} tempo {m.Tempo}, {secs:F1}s of audio in {took * 1000:F0} ms " +
+                              $"({secs / Math.Max(1e-6, took):F0}x real time){(capped ? " CAPPED" : "")} -> {path}");
+        }
+        Console.WriteLine($"total {audioSeconds:F0}s of audio in {renderSeconds:F2}s = {audioSeconds / Math.Max(1e-6, renderSeconds):F0}x real time");
+        return bad;
+    }
+
+    /// <summary>--music-solo DIR MOD: module MOD one channel at a time, for attributing a discrepancy to a channel.
+    /// The other channels keep only their position jump / pattern break / speed cells (so the song's structure and
+    /// timing survive) and are otherwise silent. Writes DIR/xm/module_MOD_cN.xm (for libopenmpt) and
+    /// DIR/out/module_MOD_cN.wav (this player) from the SAME stripped module.</summary>
+    static int MusicSolo(DiscReader disc, string outDir, int wantMod)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(outDir, "xm"));
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(outDir, "out"));
+        foreach (var (modIndex, bytes, waves) in MusicEntries(g))
+        {
+            if (modIndex != wantMod) continue;
+            if (!TrackerModule.TryParse(bytes, out var probe, out string err)) { Console.WriteLine($"#{modIndex}: {err}"); return 1; }
+            for (int c = 0; c < probe.Channels; c++)
+            {
+                TrackerModule.TryParse(bytes, out var m, out _);
+                foreach (var grid in m.Patterns)
+                    for (int r = 0; r < grid.GetLength(0); r++)
+                        for (int k = 0; k < grid.GetLength(1); k++)
+                        {
+                            if (k == c) continue;
+                            var cell = grid[r, k];
+                            bool structural = cell.Effect == 0xB || cell.Effect == 0xD || cell.Effect == 0xF;
+                            grid[r, k] = structural ? new TrackerCell(0, 0, 0, cell.Effect, cell.Param) : default;
+                        }
+                System.IO.File.WriteAllBytes(System.IO.Path.Combine(outDir, "xm", $"module_{modIndex}_c{c}.xm"), m.ToStandardXm(waves));
+                var pcm = RenderModule(m, waves, 44100, out _, out _);
+                WriteWav(System.IO.Path.Combine(outDir, "out", $"module_{modIndex}_c{c}.wav"), pcm, 2, 44100);
+            }
+            Console.WriteLine($"#{modIndex}: {probe.Channels} solo renders -> {outDir}");
+            return 0;
+        }
+        Console.WriteLine($"no module #{wantMod}");
+        return 1;
+    }
+
+    /// <summary>--music-cells MOD CH T0 T1: the non-empty cells channel CH of module MOD plays between T0 and T1
+    /// seconds (CH -1 = every channel), each stamped with the time the player reached its row.</summary>
+    static int MusicCells(DiscReader disc, int wantMod, int wantChan, double t0, double t1)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        foreach (var (modIndex, bytes, waves) in MusicEntries(g))
+        {
+            if (modIndex != wantMod) continue;
+            if (!TrackerModule.TryParse(bytes, out var m, out string err)) { Console.WriteLine($"#{modIndex}: {err}"); return 1; }
+            var player = new TrackerPlayer(m, waves, 44100) { Loop = false };
+            var buf = new short[64 * 2];
+            long frames = 0;
+            int lastPos = -1, lastRow = -1;
+            while (!player.Finished)
+            {
+                int got = player.Render(buf, 64);
+                if (got <= 0) break;
+                if (player.SongPosition != lastPos || player.Row != lastRow)
+                {
+                    lastPos = player.SongPosition; lastRow = player.Row;
+                    double t = frames / 44100.0;
+                    if (t >= t0 && t <= t1 && lastPos < m.Order.Length)
+                    {
+                        int pat = m.Order[lastPos];
+                        var grid = pat < m.Patterns.Count ? m.Patterns[pat] : null;
+                        if (grid != null && lastRow < grid.GetLength(0))
+                            for (int c = 0; c < grid.GetLength(1); c++)
+                            {
+                                if (wantChan >= 0 && c != wantChan) continue;
+                                var cell = grid[lastRow, c];
+                                if (cell.IsEmpty) continue;
+                                Console.WriteLine($"t={t,7:F2} pos={lastPos,3} pat={pat,3} row={lastRow,2} ch={c,2} | note {cell.Note,3} ins {cell.Instrument,3} vol {cell.Volume:x2} fx {cell.Effect:x1}{cell.Param:x2}  (speed {player.Speed} bpm {player.Bpm})");
+                            }
+                    }
+                }
+                frames += got;
+            }
+            return 0;
+        }
+        Console.WriteLine($"no module #{wantMod}");
+        return 1;
+    }
+
     static int Names(DiscReader disc)
     {
         var g = Archive(disc);
@@ -808,7 +947,7 @@ static class Program
     }
 
     /// <summary>A plain 16-bit PCM WAV: the 44-byte canonical header and the samples.</summary>
-    static void WriteWav(string path, short[] pcm, int channels, int rate)
+    internal static void WriteWav(string path, short[] pcm, int channels, int rate)
     {
         using var w = new System.IO.BinaryWriter(System.IO.File.Create(path));
         int dataBytes = pcm.Length * 2;
@@ -927,6 +1066,24 @@ static class Program
             // --music DIR: every module rebuilt as a standard .xm with its bank's waveforms, for any tracker.
             int musicAt = Array.IndexOf(args, "--music");
             if (musicAt >= 0 && musicAt + 1 < args.Length) return Music(disc, args[musicAt + 1]);
+            // --music-render DIR [--rate N]: every module through the port's own TrackerPlayer to WAV.
+            // --music-test DIR: synthetic one-rule modules through this player and out as .xm for libopenmpt.
+            int testAt = Array.IndexOf(args, "--music-test");
+            if (testAt >= 0 && testAt + 1 < args.Length) return MusicTests.Run(args[testAt + 1]);
+            int soloAt = Array.IndexOf(args, "--music-solo");
+            if (soloAt >= 0 && soloAt + 2 < args.Length) return MusicSolo(disc, args[soloAt + 1], int.Parse(args[soloAt + 2]));
+            int cellsAt = Array.IndexOf(args, "--music-cells");
+            if (cellsAt >= 0 && cellsAt + 4 < args.Length)
+                return MusicCells(disc, int.Parse(args[cellsAt + 1]), int.Parse(args[cellsAt + 2]),
+                                  double.Parse(args[cellsAt + 3], System.Globalization.CultureInfo.InvariantCulture),
+                                  double.Parse(args[cellsAt + 4], System.Globalization.CultureInfo.InvariantCulture));
+            int renderAt = Array.IndexOf(args, "--music-render");
+            if (renderAt >= 0 && renderAt + 1 < args.Length)
+            {
+                int rateAt = Array.IndexOf(args, "--rate");
+                int rate = rateAt >= 0 && rateAt + 1 < args.Length ? int.Parse(args[rateAt + 1]) : 44100;
+                return MusicRender(disc, args[renderAt + 1], rate);
+            }
 
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.

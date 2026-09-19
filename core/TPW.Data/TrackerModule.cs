@@ -63,6 +63,31 @@ namespace TPW.Data
 
         public bool LinearFrequencies => (Flags & 1) != 0;
 
+        /// <summary>Every module entry in the archive with the waveforms it plays. Each module's VAB bank is split
+        /// around its header entry (exactly <see cref="VabHeader.SplitHeaderSize"/> bytes): the body is the entry
+        /// before the header and the module the entry after it. Waveform N is instrument N.</summary>
+        public static IEnumerable<(int ModuleEntry, List<PcmSample> Waves)> WaveBanks(GazArchive g)
+        {
+            foreach (var e in g.Entries)
+            {
+                if (e.Size != VabHeader.SplitHeaderSize || !VabHeader.TryParse(g.Read(e), out var vab, out _)) continue;
+                int bodyIndex = e.Index - 1, modIndex = e.Index + 1;
+                if (bodyIndex < 0 || modIndex >= g.Entries.Count) continue;
+                var waves = new List<PcmSample>();
+                foreach (var w in vab.SliceBody(g.Read(g.Entries[bodyIndex]))) waves.Add(Vag.Decode(w));
+                yield return (modIndex, waves);
+            }
+        }
+
+        /// <summary>Every module that parses, with its waveforms: the game's music, ready for TrackerPlayer.</summary>
+        public static List<(int Entry, TrackerModule Module, List<PcmSample> Waves)> FindAll(GazArchive g)
+        {
+            var outp = new List<(int, TrackerModule, List<PcmSample>)>();
+            foreach (var (entry, waves) in WaveBanks(g))
+                if (TryParse(g.Read(g.Entries[entry]), out var m, out _)) outp.Add((entry, m, waves));
+            return outp;
+        }
+
         public static bool TryParse(byte[] d, out TrackerModule m, out string error)
         {
             m = null; error = null;

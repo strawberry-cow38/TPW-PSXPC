@@ -38,10 +38,18 @@ namespace TPWGodot
         System.Collections.Generic.List<(int Entry, ParkMap Map)> _maps = new();
         /// <summary>Each world's ground sheet by archive entry, for the maps found (see <see cref="ParkWorlds"/>).</summary>
         System.Collections.Generic.Dictionary<int, TextureSheet> _groundSheets = new();
+        /// <summary>The game's music: every tracker module with the waveforms it plays.</summary>
+        System.Collections.Generic.List<(int Entry, TrackerModule Module, System.Collections.Generic.List<PcmSample> Waves)> _modules = new();
+        MusicPlayer _music;
+        Button _musicButton;
+        OptionButton _musicChoice;
         /// <summary>Each world's scenery pack by archive entry.</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _sceneryPacks = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
         int _autoPark = -1;
+        /// <summary>From <c>--music=293</c>: play that module once the disc is checked (for captures: the movie
+        /// writer records the mix, so the port's own output can be compared with a reference render).</summary>
+        int _autoMusic = -1;
         /// <summary>From <c>--park-view=x,z,yaw,pitch,distance</c>: where the park camera starts.</summary>
         float[] _parkView;
         OptionButton _movieChoice;
@@ -244,6 +252,16 @@ namespace TPWGodot
             _advisorLanguage.AddItem("any language");
             _advisorLanguage.Selected = 0;   // English
             soundRow.AddChild(_advisorLanguage);
+            // ⭐ THE MUSIC: the game's tracker modules, synthesised live by TrackerPlayer (FT2's own rules; checked
+            // against libopenmpt module by module). Which module plays where in the game is not known yet.
+            _music = new MusicPlayer();
+            AddChild(_music);
+            _musicButton = new Button { Text = "Music", ToggleMode = true, Disabled = true };
+            _musicButton.Toggled += on => PlayMusic(on);
+            _musicChoice = new OptionButton { Disabled = true };
+            _musicChoice.ItemSelected += _ => { if (_musicButton.ButtonPressed) PlayMusic(true); };
+            soundRow.AddChild(_musicButton);
+            soundRow.AddChild(_musicChoice);
             _root.AddChild(soundRow);
 
             // ⭐ THE MOVIES. In the game they play on ENTERING A WORLD (see StrMovie.Catalogue), and there is no
@@ -275,6 +293,7 @@ namespace TPWGodot
                     _modelTourSpec = arg.Substring("--models=".Length).Split(',');
                 else if (arg == "--cull-on") _tourCull = true;
                 else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
+                else if (arg.StartsWith("--music=")) _autoMusic = int.Parse(arg.Substring("--music=".Length));
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
@@ -334,6 +353,7 @@ namespace TPWGodot
                     var af = disc.Find(AssetSelfTest.AssetArchive);
                     if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gz, out _))
                     {
+                        _modules = TrackerModule.FindAll(gz);
                         foreach (var (entry, map) in ParkMap.FindAll(gz))
                         {
                             _maps.Add((entry.Index, map));
@@ -422,6 +442,16 @@ namespace TPWGodot
             }
             else _playSound.Text = "No sound decoded";
 
+            _musicChoice.Clear();
+            foreach (var (entry, module, _) in _modules)
+                _musicChoice.AddItem($"module #{entry} ({module.Channels} channels)");
+            _musicChoice.Disabled = _musicButton.Disabled = _modules.Count == 0;
+            if (_autoMusic >= 0)
+            {
+                int mi = _modules.FindIndex(m => m.Entry == _autoMusic);
+                if (mi >= 0) { _musicChoice.Selected = mi; _musicButton.ButtonPressed = true; }
+            }
+
             _parkChoice.Clear();
             foreach (var (entry, _) in _maps)
                 _parkChoice.AddItem($"map #{entry}, {ParkWorlds.Describe(ParkWorlds.ForMap(entry))}" + (entry == 203 ? " (tinyclaw's park)" : ""));
@@ -483,6 +513,14 @@ namespace TPWGodot
                 _pendingMovieError = err;
                 CallDeferred(nameof(StartPendingMovie));
             });
+        }
+
+        void PlayMusic(bool on)
+        {
+            if (!on || _modules.Count == 0) { _music.Stop(); return; }
+            int sel = System.Math.Clamp(_musicChoice.Selected, 0, _modules.Count - 1);
+            var (entry, module, waves) = _modules[sel];
+            _music.Play(module, waves, $"module #{entry}");
         }
 
         void ShowPark(bool on)
