@@ -27,6 +27,9 @@ namespace TPWGodot
     public partial class ParkView : Node3D
     {
         MeshInstance3D _ground, _types, _scenery;
+        /// <summary>The material ground and scenery share; its scroll_rows advances one row per park frame.</summary>
+        ShaderMaterial _mat;
+        double _scrollClock;
         Camera3D _camera;
         ParkMap _map;
         Vector3 _focus;
@@ -93,11 +96,12 @@ namespace TPWGodot
                         if (pl.Model < scenery.Models.Count)
                             foreach (var t in scenery.Models[pl.Model].Textures) uses.Add((t.TPage, t.Clut));
                 var atlas = PageAtlas.Build(ground, uses);
-                var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
-                mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(
+                var scroll = new Scrolling(ground.ScrollRects(), atlas);
+                _mat = new ShaderMaterial { Shader = PsxShading.ScrollingShader() };
+                _mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(
                     Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false, Image.Format.Rgba8, atlas.Image.Rgba)));
-                _ground.Mesh = GroundMesh(quads, atlas, mat);
-                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, mat, out placed, out skipped);
+                _ground.Mesh = GroundMesh(quads, atlas, scroll, _mat);
+                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, out placed, out skipped);
             }
             foreach (var t in map.Tiles) if (t.NoGround) open++;
             _types.Mesh = TypeMesh(map);
@@ -117,11 +121,12 @@ namespace TPWGodot
         }
 
         /// <summary>The ground: every quad textured from the atlas at the game's (u, v) on its page.</summary>
-        static ArrayMesh GroundMesh(List<GroundQuad> quads, PageAtlas atlas, Material mat)
+        static ArrayMesh GroundMesh(List<GroundQuad> quads, PageAtlas atlas, Scrolling scroll, Material mat)
         {
             var verts = new List<Vector3>(quads.Count * 6);
             var cols = new List<Color>(quads.Count * 6);
             var uvs = new List<Vector2>(quads.Count * 6);
+            var rects = new List<float>(quads.Count * 24);
             float aw = atlas.Image.Width, ah = atlas.Image.Height;
             // The GPU draws a quad as triangles 0-1-2 and 1-2-3: the fold runs from (x+1, z) to (x, z+1), which is
             // what a bent tile shows. Winding does not matter here: the ground is drawn from both sides.
@@ -129,25 +134,30 @@ namespace TPWGodot
             foreach (var q in quads)
             {
                 atlas.TryOrigin(q.TPage, q.Clut, out int ox, out int oy);
+                var r = scroll.RectFor(q.TPage, q.Clut,
+                    Math.Min(Math.Min(q.C0.U, q.C1.U), Math.Min(q.C2.U, q.C3.U)), Math.Min(Math.Min(q.C0.V, q.C1.V), Math.Min(q.C2.V, q.C3.V)),
+                    Math.Max(Math.Max(q.C0.U, q.C1.U), Math.Max(q.C2.U, q.C3.U)), Math.Max(Math.Max(q.C0.V, q.C1.V), Math.Max(q.C2.V, q.C3.V)));
                 foreach (int k in order)
                 {
                     var c = q[k];
                     verts.Add(At(q.X + (k & 1), q.Z + (k >> 1), c.Height));
                     cols.Add(Shade(c.Shade));
                     uvs.Add(new Vector2((ox + c.U) / aw, (oy + c.V) / ah));
+                    rects.Add(r.X); rects.Add(r.Y); rects.Add(r.Z); rects.Add(r.W);
                 }
             }
-            return Surface(verts, cols, uvs, mat);
+            return Surface(verts, cols, uvs, rects, mat);
         }
 
         /// <summary>The scenery: each placement's model, scaled, turned and moved as 0x80057AF0 does, in the world's
         /// frame and then into Godot's (z negated, like everything else). Faces are drawn from both sides, as master
         /// asked of every model; the game itself drops a single-sided face that looks away.</summary>
-        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Material mat, out int placed, out int skipped)
+        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, out int placed, out int skipped)
         {
             var verts = new List<Vector3>();
             var cols = new List<Color>();
             var uvs = new List<Vector2>();
+            var rects = new List<float>();
             float aw = atlas.Image.Width, ah = atlas.Image.Height;
             int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
             placed = skipped = 0;
@@ -160,8 +170,16 @@ namespace TPWGodot
                 {
                     var tex = m.Textures[poly.Texture];
                     atlas.TryOrigin(tex.TPage, tex.Clut, out int ox, out int oy);
+                    int n = poly.IsQuad ? 4 : 3, u0 = 255, v0 = 255, u1 = 0, v1 = 0;
+                    for (int c = 0; c < n; c++)
+                    {
+                        ushort w = poly.Uv(c);
+                        u0 = Math.Min(u0, w & 0xFF); u1 = Math.Max(u1, w & 0xFF); v0 = Math.Min(v0, w >> 8); v1 = Math.Max(v1, w >> 8);
+                    }
+                    var r = scroll.RectFor(tex.TPage, tex.Clut, u0, v0, u1, v1);
                     foreach (int k in poly.IsQuad ? quad : tri)
                     {
+                        rects.Add(r.X); rects.Add(r.Y); rects.Add(r.Z); rects.Add(r.W);
                         int vi = poly.Corner(k);
                         var (x, y, z) = m.Position(vi);
                         var (wx, wy, wz) = pl.Place(x, y, z);
@@ -173,12 +191,32 @@ namespace TPWGodot
                     }
                 }
             }
-            return Surface(verts, cols, uvs, mat);
+            return Surface(verts, cols, uvs, rects, mat);
+        }
+
+        /// <summary>Which scrolling rectangle, if any, a polygon's texels lie in, as an atlas rectangle for CUSTOM0.
+        /// The game scrolls TEXELS in VRAM, so every palette's view of that page region scrolls with them: the match
+        /// is on the page (and depth), not the palette.</summary>
+        sealed class Scrolling
+        {
+            readonly List<(ushort TPage, int U, int V, int W, int H)> _rects;
+            readonly PageAtlas _atlas;
+            public Scrolling(List<(ushort, int, int, int, int)> rects, PageAtlas atlas) { _rects = rects; _atlas = atlas; }
+
+            public Vector4 RectFor(ushort tpage, ushort clut, int u0, int v0, int u1, int v1)
+            {
+                foreach (var r in _rects)
+                    if (PageAtlas.PageKey(r.TPage) == PageAtlas.PageKey(tpage) &&
+                        u0 >= r.U && u1 <= r.U + r.W && v0 >= r.V && v1 <= r.V + r.H &&
+                        _atlas.TryOrigin(tpage, clut, out int ox, out int oy))
+                        return new Vector4(ox + r.U, oy + r.V, r.W, r.H);
+                return Vector4.Zero;
+            }
         }
 
         static Color Shade(uint bgr) => new Color((bgr & 0xFF) / 255f, ((bgr >> 8) & 0xFF) / 255f, ((bgr >> 16) & 0xFF) / 255f);
 
-        static ArrayMesh Surface(List<Vector3> verts, List<Color> cols, List<Vector2> uvs, Material mat)
+        static ArrayMesh Surface(List<Vector3> verts, List<Color> cols, List<Vector2> uvs, List<float> rects, Material mat)
         {
             var mesh = new ArrayMesh();
             if (verts.Count == 0) return mesh;
@@ -187,7 +225,9 @@ namespace TPWGodot
             arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
             arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
             arrays[(int)Godot.Mesh.ArrayType.TexUV] = uvs.ToArray();
-            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            arrays[(int)Godot.Mesh.ArrayType.Custom0] = rects.ToArray();
+            var format = (Godot.Mesh.ArrayFormat)((long)Godot.Mesh.ArrayCustomFormat.RgbaFloat << (int)Godot.Mesh.ArrayFormat.FormatCustom0Shift);
+            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays, null, null, format);
             mesh.SurfaceSetMaterial(0, mat);
             return mesh;
         }
@@ -260,6 +300,10 @@ namespace TPWGodot
         public override void _Process(double delta)
         {
             if (!Visible || _map == null) return;
+            // One texel row per park frame. A park frame is one clock tick (2 vsyncs), so this is 25 rows a second at
+            // PAL's 50 Hz: derived, like ParkClock.TickSeconds, whose assumption it shares.
+            _scrollClock += delta;
+            _mat?.SetShaderParameter("scroll_rows", (float)Math.Floor(_scrollClock / TPW.Sim.ParkClock.TickSeconds));
             float dt = (float)delta;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;

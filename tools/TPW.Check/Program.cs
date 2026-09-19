@@ -1170,6 +1170,17 @@ static class Program
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
             if (Array.IndexOf(args, "--scenery") >= 0) return Scenery(disc);
+            // --extract NAME OUT: one file off the disc, byte for byte (e.g. TPW.OVL, the code overlays).
+            int extractAt = Array.IndexOf(args, "--extract");
+            if (extractAt >= 0 && extractAt + 2 < args.Length)
+            {
+                var xf = disc.Find(args[extractAt + 1]);
+                if (xf == null) { Console.WriteLine($"no {args[extractAt + 1]} on the disc"); return 1; }
+                var xb = disc.ReadFile(xf);
+                System.IO.File.WriteAllBytes(args[extractAt + 2], xb);
+                Console.WriteLine($"{xf.Name}: {xb.Length:n0} bytes -> {args[extractAt + 2]}");
+                return 0;
+            }
             int groundAt = Array.IndexOf(args, "--ground");
             if (groundAt >= 0 && groundAt + 3 < args.Length)
                 return Ground(disc, int.Parse(args[groundAt + 1]), int.Parse(args[groundAt + 2]), args[groundAt + 3]);

@@ -19,6 +19,10 @@ namespace TPW.Data
         { TPage = tpage; Clut = clut; OffsetX = ox; OffsetY = oy; W = w; H = h; U = u; V = v; Flags = flags; Extra = extra; }
 
         public bool EightBit => ((TPage >> 7) & 3) == 1;
+        /// <summary>Byte +11: the sprite's texels SCROLL. 0x800344C4 tests exactly this byte when the park registers
+        /// a sheet with its texture animator (0x80034268), which then scrolls the sprite's rectangle in VRAM one
+        /// texel row per park frame (0x80034194). Nine sprites in the jungle's ground sheet, all water.</summary>
+        public bool Scrolls => Extra != 0;
         public int PageX => (TPage & 0x0F) * 64;          // VRAM halfwords
         public int PageY => ((TPage >> 4) & 1) * 256;
         public int ClutX => (Clut & 0x3F) * 16;           // VRAM halfwords
@@ -181,6 +185,22 @@ namespace TPW.Data
             foreach (var sp in Sprites)
                 if (Contains(sp.ClutX, sp.ClutY) && Contains(sp.ClutX + (sp.EightBit ? 255 : 15), sp.ClutY)) n++;
             return n;
+        }
+
+        /// <summary>The rectangles the game's texture animator scrolls, in texels of each sprite's page: the VRAM
+        /// rectangle 0x80033E74 computes from the sprite (x = U / texels-per-halfword, width = W / the same, both
+        /// rounded down to whole halfwords; y = V, height = H), turned back into texels.</summary>
+        public List<(ushort TPage, int U, int V, int W, int H)> ScrollRects()
+        {
+            var outp = new List<(ushort, int, int, int, int)>();
+            foreach (var sp in Sprites)
+            {
+                if (!sp.Scrolls) continue;
+                int depth = (sp.TPage >> 7) & 3;
+                int perHalfword = depth == 0 ? 4 : depth == 1 ? 2 : 1;
+                outp.Add((sp.TPage, sp.U / perHalfword * perHalfword, sp.V, sp.W / perHalfword * perHalfword, sp.H));
+            }
+            return outp;
         }
 
         /// <summary>One texel as the GPU fetches it: page <paramref name="tpage"/>, palette <paramref name="clut"/>,
