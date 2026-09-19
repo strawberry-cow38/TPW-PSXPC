@@ -1072,6 +1072,28 @@ static class Program
         return 1;
     }
 
+    /// <summary>List every attraction by entry, with its English name, so a model can be found by what it
+    /// IS rather than by scrolling. The name comes from the game's own string table via the attraction
+    /// record in the same entry -- not a guess.</summary>
+    static int Attractions(GazArchive gaz, string filter)
+    {
+        StringTable.TryRead(gaz, 0, out var english, out _);
+        if (english == null) { Console.WriteLine("no English string table"); return 1; }
+        int n = 0;
+        foreach (var e in gaz.Entries)
+        {
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            if (!AttractionRecord.TryRead(bytes, c, out var rec)) continue;
+            string name = english[rec.TextId];
+            if (string.IsNullOrWhiteSpace(name)) continue;
+            if (filter != null && name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) < 0) continue;
+            Console.WriteLine($"entry #{e.Index,-4} {name}  ({rec.TypeName}, {rec.Width}x{rec.Depth} tiles, {c.SubCount} sub-entries)");
+            n++;
+        }
+        return n == 0 ? 1 : 0;
+    }
+
     static int Main(string[] args)
     {
         // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
@@ -1086,6 +1108,11 @@ static class Program
             if (!GazArchive.TryParse(gb, out var g, out string ge)) { Console.WriteLine("archive: " + ge); return 1; }
             if (Array.IndexOf(args, "--mapping") >= 0) { Mapping(g); return 0; }
             if (Array.IndexOf(args, "--anim") >= 0) return Anim(g);
+            // --attractions [text]: find a model by WHAT IT IS. ⚠ Not --names, which already exists on the
+            // disc route and dumps the string tables by language; two different jobs, and one name for
+            // both is how someone runs the wrong one and believes the output.
+            int nm = Array.IndexOf(args, "--attractions");
+            if (nm >= 0) return Attractions(g, nm + 1 < args.Length && !args[nm + 1].StartsWith("--") ? args[nm + 1] : null);
             int pd = Array.IndexOf(args, "--posedump");
             if (pd >= 0 && pd + 2 < args.Length) return PoseDump(g, int.Parse(args[pd + 1]), args[pd + 2]);
             return Meshes(g);
