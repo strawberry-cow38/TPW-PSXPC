@@ -103,16 +103,29 @@ namespace TPWGodot
                 if (_index < 0 || _index >= _meshes.Count) return PlayState.None;
                 var m = _meshes[_index].Mesh;
                 if (m.Tracks == null) return PlayState.None;
+                // ⚠ A BONE TRACK NOW REACHES VERTICES. This returned BonesOnly for anything driven
+                // through the skeleton, which was true before the skin was decoded and false the moment
+                // it was -- and it silently kept 291 models out of "next animated" after they had started
+                // working. A capability check written against yesterday's limits outlives them.
+                bool skinned = false;
+                if (m.Skeleton != null)
+                    foreach (var b in m.Skeleton.Bones)
+                        if (b.SkinCount > 0) { skinned = true; break; }
+
                 bool bones = false;
                 foreach (var t in m.Tracks)
                 {
-                    // Only a track that reaches vertices can move anything: a scatter source with a
-                    // binding behind it, or a direct vertex write.
+                    // A track can move something if it writes vertices directly, drives a scatter source
+                    // that has a binding behind it, or poses a bone that actually skins vertices.
                     if (t.Positions.Length > 0 &&
                         (t.Target == TrackTarget.Vertex ||
                          (t.Target == TrackTarget.ScatterSource && m.Binding != null && m.Binding.SourceCount > 0)))
                         return PlayState.Playable;
-                    if (t.Keys.Length > 0) bones = true;
+                    if (t.Keys.Length > 0)
+                    {
+                        if (skinned) return PlayState.Playable;
+                        bones = true;
+                    }
                 }
                 return bones ? PlayState.BonesOnly : PlayState.None;
             }
