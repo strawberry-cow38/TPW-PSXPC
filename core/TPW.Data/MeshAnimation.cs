@@ -200,6 +200,34 @@ namespace TPW.Data
         }
     }
 
+    /// <summary>The second (vector, quaternion) pair a type-0 keyframe carries beyond a type-6 one.
+    ///
+    /// Type 0 is type 6's keyframe with a whole extra pair bolted on: the evaluator interpolates +0x04
+    /// and +0x14 identically with the GTE's GPF/GPL, and passes +0x0c and +0x1c to the same quaternion
+    /// helper (0x8002c59c). Then it reads the bone's parent at +6 and composes through the parent's
+    /// matrix, exactly as a type-6 track does.
+    ///
+    /// ⚠ WHAT THE SECOND PAIR MEANS IS NOT ESTABLISHED. The first record I looked at held
+    /// (4096,4096,4096) in the vector, which is exactly 1.0 and reads beautifully as a scale -- but
+    /// across all 696 records that value appears on only 15.7%, and the commonest is
+    /// (24945,-23673,24945) on over half. One sample told a tidy story the population does not support.
+    /// The quaternion is unit length on 100% of records, though a column-shuffled control also passes at
+    /// 72%, so that alone would not have been enough either; the code is what settles it.</summary>
+    public readonly struct AnimPairB
+    {
+        public readonly short Vx, Vy, Vz;
+        public readonly float Qx, Qy, Qz, Qw;
+        public AnimPairB(ReadOnlySpan<byte> d)
+        {
+            const float S = 1f / 4096f;
+            static short H(ReadOnlySpan<byte> b, int i) => BitConverter.ToInt16(b.Slice(i * 2, 2));
+            Vx = H(d, 0); Vy = H(d, 1); Vz = H(d, 2);
+            // H(d,3) is the pad, zero as in every other 8-byte vector on the disc.
+            Qx = H(d, 4) * S; Qy = H(d, 5) * S; Qz = H(d, 6) * S; Qw = H(d, 7) * S;
+        }
+        public float QuatLength() => MathF.Sqrt(Qx * Qx + Qy * Qy + Qz * Qz + Qw * Qw);
+    }
+
     /// <summary>A position sample. Types 2/3/4/5 all carry the same 8-byte payload -- the PSX's own
     /// {s16 x, s16 y, s16 z, s16 pad} vertex, with the pad zero on all 3,973 records on the disc.
     /// Timed types put a time and duration in front of it; untimed types do not.</summary>
@@ -286,6 +314,7 @@ namespace TPW.Data
         public BoneRest Rest;                              // Type == 8
         public AnimKey[] Keys = Array.Empty<AnimKey>();    // Type == 6
         public PositionKey[] Positions = Array.Empty<PositionKey>();   // Types 2,3,4,5
+        public AnimPairB[] PairB = Array.Empty<AnimPairB>();            // Type 0's second pair
         public byte[] Raw = Array.Empty<byte>();           // everything else
 
         /// <summary>Whether the records carry their own timing.
@@ -297,7 +326,7 @@ namespace TPW.Data
         /// An untimed type is one sample per tick: the evaluator indexes the record array by the clock
         /// directly, so there is nothing to interpolate and nothing to look up.</summary>
         public bool IsTimed => Type is 0 or 3 or 5 or 6;
-        public bool IsDecoded => Type is 2 or 3 or 4 or 5 or 6 or 8;
+        public bool IsDecoded => Type is 0 or 2 or 3 or 4 or 5 or 6 or 8;
 
         /// <summary>The game's own blend weight for time <paramref name="t"/>: 0..4096 across the key
         /// that contains it. Straight from 0x8002da8c, integer division included, so it matches the
@@ -432,6 +461,21 @@ namespace TPW.Data
                                                 BitConverter.ToInt16(d.Slice(o + 8, 2)));
                     }
                     tr.Positions = ps;
+                }
+                else if (type == 0)
+                {
+                    // {time, dur, vecA, pad, quatA, vecB, pad, quatB} -- the first 20 bytes are exactly a
+                    // type-6 keyframe, so AnimKey reads them unchanged.
+                    var keys = new AnimKey[count];
+                    var pb = new AnimPairB[count];
+                    for (int k = 0; k < count; k++)
+                    {
+                        int o = p + hdr + k * stride;
+                        keys[k] = new AnimKey(d.Slice(o, 20));
+                        pb[k] = new AnimPairB(d.Slice(o + 20, 16));
+                    }
+                    tr.Keys = keys;
+                    tr.PairB = pb;
                 }
                 else if (type == 6)
                 {

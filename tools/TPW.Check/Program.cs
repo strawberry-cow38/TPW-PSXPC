@@ -172,7 +172,7 @@ static class Program
         int rests = 0, orthonormal = 0, keys = 0, unit = 0, tracks = 0, monotonic = 0, parsed = 0, animFail = 0;
         int skels = 0, wellFormed = 0, maxDepth = 0, bothEncodings = 0, agree = 0, boneUnit = 0, bonesTot = 0;
         int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
-        int spans = 0, spansMeet = 0;
+        int spans = 0, spansMeet = 0, t0keys = 0, t0a = 0, t0b = 0, t0tracks = 0;
         int posTracks = 0, posKeys = 0, posSpans = 0, posMeet = 0, empty = 0;
         int posable = 0, moved = 0; long movedVerts = 0;
         int wildMeshes = 0, originMeshes = 0, unplacedMeshes = 0; long wildVerts = 0, originVerts = 0, unplacedVerts = 0;
@@ -340,6 +340,16 @@ static class Program
                 }
                 foreach (var t in mesh.Tracks)
                 {
+                    if (t.Type == 0 && t.PairB.Length > 0)
+                    {
+                        // Type 0 carries TWO quaternions per key; both must be unit length.
+                        for (int k = 0; k < t.Keys.Length; k++)
+                        {
+                            t0keys++;
+                            if (Math.Abs(t.Keys[k].QuatLength() - 1f) < 0.03f) t0a++;
+                            if (k < t.PairB.Length && Math.Abs(t.PairB[k].QuatLength() - 1f) < 0.03f) t0b++;
+                        }
+                    }
                     if (t.Type == 8) { rests++; if (t.Rest.IsOrthonormal()) orthonormal++; }
                     else if (t.Type == 6)
                     {
@@ -361,6 +371,7 @@ static class Program
                         }
                         if (up) monotonic++;
                     }
+                    else if (t.Type == 0 && t.Keys.Length > 0) { t0tracks++; }
                     else if (t.Positions.Length > 0)
                     {
                         posTracks++; posKeys += t.Positions.Length;
@@ -385,6 +396,7 @@ static class Program
                           (firstFail.Length > 0 ? $", first: {firstFail}" : "") + ")");
         Console.WriteLine($"type 8 rest poses  : {rests}, orthonormal {orthonormal} ({pc(orthonormal, rests)})");
         Console.WriteLine($"type 6 keyframes   : {keys}, unit quaternion {unit} ({pc(unit, keys)})");
+        Console.WriteLine($"type 0 tracks      : {t0tracks}, {t0keys} keyframes; first quaternion unit {t0a} ({pc(t0a, t0keys)}), second unit {t0b} ({pc(t0b, t0keys)})");
         Console.WriteLine($"keyframe spans     : {spans} consecutive pairs, key.Time+key.Duration == next.Time on {spansMeet} ({pc(spansMeet, spans)})");
         Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
         Console.WriteLine($"skeletons          : {skels}, single-rooted and parent-before-child {wellFormed} ({pc(wellFormed, skels)}), deepest chain {maxDepth}");
@@ -407,7 +419,8 @@ static class Program
         return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
              + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree)
              + (binds - tiled) + sumBad + (bindRecs - destOk) + (spans - spansMeet)
-             + (posSpans - posMeet) + wildMeshes + originMeshes + unplacedMeshes;
+             + (posSpans - posMeet) + wildMeshes + originMeshes + unplacedMeshes
+             + (t0keys - t0a) + (t0keys - t0b);
     }
 
     static GazArchive Archive(DiscReader disc)
