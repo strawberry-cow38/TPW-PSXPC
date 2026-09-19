@@ -32,10 +32,7 @@ namespace TPWGodot
         /// kept to rebuild the ground after laying.</summary>
         PathTool _paths;
         bool _pathMode;
-        (int X, int Z)? _cursorTile, _runStart, _pressTile;
-        /// <summary>A run started with a click (press and release on one tile): its start stays put and the next
-        /// click finishes it. A press dragged to another tile lays on release instead (master's two ways).</summary>
-        bool _runSticky;
+        (int X, int Z)? _cursorTile, _runStart;
         TextureSheet _groundSheet;
         Scrolling _scroll;
         /// <summary>The flag sprite (EntranceFlags) as its own texture, and its size in texels.</summary>
@@ -652,7 +649,7 @@ namespace TPWGodot
             if (_info != null && _map != null)
                 _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
-                           + (_pathMode ? "\nPATH TOOL: click the start then click the end, or press at the start and drag to the end; right button cancels the ghost, then closes the tool" : "");
+                           + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "");
         }
 
         /// <summary>The tile under the mouse: march the ray from the camera through the pointer until it drops below
@@ -872,49 +869,42 @@ namespace TPWGodot
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
             { GameCamera = !GameCamera; return; }
             // ⭐ THE PATH TOOL, master's way. A left click on a path or an unoccupied tile (buildable or not) opens the
-            // tool -- and only opens it. With the tool open, a press starts a ghost run: released on the same tile it
-            // is a click, the start sticks and the next click lays the run; dragged to another tile it lays on
-            // release. The right button cancels the ghost, or closes the tool when there is no ghost.
+            // tool -- and only opens it. With the tool open, one click fixes the ghost's start and the next lays the
+            // run (no dragging, master's call). The right button cancels the ghost, or closes the tool when there is
+            // no ghost.
             if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _pathMode)
             {
-                if (_runStart != null) { _runStart = null; _runSticky = false; }
+                if (_runStart != null) _runStart = null;
                 else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; }
                 RefreshInfo();
                 return;
             }
-            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left } lmb && _paths != null)
+            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } && _paths != null)
             {
-                if (lmb.Pressed)
+                var tile = TileUnderMouse();            // the cursor is not tracked while the tool is closed
+                if (!_pathMode)
                 {
-                    if (_runSticky) return;             // the finishing click lays on its release
-                    var tile = TileUnderMouse();        // the cursor is not tracked while the tool is closed
-                    if (tile is not { } t || !PathTool.CanStartOn(_map, t.X, t.Z)) return;
-                    _cursorTile = tile;
-                    // The click that opens the tool only opens it; the next press starts a ghost.
-                    if (!_pathMode) { _pathMode = true; _cursorPinned = false; RefreshInfo(); return; }
-                    _runStart = tile; _pressTile = tile;
+                    // The click that opens the tool only opens it.
+                    if (tile is not { } t0 || !PathTool.CanStartOn(_map, t0.X, t0.Z)) return;
+                    _cursorTile = tile; _pathMode = true; _cursorPinned = false; RefreshInfo();
                     return;
                 }
-                if (!_pathMode) return;
-                if (_runSticky)
+                // Click the start, click the end: the first press fixes the ghost's start, the second lays the run.
+                if (tile is { } t) _cursorTile = t;
+                if (_runStart == null)
                 {
-                    // The finishing click of a clicked run.
-                    if (_runStart is { } s0 && _cursorTile is { } e0) LayPath(s0, e0);
-                    _runStart = null; _runSticky = false;
+                    if (_cursorTile is { } c && PathTool.CanStartOn(_map, c.X, c.Z)) _runStart = c;
                 }
-                else if (_runStart is { } start && _cursorTile is { } end)
+                else if (_cursorTile is { } end)
                 {
-                    // Released where it was pressed: a click, so the start sticks and the next click finishes the run.
-                    // Released elsewhere: a drag, laid now.
-                    if (end == _pressTile) _runSticky = true;
-                    else { LayPath(start, end); _runStart = null; }
+                    LayPath(_runStart.Value, end);
+                    _runStart = null;
                 }
-                else _runStart = null;
                 return;
             }
             if (_pathMode && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape } && _runStart != null)
             {
-                _runStart = null; _runSticky = false;   // drop the ghost, keep the tool
+                _runStart = null;   // drop the ghost, keep the tool
                 return;
             }
             if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Q }) { _gcam.Turn(-1); return; }
