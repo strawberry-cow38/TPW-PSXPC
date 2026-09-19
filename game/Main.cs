@@ -55,6 +55,10 @@ namespace TPWGodot
         /// <summary>From <c>--models=A,B,C</c>: hide the UI and show each model for two seconds, then quit. For
         /// capturing models unattended.</summary>
         int[] _modelTour;
+        /// <summary>The tour as given: browser indices, or "e133" for the first model of archive entry 133.</summary>
+        string[] _modelTourSpec;
+        /// <summary>From <c>--cull-on</c>: tour with back-face culling on, the view that shows winding faults.</summary>
+        bool _tourCull;
         int _tourPos = -1, _tourFrames;
 
         /// <summary>✅ 22,050 Hz, SETTLED BY LISTENING. Master tried the selector and identified it, and also
@@ -236,7 +240,8 @@ namespace TPWGodot
                 }
                 else if (arg == "--quit-after-line") _quitAfterLine = true;
                 else if (arg.StartsWith("--models="))
-                    _modelTour = System.Array.ConvertAll(arg.Substring("--models=".Length).Split(','), int.Parse);
+                    _modelTourSpec = arg.Substring("--models=".Length).Split(',');
+                else if (arg == "--cull-on") _tourCull = true;
             }
 
             GD.Print($"[tpw] data: {_data.Message}");
@@ -339,8 +344,12 @@ namespace TPWGodot
 
             // Show the first model as soon as the parse is done, so the window is never empty.
             if (_models != null && _models.Count > 0) _models.Show(0);
+            if (_modelTourSpec != null && _models != null)
+                _modelTour = System.Array.ConvertAll(_modelTourSpec,
+                    t => t.StartsWith("e") ? System.Math.Max(0, _models.IndexOfEntry(int.Parse(t.Substring(1)))) : int.Parse(t));
             if (_modelTour != null && _models != null && _models.Count > 0)
             {
+                if (_tourCull) _models.ToggleCull();
                 _root.Visible = false;
                 _tourPos = 0;
                 _models.Show(_modelTour[0]);

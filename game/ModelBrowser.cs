@@ -37,12 +37,12 @@ namespace TPWGodot
         // The toggle stays: culling ON is still the right instrument for checking winding, which is how the
         // inside-out models were caught.
         bool _cull = false;
-        // ⭐ FILE ORDER IS ALREADY CORRECT FOR GODOT — settled by looking, with culling ON. I had reversed
-        // the triangle order assuming PSX and Godot wind oppositely; master turned culling on and reported
-        // every model inside out, which is what a reversed winding looks like and what nothing could show
-        // while back faces were still being drawn.
+        // ⭐ _reverse = false IS THE CORRECT ORDER. Its history: file order was settled by looking, with culling
+        // ON (master reported every model inside out under the reversed order I had assumed). Then master saw
+        // every model MIRRORED, which needs a reflection (ToGodot negates z), and a reflection reverses every
+        // triangle. So the correct order is now the file's reversed, and "correct" is what false means here.
         //
-        // ⚠ That assumption survived for hours precisely because the check that would have falsified it was
+        // ⚠ The first assumption survived for hours because the check that would have falsified it was
         // disabled. It was not defended by evidence, it was defended by being untestable.
         bool _reverse = false;
         bool _textured = true;
@@ -59,10 +59,13 @@ namespace TPWGodot
         /// <summary>Toggle textures, to see the vertex colours on their own.</summary>
         public void ToggleTextures() { _textured = !_textured; Show(_index); }
 
-        public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "reversed" : "as-file")} · " +
+        public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "flipped" : "correct")} · " +
                                     $"textures {(_textured ? "ON" : "off")}";
 
         public int Count => _meshes.Count;
+
+        /// <summary>The browser index of the first model in archive entry <paramref name="entry"/>, or -1.</summary>
+        public int IndexOfEntry(int entry) => _meshes.FindIndex(x => x.Entry == entry);
 
         public override void _Ready()
         {
@@ -131,7 +134,7 @@ namespace TPWGodot
             float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
             for (int i = 0; i < m.VertexCount; i++)
             {
-                float x = m.Vertices[i * 3], y = m.Vertices[i * 3 + 1], z = m.Vertices[i * 3 + 2];
+                float x = m.Vertices[i * 3], y = m.Vertices[i * 3 + 1], z = -m.Vertices[i * 3 + 2];   // see ToGodot
                 if (x < minX) minX = x; if (x > maxX) maxX = x;
                 if (y < minY) minY = y; if (y > maxY) maxY = y;
                 if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
@@ -155,13 +158,16 @@ namespace TPWGodot
                 int tile = tex != null ? tex.FaceTile[fi] : -1;
                 // ⚠ NO Y FLIP. I assumed PSX vertices were Y-down and negated Y; master ran it and reported
                 // every model upside down. They are already in Godot's sense.
-                // ⭐ FILE ORDER, settled with culling on (see _reverse). The corners' UVs travel with them.
-                var corners = _reverse
+                // The corners' UVs travel with them whichever order they are emitted in.
+                // ⚠ THE Z NEGATION IN ToGodot IS A REFLECTION, AND A REFLECTION REVERSES EVERY TRIANGLE. So the
+                // file's corner order, which faced outward before the fix, faces inward after it, and the order is
+                // reversed here to keep the same faces front-facing. _reverse still flips it for comparison.
+                var corners = !_reverse
                     ? new[] { (face.I2, face.U2, face.V2), (face.I1, face.U1, face.V1), (face.I0, face.U0, face.V0) }
                     : new[] { (face.I0, face.U0, face.V0), (face.I1, face.U1, face.V1), (face.I2, face.U2, face.V2) };
                 foreach (var (vi, u, v) in corners)
                 {
-                    var pos = (new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]) - centre) * scale;
+                    var pos = (ToGodot(m, vi) - centre) * scale;
                     var col = m.VertexColours.Length >= (vi + 1) * 3
                         ? Color.Color8(m.VertexColours[vi * 3], m.VertexColours[vi * 3 + 1], m.VertexColours[vi * 3 + 2])
                         : new Color(0.5f, 0.5f, 0.5f);
@@ -232,6 +238,15 @@ namespace TPWGodot
             GD.Print($"[tpw] model {_index + 1}/{_meshes.Count}: entry #{entry} sub {sub}, " +
                      $"{m.VertexCount} verts, {m.Faces.Count} faces");
         }
+
+        /// <summary>A file vertex in Godot's frame.
+        ///
+        /// ⚠ MIRRORED UNTIL Z WAS NEGATED. Master saw every model and its textures mirrored. Y already reads up
+        /// (negating it turned them upside down, an earlier round of the same argument), so the file's frame is
+        /// x right, y up, z INTO the screen, which is left-handed, and Godot's is right-handed. Negating z
+        /// converts. That makes it a reflection, which is why the corner order is reversed with it.</summary>
+        static Vector3 ToGodot(TpwMesh m, int vi) =>
+            new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], -m.Vertices[vi * 3 + 2]);
 
         /// <summary>The GPU's texture blend, as a shader. ⚠ Three rules, each the hardware's and not a style:
         /// palette colour 0 is TRANSPARENT (the atlas stores it as alpha 0, so discard); the texel is MODULATED by
