@@ -793,8 +793,9 @@ namespace TPWGodot
             _placing = k; _placeRot = 0;
             _pathMode = false; _runStart = null; _cursorMesh.Mesh = null;
             _picker.Visible = false;
-            _ghostModel.Mesh = AttractionMesh(_attractions[k].Rec.Entry);
-            _ghostModel.Visible = true;
+            // Master: the preview is the markers alone, as the game shows it; the model appears when it is placed.
+            _ghostModel.Mesh = null;
+            _ghostModel.Visible = false;
             RefreshInfo();
         }
 
@@ -877,12 +878,10 @@ namespace TPWGodot
         void UpdatePlacementGhost()
         {
             if (!_ghostPinned) _cursorTile = TileUnderMouse();
-            if (PlacementCorner() is not { } o) { _ghostMarks.Mesh = null; _ghostModel.Visible = false; return; }
+            if (PlacementCorner() is not { } o) { _ghostMarks.Mesh = null; return; }
             var rec = _attractions[_placing].Rec;
             var marks = AttractionPlacement.Ghost(_map, rec, o.X, o.Z, _placeRot, out _);
             _ghostMarks.Mesh = MarkerMesh(marks);
-            _ghostModel.Visible = true;
-            _ghostModel.Transform = AttractionTransform(rec, o.X, o.Z, _placeRot);
         }
 
         void PlaceAttraction()
