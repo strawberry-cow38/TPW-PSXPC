@@ -1915,3 +1915,45 @@ space are now known, and only their per-record payload past the first 8 bytes is
 strides and headers and write to different arrays; so do 3 and 5. The size table is about how far to
 step, and nothing else. This is the second time that table has invited a wrong inference — the first
 was types 1 and 8, which share a size and not a format.
+
+## A fixture that employs staff — `states/park_staff.state` (2026-09-19)
+
+fable's guest report closed with "no fixture employs staff, so §6 is SOURCED only". There is one now.
+It is built from `states/park_ride.state` by the script below, and reloading the result cold gives:
+
+```
+Guards count=1
+  Guard pos=(20.50,39.50) state=0 Idle purpose=2 anim=15 tired=16 morale=92 skill=5 hired=147
+```
+
+`hired=147` is the day the source state sits on, so the record is this hire and not a leftover.
+
+`btn/` and `states/` are both untracked, so the script lives here rather than only on the box:
+
+```
+# sandbox OFF and the tile check nopped:
+#   POKE=0x80102D34:0,0x8001E754:0  POKE_HOLD=1
+300 308 triangle
+600 608 square      # -> Guards / Mechanics / Cleaners / Researchers / Entertainers, Stock 5 each
+1000 1008 cross
+1400 1408 cross     # -> the Gary Liddon card: Pay Grade 1, Monthly Wage 100
+1800 1808 cross     # -> placement tool armed
+2400 2408 cross     # -> committed
+```
+Run it for 4000 frames with `LOADSTATE=states/park_ride.state SAVESTATE=states/park_staff.state`.
+
+Two things cost several attempts, both worth writing down because each failure LOOKED like a different
+bug than it was:
+
+- **Square goes straight to the staff catalogue; the laptop route does not work from a script.** Routing
+  through `circle` puts up the Information / Build & Hire / … menu whose highlight answers neither the
+  d-pad nor the analog stick, so the `down` does nothing and the next `cross` opens *Ride Information*.
+  That reads as a wrong menu path — a plausible-looking screen — rather than as a dead button, which is
+  why it survived two attempts.
+- **I read a stale contact sheet twice.** The renderer died on a missing frame, left the previous run's
+  PNG in place, and I drew a conclusion from it — twice, about two different runs. The image was from
+  08:31 both times. A render step that fails without removing its old output is a stale-artifact trap;
+  the fix was to make the output path an argument so each run writes its own file.
+
+Also confirmed visually in passing: the HUD reads **$48.080**, which is the figure the port's money test
+now asserts. The earlier 48,040 was a transcription error of mine, and here is the screen saying so.
