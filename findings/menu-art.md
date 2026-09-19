@@ -281,3 +281,20 @@ sprites, which every advisor variant uses.)
 * Dumps: `fable/m/runs/c20/` (rel 5/60/90/450 RAM+VRAM, frames every 10), `runs/left20/` (LEFT, rel 100).
 * Display lists: `fable/m/dl_000005.txt`, `dl_000060.txt`, `dl_000450.txt`; filtered menu 2D: `menu_2d.txt`.
 * PNGs: `fable/m/png/` as named above.
+
+
+## Correction: the language screen's flag IS a stored mesh (2026-09-19)
+
+An earlier note here concluded the 12x8 flag cloth was generated in code, because no sub-mesh on the
+disc has 192 faces and none has 117 vertices. **That was the wrong question.** The flag is 192 of the
+319 faces of **entry 83 sub 10** -- the language-screen advisor, 205 verts, 29 bones -- carrying CLUT
+0x40e0 over u 1..149, v 88..173, which is exactly the range measured off the console's display list.
+The remaining 88 vertices are his body and the pole.
+
+The search that missed it fingerprinted WHOLE meshes, so an object that is part of a bigger object was
+invisible to it, and its silence read as "generated". Found by cow tools, who spotted that 205 - 117 = 88
+and asked the question the other way round; confirmed here with `--faceclut 83 10`.
+
+Consequence: the wave is BONE ANIMATION, not a cloth simulation, and the port already decodes that
+format (MeshAnimation.cs / MeshPose.cs). So the flag and the advisor are one job with one blocker --
+the boot and menu screens are a 2D pixel renderer with no 3D path -- not two separate problems.

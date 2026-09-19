@@ -1325,6 +1325,39 @@ static class Program
         return 0;
     }
 
+    static int FaceClut(GazArchive g, int entry, int sub)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            if (!c.TryParseMesh(bytes, sub, out var m2, out string err)) { Console.WriteLine(err); return 1; }
+            Console.WriteLine($"entry {entry} sub {sub}: {m2.VertexCount} verts, {m2.Faces.Count} faces, {m2.BoneCount} bones");
+            var byClut = new SortedDictionary<ushort, int>();
+            var uByClut = new Dictionary<ushort, (int u0, int u1, int v0, int v1)>();
+            foreach (var f in m2.Faces)
+            {
+                byClut.TryGetValue(f.Clut, out int n); byClut[f.Clut] = n + 1;
+                int lu = Math.Min(f.U0, Math.Min(f.U1, f.U2)), hu = Math.Max(f.U0, Math.Max(f.U1, f.U2));
+                int lv = Math.Min(f.V0, Math.Min(f.V1, f.V2)), hv = Math.Max(f.V0, Math.Max(f.V1, f.V2));
+                if (uByClut.TryGetValue(f.Clut, out var b))
+                    uByClut[f.Clut] = (Math.Min(b.u0, lu), Math.Max(b.u1, hu), Math.Min(b.v0, lv), Math.Max(b.v1, hv));
+                else uByClut[f.Clut] = (lu, hu, lv, hv);
+            }
+            foreach (var kv in byClut)
+            {
+                var b = uByClut[kv.Key];
+                Console.WriteLine($"   clut 0x{kv.Key:x4}  {kv.Value,4} faces   u {b.u0,3}..{b.u1,3}  v {b.v0,3}..{b.v1,3}");
+            }
+            return 0;
+        }
+        Console.WriteLine("no such entry");
+        return 1;
+    }
+
+    /// <summary>⚠ A no-match here means "no mesh with these totals", NOT "not on the disc" -- see the
+    /// warning at the call site. Reach for --faceclut before concluding anything is generated.</summary>
     static int FindMesh(GazArchive g, int verts, int faces)
     {
         int hits = 0, scanned = 0;
@@ -1438,9 +1471,18 @@ static class Program
             // --langnames: the language screen shows each language in ITS OWN language. Find where those
             // names live by asking every table for its own name, through the real StringTable decoder
             // (code page 850), and report the string ID that holds it.
-            // --findmesh V F: every sub-mesh in the archive with V vertices and F faces. A vertex/face
-            // pair is a tight fingerprint, so this answers "is what the console drew a STORED mesh or
-            // something the code generates" without opening a single file by hand.
+            // --findmesh V F: every sub-mesh in the archive with V vertices and F faces.
+            //
+            // ⚠ IT ANSWERS "IS THERE A MESH SHAPED LIKE THIS", NOT "IS THIS THING STORED". A whole-object
+            // fingerprint cannot see an object that is PART of a bigger one, and I read its silence as
+            // "the code generates it" -- wrongly. The language screen's flag is 192 faces; no sub-mesh
+            // has 192 faces; the flag is nonetheless stored, as 192 of the 319 faces of entry 83 sub 10.
+            // Use --faceclut to ask the other question.
+            // --faceclut E S: the face CLUT histogram of one sub-mesh. Answers "is this group of faces a
+            // PART of a bigger mesh", which a whole-mesh fingerprint search cannot see.
+            int fcAt = Array.IndexOf(args, "--faceclut");
+            if (fcAt >= 0 && fcAt + 2 < args.Length)
+                return FaceClut(g, int.Parse(args[fcAt + 1]), int.Parse(args[fcAt + 2]));
             int fmAt = Array.IndexOf(args, "--findmesh");
             if (fmAt >= 0 && fmAt + 2 < args.Length)
                 return FindMesh(g, int.Parse(args[fmAt + 1]), int.Parse(args[fmAt + 2]));
