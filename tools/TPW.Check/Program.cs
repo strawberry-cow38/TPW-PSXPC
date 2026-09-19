@@ -1354,6 +1354,60 @@ static class Program
     /// <summary>How far vertices move between consecutive animation units, across one cycle. A loop
     /// that is smooth in the DATA has a last-to-first step like any other; a big one there means the
     /// clip does not loop, or the cycle length is wrong.</summary>
+    /// <summary>Every animated sub-mesh on the disc: does its first key start at 0, and how big is the
+    /// step from its last pose back to its first compared with a typical step? Answers whether the
+    /// language advisor's loop jump is one clip's quirk or a gap in the evaluator.</summary>
+    static int LoopSurvey(GazArchive g)
+    {
+        int animated = 0, lateStart = 0, jumpy = 0, flat = 0;
+        var worst = new List<(double Ratio, int Entry, int Sub, int Start, int Len)>();
+        foreach (var e in g.Entries)
+        {
+            byte[] bytes;
+            try { bytes = g.Read(e); } catch { continue; }
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int sub = 0; sub < c.Subs.Count; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m, out _)) continue;
+                int len = MeshPose.AnimationLength(m);
+                if (len <= 1 || m.Tracks == null) continue;
+                animated++;
+                int start = int.MaxValue;
+                foreach (var tr in m.Tracks)
+                {
+                    if (tr.Keys != null && tr.Keys.Length > 0) start = Math.Min(start, tr.Keys[0].Time);
+                    if (tr.Positions != null && tr.Positions.Length > 0 && tr.IsTimed) start = Math.Min(start, tr.Positions[0].Time);
+                }
+                if (start == int.MaxValue) start = 0;
+                if (start > 0) lateStart++;
+                double sum = 0, last = 0; int n = 0;
+                for (int t = 0; t < len; t++)
+                {
+                    var a = MeshPose.Evaluate(m, t).Vertices;
+                    var b = MeshPose.Evaluate(m, (t + 1) % len).Vertices;
+                    if (a == null || b == null || a.Length != b.Length || a.Length == 0) break;
+                    double d = 0;
+                    for (int i = 0; i < a.Length; i++)
+                        d = Math.Max(d, Math.Abs(a[i].X - b[i].X) + Math.Abs(a[i].Y - b[i].Y) + Math.Abs(a[i].Z - b[i].Z));
+                    if (t == len - 1) last = d; else { sum += d; n++; }
+                }
+                double mean = n > 0 ? sum / n : 0;
+                if (mean <= 0.001) { flat++; continue; }
+                double ratio = last / mean;
+                if (ratio > 4) { jumpy++; worst.Add((ratio, e.Index, sub, start, len)); }
+            }
+        }
+        Console.WriteLine($"{animated} animated sub-meshes");
+        Console.WriteLine($"  {lateStart} whose first key is NOT at time 0");
+        Console.WriteLine($"  {jumpy} whose last-to-first step is more than 4x a typical step");
+        Console.WriteLine($"  {flat} that never move (skipped)");
+        worst.Sort((a, b) => b.Ratio.CompareTo(a.Ratio));
+        Console.WriteLine("worst offenders:");
+        foreach (var w in worst.Take(12))
+            Console.WriteLine($"  entry {w.Entry,4} sub {w.Sub,3}: loop step {w.Ratio:F1}x typical, keys start at {w.Start}, length {w.Len}");
+        return 0;
+    }
+
     static int PoseDelta(GazArchive g, int entry, int sub)
     {
         foreach (var e in g.Entries)
@@ -1640,6 +1694,7 @@ static class Program
                 return TexelScan(g, int.Parse(args[tsAt + 1]), Convert.ToUInt16(args[tsAt + 2], 16),
                                  Convert.ToUInt16(args[tsAt + 3], 16), int.Parse(args[tsAt + 4]),
                                  int.Parse(args[tsAt + 5]), int.Parse(args[tsAt + 6]), int.Parse(args[tsAt + 7]));
+            if (Array.IndexOf(args, "--loopsurvey") >= 0) return LoopSurvey(g);
             int pdAt = Array.IndexOf(args, "--posedelta");
             if (pdAt >= 0 && pdAt + 2 < args.Length)
                 return PoseDelta(g, int.Parse(args[pdAt + 1]), int.Parse(args[pdAt + 2]));
