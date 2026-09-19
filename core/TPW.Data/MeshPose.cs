@@ -84,7 +84,9 @@ namespace TPW.Data
                     foreach (var k in t.Keys) end = Math.Max(end, k.Time + k.Duration);
                     foreach (var p in t.Positions) end = Math.Max(end, p.Time + p.Duration);
                 }
-                else end = Math.Max(end, t.Positions.Length);
+                // Untimed: the length IS the sample count. Types 2 and 4 keep those in Positions,
+                // but 7 and 1 keep them in Keys -- reading only Positions scored those as zero.
+                else end = Math.Max(end, Math.Max(t.Positions.Length, t.Keys.Length));
             }
             return end;
         }

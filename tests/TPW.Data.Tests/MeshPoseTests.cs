@@ -53,6 +53,25 @@ namespace TPW.Data.Tests
             Assert.Equal(expectedX, MeshPose.SampleAt(t, time).X);
         }
 
+        // ⭐ AN UNTIMED TRACK'S LENGTH IS ITS SAMPLE COUNT, AND TYPES 7 AND 1 KEEP THEIR SAMPLES IN
+        // Keys, NOT Positions. AnimationLength only consulted Positions, so a mesh animated solely by a
+        // type-7 track measured as length 0 and was treated as not animated at all -- it would never
+        // play. REJECTS a reader that looks in one array and calls the absence of the other a zero.
+        [Fact]
+        public void AnUntimedKeyTrackContributesItsLengthNotZero()
+        {
+            var b = new List<byte>();
+            b.Add(7); b.Add(0); U16(b, 0); U16(b, 0); U16(b, 2);   // type 7, count == last slot index
+            for (int k = 0; k < 3; k++)                            // three 16-byte slots from +8
+                foreach (var v in new[] { k, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);
+
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tr, out _, out _, out _, out string e), e);
+            var mesh = new Mesh { Tracks = tr };
+            Assert.Equal(3, tr[0].Keys.Length);
+            Assert.Equal(3, MeshPose.AnimationLength(mesh));   // was 0: Positions is empty for type 7
+        }
+
         // ⭐ THE REFLECTION IS NOT THE SAME OPERATION ON A ROTATION AS ON A POSITION, and writing the
         // position rule for both is the obvious mistake. A position mirrors z; a rotation conjugated by
         // the same mirror has its axis reflected AND its angle negated, landing on (-x, -y, z, w).

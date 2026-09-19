@@ -1359,7 +1359,8 @@ static class Program
     /// language advisor's loop jump is one clip's quirk or a gap in the evaluator.</summary>
     static int LoopSurvey(GazArchive g)
     {
-        int animated = 0, lateStart = 0, jumpy = 0, flat = 0;
+        int animated = 0, lateStart = 0, jumpy = 0, flat = 0, jumpyCycleDiffers = 0;
+        int atCycleMeasured = 0, atCycleJumpy = 0;
         var worst = new List<(double Ratio, int Entry, int Sub, int Start, int Len)>();
         foreach (var e in g.Entries)
         {
@@ -1394,13 +1395,50 @@ static class Program
                 double mean = n > 0 ? sum / n : 0;
                 if (mean <= 0.001) { flat++; continue; }
                 double ratio = last / mean;
-                if (ratio > 4) { jumpy++; worst.Add((ratio, e.Index, sub, start, len)); }
+
+                // The same measurement wrapped where the GAME wraps, reported alongside rather than
+                // instead of: if a clip is smooth at its own cycle, the step above was never played.
+                int cyc = m.HeaderWord0 + 1;
+                if (cyc > 1)
+                {
+                    double csum = 0, clast = 0; int cn = 0; bool okc = true;
+                    for (int t = 0; t < cyc; t++)
+                    {
+                        var a = MeshPose.Evaluate(m, t).Vertices;
+                        var b = MeshPose.Evaluate(m, (t + 1) % cyc).Vertices;
+                        if (a == null || b == null || a.Length != b.Length || a.Length == 0) { okc = false; break; }
+                        double dd = 0;
+                        for (int i = 0; i < a.Length; i++)
+                            dd = Math.Max(dd, Math.Abs(a[i].X - b[i].X) + Math.Abs(a[i].Y - b[i].Y) + Math.Abs(a[i].Z - b[i].Z));
+                        if (t == cyc - 1) clast = dd; else { csum += dd; cn++; }
+                    }
+                    double cmean = cn > 0 ? csum / cn : 0;
+                    if (okc && cmean > 0.001) { atCycleMeasured++; if (clast / cmean > 4) atCycleJumpy++; }
+                }
+                if (ratio > 4)
+                {
+                    jumpy++; worst.Add((ratio, e.Index, sub, start, len));
+                    // ⚠ WHERE we wrap is an assumption, and it is not always the game's. This survey
+                    // wraps at AnimationLength (derived from the KEYS); the game's cycle is the mesh
+                    // header's +0x00 plus one. Entry 75 sub 7 has header 2 against keys ending at 200,
+                    // so the step measured there is a wrap the console never performs.
+                    //
+                    // ⚠ TESTED AND REFUTED, 2026-09-19. ALL 58 flagged clips have a header cycle that
+                    // differs from the length wrapped at, which looked like the whole explanation. It
+                    // is not: re-measuring each clip wrapped at its OWN header cycle leaves 56 of 239
+                    // still snapping. So the wrap point is genuinely wrong here AND the discontinuity
+                    // is real under either wrap -- two separate things, and fixing the first does not
+                    // touch the second. Do not re-run this experiment expecting the number to fall.
+                    if (m.HeaderWord0 + 1 != len) jumpyCycleDiffers++;
+                }
             }
         }
         Console.WriteLine($"{animated} animated sub-meshes");
         Console.WriteLine($"  {lateStart} whose first key is NOT at time 0");
         Console.WriteLine($"  {jumpy} whose last-to-first step is more than 4x a typical step");
+        Console.WriteLine($"    of those, {jumpyCycleDiffers} whose header cycle (+0x00 + 1) is NOT the length wrapped at");
         Console.WriteLine($"  {flat} that never move (skipped)");
+        Console.WriteLine($"  wrapped at the GAME's cycle instead: {atCycleJumpy} of {atCycleMeasured} still snap");
         worst.Sort((a, b) => b.Ratio.CompareTo(a.Ratio));
         Console.WriteLine("worst offenders:");
         foreach (var w in worst.Take(12))
