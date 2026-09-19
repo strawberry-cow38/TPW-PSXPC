@@ -30,7 +30,10 @@ public class MainWindow : Window
     // nobody -- the change ships, no one's launcher updates, and the feature simply does not exist for them.
     // The number is the release; the note beside it is what shipped in that release. Move both together or
     // the note rots into a lie, which is precisely what happened to unturnedGD's.
-    const int LauncherVersion = 8;   // v8: built TPW.sln, which excludes the game project, so no game assembly was produced
+    // v9: child processes ran with a visible console window, so every build, update and launch flashed
+    //     command prompts over the user's screen; and "check for update" was buried in the Options
+    //     expander where nobody would find it, so a user on an old launcher had no way to know.
+    const int LauncherVersion = 9;
     // v7: --path pointed at the repo root, so Play opened Godot's project manager
     // v6: Install/Update/Play merged into ONE mode-driven button; build marker
     // v5: branch dropdown, Godot auto-download, current-vs-latest commit, Options panel, settings persisted beside the exe
