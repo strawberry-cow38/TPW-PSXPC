@@ -47,6 +47,8 @@ namespace TPWGodot
         OptionButton _musicChoice;
         /// <summary>The common sheet (#416): guests, the flags by the bus stops, the loading font.</summary>
         TextureSheet _commonSheet;
+        /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
+        System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _sceneryPacks = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
@@ -477,6 +479,10 @@ namespace TPWGodot
                             if (world != null && !_groundSheets.ContainsKey(world.GroundSheet) && world.GroundSheet < gz.Entries.Count &&
                                 TextureSheet.TryParse(gz.Read(gz.Entries[world.GroundSheet]), out var ground, out _))
                                 _groundSheets[world.GroundSheet] = ground;
+                            var gateInfo = world != null ? ParkGate.ForWorld(world.Index) : null;
+                            if (gateInfo != null && !_gatePacks.ContainsKey(gateInfo.PackEntry) && gateInfo.PackEntry < gz.Entries.Count &&
+                                SceneryPack.TryParse(gz.Read(gz.Entries[gateInfo.PackEntry]), out var gatePack, out _))
+                                _gatePacks[gateInfo.PackEntry] = gatePack;
                             if (world != null && !_sceneryPacks.ContainsKey(world.SceneryEntry) && world.SceneryEntry < gz.Entries.Count &&
                                 SceneryPack.TryParse(gz.Read(gz.Entries[world.SceneryEntry]), out var pack, out _))
                                 _sceneryPacks[world.SceneryEntry] = pack;
@@ -689,7 +695,10 @@ namespace TPWGodot
                 TextureSheet ground = null;
                 SceneryPack scenery = null;
                 if (world != null) { _groundSheets.TryGetValue(world.GroundSheet, out ground); _sceneryPacks.TryGetValue(world.SceneryEntry, out scenery); }
-                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet);
+                SceneryPack gateModels = null;
+                var gateInfo = world != null ? ParkGate.ForWorld(world.Index) : null;
+                if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
+                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels);
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
                 int mi = world != null ? _modules.FindIndex(m => m.Entry == world.Music) : -1;
                 if (mi >= 0 && _autoMusic < 0)

@@ -89,7 +89,9 @@ namespace TPWGodot
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
         /// <param name="scenery">The world's scenery pack, or null for bare ground.</param>
         /// <param name="common">The common sheet (#416), for the entrance flags; null leaves them out.</param>
-        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery, TextureSheet common = null)
+        /// <param name="gatePack">The world's gate pack (ParkGate), drawn closed at the gate's base; null leaves it out.</param>
+        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery, TextureSheet common = null,
+                         SceneryPack gatePack = null)
         {
             _map = map;
             _flagMat = null;
@@ -114,13 +116,17 @@ namespace TPWGodot
                     foreach (var pl in map.Scenery)
                         if (pl.Model < scenery.Models.Count)
                             foreach (var t in scenery.Models[pl.Model].Textures) uses.Add((t.TPage, t.Clut));
+                var gate = world != null ? ParkGate.ForWorld(world.Index) : null;
+                if (gate != null && gatePack != null && gatePack.Models.Count > 0)
+                    foreach (var t in gatePack.Models[0].Textures) uses.Add((t.TPage, t.Clut));
+                else gate = null;
                 var atlas = PageAtlas.Build(ground, uses);
                 var scroll = new Scrolling(ground.ScrollRects(), atlas);
                 _mat = new ShaderMaterial { Shader = PsxShading.ScrollingShader() };
                 _mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(
                     Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false, Image.Format.Rgba8, atlas.Image.Rgba)));
                 _ground.Mesh = GroundMesh(quads, atlas, scroll, _mat);
-                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, out placed, out skipped);
+                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, out placed, out skipped, gate, gatePack);
             }
             foreach (var t in map.Tiles) if (t.NoGround) open++;
             _types.Mesh = TypeMesh(map);
@@ -171,7 +177,8 @@ namespace TPWGodot
         /// <summary>The scenery: each placement's model, scaled, turned and moved as 0x80057AF0 does, in the world's
         /// frame and then into Godot's (z negated, like everything else). Faces are drawn from both sides, as master
         /// asked of every model; the game itself drops a single-sided face that looks away.</summary>
-        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, out int placed, out int skipped)
+        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, out int placed, out int skipped,
+                                     ParkGate gate = null, SceneryPack gatePack = null)
         {
             var verts = new List<Vector3>();
             var cols = new List<Color>();
@@ -209,6 +216,29 @@ namespace TPWGodot
                         uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
                     }
                 }
+            }
+            // The gate's moving part(s), closed (ParkGate): model 0 of the world's gate pack at the gate's base.
+            if (gate != null && gatePack != null && gatePack.Models.Count > 0)
+            {
+                var gm = gatePack.Models[0];
+                var gateBase = (gate.TileX * ParkTerrain.TileUnits, map[gate.TileX, gate.TileZ].HeightUnits, gate.TileZ * ParkTerrain.TileUnits);
+                foreach (var part in gate.Parts)
+                    foreach (var poly in gm.Polygons)
+                    {
+                        var tex = gm.Textures[poly.Texture];
+                        atlas.TryOrigin(tex.TPage, tex.Clut, out int ox, out int oy);
+                        foreach (int k in poly.IsQuad ? quad : tri)
+                        {
+                            int vi = poly.Corner(k);
+                            var (wx, wy, wz) = ParkGate.Place(part, gateBase, gm.Position(vi));
+                            verts.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
+                            byte g = gm.Vertices[vi].Shade;
+                            cols.Add(new Color(g / 255f, g / 255f, g / 255f));
+                            ushort uv = poly.Uv(k);
+                            uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
+                            rects.Add(0); rects.Add(0); rects.Add(0); rects.Add(0);
+                        }
+                    }
             }
             return Surface(verts, cols, uvs, rects, mat);
         }
