@@ -70,7 +70,22 @@ namespace TPWGodot
         /// ⚠ A model with no tracks does not move, and "no animation in this model" must not look like
         /// "the player is broken". <see cref="StateLabel"/> says which, because the two are otherwise
         /// indistinguishable on screen and the wrong one of them sends someone debugging working code.</summary>
-        public void TogglePlay() { _playing = !_playing; _clock = 0; if (!_playing) { _posed = null; Show(_index); } }
+        public void TogglePlay() { _playing = !_playing; _clock = 0; Show(_index); }
+
+        /// <summary>Pose at time 0 even while paused, for models that need it.
+        ///
+        /// ⚠ AN ANIMATED MODEL'S REST GEOMETRY CAN BE EMPTY. A quarter of all vertices in the animated
+        /// models sit at exactly (0,0,0) in the file, and two models are 100% zero -- their shape exists
+        /// only once the animation places it. Drawing the file's rest pose there draws a crumpled point,
+        /// which looks like a broken parse rather than a model waiting to be posed. So a playable model
+        /// is shown posed whether or not the clock is running.</summary>
+        void RefreshPose()
+        {
+            if (_index < 0 || _index >= _meshes.Count) { _posed = null; return; }
+            _posed = Playability == PlayState.Playable
+                   ? MeshPose.Evaluate(_meshes[_index].Mesh, (int)_clock).Vertices
+                   : null;
+        }
 
         /// <summary>What this player can do with the model on screen.
         ///
@@ -185,6 +200,7 @@ namespace TPWGodot
             if (_meshes.Count == 0) return;
             _index = ((index % _meshes.Count) + _meshes.Count) % _meshes.Count;
             var (entry, sub, m) = _meshes[_index];
+            if (_posed == null || _posed.Length != m.VertexCount) RefreshPose();
 
             // ⚠ AUTO-FIT RATHER THAN A GUESSED SCALE. Vertices are s16 in the game's own units and nobody has
             // established what one unit is. Fitting to the model's own bounds shows every mesh at a usable
@@ -349,10 +365,9 @@ namespace TPWGodot
             if (_instance != null) _instance.Rotation = new Vector3(0, _spin, 0);
 
             if (!_playing || _index < 0 || _index >= _meshes.Count) return;
-            var m = _meshes[_index].Mesh;
             _clock += (float)delta * 30f;                    // a readable rate; the file's unit is not a second
             if (_clock > 4096f) _clock = 0;
-            _posed = MeshPose.Evaluate(m, (int)_clock).Vertices;
+            RefreshPose();
             Show(_index);
         }
     }
