@@ -543,6 +543,26 @@ tiles (turns and mirrors right), and the grass with its stone and twig decals lo
 ⚠ The world frame is **left-handed** like the models': a right-handed viewer negates z, or the park is mirrored
 (master caught it).
 
+## 5r. ✅ The park scenery: the build list and the world's scenery pack (2026-09-19)
+
+After the tile grid every map carries a **build list**: `u32 count; count × 12 bytes`, each
+`u32 model | flags << 24, u16 x (tile), u16 y (world units), u16 z (tile), u16 quarter turns`. 0x80057AF0 walks it
+every frame and draws each model from the world's **scenery pack**, the entry listed beside each map in the world
+table (#205 jungle, #118, #36, #359), which the map loader loads only when the list is non-empty (0x800351BC).
+
+Pack layout, from the draw routine 0x80035358 → 0x80035548 (0x80035D04 adds depth fog):
+`u8 2, u8 models, u16 offset each`; model = `u16 scale (/128), u16 tris, u16 quads, u8 verts, u8 textures,
+u8 radius/4, s8 centre×3 /4`, then textures (6: tpage, clut, flags bit 0 double-sided), triangles (10: a b c tex,
+3 UVs → POLY_GT3), quads (14: u16 tex, a b c d, 4 UVs → POLY_GT4), vertices (4: s8 x y z ×4, u8 grey shade).
+Placement rotation is PsyQ RotMatrixY (rows c 0 s / 0 1 0 / −s 0 c), read off 0x800CAF60.
+
+✅ All 80 models parse with every vertex block ending exactly at the next model; all 971 placements across the 8
+maps name a model their pack has; the textures sit on the world's **ground** sheet (920 of the jungle's 1,073
+faces inside a #258 sprite and no other sheet's). **The tiles the terrain routine skips are where the scenery
+stands**: the jungle's river and waterfall, world 2's brick retaining walls (512 units tall, placed at 256 on tiles
+whose corners run 256 → 768: exactly the drop). The park's perimeter hedge, palms and volcanoes are scenery too,
+matching the console screenshot.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is

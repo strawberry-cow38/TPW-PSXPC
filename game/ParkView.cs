@@ -10,10 +10,12 @@ namespace TPWGodot
     /// ⭐ THE GROUND IS THE GAME'S: every quad comes from <see cref="ParkTerrain"/>, which is the game's own terrain
     /// routine (0x80012110) — per tile a POLY_GT4 whose corners sit at the corner tiles' heights, textured with the
     /// sprite that tile's +4 names in its world's ground sheet (turned and mirrored as +4 says), and shaded per
-    /// corner from the map's shade table. What the routine skips (flags bit 0: on map #203, a river that falls
-    /// down a waterfall) is left open, because the game draws it with something else that is not read yet.
+    /// corner from the map's shade table. What the routine skips (flags bit 0) is where scenery models stand.
     ///
-    /// T toggles the old inspection view, every tile coloured by its type, drawn just above the ground.
+    /// ⭐ THE SCENERY IS THE GAME'S TOO: the map's build list places models from the world's scenery pack, and the
+    /// tiles the terrain routine skips are where they stand (world 2's cliff faces, the jungle's river).
+    ///
+    /// T toggles the old inspection view, every tile coloured by its type, drawn just above the ground; O the scenery.
     ///
     /// ⚠ MIRRORED UNTIL Z WAS NEGATED, like the models. The game's world is left-handed and this one is not, so
     /// row z sits at Godot -z; the first version laid rows along +z and master saw the park mirrored.
@@ -21,10 +23,10 @@ namespace TPWGodot
     /// ✅ The map itself is right: tinyclaw found map #203 in the jungle park's RAM, 27,431 of 27,552 bytes
     /// identical to the disc copy, at 0x8017A5A8.
     ///
-    /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types.</summary>
+    /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types, O scenery.</summary>
     public partial class ParkView : Node3D
     {
-        MeshInstance3D _ground, _types;
+        MeshInstance3D _ground, _types, _scenery;
         Camera3D _camera;
         ParkMap _map;
         Vector3 _focus;
@@ -42,6 +44,8 @@ namespace TPWGodot
             AddChild(_ground);
             _types = new MeshInstance3D { Visible = false };
             AddChild(_types);
+            _scenery = new MeshInstance3D();
+            AddChild(_scenery);
             _camera = new Camera3D { Fov = 50, Current = false };
             AddChild(_camera);
             Visible = false;
@@ -67,25 +71,39 @@ namespace TPWGodot
         };
 
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
-        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world)
+        /// <param name="scenery">The world's scenery pack, or null for bare ground.</param>
+        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery)
         {
             _map = map;
-            int drawn = 0, open = 0;
+            int open = 0, placed = 0, skipped = 0;
             _ground.Mesh = null;
+            _scenery.Mesh = null;
+            var quads = ground != null ? ParkTerrain.Build(map, ground.Sprites) : new List<GroundQuad>();
             if (ground != null)
             {
-                var quads = ParkTerrain.Build(map, ground.Sprites);
-                drawn = quads.Count;
-                _ground.Mesh = GroundMesh(quads, ground);
+                // ⭐ ONE ATLAS FOR BOTH: the scenery's textures are on the world's ground sheet too (SceneryPack).
+                var uses = new List<(ushort, ushort)>();
+                foreach (var q in quads) uses.Add((q.TPage, q.Clut));
+                if (scenery != null)
+                    foreach (var pl in map.Scenery)
+                        if (pl.Model < scenery.Models.Count)
+                            foreach (var t in scenery.Models[pl.Model].Textures) uses.Add((t.TPage, t.Clut));
+                var atlas = PageAtlas.Build(ground, uses);
+                var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
+                mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(
+                    Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false, Image.Format.Rgba8, atlas.Image.Rgba)));
+                _ground.Mesh = GroundMesh(quads, atlas, mat);
+                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, mat, out placed, out skipped);
             }
             foreach (var t in map.Tiles) if (t.NoGround) open++;
             _types.Mesh = TypeMesh(map);
             _types.Visible = ground == null;
 
             _infoText = $"{name}, {ParkWorlds.Describe(world)}: {map.Width}x{map.Height} tiles, " +
-                        (ground != null ? $"ground from sheet #{world?.GroundSheet}, {drawn:n0} quads, {open} tiles left open (drawn by something not read yet)"
+                        (ground != null ? $"ground from sheet #{world?.GroundSheet}, {quads.Count:n0} quads, {open} tiles left to the scenery" +
+                                          (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types";
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, O scenery";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -94,50 +112,78 @@ namespace TPWGodot
             UpdateCamera();
         }
 
-        /// <summary>The ground: one atlas tile per (page, palette) the quads use, rendered as VRAM addresses it,
-        /// so each corner's texel is the game's (u, v) plus the tile's origin.</summary>
-        static ArrayMesh GroundMesh(List<GroundQuad> quads, TextureSheet sheet)
+        /// <summary>The ground: every quad textured from the atlas at the game's (u, v) on its page.</summary>
+        static ArrayMesh GroundMesh(List<GroundQuad> quads, PageAtlas atlas, Material mat)
         {
-            var tiles = new Dictionary<(ushort, ushort), int>();
-            foreach (var q in quads)
-            {
-                var key = ((ushort)(q.TPage & 0x1FF), q.Clut);
-                if (!tiles.ContainsKey(key)) tiles[key] = tiles.Count;
-            }
-            int tx = (int)Math.Ceiling(Math.Sqrt(Math.Max(1, tiles.Count))), ty = (tiles.Count + tx - 1) / tx;
-            int aw = tx * TextureSheet.PageTexels, ah = Math.Max(1, ty) * TextureSheet.PageTexels;
-            var rgba = new byte[aw * ah * 4];
-            foreach (var ((tpage, clut), t) in tiles)
-                sheet.RenderPage(tpage, clut, rgba, aw, (t % tx) * TextureSheet.PageTexels, (t / tx) * TextureSheet.PageTexels);
-
             var verts = new List<Vector3>(quads.Count * 6);
             var cols = new List<Color>(quads.Count * 6);
             var uvs = new List<Vector2>(quads.Count * 6);
+            float aw = atlas.Image.Width, ah = atlas.Image.Height;
             // The GPU draws a quad as triangles 0-1-2 and 1-2-3: the fold runs from (x+1, z) to (x, z+1), which is
             // what a bent tile shows. Winding does not matter here: the ground is drawn from both sides.
             int[] order = { 0, 1, 2, 2, 1, 3 };
             foreach (var q in quads)
             {
-                int t = tiles[((ushort)(q.TPage & 0x1FF), q.Clut)];
-                float ox = (t % tx) * TextureSheet.PageTexels, oy = (t / tx) * TextureSheet.PageTexels;
+                atlas.TryOrigin(q.TPage, q.Clut, out int ox, out int oy);
                 foreach (int k in order)
                 {
                     var c = q[k];
                     verts.Add(At(q.X + (k & 1), q.Z + (k >> 1), c.Height));
-                    cols.Add(new Color((c.Shade & 0xFF) / 255f, ((c.Shade >> 8) & 0xFF) / 255f, ((c.Shade >> 16) & 0xFF) / 255f));
+                    cols.Add(Shade(c.Shade));
                     uvs.Add(new Vector2((ox + c.U) / aw, (oy + c.V) / ah));
                 }
             }
+            return Surface(verts, cols, uvs, mat);
+        }
+
+        /// <summary>The scenery: each placement's model, scaled, turned and moved as 0x80057AF0 does, in the world's
+        /// frame and then into Godot's (z negated, like everything else). Faces are drawn from both sides, as master
+        /// asked of every model; the game itself drops a single-sided face that looks away.</summary>
+        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Material mat, out int placed, out int skipped)
+        {
+            var verts = new List<Vector3>();
+            var cols = new List<Color>();
+            var uvs = new List<Vector2>();
+            float aw = atlas.Image.Width, ah = atlas.Image.Height;
+            int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
+            placed = skipped = 0;
+            foreach (var pl in map.Scenery)
+            {
+                if (pl.Model >= pack.Models.Count) { skipped++; continue; }
+                placed++;
+                var m = pack.Models[pl.Model];
+                foreach (var poly in m.Polygons)
+                {
+                    var tex = m.Textures[poly.Texture];
+                    atlas.TryOrigin(tex.TPage, tex.Clut, out int ox, out int oy);
+                    foreach (int k in poly.IsQuad ? quad : tri)
+                    {
+                        int vi = poly.Corner(k);
+                        var (x, y, z) = m.Position(vi);
+                        var (wx, wy, wz) = pl.Place(x, y, z);
+                        verts.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
+                        byte g = m.Vertices[vi].Shade;
+                        cols.Add(new Color(g / 255f, g / 255f, g / 255f));
+                        ushort uv = poly.Uv(k);
+                        uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
+                    }
+                }
+            }
+            return Surface(verts, cols, uvs, mat);
+        }
+
+        static Color Shade(uint bgr) => new Color((bgr & 0xFF) / 255f, ((bgr >> 8) & 0xFF) / 255f, ((bgr >> 16) & 0xFF) / 255f);
+
+        static ArrayMesh Surface(List<Vector3> verts, List<Color> cols, List<Vector2> uvs, Material mat)
+        {
+            var mesh = new ArrayMesh();
+            if (verts.Count == 0) return mesh;
             var arrays = new Godot.Collections.Array();
             arrays.Resize((int)Godot.Mesh.ArrayType.Max);
             arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
             arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
             arrays[(int)Godot.Mesh.ArrayType.TexUV] = uvs.ToArray();
-            var mesh = new ArrayMesh();
-            if (verts.Count == 0) return mesh;
             mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
-            var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
-            mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(Image.CreateFromData(aw, ah, false, Image.Format.Rgba8, rgba)));
             mesh.SurfaceSetMaterial(0, mat);
             return mesh;
         }
@@ -244,6 +290,8 @@ namespace TPWGodot
             }
             else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.T } && _ground.Mesh != null)
                 _types.Visible = !_types.Visible;
+            else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.O })
+                _scenery.Visible = !_scenery.Visible;
         }
     }
 }

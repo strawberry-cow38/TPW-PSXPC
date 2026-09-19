@@ -38,6 +38,8 @@ namespace TPWGodot
         System.Collections.Generic.List<(int Entry, ParkMap Map)> _maps = new();
         /// <summary>Each world's ground sheet by archive entry, for the maps found (see <see cref="ParkWorlds"/>).</summary>
         System.Collections.Generic.Dictionary<int, TextureSheet> _groundSheets = new();
+        /// <summary>Each world's scenery pack by archive entry.</summary>
+        System.Collections.Generic.Dictionary<int, SceneryPack> _sceneryPacks = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
         int _autoPark = -1;
         /// <summary>From <c>--park-view=x,z,yaw,pitch,distance</c>: where the park camera starts.</summary>
@@ -339,6 +341,9 @@ namespace TPWGodot
                             if (world != null && !_groundSheets.ContainsKey(world.GroundSheet) && world.GroundSheet < gz.Entries.Count &&
                                 TextureSheet.TryParse(gz.Read(gz.Entries[world.GroundSheet]), out var ground, out _))
                                 _groundSheets[world.GroundSheet] = ground;
+                            if (world != null && !_sceneryPacks.ContainsKey(world.SceneryEntry) && world.SceneryEntry < gz.Entries.Count &&
+                                SceneryPack.TryParse(gz.Read(gz.Entries[world.SceneryEntry]), out var pack, out _))
+                                _sceneryPacks[world.SceneryEntry] = pack;
                         }
                     }
                 }
@@ -488,8 +493,9 @@ namespace TPWGodot
                 var (entry, map) = _maps[sel];
                 var world = ParkWorlds.ForMap(entry);
                 TextureSheet ground = null;
-                if (world != null) _groundSheets.TryGetValue(world.GroundSheet, out ground);
-                _park.Load(map, $"map #{entry}", ground, world);
+                SceneryPack scenery = null;
+                if (world != null) { _groundSheets.TryGetValue(world.GroundSheet, out ground); _sceneryPacks.TryGetValue(world.SceneryEntry, out scenery); }
+                _park.Load(map, $"map #{entry}", ground, world, scenery);
             }
             _park.Activate(on && _park.HasMap);
             _models.Activate(!(on && _park.HasMap));

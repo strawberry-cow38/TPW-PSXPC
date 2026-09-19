@@ -11,10 +11,12 @@ namespace TPW.Data
         /// jungle park's RAM); the rest are left unnamed rather than guessed from their colours.</summary>
         public string Name { get; init; } = "";
         /// <summary>The maps a park in this world starts from, archive entries: record +0x00 points at a list
-        /// of (map, companion) pairs and +0x04 counts them.</summary>
+        /// of (map, scenery pack) pairs and +0x04 counts them.</summary>
         public int[] Maps { get; init; } = Array.Empty<int>();
-        /// <summary>The entry listed beside every map of the world (#205 for both jungle maps). Not read yet.</summary>
-        public int MapCompanion { get; init; }
+        /// <summary>The entry listed beside every map of the world (#205 for both jungle maps): its
+        /// <see cref="SceneryPack"/>, the models the maps' build lists place. The map loader loads it as the
+        /// map's second argument (0x800544E0 → 0x800351BC).</summary>
+        public int SceneryEntry { get; init; }
         /// <summary>The texture sheet the ground is cut from (record +0xA0): the one whose sprite table the park
         /// loader (0x800588D0) keeps at gp+0x12A8 for the terrain routine.</summary>
         public int GroundSheet { get; init; }
@@ -38,10 +40,10 @@ namespace TPW.Data
     {
         public static readonly IReadOnlyList<ParkWorld> All = new[]
         {
-            new ParkWorld { Index = 0, Name = "jungle", Maps = new[] { 203, 204 }, MapCompanion = 205, GroundSheet = 258, ExtraSheets = new[] { 169, 170 } },
-            new ParkWorld { Index = 1, Maps = new[] { 116, 117 }, MapCompanion = 118, GroundSheet = 168, ExtraSheets = new[] { 91, 92 } },
-            new ParkWorld { Index = 2, Maps = new[] { 34, 35 }, MapCompanion = 36, GroundSheet = 82, ExtraSheets = new[] { 17, 18 } },
-            new ParkWorld { Index = 3, Maps = new[] { 355, 356 }, MapCompanion = 359, GroundSheet = 400, ExtraSheets = new[] { 332, 333 } },
+            new ParkWorld { Index = 0, Name = "jungle", Maps = new[] { 203, 204 }, SceneryEntry = 205, GroundSheet = 258, ExtraSheets = new[] { 169, 170 } },
+            new ParkWorld { Index = 1, Maps = new[] { 116, 117 }, SceneryEntry = 118, GroundSheet = 168, ExtraSheets = new[] { 91, 92 } },
+            new ParkWorld { Index = 2, Maps = new[] { 34, 35 }, SceneryEntry = 36, GroundSheet = 82, ExtraSheets = new[] { 17, 18 } },
+            new ParkWorld { Index = 3, Maps = new[] { 355, 356 }, SceneryEntry = 359, GroundSheet = 400, ExtraSheets = new[] { 332, 333 } },
         };
 
         /// <summary>The world a map belongs to, or null for an entry no world lists.</summary>

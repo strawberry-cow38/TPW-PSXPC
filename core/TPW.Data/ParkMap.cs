@@ -105,6 +105,11 @@ namespace TPW.Data
         public uint[] ShadeTable { get; private set; } = Array.Empty<uint>();
         /// <summary>Bytes after the tile grid: the build list. Small on a real map.</summary>
         public int TrailingBytes { get; private set; }
+        /// <summary>The build list: static scenery models placed on the map, drawn every frame by 0x80057AF0 from
+        /// the world's <see cref="SceneryPack"/>. `u32 count; count × 12 bytes: u32 model | flags &lt;&lt; 24, u16 x,
+        /// u16 y, u16 z, u16 quarter turns`. The loader (0x800544E0) keeps the count at gp+0x12D8 and the records
+        /// at gp+0x12DC, and loads the scenery pack only when the count is not zero.</summary>
+        public List<SceneryPlacement> Scenery { get; private set; } = new();
 
         public MapTile this[int x, int y] => Tiles[y * Width + x];
 
@@ -133,6 +138,19 @@ namespace TPW.Data
             for (int i = 0; i < w * h; i++, p += TileBytes)
                 m.Tiles[i] = new MapTile(d[p], d[p + 1], d[p + 2], d[p + 3],
                                          BitConverter.ToUInt16(d, p + 4), d[p + 6], d[p + 7]);
+
+            // The build list. A map that ends at the grid simply has none.
+            if (p + 4 <= d.Length)
+            {
+                int count = BitConverter.ToInt32(d, p);
+                if (count < 0 || p + 4 + (long)count * 12 > d.Length) { error = $"build list of {count} runs past the end"; return false; }
+                for (int i = 0, r = p + 4; i < count; i++, r += 12)
+                {
+                    uint w0 = BitConverter.ToUInt32(d, r);
+                    m.Scenery.Add(new SceneryPlacement((int)(w0 & 0xFFFFFF), (byte)(w0 >> 24), BitConverter.ToUInt16(d, r + 4),
+                        BitConverter.ToUInt16(d, r + 6), BitConverter.ToUInt16(d, r + 8), BitConverter.ToUInt16(d, r + 10)));
+                }
+            }
 
             map = m;
             return true;

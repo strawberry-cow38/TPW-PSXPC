@@ -615,6 +615,35 @@ static class Program
         return 0;
     }
 
+    /// <summary>--scenery: every world's scenery pack through the real reader, and every map's build list against
+    /// it. Exit code: packs that failed plus placements naming a model their pack does not have.</summary>
+    static int Scenery(DiscReader disc)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        int bad = 0;
+        foreach (var w in ParkWorlds.All)
+        {
+            if (!SceneryPack.TryParse(g.Read(g.Entries[w.SceneryEntry]), out var pack, out string err))
+            { Console.WriteLine($"{ParkWorlds.Describe(w)}: scenery pack #{w.SceneryEntry} FAILED: {err}"); bad++; continue; }
+            int polys = 0, verts = 0, two = 0;
+            foreach (var m in pack.Models) { polys += m.Polygons.Count; verts += m.Vertices.Count; foreach (var t in m.Textures) if (t.DoubleSided) two++; }
+            Console.WriteLine($"{ParkWorlds.Describe(w)}: scenery pack #{w.SceneryEntry}: {pack.Models.Count} models, {polys:n0} polygons, " +
+                              $"{verts:n0} vertices, {two} double-sided textures");
+            foreach (int mapEntry in w.Maps)
+            {
+                if (!ParkMap.TryParse(g.Read(g.Entries[mapEntry]), out var map, out string me)) { Console.WriteLine($"   map #{mapEntry}: {me}"); bad++; continue; }
+                int missing = 0;
+                var used = new SortedSet<int>();
+                foreach (var pl in map.Scenery) { if (pl.Model >= pack.Models.Count) missing++; else used.Add(pl.Model); }
+                bad += missing;
+                Console.WriteLine($"   map #{mapEntry}: {map.Scenery.Count} placements of {used.Count} models" +
+                                  (missing > 0 ? $", {missing} naming a model the pack lacks" : ""));
+            }
+        }
+        return bad;
+    }
+
     static int ModelTextures(DiscReader disc)
     {
         var g = Archive(disc);
@@ -901,6 +930,7 @@ static class Program
 
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
+            if (Array.IndexOf(args, "--scenery") >= 0) return Scenery(disc);
             int groundAt = Array.IndexOf(args, "--ground");
             if (groundAt >= 0 && groundAt + 3 < args.Length)
                 return Ground(disc, int.Parse(args[groundAt + 1]), int.Parse(args[groundAt + 2]), args[groundAt + 3]);
