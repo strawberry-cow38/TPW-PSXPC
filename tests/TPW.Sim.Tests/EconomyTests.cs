@@ -9,12 +9,12 @@ namespace TPW.Sim.Tests
         // Every economy number in the game is out by 10x if this is missed, and still looks like money,
         // which is why it needs a type rather than a convention.
         //
-        // ⚠ This asserted 48,040 and was red, because the figure was mistyped in chat and the citation
-        // carried the typo in. The comment said "a HUD reading of $48,040" long after the assertion was
-        // corrected, which left the prose contradicting the line under it. 48,080 reconciles three ways
-        // and 48,040 reconciles none: fixtures/park_with_ride.json holds money = 480800; the park opened
-        // with 50,000 and bought a GBP 2,000 ride; and gate_total moves +400 per admission, GBP 40 each,
-        // with two admissions on the clock. 50,000 - 2,000 + 80 = 48,080.
+        // ⚠ This asserted 48,040 against 480,800 and was red. The cause was NOT a typo, which is what I
+        // first claimed: BOTH figures are real readings taken two in-game days apart. Captured at one
+        // instant, the HUD reads $48.040 while memory reads 480400 -- exactly ten times, no discrepancy.
+        // The fixture's 480800 is day 27 with two admissions banked (gate_total 800); the 48,040 screen
+        // is day 25 with one. The assertion paired a memory value from one moment with a screen reading
+        // from another, which is a subtler fault than a mistyped digit and reads identically in a diff.
         [Fact]
         public void TheGameStoresTenTimesWhatItDisplays()
         {
