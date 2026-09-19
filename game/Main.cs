@@ -118,6 +118,10 @@ namespace TPWGodot
         /// <summary>From <c>--cull-on</c>: tour with back-face culling on, the view that shows winding faults.</summary>
         bool _tourCull;
         int _tourPos = -1, _tourFrames;
+        /// <summary>--model-play: the tour plays each model's animation from its start. --tour-frames=N: frames per
+        /// model (24 by default), long enough to watch a loop come round.</summary>
+        bool _tourPlay;
+        int _tourHold = 24;
 
         /// <summary>✅ 22,050 Hz, SETTLED BY LISTENING. Master tried the selector and identified it, and also
         /// worked out what these waveforms are: mostly short chunks of the game's MUSIC, cut up so it can
@@ -463,6 +467,8 @@ namespace TPWGodot
                 else if (arg.StartsWith("--models="))
                     _modelTourSpec = arg.Substring("--models=".Length).Split(',');
                 else if (arg == "--cull-on") _tourCull = true;
+                else if (arg == "--model-play") _tourPlay = true;
+                else if (arg.StartsWith("--tour-frames=")) _tourHold = System.Math.Max(1, int.Parse(arg.Substring("--tour-frames=".Length)));
                 else if (arg == "--no-boot") _skipBoot = true;
                 else if (arg == "--boot") _bootNow = true;
                 else if (arg.StartsWith("--boot-from=")) _bootFrom = arg.Substring("--boot-from=".Length);
@@ -659,6 +665,7 @@ namespace TPWGodot
                 _debugLayer.Visible = false;
                 _tourPos = 0;
                 _models.Show(_modelTour[0]);
+                if (_tourPlay) _models.PlayFromStart();
             }
             else if (_modelInfo != null) _modelInfo.Text = "Models: none parsed.";
 
@@ -1175,11 +1182,15 @@ namespace TPWGodot
             double tickSeconds = _data.Variant?.TickSeconds ?? ParkClock.TickSeconds;
             while (_accum >= tickSeconds) { _accum -= tickSeconds; _clock.Advance(); }
 
-            if (_tourPos >= 0 && ++_tourFrames >= 24)
+            if (_tourPos >= 0 && ++_tourFrames >= _tourHold)
             {
                 _tourFrames = 0;
                 if (++_tourPos >= _modelTour.Length) { _tourPos = -1; GetTree().Quit(); }
-                else _models.Show(_modelTour[_tourPos]);
+                else
+                {
+                    _models.Show(_modelTour[_tourPos]);
+                    if (_tourPlay) _models.PlayFromStart();
+                }
             }
 
             _status.Text = _data.CanPlay

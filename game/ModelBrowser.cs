@@ -74,6 +74,9 @@ namespace TPWGodot
         /// indistinguishable on screen and the wrong one of them sends someone debugging working code.</summary>
         public void TogglePlay() { _playing = !_playing; _clock = 0; Show(_index); }
 
+        /// <summary>Play the model on screen from time 0 (the tour's --model-play).</summary>
+        public void PlayFromStart() { _playing = true; _clock = 0; RefreshPose(); Show(_index); }
+
         /// <summary>Pose at time 0 even while paused, for models that need it.
         ///
         /// ⚠ AN ANIMATED MODEL'S REST GEOMETRY CAN BE EMPTY. A quarter of all vertices in the animated
