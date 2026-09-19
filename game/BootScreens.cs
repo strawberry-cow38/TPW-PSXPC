@@ -292,26 +292,12 @@ namespace TPWGodot
             _menuDrawn = key;
 
             var frame = MenuRenderer.NewFrame();
-            // ⭐ MEASURED, not picked: one Gouraud quad running RGB(153,163,254) at the top to
-            // RGB(42,32,87) at the bottom (findings/menu-art.md).
-            for (int yy = 0; yy < MenuRenderer.H; yy++)
-            {
-                float t = yy / (float)(MenuRenderer.H - 1);
-                byte r = (byte)(153 + (42 - 153) * t), g = (byte)(163 + (32 - 163) * t), b = (byte)(254 + (87 - 254) * t);
-                for (int xx = 0; xx < MenuRenderer.W; xx++)
-                {
-                    int o = (yy * MenuRenderer.W + xx) * 4;
-                    frame[o] = r; frame[o + 1] = g; frame[o + 2] = b; frame[o + 3] = 255;
-                }
-            }
-            string name = LanguageRing.NameAt(_ring);
-            int w = MenuRenderer.MeasureText(_menuArt, name);
-            MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, 130, name);
+            MenuRenderer.DrawLanguageScreen(_menuArt, frame, _ring);
 
             var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);
             _menuView.Texture = ImageTexture.CreateFromImage(img);
             _big.Text = _small.Text = "";
-            _note.Text = "flags and advisor not drawn yet — they are sheet 84 sprites and a skinned mesh";
+            _note.Text = "real flag art, drawn flat — the console waves it on a mesh the advisor holds";
         }
 
         static string Bar(int level)

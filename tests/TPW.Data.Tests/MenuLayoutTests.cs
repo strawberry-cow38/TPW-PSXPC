@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Linq;
 using TPW.Data;
 using Xunit;
@@ -69,5 +71,52 @@ namespace TPW.Data.Tests
             Assert.Equal(4, MenuRenderer.DrawText(null, frame, 4, 0, "Play Game"));
             Assert.All(frame, b => Assert.Equal(0, b));
         }
-    }
+    
+        [Fact]
+        public void LanguageRingDrawsFiveSlotsSymmetricallyAboutTheCentre()
+        {
+            var slots = MenuRenderer.RingSlots;
+            Assert.Equal(5, slots.Length);
+            // The ring holds seven; the two at the back are not drawn at all.
+            Assert.True(slots.Length < LanguageRing.Count);
+            for (int i = 0; i < slots.Length / 2; i++)
+            {
+                var a = slots[i];
+                var b = slots[slots.Length - 1 - i];
+                Assert.Equal(-a.Dx, b.Dx, 1);              // mirrored offsets
+                Assert.Equal(a.Baseline, b.Baseline);      // same row
+                Assert.Equal(a.Shade, b.Shade, 3);         // same dimming
+            }
+            // The selected slot is centred and the brightest; dimming falls off monotonically.
+            Assert.Equal(0f, slots[2].Dx);
+            for (int i = 0; i < 2; i++) Assert.True(slots[i].Shade < slots[i + 1].Shade);
+            // ⚠ NOT evenly spaced: this is a projected circle. An even ring would make these equal.
+            Assert.NotEqual(MathF.Abs(slots[2].Dx - slots[1].Dx), MathF.Abs(slots[1].Dx - slots[0].Dx), 1);
+        }
+
+        [Fact]
+        public void NativeNamesAreInRingOrderAndDrawableInTheGameFont()
+        {
+            Assert.Equal(LanguageRing.Count, LanguageRing.NativeName.Length);
+            Assert.Equal("English", LanguageRing.NativeNameAt(LanguageRing.RestPosition));
+            Assert.Equal("Nederlands", LanguageRing.NativeNameAt(LanguageRing.Turn(LanguageRing.RestPosition, -1)));
+            Assert.Equal("Svenska", LanguageRing.NativeNameAt(LanguageRing.Turn(LanguageRing.RestPosition, 1)));
+            // Wrapping, both directions.
+            Assert.Equal(LanguageRing.NativeNameAt(0), LanguageRing.NativeNameAt(LanguageRing.Count));
+            Assert.Equal(LanguageRing.NativeNameAt(LanguageRing.Count - 1), LanguageRing.NativeNameAt(-1));
+            // Every character must exist in the font, accents included -- a missing one is drawn as a
+            // silent gap, which looks like a spacing bug rather than a missing glyph.
+            foreach (string n in LanguageRing.NativeName)
+                foreach (char c in n)
+                    Assert.True(c == ' ' || MenuLayout.Glyph.ContainsKey(c), $"no glyph for '{c}' in \"{n}\"");
+        }
+
+        [Fact]
+        public void EachRingPositionHasItsOwnFlagSprite()
+        {
+            Assert.Equal(LanguageRing.Count, LanguageRing.FlagSprite.Length);
+            Assert.Equal(LanguageRing.Count, LanguageRing.FlagSprite.Distinct().Count());
+            Assert.All(LanguageRing.FlagSprite, i => Assert.True(i > 0));
+        }
+}
 }

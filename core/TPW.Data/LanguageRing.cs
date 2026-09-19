@@ -37,6 +37,49 @@ namespace TPW.Data
         /// ring rests.</summary>
         public static readonly int[] ToLanguageIndex = { 2, 4, 5, 0, 6, 1, 3 };
 
+        /// <summary>Ring position -> the sheet-84 sprite holding that language's FLAG.
+        ///
+        /// ⚠ NOT IN RING ORDER AND NOT IN LANGUAGE ORDER -- a third ordering again (122, 124, 119, 120, 125, 121, 123). Read off
+        /// the disc rather than assumed, and two of the seven are verified by consequence: on the
+        /// console the flag is drawn from a SLOT sprite (#126) whose texels the game overwrites with
+        /// the chosen flag, and at rest that slot's contents equal sprite #120 (English) while after
+        /// one LEFT they equal #119 (Dutch). The other five are named by the flag picture itself.
+        ///
+        /// ⚠ THE CONSOLE DRAWS THIS ON A MESH, not as a flat quad -- the advisor holds a pole and the
+        /// cloth waves. Every textured 2D primitive on that screen is font. So drawing this sprite
+        /// flat gives the RIGHT ART in the WRONG FORM, which is worth having and worth saying.</summary>
+        public static readonly int[] FlagSprite = { 122, 124, 119, 120, 125, 121, 123 };
+
+        /// <summary>Ring position -> the name the console PRINTS for it, which is the language's own
+        /// name, not the English one. ⭐ These are the game's own strings, reached through its own
+        /// pointer array at <see cref="NameTableAddress"/> -- seven words in ring order, read both out
+        /// of a live RAM dump on the language screen and straight out of TPW.BIN at the matching file
+        /// offset, so this is static data and not something assembled at runtime.
+        ///
+        /// ⚠ NOT in the string tables, and that is not an oversight: the language screen runs BEFORE a
+        /// language is chosen, so there is no table to read from yet. Searching all eight tables for
+        /// them returns nothing, which is the check that sent me to the executable.
+        ///
+        /// The array is also the third independent witness to <see cref="ToLanguageIndex"/>: its order
+        /// is Deutsch, Español, Nederlands, English, Svenska, Français, Italiano, matching both the ring
+        /// order derived from input and the flag sprites' own keys.
+        ///
+        /// ⚠ Four of the seven live in TPW.BIN and three in the title overlay (0x8011476c onward) --
+        /// the split is by string LENGTH, the short ones fitting an 8-byte slot. A reader who assumes
+        /// one contiguous block finds four names and concludes the other three are generated.</summary>
+        public static readonly string[] NativeName =
+            { "Deutsch", "Español", "Nederlands", "English", "Svenska", "Français", "Italiano" };
+
+        /// <summary>TPW.BIN address of the pointer array above. File offset is this minus 0x80010000.</summary>
+        public const uint NameTableAddress = 0x801024F4;
+
+        /// <summary>The name as the console prints it for a ring position.</summary>
+        public static string NativeNameAt(int ringPosition)
+        {
+            int n = ToLanguageIndex.Length;
+            return NativeName[((ringPosition % n) + n) % n];
+        }
+
         /// <summary>Where the ring sits before anyone touches it: English.</summary>
         public const int RestPosition = 3;
         public static int Count => ToLanguageIndex.Length;

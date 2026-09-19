@@ -10,5 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\core\TPW.Data\TPW.Data.csproj" />
     <ProjectReference Include="..\..\core\TPW.Launcher\TPW.Launcher.csproj" />
+      <ProjectReference Include="../../core/TPW.Sim/TPW.Sim.csproj" />
   </ItemGroup>
 </Project>

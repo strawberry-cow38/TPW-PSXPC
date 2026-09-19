@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TPW.Data;
+using TPW.Sim;
 using TPW.Launcher;
 
 // Runs the startup asset self-test against a disc image and prints the report, with no engine involved.
@@ -1303,6 +1304,60 @@ static class Program
         return 1;
     }
 
+    static int LangNames(GazArchive g)
+    {
+        string[] want = { "English", "Fran", "Deutsch", "Italiano", "Espa", "Nederlands", "Svenska" };
+        int parsed = 0;
+        for (int l = 0; l < StringTable.EntryByLanguage.Length; l++)
+        {
+            int e = StringTable.EntryByLanguage[l];
+            if (e >= g.Entries.Count) { Console.WriteLine($"lang {l}: entry {e} missing"); continue; }
+            if (!StringTable.TryParse(g.Read(g.Entries[e]), e, out var t, out string err))
+            { Console.WriteLine($"lang {l} entry {e}: {err}"); continue; }
+            parsed++;
+            var found = new List<string>();
+            for (int id = 0; id < t.Strings.Length; id++)
+            {
+                string v = t[id];
+                if (v == null || v.Length > 16) continue;
+                foreach (var w in want)
+                    if (v.StartsWith(w, StringComparison.Ordinal)) { found.Add($"{id}:{v}"); break; }
+            }
+            Console.WriteLine($"lang {l} ({StringTable.LanguageNames[l]}) entry {e}: {t.Strings.Length} strings, " +
+                              (found.Count == 0 ? "NO native-language names" : string.Join(", ", found.Take(12))));
+        }
+        Console.WriteLine($"{parsed} tables parsed");
+        return 0;
+    }
+
+    static int MenuRender(GazArchive g, string dir)
+    {
+        if (MenuLayout.Sheet >= g.Entries.Count) { Console.WriteLine("menu sheet: entry missing"); return 1; }
+        if (!TextureSheet.TryParse(g.Read(g.Entries[MenuLayout.Sheet]), out var sheet, out string err))
+        { Console.WriteLine("menu sheet: " + err); return 1; }
+        var p = MenuRenderer.Prepare(sheet);
+        System.IO.Directory.CreateDirectory(dir);
+        int n = 0;
+        var menu = MenuRenderer.NewFrame();
+        MenuRenderer.DrawBackdrop(p, menu);
+        for (int i = 0; i < MainMenu.RootItems.Length; i++)
+        {
+            int y = 160 + i * 30;
+            if (i == 0) MenuRenderer.DrawHighlight(p, menu, y);
+            int w = MenuRenderer.MeasureText(p, MainMenu.RootItems[i]);
+            MenuRenderer.DrawText(p, menu, (MenuRenderer.W - w) / 2, y, MainMenu.RootItems[i]);
+        }
+        System.IO.File.WriteAllBytes(System.IO.Path.Combine(dir, "menu.rgba"), menu); n++;
+        for (int r = 0; r < LanguageRing.Count; r++)
+        {
+            var f = MenuRenderer.NewFrame();
+            MenuRenderer.DrawLanguageScreen(p, f, r);
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(dir, $"lang{r}_{LanguageRing.NameAt(r)}.rgba"), f); n++;
+        }
+        Console.WriteLine($"wrote {n} frames of {MenuRenderer.W}x{MenuRenderer.H} RGBA to {dir}");
+        return 0;
+    }
+
     static int Main(string[] args)
     {
         // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
@@ -1317,6 +1372,15 @@ static class Program
             if (!GazArchive.TryParse(gb, out var g, out string ge)) { Console.WriteLine("archive: " + ge); return 1; }
             if (Array.IndexOf(args, "--mapping") >= 0) { Mapping(g); return 0; }
             if (Array.IndexOf(args, "--anim") >= 0) return Anim(g);
+            // --menurender <dir>: the menu and all seven language screens, through the SAME
+            // MenuRenderer the game runs, as raw RGBA. No engine, so a layout error is visible without
+            // a window -- and because it is the product's code, a pass here is a pass on the game.
+            // --langnames: the language screen shows each language in ITS OWN language. Find where those
+            // names live by asking every table for its own name, through the real StringTable decoder
+            // (code page 850), and report the string ID that holds it.
+            if (Array.IndexOf(args, "--langnames") >= 0) return LangNames(g);
+            int mrAt = Array.IndexOf(args, "--menurender");
+            if (mrAt >= 0 && mrAt + 1 < args.Length) return MenuRender(g, args[mrAt + 1]);
             // --attractions [text]: find a model by WHAT IT IS. ⚠ Not --names, which already exists on the
             // disc route and dumps the string tables by language; two different jobs, and one name for
             // both is how someone runs the wrong one and believes the output.

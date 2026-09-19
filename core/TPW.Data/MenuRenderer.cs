@@ -32,6 +32,9 @@ namespace TPW.Data
             if (sheet == null) return null;
             var uses = new List<(ushort, ushort)>();
             foreach (var q in MenuLayout.Backdrop) uses.Add((q.TPage, q.Clut));
+            foreach (int fi in LanguageRing.FlagSprite)
+                if (fi >= 0 && fi < sheet.Sprites.Count)
+                { var fs = sheet.Sprites[fi]; uses.Add((fs.TPage, fs.Clut)); }
             foreach (var kv in MenuLayout.Glyph)
                 if (kv.Value >= 0 && kv.Value < sheet.Sprites.Count)
                 {
@@ -211,6 +214,116 @@ namespace TPW.Data
                     dst[o + 2] = (byte)Math.Min(255, dst[o + 2] + (int)(w0 * t.B0 + w1 * t.B1 + w2 * t.B2));
                     dst[o + 3] = 255;
                 }
+        }
+
+        /// <summary>The language ring's five VISIBLE slots, read off the console's own display list on
+        /// the language screen (RAM dump, frame 30 of states/language.state).
+        ///
+        /// The ring holds seven languages but only FIVE are drawn -- the two at the back are omitted
+        /// entirely, not merely dimmed. Each slot is an x offset from the ring's centre, a text
+        /// baseline, and a shade; the shades are the primitives' own vertex colour over 0x80, which is
+        /// 1.0 on this hardware. ⚠ The offsets are NOT evenly spaced (158.5 then 229.5) because this is
+        /// a perspective projection of a circle, not a row -- an evenly-spaced guess would look wrong
+        /// in a way that is hard to name once it is on screen.</summary>
+        public static readonly (float Dx, int Baseline, float Shade)[] RingSlots =
+        {
+            (-229.5f, 172, 0x19 / 128f),
+            (-158.5f, 200, 0x2e / 128f),
+            (   0.0f, 213, 0x64 / 128f),
+            ( 158.5f, 200, 0x2e / 128f),
+            ( 229.5f, 172, 0x19 / 128f),
+        };
+
+        /// <summary>Where the ring is centred. ⚠ 259, not 256: the screen's centre is 255.5 and the
+        /// text ring does not sit on it. Measured, not assumed.</summary>
+        public const int RingCentreX = 259;
+
+        /// <summary>The two sets of four chevrons either side of the selected name, as the console
+        /// draws them: flat semi-transparent triangles 32 wide and 24 tall, stepping 16 apart, on a
+        /// 1:2:3:4 brightness ramp with the OUTERMOST darkest. Colour is (50,45,4) times the step --
+        /// gold, not the cyan a raw little-endian read of the GPU word suggests.</summary>
+        public const int ChevronLeftApexX = 87, ChevronRightApexX = 423;
+        public const int ChevronMidY = 204, ChevronTopY = 192, ChevronBotY = 216;
+        public const int ChevronStep = 16, ChevronWidth = 32, ChevronCount = 4;
+
+        static void Chevrons(byte[] dst)
+        {
+            for (int k = 0; k < ChevronCount; k++)
+            {
+                byte r = (byte)(50 * (k + 1)), g = (byte)(45 * (k + 1)), b = (byte)(4 * (k + 1));
+                int la = ChevronLeftApexX + k * ChevronStep, lb = la + ChevronWidth;
+                int ra = ChevronRightApexX - k * ChevronStep, rb = ra - ChevronWidth;
+                FillTri(dst, new ScreenTri((short)la, ChevronMidY, (short)lb, ChevronBotY, (short)lb, ChevronTopY,
+                                           r, g, b, r, g, b, r, g, b));
+                FillTri(dst, new ScreenTri((short)ra, ChevronMidY, (short)rb, ChevronBotY, (short)rb, ChevronTopY,
+                                           r, g, b, r, g, b, r, g, b));
+            }
+        }
+
+        /// <summary>The whole language-select screen, composed. Lives HERE rather than in the Godot
+        /// layer so that the offline render and the running game are the SAME code -- a harness that
+        /// re-composes the screen itself would be testing the harness.</summary>
+        public static void DrawLanguageScreen(Prepared p, byte[] dst, int ring)
+        {
+            // ⭐ MEASURED: one Gouraud quad, RGB(153,163,254) at the top to RGB(42,32,87) at the bottom.
+            for (int yy = 0; yy < H; yy++)
+            {
+                float t = yy / (float)(H - 1);
+                byte r = (byte)(153 + (42 - 153) * t), g = (byte)(163 + (32 - 163) * t), b = (byte)(254 + (87 - 254) * t);
+                for (int xx = 0; xx < W; xx++)
+                {
+                    int o = (yy * W + xx) * 4;
+                    dst[o] = r; dst[o + 1] = g; dst[o + 2] = b; dst[o + 3] = 255;
+                }
+            }
+            int n = LanguageRing.Count;
+            int sel = ((ring % n) + n) % n;
+
+            // The real flag for this language, drawn flat. ⚠ Its POSITION is mine and its FORM is wrong:
+            // the console draws the flag as a waving cloth mesh on a pole the advisor holds -- 100-odd
+            // textured triangles in the same dump these slot positions came from. Right art, wrong form.
+            DrawSprite(p, dst, LanguageRing.FlagSprite[sel], 181, 40);
+
+            Chevrons(dst);
+
+            for (int i = 0; i < RingSlots.Length; i++)
+            {
+                // ⚠ ADDITIVE, and this is the difference between the ring reading right and reading
+                // like a list of labels. The primitives carry abr=1, which on this GPU is back+front,
+                // NOT the back/2+front/2 of abr=0 -- I implemented the half blend first and it left the
+                // selected name muddy brown where the console's is vivid orange. Additive over the blue
+                // gradient is also why the dim slots tint lavender instead of showing a black outline:
+                // the font's outline pixels add nothing and simply stay background.
+                var (dx, baseline, shade) = RingSlots[i];
+                int idx = (((sel + i - 2) % n) + n) % n;
+                string name = LanguageRing.NativeNameAt(idx);
+                int w = MeasureText(p, name);
+                DrawText(p, dst, (int)MathF.Round(RingCentreX + dx - w / 2f), baseline, name, additive: true, shade: shade);
+            }
+        }
+
+        /// <summary>Draw one sheet sprite by index, top-left at (x, y). Honours the rotation flag the
+        /// same way the glyph path does, since the flag sprites come off the same sheet.</summary>
+        public static void DrawSprite(Prepared p, byte[] dst, int index, int x, int y)
+        {
+            if (p == null || index < 0 || index >= p.SpriteCount) return;
+            var sp = p.Sheet.Sprites[index];
+            if (!p.Atlas.TryOrigin(sp.TPage, sp.Clut, out int ax, out int ay)) return;
+            var src = p.Atlas.Image;
+            bool rot = (sp.Flags & 1) != 0;
+            for (int gy = 0; gy < sp.H; gy++)
+            {
+                int dy = y + gy;
+                if (dy < 0 || dy >= H) continue;
+                for (int gx = 0; gx < sp.W; gx++)
+                {
+                    int dx = x + gx;
+                    if (dx < 0 || dx >= W) continue;
+                    int su = rot ? sp.U + gy : sp.U + gx;
+                    int sv = rot ? sp.V + (sp.W - 1 - gx) : sp.V + gy;
+                    Blend(dst, (dy * W + dx) * 4, src, ((ay + sv) * src.Width + ax + su) * 4, false);
+                }
+            }
         }
 
         /// <summary>Width of a string in the menu font, for centring.</summary>
