@@ -362,7 +362,15 @@ namespace TPWGodot
                 _language = l;
                 GD.Print($"[tpw] language chosen: {StringTable.LanguageNames[l]} (game index {l})");
             };
-            _boot.StartPracticePark += () => GD.Print("[tpw] Practice Park requested — which map it loads is not identified yet");
+            _boot.StartPracticePark += () =>
+            {
+                int i = _maps.FindIndex(m => m.Entry == ParkWorlds.PracticeParkMap);
+                if (i < 0) { GD.PushWarning($"[tpw] Practice Park map {ParkWorlds.PracticeParkMap} is not on this disc"); return; }
+                _parkChoice.Selected = i;
+                _debugLayer.Visible = false;
+                _boot.Visible = false;
+                ShowPark(true);
+            };
             // ⚠ SFX is carried but not applied: the port has no sound-effect bus yet, only music and
             // the one-shot sample button. Wiring it to the music player instead would make the slider
             // LOOK like it works, which is worse than a slider that visibly does nothing.

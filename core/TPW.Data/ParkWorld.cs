@@ -56,6 +56,21 @@ namespace TPW.Data
         /// that starts a module by number. Modules #293, #308, #311 and #314 are started some other way.</summary>
         public const int FrontEndMusic = 299;
 
+        /// <summary>The map the PRACTICE PARK loads: entry 203, the jungle world's first map.
+        ///
+        /// ⭐ MEASURED BY WHAT IS RESIDENT, not guessed from the name. Drove the console from the main
+        /// menu into Practice Park, dumped its RAM, and tested every archive entry's bytes against it:
+        /// 203 (jungle's first map), 205 (jungle's scenery), 258 (jungle's ground sheet) and 169
+        /// (jungle's extra sheet) are all present verbatim. Jungle's OTHER map, 204, is absent, and so
+        /// is every asset of every other world. Four of one world's five assets resident and nothing
+        /// from any other is not a coincidence a wrong answer could produce.
+        ///
+        /// ⚠ Reached via Play Game -> Practice Park. "Main Game" is a dead end on the test harness --
+        /// it has no memory card, not even an empty one -- so the world map that presumably sits
+        /// behind it has never been seen. Do not read "Practice Park is jungle" as "the world map
+        /// defaults to jungle"; those are different screens and only one of them has been reached.</summary>
+        public const int PracticeParkMap = 203;
+
         /// <summary>The world a map belongs to, or null for an entry no world lists.</summary>
         public static ParkWorld ForMap(int mapEntry)
         {
