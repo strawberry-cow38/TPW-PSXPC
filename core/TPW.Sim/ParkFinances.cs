@@ -17,11 +17,13 @@ namespace TPW.Sim
     {
         readonly Func<Money> _monthlyWages;
 
-        /// <param name="opening">Starting balance.
+        /// <param name="opening">Starting balance. Use <see cref="ParkEconomy.OpeningBalance"/>, £50,000.
         ///
-        /// ⚠ NOT ESTABLISHED. economy.md does not record what the game opens a park with, and it is
-        /// almost certainly per-level rather than a constant, so this is a parameter rather than a
-        /// baked-in figure. Do not invent one here.</param>
+        /// ⚠ I PREVIOUSLY MARKED THIS "NOT ESTABLISHED" AND THAT WAS WRONG. economy.md §1.2 has it READ
+        /// at 0x80058A94 in the game-mode init, and I asserted the absence without looking - the figure
+        /// was in the report the whole time. Left as a parameter because the BANK constructor's own
+        /// default (£10,000) is a different number for a bank built outside that init, so the caller
+        /// has to say which it means.</param>
         /// <param name="monthlyWages">Total staff wages for the month just ended, summed by the caller
         /// over its roster with <see cref="Wages.Monthly"/>. Defaults to nothing, because the port has
         /// no staff yet -- and a park with no staff genuinely owes no wages, so the default is the

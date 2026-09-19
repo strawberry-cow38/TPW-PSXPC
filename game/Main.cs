@@ -228,7 +228,7 @@ namespace TPWGodot
             // The opening balance: the park's game-mode init sets the bank to Money(50000, 0) (0x800588D0, at
             // 0x80058A94..0x80058AB8 through 0x800868B0; economy.md §1.2), what the HUD shows at the start. Whether a
             // level record overrides it later is not read.
-            _finances = new ParkFinances(Money.FromPounds(50000));
+            _finances = new ParkFinances(ParkEconomy.OpeningBalance);
 
             // ⚠ INSET FROM THE EDGES. Anchored full-rect with no offsets, the first label sits ON the top
             // edge and is clipped by it -- which looked like a missing widget rather than a margin bug.

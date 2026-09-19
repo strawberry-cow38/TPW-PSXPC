@@ -168,6 +168,19 @@ namespace TPW.Sim
         /// <summary>The bank's constructed default entry fee: Money(40).</summary>
         public static readonly Money DefaultEntryFee = Money.FromPounds(40);
 
+        /// <summary>What a park opens with: £50,000 (READ, economy.md §1.2 - the game-mode init at
+        /// 0x80058A94..0x80058AB8 writes `balance := Money(50000, 0)`).
+        ///
+        /// ⚠ NOT THE SAME AS THE BANK'S OWN DEFAULT, which is <see cref="BankConstructorBalance"/>.
+        /// The constructor puts £10,000 in and the game-mode init then overwrites it, so a bank created
+        /// outside that init starts with a different figure. Picking the wrong one gives a park five
+        /// times the money it should have and nothing anywhere reports an error.</summary>
+        public static readonly Money OpeningBalance = Money.FromPounds(50000);
+
+        /// <summary>The BANK constructor's own default, £10,000, before the game-mode init overwrites
+        /// it. See <see cref="OpeningBalance"/>.</summary>
+        public static readonly Money BankConstructorBalance = Money.FromPounds(10000);
+
         /// <summary>⚠ HIRING COSTS NOTHING. The game calls TrySpend with £0. See Wages.TrainingCost.</summary>
         public static readonly Money HireCost = Money.Zero;
 
