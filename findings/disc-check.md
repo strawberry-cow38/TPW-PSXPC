@@ -31,3 +31,41 @@ the flag is 1.
   A cold boot with a memory card does not change the flag (tinyclaw, 2026-09-19). A save state does not
   either, because the check runs once at boot.
 - Nothing on screen explains the greying. The game has no string for it (tinyclaw).
+
+## Reaching the world map anyway (MEASURED, tinyclaw 2026-09-19)
+
+The check can be stepped over without a `.sbi`, which is how the consequences above were confirmed
+rather than reasoned about. `fable/b/runner_b.c` now takes a `POKE=addr:value[,…]` environment
+variable and writes those u32s into RAM after every frame:
+
+```
+POKE=80103540:0 LOADSTATE=states/mainmenu.state ./run.sh out 1400 150 in_cross.txt
+```
+
+With the flag held at 0, **Main Game is drawn at 0x808080 instead of 0x202020**, and pressing it loads
+**overlay 11 and the world map** — islands joined by rope bridges, the first being "Lost Kingdom:
+Prehistoric World". This is the screen that earlier notes recorded as unreachable and whose overlay
+"never appears in RAM"; it never appeared because the menu row was never pressable.
+
+Holding the poke every frame matters: the flag is read live per draw, not cached, so a one-shot write
+before the menu appears is overwritten by nothing but is also not required — the per-frame write is
+simply the version that cannot be raced.
+
+⚠ **This is a debugging override, not a fix.** It proves what the flag gates; it is not a way to make
+the emulator pass the check, and the port should not imitate any of it. The port has no disc to check.
+
+### What the world map turned out to contain
+Read from the island table at **0x801141F4** (8 records, 0x1C bytes: world at +6, park at +7, name
+string id at +10) — ported in `TPW.Data.WorldMap`:
+
+| world | parks |
+|---|---|
+| 0 jungle | Lost Kingdom: Prehistoric World / The Park That Time Forgot |
+| 1 halloween | Halloween World: Realm of Terror / Halloween: Ghost World |
+| 2 fantasy | Wonder Land: Land of Dreams / Wonder Land: Enchanted Island |
+| 3 space | Space Zone: The Final Frontier / Space Zone: Star Park |
+
+Parks are opened with Gold Tickets, at most three open at once (string 318), and closing one deletes
+everything built in it (string 319). The table's world indices agree with the world-record table at
+0x800DDDC4, checked by following each record to the map list it loads (world 2 → maps 34/35, world 3 →
+355/356) rather than by matching themes to names.
