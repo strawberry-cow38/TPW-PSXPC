@@ -1304,6 +1304,27 @@ static class Program
         return 1;
     }
 
+    static int GrepStr(GazArchive g, string needle)
+    {
+        StringTable ids = null, en = null;
+        if (StringTable.IdEntry < g.Entries.Count)
+            StringTable.TryParse(g.Read(g.Entries[StringTable.IdEntry]), StringTable.IdEntry, out ids, out _);
+        int ee = StringTable.EntryByLanguage[0];
+        if (ee < g.Entries.Count) StringTable.TryParse(g.Read(g.Entries[ee]), ee, out en, out _);
+        if (ids == null || en == null) { Console.WriteLine("tables missing"); return 1; }
+        int n = Math.Min(ids.Strings.Length, en.Strings.Length), hits = 0;
+        for (int i = 0; i < n; i++)
+        {
+            string a = ids[i] ?? "", b = en[i] ?? "";
+            if (a.IndexOf(needle, StringComparison.OrdinalIgnoreCase) < 0 &&
+                b.IndexOf(needle, StringComparison.OrdinalIgnoreCase) < 0) continue;
+            Console.WriteLine($"{i,5}  {a,-44}  {b}");
+            hits++;
+        }
+        Console.WriteLine($"-- {hits} hit(s) for \"{needle}\"");
+        return 0;
+    }
+
     static int LangNames(GazArchive g)
     {
         string[] want = { "English", "Fran", "Deutsch", "Italiano", "Espa", "Nederlands", "Svenska" };
@@ -1379,6 +1400,10 @@ static class Program
             // names live by asking every table for its own name, through the real StringTable decoder
             // (code page 850), and report the string ID that holds it.
             if (Array.IndexOf(args, "--langnames") >= 0) return LangNames(g);
+            // --grepstr <text>: search the ID table and the English table together, so a hit shows both
+            // the symbolic name the developers gave a string and what it actually says.
+            int gsAt = Array.IndexOf(args, "--grepstr");
+            if (gsAt >= 0 && gsAt + 1 < args.Length) return GrepStr(g, args[gsAt + 1]);
             int mrAt = Array.IndexOf(args, "--menurender");
             if (mrAt >= 0 && mrAt + 1 < args.Length) return MenuRender(g, args[mrAt + 1]);
             // --attractions [text]: find a model by WHAT IT IS. ⚠ Not --names, which already exists on the
