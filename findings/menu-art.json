@@ -1,0 +1,13675 @@
+{
+ "title": "Theme Park World PSX (SLES-026.88): main menu, language screen and Now Loading artwork -> FOLIO.GAZ entries",
+ "method": "VRAM+RAM dumps from save state fable/b/states/lang4700.st (CROSS at rel 20) at rel 5 (language), 60 (jester), 450 (menu); sheet blocks hash-tied to VRAM; GPU display lists reconstructed from RAM (m/dlist.py); 2D layers re-rendered from disc data (m/recon.py) and compared with the emulator frames.",
+ "vram_layout": {
+  "framebuffers": "(0,0) and (0,256), 512x256 each (512x240 display)",
+  "sheet_84": "(512..895, 256..511) = texture pages 0x18..0x1d, 6 pages in a row",
+  "sheet_416": "(896..1023, 0..511) = pages 0x0e,0x0f (top) and 0x1e,0x1f (bottom)",
+  "empty": "(512..895, 0..255) is black on all three screens"
+ },
+ "entries": {
+  "84": {
+   "file_offset": 2394112,
+   "size": 77555,
+   "format": "texture sheet, compressed=1 (0x10 header + 136 sprites x12 + 1 free rect, then UNPAK'd 64x64-halfword blocks, block 0 raw)",
+   "pages": "6x1 at tpage 0x18 -> VRAM (512,256)",
+   "sprites": 136,
+   "vram_tie": "20/20 non-blank 8 KB blocks hash-equal to the frame-450 VRAM dump at the header's predicted positions; 17/20 at frames 5 and 60 (the 3 others are the flag slot and its CLUT row, rewritten at runtime)",
+   "ram_tie": "header+sprite table (1648 bytes) verbatim in RAM on all three screens",
+   "role": "the FRONT-END sheet: curtains, floor, logo, glow, big orange font, 7 flags, flag slot, flagpole, PS button icons"
+  },
+  "416": {
+   "file_offset": 8163328,
+   "size": 103640,
+   "format": "texture sheet, compressed=1, 894 sprites",
+   "pages": "2x2 at tpage 0x0e -> VRAM (896,0)",
+   "vram_tie": "16/16 non-blank blocks hash-equal at frames 5, 60 and 450",
+   "ram_tie": "header+sprite table (10744 bytes) verbatim in RAM",
+   "role": "in-game UI sheet; here it supplies the advisor/jester textures and the small white font of 'Now Loading...'"
+  },
+  "83": {
+   "file_offset": 2330624,
+   "size": 61864,
+   "format": "0x96 model pack, 11 skinned meshes (ntab=0, recOff=0)",
+   "ram_tie": "whole entry verbatim in RAM at frames 5, 90, 450 (absent at 60)",
+   "role": "sub 0-9: the advisor, 72 verts/12 bones/103 faces each, identical face UV sets, different vertex poses and animation tracks; sub 10: advisor + flagpole + flag as one 205-vert/29-bone/319-face mesh"
+  },
+  "0": {
+   "file_offset": 4096,
+   "size": 27136,
+   "format": "0x96 model pack, 17 meshes, sub 0 LZ-compressed (0x800BFD9C) to 0x3fc8 bytes",
+   "ram_tie": "whole entry verbatim in RAM on all three screens",
+   "role": "sub 0 = the jester (advisor in jester hat), 193 verts/17 bones/301 faces"
+  }
+ },
+ "pieces": {
+  "menu_curtains": {
+   "entry": 84,
+   "sprites": {
+    "top_drape": {
+     "index": 1,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 11,
+     "w": 122,
+     "h": 124,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16739,
+     "clut_vram_xy": [
+      560,
+      261
+     ],
+     "clut_colours_15bit": [
+      0,
+      46943,
+      47806,
+      45592,
+      56340,
+      53264,
+      46355,
+      50190,
+      45553,
+      46094,
+      46091,
+      40173,
+      41993,
+      37895,
+      34819,
+      32769
+     ]
+    },
+    "valance": {
+     "index": 2,
+     "tpage": 27,
+     "page_vram_xy": [
+      704,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 175,
+     "w": 135,
+     "h": 53,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16800,
+     "clut_vram_xy": [
+      512,
+      262
+     ],
+     "clut_colours_15bit": [
+      0,
+      46943,
+      47807,
+      44600,
+      55317,
+      53264,
+      41394,
+      46609,
+      44337,
+      49165,
+      39180,
+      45067,
+      40968,
+      36902,
+      34820,
+      32769
+     ]
+    },
+    "side_drape": {
+     "index": 3,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 125,
+     "v": 11,
+     "w": 91,
+     "h": 116,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16801,
+     "clut_vram_xy": [
+      528,
+      262
+     ],
+     "clut_colours_15bit": [
+      0,
+      47935,
+      46685,
+      45558,
+      55314,
+      53264,
+      51213,
+      43376,
+      45232,
+      48139,
+      46093,
+      45066,
+      41994,
+      40967,
+      36869,
+      32769
+     ]
+    }
+   },
+   "draw": "6 opaque POLY_FT4 (0x2c): drape at (10,5)-(132,129) and mirrored at (392,5)-(514,129); valance at (132,5)-(267,58) and mirrored (270,5)-(405,58); side drape at (10,129)-(101,245) and mirrored (423,129)-(514,245). Sprites 1 and 3 are stored rotated (flags bit0): screen x runs along v, screen y along u.",
+   "tied_by": [
+    "display list quads name these uv rects and CLUTs",
+    "sheet hash-tied to VRAM",
+    "2D re-render from disc matches frame (png/recon_menu_2d.png)"
+   ]
+  },
+  "menu_floor": {
+   "entry": 84,
+   "sprites": [
+    {
+     "index": 131,
+     "tpage": 26,
+     "page_vram_xy": [
+      640,
+      256
+     ],
+     "bpp": 4,
+     "u": 207,
+     "v": 1,
+     "w": 128,
+     "h": 43,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16673,
+     "clut_vram_xy": [
+      528,
+      260
+     ],
+     "clut_colours_15bit": [
+      39352,
+      38262,
+      38260,
+      37204,
+      37203,
+      37170,
+      37169,
+      36111,
+      36077,
+      35020,
+      35019,
+      34987,
+      34953,
+      33895,
+      32836,
+      32768
+     ]
+    },
+    {
+     "index": 132,
+     "tpage": 27,
+     "page_vram_xy": [
+      704,
+      256
+     ],
+     "bpp": 4,
+     "u": 151,
+     "v": 1,
+     "w": 128,
+     "h": 43,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16674,
+     "clut_vram_xy": [
+      544,
+      260
+     ],
+     "clut_colours_15bit": [
+      38327,
+      38293,
+      37236,
+      37202,
+      37168,
+      36079,
+      36077,
+      35019,
+      34986,
+      33929,
+      33927,
+      33894,
+      33860,
+      32803,
+      32801,
+      32768
+     ]
+    },
+    {
+     "index": 133,
+     "tpage": 27,
+     "page_vram_xy": [
+      704,
+      256
+     ],
+     "bpp": 4,
+     "u": 194,
+     "v": 1,
+     "w": 128,
+     "h": 43,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16675,
+     "clut_vram_xy": [
+      560,
+      260
+     ],
+     "clut_colours_15bit": [
+      38358,
+      38293,
+      37204,
+      37203,
+      37170,
+      37201,
+      36112,
+      36110,
+      36078,
+      35020,
+      34986,
+      33929,
+      33927,
+      33861,
+      32803,
+      32768
+     ]
+    },
+    {
+     "index": 134,
+     "tpage": 28,
+     "page_vram_xy": [
+      768,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 88,
+     "w": 128,
+     "h": 43,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16736,
+     "clut_vram_xy": [
+      512,
+      261
+     ],
+     "clut_colours_15bit": [
+      38293,
+      37236,
+      37235,
+      37202,
+      37168,
+      36111,
+      36077,
+      36076,
+      35019,
+      34986,
+      34952,
+      33927,
+      33893,
+      32836,
+      32769,
+      32768
+     ]
+    }
+   ],
+   "draw": "4 opaque 0x2c quads, 128x43 each, at y 213..256: x 0 (#131), 128 (#132), 256 (#133), 384 (#134). #131-133 rotated, #134 not.",
+   "tied_by": [
+    "display list",
+    "hash",
+    "re-render"
+   ]
+  },
+  "menu_logo": {
+   "entry": 84,
+   "sprites": {
+    "left_half_theme_WO": {
+     "index": 114,
+     "tpage": 25,
+     "page_vram_xy": [
+      576,
+      256
+     ],
+     "bpp": 4,
+     "u": 151,
+     "v": 1,
+     "w": 166,
+     "h": 70,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      2
+     ],
+     "clut": 16480,
+     "clut_vram_xy": [
+      512,
+      257
+     ],
+     "clut_colours_15bit": [
+      0,
+      65535,
+      34495,
+      32895,
+      33183,
+      33055,
+      34655,
+      34815,
+      33343,
+      32859,
+      32823,
+      54965,
+      32819,
+      32782,
+      43338,
+      32769
+     ]
+    },
+    "right_half_PARK_RLD": {
+     "index": 115,
+     "tpage": 25,
+     "page_vram_xy": [
+      576,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 175,
+     "w": 171,
+     "h": 73,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16481,
+     "clut_vram_xy": [
+      528,
+      257
+     ],
+     "clut_colours_15bit": [
+      0,
+      33343,
+      33055,
+      34815,
+      32895,
+      65535,
+      33183,
+      34495,
+      34655,
+      32859,
+      32823,
+      54965,
+      32819,
+      32782,
+      43338,
+      32769
+     ]
+    }
+   },
+   "draw": "left half (rotated) at (87,66)-(253,136), right half at (253,64)-(424,137); opaque 0x2c, shade 0x80",
+   "tied_by": [
+    "display list",
+    "hash",
+    "re-render"
+   ]
+  },
+  "menu_highlight_glow": {
+   "entry": 84,
+   "sprites": {
+    "end_cap": {
+     "index": 129,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 151,
+     "v": 133,
+     "w": 69,
+     "h": 44,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16611,
+     "clut_vram_xy": [
+      560,
+      259
+     ],
+     "clut_colours_15bit": [
+      33428,
+      33395,
+      33330,
+      33296,
+      33230,
+      33165,
+      33131,
+      33065,
+      33032,
+      32966,
+      32933,
+      32867,
+      32834,
+      32801,
+      32768,
+      32768
+     ]
+    },
+    "middle_strip": {
+     "index": 130,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 151,
+     "v": 177,
+     "w": 8,
+     "h": 44,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16672,
+     "clut_vram_xy": [
+      512,
+      260
+     ],
+     "clut_colours_15bit": [
+      33429,
+      33428,
+      33395,
+      33362,
+      33329,
+      33296,
+      33230,
+      33164,
+      33098,
+      33032,
+      32966,
+      32901,
+      32867,
+      32834,
+      32801,
+      32768
+     ]
+    }
+   },
+   "draw": "3 additive POLY_FT4 (0x2e, abr=1) behind the selected item: cap at (105,130)-(174,174), mirrored cap at (338,130)-(407,174), strip stretched over (174,130)-(338,174). Moves with the highlight.",
+   "tied_by": [
+    "display list",
+    "re-render"
+   ]
+  },
+  "menu_spotlight": {
+   "entry": null,
+   "format": "untextured Gouraud quads, no art",
+   "draw": "35 semi-transparent Gouraud quads (0x3a) per frame, two vertices at the off-screen apex (-103,-64), the other two ~15 px apart on an arc through (411,319)..(644,113); colours 0x000000 / 0x001818 (BBGGRR = dark yellow), additive via a degenerate textured tri (0x27) that latches tpage 0x0020 (abr=1). The arc end moves every frame: this is the sweeping beam.",
+   "tied_by": [
+    "display list only"
+   ]
+  },
+  "menu_font": {
+   "entry": 84,
+   "clut": 16867,
+   "clut_vram_xy": [
+    560,
+    263
+   ],
+   "sprite_range": "9..100",
+   "glyph_table": {
+    "A": 9,
+    "B": 10,
+    "C": 11,
+    "D": 12,
+    "E": 13,
+    "F": 14,
+    "G": 15,
+    "H": 16,
+    "I": 17,
+    "J": 18,
+    "K": 19,
+    "L": 20,
+    "M": 21,
+    "N": 22,
+    "O": 23,
+    "P": 24,
+    "Q": 25,
+    "R": 26,
+    "S": 27,
+    "T": 28,
+    "U": 29,
+    "V": 30,
+    "W": 31,
+    "X": 32,
+    "Y": 33,
+    "Z": 34,
+    "0": 35,
+    "1": 36,
+    "2": 37,
+    "3": 38,
+    "4": 39,
+    "5": 40,
+    "6": 41,
+    "7": 42,
+    "8": 43,
+    "9": 44,
+    "a": 65,
+    "b": 66,
+    "c": 67,
+    "d": 68,
+    "e": 69,
+    "f": 70,
+    "g": 71,
+    "h": 72,
+    "i": 73,
+    "j": 74,
+    "k": 75,
+    "l": 76,
+    "m": 77,
+    "n": 78,
+    "o": 79,
+    "p": 80,
+    "q": 81,
+    "r": 82,
+    "s": 83,
+    "t": 84,
+    "u": 85,
+    "v": 86,
+    "w": 87,
+    "x": 88,
+    "y": 89,
+    "z": 90,
+    "·": 45,
+    "!": 46,
+    "\"": 47,
+    "%": 48,
+    "&": 49,
+    "*": 50,
+    "(": 51,
+    ")": 52,
+    "-": 53,
+    ":": 54,
+    ";": 55,
+    ",": 56,
+    "?": 57,
+    "\\": 58,
+    "/": 59,
+    "£": 60,
+    "$": 61,
+    "'": 62,
+    "[": 63,
+    "]": 64,
+    "ü": 91,
+    "å": 92,
+    "ö": 93,
+    "ú": 94,
+    "é": 95,
+    "á": 96,
+    "ä": 97,
+    "î": 98,
+    "ç": 99,
+    "ñ": 100
+   },
+   "notes": "A-Z 9-34, 0-9 35-44, 20 punctuation 45-64 (read visually: png/s84_punct_45-64_x3.png), a-z 65-90, accents 91-100 (read visually). Menu items are opaque POLY_GT4 (0x3c) shaded 0x808080, disabled 'Load Game' shaded 0x202020; the highlighted item is not recoloured, the additive glow behind it does it. Verified letters from the drawn strings: P l a y G m e O p t i o n s L d E N S F v k r g h c(ç) n(ñ).",
+   "tied_by": [
+    "display list glyph rects -> sprite table",
+    "re-render"
+   ]
+  },
+  "language_background": {
+   "entry": null,
+   "draw": "one Gouraud quad (0x38) (0,0)-(512,256), top colour BBGGRR 0xfea399 = RGB(153,163,254), bottom 0x57202a = RGB(42,32,87)"
+  },
+  "language_flags": {
+   "entry": 84,
+   "sprites": {
+    "0_Deutsch": {
+     "index": 122,
+     "tpage": 26,
+     "page_vram_xy": [
+      640,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 1,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16419,
+     "clut_vram_xy": [
+      560,
+      256
+     ],
+     "clut_colours_15bit": [
+      32799,
+      33567,
+      32768,
+      32768,
+      32768,
+      32768,
+      32768,
+      32768,
+      32768,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "1_Espanol": {
+     "index": 124,
+     "tpage": 27,
+     "page_vram_xy": [
+      704,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 88,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16416,
+     "clut_vram_xy": [
+      512,
+      256
+     ],
+     "clut_colours_15bit": [
+      33791,
+      32791,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "2_Nederlands": {
+     "index": 119,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 133,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16545,
+     "clut_vram_xy": [
+      528,
+      258
+     ],
+     "clut_colours_15bit": [
+      65535,
+      65533,
+      32798,
+      32796,
+      53875,
+      32787,
+      51761,
+      50336,
+      49312,
+      47567,
+      32782,
+      44096,
+      42048,
+      32776,
+      39110,
+      35872
+     ]
+    },
+    "3_English": {
+     "index": 120,
+     "tpage": 25,
+     "page_vram_xy": [
+      576,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 1,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16546,
+     "clut_vram_xy": [
+      544,
+      258
+     ],
+     "clut_colours_15bit": [
+      63423,
+      32799,
+      58143,
+      41247,
+      46527,
+      52863,
+      35967,
+      65535,
+      64445,
+      62265,
+      60118,
+      55857,
+      53677,
+      50407,
+      46146,
+      45056
+     ]
+    },
+    "4_Svenska": {
+     "index": 125,
+     "tpage": 27,
+     "page_vram_xy": [
+      704,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 1,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16547,
+     "clut_vram_xy": [
+      560,
+      258
+     ],
+     "clut_colours_15bit": [
+      34815,
+      65024,
+      62944,
+      62944,
+      61888,
+      61824,
+      33660,
+      33561,
+      58656,
+      51424,
+      33264,
+      35244,
+      43168,
+      40165,
+      32966,
+      37984
+     ]
+    },
+    "5_Francais": {
+     "index": 121,
+     "tpage": 25,
+     "page_vram_xy": [
+      576,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 88,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16417,
+     "clut_vram_xy": [
+      528,
+      256
+     ],
+     "clut_colours_15bit": [
+      65535,
+      32799,
+      52224,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "6_Italiano": {
+     "index": 123,
+     "tpage": 28,
+     "page_vram_xy": [
+      768,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 1,
+     "w": 150,
+     "h": 87,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16418,
+     "clut_vram_xy": [
+      544,
+      256
+     ],
+     "clut_colours_15bit": [
+      65535,
+      32791,
+      33344,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "slot": {
+    "index": 126,
+    "tpage": 26,
+    "page_vram_xy": [
+     640,
+     256
+    ],
+    "bpp": 4,
+    "u": 1,
+    "v": 88,
+    "w": 150,
+    "h": 87,
+    "rotated": false,
+    "flags": 0,
+    "offset": [
+     0,
+     0
+    ],
+    "clut": 16608,
+    "clut_vram_xy": [
+     512,
+     259
+    ],
+    "clut_colours_15bit": [
+     32768,
+     33825,
+     34882,
+     36996,
+     38053,
+     42281,
+     48623,
+     53908,
+     56022,
+     57079,
+     59193,
+     61307,
+     62364,
+     63421,
+     64478,
+     65535
+    ]
+   },
+   "mechanism": "the flag mesh samples sprite #126 (page 0x1a, uv (1,88), 150x87, CLUT 0x40e0 at (512,259)); on the disc that slot holds the 'TPW Boot Boys' placeholder. The game copies the selected flag's 150x87 texels into the slot and its 16-entry CLUT row into (512,259).",
+   "verified": "English: slot == #120 (97.4% of halfwords, edge column differs by nibble alignment) and CLUT row == #120's; after LEFT (Nederlands): slot == #119 and its CLUT. The other five are named by the flag itself.",
+   "tied_by": [
+    "VRAM diff frame 5 vs 450",
+    "hash",
+    "LEFT run"
+   ]
+  },
+  "language_advisor_flagpole": {
+   "entry": 83,
+   "sub": 10,
+   "format": "skinned mesh: 205 verts, 29 bones, 319 faces, 29 tracks",
+   "textures": "advisor: sheet 416 sprites (see advisor_textures); flag: 192 tris on page 0x1a CLUT 0x40e0 (the slot); pole: 2 flat tris on page 0x18 CLUT 0x40e1 = sprite #127 (6x88)",
+   "tied_by": [
+    "217/217 distinct drawn (uv,clut,page) triangles are faces of sub 10",
+    "RAM pointers: 7 into sub 10 (4 at +0, 1 at +0x48 = vertices)"
+   ]
+  },
+  "language_arrows": {
+   "entry": null,
+   "draw": "8 semi-transparent flat triangles (0x22), 4 chevrons each side at y 192..216, x 77..157 and 353..433 mirrored, colours BBGGRR 0x011012, 0x053d44, 0x096a76, 0x0d97a8 (dark to gold), additive"
+  },
+  "language_names": {
+   "entry": 84,
+   "draw": "same big font, but POLY_GT4 semi-transparent (0x3e, abr=1 additive) shaded 0x646464 (centre), 0x2e2e2e (neighbours), 0x191919 (outer) over the blue gradient: that is what makes them look pink/lilac"
+  },
+  "menu_advisor": {
+   "entry": 83,
+   "sub": 7,
+   "format": "skinned mesh: 72 verts, 12 bones, 103 faces, 12 tracks (sub 0-9 share the face UV set; RAM pointers at frame 450 select sub 7)",
+   "textures": "sheet 416",
+   "tied_by": [
+    "23/26 distinct drawn textured triangles are faces of sub 0-9's shared set; the 8 others are scan junk",
+    "RAM pointers: 12 into sub 7 (4 at +0, 1 at +0x48)"
+   ]
+  },
+  "jester": {
+   "entry": 0,
+   "sub": 0,
+   "format": "skinned mesh, LZ sub-entry: 193 verts, 17 bones, 301 faces, 17 tracks",
+   "textures": "sheet 416: eyes #0 (clut 0x8f8), #3 (0x8fb), body sphere #4 (0x938), flat colours 1x1 #23 (0x7a), #24 (0x7b), #25 (0x7c), #31 (0xb9) for the hat and bells",
+   "background": "same gradient quad as the language screen",
+   "text": "'Now Loading...' from sheet 416 small font",
+   "tied_by": [
+    "32/37 distinct drawn triangles are faces of entry 0 sub 0; the 5 others are scan junk",
+    "entry 0 resident throughout; entry 83 NOT resident at frame 60"
+   ]
+  },
+  "loading_font": {
+   "entry": 416,
+   "clut": 1658,
+   "clut_vram_xy": [
+    928,
+    25
+   ],
+   "sprites": 155,
+   "glyphs_seen": {
+    "N": 423,
+    "L": 421,
+    "a": 466,
+    "d": 469,
+    "g": 472,
+    "i": 474,
+    "n": 479,
+    "o": 480,
+    "w": 488,
+    ".": 463
+   },
+   "order": "A-Z at 410-435, a-z at 466-491, '.' at 463: same charset order as the big font shifted by +401 (big 'A'=9, small 'A'=410)",
+   "draw": "opaque POLY_GT4 (0x3c) shaded 0x808080, glyphs 8-13 px, baseline y 220, x 208..306"
+  },
+  "advisor_textures": {
+   "entry": 416,
+   "sprites": [
+    {
+     "index": 0,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 61,
+     "v": 132,
+     "w": 30,
+     "h": 32,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      1,
+      0
+     ],
+     "clut": 2296,
+     "clut_vram_xy": [
+      896,
+      35
+     ],
+     "clut_colours_15bit": [
+      0,
+      65535,
+      64478,
+      63421,
+      61307,
+      59193,
+      56022,
+      52851,
+      49680,
+      47566,
+      45452,
+      42281,
+      40167,
+      36996,
+      34882,
+      32769
+     ]
+    },
+    {
+     "index": 2,
+     "tpage": 15,
+     "page_vram_xy": [
+      960,
+      0
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 30,
+     "w": 15,
+     "h": 7,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      8,
+      10
+     ],
+     "clut": 2298,
+     "clut_vram_xy": [
+      928,
+      35
+     ],
+     "clut_colours_15bit": [
+      0,
+      62364,
+      59193,
+      54965,
+      51794,
+      48623,
+      45452,
+      38059,
+      43338,
+      35944,
+      40168,
+      38054,
+      36997,
+      35939,
+      34882,
+      32769
+     ]
+    },
+    {
+     "index": 3,
+     "tpage": 30,
+     "page_vram_xy": [
+      896,
+      256
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 156,
+     "w": 18,
+     "h": 14,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      7,
+      8
+     ],
+     "clut": 2299,
+     "clut_vram_xy": [
+      944,
+      35
+     ],
+     "clut_colours_15bit": [
+      0,
+      60250,
+      52852,
+      50737,
+      40176,
+      33840,
+      47567,
+      43339,
+      33835,
+      39114,
+      42281,
+      39111,
+      35942,
+      36997,
+      34882,
+      32769
+     ]
+    },
+    {
+     "index": 4,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 192,
+     "v": 51,
+     "w": 48,
+     "h": 47,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      1
+     ],
+     "clut": 2360,
+     "clut_vram_xy": [
+      896,
+      36
+     ],
+     "clut_colours_15bit": [
+      0,
+      59193,
+      56022,
+      52851,
+      50737,
+      48623,
+      46509,
+      45452,
+      43338,
+      40167,
+      39110,
+      36996,
+      35939,
+      33825,
+      32769,
+      32769
+     ]
+    },
+    {
+     "index": 12,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 227,
+     "v": 226,
+     "w": 24,
+     "h": 24,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 2425,
+     "clut_vram_xy": [
+      912,
+      37
+     ],
+     "clut_colours_15bit": [
+      65535,
+      64478,
+      63421,
+      62364,
+      58135,
+      52851,
+      50737,
+      48623,
+      45452,
+      42281,
+      41224,
+      38053,
+      36996,
+      34882,
+      33825,
+      32768
+     ]
+    },
+    {
+     "index": 17,
+     "tpage": 30,
+     "page_vram_xy": [
+      896,
+      256
+     ],
+     "bpp": 4,
+     "u": 53,
+     "v": 238,
+     "w": 16,
+     "h": 8,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 2488,
+     "clut_vram_xy": [
+      896,
+      38
+     ],
+     "clut_colours_15bit": [
+      63421,
+      63388,
+      59160,
+      59159,
+      58103,
+      55988,
+      52817,
+      52785,
+      52784,
+      48557,
+      47499,
+      43272,
+      41158,
+      39044,
+      35872,
+      34816
+     ]
+    },
+    {
+     "index": 23,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 20,
+     "v": 1,
+     "w": 1,
+     "h": 1,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 122,
+     "clut_vram_xy": [
+      928,
+      1
+     ],
+     "clut_colours_15bit": [
+      64640,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "index": 24,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 19,
+     "v": 1,
+     "w": 1,
+     "h": 1,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 123,
+     "clut_vram_xy": [
+      944,
+      1
+     ],
+     "clut_colours_15bit": [
+      33216,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "index": 25,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 16,
+     "v": 1,
+     "w": 1,
+     "h": 1,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 124,
+     "clut_vram_xy": [
+      960,
+      1
+     ],
+     "clut_colours_15bit": [
+      33791,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "index": 31,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 14,
+     "v": 1,
+     "w": 1,
+     "h": 1,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 185,
+     "clut_vram_xy": [
+      912,
+      2
+     ],
+     "clut_colours_15bit": [
+      33855,
+      3599,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "index": 39,
+     "tpage": 30,
+     "page_vram_xy": [
+      896,
+      256
+     ],
+     "bpp": 4,
+     "u": 31,
+     "v": 170,
+     "w": 4,
+     "h": 4,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 1977,
+     "clut_vram_xy": [
+      912,
+      30
+     ],
+     "clut_colours_15bit": [
+      65535,
+      63421,
+      61307,
+      59193,
+      57079,
+      54965,
+      52851,
+      50737,
+      47566,
+      45452,
+      43338,
+      41224,
+      39110,
+      36996,
+      34882,
+      32768
+     ]
+    },
+    {
+     "index": 40,
+     "tpage": 30,
+     "page_vram_xy": [
+      896,
+      256
+     ],
+     "bpp": 4,
+     "u": 65,
+     "v": 33,
+     "w": 16,
+     "h": 16,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 2488,
+     "clut_vram_xy": [
+      896,
+      38
+     ],
+     "clut_colours_15bit": [
+      63421,
+      63388,
+      59160,
+      59159,
+      58103,
+      55988,
+      52817,
+      52785,
+      52784,
+      48557,
+      47499,
+      43272,
+      41158,
+      39044,
+      35872,
+      34816
+     ]
+    },
+    {
+     "index": 43,
+     "tpage": 15,
+     "page_vram_xy": [
+      960,
+      0
+     ],
+     "bpp": 4,
+     "u": 1,
+     "v": 6,
+     "w": 24,
+     "h": 24,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 1978,
+     "clut_vram_xy": [
+      928,
+      30
+     ],
+     "clut_colours_15bit": [
+      49053,
+      38714,
+      33309,
+      33309,
+      33309,
+      33308,
+      33308,
+      33308,
+      37491,
+      33275,
+      36436,
+      41521,
+      33241,
+      33174,
+      33106,
+      34059
+     ]
+    },
+    {
+     "index": 44,
+     "tpage": 15,
+     "page_vram_xy": [
+      960,
+      0
+     ],
+     "bpp": 4,
+     "u": 225,
+     "v": 37,
+     "w": 24,
+     "h": 24,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 1979,
+     "clut_vram_xy": [
+      944,
+      30
+     ],
+     "clut_colours_15bit": [
+      52125,
+      37590,
+      43632,
+      45644,
+      41448,
+      37225,
+      36259,
+      34178,
+      33153,
+      34114,
+      33088,
+      33024,
+      32992,
+      32960,
+      32960,
+      32960
+     ]
+    },
+    {
+     "index": 45,
+     "tpage": 14,
+     "page_vram_xy": [
+      896,
+      0
+     ],
+     "bpp": 4,
+     "u": 196,
+     "v": 1,
+     "w": 1,
+     "h": 1,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 60,
+     "clut_vram_xy": [
+      960,
+      0
+     ],
+     "clut_colours_15bit": [
+      46733,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "index": 46,
+     "tpage": 30,
+     "page_vram_xy": [
+      896,
+      256
+     ],
+     "bpp": 4,
+     "u": 250,
+     "v": 52,
+     "w": 4,
+     "h": 4,
+     "rotated": false,
+     "flags": 0,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 1977,
+     "clut_vram_xy": [
+      912,
+      30
+     ],
+     "clut_colours_15bit": [
+      65535,
+      63421,
+      61307,
+      59193,
+      57079,
+      54965,
+      52851,
+      50737,
+      47566,
+      45452,
+      43338,
+      41224,
+      39110,
+      36996,
+      34882,
+      32768
+     ]
+    }
+   ]
+  },
+  "extras_in_sheet_84": {
+   "ps_button_icons": [
+    {
+     "index": 4,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 241,
+     "v": 74,
+     "w": 21,
+     "h": 14,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16802,
+     "clut_vram_xy": [
+      544,
+      262
+     ],
+     "clut_colours_15bit": [
+      0,
+      65534,
+      61377,
+      59193,
+      55040,
+      53907,
+      48640,
+      49679,
+      46509,
+      44416,
+      44362,
+      41190,
+      38048,
+      38051,
+      35904,
+      32769
+     ]
+    },
+    {
+     "index": 5,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 241,
+     "v": 11,
+     "w": 21,
+     "h": 14,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16803,
+     "clut_vram_xy": [
+      560,
+      262
+     ],
+     "clut_colours_15bit": [
+      0,
+      65534,
+      51454,
+      43067,
+      53691,
+      59193,
+      55989,
+      42005,
+      43153,
+      50736,
+      46509,
+      42280,
+      36872,
+      38052,
+      35905,
+      33792
+     ]
+    },
+    {
+     "index": 6,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 241,
+     "v": 32,
+     "w": 21,
+     "h": 14,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16864,
+     "clut_vram_xy": [
+      512,
+      263
+     ],
+     "clut_colours_15bit": [
+      0,
+      65500,
+      65334,
+      59160,
+      56912,
+      53907,
+      52684,
+      49680,
+      47566,
+      45452,
+      44328,
+      41158,
+      38019,
+      35905,
+      34848,
+      32769
+     ]
+    },
+    {
+     "index": 7,
+     "tpage": 24,
+     "page_vram_xy": [
+      512,
+      256
+     ],
+     "bpp": 4,
+     "u": 241,
+     "v": 53,
+     "w": 21,
+     "h": 14,
+     "rotated": true,
+     "flags": 1,
+     "offset": [
+      0,
+      0
+     ],
+     "clut": 16865,
+     "clut_vram_xy": [
+      528,
+      263
+     ],
+     "clut_colours_15bit": [
+      0,
+      65438,
+      64061,
+      61853,
+      58103,
+      54613,
+      50737,
+      46509,
+      46251,
+      44395,
+      42281,
+      42183,
+      39044,
+      36930,
+      34848,
+      32769
+     ]
+    }
+   ],
+   "music_note": {
+    "index": 128,
+    "tpage": 28,
+    "page_vram_xy": [
+     768,
+     256
+    ],
+    "bpp": 4,
+    "u": 193,
+    "v": 203,
+    "w": 14,
+    "h": 14,
+    "rotated": false,
+    "flags": 0,
+    "offset": [
+     0,
+     0
+    ],
+    "clut": 16610,
+    "clut_vram_xy": [
+     544,
+     259
+    ],
+    "clut_colours_15bit": [
+     0,
+     34651,
+     34618,
+     34552,
+     34485,
+     34419,
+     33329,
+     33230,
+     33164,
+     33065,
+     32999,
+     32933,
+     32867,
+     32801,
+     32769,
+     33659
+    ]
+   },
+   "crate": {
+    "index": 135,
+    "tpage": 24,
+    "page_vram_xy": [
+     512,
+     256
+    ],
+    "bpp": 4,
+    "u": 1,
+    "v": 220,
+    "w": 32,
+    "h": 32,
+    "rotated": false,
+    "flags": 0,
+    "offset": [
+     0,
+     0
+    ],
+    "clut": 16737,
+    "clut_vram_xy": [
+     528,
+     261
+    ],
+    "clut_colours_15bit": [
+     36175,
+     36176,
+     36208,
+     36175,
+     36176,
+     37266,
+     37232,
+     35085,
+     36142,
+     36177,
+     37199,
+     33994,
+     35052,
+     36143,
+     33961,
+     32836
+    ]
+   },
+   "credits_katakana": {
+    "index": 0,
+    "tpage": 24,
+    "page_vram_xy": [
+     512,
+     256
+    ],
+    "bpp": 4,
+    "u": 33,
+    "v": 221,
+    "w": 160,
+    "h": 29,
+    "rotated": false,
+    "flags": 0,
+    "offset": [
+     0,
+     0
+    ],
+    "clut": 16738,
+    "clut_vram_xy": [
+     544,
+     261
+    ],
+    "clut_colours_15bit": [
+     0,
+     36996,
+     42281,
+     36026,
+     52852,
+     35259,
+     47634,
+     34589,
+     42711,
+     33759,
+     58136,
+     61307,
+     65535,
+     32769,
+     35867,
+     44368
+    ]
+   },
+   "japanese_leftovers": "sprites 8, 101-113, 116-118 are Japanese menu strings and a small 'theme Park' logo (#107), unused on this disc's screens"
+  }
+ },
+ "layouts": {
+  "menu_2d_frame450": [
+   {
+    "addr": 2148660304,
+    "op": 44,
+    "xy": [
+     [
+      87,
+      66
+     ],
+     [
+      253,
+      66
+     ],
+     [
+      87,
+      136
+     ],
+     [
+      253,
+      136
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      166
+     ],
+     [
+      151,
+      0
+     ],
+     [
+      221,
+      166
+     ],
+     [
+      221,
+      0
+     ]
+    ],
+    "clut": 16480,
+    "tpage": 25,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660344,
+    "op": 44,
+    "xy": [
+     [
+      253,
+      64
+     ],
+     [
+      424,
+      64
+     ],
+     [
+      253,
+      137
+     ],
+     [
+      424,
+      137
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      175
+     ],
+     [
+      172,
+      175
+     ],
+     [
+      1,
+      248
+     ],
+     [
+      172,
+      248
+     ]
+    ],
+    "clut": 16481,
+    "tpage": 25,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660384,
+    "op": 44,
+    "xy": [
+     [
+      0,
+      213
+     ],
+     [
+      128,
+      213
+     ],
+     [
+      0,
+      256
+     ],
+     [
+      128,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      207,
+      128
+     ],
+     [
+      207,
+      0
+     ],
+     [
+      250,
+      128
+     ],
+     [
+      250,
+      0
+     ]
+    ],
+    "clut": 16673,
+    "tpage": 26,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660424,
+    "op": 44,
+    "xy": [
+     [
+      128,
+      213
+     ],
+     [
+      256,
+      213
+     ],
+     [
+      128,
+      256
+     ],
+     [
+      256,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      128
+     ],
+     [
+      151,
+      0
+     ],
+     [
+      194,
+      128
+     ],
+     [
+      194,
+      0
+     ]
+    ],
+    "clut": 16674,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660464,
+    "op": 44,
+    "xy": [
+     [
+      256,
+      213
+     ],
+     [
+      384,
+      213
+     ],
+     [
+      256,
+      256
+     ],
+     [
+      384,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      194,
+      128
+     ],
+     [
+      194,
+      0
+     ],
+     [
+      237,
+      128
+     ],
+     [
+      237,
+      0
+     ]
+    ],
+    "clut": 16675,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660504,
+    "op": 44,
+    "xy": [
+     [
+      384,
+      213
+     ],
+     [
+      512,
+      213
+     ],
+     [
+      384,
+      256
+     ],
+     [
+      512,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      88
+     ],
+     [
+      129,
+      88
+     ],
+     [
+      1,
+      131
+     ],
+     [
+      129,
+      131
+     ]
+    ],
+    "clut": 16736,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660544,
+    "op": 60,
+    "xy": [
+     [
+      175,
+      140
+     ],
+     [
+      198,
+      140
+     ],
+     [
+      175,
+      160
+     ],
+     [
+      198,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      23
+     ],
+     [
+      233,
+      0
+     ],
+     [
+      253,
+      23
+     ],
+     [
+      253,
+      0
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660596,
+    "op": 60,
+    "xy": [
+     [
+      194,
+      139
+     ],
+     [
+      206,
+      139
+     ],
+     [
+      194,
+      160
+     ],
+     [
+      206,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 25,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660648,
+    "op": 60,
+    "xy": [
+     [
+      202,
+      145
+     ],
+     [
+      226,
+      145
+     ],
+     [
+      202,
+      160
+     ],
+     [
+      226,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660700,
+    "op": 60,
+    "xy": [
+     [
+      222,
+      144
+     ],
+     [
+      246,
+      144
+     ],
+     [
+      222,
+      165
+     ],
+     [
+      246,
+      165
+     ]
+    ],
+    "uv": [
+     [
+      176,
+      151
+     ],
+     [
+      200,
+      151
+     ],
+     [
+      176,
+      172
+     ],
+     [
+      200,
+      172
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660752,
+    "op": 60,
+    "xy": [
+     [
+      250,
+      139
+     ],
+     [
+      279,
+      139
+     ],
+     [
+      250,
+      160
+     ],
+     [
+      279,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      31,
+      234
+     ],
+     [
+      60,
+      234
+     ],
+     [
+      31,
+      255
+     ],
+     [
+      60,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 26,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660804,
+    "op": 60,
+    "xy": [
+     [
+      275,
+      145
+     ],
+     [
+      299,
+      145
+     ],
+     [
+      275,
+      160
+     ],
+     [
+      299,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660856,
+    "op": 60,
+    "xy": [
+     [
+      295,
+      143
+     ],
+     [
+      325,
+      143
+     ],
+     [
+      295,
+      160
+     ],
+     [
+      325,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      237,
+      76
+     ],
+     [
+      237,
+      46
+     ],
+     [
+      254,
+      76
+     ],
+     [
+      254,
+      46
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660908,
+    "op": 60,
+    "xy": [
+     [
+      321,
+      145
+     ],
+     [
+      344,
+      145
+     ],
+     [
+      321,
+      160
+     ],
+     [
+      344,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660960,
+    "op": 60,
+    "xy": [
+     [
+      194,
+      171
+     ],
+     [
+      224,
+      171
+     ],
+     [
+      194,
+      192
+     ],
+     [
+      224,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      238
+     ],
+     [
+      200,
+      208
+     ],
+     [
+      221,
+      238
+     ],
+     [
+      221,
+      208
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 25,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661012,
+    "op": 60,
+    "xy": [
+     [
+      220,
+      175
+     ],
+     [
+      242,
+      175
+     ],
+     [
+      220,
+      196
+     ],
+     [
+      242,
+      196
+     ]
+    ],
+    "uv": [
+     [
+      159,
+      193
+     ],
+     [
+      181,
+      193
+     ],
+     [
+      159,
+      214
+     ],
+     [
+      181,
+      214
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661064,
+    "op": 60,
+    "xy": [
+     [
+      238,
+      173
+     ],
+     [
+      260,
+      173
+     ],
+     [
+      238,
+      192
+     ],
+     [
+      260,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      93
+     ],
+     [
+      255,
+      93
+     ],
+     [
+      233,
+      112
+     ],
+     [
+      255,
+      112
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661116,
+    "op": 60,
+    "xy": [
+     [
+      256,
+      173
+     ],
+     [
+      270,
+      173
+     ],
+     [
+      256,
+      192
+     ],
+     [
+      270,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      203,
+      193
+     ],
+     [
+      217,
+      193
+     ],
+     [
+      203,
+      212
+     ],
+     [
+      217,
+      212
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661168,
+    "op": 60,
+    "xy": [
+     [
+      266,
+      177
+     ],
+     [
+      289,
+      177
+     ],
+     [
+      266,
+      192
+     ],
+     [
+      289,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      189
+     ],
+     [
+      233,
+      166
+     ],
+     [
+      248,
+      189
+     ],
+     [
+      248,
+      166
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661220,
+    "op": 60,
+    "xy": [
+     [
+      285,
+      176
+     ],
+     [
+      308,
+      176
+     ],
+     [
+      285,
+      192
+     ],
+     [
+      308,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661272,
+    "op": 60,
+    "xy": [
+     [
+      304,
+      176
+     ],
+     [
+      325,
+      176
+     ],
+     [
+      304,
+      192
+     ],
+     [
+      325,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661324,
+    "op": 60,
+    "xy": [
+     [
+      169,
+      203
+     ],
+     [
+      193,
+      203
+     ],
+     [
+      169,
+      224
+     ],
+     [
+      193,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      151
+     ],
+     [
+      224,
+      151
+     ],
+     [
+      200,
+      172
+     ],
+     [
+      224,
+      172
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661376,
+    "op": 60,
+    "xy": [
+     [
+      189,
+      209
+     ],
+     [
+      212,
+      209
+     ],
+     [
+      189,
+      224
+     ],
+     [
+      212,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      189
+     ],
+     [
+      233,
+      166
+     ],
+     [
+      248,
+      189
+     ],
+     [
+      248,
+      166
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661428,
+    "op": 60,
+    "xy": [
+     [
+      208,
+      209
+     ],
+     [
+      232,
+      209
+     ],
+     [
+      208,
+      224
+     ],
+     [
+      232,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661480,
+    "op": 60,
+    "xy": [
+     [
+      228,
+      204
+     ],
+     [
+      252,
+      204
+     ],
+     [
+      228,
+      224
+     ],
+     [
+      252,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      75,
+      231
+     ],
+     [
+      99,
+      231
+     ],
+     [
+      75,
+      251
+     ],
+     [
+      99,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661532,
+    "op": 60,
+    "xy": [
+     [
+      256,
+      203
+     ],
+     [
+      285,
+      203
+     ],
+     [
+      256,
+      224
+     ],
+     [
+      285,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      31,
+      234
+     ],
+     [
+      60,
+      234
+     ],
+     [
+      31,
+      255
+     ],
+     [
+      60,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 26,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661584,
+    "op": 60,
+    "xy": [
+     [
+      281,
+      209
+     ],
+     [
+      305,
+      209
+     ],
+     [
+      281,
+      224
+     ],
+     [
+      305,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661636,
+    "op": 60,
+    "xy": [
+     [
+      301,
+      207
+     ],
+     [
+      331,
+      207
+     ],
+     [
+      301,
+      224
+     ],
+     [
+      331,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      237,
+      76
+     ],
+     [
+      237,
+      46
+     ],
+     [
+      254,
+      76
+     ],
+     [
+      254,
+      46
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661688,
+    "op": 60,
+    "xy": [
+     [
+      327,
+      209
+     ],
+     [
+      350,
+      209
+     ],
+     [
+      327,
+      224
+     ],
+     [
+      350,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661740,
+    "op": 46,
+    "xy": [
+     [
+      174,
+      130
+     ],
+     [
+      338,
+      130
+     ],
+     [
+      174,
+      174
+     ],
+     [
+      338,
+      174
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      177
+     ],
+     [
+      157,
+      177
+     ],
+     [
+      151,
+      221
+     ],
+     [
+      157,
+      221
+     ]
+    ],
+    "clut": 16672,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661780,
+    "op": 46,
+    "xy": [
+     [
+      105,
+      130
+     ],
+     [
+      174,
+      130
+     ],
+     [
+      105,
+      174
+     ],
+     [
+      174,
+      174
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      133
+     ],
+     [
+      218,
+      133
+     ],
+     [
+      151,
+      177
+     ],
+     [
+      218,
+      177
+     ]
+    ],
+    "clut": 16611,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661820,
+    "op": 46,
+    "xy": [
+     [
+      338,
+      130
+     ],
+     [
+      407,
+      130
+     ],
+     [
+      338,
+      174
+     ],
+     [
+      407,
+      174
+     ]
+    ],
+    "uv": [
+     [
+      219,
+      133
+     ],
+     [
+      152,
+      133
+     ],
+     [
+      219,
+      177
+     ],
+     [
+      152,
+      177
+     ]
+    ],
+    "clut": 16611,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664460,
+    "op": 44,
+    "xy": [
+     [
+      10,
+      5
+     ],
+     [
+      132,
+      5
+     ],
+     [
+      10,
+      129
+     ],
+     [
+      132,
+      129
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      132
+     ],
+     [
+      1,
+      10
+     ],
+     [
+      125,
+      132
+     ],
+     [
+      125,
+      10
+     ]
+    ],
+    "clut": 16739,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664500,
+    "op": 44,
+    "xy": [
+     [
+      132,
+      5
+     ],
+     [
+      267,
+      5
+     ],
+     [
+      132,
+      58
+     ],
+     [
+      267,
+      58
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      175
+     ],
+     [
+      136,
+      175
+     ],
+     [
+      1,
+      228
+     ],
+     [
+      136,
+      228
+     ]
+    ],
+    "clut": 16800,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664540,
+    "op": 44,
+    "xy": [
+     [
+      10,
+      129
+     ],
+     [
+      101,
+      129
+     ],
+     [
+      10,
+      245
+     ],
+     [
+      101,
+      245
+     ]
+    ],
+    "uv": [
+     [
+      125,
+      101
+     ],
+     [
+      125,
+      10
+     ],
+     [
+      241,
+      101
+     ],
+     [
+      241,
+      10
+     ]
+    ],
+    "clut": 16801,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664580,
+    "op": 44,
+    "xy": [
+     [
+      392,
+      5
+     ],
+     [
+      514,
+      5
+     ],
+     [
+      392,
+      129
+     ],
+     [
+      514,
+      129
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      11
+     ],
+     [
+      1,
+      133
+     ],
+     [
+      125,
+      11
+     ],
+     [
+      125,
+      133
+     ]
+    ],
+    "clut": 16739,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664620,
+    "op": 44,
+    "xy": [
+     [
+      270,
+      5
+     ],
+     [
+      405,
+      5
+     ],
+     [
+      270,
+      58
+     ],
+     [
+      405,
+      58
+     ]
+    ],
+    "uv": [
+     [
+      135,
+      175
+     ],
+     [
+      0,
+      175
+     ],
+     [
+      135,
+      228
+     ],
+     [
+      0,
+      228
+     ]
+    ],
+    "clut": 16800,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664660,
+    "op": 44,
+    "xy": [
+     [
+      423,
+      129
+     ],
+     [
+      514,
+      129
+     ],
+     [
+      423,
+      245
+     ],
+     [
+      514,
+      245
+     ]
+    ],
+    "uv": [
+     [
+      125,
+      11
+     ],
+     [
+      125,
+      102
+     ],
+     [
+      241,
+      11
+     ],
+     [
+      241,
+      102
+     ]
+    ],
+    "clut": 16801,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661820,
+    "op": 46,
+    "xy": [
+     [
+      338,
+      130
+     ],
+     [
+      407,
+      130
+     ],
+     [
+      338,
+      174
+     ],
+     [
+      407,
+      174
+     ]
+    ],
+    "uv": [
+     [
+      219,
+      133
+     ],
+     [
+      152,
+      133
+     ],
+     [
+      219,
+      177
+     ],
+     [
+      152,
+      177
+     ]
+    ],
+    "clut": 16611,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661780,
+    "op": 46,
+    "xy": [
+     [
+      105,
+      130
+     ],
+     [
+      174,
+      130
+     ],
+     [
+      105,
+      174
+     ],
+     [
+      174,
+      174
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      133
+     ],
+     [
+      218,
+      133
+     ],
+     [
+      151,
+      177
+     ],
+     [
+      218,
+      177
+     ]
+    ],
+    "clut": 16611,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661740,
+    "op": 46,
+    "xy": [
+     [
+      174,
+      130
+     ],
+     [
+      338,
+      130
+     ],
+     [
+      174,
+      174
+     ],
+     [
+      338,
+      174
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      177
+     ],
+     [
+      157,
+      177
+     ],
+     [
+      151,
+      221
+     ],
+     [
+      157,
+      221
+     ]
+    ],
+    "clut": 16672,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661688,
+    "op": 60,
+    "xy": [
+     [
+      327,
+      209
+     ],
+     [
+      350,
+      209
+     ],
+     [
+      327,
+      224
+     ],
+     [
+      350,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661636,
+    "op": 60,
+    "xy": [
+     [
+      301,
+      207
+     ],
+     [
+      331,
+      207
+     ],
+     [
+      301,
+      224
+     ],
+     [
+      331,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      237,
+      76
+     ],
+     [
+      237,
+      46
+     ],
+     [
+      254,
+      76
+     ],
+     [
+      254,
+      46
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661584,
+    "op": 60,
+    "xy": [
+     [
+      281,
+      209
+     ],
+     [
+      305,
+      209
+     ],
+     [
+      281,
+      224
+     ],
+     [
+      305,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661532,
+    "op": 60,
+    "xy": [
+     [
+      256,
+      203
+     ],
+     [
+      285,
+      203
+     ],
+     [
+      256,
+      224
+     ],
+     [
+      285,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      31,
+      234
+     ],
+     [
+      60,
+      234
+     ],
+     [
+      31,
+      255
+     ],
+     [
+      60,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 26,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661480,
+    "op": 60,
+    "xy": [
+     [
+      228,
+      204
+     ],
+     [
+      252,
+      204
+     ],
+     [
+      228,
+      224
+     ],
+     [
+      252,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      75,
+      231
+     ],
+     [
+      99,
+      231
+     ],
+     [
+      75,
+      251
+     ],
+     [
+      99,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661428,
+    "op": 60,
+    "xy": [
+     [
+      208,
+      209
+     ],
+     [
+      232,
+      209
+     ],
+     [
+      208,
+      224
+     ],
+     [
+      232,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661376,
+    "op": 60,
+    "xy": [
+     [
+      189,
+      209
+     ],
+     [
+      212,
+      209
+     ],
+     [
+      189,
+      224
+     ],
+     [
+      212,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      189
+     ],
+     [
+      233,
+      166
+     ],
+     [
+      248,
+      189
+     ],
+     [
+      248,
+      166
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661324,
+    "op": 60,
+    "xy": [
+     [
+      169,
+      203
+     ],
+     [
+      193,
+      203
+     ],
+     [
+      169,
+      224
+     ],
+     [
+      193,
+      224
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      151
+     ],
+     [
+      224,
+      151
+     ],
+     [
+      200,
+      172
+     ],
+     [
+      224,
+      172
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     2105376,
+     2105376,
+     2105376,
+     2105376
+    ]
+   },
+   {
+    "addr": 2148661272,
+    "op": 60,
+    "xy": [
+     [
+      304,
+      176
+     ],
+     [
+      325,
+      176
+     ],
+     [
+      304,
+      192
+     ],
+     [
+      325,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661220,
+    "op": 60,
+    "xy": [
+     [
+      285,
+      176
+     ],
+     [
+      308,
+      176
+     ],
+     [
+      285,
+      192
+     ],
+     [
+      308,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661168,
+    "op": 60,
+    "xy": [
+     [
+      266,
+      177
+     ],
+     [
+      289,
+      177
+     ],
+     [
+      266,
+      192
+     ],
+     [
+      289,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      189
+     ],
+     [
+      233,
+      166
+     ],
+     [
+      248,
+      189
+     ],
+     [
+      248,
+      166
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661116,
+    "op": 60,
+    "xy": [
+     [
+      256,
+      173
+     ],
+     [
+      270,
+      173
+     ],
+     [
+      256,
+      192
+     ],
+     [
+      270,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      203,
+      193
+     ],
+     [
+      217,
+      193
+     ],
+     [
+      203,
+      212
+     ],
+     [
+      217,
+      212
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661064,
+    "op": 60,
+    "xy": [
+     [
+      238,
+      173
+     ],
+     [
+      260,
+      173
+     ],
+     [
+      238,
+      192
+     ],
+     [
+      260,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      93
+     ],
+     [
+      255,
+      93
+     ],
+     [
+      233,
+      112
+     ],
+     [
+      255,
+      112
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148661012,
+    "op": 60,
+    "xy": [
+     [
+      220,
+      175
+     ],
+     [
+      242,
+      175
+     ],
+     [
+      220,
+      196
+     ],
+     [
+      242,
+      196
+     ]
+    ],
+    "uv": [
+     [
+      159,
+      193
+     ],
+     [
+      181,
+      193
+     ],
+     [
+      159,
+      214
+     ],
+     [
+      181,
+      214
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660960,
+    "op": 60,
+    "xy": [
+     [
+      194,
+      171
+     ],
+     [
+      224,
+      171
+     ],
+     [
+      194,
+      192
+     ],
+     [
+      224,
+      192
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      238
+     ],
+     [
+      200,
+      208
+     ],
+     [
+      221,
+      238
+     ],
+     [
+      221,
+      208
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 25,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660908,
+    "op": 60,
+    "xy": [
+     [
+      321,
+      145
+     ],
+     [
+      344,
+      145
+     ],
+     [
+      321,
+      160
+     ],
+     [
+      344,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660856,
+    "op": 60,
+    "xy": [
+     [
+      295,
+      143
+     ],
+     [
+      325,
+      143
+     ],
+     [
+      295,
+      160
+     ],
+     [
+      325,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      237,
+      76
+     ],
+     [
+      237,
+      46
+     ],
+     [
+      254,
+      76
+     ],
+     [
+      254,
+      46
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660804,
+    "op": 60,
+    "xy": [
+     [
+      275,
+      145
+     ],
+     [
+      299,
+      145
+     ],
+     [
+      275,
+      160
+     ],
+     [
+      299,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660752,
+    "op": 60,
+    "xy": [
+     [
+      250,
+      139
+     ],
+     [
+      279,
+      139
+     ],
+     [
+      250,
+      160
+     ],
+     [
+      279,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      31,
+      234
+     ],
+     [
+      60,
+      234
+     ],
+     [
+      31,
+      255
+     ],
+     [
+      60,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 26,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660700,
+    "op": 60,
+    "xy": [
+     [
+      222,
+      144
+     ],
+     [
+      246,
+      144
+     ],
+     [
+      222,
+      165
+     ],
+     [
+      246,
+      165
+     ]
+    ],
+    "uv": [
+     [
+      176,
+      151
+     ],
+     [
+      200,
+      151
+     ],
+     [
+      176,
+      172
+     ],
+     [
+      200,
+      172
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660648,
+    "op": 60,
+    "xy": [
+     [
+      202,
+      145
+     ],
+     [
+      226,
+      145
+     ],
+     [
+      202,
+      160
+     ],
+     [
+      226,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660596,
+    "op": 60,
+    "xy": [
+     [
+      194,
+      139
+     ],
+     [
+      206,
+      139
+     ],
+     [
+      194,
+      160
+     ],
+     [
+      206,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 25,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660544,
+    "op": 60,
+    "xy": [
+     [
+      175,
+      140
+     ],
+     [
+      198,
+      140
+     ],
+     [
+      175,
+      160
+     ],
+     [
+      198,
+      160
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      23
+     ],
+     [
+      233,
+      0
+     ],
+     [
+      253,
+      23
+     ],
+     [
+      253,
+      0
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664660,
+    "op": 44,
+    "xy": [
+     [
+      423,
+      129
+     ],
+     [
+      514,
+      129
+     ],
+     [
+      423,
+      245
+     ],
+     [
+      514,
+      245
+     ]
+    ],
+    "uv": [
+     [
+      125,
+      11
+     ],
+     [
+      125,
+      102
+     ],
+     [
+      241,
+      11
+     ],
+     [
+      241,
+      102
+     ]
+    ],
+    "clut": 16801,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664620,
+    "op": 44,
+    "xy": [
+     [
+      270,
+      5
+     ],
+     [
+      405,
+      5
+     ],
+     [
+      270,
+      58
+     ],
+     [
+      405,
+      58
+     ]
+    ],
+    "uv": [
+     [
+      135,
+      175
+     ],
+     [
+      0,
+      175
+     ],
+     [
+      135,
+      228
+     ],
+     [
+      0,
+      228
+     ]
+    ],
+    "clut": 16800,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664580,
+    "op": 44,
+    "xy": [
+     [
+      392,
+      5
+     ],
+     [
+      514,
+      5
+     ],
+     [
+      392,
+      129
+     ],
+     [
+      514,
+      129
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      11
+     ],
+     [
+      1,
+      133
+     ],
+     [
+      125,
+      11
+     ],
+     [
+      125,
+      133
+     ]
+    ],
+    "clut": 16739,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664540,
+    "op": 44,
+    "xy": [
+     [
+      10,
+      129
+     ],
+     [
+      101,
+      129
+     ],
+     [
+      10,
+      245
+     ],
+     [
+      101,
+      245
+     ]
+    ],
+    "uv": [
+     [
+      125,
+      101
+     ],
+     [
+      125,
+      10
+     ],
+     [
+      241,
+      101
+     ],
+     [
+      241,
+      10
+     ]
+    ],
+    "clut": 16801,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664500,
+    "op": 44,
+    "xy": [
+     [
+      132,
+      5
+     ],
+     [
+      267,
+      5
+     ],
+     [
+      132,
+      58
+     ],
+     [
+      267,
+      58
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      175
+     ],
+     [
+      136,
+      175
+     ],
+     [
+      1,
+      228
+     ],
+     [
+      136,
+      228
+     ]
+    ],
+    "clut": 16800,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148664460,
+    "op": 44,
+    "xy": [
+     [
+      10,
+      5
+     ],
+     [
+      132,
+      5
+     ],
+     [
+      10,
+      129
+     ],
+     [
+      132,
+      129
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      132
+     ],
+     [
+      1,
+      10
+     ],
+     [
+      125,
+      132
+     ],
+     [
+      125,
+      10
+     ]
+    ],
+    "clut": 16739,
+    "tpage": 24,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660504,
+    "op": 44,
+    "xy": [
+     [
+      384,
+      213
+     ],
+     [
+      512,
+      213
+     ],
+     [
+      384,
+      256
+     ],
+     [
+      512,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      88
+     ],
+     [
+      129,
+      88
+     ],
+     [
+      1,
+      131
+     ],
+     [
+      129,
+      131
+     ]
+    ],
+    "clut": 16736,
+    "tpage": 28,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660464,
+    "op": 44,
+    "xy": [
+     [
+      256,
+      213
+     ],
+     [
+      384,
+      213
+     ],
+     [
+      256,
+      256
+     ],
+     [
+      384,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      194,
+      128
+     ],
+     [
+      194,
+      0
+     ],
+     [
+      237,
+      128
+     ],
+     [
+      237,
+      0
+     ]
+    ],
+    "clut": 16675,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660424,
+    "op": 44,
+    "xy": [
+     [
+      128,
+      213
+     ],
+     [
+      256,
+      213
+     ],
+     [
+      128,
+      256
+     ],
+     [
+      256,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      151,
+      128
+     ],
+     [
+      151,
+      0
+     ],
+     [
+      194,
+      128
+     ],
+     [
+      194,
+      0
+     ]
+    ],
+    "clut": 16674,
+    "tpage": 27,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660384,
+    "op": 44,
+    "xy": [
+     [
+      0,
+      213
+     ],
+     [
+      128,
+      213
+     ],
+     [
+      0,
+      256
+     ],
+     [
+      128,
+      256
+     ]
+    ],
+    "uv": [
+     [
+      207,
+      128
+     ],
+     [
+      207,
+      0
+     ],
+     [
+      250,
+      128
+     ],
+     [
+      250,
+      0
+     ]
+    ],
+    "clut": 16673,
+    "tpage": 26,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504
+    ]
+   }
+  ],
+  "menu_spotlight_fan_frame450": [
+   {
+    "addr": 2148664700,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      588,
+      187
+     ],
+     [
+      598,
+      176
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148664736,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      598,
+      176
+     ],
+     [
+      611,
+      160
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148664756,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      611,
+      160
+     ],
+     [
+      620,
+      149
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148664824,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      607,
+      164
+     ],
+     [
+      615,
+      153
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148664860,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      615,
+      153
+     ],
+     [
+      622,
+      147
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148664880,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      622,
+      147
+     ],
+     [
+      630,
+      135
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148664948,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      532,
+      239
+     ],
+     [
+      543,
+      229
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148664984,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      543,
+      229
+     ],
+     [
+      543,
+      229
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665004,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      543,
+      229
+     ],
+     [
+      555,
+      219
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665072,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      427,
+      310
+     ],
+     [
+      441,
+      301
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665108,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      441,
+      301
+     ],
+     [
+      444,
+      300
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665128,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      444,
+      300
+     ],
+     [
+      457,
+      292
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665196,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      558,
+      217
+     ],
+     [
+      567,
+      207
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665232,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      567,
+      207
+     ],
+     [
+      575,
+      199
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665252,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      575,
+      199
+     ],
+     [
+      587,
+      189
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665320,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      553,
+      222
+     ],
+     [
+      563,
+      211
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665356,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      563,
+      211
+     ],
+     [
+      590,
+      184
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665376,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      590,
+      184
+     ],
+     [
+      599,
+      173
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665444,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      486,
+      274
+     ],
+     [
+      499,
+      264
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665480,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      499,
+      264
+     ],
+     [
+      503,
+      261
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665500,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      503,
+      261
+     ],
+     [
+      516,
+      252
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665568,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      564,
+      210
+     ],
+     [
+      575,
+      200
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665604,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      575,
+      200
+     ],
+     [
+      590,
+      185
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665624,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      590,
+      185
+     ],
+     [
+      599,
+      175
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665692,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      431,
+      307
+     ],
+     [
+      446,
+      299
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665728,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      446,
+      299
+     ],
+     [
+      479,
+      278
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665748,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      479,
+      278
+     ],
+     [
+      492,
+      269
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665816,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      599,
+      175
+     ],
+     [
+      607,
+      164
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665852,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      607,
+      164
+     ],
+     [
+      623,
+      144
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665872,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      623,
+      144
+     ],
+     [
+      631,
+      133
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665940,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      422,
+      312
+     ],
+     [
+      438,
+      304
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665976,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      438,
+      304
+     ],
+     [
+      447,
+      298
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665996,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      447,
+      298
+     ],
+     [
+      462,
+      289
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666064,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      583,
+      191
+     ],
+     [
+      593,
+      181
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666100,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      593,
+      181
+     ],
+     [
+      606,
+      166
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666120,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      606,
+      166
+     ],
+     [
+      615,
+      155
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666188,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      411,
+      319
+     ],
+     [
+      425,
+      311
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666224,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      425,
+      311
+     ],
+     [
+      439,
+      302
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666244,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      439,
+      302
+     ],
+     [
+      454,
+      294
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666312,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      620,
+      148
+     ],
+     [
+      628,
+      137
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666348,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      628,
+      137
+     ],
+     [
+      638,
+      124
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666368,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      638,
+      124
+     ],
+     [
+      644,
+      113
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666436,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      598,
+      175
+     ],
+     [
+      607,
+      164
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666472,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      607,
+      164
+     ],
+     [
+      611,
+      160
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666492,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      611,
+      160
+     ],
+     [
+      620,
+      149
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666560,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      556,
+      218
+     ],
+     [
+      567,
+      208
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666596,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      567,
+      208
+     ],
+     [
+      575,
+      200
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666616,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      575,
+      200
+     ],
+     [
+      585,
+      190
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666720,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      343,
+      350
+     ],
+     [
+      359,
+      343
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666756,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      359,
+      343
+     ],
+     [
+      377,
+      335
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666776,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      377,
+      335
+     ],
+     [
+      393,
+      328
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666856,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      375,
+      336
+     ],
+     [
+      391,
+      328
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666616,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      575,
+      200
+     ],
+     [
+      585,
+      190
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666596,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      567,
+      208
+     ],
+     [
+      575,
+      200
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666560,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      556,
+      218
+     ],
+     [
+      567,
+      208
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666492,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      611,
+      160
+     ],
+     [
+      620,
+      149
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666472,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      607,
+      164
+     ],
+     [
+      611,
+      160
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666436,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      598,
+      175
+     ],
+     [
+      607,
+      164
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666368,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      638,
+      124
+     ],
+     [
+      644,
+      113
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666348,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      628,
+      137
+     ],
+     [
+      638,
+      124
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666312,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      620,
+      148
+     ],
+     [
+      628,
+      137
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666244,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      439,
+      302
+     ],
+     [
+      454,
+      294
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666224,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      425,
+      311
+     ],
+     [
+      439,
+      302
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666188,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      411,
+      319
+     ],
+     [
+      425,
+      311
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148666120,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      606,
+      166
+     ],
+     [
+      615,
+      155
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148666100,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      593,
+      181
+     ],
+     [
+      606,
+      166
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148666064,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      583,
+      191
+     ],
+     [
+      593,
+      181
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665996,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      447,
+      298
+     ],
+     [
+      462,
+      289
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665976,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      438,
+      304
+     ],
+     [
+      447,
+      298
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665940,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      422,
+      312
+     ],
+     [
+      438,
+      304
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665872,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      623,
+      144
+     ],
+     [
+      631,
+      133
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665852,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      607,
+      164
+     ],
+     [
+      623,
+      144
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665816,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      599,
+      175
+     ],
+     [
+      607,
+      164
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665748,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      479,
+      278
+     ],
+     [
+      492,
+      269
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665728,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      446,
+      299
+     ],
+     [
+      479,
+      278
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665692,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      431,
+      307
+     ],
+     [
+      446,
+      299
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665624,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      590,
+      185
+     ],
+     [
+      599,
+      175
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665604,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      575,
+      200
+     ],
+     [
+      590,
+      185
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665568,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      564,
+      210
+     ],
+     [
+      575,
+      200
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665500,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      503,
+      261
+     ],
+     [
+      516,
+      252
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665480,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      499,
+      264
+     ],
+     [
+      503,
+      261
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665444,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      486,
+      274
+     ],
+     [
+      499,
+      264
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665376,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      590,
+      184
+     ],
+     [
+      599,
+      173
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665356,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      563,
+      211
+     ],
+     [
+      590,
+      184
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665320,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      553,
+      222
+     ],
+     [
+      563,
+      211
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665252,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      575,
+      199
+     ],
+     [
+      587,
+      189
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665232,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      567,
+      207
+     ],
+     [
+      575,
+      199
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665196,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      558,
+      217
+     ],
+     [
+      567,
+      207
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665128,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      444,
+      300
+     ],
+     [
+      457,
+      292
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148665108,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      441,
+      301
+     ],
+     [
+      444,
+      300
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148665072,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      427,
+      310
+     ],
+     [
+      441,
+      301
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148665004,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      543,
+      229
+     ],
+     [
+      555,
+      219
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148664984,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      543,
+      229
+     ],
+     [
+      543,
+      229
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148664948,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      532,
+      239
+     ],
+     [
+      543,
+      229
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148664880,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      622,
+      147
+     ],
+     [
+      630,
+      135
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148664860,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      615,
+      153
+     ],
+     [
+      622,
+      147
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148664824,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      607,
+      164
+     ],
+     [
+      615,
+      153
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   },
+   {
+    "addr": 2148664756,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      611,
+      160
+     ],
+     [
+      620,
+      149
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     6168,
+     0
+    ]
+   },
+   {
+    "addr": 2148664736,
+    "op": 34,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      598,
+      176
+     ],
+     [
+      611,
+      160
+     ]
+    ],
+    "rgb_BBGGRR": [
+     6168
+    ]
+   },
+   {
+    "addr": 2148664700,
+    "op": 58,
+    "xy": [
+     [
+      -103,
+      -64
+     ],
+     [
+      -103,
+      -64
+     ],
+     [
+      588,
+      187
+     ],
+     [
+      598,
+      176
+     ]
+    ],
+    "rgb_BBGGRR": [
+     0,
+     6168,
+     0,
+     6168
+    ]
+   }
+  ],
+  "language_2d_frame5": [
+   {
+    "addr": 2148660304,
+    "op": 62,
+    "xy": [
+     [
+      -34,
+      151
+     ],
+     [
+      -9,
+      151
+     ],
+     [
+      -34,
+      172
+     ],
+     [
+      -9,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      230,
+      150
+     ],
+     [
+      255,
+      150
+     ],
+     [
+      230,
+      171
+     ],
+     [
+      255,
+      171
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660356,
+    "op": 62,
+    "xy": [
+     [
+      -13,
+      156
+     ],
+     [
+      8,
+      156
+     ],
+     [
+      -13,
+      172
+     ],
+     [
+      8,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660408,
+    "op": 62,
+    "xy": [
+     [
+      4,
+      155
+     ],
+     [
+      26,
+      155
+     ],
+     [
+      4,
+      176
+     ],
+     [
+      26,
+      176
+     ]
+    ],
+    "uv": [
+     [
+      159,
+      193
+     ],
+     [
+      181,
+      193
+     ],
+     [
+      159,
+      214
+     ],
+     [
+      181,
+      214
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660460,
+    "op": 62,
+    "xy": [
+     [
+      22,
+      157
+     ],
+     [
+      46,
+      157
+     ],
+     [
+      22,
+      172
+     ],
+     [
+      46,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660512,
+    "op": 62,
+    "xy": [
+     [
+      42,
+      147
+     ],
+     [
+      65,
+      147
+     ],
+     [
+      42,
+      172
+     ],
+     [
+      65,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      141,
+      241
+     ],
+     [
+      141,
+      218
+     ],
+     [
+      166,
+      241
+     ],
+     [
+      166,
+      218
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 58,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660564,
+    "op": 62,
+    "xy": [
+     [
+      61,
+      157
+     ],
+     [
+      84,
+      157
+     ],
+     [
+      61,
+      172
+     ],
+     [
+      84,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      189
+     ],
+     [
+      233,
+      166
+     ],
+     [
+      248,
+      189
+     ],
+     [
+      248,
+      166
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660616,
+    "op": 62,
+    "xy": [
+     [
+      80,
+      151
+     ],
+     [
+      92,
+      151
+     ],
+     [
+      80,
+      172
+     ],
+     [
+      92,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660668,
+    "op": 62,
+    "xy": [
+     [
+      6,
+      179
+     ],
+     [
+      36,
+      179
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      36,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      234
+     ],
+     [
+      31,
+      234
+     ],
+     [
+      1,
+      255
+     ],
+     [
+      31,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 58,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660720,
+    "op": 62,
+    "xy": [
+     [
+      32,
+      185
+     ],
+     [
+      55,
+      185
+     ],
+     [
+      32,
+      200
+     ],
+     [
+      55,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660772,
+    "op": 62,
+    "xy": [
+     [
+      51,
+      180
+     ],
+     [
+      75,
+      180
+     ],
+     [
+      51,
+      200
+     ],
+     [
+      75,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      75,
+      231
+     ],
+     [
+      99,
+      231
+     ],
+     [
+      75,
+      251
+     ],
+     [
+      99,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660824,
+    "op": 62,
+    "xy": [
+     [
+      71,
+      185
+     ],
+     [
+      94,
+      185
+     ],
+     [
+      71,
+      200
+     ],
+     [
+      94,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660876,
+    "op": 62,
+    "xy": [
+     [
+      90,
+      184
+     ],
+     [
+      111,
+      184
+     ],
+     [
+      90,
+      200
+     ],
+     [
+      111,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      239
+     ],
+     [
+      221,
+      239
+     ],
+     [
+      200,
+      255
+     ],
+     [
+      221,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660928,
+    "op": 62,
+    "xy": [
+     [
+      107,
+      179
+     ],
+     [
+      119,
+      179
+     ],
+     [
+      107,
+      200
+     ],
+     [
+      119,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660980,
+    "op": 62,
+    "xy": [
+     [
+      115,
+      185
+     ],
+     [
+      139,
+      185
+     ],
+     [
+      115,
+      200
+     ],
+     [
+      139,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661032,
+    "op": 62,
+    "xy": [
+     [
+      135,
+      184
+     ],
+     [
+      158,
+      184
+     ],
+     [
+      135,
+      200
+     ],
+     [
+      158,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661084,
+    "op": 62,
+    "xy": [
+     [
+      154,
+      180
+     ],
+     [
+      178,
+      180
+     ],
+     [
+      154,
+      200
+     ],
+     [
+      178,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      75,
+      231
+     ],
+     [
+      99,
+      231
+     ],
+     [
+      75,
+      251
+     ],
+     [
+      99,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661136,
+    "op": 62,
+    "xy": [
+     [
+      174,
+      184
+     ],
+     [
+      195,
+      184
+     ],
+     [
+      174,
+      200
+     ],
+     [
+      195,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661188,
+    "op": 62,
+    "xy": [
+     [
+      200,
+      192
+     ],
+     [
+      225,
+      192
+     ],
+     [
+      200,
+      213
+     ],
+     [
+      225,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      230,
+      150
+     ],
+     [
+      255,
+      150
+     ],
+     [
+      230,
+      171
+     ],
+     [
+      255,
+      171
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661240,
+    "op": 62,
+    "xy": [
+     [
+      221,
+      197
+     ],
+     [
+      244,
+      197
+     ],
+     [
+      221,
+      213
+     ],
+     [
+      244,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661292,
+    "op": 62,
+    "xy": [
+     [
+      240,
+      197
+     ],
+     [
+      264,
+      197
+     ],
+     [
+      240,
+      217
+     ],
+     [
+      264,
+      217
+     ]
+    ],
+    "uv": [
+     [
+      51,
+      231
+     ],
+     [
+      75,
+      231
+     ],
+     [
+      51,
+      251
+     ],
+     [
+      75,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661344,
+    "op": 62,
+    "xy": [
+     [
+      260,
+      192
+     ],
+     [
+      272,
+      192
+     ],
+     [
+      260,
+      213
+     ],
+     [
+      272,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661396,
+    "op": 62,
+    "xy": [
+     [
+      268,
+      194
+     ],
+     [
+      282,
+      194
+     ],
+     [
+      268,
+      213
+     ],
+     [
+      282,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      203,
+      193
+     ],
+     [
+      217,
+      193
+     ],
+     [
+      203,
+      212
+     ],
+     [
+      217,
+      212
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661448,
+    "op": 62,
+    "xy": [
+     [
+      278,
+      197
+     ],
+     [
+      299,
+      197
+     ],
+     [
+      278,
+      213
+     ],
+     [
+      299,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661500,
+    "op": 62,
+    "xy": [
+     [
+      295,
+      192
+     ],
+     [
+      318,
+      192
+     ],
+     [
+      295,
+      213
+     ],
+     [
+      318,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      197,
+      172
+     ],
+     [
+      220,
+      172
+     ],
+     [
+      197,
+      193
+     ],
+     [
+      220,
+      193
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661552,
+    "op": 62,
+    "xy": [
+     [
+      347,
+      181
+     ],
+     [
+      375,
+      181
+     ],
+     [
+      347,
+      200
+     ],
+     [
+      375,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      159,
+      202
+     ],
+     [
+      187,
+      202
+     ],
+     [
+      159,
+      221
+     ],
+     [
+      187,
+      221
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661604,
+    "op": 62,
+    "xy": [
+     [
+      371,
+      185
+     ],
+     [
+      394,
+      185
+     ],
+     [
+      371,
+      200
+     ],
+     [
+      394,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      212
+     ],
+     [
+      233,
+      189
+     ],
+     [
+      248,
+      212
+     ],
+     [
+      248,
+      189
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661656,
+    "op": 62,
+    "xy": [
+     [
+      390,
+      185
+     ],
+     [
+      413,
+      185
+     ],
+     [
+      390,
+      200
+     ],
+     [
+      413,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661708,
+    "op": 62,
+    "xy": [
+     [
+      409,
+      184
+     ],
+     [
+      432,
+      184
+     ],
+     [
+      409,
+      200
+     ],
+     [
+      432,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661760,
+    "op": 62,
+    "xy": [
+     [
+      428,
+      184
+     ],
+     [
+      449,
+      184
+     ],
+     [
+      428,
+      200
+     ],
+     [
+      449,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661812,
+    "op": 62,
+    "xy": [
+     [
+      445,
+      179
+     ],
+     [
+      468,
+      179
+     ],
+     [
+      445,
+      200
+     ],
+     [
+      468,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      174,
+      172
+     ],
+     [
+      197,
+      172
+     ],
+     [
+      174,
+      193
+     ],
+     [
+      197,
+      193
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661864,
+    "op": 62,
+    "xy": [
+     [
+      464,
+      185
+     ],
+     [
+      488,
+      185
+     ],
+     [
+      464,
+      200
+     ],
+     [
+      488,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661916,
+    "op": 62,
+    "xy": [
+     [
+      415,
+      151
+     ],
+     [
+      439,
+      151
+     ],
+     [
+      415,
+      172
+     ],
+     [
+      439,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      224,
+      171
+     ],
+     [
+      248,
+      171
+     ],
+     [
+      224,
+      192
+     ],
+     [
+      248,
+      192
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148661968,
+    "op": 62,
+    "xy": [
+     [
+      435,
+      156
+     ],
+     [
+      456,
+      156
+     ],
+     [
+      435,
+      172
+     ],
+     [
+      456,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      239
+     ],
+     [
+      221,
+      239
+     ],
+     [
+      200,
+      255
+     ],
+     [
+      221,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662020,
+    "op": 62,
+    "xy": [
+     [
+      452,
+      157
+     ],
+     [
+      476,
+      157
+     ],
+     [
+      452,
+      172
+     ],
+     [
+      476,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662072,
+    "op": 62,
+    "xy": [
+     [
+      472,
+      156
+     ],
+     [
+      495,
+      156
+     ],
+     [
+      472,
+      172
+     ],
+     [
+      495,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662124,
+    "op": 62,
+    "xy": [
+     [
+      491,
+      156
+     ],
+     [
+      514,
+      156
+     ],
+     [
+      491,
+      179
+     ],
+     [
+      514,
+      179
+     ]
+    ],
+    "uv": [
+     [
+      190,
+      219
+     ],
+     [
+      213,
+      219
+     ],
+     [
+      190,
+      242
+     ],
+     [
+      213,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 58,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662176,
+    "op": 62,
+    "xy": [
+     [
+      510,
+      157
+     ],
+     [
+      534,
+      157
+     ],
+     [
+      510,
+      172
+     ],
+     [
+      534,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662228,
+    "op": 62,
+    "xy": [
+     [
+      530,
+      153
+     ],
+     [
+      544,
+      153
+     ],
+     [
+      530,
+      172
+     ],
+     [
+      544,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      203,
+      193
+     ],
+     [
+      217,
+      193
+     ],
+     [
+      203,
+      212
+     ],
+     [
+      217,
+      212
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662280,
+    "op": 62,
+    "xy": [
+     [
+      540,
+      156
+     ],
+     [
+      561,
+      156
+     ],
+     [
+      540,
+      172
+     ],
+     [
+      561,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662332,
+    "op": 56,
+    "xy": [
+     [
+      0,
+      0
+     ],
+     [
+      512,
+      0
+     ],
+     [
+      0,
+      256
+     ],
+     [
+      512,
+      256
+     ]
+    ],
+    "rgb_BBGGRR": [
+     16688025,
+     16688025,
+     5709866,
+     5709866
+    ]
+   },
+   {
+    "addr": 2148662368,
+    "op": 34,
+    "xy": [
+     [
+      77,
+      204
+     ],
+     [
+      109,
+      216
+     ],
+     [
+      109,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     69650
+    ]
+   },
+   {
+    "addr": 2148662420,
+    "op": 34,
+    "xy": [
+     [
+      433,
+      204
+     ],
+     [
+      401,
+      216
+     ],
+     [
+      401,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     69650
+    ]
+   },
+   {
+    "addr": 2148662472,
+    "op": 34,
+    "xy": [
+     [
+      125,
+      204
+     ],
+     [
+      157,
+      216
+     ],
+     [
+      157,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     890792
+    ]
+   },
+   {
+    "addr": 2148662524,
+    "op": 34,
+    "xy": [
+     [
+      385,
+      204
+     ],
+     [
+      353,
+      216
+     ],
+     [
+      353,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     890792
+    ]
+   },
+   {
+    "addr": 2148662576,
+    "op": 34,
+    "xy": [
+     [
+      109,
+      204
+     ],
+     [
+      141,
+      216
+     ],
+     [
+      141,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     617078
+    ]
+   },
+   {
+    "addr": 2148662628,
+    "op": 34,
+    "xy": [
+     [
+      401,
+      204
+     ],
+     [
+      369,
+      216
+     ],
+     [
+      369,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     617078
+    ]
+   },
+   {
+    "addr": 2148662680,
+    "op": 34,
+    "xy": [
+     [
+      93,
+      204
+     ],
+     [
+      125,
+      216
+     ],
+     [
+      125,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     343364
+    ]
+   },
+   {
+    "addr": 2148662732,
+    "op": 34,
+    "xy": [
+     [
+      417,
+      204
+     ],
+     [
+      385,
+      216
+     ],
+     [
+      385,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     343364
+    ]
+   },
+   {
+    "addr": 2148662732,
+    "op": 34,
+    "xy": [
+     [
+      417,
+      204
+     ],
+     [
+      385,
+      216
+     ],
+     [
+      385,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     343364
+    ]
+   },
+   {
+    "addr": 2148662680,
+    "op": 34,
+    "xy": [
+     [
+      93,
+      204
+     ],
+     [
+      125,
+      216
+     ],
+     [
+      125,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     343364
+    ]
+   },
+   {
+    "addr": 2148662628,
+    "op": 34,
+    "xy": [
+     [
+      401,
+      204
+     ],
+     [
+      369,
+      216
+     ],
+     [
+      369,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     617078
+    ]
+   },
+   {
+    "addr": 2148662576,
+    "op": 34,
+    "xy": [
+     [
+      109,
+      204
+     ],
+     [
+      141,
+      216
+     ],
+     [
+      141,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     617078
+    ]
+   },
+   {
+    "addr": 2148662524,
+    "op": 34,
+    "xy": [
+     [
+      385,
+      204
+     ],
+     [
+      353,
+      216
+     ],
+     [
+      353,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     890792
+    ]
+   },
+   {
+    "addr": 2148662472,
+    "op": 34,
+    "xy": [
+     [
+      125,
+      204
+     ],
+     [
+      157,
+      216
+     ],
+     [
+      157,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     890792
+    ]
+   },
+   {
+    "addr": 2148662420,
+    "op": 34,
+    "xy": [
+     [
+      433,
+      204
+     ],
+     [
+      401,
+      216
+     ],
+     [
+      401,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     69650
+    ]
+   },
+   {
+    "addr": 2148662368,
+    "op": 34,
+    "xy": [
+     [
+      77,
+      204
+     ],
+     [
+      109,
+      216
+     ],
+     [
+      109,
+      192
+     ]
+    ],
+    "rgb_BBGGRR": [
+     69650
+    ]
+   },
+   {
+    "addr": 2148661864,
+    "op": 62,
+    "xy": [
+     [
+      464,
+      185
+     ],
+     [
+      488,
+      185
+     ],
+     [
+      464,
+      200
+     ],
+     [
+      488,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661812,
+    "op": 62,
+    "xy": [
+     [
+      445,
+      179
+     ],
+     [
+      468,
+      179
+     ],
+     [
+      445,
+      200
+     ],
+     [
+      468,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      174,
+      172
+     ],
+     [
+      197,
+      172
+     ],
+     [
+      174,
+      193
+     ],
+     [
+      197,
+      193
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661760,
+    "op": 62,
+    "xy": [
+     [
+      428,
+      184
+     ],
+     [
+      449,
+      184
+     ],
+     [
+      428,
+      200
+     ],
+     [
+      449,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661708,
+    "op": 62,
+    "xy": [
+     [
+      409,
+      184
+     ],
+     [
+      432,
+      184
+     ],
+     [
+      409,
+      200
+     ],
+     [
+      432,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661656,
+    "op": 62,
+    "xy": [
+     [
+      390,
+      185
+     ],
+     [
+      413,
+      185
+     ],
+     [
+      390,
+      200
+     ],
+     [
+      413,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661604,
+    "op": 62,
+    "xy": [
+     [
+      371,
+      185
+     ],
+     [
+      394,
+      185
+     ],
+     [
+      371,
+      200
+     ],
+     [
+      394,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      212
+     ],
+     [
+      233,
+      189
+     ],
+     [
+      248,
+      212
+     ],
+     [
+      248,
+      189
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661552,
+    "op": 62,
+    "xy": [
+     [
+      347,
+      181
+     ],
+     [
+      375,
+      181
+     ],
+     [
+      347,
+      200
+     ],
+     [
+      375,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      159,
+      202
+     ],
+     [
+      187,
+      202
+     ],
+     [
+      159,
+      221
+     ],
+     [
+      187,
+      221
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 56,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661136,
+    "op": 62,
+    "xy": [
+     [
+      174,
+      184
+     ],
+     [
+      195,
+      184
+     ],
+     [
+      174,
+      200
+     ],
+     [
+      195,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661084,
+    "op": 62,
+    "xy": [
+     [
+      154,
+      180
+     ],
+     [
+      178,
+      180
+     ],
+     [
+      154,
+      200
+     ],
+     [
+      178,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      75,
+      231
+     ],
+     [
+      99,
+      231
+     ],
+     [
+      75,
+      251
+     ],
+     [
+      99,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148661032,
+    "op": 62,
+    "xy": [
+     [
+      135,
+      184
+     ],
+     [
+      158,
+      184
+     ],
+     [
+      135,
+      200
+     ],
+     [
+      158,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660980,
+    "op": 62,
+    "xy": [
+     [
+      115,
+      185
+     ],
+     [
+      139,
+      185
+     ],
+     [
+      115,
+      200
+     ],
+     [
+      139,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660928,
+    "op": 62,
+    "xy": [
+     [
+      107,
+      179
+     ],
+     [
+      119,
+      179
+     ],
+     [
+      107,
+      200
+     ],
+     [
+      119,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660876,
+    "op": 62,
+    "xy": [
+     [
+      90,
+      184
+     ],
+     [
+      111,
+      184
+     ],
+     [
+      90,
+      200
+     ],
+     [
+      111,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      239
+     ],
+     [
+      221,
+      239
+     ],
+     [
+      200,
+      255
+     ],
+     [
+      221,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660824,
+    "op": 62,
+    "xy": [
+     [
+      71,
+      185
+     ],
+     [
+      94,
+      185
+     ],
+     [
+      71,
+      200
+     ],
+     [
+      94,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660772,
+    "op": 62,
+    "xy": [
+     [
+      51,
+      180
+     ],
+     [
+      75,
+      180
+     ],
+     [
+      51,
+      200
+     ],
+     [
+      75,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      75,
+      231
+     ],
+     [
+      99,
+      231
+     ],
+     [
+      75,
+      251
+     ],
+     [
+      99,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660720,
+    "op": 62,
+    "xy": [
+     [
+      32,
+      185
+     ],
+     [
+      55,
+      185
+     ],
+     [
+      32,
+      200
+     ],
+     [
+      55,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      240,
+      253
+     ],
+     [
+      240,
+      230
+     ],
+     [
+      255,
+      253
+     ],
+     [
+      255,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148660668,
+    "op": 62,
+    "xy": [
+     [
+      6,
+      179
+     ],
+     [
+      36,
+      179
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      36,
+      200
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      234
+     ],
+     [
+      31,
+      234
+     ],
+     [
+      1,
+      255
+     ],
+     [
+      31,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 58,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     3026478,
+     3026478,
+     3026478,
+     3026478
+    ]
+   },
+   {
+    "addr": 2148662280,
+    "op": 62,
+    "xy": [
+     [
+      540,
+      156
+     ],
+     [
+      561,
+      156
+     ],
+     [
+      540,
+      172
+     ],
+     [
+      561,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662228,
+    "op": 62,
+    "xy": [
+     [
+      530,
+      153
+     ],
+     [
+      544,
+      153
+     ],
+     [
+      530,
+      172
+     ],
+     [
+      544,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      203,
+      193
+     ],
+     [
+      217,
+      193
+     ],
+     [
+      203,
+      212
+     ],
+     [
+      217,
+      212
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662176,
+    "op": 62,
+    "xy": [
+     [
+      510,
+      157
+     ],
+     [
+      534,
+      157
+     ],
+     [
+      510,
+      172
+     ],
+     [
+      534,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662124,
+    "op": 62,
+    "xy": [
+     [
+      491,
+      156
+     ],
+     [
+      514,
+      156
+     ],
+     [
+      491,
+      179
+     ],
+     [
+      514,
+      179
+     ]
+    ],
+    "uv": [
+     [
+      190,
+      219
+     ],
+     [
+      213,
+      219
+     ],
+     [
+      190,
+      242
+     ],
+     [
+      213,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 58,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662072,
+    "op": 62,
+    "xy": [
+     [
+      472,
+      156
+     ],
+     [
+      495,
+      156
+     ],
+     [
+      472,
+      172
+     ],
+     [
+      495,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148662020,
+    "op": 62,
+    "xy": [
+     [
+      452,
+      157
+     ],
+     [
+      476,
+      157
+     ],
+     [
+      452,
+      172
+     ],
+     [
+      476,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148661968,
+    "op": 62,
+    "xy": [
+     [
+      435,
+      156
+     ],
+     [
+      456,
+      156
+     ],
+     [
+      435,
+      172
+     ],
+     [
+      456,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      200,
+      239
+     ],
+     [
+      221,
+      239
+     ],
+     [
+      200,
+      255
+     ],
+     [
+      221,
+      255
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148661916,
+    "op": 62,
+    "xy": [
+     [
+      415,
+      151
+     ],
+     [
+      439,
+      151
+     ],
+     [
+      415,
+      172
+     ],
+     [
+      439,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      224,
+      171
+     ],
+     [
+      248,
+      171
+     ],
+     [
+      224,
+      192
+     ],
+     [
+      248,
+      192
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660616,
+    "op": 62,
+    "xy": [
+     [
+      80,
+      151
+     ],
+     [
+      92,
+      151
+     ],
+     [
+      80,
+      172
+     ],
+     [
+      92,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660564,
+    "op": 62,
+    "xy": [
+     [
+      61,
+      157
+     ],
+     [
+      84,
+      157
+     ],
+     [
+      61,
+      172
+     ],
+     [
+      84,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      189
+     ],
+     [
+      233,
+      166
+     ],
+     [
+      248,
+      189
+     ],
+     [
+      248,
+      166
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660512,
+    "op": 62,
+    "xy": [
+     [
+      42,
+      147
+     ],
+     [
+      65,
+      147
+     ],
+     [
+      42,
+      172
+     ],
+     [
+      65,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      141,
+      241
+     ],
+     [
+      141,
+      218
+     ],
+     [
+      166,
+      241
+     ],
+     [
+      166,
+      218
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 58,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660460,
+    "op": 62,
+    "xy": [
+     [
+      22,
+      157
+     ],
+     [
+      46,
+      157
+     ],
+     [
+      22,
+      172
+     ],
+     [
+      46,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      147,
+      254
+     ],
+     [
+      147,
+      230
+     ],
+     [
+      162,
+      254
+     ],
+     [
+      162,
+      230
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660408,
+    "op": 62,
+    "xy": [
+     [
+      4,
+      155
+     ],
+     [
+      26,
+      155
+     ],
+     [
+      4,
+      176
+     ],
+     [
+      26,
+      176
+     ]
+    ],
+    "uv": [
+     [
+      159,
+      193
+     ],
+     [
+      181,
+      193
+     ],
+     [
+      159,
+      214
+     ],
+     [
+      181,
+      214
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660356,
+    "op": 62,
+    "xy": [
+     [
+      -13,
+      156
+     ],
+     [
+      8,
+      156
+     ],
+     [
+      -13,
+      172
+     ],
+     [
+      8,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148660304,
+    "op": 62,
+    "xy": [
+     [
+      -34,
+      151
+     ],
+     [
+      -9,
+      151
+     ],
+     [
+      -34,
+      172
+     ],
+     [
+      -9,
+      172
+     ]
+    ],
+    "uv": [
+     [
+      230,
+      150
+     ],
+     [
+      255,
+      150
+     ],
+     [
+      230,
+      171
+     ],
+     [
+      255,
+      171
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     1644825,
+     1644825,
+     1644825,
+     1644825
+    ]
+   },
+   {
+    "addr": 2148661500,
+    "op": 62,
+    "xy": [
+     [
+      295,
+      192
+     ],
+     [
+      318,
+      192
+     ],
+     [
+      295,
+      213
+     ],
+     [
+      318,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      197,
+      172
+     ],
+     [
+      220,
+      172
+     ],
+     [
+      197,
+      193
+     ],
+     [
+      220,
+      193
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661448,
+    "op": 62,
+    "xy": [
+     [
+      278,
+      197
+     ],
+     [
+      299,
+      197
+     ],
+     [
+      278,
+      213
+     ],
+     [
+      299,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      233,
+      151
+     ],
+     [
+      254,
+      151
+     ],
+     [
+      233,
+      167
+     ],
+     [
+      254,
+      167
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661396,
+    "op": 62,
+    "xy": [
+     [
+      268,
+      194
+     ],
+     [
+      282,
+      194
+     ],
+     [
+      268,
+      213
+     ],
+     [
+      282,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      203,
+      193
+     ],
+     [
+      217,
+      193
+     ],
+     [
+      203,
+      212
+     ],
+     [
+      217,
+      212
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661344,
+    "op": 62,
+    "xy": [
+     [
+      260,
+      192
+     ],
+     [
+      272,
+      192
+     ],
+     [
+      260,
+      213
+     ],
+     [
+      272,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      172,
+      254
+     ],
+     [
+      172,
+      242
+     ],
+     [
+      193,
+      254
+     ],
+     [
+      193,
+      242
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 57,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661292,
+    "op": 62,
+    "xy": [
+     [
+      240,
+      197
+     ],
+     [
+      264,
+      197
+     ],
+     [
+      240,
+      217
+     ],
+     [
+      264,
+      217
+     ]
+    ],
+    "uv": [
+     [
+      51,
+      231
+     ],
+     [
+      75,
+      231
+     ],
+     [
+      51,
+      251
+     ],
+     [
+      75,
+      251
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661240,
+    "op": 62,
+    "xy": [
+     [
+      221,
+      197
+     ],
+     [
+      244,
+      197
+     ],
+     [
+      221,
+      213
+     ],
+     [
+      244,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      134,
+      153
+     ],
+     [
+      134,
+      130
+     ],
+     [
+      150,
+      153
+     ],
+     [
+      150,
+      130
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 60,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   },
+   {
+    "addr": 2148661188,
+    "op": 62,
+    "xy": [
+     [
+      200,
+      192
+     ],
+     [
+      225,
+      192
+     ],
+     [
+      200,
+      213
+     ],
+     [
+      225,
+      213
+     ]
+    ],
+    "uv": [
+     [
+      230,
+      150
+     ],
+     [
+      255,
+      150
+     ],
+     [
+      230,
+      171
+     ],
+     [
+      255,
+      171
+     ]
+    ],
+    "clut": 16867,
+    "tpage": 59,
+    "abr": 1,
+    "rgb_BBGGRR": [
+     6579300,
+     6579300,
+     6579300,
+     6579300
+    ]
+   }
+  ],
+  "jester_2d_frame60": [
+   {
+    "addr": 2148660304,
+    "op": 60,
+    "xy": [
+     [
+      208,
+      208
+     ],
+     [
+      217,
+      208
+     ],
+     [
+      208,
+      220
+     ],
+     [
+      217,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      243,
+      146
+     ],
+     [
+      243,
+      137
+     ],
+     [
+      255,
+      146
+     ],
+     [
+      255,
+      137
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660356,
+    "op": 60,
+    "xy": [
+     [
+      218,
+      210
+     ],
+     [
+      226,
+      210
+     ],
+     [
+      218,
+      220
+     ],
+     [
+      226,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      192,
+      188
+     ],
+     [
+      192,
+      180
+     ],
+     [
+      202,
+      188
+     ],
+     [
+      202,
+      180
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660408,
+    "op": 60,
+    "xy": [
+     [
+      226,
+      210
+     ],
+     [
+      237,
+      210
+     ],
+     [
+      226,
+      220
+     ],
+     [
+      237,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      128,
+      138
+     ],
+     [
+      139,
+      138
+     ],
+     [
+      128,
+      148
+     ],
+     [
+      139,
+      148
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660460,
+    "op": 60,
+    "xy": [
+     [
+      243,
+      207
+     ],
+     [
+      252,
+      207
+     ],
+     [
+      243,
+      220
+     ],
+     [
+      252,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      131,
+      156
+     ],
+     [
+      131,
+      147
+     ],
+     [
+      144,
+      156
+     ],
+     [
+      144,
+      147
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660512,
+    "op": 60,
+    "xy": [
+     [
+      253,
+      210
+     ],
+     [
+      261,
+      210
+     ],
+     [
+      253,
+      220
+     ],
+     [
+      261,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      192,
+      188
+     ],
+     [
+      192,
+      180
+     ],
+     [
+      202,
+      188
+     ],
+     [
+      202,
+      180
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660564,
+    "op": 60,
+    "xy": [
+     [
+      261,
+      210
+     ],
+     [
+      269,
+      210
+     ],
+     [
+      261,
+      220
+     ],
+     [
+      269,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      189
+     ],
+     [
+      1,
+      181
+     ],
+     [
+      11,
+      189
+     ],
+     [
+      11,
+      181
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660616,
+    "op": 60,
+    "xy": [
+     [
+      269,
+      207
+     ],
+     [
+      277,
+      207
+     ],
+     [
+      269,
+      220
+     ],
+     [
+      277,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      154,
+      172
+     ],
+     [
+      154,
+      164
+     ],
+     [
+      167,
+      172
+     ],
+     [
+      167,
+      164
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660668,
+    "op": 60,
+    "xy": [
+     [
+      277,
+      207
+     ],
+     [
+      281,
+      207
+     ],
+     [
+      277,
+      220
+     ],
+     [
+      281,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      136,
+      253
+     ],
+     [
+      136,
+      249
+     ],
+     [
+      149,
+      253
+     ],
+     [
+      149,
+      249
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 30,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660720,
+    "op": 60,
+    "xy": [
+     [
+      281,
+      210
+     ],
+     [
+      289,
+      210
+     ],
+     [
+      281,
+      220
+     ],
+     [
+      289,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      182,
+      188
+     ],
+     [
+      182,
+      180
+     ],
+     [
+      192,
+      188
+     ],
+     [
+      192,
+      180
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660772,
+    "op": 60,
+    "xy": [
+     [
+      289,
+      210
+     ],
+     [
+      297,
+      210
+     ],
+     [
+      289,
+      223
+     ],
+     [
+      297,
+      223
+     ]
+    ],
+    "uv": [
+     [
+      128,
+      172
+     ],
+     [
+      128,
+      164
+     ],
+     [
+      141,
+      172
+     ],
+     [
+      141,
+      164
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660824,
+    "op": 60,
+    "xy": [
+     [
+      297,
+      215
+     ],
+     [
+      300,
+      215
+     ],
+     [
+      297,
+      220
+     ],
+     [
+      300,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      25,
+      29
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      30,
+      29
+     ],
+     [
+      30,
+      26
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 15,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660876,
+    "op": 60,
+    "xy": [
+     [
+      300,
+      215
+     ],
+     [
+      303,
+      215
+     ],
+     [
+      300,
+      220
+     ],
+     [
+      303,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      25,
+      29
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      30,
+      29
+     ],
+     [
+      30,
+      26
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 15,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660928,
+    "op": 60,
+    "xy": [
+     [
+      303,
+      215
+     ],
+     [
+      306,
+      215
+     ],
+     [
+      303,
+      220
+     ],
+     [
+      306,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      25,
+      29
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      30,
+      29
+     ],
+     [
+      30,
+      26
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 15,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148672536,
+    "op": 56,
+    "xy": [
+     [
+      0,
+      0
+     ],
+     [
+      512,
+      0
+     ],
+     [
+      0,
+      256
+     ],
+     [
+      512,
+      256
+     ]
+    ],
+    "rgb_BBGGRR": [
+     16688025,
+     16688025,
+     5709866,
+     5709866
+    ]
+   },
+   {
+    "addr": 2148660928,
+    "op": 60,
+    "xy": [
+     [
+      303,
+      215
+     ],
+     [
+      306,
+      215
+     ],
+     [
+      303,
+      220
+     ],
+     [
+      306,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      25,
+      29
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      30,
+      29
+     ],
+     [
+      30,
+      26
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 15,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660876,
+    "op": 60,
+    "xy": [
+     [
+      300,
+      215
+     ],
+     [
+      303,
+      215
+     ],
+     [
+      300,
+      220
+     ],
+     [
+      303,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      25,
+      29
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      30,
+      29
+     ],
+     [
+      30,
+      26
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 15,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660824,
+    "op": 60,
+    "xy": [
+     [
+      297,
+      215
+     ],
+     [
+      300,
+      215
+     ],
+     [
+      297,
+      220
+     ],
+     [
+      300,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      25,
+      29
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      30,
+      29
+     ],
+     [
+      30,
+      26
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 15,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660772,
+    "op": 60,
+    "xy": [
+     [
+      289,
+      210
+     ],
+     [
+      297,
+      210
+     ],
+     [
+      289,
+      223
+     ],
+     [
+      297,
+      223
+     ]
+    ],
+    "uv": [
+     [
+      128,
+      172
+     ],
+     [
+      128,
+      164
+     ],
+     [
+      141,
+      172
+     ],
+     [
+      141,
+      164
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660720,
+    "op": 60,
+    "xy": [
+     [
+      281,
+      210
+     ],
+     [
+      289,
+      210
+     ],
+     [
+      281,
+      220
+     ],
+     [
+      289,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      182,
+      188
+     ],
+     [
+      182,
+      180
+     ],
+     [
+      192,
+      188
+     ],
+     [
+      192,
+      180
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660668,
+    "op": 60,
+    "xy": [
+     [
+      277,
+      207
+     ],
+     [
+      281,
+      207
+     ],
+     [
+      277,
+      220
+     ],
+     [
+      281,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      136,
+      253
+     ],
+     [
+      136,
+      249
+     ],
+     [
+      149,
+      253
+     ],
+     [
+      149,
+      249
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 30,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660616,
+    "op": 60,
+    "xy": [
+     [
+      269,
+      207
+     ],
+     [
+      277,
+      207
+     ],
+     [
+      269,
+      220
+     ],
+     [
+      277,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      154,
+      172
+     ],
+     [
+      154,
+      164
+     ],
+     [
+      167,
+      172
+     ],
+     [
+      167,
+      164
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660564,
+    "op": 60,
+    "xy": [
+     [
+      261,
+      210
+     ],
+     [
+      269,
+      210
+     ],
+     [
+      261,
+      220
+     ],
+     [
+      269,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      1,
+      189
+     ],
+     [
+      1,
+      181
+     ],
+     [
+      11,
+      189
+     ],
+     [
+      11,
+      181
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660512,
+    "op": 60,
+    "xy": [
+     [
+      253,
+      210
+     ],
+     [
+      261,
+      210
+     ],
+     [
+      253,
+      220
+     ],
+     [
+      261,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      192,
+      188
+     ],
+     [
+      192,
+      180
+     ],
+     [
+      202,
+      188
+     ],
+     [
+      202,
+      180
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660460,
+    "op": 60,
+    "xy": [
+     [
+      243,
+      207
+     ],
+     [
+      252,
+      207
+     ],
+     [
+      243,
+      220
+     ],
+     [
+      252,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      131,
+      156
+     ],
+     [
+      131,
+      147
+     ],
+     [
+      144,
+      156
+     ],
+     [
+      144,
+      147
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660408,
+    "op": 60,
+    "xy": [
+     [
+      226,
+      210
+     ],
+     [
+      237,
+      210
+     ],
+     [
+      226,
+      220
+     ],
+     [
+      237,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      128,
+      138
+     ],
+     [
+      139,
+      138
+     ],
+     [
+      128,
+      148
+     ],
+     [
+      139,
+      148
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660356,
+    "op": 60,
+    "xy": [
+     [
+      218,
+      210
+     ],
+     [
+      226,
+      210
+     ],
+     [
+      218,
+      220
+     ],
+     [
+      226,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      192,
+      188
+     ],
+     [
+      192,
+      180
+     ],
+     [
+      202,
+      188
+     ],
+     [
+      202,
+      180
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   },
+   {
+    "addr": 2148660304,
+    "op": 60,
+    "xy": [
+     [
+      208,
+      208
+     ],
+     [
+      217,
+      208
+     ],
+     [
+      208,
+      220
+     ],
+     [
+      217,
+      220
+     ]
+    ],
+    "uv": [
+     [
+      243,
+      146
+     ],
+     [
+      243,
+      137
+     ],
+     [
+      255,
+      146
+     ],
+     [
+      255,
+      137
+     ]
+    ],
+    "clut": 1658,
+    "tpage": 31,
+    "abr": 0,
+    "rgb_BBGGRR": [
+     8421504,
+     8421504,
+     8421504,
+     8421504
+    ]
+   }
+  ]
+ },
+ "not_established": [
+  "which of entry 83's ten poses (sub 0-9) plays at other moments of the menu idle/point animation; only frame 450 (P+430) was read: sub 7",
+  "the exact GPU command the game uses to fill the flag slot (a 0x80 VRAM copy or a draw into the texture page); only the resulting VRAM was measured",
+  "punctuation and accent glyph identities were read by eye from png/s84_punct_45-64_x3.png and s84_accents_91-100_x3.png; big-font #62 looks like an apostrophe while the small font's #463 (same order slot) is the period used by 'Now Loading...'",
+  "no rendered PNG of the three meshes (advisor, advisor+flag, jester); their textures and entry/sub ids are given instead",
+  "the Options/Play Game submenus and the 'Load Game' with a save present were not captured"
+ ]
+}
