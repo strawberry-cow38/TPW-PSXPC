@@ -63,6 +63,12 @@ namespace TPWGodot
         /// port's free camera, which can go where the game's never does.</summary>
         bool _gameCam;
         readonly ParkCamera _gcam = new();
+        /// <summary>The game camera's eye and look-at point at the last two park frames, in Godot space. ⭐ THE
+        /// CAMERA RUNS AT THE GAME'S 25 Hz AND IS DRAWN BETWEEN THEM: its height easing is per frame, not per unit
+        /// of frame time, so stepping it at the render rate would change how it moves; planting the view on the
+        /// last step made it judder at the port's frame rate (master). Drawing it part-way from the previous
+        /// frame to the latest, by how far the clock is into the next, is smooth and moves exactly as the game's.</summary>
+        Vector3 _gEyePrev, _gEyeCur, _gLookPrev, _gLookCur;
         Label _info;
         string _infoText = "";
 
@@ -585,6 +591,7 @@ namespace TPWGodot
                 {
                     int yaw = (int)Math.Round(-_yaw * 4096 / (2 * Math.PI) / ParkCamera.QuarterTurn) * ParkCamera.QuarterTurn;
                     _gcam.Reset(_map, ClampX(_focus.X * ParkTerrain.TileUnits), ClampZ(-_focus.Z * ParkTerrain.TileUnits), yaw);
+                    TakeGameCamera(); _gEyePrev = _gEyeCur; _gLookPrev = _gLookCur;
                     PlaceGameCamera();
                 }
                 else
@@ -603,11 +610,20 @@ namespace TPWGodot
         int ClampX(float units) => (int)Math.Clamp(units, 0, (_map.Width - 1) * ParkTerrain.TileUnits);
         int ClampZ(float units) => (int)Math.Clamp(units, 0, (_map.Height - 1) * ParkTerrain.TileUnits);
 
-        void PlaceGameCamera()
+        /// <summary>The game camera's current eye and look-at point, into <see cref="_gEyeCur"/> / <see cref="_gLookCur"/>.</summary>
+        void TakeGameCamera()
         {
             float u = ParkTerrain.TileUnits;
-            _camera.Position = new Vector3(_gcam.EyeX / u, _gcam.EyeY / u, -_gcam.EyeZ / u);
-            _camera.LookAt(new Vector3((_gcam.FocusX >> 8) / u, _gcam.LookY / u, -(_gcam.FocusZ >> 8) / u), Vector3.Up);
+            _gEyeCur = new Vector3(_gcam.EyeX / u, _gcam.EyeY / u, -_gcam.EyeZ / u);
+            _gLookCur = new Vector3((_gcam.FocusX >> 8) / u, _gcam.LookY / u, -(_gcam.FocusZ >> 8) / u);
+        }
+
+        /// <summary>Put the view between the last two park frames, by how far the park clock is into the next.</summary>
+        void PlaceGameCamera()
+        {
+            float t = Mathf.Clamp((float)(_frameClock * ParticleSystem.FramesPerSecond), 0f, 1f);
+            _camera.Position = _gEyePrev.Lerp(_gEyeCur, t);
+            _camera.LookAt(_gLookPrev.Lerp(_gLookCur, t), Vector3.Up);
         }
 
         void RefreshInfo()
@@ -664,7 +680,12 @@ namespace TPWGodot
             {
                 _frameClock -= 1.0 / ParticleSystem.FramesPerSecond;
                 frames++;
-                if (_gameCam) _gcam.Step(_map, frameTime);
+                if (_gameCam)
+                {
+                    _gEyePrev = _gEyeCur; _gLookPrev = _gLookCur;
+                    _gcam.Step(_map, frameTime);
+                    TakeGameCamera();
+                }
                 _gate?.Update(frameTime, ParkOpen);
                 if (_gate != null)
                     foreach (int i in _gate.TakeDueEffects())
