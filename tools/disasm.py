@@ -7,10 +7,12 @@ dispatch table at 0x800DDD78 must read as a run of code pointers, and it does (1
 type handlers 0x8002c9a0 / 0x8002ca30 / ...). A wrong base fails this and the tool refuses
 to disassemble rather than printing plausible nonsense at the wrong address.
 """
-import struct, sys
+import os, struct, sys
 from capstone import Cs, CS_ARCH_MIPS, CS_MODE_MIPS32, CS_MODE_LITTLE_ENDIAN
 
-BIN  = '/home/ec2-user/tpw/ext/TPW.BIN'
+# Resolved relative to the repo, not to whoever's box this is. TPW_BIN overrides it.
+BIN  = os.environ.get('TPW_BIN',
+       os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'ext', 'TPW.BIN'))
 BASE = 0x80010000
 JUMPTAB = 0x800DDD78          # the game's track-size dispatch, fable/folio.md 3.4
 

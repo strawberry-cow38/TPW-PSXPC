@@ -1,0 +1,55 @@
+# ── GAME DATA AND CONSOLE FIRMWARE: NEVER COMMITTED ────────────────────────────
+# Bring your own disc and your own BIOS. Nothing here ships either.
+*.bin
+*.cue
+*.iso
+*.7z
+*.img
+*.sbi
+SLES_*
+SLUS_*
+SLPS_*
+TPW.OVL
+FOLIO.GAZ
+bios/
+sysdir/
+ext/
+disc/
+"Theme Park World"*
+Theme_Park_World*
+
+# save states embed the game's own RAM, so they are game data too
+*.state
+states/
+
+# ── BULK OUTPUT ───────────────────────────────────────────────────────────────
+*.ppm
+*.png
+*.o
+*.d
+*.so
+pcsx_rearmed/
+sigs/
+run*/
+btn/
+fixtures/*.json
+*.log
+
+# Bulk disassembly dumps are the game's code in another form — derived game data.
+# NOTE: *.s and *.asm are deliberately NOT blocked. A matching decomp commits
+# extracted assembly as its actual source, so refusing it would block the
+# project's own work (cow tools, 2026-09-18). The bulk-dump rules below cover
+# the real risk instead.
+*.dis
+sles.dis
+tpw.dis
+
+# third-party binaries / unpacked emulator trees
+DuckStation-*.AppImage
+squashfs-root/
+duckdata/
+__pycache__/
+*.pyc
+
+# build artifact, not source
+runner
