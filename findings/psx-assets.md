@@ -419,6 +419,33 @@ recoveries came from stated limits, not from stated findings.
 (Also settled: the nine "parks" are byte-identical, so they were always one park. A caveat that had
 been flagged in prose is now a measurement.)
 
+## 5n. The mesh archive holds objects, not landscape — with a behavioural test
+
+Measuring face-normal handedness in the file gives 53-71% per page: nothing is one-handed. That is
+correct for **closed objects**, whose faces point every way, and it means the console's 100.0%
+one-handed terrain triangles are **not in this archive**. "Terrain page" names a TEXTURE; it does not
+name a source of triangles.
+
+⭐ **tinyclaw then falsified it properly, by moving the camera:**
+
+    page          idle       panning    change
+    640        221,400      222,268     +0.4%
+    576         61,452       19,094      -69%
+    512         19,200        5,868      -69%
+
+**Page 640 does not move at all** — about 185 triangles every frame whether the camera is still or
+sweeping. 512 and 576 collapse by two thirds as the view changes. A fixed grid around the camera
+costs the same regardless of where it points; placed objects come and go with the view. So the claim
+now rests on behaviour rather than on the absence of one-handedness.
+
+⚠ **And it refines the attribution both of us were using.** The earlier reading had 512 AND 640 as
+"the two pure-terrain pages". The panning test says only **640** is landscape; 512 and 576 are things
+standing on it. A number measured in one static scene could not separate those, and only changing the
+camera could.
+
+**For the port: terrain is ~185 triangles per frame, constant.** Generate a fixed patch around the
+camera; do not stream variable geometry for it.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
