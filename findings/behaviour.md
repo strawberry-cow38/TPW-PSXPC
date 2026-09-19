@@ -469,6 +469,17 @@ So a guard that catches someone walks them to the exit point, leaves the park, r
 turnstile and takes up a post by the entrance before patrolling again.
 
 ### 3.5 Mechanic (Update 0x8009710C; states 14, 16, 17, 52, 54, 56, 57, 58) — READ
+
+> ⚠ **CORRECTION (tinyclaw, 2026-09-19): `0x800E4574` is PAIRS of s16, not a flat array.** The
+> durations quoted below — 240/180/120/60/60 — are right, but they are every *other* halfword. The
+> real layout is five rows of two: `(240,9) (180,12) (120,14) (60,16) (60,18)`. The second column
+> rises as the duration falls, so it improves with skill; nothing in this section reads it and I have
+> not traced what does.
+>
+> Worth the warning because of how the wrong readings fail. As flat **s32** it is
+> 590064/786612/917624 — obvious nonsense, caught immediately. As flat **s16** it is 240, 9, 180, 12 —
+> the first value correct and the second plausible, which is the reading that survives review. Ported
+> in `TPW.Sim.Mechanic.RepairTicks` and `UnknownSecondColumn`.
 - **Idle** (0x80096D60): not on strike → **tiredness +6, morale +1** (once per idle tick), then 50/50:
   broken ride first (0x8005BCB0) then service-due ride (0x8005BE44), or the reverse. A ride is taken via
   0x80096C58 only if unclaimed (ride+0x54 == 0 or me), and for repairs its slots 20 and 84 are set;
