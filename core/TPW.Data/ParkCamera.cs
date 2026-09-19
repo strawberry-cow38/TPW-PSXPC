@@ -16,7 +16,11 @@ namespace TPW.Data
     /// eighth), not under the point, so on a slope the view tips a little.
     ///
     /// Not read, so not claimed: how fast the game's cursor moves, and how far it may go. The port moves the cursor
-    /// with the keys and keeps it on the map.</summary>
+    /// with the keys and keeps it on the map.
+    ///
+    /// One departure, master's call: the ground the camera keeps its height above is the ground as DRAWN, the
+    /// edge continued past the map included (<see cref="GroundHeight"/>), where the game freezes it while the camera
+    /// is off the map.</summary>
     public sealed class ParkCamera
     {
         /// <summary>World units above the ground under the camera (0x80054C1C: 0xA10).</summary>
@@ -65,9 +69,11 @@ namespace TPW.Data
             FocusX -= Chase(FocusX, CursorX) * frameTime >> 10;
             FocusZ -= Chase(FocusZ, CursorZ) * frameTime >> 10;
             Place(map);
-            // The ground under the camera is re-read only while the camera is over the map (0x800508C8).
-            int tx = EyeX >> 8, tz = EyeZ >> 8;
-            if (tx >= 0 && tx < map.Width - 1 && tz >= 0 && tz < map.Height - 1) _ground = GroundHeight(map, EyeX, EyeZ);
+            // ⚠ THE PORT'S ONE DEPARTURE, master's call: the ground under the camera is the ground AS DRAWN, off the map
+            // too. The game re-reads it only while the camera is over the map (0x800508C8) and takes 0 for corners
+            // off it; the ground it draws there is the edge continued (ParkTerrain.TryQuadAt), so that is what the
+            // camera now keeps its height above.
+            _ground = GroundHeight(map, EyeX, EyeZ);
             int ground = _ground;
             int eye = ground + Above;
             EyeY -= (EyeY - eye) >> 3;
@@ -96,13 +102,18 @@ namespace TPW.Data
             EyeZ = (FocusZ >> 8) - (EntranceFlags.Cos(a) * Behind >> 12);
         }
 
-        /// <summary>The ground's height at world (x, z), as 0x80050938 gives it: the four corner heights of the tile
-        /// (byte +1 × 4, 0 off the map) blended by the position within the tile, x first.</summary>
+        /// <summary>The height of the ground as drawn at world (x, z): the blend of 0x80050938 (the tile's four corner
+        /// heights, byte +1 × 4, mixed by the position within the tile, x first) over the corners the terrain routine
+        /// draws there, so off the map it is the edge continued exactly as <see cref="ParkTerrain.TryQuadAt"/> clamps
+        /// it (the game's own 0x80050938 takes 0 for corners off the map; see <see cref="Step"/>).</summary>
         public static int GroundHeight(ParkMap map, int x, int z)
         {
             int tx = x >> 8, tz = z >> 8, fx = x & 0xFF, fz = z & 0xFF;
-            int H(int cx, int cz) => cx >= 0 && cx < map.Width - 1 && cz >= 0 && cz < map.Height - 1 ? map[cx, cz].HeightUnits : 0;
-            int h00 = H(tx, tz), h10 = H(tx + 1, tz), h01 = H(tx, tz + 1), h11 = H(tx + 1, tz + 1);
+            int w = map.Width, h = map.Height;
+            int r0, r1, c0, c1;
+            if (tz < 1) { r0 = 0; r1 = 0; } else { r0 = tz >= h - 1 ? h - 2 : tz; r1 = r0 + 1; }
+            if (tx < 0) { c0 = 0; c1 = 0; } else if (tx < w - 1) { c0 = tx; c1 = tx + 1; } else { c0 = w - 2; c1 = w - 2; }
+            int h00 = map[c0, r0].HeightUnits, h10 = map[c1, r0].HeightUnits, h01 = map[c0, r1].HeightUnits, h11 = map[c1, r1].HeightUnits;
             int top = h00 + (fx * ((h10 - h00) << 16 >> 8) >> 16);
             int bottom = h01 + (fx * ((h11 - h01) << 16 >> 8) >> 16);
             return (short)(top + (fz * ((bottom - top) << 16 >> 8) >> 16));
