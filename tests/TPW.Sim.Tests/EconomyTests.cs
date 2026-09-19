@@ -130,9 +130,34 @@ namespace TPW.Sim.Tests
                 else
                     Assert.Equal(Wages.MultiplierByKind[k], Wages.TrainingMultiplierByKind[k]);
 
-            Assert.Equal(Money.FromPounds(300), Wages.TrainingCost(0, StaffKind.Researcher));  // 50*6
+            Assert.Equal(Money.FromPounds(1500), Wages.TrainingCost(0, StaffKind.Researcher));  // 250*6
             Assert.Equal(Money.FromPounds(150), Wages.Monthly(0, StaffKind.Researcher, 30, 30));
         }
+
+        // ⭐ REJECTS PRICING TRAINING OFF THE WAGE TABLE, which this code did. fable's falsifier (wages.md §7),
+        // predicted from the code and NOT yet measured: train Gary Liddon, a grade-1 guard, once, and the bank
+        // loses 5500 tenths = £550 = 275*2, the NEXT row of the training table. The wage table would charge
+        // 55*2 = £110, a fifth of it.
+        [Fact]
+        public void TrainingAGradeOneGuardCharges550()
+            => Assert.Equal(Money.FromPounds(550), Wages.TrainingCost(newLevel: 1, StaffKind.Guard));
+
+        // ⭐ The same falsifier's other half: BEFORE the purchase, that card showed 500 and 110. The printed
+        // cost is the current row (250*2), one row cheaper than the charge, and the printed wage is the next
+        // level's (55*2). A port that shows what it charges, or charges what it shows, fails one of these.
+        [Fact]
+        public void TheTrainingCardShowsTheCurrentRowAndTheNextWage()
+        {
+            Assert.Equal(Money.FromPounds(500), Wages.TrainingCardCost(0, StaffKind.Guard));
+            Assert.NotEqual(Wages.TrainingCardCost(0, StaffKind.Guard), Wages.TrainingCost(1, StaffKind.Guard));
+            Assert.Equal(Money.FromPounds(110), Wages.TrainingCardWage(0, StaffKind.Guard));
+        }
+
+        // The original's own bug, reproduced on purpose: at level 4 the card indexes base[5], one past the
+        // five-entry table, and reads the 3 that follows it. 3 * 3 = £9 for a top-grade mechanic.
+        [Fact]
+        public void AtTheTopLevelTheTrainingCardReadsPastTheTable()
+            => Assert.Equal(Money.FromPounds(9), Wages.TrainingCardWage(4, StaffKind.Mechanic));
 
         // ⚠ REJECTS CHARGING FOR A HIRE. An earlier report read the TRAINING card's purchase handler as the
         // hire cost. The game spends £0 to hire; billing for it drains a balance the original never touched.

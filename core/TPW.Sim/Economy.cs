@@ -70,6 +70,20 @@ namespace TPW.Sim
         /// same table and are not interchangeable.</summary>
         public static readonly int[] TrainingMultiplierByKind = { 3, 1, 1, 2, 6 };
 
+        /// <summary>Training price by level, the table at 0x800E1654 (economy.md §4.4, wages.md §1).
+        ///
+        /// ⚠⚠ NOT THE WAGE TABLE. It is exactly five times it, {250..500} against {50..100}, and
+        /// TrainingCost used to read the wage table, so every training in the port cost a fifth of the
+        /// original's. Nothing looked wrong: the numbers were small, round and plausible for a park sim. It
+        /// was caught by re-reading fable's report while answering an unrelated question about the training
+        /// CARD. Same shape as the multiplier trap above: two tables that look alike, one of them silently used
+        /// for the other.</summary>
+        public static readonly int[] TrainingBaseByLevel = { 250, 275, 325, 400, 500 };
+
+        /// <summary>The word in memory after the five-entry wage table (0x800E162C[5]). The Training card
+        /// reads it for a top-level member; see <see cref="TrainingCardWage"/>.</summary>
+        public const int WordAfterWageTable = 3;
+
         public const int MaxLevel = 4;
 
         /// <summary>Monthly wage for one staff member.
@@ -96,14 +110,53 @@ namespace TPW.Sim
             return Money.FromPounds(pounds);
         }
 
-        /// <summary>Cost of training a member to <paramref name="newLevel"/>. ⚠ This is what an earlier report
-        /// mistook for the cost of HIRING. Hiring is free — the game spends £0 — so a port that charges for it
-        /// drains the player's balance for something the original never billed.</summary>
+        /// <summary>What the bank is CHARGED to train a member up to <paramref name="newLevel"/>:
+        /// TrainingBase[newLevel] × training multiplier.
+        ///
+        /// ⚠ This is what an earlier report mistook for the cost of HIRING. Hiring is free (the game spends £0),
+        /// so a port that charges for it drains the balance for something the original never billed.
+        ///
+        /// ⚠⚠ ONE ROW DEARER THAN THE CARD SAID. The Training card prints the price at the CURRENT level
+        /// (<see cref="TrainingCardCost"/>), and the purchase handler (0x80085728) sets level = L+1 first and
+        /// THEN prices it, so the player pays the next row: a grade-1 guard's card says £500 and the bank
+        /// loses £550. That is the original's bug, and a port that "fixes" it disagrees with every save.</summary>
         public static Money TrainingCost(int newLevel, StaffKind kind)
         {
             if (newLevel < 0) newLevel = 0;
             if (newLevel > MaxLevel) newLevel = MaxLevel;
-            return Money.FromPounds((long)BaseByLevel[newLevel] * TrainingMultiplierByKind[(int)kind]);
+            return Money.FromPounds((long)TrainingBaseByLevel[newLevel] * TrainingMultiplierByKind[(int)kind]);
+        }
+
+        /// <summary>The "Training Cost" the Training card PRINTS: TrainingBase[level] × training multiplier,
+        /// the current row. Not what is charged; see <see cref="TrainingCost"/>. (SOURCED, 0x80094DC0 called
+        /// at the current level from the card's draw at 0x80085908.)
+        ///
+        /// ⚠ THIS CARD HAS NOT BEEN SEEN ON SCREEN. tinyclaw opened an employee's Staff Information card and
+        /// found three bars (skill, motivation, overall motivation) and an "All Staff" button: no wage and no
+        /// training anywhere on it. So where this card lives in this build, or whether it is reachable, is
+        /// open. The draw code exists; the screen that shows it has not been found. The PRICE TABLE is a
+        /// separate matter, read off the purchase handler, and does not depend on finding the card.</summary>
+        public static Money TrainingCardCost(int level, StaffKind kind)
+        {
+            if (level < 0) level = 0;
+            if (level > MaxLevel) level = MaxLevel;
+            return Money.FromPounds((long)TrainingBaseByLevel[level] * TrainingMultiplierByKind[(int)kind]);
+        }
+
+        /// <summary>The "Monthly Wage" the Training card prints: the NEXT level's wage,
+        /// base[min(level+1, 5)] × wage multiplier.
+        ///
+        /// ⚠ AT THE TOP LEVEL IT READS PAST THE TABLE. The table has five entries (0..4) and the clamp is to
+        /// 5, not 4, so a level-4 member's card indexes one past the end and prints whatever word follows,
+        /// which is 3: "Monthly Wage £9" for a top-grade mechanic. SOURCED by fable (wages.md §2.3), not yet
+        /// seen on screen, and see the warning on <see cref="TrainingCardCost"/>: nobody has found the card.
+        /// Reproduced rather than clamped, because it is what the original's code draws.</summary>
+        public static Money TrainingCardWage(int level, StaffKind kind)
+        {
+            if (level < 0) level = 0;
+            int i = Math.Min(level + 1, 5);
+            int b = i < BaseByLevel.Length ? BaseByLevel[i] : WordAfterWageTable;
+            return Money.FromPounds((long)b * MultiplierByKind[(int)kind]);
         }
 
         /// <summary>What the hire screen prints. The stored level is zero-based; the display is not.</summary>
