@@ -120,6 +120,19 @@ namespace TPW.Sim.Tests
                 Assert.False(BootSequence.IsBlack(s.Screen) && BootSequence.MovieFor(s.Screen) != null);
         }
 
+        /// <summary>⚠ NO TWO MOVIES ARE ADJACENT, and the renderer quietly depends on it: leaving a
+        /// movie goes through the arrival path, but if that ever regressed, only a movie-after-movie
+        /// would show it. Pinning the table's shape here means the day someone adds a third FMV, this
+        /// says so instead of the second one silently never playing.</summary>
+        [Fact]
+        public void NoMovieFollowsAnotherMovie()
+        {
+            for (int i = 1; i < BootSequence.Steps.Length; i++)
+                Assert.False(BootSequence.MovieFor(BootSequence.Steps[i].Screen) != null
+                          && BootSequence.MovieFor(BootSequence.Steps[i - 1].Screen) != null,
+                             $"{BootSequence.Steps[i - 1].Screen} -> {BootSequence.Steps[i].Screen}");
+        }
+
         /// <summary>The legal screen's three phases must account for its whole length, or a fade will
         /// run past the screen it belongs to.</summary>
         [Fact]

@@ -70,6 +70,26 @@ thing showing they meet.
 ⚠ The last row is the honest one. What exists is a verified skeleton and a real
 launcher; what does not exist is Theme Park World.
 
+## Building
+
+⚠⚠ **`dotnet build` AT THE ROOT DOES NOT BUILD THE GAME, AND SAYS "Build succeeded".**
+`TPW.sln` does not contain `game/TPWGodot.csproj`, so a solution build leaves the
+assembly Godot loads — `game/.godot/mono/temp/bin/Debug/TPWGodot.dll` — exactly as
+it was, reports success, and the next run of the port executes your PREVIOUS code.
+Measured: source at 11:44:54, assembly still 11:39:42 after a clean solution build;
+`dotnet build game` moved it to 11:48:15.
+
+    dotnet build game     # the port — ALWAYS this before running or rendering it
+    dotnet build          # core + launcher + tools only
+    dotnet test           # the three test projects
+
+This is not theoretical. It cost a debugging session here: a rendered frame was
+missing a widget that was present in the source, and the obvious readings — a
+layout bug, a visibility bug — were both wrong and both took time to rule out.
+A stale build is invisible from the output; it looks like your change not working.
+The launcher already does the right thing (it builds the game project by name),
+so this bites developers at a terminal, not users.
+
 ## Conventions
 
 Every claim recorded here is marked **sourced**, **derived** or **unmeasured**.

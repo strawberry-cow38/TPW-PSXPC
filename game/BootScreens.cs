@@ -98,6 +98,12 @@ namespace TPWGodot
             if (!_waitingForMovie) return;
             _waitingForMovie = false;
             _boot.Advance();
+            // ⚠ EnterScreen, NOT just Redraw. Advancing out of a movie has to go through the same
+            // arrival path as any other transition, or the screen it lands on never gets STARTED --
+            // only drawn. Today every movie is followed by a black gap so nothing visible breaks, and
+            // the only symptom was a missing log line; put two movies back to back and the second one
+            // would silently never play. Found because the boot log skipped BlackAfterBullfrog.
+            EnterScreen(_boot.Screen);
             Redraw();
         }
 
@@ -161,6 +167,10 @@ namespace TPWGodot
 
         void EnterScreen(BootScreen s)
         {
+            // One line per screen. A boot that stalls is the failure mode here -- a movie that never
+            // reports back, a screen waiting on input nobody sends -- and it looks identical to a long
+            // black gap from outside. This is what says which screen it stopped on.
+            GD.Print($"[tpw] boot: {s} at frame {_boot.TotalFrames}");
             string movie = BootSequence.MovieFor(s);
             if (movie != null) { _waitingForMovie = true; WantMovie?.Invoke(movie); }
         }
