@@ -1090,20 +1090,27 @@ static class Program
 
     /// <summary>Dump one animated mesh posed at several times, as OBJ, so the animation can be LOOKED at
     /// without a GPU. A render change verified only numerically has not been verified.</summary>
-    static int PoseDump(GazArchive gaz, int want, string dir)
+    /// <summary>Dump entry ENTRY, sub-entry SUB, posed at several times, as OBJ.
+    ///
+    /// ⚠ ADDRESSED BY THE ENTRY NUMBER, NOT BY POSITION AMONG ANIMATED MESHES. It used to take an
+    /// ordinal, and widening the "which meshes count as animated" filter silently renumbered everything:
+    /// index 0 stopped meaning entry 43 and started meaning entry 0. I then spent a long stretch
+    /// comparing one model's file data against another model's posed output and concluding, reasonably,
+    /// that the poser was badly broken. An identifier that moves when an unrelated filter changes is not
+    /// an identifier.</summary>
+    static int PoseDump(GazArchive gaz, int entry, int sub, string dir)
     {
-        int seen = 0;
         foreach (var e in gaz.Entries)
         {
+            if (e.Index != entry) continue;
             var bytes = gaz.Read(e);
-            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _))
+            { Console.WriteLine($"entry #{entry} is not a mesh container"); return 1; }
             for (int i = 0; i < c.SubCount; i++)
             {
-                if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
-                bool anySkin = false;
-                if (m.Skeleton != null) foreach (var bb in m.Skeleton.Bones) if (bb.SkinCount > 0) anySkin = true;
-                if (m.Binding == null || (m.Binding.SourceCount == 0 && !anySkin)) continue;
-                if (seen++ != want) continue;
+                if (i != sub) continue;
+                if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0)
+                { Console.WriteLine($"entry #{entry} sub {i} has no faces"); return 1; }
                 System.IO.Directory.CreateDirectory(dir);
                 foreach (int t in new[] { 0, 16, 32, 48, 64, 96 })
                 {
@@ -1118,7 +1125,7 @@ static class Program
                 return 0;
             }
         }
-        Console.WriteLine($"no animated mesh at index {want} (saw {seen})");
+        Console.WriteLine($"entry #{entry} sub {sub} not found");
         return 1;
     }
 
@@ -1163,8 +1170,10 @@ static class Program
             // both is how someone runs the wrong one and believes the output.
             int nm = Array.IndexOf(args, "--attractions");
             if (nm >= 0) return Attractions(g, nm + 1 < args.Length && !args[nm + 1].StartsWith("--") ? args[nm + 1] : null);
+            // --posedump <entry> <sub> <dir>
             int pd = Array.IndexOf(args, "--posedump");
-            if (pd >= 0 && pd + 2 < args.Length) return PoseDump(g, int.Parse(args[pd + 1]), args[pd + 2]);
+            if (pd >= 0 && pd + 3 < args.Length)
+                return PoseDump(g, int.Parse(args[pd + 1]), int.Parse(args[pd + 2]), args[pd + 3]);
             return Meshes(g);
         }
 
