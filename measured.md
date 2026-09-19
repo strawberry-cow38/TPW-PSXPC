@@ -1843,3 +1843,44 @@ r12 at n8b×12, then r12b at m12×12, then the tracks. Matches the existing walk
 `r12` records split cleanly: bytes 0-3 are the {count, start} range chain, and the evaluator copies
 only bytes **4..11** into ARS (`addiu $a0, $s1, 4` at 0x8002cab0), which is why the chain lives in the
 half the runtime ignores.
+
+## Vertex→bone binding — FOUND. It is weighted scatter, not a per-vertex bone index (2026-09-19)
+
+Every probe that looked for "a bone index per vertex" failed because there isn't one. The design is a
+scatter: a small set of animated SOURCE points, each of which pushes a weighted contribution into a run
+of vertices. Read off the blend loop at 0x8002e31c.
+
+```
+for each r12 entry i:                       ; n8b of them, 12 bytes each
+    {count, start} = r12[i]                 ; +0 count, +2 start  -- the range chain
+    src = region[i]                         ; 8 bytes: the animated position, written by the track evaluators
+    for k in 0..count-1:
+        {dest, weight} = r12b[start + k]    ; +0 destination vertex, +2 weight
+        vertexbuf[dest].x += (src.x * weight) >> 14
+        vertexbuf[dest].y += (src.y * weight) >> 14
+        vertexbuf[dest].z += (src.z * weight) >> 14
+```
+`vertexbuf` is ARS + rec[0x1c], the n8 vertices copied into the work buffer. The `>> 14` sets the weight
+scale: **16384 = 1.0**.
+
+### Why this is the binding and not a coincidence
+- **Weights are a partition of unity.** Grouping all 20,002 binding records in 239 meshes by destination
+  vertex, the weights per vertex sum to exactly 16384 for 15,306 of 15,633 destinations; every one of
+  the rest lands on 16383 or 16385 except 14, which are off by two. Integer rounding, and nothing but
+  real skinning weights sums to 1.0 that way.
+- **The observed weights are the expected fractions**: 16384 (1.0) dominates at 14,568, then 8192 (½),
+  4096 (¼), 12288 (¾), and arbitrary values that pair up to 16384.
+- **The two tables interlock exactly.** `start[i+1] == start[i] + count[i]` across the whole r12 table,
+  and the final run ends exactly on the binding table's length, in 30 of 30 meshes that have both.
+  Mean coverage 1.000 — the runs partition the binding table with nothing left over and no overlap.
+- **Every destination is a real vertex**: 6,557 of 6,557 below the mesh's vertex count.
+
+### What this means for the port
+A vertex is not owned by a bone. It is the weighted sum of however many animated sources reach it, and
+the sources are what the tracks drive — which is also why the +4 track header field was measured as a
+valid bone index only 0.0-36.1% of the time on types 2/3/4/5. It was never a bone. Playback needs the
+scatter loop, not a skin-matrix palette.
+
+⚠ Still open: bytes 4..11 of each r12b record (the builder copies bytes 4..11 of the **r12** records into
+ARS at 0x8002cab0, which is a different table — don't mix them), and the exact indexing of the source
+region by a track's +4 field. The binding itself does not depend on either.
