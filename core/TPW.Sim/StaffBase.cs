@@ -73,6 +73,10 @@ namespace TPW.Sim
         /// <summary>S+0x44. Its low three bits index the per-class duration tables.</summary>
         public int Skill { get; set; }
 
+        /// <summary>H+0x2C and friends: the tick a timed job finishes. Per-class states use it as a
+        /// deadline, the same way the visitor uses WaitUntil.</summary>
+        public long BusyUntil { get; set; }
+
         /// <summary>Whether this member has somewhere to be.</summary>
         public bool HasTarget { get; set; }
 
