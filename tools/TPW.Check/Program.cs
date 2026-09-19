@@ -1360,7 +1360,7 @@ static class Program
     static int LoopSurvey(GazArchive g)
     {
         int animated = 0, lateStart = 0, jumpy = 0, flat = 0, jumpyCycleDiffers = 0;
-        int atCycleMeasured = 0, atCycleJumpy = 0;
+        int atCycleMeasured = 0, atCycleJumpy = 0, cleanHdrAgrees = 0, quietButDisagrees = 0;
         var worst = new List<(double Ratio, int Entry, int Sub, int Start, int Len)>();
         foreach (var e in g.Entries)
         {
@@ -1415,6 +1415,16 @@ static class Program
                     double cmean = cn > 0 ? csum / cn : 0;
                     if (okc && cmean > 0.001) { atCycleMeasured++; if (clast / cmean > 4) atCycleJumpy++; }
                 }
+                // ⚠ Compare like with like, and this took three goes to get right.
+                // --animheaders prints AnimationLength under the label "keys end", and on a healthy
+                // mesh that equals the header word exactly (entry 83: 41/41, 32/32, 127/127). The
+                // cycle is then header+1, i.e. the last key holds for one unit before wrapping.
+                // Two earlier versions of this counter compared header+1 against AnimationLength, and
+                // then header against the last key's TIME -- both off by one quantity, both reported
+                // near-total "disagreement" that sounded decisive and separated nothing.
+                bool hdrDisagrees = m.HeaderWord0 != len;
+                if (!hdrDisagrees) cleanHdrAgrees += ratio > 4 ? 0 : 1;
+                if (hdrDisagrees && ratio <= 4) quietButDisagrees++;
                 if (ratio > 4)
                 {
                     jumpy++; worst.Add((ratio, e.Index, sub, start, len));
@@ -1423,22 +1433,32 @@ static class Program
                     // header's +0x00 plus one. Entry 75 sub 7 has header 2 against keys ending at 200,
                     // so the step measured there is a wrap the console never performs.
                     //
-                    // ⚠ TESTED AND REFUTED, 2026-09-19. ALL 58 flagged clips have a header cycle that
-                    // differs from the length wrapped at, which looked like the whole explanation. It
-                    // is not: re-measuring each clip wrapped at its OWN header cycle leaves 56 of 239
-                    // still snapping. So the wrap point is genuinely wrong here AND the discontinuity
-                    // is real under either wrap -- two separate things, and fixing the first does not
-                    // touch the second. Do not re-run this experiment expecting the number to fall.
-                    if (m.HeaderWord0 + 1 != len) jumpyCycleDiffers++;
+                        // ⚠ TWO EXPLANATIONS TESTED, BOTH REFUTED, 2026-09-19.
+                    //
+                    // 1. THE WRAP POINT. This survey wraps at AnimationLength; the console wraps at the
+                    //    header word + 1. Entry 75 sub 7 has header 2 against a length of 200, so the
+                    //    step measured there is a wrap the console never performs. Re-measuring every
+                    //    clip at its OWN cycle leaves 56 of 239 snapping -- essentially unchanged.
+                    //
+                    // 2. THE HEADER DISAGREEING WITH THE KEYS. It looked like the marker of a broken
+                    //    clip because 83 (agrees, smooth) and 75/7 (disagrees wildly, snaps) sit at
+                    //    opposite extremes. Counted across the disc it separates nothing: 52 of the 58
+                    //    snapping clips have a header that agrees EXACTLY, as do 177 of the 181 smooth
+                    //    ones. Only ~10 clips disagree at all, split across both groups.
+                    //
+                    // So the cause of the 58 is still unknown, and these two are spent. Do not re-run
+                    // either expecting the number to fall.
+                    if (hdrDisagrees) jumpyCycleDiffers++;
                 }
             }
         }
         Console.WriteLine($"{animated} animated sub-meshes");
         Console.WriteLine($"  {lateStart} whose first key is NOT at time 0");
         Console.WriteLine($"  {jumpy} whose last-to-first step is more than 4x a typical step");
-        Console.WriteLine($"    of those, {jumpyCycleDiffers} whose header cycle (+0x00 + 1) is NOT the length wrapped at");
+        Console.WriteLine($"    of those, {jumpyCycleDiffers} whose header word does NOT equal the animation length");
         Console.WriteLine($"  {flat} that never move (skipped)");
         Console.WriteLine($"  wrapped at the GAME's cycle instead: {atCycleJumpy} of {atCycleMeasured} still snap");
+        Console.WriteLine($"  separation test -- smooth AND header agrees with keys: {cleanHdrAgrees};  smooth BUT header disagrees: {quietButDisagrees}");
         worst.Sort((a, b) => b.Ratio.CompareTo(a.Ratio));
         Console.WriteLine("worst offenders:");
         foreach (var w in worst.Take(12))
