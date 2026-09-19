@@ -161,7 +161,10 @@ the sub-entry and keyframe (0x8002FE14: `subEntry = frame % nsub`).
 
 ### 3.5 Compressed sub-entries and the `f4 01 00 30` observation
 Sub-entries with a non-zero second word are LZ-compressed; 0x800308C4 decompresses them once into a
-cached handle with **0x800BFD9C(src, dst)** (bit-flag LZSS, ported in `f/sublz.py`; all 25 such
+cached handle with **0x800BFD9C(src, dst)** (bit-flag LZSS, ported in `f/sublz.py` and, from the
+listing, in `core/TPW.Data/SubLz.cs` — 8 flag bits/byte LSB-first, 0 = literal; code ≥ 0x60 → 2 bytes
+at distance 0x100−code, else 12-bit distance with length nibble+3 (nibble 5 → next byte+8), distance 0
+= end; all 25 such
 sub-entries — every one in entries 0000 and 0003 — expand to exactly their declared size and then parse
 as meshes to the byte). `f4 01 00 30 …` at entry 0000 offset 0x49D0 is sub-entry 6's flag byte and first
 literals; decompressed it begins `01 00 00 00 00 00 00 00 24 00 00 00` — a mesh header. Not a GP0 packet.

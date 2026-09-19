@@ -361,7 +361,10 @@ between the two artefacts, and it is the opposite of using the map to produce th
 ## 5l. The mesh parser, and a corroboration I overstated
 
 531 of 531 plain sub-entries parse, 0 failures: 38,680 vertices, 53,382 faces across 268 containers.
-25 are LZSS-compressed and skipped (all in entries 0 and 3). The count is the falsifier — every field
+The 25 LZSS-compressed ones (all in entries 0 and 3) are expanded by `core/TPW.Data/SubLz.cs`, a port
+of 0x800BFD9C read off the MIPS listing: **25/25 reach the stream terminator at exactly their declared
+size and parse as meshes**, for 556/556 in all — 39,521 vertices, 54,619 faces
+(`tpwcheck --gaz FOLIO.GAZ --meshes`, exit code = failures). The count is the falsifier — every field
 feeds the walk that finds the next, so a wrong layout fails on most sub-entries, not a few.
 
 ⭐ **Reading `tpage` off the file reproduces the GPU's own page list**: `512/576/640/704/896/960` at
