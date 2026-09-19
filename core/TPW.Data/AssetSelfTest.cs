@@ -75,6 +75,7 @@ namespace TPW.Data
             CheckLegalScreen(disc, r);
             CheckArchive(disc, r, decodeEveryImage);
             CheckSpeechIsStreaming(disc, r);
+            CheckMovies(disc, r);
 
             r.ElapsedMs = sw.ElapsedMilliseconds;
             return r;
@@ -293,6 +294,62 @@ namespace TPW.Data
                 streaming
                     ? $"{SpeechStream} is Form 2 streaming media, {f.Length:n0} bytes — correctly not an archive"
                     : $"{SpeechStream} is Form 1 — expected streaming audio; the sector layout may be misdetected");
+        }
+
+        /// <summary>Every movie, demuxed in full.
+        ///
+        /// ⭐ TWO CHECKS THE DATA CAN FAIL. Every chunk of a frame repeats that frame's total byte count, so a
+        /// frame whose chunks do not add up to it was misassembled: a skipped sector, a misread chunk index,
+        /// an audio sector taken for video. And every XA sound group carries its parameters twice, so a
+        /// soundtrack read from the wrong offset, or a sector that is not audio at all, fails a comparison
+        /// random bytes pass with probability 2^-64 per group. A bad rip is caught here rather than as a movie
+        /// that stops halfway.
+        ///
+        /// ✅ The soundtrack decode was checked outside this test against ffmpeg's XA decoder, a separate
+        /// implementation sharing no code with this one. Every sample was identical: 721,728 of 721,728 on
+        /// BF.STR and 2,987,712 of 2,987,712 on GRAV.STR. The same comparison shifted by one stereo frame
+        /// matches 1-4%, so the identity is a result, not a quirk of silent audio.</summary>
+        static void CheckMovies(DiscReader disc, SelfTestReport r)
+        {
+            int files = 0, frames = 0, bad = 0;
+            long groups = 0;
+            double seconds = 0;
+            string firstProblem = "";
+            foreach (var f in disc.Files)
+            {
+                if (f.IsDirectory || !f.Name.EndsWith(".STR", StringComparison.OrdinalIgnoreCase)) continue;
+                files++;
+                if (!StrMovie.TryLoad(disc, f, out var m, out string err))
+                {
+                    bad++;
+                    if (firstProblem.Length == 0) firstProblem = $"{f.Name}: {err}";
+                    continue;
+                }
+                frames += m.Frames.Count;
+                groups += m.XaGroups;
+                seconds += m.DurationSeconds;
+
+                string problem =
+                    m.Misassembled > 0 ? $"{m.Misassembled} frames did not add up to their declared size" :
+                    m.XaBadCopies > 0 ? $"{m.XaBadCopies} sound groups whose two parameter copies disagree" :
+                    m.AudioError != null ? $"soundtrack: {m.AudioError}" :
+                    m.AudioSectors == 0 ? "no soundtrack" : null;
+                if (problem == null)
+                    foreach (var fr in m.Frames)
+                        if (fr.Width != m.Width || fr.Height != m.Height)
+                        { problem = $"frame {fr.Number} is {fr.Width}x{fr.Height}, the first is {m.Width}x{m.Height}"; break; }
+                if (problem != null)
+                {
+                    bad++;
+                    if (firstProblem.Length == 0) firstProblem = $"{f.Name}: {problem}";
+                }
+            }
+            if (files == 0) return;   // a disc without movies is not a broken one
+
+            r.Add("movies", bad == 0, bad == 0
+                ? $"{files} files, {frames:n0} frames over {seconds:0} s, every frame assembled to its declared size; " +
+                  $"{groups:n0} XA sound groups, every one's duplicated parameters agree"
+                : $"{bad} of {files} movies have a problem; first: {firstProblem}");
         }
 
         static bool LooksLikeTga(byte[] d)

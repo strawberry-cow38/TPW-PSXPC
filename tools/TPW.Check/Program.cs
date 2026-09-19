@@ -252,6 +252,47 @@ static class Program
             }
     }
 
+    /// <summary>Every movie on the disc, demuxed and its soundtrack decoded. Exit code is the number of files
+    /// with a problem: a frame that did not assemble to its declared size, an XA group whose duplicated
+    /// parameters disagree, or audio that failed to decode.</summary>
+    static int Movies(DiscReader disc, string outDir)
+    {
+        int bad = 0;
+        foreach (var f in disc.Files)
+        {
+            if (f.IsDirectory || !f.Name.EndsWith(".STR", StringComparison.OrdinalIgnoreCase)) continue;
+            if (!StrMovie.TryLoad(disc, f, out var m, out string err)) { Console.WriteLine($"{f.Name}: {err}"); bad++; continue; }
+
+            Console.WriteLine($"{f.Name,-12} {m.Frames.Count,4} frames {m.Width}x{m.Height}, {m.DurationSeconds:0.00} s, {m.FramesPerSecond:0.00} fps  [{StrMovie.Describe(f.Name)}]");
+            Console.WriteLine($"             audio {m.AudioCoding}, {m.AudioSeconds:0.00} s, {m.AudioSectors} sectors from #{m.FirstAudioSector}" +
+                              $"; xa groups {m.XaGroups:n0}, bad copies {m.XaBadCopies}, reserved params {m.XaReservedParams}" +
+                              $"; empty {m.EmptySectors}, foreign {m.ForeignAudioSectors}, misassembled {m.Misassembled}" +
+                              (m.AudioError != null ? $"; AUDIO ERROR {m.AudioError}" : ""));
+            if (m.XaBadCopies > 0 || m.Misassembled > 0 || m.AudioError != null) bad++;
+
+            if (outDir != null && m.Audio.Length > 0)
+            {
+                System.IO.Directory.CreateDirectory(outDir);
+                string wav = System.IO.Path.Combine(outDir, System.IO.Path.GetFileNameWithoutExtension(f.Name) + ".wav");
+                WriteWav(wav, m.Audio, m.AudioCoding.Channels, m.AudioCoding.SampleRate);
+                Console.WriteLine($"             wrote {wav}");
+            }
+        }
+        return bad;
+    }
+
+    /// <summary>A plain 16-bit PCM WAV: the 44-byte canonical header and the samples.</summary>
+    static void WriteWav(string path, short[] pcm, int channels, int rate)
+    {
+        using var w = new System.IO.BinaryWriter(System.IO.File.Create(path));
+        int dataBytes = pcm.Length * 2;
+        w.Write("RIFF"u8.ToArray()); w.Write(36 + dataBytes); w.Write("WAVE"u8.ToArray());
+        w.Write("fmt "u8.ToArray()); w.Write(16); w.Write((short)1); w.Write((short)channels);
+        w.Write(rate); w.Write(rate * channels * 2); w.Write((short)(channels * 2)); w.Write((short)16);
+        w.Write("data"u8.ToArray()); w.Write(dataBytes);
+        foreach (var v in pcm) w.Write(v);
+    }
+
     static int Main(string[] args)
     {
         // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
@@ -307,6 +348,15 @@ static class Program
 
         using (disc)
         {
+            // --movies [dir]: demux every .STR, print what each holds, and with a directory write each
+            // soundtrack as a WAV, so it can be compared sample for sample with a decoder that shares no code
+            // with this one.
+            int moviesAt = Array.IndexOf(args, "--movies");
+            if (moviesAt >= 0)
+            {
+                string outDir = moviesAt + 1 < args.Length && !args[moviesAt + 1].StartsWith("--") ? args[moviesAt + 1] : null;
+                return Movies(disc, outDir);
+            }
             if (rawOut != null && texIndex >= 0)
             {
                 var af = disc.Find(AssetSelfTest.AssetArchive);
