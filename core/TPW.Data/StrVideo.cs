@@ -17,9 +17,25 @@ namespace TPW.Data
     /// <summary>The `.STR` movie container: PlayStation streaming video with audio interleaved.
     ///
     /// ⭐ WHAT THESE FILES ARE. Five of them, 12-14 MB each, and everyone including me assumed they were the
-    /// music — they are 320x176 VIDEO. BF is the Bullfrog logo, GRAV/MIR/JUG the title attract loop, and
-    /// english/french/spanish/END are the same ending cutscene four times with the text burned into the
-    /// picture and byte-identical audio. The actual music was the XM tracker in the archive all along.
+    /// music — they are 320x176 VIDEO. The actual music was the XM tracker in the archive all along.
+    ///
+    /// ⚠ THEY ARE NOT THE TITLE-SCREEN ATTRACT CYCLE, which is what fable's report calls GRAV/MIR/JUG. They
+    /// play ON ENTERING A WORLD, one per world. Master remembers it that way, and tinyclaw's failed capture
+    /// turned into the control: 9,000 frames idling the title screen with ZERO vram uploads, and a playing
+    /// movie uploads a frame at a time. The absence carries information because something was predicted to
+    /// be there. It also fits the rest of that same report better than the report's own label does — it
+    /// found the music picks its module by WORLD INDEX. Four worlds, four modules, one intro movie each.
+    ///
+    /// ⭐ SO THE DECODER HAS FOUR POSITIVE CONTROLS, NOT ONE — from master, who has played it:
+    ///     BF     the Bullfrog logo        (publicly known)
+    ///     GRAV   a gravity bounce-house   (space)
+    ///     MIR    a freaky mirror thing    (halloween)
+    ///     JUG    jungle                   (jungle)
+    /// A logo only proves the output is not noise. "A gravity bounce-house" catches the failure a logo
+    /// cannot: a DCT close enough to give plausible shapes in roughly the right colours.
+    ///
+    /// english/french/spanish/END are the same ending cutscene four times, the text burned into the picture
+    /// and the audio byte-identical.
     ///
     /// ⚠ THE SECTORS ARE NOT ALL THE SAME KIND, and a reader that treats them uniformly produces corrupt
     /// frames rather than an error. The Mode 2 subheader's submode byte says which: bit 0x04 is audio and
