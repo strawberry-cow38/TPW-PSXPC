@@ -21,6 +21,15 @@ namespace TPW.Sim
         WalkToBin = 11,
         /// <summary>Watching an entertainer (§2.9); pushed by the needs update, not by Idle.</summary>
         WatchEntertainer = 28,
+        /// <summary>Using a shop or stall (§2.3 purpose 0). Its own handler is in a section of the
+        /// findings not yet read, so only the transition INTO it is modelled.</summary>
+        UsingAttraction = 35,
+        /// <summary>Joining a ride's queue (§2.4).</summary>
+        JoiningQueue = 41,
+        /// <summary>Shuffling forward within a queue (§2.4).</summary>
+        ShuffleForward = 19,
+        /// <summary>Standing in a queue waiting (§2.4).</summary>
+        WaitingInQueue = 18,
         Vomiting = 29,
         /// <summary>Pathing to the park exit -- the leaving state (§2.6).</summary>
         LeavingPark = 38,
@@ -187,6 +196,9 @@ namespace TPW.Sim
         /// entertainer until the clock passes it, so a guest that has just walked in does not immediately
         /// stand and watch a show. Its meaning beyond that gate is unknown.</summary>
         public long EntertainerNotBefore { get; set; }
+
+        /// <summary>P+0x2C: why the guest is walking somewhere, consumed on arrival.</summary>
+        public Purpose Purpose { get; set; } = Purpose.Spent;
 
         /// <summary>V+0x28: whether the guest currently has something it is heading for.</summary>
         public bool HasTarget { get; set; }
