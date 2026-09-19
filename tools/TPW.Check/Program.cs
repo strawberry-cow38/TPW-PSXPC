@@ -1468,6 +1468,32 @@ static class Program
     /// one past the last -- so the array may carry a loop-closing sentinel this parser stops before.</summary>
     /// <summary>Across the whole disc: what TIME does the record at track+8 carry -- the one the
     /// parser skips? If a keyed track's animation really begins there, it should be 0.</summary>
+    /// <summary>Sub-meshes whose faces use a given set of palettes, with their cycle field -- for
+    /// identifying WHICH model a screen draws from the palettes its display list shows.</summary>
+    static int FindByClut(GazArchive g, string clutList)
+    {
+        var want = new HashSet<ushort>();
+        foreach (var t in clutList.Split(',')) want.Add(Convert.ToUInt16(t.Trim(), 16));
+        const double UnitsPerFrame = 33868800.0 / 8 / 2150 * 128 / 4096 / 50;
+        foreach (var e in g.Entries)
+        {
+            byte[] bytes;
+            try { bytes = g.Read(e); } catch { continue; }
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int sub = 0; sub < c.Subs.Count; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m, out _)) continue;
+                var have = new HashSet<ushort>();
+                foreach (var f in m.Faces) have.Add(f.Clut);
+                if (!want.IsSubsetOf(have)) continue;
+                int cyc = m.HeaderWord0 + 1;
+                Console.WriteLine($"  entry {e.Index,4} sub {sub,3}: {m.VertexCount,4} verts {m.Faces.Count,4} faces  " +
+                                  $"+0x00={m.HeaderWord0,4}  cycle {cyc,4} -> {cyc / UnitsPerFrame,6:F1} frames");
+            }
+        }
+        return 0;
+    }
+
     static int FirstRecord(GazArchive g)
     {
         var times = new SortedDictionary<int,int>();
@@ -1795,6 +1821,8 @@ static class Program
             int pdAt = Array.IndexOf(args, "--posedelta");
             if (pdAt >= 0 && pdAt + 2 < args.Length)
                 return PoseDelta(g, int.Parse(args[pdAt + 1]), int.Parse(args[pdAt + 2]));
+            int fbAt = Array.IndexOf(args, "--findbyclut");
+            if (fbAt >= 0 && fbAt + 1 < args.Length) return FindByClut(g, args[fbAt + 1]);
             if (Array.IndexOf(args, "--firstrecord") >= 0) return FirstRecord(g);
             int keAt = Array.IndexOf(args, "--keyends");
             if (keAt >= 0 && keAt + 2 < args.Length) return KeyEnds(g, int.Parse(args[keAt + 1]), int.Parse(args[keAt + 2]));

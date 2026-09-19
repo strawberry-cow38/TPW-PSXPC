@@ -24,8 +24,23 @@ namespace TPW.Data
         public const int SubMesh = 10;
 
         /// <summary>The menu's advisor, without the pole: ten sub-meshes of 72 vertices and 103 faces
-        /// each, subs 0-9. ⚠ Which of the ten the menu uses has NOT been established, so nothing here
-        /// picks one.</summary>
+        /// each, subs 0-9 -- ten animation CLIPS of one model, not ten models (same geometry and bone
+        /// count throughout, different track lengths).
+        ///
+        /// ⚠ WHICH CLIP THE MENU PLAYS IS STILL NOT ESTABLISHED, and the measurement says it is none of
+        /// them on its own. The menu advisor's pose repeats exactly every 84 frames -- confirmed twice,
+        /// at frames 114 and 198 against frame 30, point for point, and no lag under 40 repeats at all.
+        /// At the game's animation rate that is 103.4 units, and entry 83's clip cycles are 24, 24, 24,
+        /// 32, 33, 42, 52, 102, 102, 102. The nearest, 102, predicts 82.9 frames.
+        ///
+        /// ⚠ 1.1 frames is too big to be rounding: the same arithmetic predicts the LANGUAGE advisor's
+        /// period as 104.0 against 104 measured. So the menu is doing something this model does not
+        /// describe -- clips in sequence, a different clock, or a clip I have not found. Two clips of
+        /// cycle 52 would come to 84.5 frames, which is the closest fit available and is exactly the
+        /// sort of coincidence that should not be written down as a finding.
+        ///
+        /// ⭐ The MODEL is settled even though the clip is not: a disc-wide search for sub-meshes using
+        /// the menu advisor's six palettes returns entry 83 and nothing else.</summary>
         public const int MenuSubMeshFirst = 0, MenuSubMeshLast = 9;
 
         /// <summary>Faces of <see cref="SubMesh"/> that are the flag, and the palette they carry.</summary>
