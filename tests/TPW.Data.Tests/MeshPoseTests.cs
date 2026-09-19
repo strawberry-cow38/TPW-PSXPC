@@ -14,9 +14,9 @@ namespace TPW.Data.Tests
         static AnimTrack PosTrack(int type, int index, params (int t, int d, int x, int y, int z)[] recs)
         {
             var b = new List<byte>();
-            b.Add((byte)type); b.Add(0); U16(b, 0); U16(b, index); U16(b, recs.Length);
-            int hdr = type switch { 2 => 0x10, 3 => 0x14, 4 => 0x10, 5 => 0x14, _ => 0x10 };
-            b.AddRange(new byte[hdr - 8]);
+            // count is the LAST slot index, and slots start at +8 - so recs.Length records
+            // laid straight after the 8-byte header are slots 0..recs.Length-1.
+            b.Add((byte)type); b.Add(0); U16(b, 0); U16(b, index); U16(b, recs.Length - 1);
             foreach (var r in recs)
             {
                 if (type is 3 or 5) { S16(b, r.t); S16(b, r.d); }

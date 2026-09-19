@@ -61,8 +61,7 @@ namespace TPW.Data.Tests
         public void ATypeSixTrackCarriesTimeTranslationAndAUnitQuaternion()
         {
             var b = new List<byte>();
-            Header(b, 6, bone: 3, count: 2);
-            b.AddRange(new byte[20]);                                            // preamble record
+            Header(b, 6, bone: 3, count: 1);   // count is the LAST slot index: 1 => slots 0 and 1
             foreach (var v in new[] { 10, 1, -5, 6, 7, 0, 2048, 2048, 2048, 2048 }) S16(b, v);
             foreach (var v in new[] { 25, 2, -5, 6, 7, 0, 0, 0, 0, 4096 }) S16(b, v);
 
@@ -80,7 +79,7 @@ namespace TPW.Data.Tests
             Assert.Equal(0.5f, t.Keys[0].Qx, 4);
             Assert.Equal(1f, t.Keys[0].QuatLength(), 3);
             Assert.Equal(1f, t.Keys[1].QuatLength(), 3);
-            Assert.Equal(20 * 2 + 0x1C, end);
+            Assert.Equal(20 * 1 + 0x1C, end);
         }
 
         // Sampling holds at both ends rather than extrapolating, and picks the nearer key between.
@@ -88,8 +87,7 @@ namespace TPW.Data.Tests
         public void SamplingHoldsTheEndsAndPicksTheNearerKey()
         {
             var b = new List<byte>();
-            Header(b, 6, bone: 0, count: 2);
-            b.AddRange(new byte[20]);
+            Header(b, 6, bone: 0, count: 1);
             foreach (var v in new[] { 10, 0, 100, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);
             foreach (var v in new[] { 30, 0, 200, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);
 
@@ -113,8 +111,7 @@ namespace TPW.Data.Tests
         public void ATypeSevenTrackIsAnUntimedBoneBlock()
         {
             var b = new List<byte>();
-            Header(b, 7, bone: 4, count: 2);
-            b.AddRange(new byte[16]);            // rest of the 0x18 track header
+            Header(b, 7, bone: 4, count: 1);   // slots 0 and 1, both real keys, starting at +8
             foreach (var v in new[] { -5, 6, 7, 0, 2048, 2048, 2048, 2048 }) S16(b, v);
             foreach (var v in new[] { 11, 12, 13, 0, 0, 0, -2048, 3547 }) S16(b, v);
 
@@ -140,7 +137,7 @@ namespace TPW.Data.Tests
             Assert.Equal(0, t.Keys[0].Time);
             Assert.Equal(1, t.Keys[1].Time);
             Assert.Equal(11, t.Sample(1).Tx);
-            Assert.Equal(16 * 2 + 0x18, end);
+            Assert.Equal(16 * 1 + 0x18, end);
         }
 
         // ⚠ Types 1 and 8 share a SIZE row in the game's jump table but not a format: type 1 is two
@@ -159,8 +156,7 @@ namespace TPW.Data.Tests
             Assert.Equal(MeshAnimation.TrackSize(8, 3), MeshAnimation.TrackSize(1, 3));
 
             var b = new List<byte>();
-            Header(b, 1, bone: 0, count: 1);
-            b.AddRange(new byte[32]);            // rest of the 0x28 track header
+            Header(b, 1, bone: 0, count: 0);   // one slot, at +8
             // Block A: vector (10,20,30), zero pad, identity quaternion. Block B: zeroed.
             S16(b, 10); S16(b, 20); S16(b, 30); S16(b, 0);
             S16(b, 0); S16(b, 0); S16(b, 0); S16(b, 4096);
@@ -377,13 +373,38 @@ namespace TPW.Data.Tests
             Assert.NotEqual(t2[0].Target, t4[0].Target);
         }
 
+        // ⭐ THE RECORD BASE ITSELF. Every one of the nine track handlers computes its record base as
+        // $s4 + 8, and Header == 8 + Stride for all nine types, so a track holds count+1 slots starting
+        // at +8 -- reading `count` of them from p+Header silently skipped slot 0 on every track on the
+        // disc. On the real archive that showed up as 232 of 251 animated sub-meshes whose first key was
+        // not at time 0 (now 3), and 200 clips whose loop step was >4x a typical step (now 58).
+        //
+        // REJECTS the old base directly: slot 0 here carries a value that appears NOWHERE else, so a
+        // reader starting at p+Header returns one key instead of two AND loses 111 entirely. A fixture
+        // that pads to the header size cannot catch this -- it agrees with the bug by construction,
+        // which is exactly why the old fixtures all passed while the disc was being misread.
+        [Fact]
+        public void KeysStartAtPlusEightNotAtTheTypesHeaderSize()
+        {
+            var b = new List<byte>();
+            Header(b, 6, bone: 0, count: 1);                 // count == last slot index => slots 0 and 1
+            foreach (var v in new[] { 0, 50, 111, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);   // slot 0, at +8
+            foreach (var v in new[] { 50, 10, 222, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);  // slot 1
+
+            var t = One(b);
+            Assert.Equal(2, t.Keys.Length);          // the old base yielded 1
+            Assert.Equal(0, t.Keys[0].Time);         // a real track's first key is at time 0
+            Assert.Equal(111, t.Keys[0].Tx);         // the old base never read this slot at all
+            Assert.Equal(50, t.Keys[1].Time);
+            Assert.Equal(222, t.Keys[1].Tx);
+        }
+
         // --- interpolation ------------------------------------------------------------------
 
         static List<byte> SixTrack(params (int t, int dur, int tx, int qz, int qw)[] keys)
         {
             var b = new List<byte>();
-            Header(b, 6, bone: 0, count: keys.Length);
-            b.AddRange(new byte[20]);                      // preamble
+            Header(b, 6, bone: 0, count: keys.Length - 1);   // count == last slot index
             foreach (var k in keys)
                 foreach (var v in new[] { k.t, k.dur, k.tx, 0, 0, 0, 0, 0, k.qz, k.qw }) S16(b, v);
             return b;
@@ -479,8 +500,7 @@ namespace TPW.Data.Tests
         public void AnUntimedPositionTrackIsOneSamplePerTick()
         {
             var b = new List<byte>();
-            Header(b, 2, bone: 0, count: 3);
-            b.AddRange(new byte[0x10 - 8]);        // records begin at the TYPE's header size, not at +8
+            Header(b, 2, bone: 0, count: 2);        // records begin at +8; count is the last slot index
             foreach (var v in new[] { 10, 20, 30, 0, 11, 21, 31, 0, 12, 22, 32, 0 }) S16(b, v);
 
             Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
@@ -499,8 +519,7 @@ namespace TPW.Data.Tests
         public void ATimedPositionTrackPutsTimingInFrontOfTheSamePayload()
         {
             var b = new List<byte>();
-            Header(b, 3, bone: 0, count: 2);
-            b.AddRange(new byte[0x14 - 8]);        // ditto: type 3's header is 0x14
+            Header(b, 3, bone: 0, count: 1);        // ditto: slots 0 and 1 from +8
             foreach (var v in new[] { 5, 15, 10, 20, 30, 0, 20, 8, 11, 21, 31, 0 }) S16(b, v);
 
             Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,

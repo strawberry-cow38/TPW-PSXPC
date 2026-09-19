@@ -342,7 +342,10 @@ namespace TPW.Data
         /// is stride 20 with header 0x1C and keys starting at +8, so 20*count + 28 - (8 + 20*count) =
         /// 20 bytes spare; type 0 is 36 with header 0x2C, leaving 36. That is not slack, it is a
         /// record.</summary>
-        public int TrailingSlotOffset => KeyCount <= 0 ? -1 : FileOffset + 8 + KeySizes(Type) * KeyCount;
+        /// <summary>Offset of the LAST slot (index KeyCount). Before the +8 fix this was the last slot
+        /// the parse read while slot 0 went unread; now every slot 0..KeyCount is a key, so nothing is
+        /// actually "trailing" and this is just the final key. Kept for diagnostics.</summary>
+        public int TrailingSlotOffset => KeyCount < 0 ? -1 : FileOffset + 8 + KeySizes(Type) * KeyCount;
 
         /// <summary>Bytes per key for the types that have them, 0 otherwise.</summary>
         public static int KeySizes(byte type) => type switch { 0 => 36, 1 => 32, 6 => 20, 7 => 16, _ => 0 };
@@ -481,7 +484,7 @@ namespace TPW.Data
         /// project derived independently: types 0, 3, 5 and 6 read the record's TIME at 8($s4); types
         /// 2, 4, 7 and 8 read 4($s4) instead, having no time field to read. That agreement was not
         /// designed for -- it is two separate decodes landing on the same partition.
-        const int KeyBase = 8;   // still NOT used by the parse: adopting it is a reviewed change.
+        const int KeyBase = 8;   // ADOPTED by the parse (2026-09-19): records start here, not at Header.
 
         static readonly (int Stride, int Header)[] Sizes =
         {
@@ -533,6 +536,12 @@ namespace TPW.Data
                 int size = stride * count + hdr;
                 if (p + size > d.Length) { error = "track body past the end"; return false; }
 
+                // Slots run from +8, not from the type's header size: every one of the nine handlers
+                // computes its record base as $s4 + 8, and Header == 8 + Stride for all nine types, so a
+                // track holds count+1 slots; reading `count` of them from p+hdr skipped the first.
+                int n = count + 1;
+                int kbase = p + KeyBase;
+
                 var tr = new AnimTrack
                 {
                     Type = type,
@@ -544,10 +553,10 @@ namespace TPW.Data
                 else if (type == 2 || type == 4)
                 {
                     // Untimed: one 8-byte position per tick, the evaluator indexing by the clock itself.
-                    var ps = new PositionKey[count];
-                    for (int k = 0; k < count; k++)
+                    var ps = new PositionKey[n];
+                    for (int k = 0; k < n; k++)
                     {
-                        int o = p + hdr + k * stride;
+                        int o = kbase + k * stride;
                         ps[k] = new PositionKey(0, 0, BitConverter.ToInt16(d.Slice(o, 2)),
                                                 BitConverter.ToInt16(d.Slice(o + 2, 2)),
                                                 BitConverter.ToInt16(d.Slice(o + 4, 2)));
@@ -557,10 +566,10 @@ namespace TPW.Data
                 else if (type == 3 || type == 5)
                 {
                     // Timed: 2+2 of timing in front of the same payload.
-                    var ps = new PositionKey[count];
-                    for (int k = 0; k < count; k++)
+                    var ps = new PositionKey[n];
+                    for (int k = 0; k < n; k++)
                     {
-                        int o = p + hdr + k * stride;
+                        int o = kbase + k * stride;
                         ps[k] = new PositionKey(BitConverter.ToInt16(d.Slice(o, 2)),
                                                 BitConverter.ToInt16(d.Slice(o + 2, 2)),
                                                 BitConverter.ToInt16(d.Slice(o + 4, 2)),
@@ -573,11 +582,11 @@ namespace TPW.Data
                 {
                     // {time, dur, vecA, pad, quatA, vecB, pad, quatB} -- the first 20 bytes are exactly a
                     // type-6 keyframe, so AnimKey reads them unchanged.
-                    var keys = new AnimKey[count];
-                    var pb = new BoneScale[count];
-                    for (int k = 0; k < count; k++)
+                    var keys = new AnimKey[n];
+                    var pb = new BoneScale[n];
+                    for (int k = 0; k < n; k++)
                     {
-                        int o = p + hdr + k * stride;
+                        int o = kbase + k * stride;
                         keys[k] = new AnimKey(d.Slice(o, 20));
                         pb[k] = new BoneScale(d.Slice(o + 20, 16));
                     }
@@ -588,19 +597,19 @@ namespace TPW.Data
                 {
                     // Untimed, one 16-byte {vector, pad, quaternion} block per tick -- a type-6
                     // keyframe with the 4-byte timing header removed.
-                    var keys = new AnimKey[count];
-                    for (int k = 0; k < count; k++)
-                        keys[k] = AnimKey.FromBlock(d.Slice(p + hdr + k * stride, 16), (short)k, 1);
+                    var keys = new AnimKey[n];
+                    for (int k = 0; k < n; k++)
+                        keys[k] = AnimKey.FromBlock(d.Slice(kbase + k * stride, 16), (short)k, 1);
                     tr.Keys = keys;
                 }
                 else if (type == 1)
                 {
                     // Untimed, TWO blocks per tick: type 0 is to type 6 as type 1 is to type 7.
-                    var keys = new AnimKey[count];
-                    var pb = new BoneScale[count];
-                    for (int k = 0; k < count; k++)
+                    var keys = new AnimKey[n];
+                    var pb = new BoneScale[n];
+                    for (int k = 0; k < n; k++)
                     {
-                        int o = p + hdr + k * stride;
+                        int o = kbase + k * stride;
                         keys[k] = AnimKey.FromBlock(d.Slice(o, 16), (short)k, 1);
                         pb[k] = new BoneScale(d.Slice(o + 16, 16));
                     }
@@ -609,8 +618,8 @@ namespace TPW.Data
                 }
                 else if (type == 6)
                 {
-                    var keys = new AnimKey[count];
-                    for (int k = 0; k < count; k++) keys[k] = new AnimKey(d.Slice(p + hdr + k * stride, stride));
+                    var keys = new AnimKey[n];
+                    for (int k = 0; k < n; k++) keys[k] = new AnimKey(d.Slice(kbase + k * stride, stride));
                     tr.Keys = keys;
                 }
                 else tr.Raw = d.Slice(p, size).ToArray();
