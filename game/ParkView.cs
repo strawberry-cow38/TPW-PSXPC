@@ -53,7 +53,10 @@ namespace TPWGodot
             AddChild(_types);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
-            _camera = new Camera3D { Fov = 50, Current = false };
+            // The game's own field of view: projection distance H = 256 (SetGeomScreen at 0x80054C44, from
+            // gp+0x700) about the centre of its 512x256 PAL screen (0x800BA6A4 → 0x800BB3B4 sets 512x256 and puts
+            // the projection centre at half of it), so the vertical view is 2·atan(128 / 256) = 53.13°.
+            _camera = new Camera3D { Fov = 53.13f, Current = false };
             AddChild(_camera);
             Visible = false;
         }
