@@ -35,8 +35,19 @@ namespace TPW.Sim
         /// reading, "it prints capacity minus placed", was a tidier rule than the game has. The pool table is
         /// the only source that states capacity alone.
         ///
-        /// ⚠ TourRide has three slots and appears on no purchase screen we have seen, so the UI is not even
-        /// a complete list of the types. Reading capacity off the interface would have lost one entirely.</summary>
+        /// ⚠ TourRide has three slots and appears on no purchase screen we have seen. I read that as "the
+        /// UI is not a complete list of the types" — right in effect, wrong in mechanism. It is a complete
+        /// list of what has been RESEARCHED: TourRide is not hidden, it is not unlocked yet. The mechanism
+        /// matters for a port, because the fix is a research gate rather than a concept of hidden types.
+        ///
+        /// ✅ AND FABLE HAD ALREADY WRITTEN ALL OF THIS DOWN, in wages.md §2.1, naming the trap outright:
+        /// "the number drawn beside each = remaining hireable = capacity minus pool+0xC employed. 'Guards 5'
+        /// therefore means 0 guards employed, not 5." Two of us measured our way to a fact stated plainly in
+        /// a report we had both cited today for other things. **Read the index before reaching for the
+        /// instrument.**
+        ///
+        /// Research is a separate currency — a singleton at 0x8009B384 holding POINTS, with no bank access —
+        /// so nothing about it is payable in money.</summary>
         public static int PoolSize(AttractionType t) => t switch
         {
             AttractionType.Ride => 15,
