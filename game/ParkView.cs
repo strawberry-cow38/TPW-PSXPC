@@ -211,6 +211,7 @@ namespace TPWGodot
             _fx = new ParticleSystem();
             _openingFx.Clear();
             _pathMode = false; _runStart = null; _cursorTile = null; _cursorMesh.Mesh = null; _paths = null; _cursorPinned = false;
+            _queue = null;
             StopPlacing();
             foreach (var m in _placed) m.QueueFree();
             _placed.Clear();
@@ -242,10 +243,11 @@ namespace TPWGodot
                 foreach (var (rec, _) in _attractions)
                     foreach (var (ps, _) in rec.Pad)
                         if (ps >= 0 && ps < ground.Sprites.Count) uses.Add((ground.Sprites[ps].TPage, ground.Sprites[ps].Clut));
-                // Every path piece the tool can lay, so a path laid later has its texture in the atlas.
+                // Every path and queue piece the tools can lay, and the grass the queue's undo leaves, so a tile laid
+                // later has its texture in the atlas.
                 _paths = exe != null && world != null ? PathTool.Create(exe, AssetSelfTest.GameExecutableBase, world.Index) : null;
                 if (_paths != null)
-                    foreach (int ps in _paths.Sprites)
+                    foreach (int ps in _paths.AllSprites)
                         if (ps < ground.Sprites.Count) uses.Add((ground.Sprites[ps].TPage, ground.Sprites[ps].Clut));
                 var gate = world != null ? ParkGate.ForWorld(world.Index) : null;
                 if (gate != null && gatePack != null && gatePack.Models.Count > 0)
@@ -712,6 +714,8 @@ namespace TPWGodot
                 _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
                            + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "")
+                           + (_queue != null ? $"\nQUEUE TOOL ({_queue.Points.Count}/{QueueRun.MaxPoints - 1} corners): click to lay the queue toward the pointer; it goes on from its end, "
+                                              + "and is done when it reaches a path or you click its end again; right button takes the last piece back, then closes; Esc closes" : "")
                            + (_placing >= 0 ? $"\nPLACING {_attractions[_placing].Name}: , . or R to turn, left button to place, right button to stop" : "");
         }
 
@@ -752,7 +756,7 @@ namespace TPWGodot
         {
             if (k < 0 || k >= _attractions.Count) return;
             _placing = k; _placeRot = 0;
-            _pathMode = false; _runStart = null; _cursorMesh.Mesh = null;
+            _pathMode = false; _runStart = null; _cursorMesh.Mesh = null; _queue = null;
             _picker.Visible = false;
             // Master: the preview is the markers alone, as the game shows it; the model appears when it is placed.
             _ghostModel.Mesh = null;
@@ -769,11 +773,33 @@ namespace TPWGodot
             AttractionPlacement.Ghost(_map, rec, x, z, rot & 3, out bool ok);
             if (!ok) return false;
             AttractionPlacement.Place(_map, rec, x, z, rot & 3);
+            _paths?.LayDoors(_map, rec, x, z, rot & 3);
             var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
             AddChild(inst);
             _placed.Add(inst);
             RebuildGround();
             return true;
+        }
+
+        /// <summary>Place ride <paramref name="entry"/> as <see cref="PlaceAt"/> does, open its queue tool, and press at
+        /// each of <paramref name="clicks"/> in turn, as the mouse would; then hold the pointer at
+        /// <paramref name="hover"/> (the ghost toward it stays pinned). For captures. Returns what the last press did.</summary>
+        public QueueRun.Step? QueueAt(int entry, int x, int z, int rot, IReadOnlyList<(int X, int Z)> clicks, (int X, int Z)? hover = null)
+        {
+            if (!PlaceAt(entry, x, z, rot)) return null;
+            var rec = _attractions.Find(a => a.Rec.Entry == entry).Rec;
+            StartQueue(rec, x, z, rot & 3);
+            QueueRun.Step? last = null;
+            foreach (var c in clicks)
+            {
+                if (_queue == null) break;
+                if (c.X < 0) { if (_queue.Undo(_map)) RebuildGround(); continue; }   // (-1, -1): the undo
+                _cursorTile = c;
+                last = PressQueue(c);
+            }
+            if (hover is { } h) _cursorTile = h;
+            if (_queue != null || _pathMode) _cursorPinned = true;
+            return last;
         }
 
         /// <summary>Show attraction <paramref name="entry"/> as the placement ghost with its footprint's corner at
@@ -854,15 +880,103 @@ namespace TPWGodot
             AttractionPlacement.Ghost(_map, rec, o.X, o.Z, _placeRot, out bool ok);
             if (!ok) { PlaySfx(ToolSound.Refused); return; }
             AttractionPlacement.Place(_map, rec, o.X, o.Z, _placeRot);
+            _paths?.LayDoors(_map, rec, o.X, o.Z, _placeRot);
             var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
             AddChild(inst);
             _placed.Add(inst);
             RebuildGround();
-            // 0x8001C5C8: the placed sound, then the tool closes (it switches to tool 0). Only the features' tool (15)
-            // reopens itself while the park may take more features; the picker has none of those yet.
+            // The placed sound. A shop or sideshow's tool then closes (0x8001C5C8 switches to tool 0; only the
+            // features' tool, 15, reopens itself). A flat or tour ride's hands over to the queue tool (0x8001C92C /
+            // 0x8001CAFC switch to tool 3).
             PlaySfx(PlaceSound.Placed);
+            int rot = _placeRot;
             StopPlacing();
+            if (rec.IsRide) StartQueue(rec, o.X, o.Z, rot);
             RefreshInfo();
+        }
+
+        /// <summary>The queue tool, open after a ride is placed (null otherwise), and the ride it queues for.</summary>
+        QueueRun _queue;
+        AttractionDefinition _queueRide;
+        int _queueOx, _queueOz, _queueRot;
+
+        /// <summary>Open the queue tool for a ride just placed (0x8001DDD8): its run starts on the queue piece outside
+        /// the entrance, the game camera swings round to look at the entrance, and the tool's start sound plays.</summary>
+        void StartQueue(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            _queue = _paths?.StartQueue(rec, ox, oz, rot);
+            if (_queue == null) return;
+            _queueRide = rec; _queueOx = ox; _queueOz = oz; _queueRot = rot;
+            _pathMode = false; _runStart = null; _cursorPinned = false;
+            _cursorTile = _queue.End;
+            SwingGameCamera(_queue.End, rec.EntranceTurn(rot));
+            PlaySfx(ToolSound.Start);
+            RefreshInfo();
+        }
+
+        /// <summary>A press of the queue tool at tile c (0x8001DF08): lays the ghost when it may be laid, else refuses.
+        /// A finished queue hands over to the path tool at the ride's exit.</summary>
+        QueueRun.Step PressQueue((int X, int Z) c)
+        {
+            var step = _queue.Lay(_map, c.X, c.Z);
+            switch (step)
+            {
+                case QueueRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
+                case QueueRun.Step.Laid: RebuildGround(); PlaySfx(ToolSound.Lay); break;
+                case QueueRun.Step.Finished: RebuildGround(); FinishQueue(); break;
+            }
+            RefreshInfo();
+            return step;
+        }
+
+        /// <summary>The queue is done (0x8001DF08, for a ride just placed): the game camera moves to the tile outside
+        /// the exit and turns to face it, and the path tool opens with its run already started there (0x8001D36C sees
+        /// it came from the queue tool) -- its start sound, then the queue's connected sound.</summary>
+        void FinishQueue()
+        {
+            var rec = _queueRide;
+            var exit = rec?.ExitTile(_queueOx, _queueOz, _queueRot);
+            CloseQueue(false);
+            if (exit is { } x && _paths != null)
+            {
+                _pathMode = true; _cursorPinned = false;
+                _runStart = x; _cursorTile = x;
+                SwingGameCamera(x, rec.ExitTurn(_queueRot));
+                PlaySfx(ToolSound.Start);
+            }
+            PlaySfx(ToolSound.Connected);
+            RefreshInfo();
+        }
+
+        /// <summary>Close the queue tool, the queue laid so far staying (0x8001E178, with its sound 7 when asked).</summary>
+        void CloseQueue(bool sound)
+        {
+            _queue = null;
+            _cursorMesh.Mesh = null;
+            if (sound) PlaySfx(ToolSound.Closed);
+            RefreshInfo();
+        }
+
+        /// <summary>The game camera to tile t, turning to look the way <paramref name="turn"/> faces (0x8001934C moves the
+        /// cursor there, 0x80053F04 sets the target yaw to turn × 0x400); it eases after both as it always does. The
+        /// free camera is left alone.</summary>
+        void SwingGameCamera((int X, int Z) t, int turn)
+        {
+            if (!_gameCam) return;
+            _gcam.CursorX = t.X * ParkTerrain.TileUnits + ParkTerrain.TileUnits / 2;
+            _gcam.CursorZ = t.Z * ParkTerrain.TileUnits + ParkTerrain.TileUnits / 2;
+            _gcam.TargetYaw = turn * ParkCamera.QuarterTurn;
+        }
+
+        /// <summary>The queue tool's ghost: from the queue's end toward the tile under the mouse, each tile wearing the
+        /// marker for its verdict (0x8001D9D0 with kind 4, drawn as every marker is).</summary>
+        ArrayMesh QueueMesh()
+        {
+            if (_queue == null || _common == null) return new ArrayMesh();
+            var c = _cursorTile ?? _queue.End;
+            var marks = new List<AttractionPlacement.Marker>();
+            foreach (var (x, z, sprite, _) in _queue.Ghost(_map, c.X, c.Z, out _)) marks.Add(new AttractionPlacement.Marker(x, z, sprite, 0));
+            return MarkerMesh(marks);
         }
 
         /// <summary>The underlay every marker has (0x800553B0: common-sheet sprite 171 at shade 0x40).</summary>
@@ -992,7 +1106,7 @@ namespace TPWGodot
 
         /// <summary>The path tool's sounds in group 7, as 0x8001D5C0 plays them. The placement tools refuse with the
         /// same sound 2 (0x8001C5C8).</summary>
-        public enum ToolSound { Start = 0, Refused = 2, Connected = 3, Lay = 4 }
+        public enum ToolSound { Start = 0, Refused = 2, Connected = 3, Lay = 4, Undo = 5, Closed = 7 }
 
         /// <summary>The placement tools' sounds in group 8, shared by every placement tool (rides, shops, sideshows,
         /// features): placed by 0x8001C5C8, cancelled by 0x8001C7E4, turned by 0x8001C6BC / 0x8001C750.</summary>
@@ -1123,6 +1237,11 @@ namespace TPWGodot
                 if (!_cursorPinned) _cursorTile = TileUnderMouse();
                 _cursorMesh.Mesh = CursorMesh();
             }
+            else if (_queue != null)
+            {
+                if (!_cursorPinned) _cursorTile = TileUnderMouse() ?? _cursorTile;
+                _cursorMesh.Mesh = QueueMesh();
+            }
             if (_placing >= 0) UpdatePlacementGhost();
             float dt = (float)delta;
             var move = Vector2.Zero;
@@ -1191,6 +1310,26 @@ namespace TPWGodot
                     StopPlacing(); RefreshInfo();
                     return;
                 }
+            }
+            // ⭐ THE QUEUE TOOL, open after a ride is placed (the game's tool 3). The left button lays the ghost from the
+            // queue's end toward the pointer when no tile of it refuses (0x8001DF08); the right button takes the last
+            // segment back (the game's undo, 0x8001E114) or, with nothing to take back, closes the tool; Esc closes it
+            // (the game's close, 0x8001E178). Closing keeps the queue laid so far.
+            if (_queue != null)
+            {
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
+                {
+                    if ((_cursorPinned ? _cursorTile : TileUnderMouse() ?? _cursorTile) is { } c) { _cursorTile = c; PressQueue(c); }
+                    else PlaySfx(ToolSound.Refused);
+                    return;
+                }
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
+                {
+                    if (_queue.Undo(_map)) { RebuildGround(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
+                    else CloseQueue(true);
+                    return;
+                }
+                if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape }) { CloseQueue(true); return; }
             }
             // ⭐ THE PATH TOOL, master's way. A left click on a path or an unoccupied tile (buildable or not) opens the
             // tool -- and only opens it. With the tool open, one click fixes the ghost's start and the next lays the

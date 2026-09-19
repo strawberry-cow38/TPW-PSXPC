@@ -32,8 +32,14 @@ namespace TPW.Data
                          South = 0x10, SouthWest = 0x20, West = 0x40, NorthWest = 0x80;
 
         const uint PieceTable = 0x800EFFCC, PieceCount = 0x801026E0;
-        /// <summary>Each world's sixteen path sprites, s16 indices into its ground sheet.</summary>
+        /// <summary>The queue's pieces (0x8004D9DC for type 4): 11 records, straight, end, corner and lone, all list 2.</summary>
+        const uint QueuePieceTable = 0x800EFF48, QueuePieceCount = 0x801026DC;
+        /// <summary>Each world's sixteen path sprites, s16 indices into its ground sheet (the world record's +0x90).</summary>
         static readonly uint[] PathSpriteLists = { 0x800E14D4, 0x800E1534, 0x800E14F4, 0x800E1514 };
+        /// <summary>Each world's four queue sprites (+0x98: lone, end, straight, corner) and two grass sprites (+0x88),
+        /// the lists 0x8002ED50 puts in the world records beside the path sprites.</summary>
+        static readonly uint[] QueueSpriteLists = { 0x80102DF4, 0x80102E3C, 0x80102E0C, 0x80102E24 };
+        static readonly uint[] GrassSpriteLists = { 0x80102DE8, 0x80102E30, 0x80102E00, 0x80102E18 };
         /// <summary>The path sprite the road's ends wear (0x800541B8 reads the list at +0x16).</summary>
         public const int RoadEndSprite = 11;
 
@@ -45,9 +51,12 @@ namespace TPW.Data
             public Piece(int list, int sprite, int angle, int mask) { List = list; Sprite = sprite; Angle = angle; Mask = mask; }
         }
 
-        public static Piece[] ReadPieces(byte[] exe, uint baseAddress)
+        public static Piece[] ReadPieces(byte[] exe, uint baseAddress) => ReadPieces(exe, baseAddress, PieceTable, PieceCount);
+        public static Piece[] ReadQueuePieces(byte[] exe, uint baseAddress) => ReadPieces(exe, baseAddress, QueuePieceTable, QueuePieceCount);
+
+        static Piece[] ReadPieces(byte[] exe, uint baseAddress, uint table, uint count)
         {
-            int c = (int)(PieceCount - baseAddress), t = (int)(PieceTable - baseAddress);
+            int c = (int)(count - baseAddress), t = (int)(table - baseAddress);
             if (exe == null || c < 0 || c + 4 > exe.Length) return null;
             int n = BitConverter.ToInt32(exe, c);
             if (n <= 0 || n > 256 || t < 0 || t + n * 12 > exe.Length) return null;
@@ -60,13 +69,17 @@ namespace TPW.Data
             return pieces;
         }
 
-        public static int[] ReadPathSprites(byte[] exe, uint baseAddress, int world)
+        public static int[] ReadPathSprites(byte[] exe, uint baseAddress, int world) => ReadSprites(exe, baseAddress, PathSpriteLists, world, 16);
+        public static int[] ReadQueueSprites(byte[] exe, uint baseAddress, int world) => ReadSprites(exe, baseAddress, QueueSpriteLists, world, 4);
+        public static int[] ReadGrassSprites(byte[] exe, uint baseAddress, int world) => ReadSprites(exe, baseAddress, GrassSpriteLists, world, 2);
+
+        static int[] ReadSprites(byte[] exe, uint baseAddress, uint[] lists, int world, int n)
         {
-            if (exe == null || world < 0 || world >= PathSpriteLists.Length) return null;
-            int o = (int)(PathSpriteLists[world] - baseAddress);
-            if (o < 0 || o + 32 > exe.Length) return null;
-            var s = new int[16];
-            for (int i = 0; i < 16; i++) s[i] = BitConverter.ToUInt16(exe, o + i * 2);
+            if (exe == null || world < 0 || world >= lists.Length) return null;
+            int o = (int)(lists[world] - baseAddress);
+            if (o < 0 || o + n * 2 > exe.Length) return null;
+            var s = new int[n];
+            for (int i = 0; i < n; i++) s[i] = BitConverter.ToUInt16(exe, o + i * 2);
             return s;
         }
 
@@ -95,22 +108,39 @@ namespace TPW.Data
             return laid.Result();
         }
 
+        /// <summary>What the queue's linking needs to know about the run it belongs to (0x8004E20C's queue branch): the
+        /// ride's entrance tile, the way the last tile laid went (0x80102D0C / 0x80102D10, 0x80 while no run is going)
+        /// and whether a tile lies on the run so far (0x8001B76C).</summary>
+        internal sealed class QueueLink
+        {
+            public int DoorX = -1, DoorZ = -1;
+            public int PrevDx = NoWay, PrevDz = NoWay;
+            public Func<int, int, bool> OnRun = (_, _) => false;
+            public const int NoWay = 0x80;
+        }
+
         /// <summary>The tile fields the path code changes, worked on in place.</summary>
         internal sealed class Layer
         {
             readonly ParkMap _map;
-            readonly Piece[] _pieces;
-            readonly int[] _sprites;
+            readonly Piece[] _pieces, _queuePieces;
+            readonly int[] _sprites, _queueSprites, _grassSprites;
+            readonly Random _rng;
             readonly int _w, _h;
-            readonly byte[] _type, _links;
+            readonly byte[] _type, _links, _facing;
             readonly ushort[] _ground;
 
-            public Layer(ParkMap map, Piece[] pieces, int[] sprites)
+            public Layer(ParkMap map, Piece[] pieces, int[] sprites, Piece[] queuePieces = null, int[] queueSprites = null,
+                         int[] grassSprites = null, Random rng = null)
             {
                 _map = map; _pieces = pieces; _sprites = sprites; _w = map.Width; _h = map.Height;
-                _type = new byte[_w * _h]; _links = new byte[_w * _h]; _ground = new ushort[_w * _h];
+                _queuePieces = queuePieces; _queueSprites = queueSprites; _grassSprites = grassSprites; _rng = rng;
+                _type = new byte[_w * _h]; _links = new byte[_w * _h]; _facing = new byte[_w * _h]; _ground = new ushort[_w * _h];
                 for (int i = 0; i < map.Tiles.Length; i++)
-                { _type[i] = map.Tiles[i].Raw0; _links[i] = map.Tiles[i].Links; _ground[i] = map.Tiles[i].Ground; }
+                {
+                    _type[i] = map.Tiles[i].Raw0; _links[i] = map.Tiles[i].Links;
+                    _facing[i] = map.Tiles[i].Facing; _ground[i] = map.Tiles[i].Ground;
+                }
             }
 
             public ParkMap Result()
@@ -119,7 +149,7 @@ namespace TPW.Data
                 for (int i = 0; i < m.Tiles.Length; i++)
                 {
                     var t = m.Tiles[i];
-                    m.Tiles[i] = new MapTile(_type[i], t.Raw1, _links[i], t.Facing, _ground[i], t.Shade, t.Flags);
+                    m.Tiles[i] = new MapTile(_type[i], t.Raw1, _links[i], _facing[i], _ground[i], t.Shade, t.Flags);
                 }
                 return m;
             }
@@ -155,18 +185,38 @@ namespace TPW.Data
             /// <summary>0x8004DC78: the neighbour's index, or -1 off the map (the last row and column never count).</summary>
             int At(int x, int z) => x >= 0 && x < _w - 1 && z >= 0 && z < _h - 1 ? z * _w + x : -1;
             bool IsPath(int t) => t >= 0 && (_type[t] == 2 || _type[t] == 13);
+            static int Popcount(byte b) { int n = 0; for (; b != 0; b &= (byte)(b - 1)) n++; return n; }
+            static int Opposite(int bit) => bit < 0x10 ? bit << 4 : bit >> 4;
 
-            /// <summary>0x8004D9DC, for path tiles.</summary>
+            /// <summary>0x8004D9DC: a path, path-and-queue or queue tile picks its piece by its links (the last record
+            /// whose mask equals them, else the first whose mask they contain), from the path table or, for a queue,
+            /// the queue table; the piece's list says which of the world's lists its sprite comes from (0 grass,
+            /// 1 path, 2 queue). A grass tile gets one of the world's two grass sprites, turned, both at random: what
+            /// the queue's undo leaves behind.</summary>
             void Wear(int t)
             {
-                if (_type[t] != 2 && _type[t] != 13) return;
-                var p = Choose(_pieces, _links[t]);
-                if (p.List != 1 || p.Sprite >= _sprites.Length) return;
-                _ground[t] = (ushort)(_sprites[p.Sprite] | ((p.Angle / 90) & 3) << 12);
+                Piece p;
+                switch (_type[t])
+                {
+                    case 2: case 13: p = Choose(_pieces, _links[t]); break;
+                    case 4:
+                        if (_queuePieces == null) return;
+                        p = Choose(_queuePieces, _links[t]);
+                        break;
+                    case 0:
+                        if (_grassSprites == null || _rng == null) return;
+                        int angle = _rng.Next(360), pick = _rng.Next(2);
+                        _ground[t] = (ushort)(_grassSprites[pick] | (angle / 90 & 3) << 12);
+                        return;
+                    default: return;
+                }
+                var list = p.List switch { 0 => _grassSprites, 1 => _sprites, 2 => _queueSprites, _ => null };
+                if (list == null || p.Sprite >= list.Length) return;
+                _ground[t] = (ushort)(list[p.Sprite] | ((p.Angle / 90) & 3) << 12);
             }
 
-            /// <summary>0x8004E20C for path (kind 2), neighbour by neighbour in the game's order. It also joins the
-            /// entrance and exit tiles of attractions facing the tile, which a freshly loaded map does not have.</summary>
+            /// <summary>0x8004E20C for path (kind 2), neighbour by neighbour in the game's order. After each orthogonal
+            /// neighbour's path test comes its door test (<see cref="JoinDoor"/>).</summary>
             void Link(int x, int z)
             {
                 int t = At(x, z);
@@ -179,6 +229,7 @@ namespace TPW.Data
                     if (IsPath(At(x - 1, z))) _links[n] |= SouthWest;
                     Wear(n);
                 }
+                JoinDoor(t, n, North, South);
                 int ne = At(x + 1, z - 1);
                 if (ne >= 0 && _type[ne] == 2 && IsPath(At(x, z - 1)) && IsPath(At(x + 1, z)))
                 { _links[t] |= NorthEast; _links[ne] |= SouthWest; Wear(ne); }
@@ -190,6 +241,7 @@ namespace TPW.Data
                     if (IsPath(At(x, z + 1))) _links[e] |= SouthWest;
                     Wear(e);
                 }
+                JoinDoor(t, e, East, West);
                 int se = At(x + 1, z + 1);
                 if (IsPath(se) && IsPath(At(x, z + 1)) && IsPath(At(x + 1, z)))
                 { _links[t] |= SouthEast; _links[se] |= NorthWest; Wear(se); }
@@ -201,6 +253,7 @@ namespace TPW.Data
                     if (IsPath(At(x - 1, z))) _links[s] |= NorthWest;
                     Wear(s);
                 }
+                JoinDoor(t, s, South, North);
                 int sw = At(x - 1, z + 1);
                 if (IsPath(sw) && IsPath(At(x, z + 1)) && IsPath(At(x - 1, z)))
                 { _links[t] |= SouthWest; _links[sw] |= NorthEast; Wear(sw); }
@@ -212,9 +265,182 @@ namespace TPW.Data
                     if (IsPath(At(x, z + 1))) _links[w] |= SouthEast;
                     Wear(w);
                 }
+                JoinDoor(t, w, West, East);
                 int nw = At(x - 1, z - 1);
                 if (IsPath(nw) && IsPath(At(x, z - 1)) && IsPath(At(x - 1, z)))
                 { _links[t] |= NorthWest; _links[nw] |= SouthEast; Wear(nw); }
+            }
+
+            /// <summary>The door half of 0x8004E20C's path branch for the orthogonal neighbour n (bit: the way from
+            /// this tile to n, opp: back): an exit (8) or an entrance (7) whose facing points at this tile is joined
+            /// both ways; a queue (4) whose own link already points here only picks its piece again.</summary>
+            void JoinDoor(int t, int n, int bit, int opp)
+            {
+                if (n < 0) return;
+                if (_type[n] == 8 && (_facing[n] & opp) != 0) { _links[t] |= (byte)bit; _links[n] |= (byte)opp; Wear(n); }
+                if (_type[n] == 7)
+                {
+                    if ((_facing[n] & opp) != 0) { _links[t] |= (byte)bit; _links[n] |= (byte)opp; Wear(n); }
+                }
+                else if (_type[n] == 4 && (_links[n] & opp) != 0) Wear(n);
+            }
+
+            /// <summary>0x8004E20C's queue branch (kind 4). A queue tile joins only the tile behind it on the run, and
+            /// that only while the tile behind is a queue with fewer than two links that lies on the run
+            /// (0x8001B76C): so a queue is one line, and never joins a part of itself it passes beside. The first
+            /// tile of a segment also joins the ride's entrance when that is beside it and not joined yet, and looks
+            /// behind along the way the previous segment went. A path tile the queue ends on (13) drops its
+            /// diagonal links on that side, so its path piece opens toward the queue.</summary>
+            void LinkQueue(int x, int z, int dx, int dz, bool first, QueueLink q)
+            {
+                int t = At(x, z);
+                if (t < 0) return;
+                int door = q.DoorX >= 0 ? At(q.DoorX, q.DoorZ) : -1;
+                if (door >= 0 && _links[door] != 0) door = -1;
+                int bx = dx, bz = dz;
+                if (first)
+                {
+                    int dn = At(x, z - 1), de = At(x + 1, z), ds = At(x, z + 1), dw = At(x - 1, z);
+                    if (dn >= 0 && dn == door) { _links[t] |= North; _links[dn] |= South; }
+                    if (de >= 0 && de == door) { _links[t] |= East; _links[de] |= West; }
+                    if (ds >= 0 && ds == door) { _links[t] |= South; _links[ds] |= North; }
+                    if (dw >= 0 && dw == door) { _links[t] |= West; _links[dw] |= East; }
+                    if (q.PrevDx == QueueLink.NoWay || q.PrevDz == QueueLink.NoWay) { bx = 0; bz = 0; }
+                    else { bx = q.PrevDx; bz = q.PrevDz; }
+                }
+                bool pathy = _type[t] is 2 or 13;
+                if (bx == -1) Behind(t, x + 1, z, East, West, pathy, NorthEast | SouthEast, q);
+                if (bx == 1) Behind(t, x - 1, z, West, East, pathy, NorthWest | SouthWest, q);
+                if (bz == 1) Behind(t, x, z - 1, North, South, pathy, NorthEast | NorthWest, q);
+                if (bz == -1) Behind(t, x, z + 1, South, North, pathy, SouthEast | SouthWest, q);
+                q.PrevDx = dx; q.PrevDz = dz;
+            }
+
+            void Behind(int t, int nx, int nz, int bit, int opp, bool pathy, int diagonals, QueueLink q)
+            {
+                int n = At(nx, nz);
+                if (n < 0 || _type[n] != 4) return;
+                if (Popcount(_links[n]) < 2 && q.OnRun(nx, nz)) { _links[t] |= (byte)bit; _links[n] |= (byte)opp; }
+                if (pathy) _links[t] &= (byte)~diagonals;
+            }
+
+            /// <summary>0x8004F200: whether a tile takes the kind (2 path, 4 queue, 13 path and queue, 5 footprint,
+            /// 0 grass). Grass and the kind itself always do; flag 0x10 takes path and queue; path takes path and
+            /// queue, a queue an entrance; path takes the END of a queue (one link).</summary>
+            bool Accepts(int t, int kind)
+            {
+                byte type = _type[t];
+                if (kind == 5 && type == 5) return false;
+                if (type == kind || type == 0) return true;
+                if ((_map.Tiles[t].Flags & 0x10) != 0 && kind is 2 or 4 or 13) return true;
+                if (kind == 5 && type is 2 or 13) return true;
+                if (kind == 0) return true;
+                if (kind == 2 && type == 13) return true;
+                if (kind == 4 && type == 7) return true;
+                if (kind is 2 or 13 && type == 4) return Popcount(_links[t]) == 1;
+                return false;
+            }
+
+            /// <summary>0x8004E034: lay the kind on a tile. A tile that refuses stays as it was, except that a queue
+            /// refused by path makes it path and queue (13). Queue over path, path over queue and anything over
+            /// path and queue make 13.</summary>
+            bool LayTile(int t, int kind)
+            {
+                byte type = _type[t];
+                if (!Accepts(t, kind))
+                {
+                    if (kind == 4 && type == 2) _type[t] = 13;
+                    return false;
+                }
+                if (kind != 0 && type == kind) return true;
+                int k = kind;
+                if (k == 4 && type == 2) k = 13;
+                if (k == 2 && type == 4) k = 13;
+                if (type == 13) k = 13;
+                _type[t] = (byte)k;
+                return true;
+            }
+
+            static byte FacingBit(int dx, int dz) =>
+                (byte)((dx == -1 ? East : dx == 1 ? West : 0) | (dz == -1 ? South : dz == 1 ? North : 0));
+
+            /// <summary>0x8001B924's walk: along x when the segment runs further in x than in z, else along z; each tile
+            /// with the step it was reached by (a lone tile has none).</summary>
+            static System.Collections.Generic.List<(int X, int Z, int Dx, int Dz)> Steps(int x0, int z0, int x1, int z1)
+            {
+                var list = new System.Collections.Generic.List<(int, int, int, int)>();
+                if (Math.Abs(z1 - z0) < Math.Abs(x1 - x0))
+                {
+                    int s = x1 < x0 ? -1 : 1;
+                    for (int x = x0; x != x1; x += s) list.Add((x, z0, s, 0));
+                    list.Add((x1, z0, s, 0));
+                }
+                else
+                {
+                    int s = z1 < z0 ? -1 : 1;
+                    for (int z = z0; z != z1; z += s) list.Add((x0, z, 0, s));
+                    list.Add((x0, z1, 0, z0 == z1 ? 0 : s));
+                }
+                return list;
+            }
+
+            /// <summary>One segment of a run as 0x8001BD30 lays it: the tiles from (x0, z0) to (x1, z1) are laid with the
+            /// kind in order until one refuses (0x8004E034); then every tile of the segment is linked with the kind
+            /// last laid (pass 0x80), gains the way back along the run in its facing (0x82: 0x8004FA68) and picks its
+            /// piece (0x81). Returns whether the run is finished: its last tile was path, queue, path and queue or
+            /// track before it was laid (0x8004DE04 sets 0x801026D0, which ends the run in pass 0x81).</summary>
+            public bool LaySegment(int x0, int z0, int x1, int z1, int kind, QueueLink q)
+            {
+                var tiles = Steps(x0, z0, x1, z1);
+                int laidKind = 0;
+                bool ended = false;
+                for (int i = 0; i < tiles.Count; i++)
+                {
+                    int t = At(tiles[i].X, tiles[i].Z);
+                    if (t < 0) break;
+                    ended = i == tiles.Count - 1 && _type[t] is 4 or 2 or 13 or 10;
+                    if (!LayTile(t, kind)) break;
+                    laidKind = kind;
+                }
+                for (int i = 0; i < tiles.Count; i++)
+                {
+                    var (x, z, dx, dz) = tiles[i];
+                    if (At(x, z) < 0) continue;
+                    if (laidKind == 2) Link(x, z);
+                    else if (laidKind == 4 && q != null) LinkQueue(x, z, dx, dz, i == 0, q);
+                }
+                foreach (var (x, z, dx, dz) in tiles)
+                {
+                    int t = At(x, z);
+                    if (t >= 0) _facing[t] |= FacingBit(dx, dz);
+                }
+                foreach (var (x, z, _, _) in tiles)
+                {
+                    int t = At(x, z);
+                    if (t >= 0) Wear(t);
+                }
+                return ended;
+            }
+
+            /// <summary>0x8004FBEC for a queue tile, the queue's undo: each of its four links is dropped, from the
+            /// neighbour too, which picks its piece again; then the tile is grass again (0x8004E034 with kind 0),
+            /// wearing a random grass sprite.</summary>
+            public void RemoveQueueTile(int x, int z)
+            {
+                int t = At(x, z);
+                if (t < 0 || _type[t] != 4) return;
+                foreach (var (bit, dx, dz) in new[] { (North, 0, -1), (East, 1, 0), (South, 0, 1), (West, -1, 0) })
+                {
+                    if ((_links[t] & bit) == 0) continue;
+                    _links[t] &= (byte)~bit;
+                    int n = At(x + dx, z + dz);
+                    if (n < 0) continue;
+                    _links[n] &= (byte)~Opposite(bit);
+                    Wear(n);
+                }
+                _links[t] = 0;
+                LayTile(t, 0);
+                Wear(t);
             }
 
             /// <summary>The path tool's run (0x8001BD30 → 0x8001B924, then the 0x80 and 0x81 passes): path on each
@@ -241,8 +467,8 @@ namespace TPW.Data
                 for (int i = 0; i < map.Tiles.Length; i++)
                 {
                     var t = map.Tiles[i];
-                    if (t.Raw0 != _type[i] || t.Links != _links[i] || t.Ground != _ground[i])
-                        map.Tiles[i] = new MapTile(_type[i], t.Raw1, _links[i], t.Facing, _ground[i], t.Shade, t.Flags);
+                    if (t.Raw0 != _type[i] || t.Links != _links[i] || t.Ground != _ground[i] || t.Facing != _facing[i])
+                        map.Tiles[i] = new MapTile(_type[i], t.Raw1, _links[i], _facing[i], _ground[i], t.Shade, t.Flags);
                 }
             }
         }
@@ -257,14 +483,36 @@ namespace TPW.Data
     /// the ground. (It also refuses when the bank cannot pay; the port has no bank yet.)</summary>
     public sealed class PathTool
     {
-        readonly ParkPaths.Piece[] _pieces;
-        readonly int[] _sprites;
+        readonly ParkPaths.Piece[] _pieces, _queuePieces;
+        readonly int[] _sprites, _queueSprites, _grassSprites;
         readonly int[] _markers;
+        /// <summary>For the grass the queue's undo leaves (0x8004D9DC draws its sprite and turn with rand()).</summary>
+        readonly Random _rng = new(1);
 
         /// <summary>The world's sixteen path sprites, for the atlas.</summary>
         public System.Collections.Generic.IReadOnlyList<int> Sprites => _sprites;
 
-        PathTool(ParkPaths.Piece[] pieces, int[] sprites, int[] markers) { _pieces = pieces; _sprites = sprites; _markers = markers; }
+        /// <summary>Every ground sprite the tools can put down: path, queue, and the grass the queue's undo leaves.</summary>
+        public System.Collections.Generic.IEnumerable<int> AllSprites
+        {
+            get
+            {
+                foreach (int s in _sprites) yield return s;
+                if (_queueSprites != null) foreach (int s in _queueSprites) yield return s;
+                if (_grassSprites != null) foreach (int s in _grassSprites) yield return s;
+            }
+        }
+
+        PathTool(ParkPaths.Piece[] pieces, int[] sprites, int[] markers, ParkPaths.Piece[] queuePieces, int[] queueSprites, int[] grassSprites)
+        {
+            _pieces = pieces; _sprites = sprites; _markers = markers;
+            _queuePieces = queuePieces; _queueSprites = queueSprites; _grassSprites = grassSprites;
+        }
+
+        internal ParkPaths.Layer NewLayer(ParkMap map) => new(map, _pieces, _sprites, _queuePieces, _queueSprites, _grassSprites, _rng);
+
+        /// <summary>The marker sprite for a validator result code (0x800DBEFC).</summary>
+        internal int Marker(int code) => _markers[code];
 
         /// <summary>The ghost's marker sprites in the common sheet (#416), by the validator's result code (the table at
         /// 0x800DBEFC, eight words: 0 takes path, 1 refused, 6 the run ends on path already there, others for queues).</summary>
@@ -278,7 +526,8 @@ namespace TPW.Data
             if (pieces == null || sprites == null || m < 0 || m + 32 > exe.Length) return null;
             var markers = new int[8];
             for (int i = 0; i < 8; i++) markers[i] = BitConverter.ToInt32(exe, m + i * 4);
-            return new PathTool(pieces, sprites, markers);
+            return new PathTool(pieces, sprites, markers, ParkPaths.ReadQueuePieces(exe, baseAddress),
+                                ParkPaths.ReadQueueSprites(exe, baseAddress, world), ParkPaths.ReadGrassSprites(exe, baseAddress, world));
         }
 
         /// <summary>The ghost the tool draws over a run (0x8001D9D0): per tile, the common-sheet sprite for the
@@ -331,10 +580,164 @@ namespace TPW.Data
         /// path (the run stops at the first that refuses).</summary>
         public int Lay(ParkMap map, System.Collections.Generic.IReadOnlyList<(int X, int Z)> run)
         {
-            var layer = new ParkPaths.Layer(map, _pieces, _sprites);
+            var layer = NewLayer(map);
             int n = layer.LayRun(run);
             layer.WriteInto(map);
             return n;
         }
+
+        /// <summary>What placing an attraction lays at its doors (0x80063B98, after the footprint and the door tiles):
+        /// on the tile outside the entrance, a one-tile run (0x8001BD30 twice on the same tile) of queue for a ride
+        /// and of path for anything else; on the tile outside the exit, one of path. Each joins its door.</summary>
+        public void LayDoors(ParkMap map, AttractionDefinition a, int ox, int oz, int rot)
+        {
+            var layer = NewLayer(map);
+            if (a.EntranceTile(ox, oz, rot) is { } e && a.EntranceDoor(ox, oz, rot) is { } d)
+            {
+                var link = new ParkPaths.QueueLink { DoorX = d.X, DoorZ = d.Z, OnRun = (x, z) => x == e.X && z == e.Z };
+                layer.LaySegment(e.X, e.Z, e.X, e.Z, a.IsRide ? 4 : 2, link);
+            }
+            if (a.ExitTile(ox, oz, rot) is { } x2) layer.LaySegment(x2.X, x2.Z, x2.X, x2.Z, 2, null);
+            layer.WriteInto(map);
+        }
+
+        /// <summary>The queue tool for a ride just placed with its footprint's corner at (ox, oz): its run starts on
+        /// the queue piece outside the entrance (0x8001DDD8, which asks the ride for that tile, 0x8009D240).</summary>
+        public QueueRun StartQueue(AttractionDefinition a, int ox, int oz, int rot)
+        {
+            if (a.EntranceTile(ox, oz, rot) is not { } e || a.EntranceDoor(ox, oz, rot) is not { } d) return null;
+            return new QueueRun(this, e, d);
+        }
+    }
+
+    /// <summary>The queue tool's run (tool 3, vtable 0x800DC324), which placing a ride hands over to (0x8001C92C
+    /// switches to tool 3). ⭐ FROM THE GAME'S CODE.
+    ///
+    /// It starts on the queue piece placing laid outside the entrance, and keeps the run's corners (0x80104AD8); it
+    /// lays only while there are fewer than <see cref="MaxPoints"/> (0x8001DF08). The ghost runs from the last corner
+    /// toward the cursor along one axis (0x8001D9D0 with kind 4), and a press lays it when no tile of it refuses
+    /// (0x8001DF08 → 0x8001BD30): the queue then carries on from its new end. The run is FINISHED when the
+    /// segment's last tile was path (it becomes path and queue, 13: the queue has joined the paths) or queue, or when
+    /// the press lands on the run's own end. The undo (0x8001E114 → 0x8001BB08) takes the last segment back, up to
+    /// the corner before it.
+    ///
+    /// The ghost's verdict per tile (0x8004F360, kind 4): flag 0x02 refuses; grass takes it; a queue tile takes it
+    /// only if it is one of the run's corners and not a middle piece (two links); path or path and queue refuses
+    /// except as the LAST tile, where it shows the join (code 5, marker #173); everything else refuses, and so does
+    /// every tile after a refusal. Not ported: the bank check, and the attraction lookup for tiles with flag 0x10,
+    /// which nothing sets yet.</summary>
+    public sealed class QueueRun
+    {
+        readonly PathTool _tool;
+        readonly System.Collections.Generic.List<(int X, int Z)> _points = new();
+        readonly ParkPaths.QueueLink _link;
+
+        /// <summary>0x8001DF08 lays a segment only while the run has fewer corners than this.</summary>
+        public const int MaxPoints = 0x20;
+
+        public System.Collections.Generic.IReadOnlyList<(int X, int Z)> Points => _points;
+        public (int X, int Z) End => _points[^1];
+        public bool Finished { get; private set; }
+
+        public enum Step { Refused, Laid, Finished }
+
+        internal QueueRun(PathTool tool, (int X, int Z) start, (int X, int Z) door)
+        {
+            _tool = tool;
+            _points.Add(start);
+            _link = new ParkPaths.QueueLink { DoorX = door.X, DoorZ = door.Z, OnRun = OnRun };
+        }
+
+        /// <summary>The ghost's far end for the cursor at (cx, cz): along whichever axis it has moved further on from
+        /// the run's end (x only if strictly further).</summary>
+        public (int X, int Z) Snap(int cx, int cz)
+        {
+            var (x0, z0) = End;
+            return Math.Abs(cz - z0) < Math.Abs(cx - x0) ? (cx, z0) : (x0, cz);
+        }
+
+        /// <summary>The ghost from the run's end toward the cursor: per tile its marker sprite and verdict code, and
+        /// whether a press would lay it (no tile refuses).</summary>
+        public System.Collections.Generic.List<(int X, int Z, int Sprite, int Code)> Ghost(ParkMap map, int cx, int cz, out bool valid)
+        {
+            var (ex, ez) = Snap(cx, cz);
+            var run = PathTool.Run(End.X, End.Z, ex, ez);
+            var ghost = new System.Collections.Generic.List<(int, int, int, int)>();
+            valid = true;
+            for (int i = 0; i < run.Count; i++)
+            {
+                var (x, z) = run[i];
+                int code = valid ? Verdict(map, x, z, i == run.Count - 1) : 1;
+                if (code == 1) valid = false;
+                ghost.Add((x, z, _tool.Marker(code), code));
+            }
+            return ghost;
+        }
+
+        int Verdict(ParkMap map, int x, int z, bool last)
+        {
+            if (x < 0 || x >= map.Width - 1 || z < 0 || z >= map.Height - 1) return 1;
+            var t = map[x, z];
+            if ((t.Flags & 0x02) != 0) return 1;
+            if (t.Raw0 == 4) return Popcount(t.Links) == 2 || !IsPoint(x, z) ? 1 : 0;
+            if ((t.Flags & 0x10) != 0) return 0;
+            return t.Raw0 switch { 0 => 0, 2 or 13 => last ? 5 : 1, _ => 1 };
+        }
+
+        /// <summary>A press with the cursor at (cx, cz), as 0x8001DF08 takes it.</summary>
+        public Step Lay(ParkMap map, int cx, int cz)
+        {
+            if (Finished) return Step.Refused;
+            Ghost(map, cx, cz, out bool valid);
+            if (!valid || _points.Count >= MaxPoints) return Step.Refused;
+            var start = End;
+            var end = Snap(cx, cz);
+            bool ended = false;
+            if (end != start || _points.Count == 1)
+            {
+                _points.Add(end);
+                var layer = _tool.NewLayer(map);
+                ended = layer.LaySegment(start.X, start.Z, end.X, end.Z, 4, _link);
+                layer.WriteInto(map);
+            }
+            if (end != start && !ended) return Step.Laid;
+            Finished = true;
+            _link.PrevDx = _link.PrevDz = ParkPaths.QueueLink.NoWay;
+            return Step.Finished;
+        }
+
+        /// <summary>Take the last segment back (0x8001BB08): its tiles, all but the corner it started from, are grass
+        /// again, and that corner is the queue's end. False when there is nothing to take back.</summary>
+        public bool Undo(ParkMap map)
+        {
+            if (Finished || _points.Count <= 1) return false;
+            var gone = _points[^1];
+            _points.RemoveAt(_points.Count - 1);
+            var back = End;
+            if (gone == back) return true;
+            int sx = Math.Sign(back.X - gone.X), sz = Math.Sign(back.Z - gone.Z);
+            var layer = _tool.NewLayer(map);
+            foreach (var (x, z) in PathTool.Run(gone.X, gone.Z, back.X - sx, back.Z - sz)) layer.RemoveQueueTile(x, z);
+            layer.WriteInto(map);
+            return true;
+        }
+
+        /// <summary>0x8001B76C: whether (x, z) lies on the run, any tile of any segment between its corners.</summary>
+        bool OnRun(int x, int z)
+        {
+            for (int i = 0; i + 1 < _points.Count; i++)
+                foreach (var p in PathTool.Run(_points[i].X, _points[i].Z, _points[i + 1].X, _points[i + 1].Z))
+                    if (p.X == x && p.Z == z) return true;
+            return false;
+        }
+
+        /// <summary>0x8004D298: whether (x, z) is one of the run's corners.</summary>
+        bool IsPoint(int x, int z)
+        {
+            foreach (var p in _points) if (p.X == x && p.Z == z) return true;
+            return false;
+        }
+
+        static int Popcount(int b) { int n = 0; for (; b != 0; b &= b - 1) n++; return n; }
     }
 }

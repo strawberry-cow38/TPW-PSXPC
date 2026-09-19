@@ -72,6 +72,10 @@ namespace TPWGodot
         /// <summary>From <c>--park-place=entry,x,z,rot;...</c>: attractions placed at load (footprint corner, quarter
         /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
         string _autoPlace, _autoGhost;
+        /// <summary>From <c>--park-queue=entry,x,z,rot:cx,cz:cx,cz...[:~hx,hz]</c>: a ride placed at load, then its queue
+        /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
+        /// queue building.</summary>
+        string _autoQueue;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -480,6 +484,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-lay=")) _autoLay = arg.Substring("--park-lay=".Length);
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
+                else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
@@ -726,6 +731,23 @@ namespace TPWGodot
                     {
                         var v = System.Array.ConvertAll(_autoGhost.Split(','), int.Parse);
                         if (v.Length == 4) _park.PinGhost(v[0], v[1], v[2], v[3]);
+                    }
+                    if (_autoQueue != null)
+                    {
+                        var parts = _autoQueue.Split(':');
+                        var v = System.Array.ConvertAll(parts[0].Split(','), int.Parse);
+                        var clicks = new System.Collections.Generic.List<(int X, int Z)>();
+                        (int X, int Z)? hover = null;
+                        for (int k = 1; k < parts.Length; k++)
+                        {
+                            // "~x,z": hold the pointer there without pressing (the last one wins); "u": the undo.
+                            if (parts[k] == "u") { clicks.Add((-1, -1)); continue; }
+                            bool held = parts[k].StartsWith("~");
+                            var c = System.Array.ConvertAll(parts[k].TrimStart('~').Split(','), int.Parse);
+                            if (c.Length != 2) continue;
+                            if (held) hover = (c[0], c[1]); else clicks.Add((c[0], c[1]));
+                        }
+                        if (v.Length == 4) GD.Print($"[tpw] --park-queue {_autoQueue}: {_park.QueueAt(v[0], v[1], v[2], v[3], clicks, hover)?.ToString() ?? "not placed"}");
                     }
                     if (_autoPathCursor != null)
                     {

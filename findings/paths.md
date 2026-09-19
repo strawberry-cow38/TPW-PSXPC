@@ -176,6 +176,8 @@ in front of an entrance later goes through 0x8004E20C, which sets the path tile'
 entrance **and the entrance tile's bit back** when `entrance.byte3 & bit` matches
 (0x8004E3BC..0x8004E3F4 for north, 0x8004E638..0x8004E670 for east; the other two directions are
 the same code shape, GUESS-high). That pair of bits is the whole "connection".
+⚠ Correction (cow tools, §10.1): the 7 goes on the door's OWN tile, on the footprint's edge, and the
+0x8001BD30 run is on the tile one step outside it (0x800635E8), not on the 7.
 
 ## 3. ★ What to write
 
@@ -391,3 +393,74 @@ That branch also calls `0x8001C328` and shows message 5, where the other branch 
 
 ⚠ A .wav exported from the port proves nothing about this — the exporter chose that header. The rate
 is `record+2`, and that is the only thing worth quoting.
+
+## 10. Doors, the queue piece and the queue tool (READ, cow tools)
+
+### 10.1 What placing lays at the doors (0x80063B98)
+- The door tiles are the record's offsets turned (0x80062E48 entrance, 0x80062FF8 exit), and every flat
+  ride, shop and sideshow record READ has them INSIDE the footprint, on its edge. They become 7 / 8 with
+  byte +3 = the facing bit, after the footprint loop has made them 5 and given them the pad sprite.
+- The tile one step outside (0x800635E8 / 0x800636F0) gets a one-tile run: 0x8001B5A0(kind), then
+  0x8001BD30 twice on the same tile (start, then end == start, which finishes it). Entrance: kind 4 for
+  types 1, 3, 6, 7 (the rides), else 2. Exit: always kind 2 when placing interactively (the second
+  argument is 0; when it is set, only if that tile is already path).
+- The placement ghost's door markers (0x80064558) stand on those outside tiles.
+
+### 10.2 Which tool hands over to which (tool objects 0x800EFD5C[id], vtable at tool+0x10)
+| tool | builds | after a good press |
+|---|---|---|
+| 5 (vt 0x800DC124) | flat ride, kind 3 | g8_3, then tool **3** (0x8001C92C) |
+| 6 (vt 0x800DC0A4) | tour ride, kind 7 | g8_3, then tool **3** (0x8001CAFC) |
+| 14 / 16 | shop / sideshow | g8_3, then tool 0: closed (0x8001C5C8) |
+| 15 | feature | g8_3, then tool 15 again while the park may take more (count limit 0x2D) |
+| 7 / 11 | track ride, kind 6 / coaster, kind 1 | g8_3, then tool 8 / 12, their track builders (0x80021E48 / 0x8001F038) |
+
+Every placement tool shares move 0x8001C454 (corner = cursor − (w >> 1, d >> 1) of the turned footprint,
+every frame), turn 0x8001C6BC / 0x8001C750 (+1 only, instant, g8_9), cancel 0x8001C7E4 (g8_6); a
+refused press is g7_2.
+
+### 10.3 The queue tool (tool 3, vt 0x800DC324)
+- Start 0x8001DDD8: the run starts on the queue piece outside the entrance (ride slot 0x154 = 0x8009D240);
+  the camera's target yaw := ((entrance facing + rotation) & 3) << 10 (0x80053F04) and the cursor goes
+  there (0x8001934C); g7_0.
+- Press 0x8001DF08: only when the ghost has no refused tile and the run has fewer than 0x20 corners.
+  0x8001BD30 lays from the last corner to the cursor (axis-snapped) and the run goes on from there.
+  Finished (0x8001B5D4 == 0) → for a ride just placed (previous tool 5..8, 0xB..0xD: 0x80019230) the
+  camera moves to the tile outside the exit and turns to face it, and the tool switches to 2, the path
+  tool, whose start (0x8001D36C) starts a run there at once because it came from tool 3: g7_0 then
+  g7_3. Not finished: g7_4.
+- Undo 0x8001E114 (with more than one corner; g7_5) → 0x8001BB08; close 0x8001E178 (g7_7), the queue
+  so far staying.
+
+### 10.4 The queue's rules
+- **Finished** when the segment's last tile was 4, 2, 13 or 10 before laying (0x8004DE04 sets
+  0x801026D0; pass 0x81 returns 0 on it), or when the press lands on the run's own end.
+- **Lay** (0x8004E034, validator 0x8004F200): grass takes 4. Queue onto path is refused, but the tile
+  becomes 13 (path and queue) and the run stops there: that is how a queue joins the paths.
+- **Ghost** (0x8004F360, kind 4) per tile: flag 0x02 → 1; a queue tile → 1 if it has two links or is not
+  one of the run's corners (0x8004D298), else 0; grass → 0; path or 13 → 5 on the LAST tile (the join,
+  marker #173), else 1; anything else → 1; after a 1, every tile is 1. Markers 0x800DBEFC: 0 → #165,
+  1 → #175, 5 → #173, 6 → #167.
+- **Linking** (0x8004E20C, kind 4): a queue tile joins only the tile BEHIND it along the run, and only if
+  that one is a queue with fewer than two links that lies on the run (0x8001B76C), so a queue is one line
+  and never joins a stretch of itself it runs beside. The first tile of a segment also joins the
+  ride's entrance tile if it is beside it and has no links yet, and looks behind along the previous
+  segment's way (0x80102D0C / 10; 0x80 when unset). A 13 drops its diagonal links on the joined side.
+- **Facing** (pass 0x82, 0x8004FA68): each tile ORs in the way back along the run.
+- **Pieces** (0x8004D9DC): table 0x800EFF48 (count 0x801026DC, 11 records: straight, end, corner, lone)
+  over the world's four queue sprites, world record +0x98 (0x80102DF4 / 0x80102E3C / 0x80102E0C /
+  0x80102E24 for worlds 0..3). Lost Kingdom's are a wooden walkway: 213 lone, 212 end, 210 straight,
+  211 corner.
+- **Undo** (0x8001BB08 → pass 0x32 → 0x8004FBEC) removes the last segment but its first corner: each
+  tile drops its four links, from the neighbours too, and is grass again (kind 0) wearing one of the
+  world's two grass sprites (+0x88) at a random turn.
+- **Paths meet doors** (0x8004E20C, kind 2): an exit (8) or entrance (7) whose facing points at the path
+  tile is joined both ways; a queue whose own link already points at it only picks its piece again.
+
+### 10.5 ⚠ Where the port's path tool is not the game's (master's controls)
+The game's path tool is chained like the queue: a press lays the ghost only if NO tile of it refuses
+(0x8001D5C0 checks the ghost first), the run then goes on from its end, and the tool CLOSES itself
+when a run finishes on existing path (0x8001C328 after g7_3). The port's path tool is click start /
+click end (master's controls), and it also lays up to the first refusal and stays open: those two are
+the port's, not the game's, and wait on master's call.
+

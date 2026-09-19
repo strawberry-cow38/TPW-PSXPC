@@ -64,10 +64,25 @@ namespace TPW.Data
             _ => (x, z),
         };
 
-        /// <summary>The entrance's tile on the map (0x800635E8): the offset turned, then one step out of the footprint
-        /// the way it faces (facing + rotation: 0 north, z - 1; 1 west, x - 1; 2 south, z + 1; 3 east, x + 1).</summary>
+        /// <summary>The tile just outside the entrance (0x800635E8) and the exit (0x800636F0): the door's own tile, then
+        /// one step out of the footprint the way it faces (facing + rotation: 0 north, z - 1; 1 west, x - 1; 2 south,
+        /// z + 1; 3 east, x + 1). The placement ghost's door markers stand here, placing lays the queue piece or path
+        /// here, and a ride's queue starts here.</summary>
         public (int X, int Z)? EntranceTile(int ox, int oz, int rot) => Door(Entrance, EntranceFacing, ox, oz, rot);
         public (int X, int Z)? ExitTile(int ox, int oz, int rot) => Door(Exit, ExitFacing, ox, oz, rot);
+
+        /// <summary>The entrance's and exit's own tiles (0x80062E48 / 0x80062FF8): the record's offset turned, which is
+        /// always on the footprint's edge (every flat ride, shop and sideshow record READ: the offsets are inside
+        /// the footprint). Placing makes them 7 and 8.</summary>
+        public (int X, int Z)? EntranceDoor(int ox, int oz, int rot) => Inside(Entrance, ox, oz, rot);
+        public (int X, int Z)? ExitDoor(int ox, int oz, int rot) => Inside(Exit, ox, oz, rot);
+
+        (int X, int Z)? Inside((int X, int Z)? offset, int ox, int oz, int rot)
+        {
+            if (offset is not { } o) return null;
+            var (x, z) = Rotate(o.X, o.Z, rot);
+            return (x + ox, z + oz);
+        }
 
         /// <summary>Which way the entrance or exit faces on the map (0 north … 3 east), for its marker's turn.</summary>
         public int EntranceTurn(int rot) => (EntranceFacing + rot) & 3;
@@ -174,8 +189,9 @@ namespace TPW.Data
 
         /// <summary>Place it (0x80063B98), in place on the map: each footprint tile becomes a footprint (type 5) and
         /// wears the record's ground pad, turned with it (the pad's own turns plus the rotation, where the game swaps
-        /// 1 and 3); a pad tile with no sprite draws no ground (flags = 1). The entrance tile becomes 7 and the exit
-        /// 8, each facing out of it.</summary>
+        /// 1 and 3); a pad tile with no sprite draws no ground (flags = 1). Then the entrance's own tile, on the
+        /// footprint's edge, becomes 7 and the exit's 8, each facing out. What goes on the tiles outside them (a
+        /// queue piece or path) is <see cref="PathTool.LayDoors"/>.</summary>
         public static void Place(ParkMap map, AttractionDefinition a, int ox, int oz, int rot)
         {
             rot &= 3;
@@ -208,8 +224,8 @@ namespace TPW.Data
                 byte facing = turn switch { 0 => 0x01, 1 => 0x40, 2 => 0x10, _ => 0x04 };
                 map.Tiles[p.Z * map.Width + p.X] = new MapTile(type, t.Raw1, t.Links, facing, t.Ground, t.Shade, t.Flags);
             }
-            Door(a.EntranceTile(ox, oz, rot), 7, a.EntranceTurn(rot));
-            Door(a.ExitTile(ox, oz, rot), 8, a.ExitTurn(rot));
+            Door(a.EntranceDoor(ox, oz, rot), 7, a.EntranceTurn(rot));
+            Door(a.ExitDoor(ox, oz, rot), 8, a.ExitTurn(rot));
         }
     }
 }
