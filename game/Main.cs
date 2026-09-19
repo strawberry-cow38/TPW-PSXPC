@@ -53,6 +53,9 @@ namespace TPWGodot
         bool _autoOpen;
         /// <summary>From <c>--park-buildable</c>: show where a ride or shop may stand (the park view's B key).</summary>
         bool _autoBuildable;
+        /// <summary>From <c>--park-gamecam</c>: start the park view on the game's own camera (its G key), seeded from
+        /// <c>--park-view</c>'s focus and nearest quarter turn.</summary>
+        bool _autoGameCam;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -426,6 +429,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--music=")) _autoMusic = int.Parse(arg.Substring("--music=".Length));
                 else if (arg == "--park-open") _autoOpen = true;
                 else if (arg == "--park-buildable") _autoBuildable = true;
+                else if (arg == "--park-gamecam") _autoGameCam = true;
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
@@ -636,6 +640,7 @@ namespace TPWGodot
                 {
                     _parkChoice.Selected = i; _debugLayer.Visible = false; ShowPark(true);
                     if (_parkView != null && _parkView.Length == 5) _park.SetView(_parkView[0], _parkView[1], _parkView[2], _parkView[3], _parkView[4]);
+                    if (_autoGameCam) _park.GameCamera = true;
                 }
             }
 

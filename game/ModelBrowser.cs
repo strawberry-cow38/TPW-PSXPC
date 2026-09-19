@@ -169,6 +169,17 @@ namespace TPWGodot
             _camera = new Camera3D { Position = new Vector3(0, 0.6f, 2.6f) };
             AddChild(_camera);
             _camera.LookAt(Vector3.Zero, Vector3.Up);
+            // --model-elevation=RADIANS (captures): look from that far above the horizon, same distance. Tops of
+            // things are where angles the game's cameras never use show the data's own oddities.
+            foreach (var arg in OS.GetCmdlineUserArgs())
+                if (arg.StartsWith("--model-elevation=") &&
+                    float.TryParse(arg.Substring("--model-elevation=".Length), System.Globalization.NumberStyles.Float,
+                                   System.Globalization.CultureInfo.InvariantCulture, out float el))
+                {
+                    float d = _camera.Position.Length();
+                    _camera.Position = new Vector3(0, d * Mathf.Sin(el), d * Mathf.Cos(el));
+                    _camera.LookAt(Vector3.Zero, Mathf.Abs(Mathf.Cos(el)) < 0.01f ? Vector3.Forward : Vector3.Up);
+                }
 
             // Unshaded with vertex colours: no lighting rig to get wrong, and what is on screen is exactly
             // what is in the file rather than a lighting model's opinion of it.

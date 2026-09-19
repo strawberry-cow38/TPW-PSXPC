@@ -59,6 +59,10 @@ namespace TPWGodot
         ParkMap _map;
         Vector3 _focus;
         float _yaw = 0f, _pitch = -0.85f, _distance = 30f;
+        /// <summary>The game's own camera (ParkCamera): fixed height and distance, quarter turns only. Off: the
+        /// port's free camera, which can go where the game's never does.</summary>
+        bool _gameCam;
+        readonly ParkCamera _gcam = new();
         Label _info;
         string _infoText = "";
 
@@ -201,7 +205,7 @@ namespace TPWGodot
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
                         "\n" + buildCounts +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park";
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -568,6 +572,51 @@ namespace TPWGodot
             return mesh;
         }
 
+        /// <summary>Use the game's camera (G) or the free one. Switching carries the view across: the game camera
+        /// starts at the free camera's focus and nearest quarter turn, the free camera where the game's one is.</summary>
+        public bool GameCamera
+        {
+            get => _gameCam;
+            set
+            {
+                if (_map == null || value == _gameCam) { _gameCam = value && _map != null; return; }
+                _gameCam = value;
+                if (value)
+                {
+                    int yaw = (int)Math.Round(-_yaw * 4096 / (2 * Math.PI) / ParkCamera.QuarterTurn) * ParkCamera.QuarterTurn;
+                    _gcam.Reset(_map, ClampX(_focus.X * ParkTerrain.TileUnits), ClampZ(-_focus.Z * ParkTerrain.TileUnits), yaw);
+                    PlaceGameCamera();
+                }
+                else
+                {
+                    _yaw = -(_gcam.Yaw & 0xFFF) * 2 * Mathf.Pi / 4096;
+                    _pitch = -Mathf.Atan2(ParkCamera.Above, ParkCamera.Behind);
+                    _distance = Mathf.Sqrt((float)ParkCamera.Above * ParkCamera.Above + (float)ParkCamera.Behind * ParkCamera.Behind) / ParkTerrain.TileUnits;
+                    _focus = new Vector3((_gcam.FocusX >> 8) / (float)ParkTerrain.TileUnits, _gcam.LookY / (float)ParkTerrain.TileUnits,
+                                         -(_gcam.FocusZ >> 8) / (float)ParkTerrain.TileUnits);
+                    UpdateCamera();
+                }
+                RefreshInfo();
+            }
+        }
+
+        int ClampX(float units) => (int)Math.Clamp(units, 0, (_map.Width - 1) * ParkTerrain.TileUnits);
+        int ClampZ(float units) => (int)Math.Clamp(units, 0, (_map.Height - 1) * ParkTerrain.TileUnits);
+
+        void PlaceGameCamera()
+        {
+            float u = ParkTerrain.TileUnits;
+            _camera.Position = new Vector3(_gcam.EyeX / u, _gcam.EyeY / u, -_gcam.EyeZ / u);
+            _camera.LookAt(new Vector3((_gcam.FocusX >> 8) / u, _gcam.LookY / u, -(_gcam.FocusZ >> 8) / u), Vector3.Up);
+        }
+
+        void RefreshInfo()
+        {
+            if (_info != null && _map != null)
+                _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
+                                                  : "\ncamera: free; G for the game's own");
+        }
+
         /// <summary>Set the camera outright: focus tile (x, z), yaw and pitch in radians, distance in tiles. For
         /// captures; the keys do the same thing interactively.</summary>
         public void SetView(float x, float z, float yaw, float pitch, float distance)
@@ -579,6 +628,7 @@ namespace TPWGodot
             }
             _yaw = yaw; _pitch = pitch; _distance = distance;
             UpdateCamera();
+            if (_gameCam) { _gameCam = false; GameCamera = true; }
         }
 
         public void Activate(bool on)
@@ -592,7 +642,7 @@ namespace TPWGodot
             var dir = new Vector3(Mathf.Sin(_yaw) * Mathf.Cos(_pitch), Mathf.Sin(-_pitch), Mathf.Cos(_yaw) * Mathf.Cos(_pitch));
             _camera.Position = _focus + dir * _distance;
             _camera.LookAt(_focus, Vector3.Up);
-            if (_info != null && _map != null) _info.Text = _infoText;
+            RefreshInfo();
         }
 
         public override void _Process(double delta)
@@ -614,6 +664,7 @@ namespace TPWGodot
             {
                 _frameClock -= 1.0 / ParticleSystem.FramesPerSecond;
                 frames++;
+                if (_gameCam) _gcam.Step(_map, frameTime);
                 _gate?.Update(frameTime, ParkOpen);
                 if (_gate != null)
                     foreach (int i in _gate.TakeDueEffects())
@@ -629,6 +680,21 @@ namespace TPWGodot
             if (Input.IsKeyPressed(Key.S) || Input.IsKeyPressed(Key.Down)) move.Y += 1;
             if (Input.IsKeyPressed(Key.A) || Input.IsKeyPressed(Key.Left)) move.X -= 1;
             if (Input.IsKeyPressed(Key.D) || Input.IsKeyPressed(Key.Right)) move.X += 1;
+            if (_gameCam)
+            {
+                // The cursor moves over the ground relative to the way the camera faces; the camera chases it. The
+                // speed is the port's (the game's cursor speed is not read), 8 tiles a second.
+                if (move != Vector2.Zero)
+                {
+                    double a = (_gcam.TargetYaw & 0xFFF) * 2 * Math.PI / 4096;
+                    double fx = Math.Sin(a), fz = Math.Cos(a);          // forward, game x and z
+                    double step = 8 * ParkTerrain.TileUnits * dt;
+                    _gcam.CursorX = ClampX((float)(_gcam.CursorX + (fz * move.X - fx * move.Y) * step));
+                    _gcam.CursorZ = ClampZ((float)(_gcam.CursorZ + (-fx * move.X - fz * move.Y) * step));
+                }
+                PlaceGameCamera();
+                return;
+            }
             bool changed = false;
             if (move != Vector2.Zero)
             {
@@ -650,7 +716,11 @@ namespace TPWGodot
         public override void _UnhandledInput(InputEvent e)
         {
             if (!Visible || _map == null) return;
-            if (e is InputEventMouseButton { Pressed: true } mb)
+            if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
+            { GameCamera = !GameCamera; return; }
+            if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Q }) { _gcam.Turn(-1); return; }
+            if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.E }) { _gcam.Turn(1); return; }
+            if (!_gameCam && e is InputEventMouseButton { Pressed: true } mb)
             {
                 if (mb.ButtonIndex == MouseButton.WheelUp) { _distance = Mathf.Max(3, _distance * 0.9f); UpdateCamera(); }
                 else if (mb.ButtonIndex == MouseButton.WheelDown) { _distance = Mathf.Min(120, _distance * 1.1f); UpdateCamera(); }
