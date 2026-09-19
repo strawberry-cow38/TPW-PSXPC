@@ -1462,6 +1462,31 @@ static class Program
         return 1;
     }
 
+    /// <summary>Header +0x00 and the keys' end time for every sub-mesh of one entry, so a measured
+    /// on-screen period can be tested against both readings of the cycle.</summary>
+    static int AnimHeaders(GazArchive g, int entry)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            const double UnitsPerFrame = 33868800.0 / 8 / 2150 * 128 / 4096 / 50;
+            for (int sub = 0; sub < c.Subs.Count; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m, out _)) continue;
+                int len = MeshPose.AnimationLength(m);
+                if (len <= 1) continue;
+                int n0 = m.HeaderWord0;
+                Console.WriteLine($"  sub {sub,2}: +0x00 = {n0,4}   keys end {len,4}   " +
+                                  $"period if cycle=+0x00: {n0 / UnitsPerFrame,6:F1} frames   " +
+                                  $"if cycle=+0x00+1: {(n0 + 1) / UnitsPerFrame,6:F1}");
+            }
+            return 0;
+        }
+        return 1;
+    }
+
     static int FaceGroup(GazArchive g, int entry, int sub, ushort clut)
     {
         foreach (var e in g.Entries)
@@ -1698,6 +1723,8 @@ static class Program
             int pdAt = Array.IndexOf(args, "--posedelta");
             if (pdAt >= 0 && pdAt + 2 < args.Length)
                 return PoseDelta(g, int.Parse(args[pdAt + 1]), int.Parse(args[pdAt + 2]));
+            int ahAt = Array.IndexOf(args, "--animheaders");
+            if (ahAt >= 0 && ahAt + 1 < args.Length) return AnimHeaders(g, int.Parse(args[ahAt + 1]));
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
