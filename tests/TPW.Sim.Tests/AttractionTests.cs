@@ -51,7 +51,7 @@ namespace TPW.Sim.Tests
         [Fact]
         public void SellingBelowCostChargesTheParkPerSale()
         {
-            var r = Trading.ShopSale(pricePounds: 5, unitCostPounds: 12);
+            var r = Trading.ShopSale(Money.FromPounds(5), Money.FromPounds(12));
             Assert.Equal(Money.FromPounds(5), r.GuestPays);            // the guest still pays full price
             Assert.Equal(Money.FromPounds(-7), r.BankDelta);           // and the park loses the difference
             Assert.True(r.BankDelta < Money.Zero);
@@ -60,7 +60,7 @@ namespace TPW.Sim.Tests
         [Fact]
         public void AShopBooksPriceMinusUnitCost()
         {
-            var r = Trading.ShopSale(20, 8);
+            var r = Trading.ShopSale(Money.FromPounds(20), Money.FromPounds(8));
             Assert.Equal(Money.FromPounds(20), r.GuestPays);
             Assert.Equal(Money.FromPounds(12), r.BankDelta);
         }
@@ -71,7 +71,7 @@ namespace TPW.Sim.Tests
         [Fact]
         public void ASideShowBooksTheFullPriceAndPaysTheePrizeSeparately()
         {
-            var r = Trading.SideShowPlay(pricePounds: 10, prizePounds: 4);
+            var r = Trading.SideShowPlay(Money.FromPounds(10), Money.FromPounds(4));
             Assert.Equal(Money.FromPounds(10), r.BankDelta);   // full price, no unit cost
             Assert.Equal(Money.FromPounds(6), r.GuestPays);    // price net of the prize
         }
@@ -79,7 +79,7 @@ namespace TPW.Sim.Tests
         [Fact]
         public void AWinningSideShowGuestCanPayNothing()
         {
-            var r = Trading.SideShowPlay(10, 10);
+            var r = Trading.SideShowPlay(Money.FromPounds(10), Money.FromPounds(10));
             Assert.Equal(Money.Zero, r.GuestPays);
             Assert.Equal(Money.FromPounds(10), r.BankDelta);   // the park still books the price
         }
@@ -92,12 +92,14 @@ namespace TPW.Sim.Tests
             Assert.Equal(Money.FromPounds(40), r.BankDelta);
         }
 
-        // The measured shop base prices: £20 for two variants and £30 for a third. Recorded as a sanity
-        // anchor on the arithmetic, not as the price list -- prices are adjustable and these are the bases.
+        // The measured shop base prices: £20 for two variants, £30 for a third. A sanity anchor on the
+        // arithmetic, not a price list -- prices are adjustable and these are the bases.
+        // ⚠ And note the call sites say FromPounds explicitly: the stored field's unit is disputed (a report
+        // says pounds, hardware suggests tenths), so nothing here may assume which one a caller holds.
         [Theory]
         [InlineData(20, 8, 12)]
         [InlineData(30, 8, 22)]
         public void MeasuredBasePricesBookTheExpectedMargin(int price, int cost, int margin)
-            => Assert.Equal(Money.FromPounds(margin), Trading.ShopSale(price, cost).BankDelta);
+            => Assert.Equal(Money.FromPounds(margin), Trading.ShopSale(Money.FromPounds(price), Money.FromPounds(cost)).BankDelta);
     }
 }

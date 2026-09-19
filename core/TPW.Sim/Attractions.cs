@@ -78,6 +78,19 @@ namespace TPW.Sim
         public SaleResult(Money guestPays, Money bankDelta) { GuestPays = guestPays; BankDelta = bankDelta; }
     }
 
+    /// <summary>⚠⚠ THESE TAKE <see cref="Money"/>, NOT ints, AND THAT IS THE POINT. They used to take
+    /// "pricePounds", on the strength of a report describing the shop's price field as u16 POUNDS. tinyclaw
+    /// went to check that on hardware and found the one candidate object reading **200** for a shop charging
+    /// £20 — i.e. tenths, the unit everything else in this game's money uses.
+    ///
+    /// They are explicit that it is a candidate and not a confirmation (a park with no shops also reads 200,
+    /// so it may be a stale object or a definition record). **The unit is therefore UNRESOLVED**, and an int
+    /// parameter named "pounds" would quietly resolve it by fiat: read 200 off the object, pass it, charge
+    /// £200. A tenfold price error is entirely plausible-looking in a park sim and would never be noticed.
+    ///
+    /// So the conversion is forced out of this layer and onto whoever reads the field, where the ambiguity
+    /// actually lives — `Money.FromPounds(20)` and `Money.FromRaw(200)` are the same value and the caller has
+    /// to say which they have.</summary>
     public static class Trading
     {
         /// <summary>A shop sale.
@@ -89,8 +102,8 @@ namespace TPW.Sim
         ///
         /// ⚠ The GUEST still pays the full price either way. What the guest pays and what the park earns are
         /// two different numbers, and conflating them silently swallows the unit cost.</summary>
-        public static SaleResult ShopSale(int pricePounds, int unitCostPounds)
-            => new(Money.FromPounds(pricePounds), Money.FromPounds(pricePounds - unitCostPounds));
+        public static SaleResult ShopSale(Money price, Money unitCost)
+            => new(price, price - unitCost);
 
         /// <summary>A sideshow play.
         ///
@@ -99,8 +112,8 @@ namespace TPW.Sim
         /// the price and get the prize's worth back, so a winning guest can effectively pay nothing.
         ///
         /// Reusing the shop path here would silently subtract a unit cost the game never charges.</summary>
-        public static SaleResult SideShowPlay(int pricePounds, int prizePounds)
-            => new(Money.FromPounds(pricePounds - prizePounds), Money.FromPounds(pricePounds));
+        public static SaleResult SideShowPlay(Money price, Money prize)
+            => new(price - prize, price);
 
         /// <summary>Admission. The bank's constructed default is £40.</summary>
         public static SaleResult Admission(Money entryFee) => new(entryFee, entryFee);

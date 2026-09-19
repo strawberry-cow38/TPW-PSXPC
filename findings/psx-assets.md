@@ -446,6 +446,32 @@ camera could.
 **For the port: terrain is ~185 triangles per frame, constant.** Generate a fixed patch around the
 camera; do not stream variable geometry for it.
 
+## 5o. Texture page header: the size field, and why UNPAK is not enough on its own
+
+✅ **`blocks * 0x8000 = size - 0x54`, exactly.** The `u16` at header offset `+0x02` is a BLOCK COUNT, and
+each block is 0x8000 bytes of 4bpp pixels. Verified against the uncompressed pages: entries 6, 7 and 8
+all declare 4 blocks and are 131,072 bytes past their header. So a compressed entry declaring 6 blocks
+must expand to 196,608 bytes, and that figure is an oracle for any decompressor.
+
+⚠ **The first `u32` is NOT a size**, though it reads like one — `0x40011` is 262,161, which sits
+temptingly close to 262,144. It is two `u16` fields, a count and the block count, and reading it whole
+is how a plausible wrong size appears. The `compressed=1` flag is the low `u16` at `+0x0C`.
+
+❌ **UNPAK over the whole payload does not work.** Running it from `+0x54` on all 13 compressed texture
+entries produced between 0 and 4,010 bytes against targets of 65,536 to 393,216 — nothing close. That
+is consistent with fable's own description, "UNPAK'd **64x64 blocks**": the compression is **per block**,
+so there is framing between `+0x54` and the first stream that has not been worked out. The port of UNPAK
+itself is in `core/TPW.Data/Unpak.cs` and is probably fine; what is missing is where each block starts.
+
+⚠⚠ **AND UNPAK IS NOT SubLz.** Both are LZ, both live in this archive, and they expand different things:
+SubLz (`0x800BFD9C`) for compressed MESH sub-entries, UNPAK (`0x80018EF0`) for compressed TEXTURE
+entries. Feeding one to the other yields garbage of exactly the right length, so the size oracle passes.
+
+⚠ **The entry numbers in fable's report are DECIMAL.** They are written zero-padded — `0005, 0082, 0258`
+— which reads as hex. As hex, `0x258` is 600 in a 422-entry archive, and `0x0082`/`0x0084` land on real
+entries that are mesh containers, failing quietly as "UNPAK did not expand this" and looking like a
+decompressor bug.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
