@@ -678,38 +678,51 @@ namespace TPWGodot
         ArrayMesh CursorMesh()
         {
             var mesh = new ArrayMesh();
-            if (_cursorTile is not { } cur) return mesh;
-            var tiles = _runStart is { } st ? PathTool.Run(st.X, st.Z, cur.X, cur.Z) : new List<(int X, int Z)> { cur };
-            var verts = new List<Vector3>(); var cols = new List<Color>();
-            const int lift = 14;
-            bool blocked = false;
-            foreach (var (x, z) in tiles)
+            if (_cursorTile is not { } cur || _paths == null || _common == null) return mesh;
+            var run = _runStart is { } st ? PathTool.Run(st.X, st.Z, cur.X, cur.Z) : new List<(int X, int Z)> { cur };
+            // ⭐ THE GAME'S GHOST (0x8001D9D0 → 0x800553B0): each tile of the run wears a marker sprite from the common
+            // sheet chosen by the tool's own verdict, drawn semi-transparent (the markers' texels all carry the GPU's
+            // blend bit, their page is mode 0: half and half) over the ground, neutral grey. The game also pulses the
+            // markers' brightness and lays a dim quad under them; not yet.
+            var byMarker = new Dictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
+            const int lift = 12;
+            var grey = new Color(0.5f, 0.5f, 0.5f);
+            foreach (var (x, z, sprite, _) in _paths.Ghost(_map, run))
             {
-                // A run stops at the first tile that refuses, so everything after it is refused too.
-                blocked |= !PathTool.CanLay(_map, x, z);
-                var c = blocked ? new Color(0.95f, 0.2f, 0.2f, 0.6f) : new Color(0.25f, 0.95f, 0.35f, 0.6f);
+                if (!byMarker.TryGetValue(sprite, out var b)) byMarker[sprite] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
                 var a = At(x, z, _map[x, z].HeightUnits + lift);
-                var b = At(x + 1, z, _map[x + 1, z].HeightUnits + lift);
+                var p1 = At(x + 1, z, _map[x + 1, z].HeightUnits + lift);
                 var d = At(x, z + 1, _map[x, z + 1].HeightUnits + lift);
                 var e = At(x + 1, z + 1, _map[x + 1, z + 1].HeightUnits + lift);
-                verts.AddRange(new[] { a, b, d, d, b, e });
-                for (int k = 0; k < 6; k++) cols.Add(c);
+                b.V.AddRange(new[] { a, p1, d, d, p1, e });
+                b.UV.AddRange(new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1) });
+                for (int k = 0; k < 6; k++) b.C.Add(grey);
             }
-            var arrays = new Godot.Collections.Array();
-            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
-            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
-            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
-            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
-            mesh.SurfaceSetMaterial(0, new StandardMaterial3D
+            foreach (var (sprite, b) in byMarker)
             {
-                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-                VertexColorUseAsAlbedo = true,
-                VertexColorIsSrgb = true,
-                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-                CullMode = BaseMaterial3D.CullModeEnum.Disabled,
-            });
+                if (!_markerTex.TryGetValue(sprite, out var tex))
+                {
+                    var img = sprite < _common.Sprites.Count ? _common.RenderSprite(sprite) : null;
+                    tex = img == null ? null : ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, img.Rgba));
+                    _markerTex[sprite] = tex;
+                }
+                if (tex == null) continue;
+                foreach (bool blended in new[] { false, true })
+                {
+                    var arrays = new Godot.Collections.Array();
+                    arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                    arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
+                    mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+                    var m = new ShaderMaterial { Shader = PsxShading.SemiTransparentShader(0, blended, false) };
+                    m.SetShaderParameter("atlas", tex);
+                    mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, m);
+                }
+            }
             return mesh;
         }
+        readonly Dictionary<int, ImageTexture> _markerTex = new();
 
         void LayPath((int X, int Z) start, (int X, int Z) end)
         {

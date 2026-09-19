@@ -259,17 +259,46 @@ namespace TPW.Data
     {
         readonly ParkPaths.Piece[] _pieces;
         readonly int[] _sprites;
+        readonly int[] _markers;
 
         /// <summary>The world's sixteen path sprites, for the atlas.</summary>
         public System.Collections.Generic.IReadOnlyList<int> Sprites => _sprites;
 
-        PathTool(ParkPaths.Piece[] pieces, int[] sprites) { _pieces = pieces; _sprites = sprites; }
+        PathTool(ParkPaths.Piece[] pieces, int[] sprites, int[] markers) { _pieces = pieces; _sprites = sprites; _markers = markers; }
+
+        /// <summary>The ghost's marker sprites in the common sheet (#416), by the validator's result code (the table at
+        /// 0x800DBEFC, eight words: 0 takes path, 1 refused, 6 the run ends on path already there, others for queues).</summary>
+        const uint MarkerTable = 0x800DBEFC;
 
         public static PathTool Create(byte[] exe, uint baseAddress, int world)
         {
             var pieces = ParkPaths.ReadPieces(exe, baseAddress);
             var sprites = ParkPaths.ReadPathSprites(exe, baseAddress, world);
-            return pieces == null || sprites == null ? null : new PathTool(pieces, sprites);
+            int m = (int)(MarkerTable - baseAddress);
+            if (pieces == null || sprites == null || m < 0 || m + 32 > exe.Length) return null;
+            var markers = new int[8];
+            for (int i = 0; i < 8; i++) markers[i] = BitConverter.ToInt32(exe, m + i * 4);
+            return new PathTool(pieces, sprites, markers);
+        }
+
+        /// <summary>The ghost the tool draws over a run (0x8001D9D0): per tile, the common-sheet sprite for the
+        /// validator's verdict (0x8004F360, for path): refused (flag 0x02, or not grass or path) is 1, and so is every
+        /// tile after the first refusal; the LAST tile on existing path is 6; any other grass or path is 0.</summary>
+        public System.Collections.Generic.List<(int X, int Z, int Sprite, bool Takes)> Ghost(ParkMap map,
+            System.Collections.Generic.IReadOnlyList<(int X, int Z)> run)
+        {
+            var ghost = new System.Collections.Generic.List<(int, int, int, bool)>();
+            bool refused = false;
+            for (int i = 0; i < run.Count; i++)
+            {
+                var (x, z) = run[i];
+                int code;
+                if (refused || !CanLay(map, x, z)) { code = 1; refused = true; }
+                else if (i == run.Count - 1 && map[x, z].Raw0 == 2) code = 6;
+                else code = 0;
+                ghost.Add((x, z, _markers[code], code != 1));
+            }
+            return ghost;
         }
 
         /// <summary>Whether a click on tile (x, z) opens the path tool (the port's control, master's call): any tile on
