@@ -56,6 +56,17 @@ namespace TPW.Data
         public int BoneCount;
         public int BlockCount;
         public int TrackCount;
+
+        /// <summary>⚠ HEADER +0x00 IS NOT EXPOSED AS AN ANIMATION CYCLE, ON PURPOSE. The game's track
+        /// dispatcher (0x8002cbc4) does `divu time, [anim+0x00]` / `mfhi` before evaluating anything, so
+        /// a cycle length really does come from the data rather than from the keys' end time -- but the
+        /// field this parser reads at +0x00 is a per-BLOCK count (see the bit array below), and using it
+        /// as the cycle does not reproduce the console: 127 units at the measured 61.54 units/second is
+        /// 103.2 frames, against a flag that repeats every 104 exactly.
+        ///
+        /// So the mechanism is found and the field is not. Naming one here would put a number into
+        /// shared mesh code on the strength of two offsets agreeing, which is how a plausible wrong
+        /// constant outlives everyone who remembers doubting it.</summary>
         /// <summary>{x, y, z} per vertex, in the file's own s16 units.</summary>
         public short[] Vertices = Array.Empty<short>();
         public byte[] VertexColours = Array.Empty<byte>();     // RGB triplets
