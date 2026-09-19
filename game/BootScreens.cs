@@ -26,6 +26,8 @@ namespace TPWGodot
         public event Action<int> LanguageChosen;
         /// <summary>The player asked to start the Practice Park.</summary>
         public event Action StartPracticePark;
+        /// <summary>Music and SFX volume, 0..1, from the Options sliders.</summary>
+        public event Action<float, float> VolumeChanged;
 
         readonly BootSequence _boot = new();
         readonly MainMenu _menu = new();
@@ -162,6 +164,12 @@ namespace TPWGodot
             if (_menuFrame < BootSequence.MenuInputDelay) return;
             if (_upEdge)   _menu.Move(-1);
             if (_downEdge) _menu.Move(+1);
+            // LEFT/RIGHT only do anything on a slider row. On the root menu they were byte-identical to
+            // no press on the console, and Adjust() enforces that rather than this call site.
+            bool moved = false;
+            if (_leftEdge)  moved |= _menu.Adjust(-1);
+            if (_rightEdge) moved |= _menu.Adjust(+1);
+            if (moved) VolumeChanged?.Invoke(_menu.MusicVolume, _menu.SfxVolume);
             if (_confirmEdge && _menu.Confirm() == MenuAction.StartPracticePark) StartPracticePark?.Invoke();
         }
 
@@ -174,6 +182,9 @@ namespace TPWGodot
             string movie = BootSequence.MovieFor(s);
             if (movie != null) { _waitingForMovie = true; WantMovie?.Invoke(movie); }
         }
+
+        static string Bar(int level)
+            => new string('|', level) + new string('.', MainMenu.SliderSteps - level);
 
         void Redraw()
         {
@@ -217,10 +228,19 @@ namespace TPWGodot
                 case BootScreen.MainMenu:
                     _bg.Color = new Color(0.16f, 0.04f, 0.07f);
                     var sb = new System.Text.StringBuilder();
-                    foreach (string item in _menu.Items)
-                        sb.AppendLine(item == _menu.Current ? $"▸  {item}" : $"    {item}");
+                    for (int i = 0; i < _menu.Items.Length; i++)
+                    {
+                        string item = _menu.Items[i];
+                        string row = _menu.Page == MenuPage.Options && i < MainMenu.OptionKinds.Length
+                                  && MainMenu.OptionKinds[i] == MainMenu.OptionKind.Slider
+                            ? $"{item}  {Bar(i == 0 ? _menu.MusicLevel : _menu.SfxLevel)}"
+                            : item;
+                        sb.AppendLine(i == _menu.Index ? $"▸  {row}" : $"    {row}");
+                    }
                     _big.Text = sb.ToString().TrimEnd();
-                    _small.Text = _menuFrame < BootSequence.MenuInputDelay ? "" : "up / down, cross to choose";
+                    _small.Text = _menuFrame < BootSequence.MenuInputDelay ? ""
+                        : _menu.CurrentKind == MainMenu.OptionKind.Slider ? "left / right to set"
+                        : "up / down, cross to choose";
                     _note.Text = "placeholder — the curtains, logo and advisor are not identified yet";
                     break;
             }

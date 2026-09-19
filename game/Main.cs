@@ -348,7 +348,11 @@ namespace TPWGodot
                 _language = l;
                 GD.Print($"[tpw] language chosen: {StringTable.LanguageNames[l]} (game index {l})");
             };
-            _boot.StartPracticePark += () => GD.Print("[tpw] Practice Park requested — not implemented yet");
+            _boot.StartPracticePark += () => GD.Print("[tpw] Practice Park requested — which map it loads is not identified yet");
+            // ⚠ SFX is carried but not applied: the port has no sound-effect bus yet, only music and
+            // the one-shot sample button. Wiring it to the music player instead would make the slider
+            // LOOK like it works, which is worse than a slider that visibly does nothing.
+            _boot.VolumeChanged += (music, _) => _music?.SetVolume(music);
             _playMovie = new Button { Text = "Play movie", Disabled = true };
             _playMovie.Pressed += PlayMovie;
             _movieChoice = new OptionButton { Disabled = true };

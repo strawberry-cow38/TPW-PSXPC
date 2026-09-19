@@ -22,6 +22,15 @@ namespace TPWGodot
         int _rate = 44100;
 
         AudioStreamPlayer _out;
+
+        /// <summary>Menu volume, 0..1. Applied as dB because that is what the mixer wants and a linear
+        /// 0..1 straight into VolumeDb is silence at 1 and +inf at 0 -- backwards AND unbounded.
+        /// 0 mutes outright rather than dividing by zero.</summary>
+        public void SetVolume(float linear)
+        {
+            if (_out == null) return;
+            _out.VolumeDb = linear <= 0f ? -80f : Mathf.LinearToDb(Mathf.Clamp(linear, 0f, 1f));
+        }
         AudioStreamGeneratorPlayback _playback;
         TrackerPlayer _tracker;
         short[] _pcm = Array.Empty<short>();

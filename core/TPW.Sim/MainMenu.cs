@@ -31,6 +31,53 @@ namespace TPW.Sim
         public static readonly string[] PlayGameItems = { "Main Game", "Practice Park", "Exit" };
         public static readonly string[] OptionsItems  = { "Music", "SFX", "Tutorial", "Screen", "Credits", "Exit" };
 
+        /// <summary>What an Options row does when you push LEFT/RIGHT or CROSS.
+        ///
+        /// ⚠ ONLY THE TWO SLIDERS ARE MEASURED. LEFT on the Music row changed the rendered frame and
+        /// CROSS on it did nothing, which is a slider; SFX is drawn identically beside it. Everything
+        /// below them is <see cref="OptionKind.Unmeasured"/> -- the row exists and is drawn, and what it
+        /// does was never tested. "Tutorial" READS as "Tutorial On" on screen, which strongly suggests a
+        /// toggle, but reading a label is not pressing the button and the difference is the whole point
+        /// of this enum. Do not promote a row to Toggle or Action without measuring it.</summary>
+        public enum OptionKind { Slider, Unmeasured }
+
+        public static readonly OptionKind[] OptionKinds =
+        {
+            OptionKind.Slider,      // Music
+            OptionKind.Slider,      // SFX
+            OptionKind.Unmeasured,  // Tutorial -- label says "Tutorial On"; toggling never tested
+            OptionKind.Unmeasured,  // Screen
+            OptionKind.Unmeasured,  // Credits
+            OptionKind.Unmeasured,  // Exit
+        };
+
+        /// <summary>⚠ THE NUMBER OF STEPS IS A GUESS AND IS MARKED AS ONE. All that was measured is that
+        /// LEFT changes the frame; how many notches the bar has, and where it starts, were not. Eleven
+        /// gives a usable 0-100% in tens. If anyone measures the real step count, this is the constant
+        /// to change -- and the volumes below are fractions of it, so nothing else needs touching.</summary>
+        public const int SliderSteps = 10;
+
+        public int MusicLevel { get; private set; } = SliderSteps;
+        public int SfxLevel { get; private set; } = SliderSteps;
+
+        /// <summary>Music volume as 0..1.</summary>
+        public float MusicVolume => MusicLevel / (float)SliderSteps;
+        public float SfxVolume => SfxLevel / (float)SliderSteps;
+
+        /// <summary>The kind of the highlighted row, or Unmeasured off the Options page.</summary>
+        public OptionKind CurrentKind =>
+            Page == MenuPage.Options && Index < OptionKinds.Length ? OptionKinds[Index] : OptionKind.Unmeasured;
+
+        /// <summary>LEFT/RIGHT on a slider row. Does nothing anywhere else, which matches the console:
+        /// LEFT and RIGHT on the ROOT menu were byte-identical to no press.</summary>
+        public bool Adjust(int delta)
+        {
+            if (CurrentKind != OptionKind.Slider) return false;
+            int v = Math.Clamp((Index == 0 ? MusicLevel : SfxLevel) + delta, 0, SliderSteps);
+            if (Index == 0) MusicLevel = v; else SfxLevel = v;
+            return true;
+        }
+
         public MenuPage Page { get; private set; } = MenuPage.Root;
         public int Index { get; private set; }
 
