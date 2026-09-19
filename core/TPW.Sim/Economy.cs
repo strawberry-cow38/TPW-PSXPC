@@ -179,4 +179,56 @@ namespace TPW.Sim
         /// <summary>Months of history the bank keeps, indexed modulo this. Twelve years.</summary>
         public const int HistoryMonths = 144;
     }
+
+    /// <summary>What the month end says about debt.</summary>
+    public enum DebtNotice
+    {
+        None,
+        /// <summary>First month in the red, no loans outstanding (message 0x8A).</summary>
+        InDebt,
+        /// <summary>First month in the red with a loan outstanding (message 0x89).</summary>
+        InDebtWithLoans,
+        /// <summary>Third month running (0x8B).</summary>
+        ThirdMonth,
+        /// <summary>Fifth month running (0x8C): the last warning.</summary>
+        FifthMonth,
+        /// <summary>Sixth month running (0x8D): GAME OVER.</summary>
+        Bankrupt,
+    }
+
+    /// <summary>The debt clock.
+    ///
+    /// READ by fable after each month rollover (0x80066C50, 0x80066CC8..0x80066DEC): balance below zero adds a
+    /// month to a counter and posts a message on months 1, 3, 5 and 6; a balance of zero or more resets it.
+    /// There is no grace for being "nearly" solvent, and one good month clears the whole count.
+    ///
+    /// ✅ THE SIXTH MONTH ENDS THE GAME, MEASURED. fable could not find the bankrupt → game-over transition in
+    /// the code and left "whether 0x8D is terminal" open. tinyclaw forced the bank to -£435,000, held it, and
+    /// let the months run with no input: GAME OVER at about day 172, six months to within the sampling, and
+    /// the game-over movie followed.
+    ///
+    /// ⚠ The loan check decides only WHICH first-month message appears. It does not slow the clock.</summary>
+    public sealed class DebtWatch
+    {
+        public const int MonthsToBankruptcy = 6;
+
+        public int MonthsInDebt { get; private set; }
+        public bool GameOver => MonthsInDebt >= MonthsToBankruptcy;
+
+        /// <summary>Call once per month end, after wages and everything else for the month has been booked.</summary>
+        public DebtNotice MonthEnd(Money balance, bool loansOutstanding)
+        {
+            if (GameOver) return DebtNotice.Bankrupt;
+            if (balance.Raw >= 0) { MonthsInDebt = 0; return DebtNotice.None; }
+            MonthsInDebt++;
+            return MonthsInDebt switch
+            {
+                1 => loansOutstanding ? DebtNotice.InDebtWithLoans : DebtNotice.InDebt,
+                3 => DebtNotice.ThirdMonth,
+                5 => DebtNotice.FifthMonth,
+                MonthsToBankruptcy => DebtNotice.Bankrupt,
+                _ => DebtNotice.None,
+            };
+        }
+    }
 }

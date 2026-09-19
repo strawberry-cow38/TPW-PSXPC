@@ -183,4 +183,53 @@ namespace TPW.Sim.Tests
         public void TheDefaultEntryFeeIsForty()
             => Assert.Equal(Money.FromPounds(40), ParkEconomy.DefaultEntryFee);
     }
+
+    public class DebtTests
+    {
+        static readonly Money Red = Money.FromPounds(-1);
+        static readonly Money Black = Money.Zero;
+
+        // ⭐ Hand-worked from the READ sequence: messages on months 1, 3 and 5, game over on 6, silence between.
+        [Fact]
+        public void SixMonthsInTheRedEndTheGame()
+        {
+            var d = new DebtWatch();
+            var got = new DebtNotice[6];
+            for (int i = 0; i < 6; i++) got[i] = d.MonthEnd(Red, loansOutstanding: false);
+            Assert.Equal(new[] { DebtNotice.InDebt, DebtNotice.None, DebtNotice.ThirdMonth, DebtNotice.None,
+                                 DebtNotice.FifthMonth, DebtNotice.Bankrupt }, got);
+            Assert.True(d.GameOver);
+        }
+
+        // ⭐ REJECTS A CUMULATIVE COUNT. One month at zero or above clears everything: five months in the red,
+        // one in the black, then red again starts over at month one, not month six.
+        [Fact]
+        public void OneSolventMonthResetsTheClock()
+        {
+            var d = new DebtWatch();
+            for (int i = 0; i < 5; i++) d.MonthEnd(Red, false);
+            Assert.Equal(DebtNotice.None, d.MonthEnd(Black, false));
+            Assert.Equal(DebtNotice.InDebt, d.MonthEnd(Red, false));
+            Assert.Equal(1, d.MonthsInDebt);
+            Assert.False(d.GameOver);
+        }
+
+        [Fact]
+        public void ZeroIsNotDebt()
+        {
+            var d = new DebtWatch();
+            Assert.Equal(DebtNotice.None, d.MonthEnd(Money.Zero, false));
+            Assert.Equal(0, d.MonthsInDebt);
+        }
+
+        // The loan only changes the first message, never the clock.
+        [Fact]
+        public void ALoanChangesTheFirstMessageOnly()
+        {
+            var d = new DebtWatch();
+            Assert.Equal(DebtNotice.InDebtWithLoans, d.MonthEnd(Red, loansOutstanding: true));
+            for (int i = 0; i < 4; i++) d.MonthEnd(Red, true);
+            Assert.Equal(DebtNotice.Bankrupt, d.MonthEnd(Red, true));
+        }
+    }
 }
