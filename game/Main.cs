@@ -138,6 +138,16 @@ namespace TPWGodot
         /// music bank. Recorded so the next person does not inherit 22,050 for them.</summary>
         public static readonly int[] EffectRatesHz = { 11025, 8000 };
         VBoxContainer _root;
+        /// <summary>Everything debug, inside <see cref="_root"/>. F3 toggles THIS; the capture paths hide
+        /// <see cref="_root"/> itself.
+        ///
+        /// ⚠ TWO LEVELS ON PURPOSE. A capture (--models=, --park=) must leave a COMPLETELY clean frame, so
+        /// it hides the outer node and takes the "press F3" hint with it. If F3 toggled the same node the
+        /// captures hide, then either the hint would be burned into every captured frame or pressing F3
+        /// during a capture would silently un-hide the whole panel mid-recording.</summary>
+        VBoxContainer _debugPanel;
+        /// <summary>The one line left on screen when the panel is closed, so the key is discoverable.</summary>
+        Label _hint;
         double _accum;
 
         public override void _Ready()
@@ -155,21 +165,35 @@ namespace TPWGodot
 
             _clock = new ParkClock();
 
-            _root = new VBoxContainer { AnchorRight = 1, AnchorBottom = 1 };
-            _root.AddThemeConstantOverride("separation", 10);
+            // ⚠ INSET FROM THE EDGES. Anchored full-rect with no offsets, the first label sits ON the top
+            // edge and is clipped by it -- which looked like a missing widget rather than a margin bug.
+            _root = new VBoxContainer
+            {
+                AnchorRight = 1, AnchorBottom = 1,
+                OffsetLeft = 8, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8,
+            };
+            _root.AddThemeConstantOverride("separation", 6);
             AddChild(_root);
 
-            _root.AddChild(new Label { Text = "Theme Park World — Godot" });
-            _status = new Label();
-            _root.AddChild(_status);
-            _selfTest = new Label { Text = "Asset self-test: running…" };
-            _root.AddChild(_selfTest);
+            // ⭐ THE DEBUG MENU. What used to be here was every label, every button and the legal-screen
+            // preview stacked in one flat column, always on screen -- the port's whole UI was its debug
+            // output. None of it is deleted: this is the same controls, grouped by what they inspect and
+            // put behind one key, so the window can eventually show the game instead.
+            _hint = new Label { Text = "F3 — debug menu", Modulate = new Color(1, 1, 1, 0.45f) };
+            _root.AddChild(_hint);
+            _debugPanel = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+            _debugPanel.AddThemeConstantOverride("separation", 8);
+            _root.AddChild(_debugPanel);
+
+            _debugPanel.AddChild(new Label { Text = "Theme Park World — Godot" });
+            _status = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+            _debugPanel.AddChild(_status);
+            _selfTest = new Label { Text = "Asset self-test: running…", AutowrapMode = TextServer.AutowrapMode.WordSmart };
             _preview = new TextureRect
             {
                 StretchMode = TextureRect.StretchModeEnum.KeepAspect,
                 CustomMinimumSize = new Vector2(320, 256),
             };
-            _root.AddChild(_preview);
 
             // ⭐ A WAY TO LOOK AT THINGS. Every image fault today -- a 180 rotation, a residual mirror, the
             // wrong channel order -- was found by a person looking at the screen while every headless check
@@ -212,21 +236,53 @@ namespace TPWGodot
             _parkChoice = new OptionButton { Disabled = true };
             _parkChoice.ItemSelected += i => { if (_parkButton.ButtonPressed) ShowPark(true); };
 
-            var row = new HBoxContainer();
-            row.AddThemeConstantOverride("separation", 8);
-            row.AddChild(_next);
-            row.AddChild(prevModel);
-            row.AddChild(nextModel);
-            row.AddChild(cullBtn);
-            row.AddChild(windBtn);
-            row.AddChild(texBtn);
-            row.AddChild(animBtn);
-            row.AddChild(nextAnimBtn);
-            row.AddChild(_parkButton);
-            row.AddChild(_parkChoice);
-            _root.AddChild(row);
-            _root.AddChild(_modelInfo);
-            _root.AddChild(_parkInfo);
+            // ⚠ THE TABS MUST EXPAND, NOT BE GIVEN A FIXED SIZE. A CustomMinimumSize taller than the
+            // window pushes the panel off the bottom of the screen and nothing clips it -- the controls
+            // are simply gone, with no scrollbar to suggest they exist.
+            var tabs = new TabContainer
+            {
+                CustomMinimumSize = new Vector2(0, 180),
+                SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            };
+            _debugPanel.AddChild(tabs);
+
+            // ⚠ A TabContainer TAKES ITS TAB TITLES FROM ITS CHILDREN'S NODE NAMES, so Name is the label
+            // here and not decoration -- leave it off and the tab reads "@VBoxContainer@31".
+            // ⚠ THE SCROLLER IS THE TAB, AND THE BOX INSIDE IT IS WHAT CALLERS FILL. The self-test alone
+            // is 15 lines plus a 256px image, which is taller than the tab on any window -- without this
+            // the overflow is invisible rather than scrollable.
+            static VBoxContainer Tab(TabContainer into, string name)
+            {
+                var scroll = new ScrollContainer { Name = name };
+                var v = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+                v.AddThemeConstantOverride("separation", 8);
+                scroll.AddChild(v);
+                into.AddChild(scroll);
+                return v;
+            }
+            static HBoxContainer Row(Node into, params Node[] items)
+            {
+                var h = new HBoxContainer();
+                h.AddThemeConstantOverride("separation", 8);
+                foreach (var i in items) h.AddChild(i);
+                into.AddChild(h);
+                return h;
+            }
+
+            // Disc: what the self-test found, and the decoded images -- the legal/copyright screen among
+            // them, which is why that text was the first thing on screen before this.
+            var discTab = Tab(tabs, "Disc");
+            discTab.AddChild(_selfTest);
+            Row(discTab, _next);
+            discTab.AddChild(_preview);
+
+            var modelTab = Tab(tabs, "Models");
+            Row(modelTab, prevModel, nextModel, cullBtn, windBtn, texBtn, animBtn, nextAnimBtn);
+            modelTab.AddChild(_modelInfo);
+
+            var parkTab = Tab(tabs, "Park");
+            Row(parkTab, _parkButton, _parkChoice);
+            parkTab.AddChild(_parkInfo);
 
             _audio = new AudioStreamPlayer();
             AddChild(_audio);
@@ -262,9 +318,10 @@ namespace TPWGodot
             _musicButton.Toggled += on => { _parkStartedMusic = false; PlayMusic(on); };
             _musicChoice = new OptionButton { Disabled = true };
             _musicChoice.ItemSelected += _ => { _parkStartedMusic = false; if (_musicButton.ButtonPressed) PlayMusic(true); };
-            soundRow.AddChild(_musicButton);
-            soundRow.AddChild(_musicChoice);
-            _root.AddChild(soundRow);
+            var audioTab = Tab(tabs, "Audio");
+            audioTab.AddChild(soundRow);
+            Row(audioTab, new Label { Text = "music:", VerticalAlignment = VerticalAlignment.Center },
+                          _musicButton, _musicChoice);
 
             // ⭐ THE MOVIES. In the game they play on ENTERING A WORLD (see StrMovie.Catalogue), and there is no
             // world to enter yet, so for now they play from here: pick one, press play, any key skips.
@@ -278,7 +335,7 @@ namespace TPWGodot
             movieRow.AddThemeConstantOverride("separation", 8);
             movieRow.AddChild(_playMovie);
             movieRow.AddChild(_movieChoice);
-            _root.AddChild(movieRow);
+            Tab(tabs, "Movies").AddChild(movieRow);
 
             foreach (var arg in OS.GetCmdlineUserArgs())
             {
@@ -789,6 +846,23 @@ namespace TPWGodot
 
         int CurrentRate => _rate != null && _rate.Selected >= 0 && _rate.Selected < RateChoices.Length
             ? RateChoices[_rate.Selected] : ConfirmedRateHz;
+
+        /// <summary>F3 opens and closes the debug menu.
+        ///
+        /// ⚠ _UnhandledInput, NOT _Input. MoviePlayer takes _Input and marks the event handled to skip a
+        /// playing movie; if this were _Input too, F3 during a movie would both skip it and toggle the
+        /// panel, and which happened first would depend on node order. Unhandled input runs only after
+        /// nobody claimed the key, which is exactly the rule wanted here.
+        ///
+        /// Note this toggles the PANEL, not _root: a capture hides _root, so F3 cannot bring the debug
+        /// chrome back into a recording that is already running.</summary>
+        public override void _UnhandledInput(InputEvent e)
+        {
+            if (e is not InputEventKey { Pressed: true, Echo: false, Keycode: Key.F3 }) return;
+            if (_debugPanel == null) return;
+            _debugPanel.Visible = !_debugPanel.Visible;
+            GetViewport().SetInputAsHandled();
+        }
 
         public override void _Process(double delta)
         {
