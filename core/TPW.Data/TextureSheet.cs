@@ -247,6 +247,30 @@ namespace TPW.Data
                 }
         }
 
+        /// <summary>One sprite on its own, through its own palette, as the rectangle the sheet stores: W x H texels,
+        /// or H x W for a sprite the packer stored turned (<see cref="SheetSprite.Flags"/> non-zero; which way to
+        /// turn it back is the drawing code's business). Colour 0 is alpha 0 and the GPU's bit 15 is alpha 128, as
+        /// in <see cref="RenderPage"/>. Null for an index the sheet does not have.</summary>
+        public TpwImage RenderSprite(int index)
+        {
+            if (index < 0 || index >= Sprites.Count) return null;
+            var sp = Sprites[index];
+            int w = sp.Flags != 0 ? sp.H : sp.W, h = sp.Flags != 0 ? sp.W : sp.H;
+            var rgba = new byte[Math.Max(1, w * h) * 4];
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    int c = Texel(sp.TPage, sp.Clut, sp.U + x, sp.V + y);
+                    if (c <= 0) continue;
+                    int o = (y * w + x) * 4;
+                    rgba[o] = (byte)((c & 31) << 3);
+                    rgba[o + 1] = (byte)(((c >> 5) & 31) << 3);
+                    rgba[o + 2] = (byte)(((c >> 10) & 31) << 3);
+                    rgba[o + 3] = (c & 0x8000) != 0 ? (byte)128 : (byte)255;
+                }
+            return new TpwImage { Width = w, Height = h, Rgba = rgba, Source = $"sprite {index}" };
+        }
+
         /// <summary>Every sprite drawn with its own palette, at its place on the sheet. Space no sprite covers is
         /// left dark, and palette colour 0 is transparent, as the GPU treats it.</summary>
         public TpwImage RenderSprites(string source = "")

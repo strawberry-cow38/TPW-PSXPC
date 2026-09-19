@@ -1434,6 +1434,29 @@ static class Program
                 Console.WriteLine($"{withSemi} of {models} models have semi-transparent faces");
                 return 0;
             }
+            // --sprites SHEET OUT i,j,k: those sprites of one sheet side by side (sheet orientation), as raw RGBA.
+            int spritesAt = Array.IndexOf(args, "--sprites");
+            if (spritesAt >= 0 && spritesAt + 3 < args.Length)
+            {
+                var gs = Archive(disc);
+                if (gs == null) return 1;
+                if (!TextureSheet.TryParse(gs.Read(gs.Entries[int.Parse(args[spritesAt + 1])]), out var sh, out string sherr)) { Console.WriteLine(sherr); return 1; }
+                var imgs = new List<TpwImage>();
+                foreach (var part in args[spritesAt + 3].Split(',')) { var im = sh.RenderSprite(int.Parse(part)); if (im != null) imgs.Add(im); }
+                int tw = 0, th = 0;
+                foreach (var im in imgs) { tw += im.Width + 4; th = Math.Max(th, im.Height); }
+                var outRgba = new byte[Math.Max(1, tw * th) * 4];
+                int ox = 0;
+                foreach (var im in imgs)
+                {
+                    for (int y = 0; y < im.Height; y++)
+                        Array.Copy(im.Rgba, y * im.Width * 4, outRgba, (y * tw + ox) * 4, im.Width * 4);
+                    ox += im.Width + 4;
+                }
+                System.IO.File.WriteAllBytes(args[spritesAt + 2], outRgba);
+                Console.WriteLine($"sprites -> {args[spritesAt + 2]} {tw}x{th} rgba");
+                return 0;
+            }
             int facesAt = Array.IndexOf(args, "--model-faces");
             if (facesAt >= 0 && facesAt + 1 < args.Length)
                 return ModelFaces(disc, int.Parse(args[facesAt + 1]),
