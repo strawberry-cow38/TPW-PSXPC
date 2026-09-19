@@ -790,6 +790,38 @@ static class Program
         foreach (var v in pcm) w.Write(v);
     }
 
+    /// <summary>Dump one animated mesh posed at several times, as OBJ, so the animation can be LOOKED at
+    /// without a GPU. A render change verified only numerically has not been verified.</summary>
+    static int PoseDump(GazArchive gaz, int want, string dir)
+    {
+        int seen = 0;
+        foreach (var e in gaz.Entries)
+        {
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
+                if (m.Binding == null || m.Binding.SourceCount == 0) continue;
+                if (seen++ != want) continue;
+                System.IO.Directory.CreateDirectory(dir);
+                foreach (int t in new[] { 0, 16, 32, 48, 64, 96 })
+                {
+                    var pose = MeshPose.Evaluate(m, t);
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var v in pose.Vertices) sb.AppendLine($"v {v.X} {v.Y} {-v.Z}");
+                    foreach (var fc in m.Faces) sb.AppendLine($"f {fc.I0 + 1} {fc.I1 + 1} {fc.I2 + 1}");
+                    System.IO.File.WriteAllText($"{dir}/pose_{t:D3}.obj", sb.ToString());
+                }
+                Console.WriteLine($"entry #{e.Index} sub {i}: {m.VertexCount} verts, {m.Faces.Count} faces, " +
+                                  $"{m.Binding.SourceCount} sources -> {dir}/pose_*.obj");
+                return 0;
+            }
+        }
+        Console.WriteLine($"no animated mesh at index {want} (saw {seen})");
+        return 1;
+    }
+
     static int Main(string[] args)
     {
         // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
@@ -804,6 +836,8 @@ static class Program
             if (!GazArchive.TryParse(gb, out var g, out string ge)) { Console.WriteLine("archive: " + ge); return 1; }
             if (Array.IndexOf(args, "--mapping") >= 0) { Mapping(g); return 0; }
             if (Array.IndexOf(args, "--anim") >= 0) return Anim(g);
+            int pd = Array.IndexOf(args, "--posedump");
+            if (pd >= 0 && pd + 2 < args.Length) return PoseDump(g, int.Parse(args[pd + 1]), args[pd + 2]);
             return Meshes(g);
         }
 

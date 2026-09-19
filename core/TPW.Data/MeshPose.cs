@@ -64,8 +64,23 @@ namespace TPW.Data
                 }
             pose.Sources = sources;
 
+            // ⚠ A VERTEX NO SOURCE REACHES KEEPS ITS REST POSITION -- it does not go to the origin.
+            // The scatter is a weighted AVERAGE of sources, not a delta on top of the rest pose: the
+            // source coordinates occupy the same range as the vertices themselves (median 383 against
+            // 262, maxima 1448 against 1443), and the weights reaching a vertex sum to exactly 1. So a
+            // reached vertex is replaced outright, and an unreached one was never written at all.
+            // Zeroing those instead would collapse them onto the origin and read as a shattered model.
             var verts = new (int X, int Y, int Z)[mesh.VertexCount];
-            bind?.Scatter(sources, verts);
+            for (int v = 0; v < verts.Length && v * 3 + 2 < mesh.Vertices.Length; v++)
+                verts[v] = ((int)mesh.Vertices[v * 3], (int)mesh.Vertices[v * 3 + 1], (int)mesh.Vertices[v * 3 + 2]);
+
+            if (bind != null && bind.Records.Length > 0 && bind.SourceCount > 0)
+            {
+                var scattered = new (int X, int Y, int Z)[mesh.VertexCount];
+                bind.Scatter(sources, scattered);
+                foreach (var r in bind.Records)
+                    if (r.Vertex < verts.Length) verts[r.Vertex] = scattered[r.Vertex];
+            }
 
             // Direct vertex writes land after the scatter, as they do on the console.
             if (mesh.Tracks != null)

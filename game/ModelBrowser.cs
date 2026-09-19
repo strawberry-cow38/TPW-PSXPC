@@ -29,6 +29,12 @@ namespace TPWGodot
         Label _info;
         int _index = -1;
         float _spin;
+
+        // --- animation ---------------------------------------------------------------------------
+        bool _playing;
+        float _clock;                                   // in the file's own time units
+        (int X, int Y, int Z)[] _posed;                 // null = draw the file's rest vertices
+        Vector3 _fitCentre; float _fitScale = 1f;       // fixed at the REST pose, see Show()
         // ⭐ CULLING OFF BY DEFAULT, BY MASTER'S CALL, and the reason is fidelity rather than taste: "in this era
         // the devs would have manually removed faces". The PS1 GPU has no back-face culling at all; a game culls
         // in software per polygon if it chooses to, and tinyclaw measured this one's park geometry at 88-90% one
@@ -59,8 +65,30 @@ namespace TPWGodot
         /// <summary>Toggle textures, to see the vertex colours on their own.</summary>
         public void ToggleTextures() { _textured = !_textured; Show(_index); }
 
+        /// <summary>Play or pause this model's animation.
+        ///
+        /// ⚠ A model with no tracks does not move, and "no animation in this model" must not look like
+        /// "the player is broken". <see cref="StateLabel"/> says which, because the two are otherwise
+        /// indistinguishable on screen and the wrong one of them sends someone debugging working code.</summary>
+        public void TogglePlay() { _playing = !_playing; _clock = 0; if (!_playing) { _posed = null; Show(_index); } }
+
+        /// <summary>Whether the model on screen has anything to play.</summary>
+        public bool HasAnimation
+        {
+            get
+            {
+                if (_index < 0 || _index >= _meshes.Count) return false;
+                var m = _meshes[_index].Mesh;
+                if (m.Tracks == null) return false;
+                foreach (var t in m.Tracks) if (t.Positions.Length > 0 || t.Keys.Length > 0) return true;
+                return false;
+            }
+        }
+
         public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "flipped" : "correct")} · " +
-                                    $"textures {(_textured ? "ON" : "off")}";
+                                    $"textures {(_textured ? "ON" : "off")} · " +
+                                    (!HasAnimation ? "no animation in this model"
+                                     : _playing ? $"playing, t={(int)_clock}" : "animation available, paused");
 
         public int Count => _meshes.Count;
 
@@ -148,6 +176,9 @@ namespace TPWGodot
             }
             var centre = new Vector3((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2);
             float span = Mathf.Max(maxX - minX, Mathf.Max(maxY - minY, maxZ - minZ));
+            // ⚠ The fit is taken from the REST pose and then held. Refitting each animated frame would
+            // rescale the model as it moves, so a limb swinging out would shrink the whole thing -- motion
+            // would be partly cancelled by the view, which is the opposite of what a browser is for.
             float scale = span > 0.0001f ? 1.6f / span : 1f;
 
             MeshTextures tex = _textured && _sheets.Count > 0 ? ModelTexturing.Build(m, _sheets) : null;
@@ -174,7 +205,7 @@ namespace TPWGodot
                     : new[] { (face.I0, face.U0, face.V0), (face.I1, face.U1, face.V1), (face.I2, face.U2, face.V2) };
                 foreach (var (vi, u, v) in corners)
                 {
-                    var pos = (ToGodot(m, vi) - centre) * scale;
+                    var pos = (Vert(m, vi) - centre) * scale;
                     var col = m.VertexColours.Length >= (vi + 1) * 3
                         ? Color.Color8(m.VertexColours[vi * 3], m.VertexColours[vi * 3 + 1], m.VertexColours[vi * 3 + 2])
                         : new Color(0.5f, 0.5f, 0.5f);
@@ -252,6 +283,15 @@ namespace TPWGodot
         /// (negating it turned them upside down, an earlier round of the same argument), so the file's frame is
         /// x right, y up, z INTO the screen, which is left-handed, and Godot's is right-handed. Negating z
         /// converts. That makes it a reflection, which is why the corner order is reversed with it.</summary>
+        /// <summary>The vertex to draw: the posed one while an animation is playing, the file's otherwise.
+        /// Both go through the same z negation, so playing cannot silently change the handedness.</summary>
+        Vector3 Vert(TpwMesh m, int vi)
+        {
+            if (_posed != null && vi < _posed.Length)
+                return new Vector3(_posed[vi].X, _posed[vi].Y, -_posed[vi].Z);
+            return ToGodot(m, vi);
+        }
+
         static Vector3 ToGodot(TpwMesh m, int vi) =>
             new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], -m.Vertices[vi * 3 + 2]);
 
@@ -265,6 +305,13 @@ namespace TPWGodot
             // inside-out winding or a collapsed axis both look fine from one angle.
             _spin += (float)delta * 0.6f;
             if (_instance != null) _instance.Rotation = new Vector3(0, _spin, 0);
+
+            if (!_playing || _index < 0 || _index >= _meshes.Count) return;
+            var m = _meshes[_index].Mesh;
+            _clock += (float)delta * 30f;                    // a readable rate; the file's unit is not a second
+            if (_clock > 4096f) _clock = 0;
+            _posed = MeshPose.Evaluate(m, (int)_clock).Vertices;
+            Show(_index);
         }
     }
 }
