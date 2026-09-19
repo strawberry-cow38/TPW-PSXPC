@@ -1904,6 +1904,43 @@ static class Program
 
         using (disc)
         {
+            // --sfx GROUP [DIR]: a sound-effect group (SoundGroup: the pair of entries at 0x800F91D0), every sound's
+            // record, length and rate, and with a directory each one as a WAV to listen to.
+            int sfxAt = Array.IndexOf(args, "--sfx");
+            if (sfxAt >= 0 && sfxAt + 1 < args.Length)
+            {
+                var sg = Archive(disc);
+                var exeF = disc.Find(AssetSelfTest.GameExecutable);
+                if (sg == null || exeF == null) { Console.WriteLine("no archive or executable"); return 1; }
+                int grp = int.Parse(args[sfxAt + 1]);
+                string dir = sfxAt + 2 < args.Length && !args[sfxAt + 2].StartsWith("--") ? args[sfxAt + 2] : null;
+                var exeB = disc.ReadFile(exeF);
+                var ents = SoundGroup.Entries(exeB, AssetSelfTest.GameExecutableBase, grp);
+                var group = SoundGroup.Load(sg, exeB, AssetSelfTest.GameExecutableBase, grp);
+                if (group == null) { Console.WriteLine($"group {grp}: not loadable"); return 1; }
+                Console.WriteLine($"group {grp}: entries {ents?.Samples}/{ents?.Table}, {group.Sounds.Count} sounds");
+                if (dir != null) System.IO.Directory.CreateDirectory(dir);
+                for (int i = 0; i < group.Sounds.Count; i++)
+                {
+                    var snd = group.Sounds[i];
+                    var pcm = group.Decode(i);
+                    int n = pcm?.SampleCount ?? 0, peak = 0;
+                    if (pcm != null) foreach (var v in pcm.Samples) peak = Math.Max(peak, Math.Abs((int)v));
+                    Console.WriteLine($"  #{i,2}  flag {snd.Flag}  pitch 0x{snd.Pitch:x4} = {snd.SampleRate,5} Hz  offset {snd.Offset,7}  " +
+                                      $"{n,6} samples = {(n / (double)snd.SampleRate):0.000} s  peak {peak}" + (pcm != null && pcm.LoopStart >= 0 ? $"  loops at {pcm.LoopStart}" : ""));
+                    if (dir != null && pcm != null && n > 0)
+                    {
+                        using var fs = System.IO.File.Create(System.IO.Path.Combine(dir, $"g{grp}_{i:00}.wav"));
+                        using var bw = new System.IO.BinaryWriter(fs);
+                        bw.Write("RIFF"u8.ToArray()); bw.Write(36 + n * 2); bw.Write("WAVEfmt "u8.ToArray()); bw.Write(16);
+                        bw.Write((short)1); bw.Write((short)1); bw.Write(snd.SampleRate); bw.Write(snd.SampleRate * 2);
+                        bw.Write((short)2); bw.Write((short)16); bw.Write("data"u8.ToArray()); bw.Write(n * 2);
+                        foreach (var v in pcm.Samples) bw.Write(v);
+                    }
+                }
+                return 0;
+            }
+
             // --buildable [MAP]: where a ride or shop may stand on each park map (ParkBuild, the game's placement
             // test), on the map as loaded (ParkPaths, which needs the executable's tables); with a map entry, the
             // grid itself.

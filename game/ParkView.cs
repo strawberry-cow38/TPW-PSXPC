@@ -32,6 +32,10 @@ namespace TPWGodot
         /// kept to rebuild the ground after laying.</summary>
         PathTool _paths;
         bool _pathMode;
+        /// <summary>The build tools' sound group (SoundGroup 7) and a player for it: the path tool's own sounds.</summary>
+        SoundGroup _toolSounds;
+        AudioStreamPlayer _sfx;
+        readonly Dictionary<int, AudioStreamWav> _sfxStreams = new();
         (int X, int Z)? _cursorTile, _runStart;
         TextureSheet _groundSheet;
         Scrolling _scroll;
@@ -98,6 +102,8 @@ namespace TPWGodot
             AddChild(_build);
             _cursorMesh = new MeshInstance3D();
             AddChild(_cursorMesh);
+            _sfx = new AudioStreamPlayer();
+            AddChild(_sfx);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
             _flags = new MeshInstance3D();
@@ -712,7 +718,10 @@ namespace TPWGodot
                     arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
                     arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
                     mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
-                    var m = new ShaderMaterial { Shader = PsxShading.SemiTransparentShader(0, blended, false) };
+                    // The blend is the sprite's own page's (its record's tpage, bits 5-6): mode 0, half and half, for
+                    // every marker on the disc, read rather than assumed.
+                    int mode = (_common.Sprites[sprite].TPage >> 5) & 3;
+                    var m = new ShaderMaterial { Shader = PsxShading.SemiTransparentShader(mode, blended, false) };
                     m.SetShaderParameter("atlas", tex);
                     mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, m);
                 }
@@ -723,7 +732,34 @@ namespace TPWGodot
 
         void LayPath((int X, int Z) start, (int X, int Z) end)
         {
-            if (_paths.Lay(_map, PathTool.Run(start.X, start.Z, end.X, end.Z)) > 0) RebuildGround();
+            int laid = _paths.Lay(_map, PathTool.Run(start.X, start.Z, end.X, end.Z));
+            if (laid > 0) { RebuildGround(); PlaySfx(ToolSound.Lay); }
+            else PlaySfx(ToolSound.Refused);
+        }
+
+        /// <summary>The path tool's sounds in group 7, as 0x8001D5C0 plays them.</summary>
+        public enum ToolSound { Start = 0, Refused = 2, Finished = 3, Lay = 4 }
+
+        /// <summary>Give the park view the build tools' sound group (SoundGroup.Load(…, 7)).</summary>
+        public void SetToolSounds(SoundGroup group) { _toolSounds = group; _sfxStreams.Clear(); }
+
+        /// <summary>Play one of the tools' sounds, at the rate its record's pitch gives, full volume, centred (0x800B84AC).</summary>
+        void PlaySfx(ToolSound which)
+        {
+            int n = (int)which;
+            if (_toolSounds == null || _sfx == null) return;
+            if (!_sfxStreams.TryGetValue(n, out var stream))
+            {
+                var pcm = _toolSounds.Decode(n);
+                if (pcm == null || pcm.SampleCount == 0) { _sfxStreams[n] = null; return; }
+                var bytes = new byte[pcm.SampleCount * 2];
+                Buffer.BlockCopy(pcm.Samples, 0, bytes, 0, bytes.Length);
+                stream = new AudioStreamWav { Format = AudioStreamWav.FormatEnum.Format16Bits, MixRate = _toolSounds.Sounds[n].SampleRate, Stereo = false, Data = bytes };
+                _sfxStreams[n] = stream;
+            }
+            if (stream == null) return;
+            _sfx.Stream = stream;
+            _sfx.Play();
         }
 
         /// <summary>Lay a run of path as the tool would, from tile (x0, z0) toward (x1, z1). For captures: the mouse
@@ -875,7 +911,7 @@ namespace TPWGodot
             if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _pathMode)
             {
                 if (_runStart != null) _runStart = null;
-                else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; }
+                else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; PlaySfx(ToolSound.Finished); }
                 RefreshInfo();
                 return;
             }
@@ -893,7 +929,8 @@ namespace TPWGodot
                 if (tile is { } t) _cursorTile = t;
                 if (_runStart == null)
                 {
-                    if (_cursorTile is { } c && PathTool.CanStartOn(_map, c.X, c.Z)) _runStart = c;
+                    if (_cursorTile is { } c && PathTool.CanStartOn(_map, c.X, c.Z)) { _runStart = c; PlaySfx(ToolSound.Start); }
+                    else PlaySfx(ToolSound.Refused);
                 }
                 else if (_cursorTile is { } end)
                 {

@@ -52,6 +52,8 @@ namespace TPWGodot
         OptionButton _musicChoice;
         /// <summary>The common sheet (#416): guests, the flags by the bus stops, the loading font.</summary>
         TextureSheet _commonSheet;
+        /// <summary>The build tools' sound-effect group (SoundGroup 7), for the park view's path tool.</summary>
+        SoundGroup _toolSounds;
         /// <summary>The game's executable (TPW.BIN), for the data tables the port reads out of it (particle templates).</summary>
         byte[] _exe;
         /// <summary>From <c>--park-open</c>: open the park as soon as it shows (captures of the gates opening).</summary>
@@ -530,6 +532,8 @@ namespace TPWGodot
                         if (EntranceFlags.CommonSheet < gz.Entries.Count &&
                             TextureSheet.TryParse(gz.Read(gz.Entries[EntranceFlags.CommonSheet]), out var common, out _))
                             _commonSheet = common;
+                        // The build tools' sounds: group 7 of the game's effect groups (entries 320/321).
+                        _toolSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 7);
                         if (MenuLayout.Sheet < gz.Entries.Count &&
                             TextureSheet.TryParse(gz.Read(gz.Entries[MenuLayout.Sheet]), out var ms, out _))
                             _menuSheet = ms;
@@ -780,6 +784,7 @@ namespace TPWGodot
                 var gateInfo = world != null ? ParkGate.ForWorld(world.Index) : null;
                 if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
+                _park.SetToolSounds(_toolSounds);
                 if (_autoOpen) _park.ParkOpen = true;
                 if (_autoBuildable) _park.ShowBuildable = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
