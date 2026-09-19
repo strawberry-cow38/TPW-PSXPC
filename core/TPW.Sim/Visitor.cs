@@ -153,6 +153,31 @@ namespace TPW.Sim
         /// <summary>P+0x2C: the "wait until" deadline in ticks, and the decision cooldown.</summary>
         public long WaitUntil { get; set; }
 
+        /// <summary>V+0x61: index into the 8-entry visitor-type table at 0x800F79E8, which supplies the
+        /// ride preference the score matches against.</summary>
+        public int VisitorType { get; set; }
+
+        /// <summary>V+0x10: the per-guest offset that staggers the once-every-8-ticks decision, so a
+        /// park full of guests does not re-plan in lockstep.</summary>
+        public int DecisionStagger { get; set; }
+
+        /// <summary>The id of whatever the guest most recently chose to head for.</summary>
+        public int ChosenId { get; set; }
+
+        readonly int[] _history = { -1, -1, -1, -1 };
+
+        /// <summary>V+0x38..0x44: the last four attraction ids, most recent first, -1 when unused.
+        /// The score divides by 5, 4, 3 and 2 by position, so the thing just ridden is punished hardest
+        /// and the penalty fades rather than being a flat ban.</summary>
+        public System.Collections.Generic.IReadOnlyList<int> RideHistory => _history;
+
+        /// <summary>Push an id onto the four-slot history, dropping the oldest (0x8008CFF0).</summary>
+        public void RememberRide(int id)
+        {
+            for (int i = _history.Length - 1; i > 0; i--) _history[i] = _history[i - 1];
+            _history[0] = id;
+        }
+
         /// <summary>V+0x28: whether the guest currently has something it is heading for.</summary>
         public bool HasTarget { get; set; }
 
