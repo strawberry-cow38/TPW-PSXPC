@@ -1325,6 +1325,29 @@ static class Program
         return 0;
     }
 
+    static int FindMesh(GazArchive g, int verts, int faces)
+    {
+        int hits = 0, scanned = 0;
+        foreach (var e in g.Entries)
+        {
+            byte[] bytes;
+            try { bytes = g.Read(e); } catch { continue; }
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int sub = 0; sub < c.Subs.Count; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m2, out _)) continue;
+                scanned++;
+                bool vOk = verts < 0 || m2.VertexCount == verts;
+                bool fOk = faces < 0 || m2.Faces.Count == faces;
+                if (!vOk || !fOk) continue;
+                Console.WriteLine($"entry {e.Index,4} sub {sub,3}: {m2.VertexCount} verts, {m2.Faces.Count} faces");
+                hits++;
+            }
+        }
+        Console.WriteLine($"-- {hits} match(es) out of {scanned} sub-meshes");
+        return 0;
+    }
+
     static int LangNames(GazArchive g)
     {
         string[] want = { "English", "Fran", "Deutsch", "Italiano", "Espa", "Nederlands", "Svenska" };
@@ -1399,6 +1422,12 @@ static class Program
             // --langnames: the language screen shows each language in ITS OWN language. Find where those
             // names live by asking every table for its own name, through the real StringTable decoder
             // (code page 850), and report the string ID that holds it.
+            // --findmesh V F: every sub-mesh in the archive with V vertices and F faces. A vertex/face
+            // pair is a tight fingerprint, so this answers "is what the console drew a STORED mesh or
+            // something the code generates" without opening a single file by hand.
+            int fmAt = Array.IndexOf(args, "--findmesh");
+            if (fmAt >= 0 && fmAt + 2 < args.Length)
+                return FindMesh(g, int.Parse(args[fmAt + 1]), int.Parse(args[fmAt + 2]));
             if (Array.IndexOf(args, "--langnames") >= 0) return LangNames(g);
             // --grepstr <text>: search the ID table and the English table together, so a hit shows both
             // the symbolic name the developers gave a string and what it actually says.
