@@ -46,8 +46,26 @@ namespace TPWGodot
         /// so the next open rate is settled the same way instead of argued about.</summary>
         static readonly int[] RateChoices = { 8363, 11025, 16726, 22050, 32000, 37800, 44100 };
 
-        /// <summary>The rate master identified by ear. See the note above for why it is not 8363.</summary>
+        /// <summary>⚠⚠ 22,050 Hz IS RIGHT FOR THESE WAVEFORMS AND IS NOT THE GAME'S SAMPLE RATE. Master
+        /// identified it by ear, on the 192 waveforms this browser plays — and fable has since established
+        /// that those are the MUSIC bank, not the sound effects. The two are different populations with
+        /// different rates, and nothing about listening to one says anything about the other.
+        ///
+        /// The effects have only two rates across all 132 of them: **11,025 Hz and 8,000 Hz**. Playing an
+        /// effect at 22,050 would be twice to nearly three times too fast.
+        ///
+        /// ⚠ It also invalidates the route by which 22,050 was first suggested: tinyclaw read the console's
+        /// pitch registers for voices 0-7, which are the MUSIC voices, so that measurement was of a tracker
+        /// note's playback speed rather than a sample's base rate. A correct reading of the wrong voices.
+        ///
+        /// And the music waveforms carry a per-sample rate of their own, so one flat constant is right for
+        /// perhaps one of them and slightly wrong for the rest — wrong in the way that sounds fine rather
+        /// than broken, which is exactly why it survived a listen.</summary>
         public const int ConfirmedRateHz = 22050;
+
+        /// <summary>The two rates the 132 sound EFFECTS actually use. Not yet wired: this browser plays the
+        /// music bank. Recorded so the next person does not inherit 22,050 for them.</summary>
+        public static readonly int[] EffectRatesHz = { 11025, 8000 };
         VBoxContainer _root;
         double _accum;
 
