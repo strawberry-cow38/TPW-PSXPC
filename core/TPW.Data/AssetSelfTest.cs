@@ -79,6 +79,7 @@ namespace TPW.Data
             CheckLegalScreen(disc, r);
             CheckArchive(disc, r, decodeEveryImage);
             CheckSpeechIsStreaming(disc, r);
+            CheckAdvisor(disc, r);
             CheckMovies(disc, r);
 
             r.ElapsedMs = sw.ElapsedMilliseconds;
@@ -298,6 +299,41 @@ namespace TPW.Data
                 streaming
                     ? $"{SpeechStream} is Form 2 streaming media, {f.Length:n0} bytes — correctly not an archive"
                     : $"{SpeechStream} is Form 1 — expected streaming audio; the sector layout may be misdetected");
+        }
+
+        /// <summary>The advisor's speech: the first block, all 32 lines of it, found and decoded.
+        ///
+        /// ⭐ THREE THINGS THAT CAN EACH FAIL. Every audio sector must sit on channel (sector mod 32), or the
+        /// interleave is not what the reader assumes and it refuses. Every line must end on the zero-filled
+        /// marker sector. And every XA sound group's duplicated parameters must agree when decoded. Only the
+        /// first block is checked at startup: the whole file is 346 MB of reads, and the first block is 6,000
+        /// sectors that exercise all 32 channels.</summary>
+        static void CheckAdvisor(DiscReader disc, SelfTestReport r)
+        {
+            var f = disc.Find(AdvisorSpeech.File);
+            if (f == null || !disc.IsRawSectors) return;   // absent, or unreadable as XA; the speech check says which
+            if (!AdvisorSpeech.TryScan(disc, f, out var clips, out int unmarked, out string err, maxSectors: 6000))
+            { r.Add("advisor speech", false, err); return; }
+
+            var first = clips.FindAll(c => c.Block == 0);
+            int decoded = 0;
+            double seconds = 0;
+            string problem = null;
+            foreach (var c in first)
+            {
+                if (!AdvisorSpeech.TryDecode(disc, f, c, out var pcm, out var coding, out string derr))
+                { problem ??= $"{c}: {derr}"; continue; }
+                decoded++;
+                seconds += pcm.SampleCount / (double)coding.SampleRate;
+            }
+            bool channelsOk = first.Count == AdvisorSpeech.Channels;
+            bool ok = channelsOk && unmarked == 0 && problem == null;
+            r.Add("advisor speech", ok, ok
+                ? $"first block: {first.Count} lines, one per channel, each ending on its marker sector; " +
+                  $"all decoded ({seconds:0} s), every sound group's parameter copies agree"
+                : !channelsOk ? $"first block has {first.Count} lines, expected one per channel ({AdvisorSpeech.Channels})"
+                : unmarked > 0 ? $"{unmarked} lines did not end on the marker sector"
+                : problem);
         }
 
         /// <summary>Every movie, demuxed in full.

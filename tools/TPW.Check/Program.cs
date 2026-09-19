@@ -315,6 +315,37 @@ static class Program
         return bad;
     }
 
+    static int Advisor(DiscReader disc, string outDir, string want)
+    {
+        var f = disc.Find(AdvisorSpeech.File);
+        if (f == null) { Console.WriteLine("no advisor file on this disc"); return 1; }
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        if (!AdvisorSpeech.TryScan(disc, f, out var clips, out string err)) { Console.WriteLine("scan: " + err); return 1; }
+        int blocks = clips.Count == 0 ? 0 : clips[^1].Block + 1;
+        long sectors = 0; foreach (var c in clips) sectors += c.Sectors;
+        Console.WriteLine($"{clips.Count:n0} clips in {blocks} blocks, {sectors:n0} audio sectors, scanned in {sw.ElapsedMilliseconds} ms");
+        var perBlock = new Dictionary<int, int>();
+        foreach (var c in clips) perBlock[c.Block] = perBlock.GetValueOrDefault(c.Block) + 1;
+        int full = 0; foreach (var v in perBlock.Values) if (v == AdvisorSpeech.Channels) full++;
+        Console.WriteLine($"blocks with all {AdvisorSpeech.Channels} channels: {full}/{blocks}");
+
+        if (outDir == null || want.Length == 0) return 0;
+        System.IO.Directory.CreateDirectory(outDir);
+        int bad = 0;
+        foreach (var spec in want.Split(','))
+        {
+            var parts = spec.Split(':');
+            int b = int.Parse(parts[0]), ch = int.Parse(parts[1]);
+            var clip = clips.Find(c => c.Block == b && c.Channel == ch);
+            if (clip.Sectors == 0) { Console.WriteLine($"no clip at {spec}"); bad++; continue; }
+            if (!AdvisorSpeech.TryDecode(disc, f, clip, out var pcm, out var coding, out string derr)) { Console.WriteLine($"{spec}: {derr}"); bad++; continue; }
+            string wav = System.IO.Path.Combine(outDir, $"advisor_b{b:000}_c{ch:00}.wav");
+            WriteWav(wav, pcm.Samples, coding.Channels, coding.SampleRate);
+            Console.WriteLine($"{clip}: {coding}, {pcm.SampleCount / (double)coding.SampleRate:0.00} s -> {wav}");
+        }
+        return bad;
+    }
+
     /// <summary>A plain 16-bit PCM WAV: the 44-byte canonical header and the samples.</summary>
     static void WriteWav(string path, short[] pcm, int channels, int rate)
     {
@@ -382,6 +413,17 @@ static class Program
 
         using (disc)
         {
+            // --advisor [dir] [--clip B:C,...]: find every clip in the advisor's speech file, print what was found,
+            // and write the named clips (block:channel) as WAVs for a human to listen to.
+            int advAt = Array.IndexOf(args, "--advisor");
+            if (advAt >= 0)
+            {
+                string outDir = advAt + 1 < args.Length && !args[advAt + 1].StartsWith("--") ? args[advAt + 1] : null;
+                int clipAt = Array.IndexOf(args, "--clip");
+                string want = clipAt >= 0 && clipAt + 1 < args.Length ? args[clipAt + 1] : "";
+                return Advisor(disc, outDir, want);
+            }
+
             // --movies [dir]: demux every .STR, print what each holds, and with a directory write each
             // soundtrack as a WAV, so it can be compared sample for sample with a decoder that shares no code
             // with this one.

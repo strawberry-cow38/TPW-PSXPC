@@ -41,6 +41,16 @@ namespace TPWGodot
         /// be made unattended.</summary>
         string _autoMovie;
         bool _quitAfterMovie;
+        Button _playAdvisor;
+        bool _hasAdvisor;
+        System.Collections.Generic.List<AdvisorClip> _advisorClips;
+        PcmSample _pendingLine;
+        XaAudio.Coding _pendingLineCoding;
+        string _pendingLineError;
+        /// <summary>From <c>--advisor-line=LINE:LANGUAGE</c>: play that line once the disc is checked, and with
+        /// <c>--quit-after-line</c> exit when it ends. For capturing it unattended.</summary>
+        int _autoLine = -1, _autoLanguage;
+        bool _quitAfterLine;
 
         /// <summary>✅ 22,050 Hz, SETTLED BY LISTENING. Master tried the selector and identified it, and also
         /// worked out what these waveforms are: mostly short chunks of the game's MUSIC, cut up so it can
@@ -179,6 +189,12 @@ namespace TPWGodot
             soundRow.AddChild(_playSound);
             soundRow.AddChild(new Label { Text = "rate:", VerticalAlignment = VerticalAlignment.Center });
             soundRow.AddChild(_rate);
+            // ⭐ THE ADVISOR: 3,616 recorded lines in ADVISOR.TPW, two thirds of the disc. Which line is which is
+            // not known yet (the file has no index), so this plays a random one, the same way the sound button
+            // does, and for the same reason: a different one each press shows the whole file is read correctly.
+            _playAdvisor = new Button { Text = "Play an advisor line", Disabled = true };
+            _playAdvisor.Pressed += PlayAdvisorLine;
+            soundRow.AddChild(_playAdvisor);
             _root.AddChild(soundRow);
 
             // ⭐ THE MOVIES. In the game they play on ENTERING A WORLD (see StrMovie.Catalogue), and there is no
@@ -199,6 +215,13 @@ namespace TPWGodot
             {
                 if (arg.StartsWith("--movie=")) _autoMovie = arg.Substring("--movie=".Length).ToUpperInvariant();
                 else if (arg == "--quit-after-movie") _quitAfterMovie = true;
+                else if (arg.StartsWith("--advisor-line="))
+                {
+                    var parts = arg.Substring("--advisor-line=".Length).Split(':');
+                    _autoLine = int.Parse(parts[0]);
+                    _autoLanguage = parts.Length > 1 ? int.Parse(parts[1]) : 0;
+                }
+                else if (arg == "--quit-after-line") _quitAfterLine = true;
             }
 
             GD.Print($"[tpw] data: {_data.Message}");
@@ -250,6 +273,7 @@ namespace TPWGodot
                     foreach (var df in disc.Files)
                         if (!df.IsDirectory && df.Name.EndsWith(".STR", System.StringComparison.OrdinalIgnoreCase))
                             movies.Add(df.Name);
+                    _hasAdvisor = disc.Find(AdvisorSpeech.File) != null && disc.IsRawSectors;
                 }
                 catch (System.Exception e)
                 {
@@ -316,6 +340,10 @@ namespace TPWGodot
             }
             else _playSound.Text = "No sound decoded";
 
+            _playAdvisor.Disabled = !_hasAdvisor;
+            if (!_hasAdvisor) _playAdvisor.Text = "No advisor speech on this disc";
+            else if (_autoLine >= 0) PlayAdvisorLine(_autoLine, _autoLanguage);
+
             _movieChoice.Clear();
             foreach (var name in _movieFiles) _movieChoice.AddItem($"{name}  —  {StrMovie.Describe(name)}");
             _movieChoice.Disabled = _playMovie.Disabled = _movieFiles.Count == 0;
@@ -359,6 +387,79 @@ namespace TPWGodot
                 _pendingMovieError = err;
                 CallDeferred(nameof(StartPendingMovie));
             });
+        }
+
+        void PlayAdvisorLine() => PlayAdvisorLine(-1, 0);
+
+        /// <summary>Play a line in a language, or a random audible line when <paramref name="line"/> is -1.</summary>
+        void PlayAdvisorLine(int line, int language)
+        {
+            if (_player.IsPlaying) return;
+            string path = _data.SourcePath;
+            _playAdvisor.Disabled = true;
+            _playAdvisor.Text = _advisorClips == null ? "Finding the advisor's lines…" : "Loading…";
+
+            // ⚠ OFF THE MAIN THREAD. The first press reads the subheader of every one of the file's 169,344 sectors
+            // to find where each line starts; later presses reuse that list and read only the one line.
+            Task.Run(() =>
+            {
+                PcmSample pcm = null;
+                XaAudio.Coding coding = default;
+                string err = null;
+                try
+                {
+                    using var disc = DiscReader.Open(path);
+                    var f = disc.Find(AdvisorSpeech.File);
+                    var clips = _advisorClips;
+                    if (clips == null && AdvisorSpeech.TryScan(disc, f, out var found, out err)) clips = _advisorClips = found;
+                    if (clips != null)
+                    {
+                        AdvisorClip clip;
+                        if (line >= 0) clip = clips.Find(c => c.Line == line && c.Language == language);
+                        else
+                        {
+                            // Skip the few near-empty lines: a random pick should be something you can hear.
+                            var audible = clips.FindAll(c => c.Sectors >= 5);
+                            clip = audible[System.Random.Shared.Next(audible.Count)];
+                        }
+                        if (clip.Sectors == 0) err = $"no line {line} in language {language}";
+                        else AdvisorSpeech.TryDecode(disc, f, clip, out pcm, out coding, out err);
+                    }
+                }
+                catch (System.Exception e) { err = e.Message; }
+                _pendingLine = pcm;
+                _pendingLineCoding = coding;
+                _pendingLineError = err;
+                CallDeferred(nameof(PlayPendingLine));
+            });
+        }
+
+        void PlayPendingLine()
+        {
+            _playAdvisor.Disabled = false;
+            var pcm = _pendingLine;
+            _pendingLine = null;
+            if (pcm == null || pcm.SampleCount == 0)
+            {
+                _playAdvisor.Text = "Play an advisor line";
+                GD.PushWarning($"[tpw] advisor line failed: {_pendingLineError}");
+                if (_quitAfterLine) GetTree().Quit(1);
+                return;
+            }
+            var bytes = new byte[pcm.SampleCount * 2];
+            System.Buffer.BlockCopy(pcm.Samples, 0, bytes, 0, bytes.Length);
+            _audio.Stream = new AudioStreamWav
+            {
+                Format = AudioStreamWav.FormatEnum.Format16Bits,
+                MixRate = _pendingLineCoding.SampleRate,
+                Stereo = _pendingLineCoding.Stereo,
+                Data = bytes,
+            };
+            _audio.Play();
+            if (_quitAfterLine) _audio.Finished += () => GetTree().Quit();
+            double secs = pcm.SampleCount / (double)_pendingLineCoding.Channels / _pendingLineCoding.SampleRate;
+            _playAdvisor.Text = $"Play an advisor line ({_advisorClips?.Count ?? 0:n0})  —  now: {pcm.Source}, {secs:0.0}s";
+            GD.Print($"[tpw] playing {pcm.Source}: {_pendingLineCoding}, {secs:0.00}s");
         }
 
         void StartPendingMovie()
