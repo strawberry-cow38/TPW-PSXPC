@@ -103,5 +103,69 @@ namespace TPW.Data.Tests
             Assert.Equal(0.1f, r.X, 5); Assert.Equal(0.2f, r.Y, 5);
             Assert.Equal(0.3f, r.Z, 5); Assert.Equal(0.9f, r.W, 5);
         }
+
+        /// <summary>Build a one-bone mesh whose bone is driven by a type-0 track with a scale that
+        /// runs from a quarter size to full over one span.</summary>
+        static Mesh ScalingRig(int type)
+        {
+            var b = new List<byte>();
+            // One root bone, 40 bytes / 20 halfwords: parent at H3, identity quaternion at H4..H7.
+            for (int h = 0; h < 20; h++) S16(b, h == 3 ? -1 : h == 7 ? 4096 : 0);
+            b.Add((byte)type); b.Add(0); U16(b, 0); U16(b, 0); U16(b, 1);   // bone 0, count 1 => 2 slots
+            // Two 36-byte records: {time, dur, vecA, pad, quatA, vecB(scale), pad, quatB}
+            foreach (var (t, d, sc) in new[] { (0, 10, 1024), (10, 10, 4096) })
+            {
+                S16(b, t); S16(b, d);
+                S16(b, 0); S16(b, 0); S16(b, 0); S16(b, 0);          // vecA + pad
+                S16(b, 0); S16(b, 0); S16(b, 0); S16(b, 4096);       // quatA = identity
+                S16(b, sc); S16(b, sc); S16(b, sc); S16(b, 0);       // vecB = the diagonal
+                S16(b, 0); S16(b, 0); S16(b, 0); S16(b, 4096);       // quatB = identity
+            }
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 1, 1, 0, 0,
+                                               out var tr, out var skel, out _, out _, out string e), e);
+            return new Mesh { Tracks = tr, Skeleton = skel };
+        }
+
+        // ⭐ FOUR TRACK TYPES DRIVE BONES, NOT ONE. Only type 6 was applied, so a bone driven by 0, 1 or
+        // 7 sat frozen at its rest pose - which is not a wrong pose, it is NO animation, and it looks
+        // exactly like a model that simply does not move. That is how the build rigs read as static.
+        [Theory]
+        [InlineData(0)]
+        [InlineData(6)]
+        public void ABoneDrivenByATypeZeroTrackActuallyMoves(int type)
+        {
+            var mesh = ScalingRig(type);
+            Assert.NotEmpty(mesh.Tracks);
+            Assert.Contains(mesh.Tracks, t => t.Type == type && t.Keys.Length > 0);
+        }
+
+        // ⭐ THE SCALE IS THE ANIMATION ON THESE RIGS, and it BLENDS. An earlier version stepped it,
+        // which on the real build rigs turned a smooth grow into the ride popping through fourteen
+        // sizes. REJECTS stepping: at the half-way point the scale must be between its two keys, not
+        // equal to either.
+        [Fact]
+        public void TheScaleBlendsBetweenItsKeysRatherThanStepping()
+        {
+            var mesh = ScalingRig(0);
+            var at0 = MeshPose.Evaluate(mesh, 0).Bones;
+            var at5 = MeshPose.Evaluate(mesh, 5).Bones;
+            var at10 = MeshPose.Evaluate(mesh, 10).Bones;
+            Assert.NotNull(at0); Assert.NotNull(at5); Assert.NotNull(at10);
+
+            float s0 = at0[0].R.M00, s5 = at5[0].R.M00, s10 = at10[0].R.M00;
+            Assert.Equal(0.25f, s0, 3);        // 1024 / 4096
+            Assert.Equal(1.0f, s10, 3);        // 4096 / 4096
+            Assert.True(s5 > s0 && s5 < s10, $"half-way scale {s5} should lie between {s0} and {s10}");
+            Assert.Equal(0.625f, s5, 2);       // exactly half of the way from 0.25 to 1.0
+        }
+
+        // Before the first key and after the last it holds, rather than extrapolating off to nothing.
+        [Fact]
+        public void TheScaleHoldsAtBothEnds()
+        {
+            var mesh = ScalingRig(0);
+            Assert.Equal(0.25f, MeshPose.Evaluate(mesh, -5).Bones[0].R.M00, 3);
+            Assert.Equal(1.0f, MeshPose.Evaluate(mesh, 999).Bones[0].R.M00, 3);
+        }
     }
 }

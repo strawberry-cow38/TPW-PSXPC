@@ -91,6 +91,62 @@ namespace TPW.Data
             return end;
         }
 
+        /// <summary>The scale at <paramref name="time"/>, blended exactly as the keyframe is.
+        ///
+        /// ⭐ IT INTERPOLATES, AND THE FIRST VERSION OF THIS STEPPED. The scale lives in the SAME record
+        /// as the key and is selected by the same key index, so the evaluator's one blend weight per
+        /// span -- ((t - start) &lt;&lt; 12) / duration -- covers the whole record. Stepping the scale while
+        /// easing the rotation would mean using that weight on half of it.
+        ///
+        /// The data says so too. On the build rigs the rotation is near-identity, so essentially ALL the
+        /// motion is scale: with 14 keys over 61 units, stepping produced a vertex delta of zeroes
+        /// punctuated by jumps of 30 and 11 -- the ride popping through fourteen sizes instead of
+        /// growing. That profile is a mechanical artefact, not an authored look.</summary>
+        static (float X, float Y, float Z) ScaleAt(AnimTrack t, int time)
+        {
+            var sc = t.Scales;
+            if (sc.Length == 0) return (1f, 1f, 1f);
+            const float S = 1f / 4096f;
+
+            if (!t.IsTimed)
+            {
+                // Untimed: one block per tick, so the clock is the index and there is nothing between
+                // two of them to blend.
+                int i = time < 0 ? 0 : time >= sc.Length ? sc.Length - 1 : time;
+                return (sc[i].Sx * S, sc[i].Sy * S, sc[i].Sz * S);
+            }
+
+            if (time <= t.Keys[0].Time) return (sc[0].Sx * S, sc[0].Sy * S, sc[0].Sz * S);
+            for (int i = 0; i < t.Keys.Length - 1 && i + 1 < sc.Length; i++)
+            {
+                int start = t.Keys[i].Time, dur = t.Keys[i].Duration;
+                if (dur <= 0 || time < start || time >= start + dur) continue;
+                // The same integer weight the keyframe blend uses, so the two cannot drift apart.
+                int w = ((time - start) << 12) / dur;
+                float f = w / 4096f;
+                return (Lerp(sc[i].Sx, sc[i + 1].Sx, f) * S,
+                        Lerp(sc[i].Sy, sc[i + 1].Sy, f) * S,
+                        Lerp(sc[i].Sz, sc[i + 1].Sz, f) * S);
+            }
+            var last = sc[^1];
+            return (last.Sx * S, last.Sy * S, last.Sz * S);
+        }
+
+        static float Lerp(short a, short b, float f) => a + (b - a) * f;
+
+        /// <summary>R * diag(sx, sy, sz): the diagonal scales the matrix's COLUMNS.
+        ///
+        /// ⚠ THE COMPOSITION ORDER AGAINST quatB IS NOT VERIFIED. The evaluator builds this diagonal
+        /// from the second block's vector and conjugates it by that block's quaternion (0x8002BE58 bit
+        /// 4: quat to matrix, diagonal, then LIBGTE TransposeMatrix). Every quatB in entry 3 is the
+        /// identity, so the conjugation is a no-op on the only data that exercises this and the order
+        /// cannot be settled from it. If a rig ever turns up with a non-identity quatB, read the inline
+        /// multiply in 0x8002BE58 rather than assuming this.</summary>
+        static BoneRest ScaleColumns(BoneRest r, float sx, float sy, float sz)
+            => BoneRest.FromRows(r.M00 * sx, r.M01 * sy, r.M02 * sz,
+                                 r.M10 * sx, r.M11 * sy, r.M12 * sz,
+                                 r.M20 * sx, r.M21 * sy, r.M22 * sz);
+
         /// <summary>Evaluate <paramref name="mesh"/> at <paramref name="time"/>.</summary>
         public static MeshPose Evaluate(Mesh mesh, int time)
         {
@@ -117,11 +173,28 @@ namespace TPW.Data
                 if (mesh.Tracks != null)
                     foreach (var t in mesh.Tracks)
                     {
-                        if (t.Type != 6 || t.Keys.Length == 0) continue;
+                        // ⚠ FOUR TYPES DRIVE BONES, NOT ONE. 6 is the timed keyframe, 7 is the same
+                        // block untimed, and 0 and 1 are those two again with a SECOND block carrying a
+                        // scale. Only 6 was applied here, so every bone driven by 0, 1 or 7 sat frozen
+                        // at its rest pose -- which is not a wrong pose, it is no animation at all, and
+                        // it looks exactly like a model that simply does not move.
+                        if (t.Type is not (0 or 1 or 6 or 7) || t.Keys.Length == 0) continue;
                         int b = t.BoneIndex;
                         if (b < 0 || b >= n) continue;
                         var k = t.Sample(time);
-                        localR[b] = QuatToMatrix(k.Qx, k.Qy, k.Qz, k.Qw);
+                        var r = QuatToMatrix(k.Qx, k.Qy, k.Qz, k.Qw);
+
+                        // Types 0 and 1 carry a per-key diagonal scale in the second block. On the
+                        // build rigs (entry 3) that scale IS the animation: the diagonal runs from
+                        // about 380 to 4096, so the ride grows from a tenth of its size to full, with
+                        // a springy overshoot. Drop it and the ride does not grow, it just moves.
+                        if (t.Type is 0 or 1 && t.Scales.Length > 0)
+                        {
+                            var (sx, sy, sz) = ScaleAt(t, time);
+                            r = ScaleColumns(r, sx, sy, sz);
+                        }
+
+                        localR[b] = r;
                         localT[b] = (k.Tx, k.Ty, k.Tz);
                     }
 

@@ -1717,6 +1717,53 @@ static class Program
         return 1;
     }
 
+
+    /// <summary>--scaleblocks E: for every type-0 and type-1 track in entry E, the second block's
+    /// diagonal (vecB) and axis quaternion (quatB).
+    ///
+    /// Exists to answer one question before porting the scale: does it actually DO anything on these
+    /// rigs? The evaluator builds a diagonal from vecB and conjugates it by quatB, so an identity
+    /// diagonal with an identity quaternion is a no-op and the composition ORDER cannot matter.
+    /// 4096 is 1.0 in the GTE's 1.12 fixed point.</summary>
+    static int ScaleBlocks(GazArchive gaz, int entry)
+    {
+        foreach (var e in gaz.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _))
+            { Console.WriteLine($"entry #{entry} is not a mesh container"); return 1; }
+
+            int identity = 0, scaled = 0;
+            for (int sub = 0; sub < c.SubCount; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m, out _) || m.Tracks == null) continue;
+                foreach (var t in m.Tracks)
+                {
+                    if (t.Type != 0 && t.Type != 1) continue;
+                    if (t.Scales == null || t.Scales.Length == 0) continue;
+                    for (int k = 0; k < t.Scales.Length; k++)
+                    {
+                        var s = t.Scales[k];
+                        bool unit = s.Sx == 4096 && s.Sy == 4096 && s.Sz == 4096;
+                        bool noRot = Math.Abs(s.Qx) < 1e-4 && Math.Abs(s.Qy) < 1e-4
+                                  && Math.Abs(s.Qz) < 1e-4 && Math.Abs(Math.Abs(s.Qw) - 1f) < 1e-3;
+                        if (unit && noRot) { identity++; continue; }
+                        scaled++;
+                        if (scaled <= 12)
+                            Console.WriteLine($"  sub {sub,2} type {t.Type} bone {t.BoneIndex,2} key {k,3}: " +
+                                              $"diag ({s.Sx,6},{s.Sy,6},{s.Sz,6})  " +
+                                              $"quatB ({s.Qx,6:F3},{s.Qy,6:F3},{s.Qz,6:F3},{s.Qw,6:F3})  slot3 {s.Slot3}");
+                    }
+                }
+            }
+            Console.WriteLine($"entry #{entry}: {identity} blocks are a no-op (unit diagonal, identity quat), {scaled} are not");
+            return 0;
+        }
+        Console.WriteLine($"no entry #{entry}");
+        return 1;
+    }
+
     static int FaceGroup(GazArchive g, int entry, int sub, ushort clut)
     {
         foreach (var e in g.Entries)
@@ -1958,6 +2005,8 @@ static class Program
             if (Array.IndexOf(args, "--firstrecord") >= 0) return FirstRecord(g);
             int keAt = Array.IndexOf(args, "--keyends");
             if (keAt >= 0 && keAt + 2 < args.Length) return KeyEnds(g, int.Parse(args[keAt + 1]), int.Parse(args[keAt + 2]));
+            int sbAt = Array.IndexOf(args, "--scaleblocks");
+            if (sbAt >= 0 && sbAt + 1 < args.Length) return ScaleBlocks(g, int.Parse(args[sbAt + 1]));
             int ahAt = Array.IndexOf(args, "--animheaders");
             if (ahAt >= 0 && ahAt + 1 < args.Length) return AnimHeaders(g, int.Parse(args[ahAt + 1]));
             int fgAt = Array.IndexOf(args, "--facegroup");
