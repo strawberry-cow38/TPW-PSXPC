@@ -34,7 +34,10 @@ namespace TPWGodot
         bool _pathMode;
         /// <summary>The build tools' sound group (SoundGroup 7) and a player for it: the path tool's own sounds.</summary>
         SoundGroup _toolSounds;
-        AudioStreamPlayer _sfx;
+        /// <summary>A few voices, so two sounds the game starts together (lay, then connected) both play, as the
+        /// game's voice allocator (0x800B8300) gives each its own SPU voice.</summary>
+        readonly AudioStreamPlayer[] _sfx = new AudioStreamPlayer[4];
+        int _sfxNext;
         readonly Dictionary<int, AudioStreamWav> _sfxStreams = new();
         (int X, int Z)? _cursorTile, _runStart;
         TextureSheet _groundSheet;
@@ -102,8 +105,7 @@ namespace TPWGodot
             AddChild(_build);
             _cursorMesh = new MeshInstance3D();
             AddChild(_cursorMesh);
-            _sfx = new AudioStreamPlayer();
-            AddChild(_sfx);
+            for (int i = 0; i < _sfx.Length; i++) { _sfx[i] = new AudioStreamPlayer(); AddChild(_sfx[i]); }
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
             _flags = new MeshInstance3D();
@@ -732,13 +734,25 @@ namespace TPWGodot
 
         void LayPath((int X, int Z) start, (int X, int Z) end)
         {
-            int laid = _paths.Lay(_map, PathTool.Run(start.X, start.Z, end.X, end.Z));
-            if (laid > 0) { RebuildGround(); PlaySfx(ToolSound.Lay); }
+            var run = PathTool.Run(start.X, start.Z, end.X, end.Z);
+            // ⭐ CONNECTED: the run reached its last tile and that tile was already path (or queue or track). The place
+            // step flags it (0x8004DE04 sets 0x801026D0 for the last tile of those types), the piece pass then
+            // reports the run finished, the tool resets and 0x8001D5C0 plays sound 3 after sound 4. Master: "03 plays
+            // when a path is connected to another one successfully".
+            var last = run[^1];
+            bool endsOnPath = _map[last.X, last.Z].Raw0 is 2 or 4 or 10 or 13;
+            int laid = _paths.Lay(_map, run);
+            if (laid > 0)
+            {
+                RebuildGround();
+                PlaySfx(ToolSound.Lay);
+                if (laid == run.Count && endsOnPath) PlaySfx(ToolSound.Connected);
+            }
             else PlaySfx(ToolSound.Refused);
         }
 
         /// <summary>The path tool's sounds in group 7, as 0x8001D5C0 plays them.</summary>
-        public enum ToolSound { Start = 0, Refused = 2, Finished = 3, Lay = 4 }
+        public enum ToolSound { Start = 0, Refused = 2, Connected = 3, Lay = 4 }
 
         /// <summary>Give the park view the build tools' sound group (SoundGroup.Load(…, 7)).</summary>
         public void SetToolSounds(SoundGroup group) { _toolSounds = group; _sfxStreams.Clear(); }
@@ -747,7 +761,7 @@ namespace TPWGodot
         void PlaySfx(ToolSound which)
         {
             int n = (int)which;
-            if (_toolSounds == null || _sfx == null) return;
+            if (_toolSounds == null) return;
             if (!_sfxStreams.TryGetValue(n, out var stream))
             {
                 var pcm = _toolSounds.Decode(n);
@@ -758,8 +772,10 @@ namespace TPWGodot
                 _sfxStreams[n] = stream;
             }
             if (stream == null) return;
-            _sfx.Stream = stream;
-            _sfx.Play();
+            var voice = _sfx[_sfxNext];
+            _sfxNext = (_sfxNext + 1) % _sfx.Length;
+            voice.Stream = stream;
+            voice.Play();
         }
 
         /// <summary>Lay a run of path as the tool would, from tile (x0, z0) toward (x1, z1). For captures: the mouse
@@ -911,7 +927,7 @@ namespace TPWGodot
             if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _pathMode)
             {
                 if (_runStart != null) _runStart = null;
-                else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; PlaySfx(ToolSound.Finished); }
+                else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; }
                 RefreshInfo();
                 return;
             }

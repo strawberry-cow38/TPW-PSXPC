@@ -11,8 +11,8 @@ namespace TPW.Data
     /// with count = its size / 8. 0x800B8E08(g, n) plays sound n of group g (0x800B84AC): record n is `s16 flag
     /// (a per-voice switch, 0x801033D0), u16 pitch (0x1000 = 44,100 Hz), u32 offset` into the group's samples, at
     /// volume 0x3FFF of the master effects volume and centre pan. Group 7 is entries 320/321, the park's build
-    /// tools: the path tool plays 0 when a run is started, 4 when it is laid, 3 when the tool finishes a path and 2
-    /// when it refuses (0x8001D5C0).</summary>
+    /// tools: the path tool plays 0 when a run is started, 4 when it is laid, 3 as well when the run ends on path
+    /// already there (connected; master confirmed it by ear) and 2 when it refuses (0x8001D5C0).</summary>
     public sealed class SoundGroup
     {
         public readonly struct Sound
