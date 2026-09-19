@@ -47,6 +47,10 @@ namespace TPWGodot
         OptionButton _musicChoice;
         /// <summary>The common sheet (#416): guests, the flags by the bus stops, the loading font.</summary>
         TextureSheet _commonSheet;
+        /// <summary>The game's executable (TPW.BIN), for the data tables the port reads out of it (particle templates).</summary>
+        byte[] _exe;
+        /// <summary>From <c>--park-open</c>: open the park as soon as it shows (captures of the gates opening).</summary>
+        bool _autoOpen;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -406,6 +410,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--boot-from=")) _bootFrom = arg.Substring("--boot-from=".Length);
                 else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
                 else if (arg.StartsWith("--music=")) _autoMusic = int.Parse(arg.Substring("--music=".Length));
+                else if (arg == "--park-open") _autoOpen = true;
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
@@ -466,6 +471,8 @@ namespace TPWGodot
                     if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gz, out _))
                     {
                         _modules = TrackerModule.FindAll(gz);
+                        var exeFile = disc.Find(AssetSelfTest.GameExecutable);
+                        if (exeFile != null) _exe = disc.ReadFile(exeFile);
                         if (EntranceFlags.CommonSheet < gz.Entries.Count &&
                             TextureSheet.TryParse(gz.Read(gz.Entries[EntranceFlags.CommonSheet]), out var common, out _))
                             _commonSheet = common;
@@ -698,7 +705,8 @@ namespace TPWGodot
                 SceneryPack gateModels = null;
                 var gateInfo = world != null ? ParkGate.ForWorld(world.Index) : null;
                 if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
-                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels);
+                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
+                if (_autoOpen) _park.ParkOpen = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
                 int mi = world != null ? _modules.FindIndex(m => m.Entry == world.Music) : -1;
                 if (mi >= 0 && _autoMusic < 0)

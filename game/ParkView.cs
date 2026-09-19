@@ -31,6 +31,19 @@ namespace TPWGodot
         ShaderMaterial _flagMat;
         int _flagW, _flagH;
         double _parkTime;   // the park's time accumulator, in the game's time units (EntranceFlags.TimeUnitsPerSecond)
+        // The gate (ParkGate), drawn on its own so it can swing, and the effects (ParticleSystem).
+        MeshInstance3D _gateMesh, _fxMesh;
+        ParkGate.State _gate;
+        SceneryModel _gateModel;
+        (int X, int Y, int Z) _gateBase;
+        PageAtlas _atlas;
+        ParticleSystem _fx;
+        readonly Dictionary<int, (ImageTexture Tex, int W, int H)> _fxSprites = new();
+        TextureSheet _common;
+        double _frameClock;
+        int _gateAngleDrawn = int.MinValue;
+        /// <summary>Whether the park is open: the gates only open then (0x800541AC).</summary>
+        public bool ParkOpen { get; set; }
         /// <summary>The material ground and scenery share; its scroll_rows advances one row per park frame.</summary>
         ShaderMaterial _mat;
         double _scrollClock;
@@ -59,6 +72,10 @@ namespace TPWGodot
             AddChild(_scenery);
             _flags = new MeshInstance3D();
             AddChild(_flags);
+            _gateMesh = new MeshInstance3D();
+            AddChild(_gateMesh);
+            _fxMesh = new MeshInstance3D();
+            AddChild(_fxMesh);
             // The game's own field of view: projection distance H = 256 (SetGeomScreen at 0x80054C44, from
             // gp+0x700) about the centre of its 512x256 PAL screen (0x800BA6A4 → 0x800BB3B4 sets 512x256 and puts
             // the projection centre at half of it), so the vertical view is 2·atan(128 / 256) = 53.13°.
@@ -91,9 +108,14 @@ namespace TPWGodot
         /// <param name="common">The common sheet (#416), for the entrance flags; null leaves them out.</param>
         /// <param name="gatePack">The world's gate pack (ParkGate), drawn closed at the gate's base; null leaves it out.</param>
         public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery, TextureSheet common = null,
-                         SceneryPack gatePack = null)
+                         SceneryPack gatePack = null, byte[] exe = null)
         {
             _map = map;
+            _common = common;
+            _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
+            _fx = new ParticleSystem();
+            _fxMesh.Mesh = null;
+            ParkOpen = false;
             _flagMat = null;
             _flags.Mesh = null;
             if (common != null && EntranceFlags.Sprite < common.Sprites.Count)
@@ -126,7 +148,20 @@ namespace TPWGodot
                 _mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(
                     Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false, Image.Format.Rgba8, atlas.Image.Rgba)));
                 _ground.Mesh = GroundMesh(quads, atlas, scroll, _mat);
-                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, out placed, out skipped, gate, gatePack);
+                _atlas = atlas;
+                if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, out placed, out skipped);
+                if (gate != null)
+                {
+                    _gate = new ParkGate.State(gate);
+                    _gateModel = gatePack.Models[0];
+                    _gateBase = (gate.TileX * ParkTerrain.TileUnits, map[gate.TileX, gate.TileZ].HeightUnits, gate.TileZ * ParkTerrain.TileUnits);
+                    if (exe != null)
+                        foreach (var (ex, ey, ez, addr) in gate.Effects)
+                        {
+                            var t = EmitterTemplate.Read(exe, AssetSelfTest.GameExecutableBase, addr);
+                            if (t != null) _fx.Add(t, _gateBase.X + ex, _gateBase.Y + ey, _gateBase.Z + ez);
+                        }
+                }
             }
             foreach (var t in map.Tiles) if (t.NoGround) open++;
             _types.Mesh = TypeMesh(map);
@@ -136,7 +171,7 @@ namespace TPWGodot
                         (ground != null ? $"ground from sheet #{world?.GroundSheet}, {quads.Count:n0} quads (with {GroundBorder} tiles past each edge), {open} tiles left to the scenery" +
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, O scenery";
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, O scenery, P open the park";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -177,8 +212,7 @@ namespace TPWGodot
         /// <summary>The scenery: each placement's model, scaled, turned and moved as 0x80057AF0 does, in the world's
         /// frame and then into Godot's (z negated, like everything else). Faces are drawn from both sides, as master
         /// asked of every model; the game itself drops a single-sided face that looks away.</summary>
-        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, out int placed, out int skipped,
-                                     ParkGate gate = null, SceneryPack gatePack = null)
+        static ArrayMesh SceneryMesh(ParkMap map, SceneryPack pack, PageAtlas atlas, Scrolling scroll, Material mat, out int placed, out int skipped)
         {
             var verts = new List<Vector3>();
             var cols = new List<Color>();
@@ -216,29 +250,6 @@ namespace TPWGodot
                         uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
                     }
                 }
-            }
-            // The gate's moving part(s), closed (ParkGate): model 0 of the world's gate pack at the gate's base.
-            if (gate != null && gatePack != null && gatePack.Models.Count > 0)
-            {
-                var gm = gatePack.Models[0];
-                var gateBase = (gate.TileX * ParkTerrain.TileUnits, map[gate.TileX, gate.TileZ].HeightUnits, gate.TileZ * ParkTerrain.TileUnits);
-                foreach (var part in gate.Parts)
-                    foreach (var poly in gm.Polygons)
-                    {
-                        var tex = gm.Textures[poly.Texture];
-                        atlas.TryOrigin(tex.TPage, tex.Clut, out int ox, out int oy);
-                        foreach (int k in poly.IsQuad ? quad : tri)
-                        {
-                            int vi = poly.Corner(k);
-                            var (wx, wy, wz) = ParkGate.Place(part, gateBase, gm.Position(vi));
-                            verts.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
-                            byte g = gm.Vertices[vi].Shade;
-                            cols.Add(new Color(g / 255f, g / 255f, g / 255f));
-                            ushort uv = poly.Uv(k);
-                            uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
-                            rects.Add(0); rects.Add(0); rects.Add(0); rects.Add(0);
-                        }
-                    }
             }
             return Surface(verts, cols, uvs, rects, mat);
         }
@@ -300,6 +311,88 @@ namespace TPWGodot
             var mesh = new ArrayMesh();
             mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
             mesh.SurfaceSetMaterial(0, _flagMat);
+            return mesh;
+        }
+
+        /// <summary>The gate's moving parts at the gate state's angle (ParkGate.State.Part), textured from the park atlas.</summary>
+        ArrayMesh GateMesh()
+        {
+            var verts = new List<Vector3>(); var cols = new List<Color>(); var uvs = new List<Vector2>(); var rects = new List<float>();
+            float aw = _atlas.Image.Width, ah = _atlas.Image.Height;
+            int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
+            for (int i = 0; i < _gate.Gate.Parts.Length; i++)
+            {
+                var part = _gate.Part(i);
+                foreach (var poly in _gateModel.Polygons)
+                {
+                    var tex = _gateModel.Textures[poly.Texture];
+                    _atlas.TryOrigin(tex.TPage, tex.Clut, out int ox, out int oy);
+                    foreach (int k in poly.IsQuad ? quad : tri)
+                    {
+                        int vi = poly.Corner(k);
+                        var (wx, wy, wz) = ParkGate.Place(part, _gateBase, _gateModel.Position(vi));
+                        verts.Add(new Vector3(wx / ParkTerrain.TileUnits, wy / ParkTerrain.TileUnits, -wz / ParkTerrain.TileUnits));
+                        byte g = _gateModel.Vertices[vi].Shade;
+                        cols.Add(new Color(g / 255f, g / 255f, g / 255f));
+                        ushort uv = poly.Uv(k);
+                        uvs.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
+                        rects.Add(0); rects.Add(0); rects.Add(0); rects.Add(0);
+                    }
+                }
+            }
+            return Surface(verts, cols, uvs, rects, _mat);
+        }
+
+        /// <summary>The live particles as billboards facing the camera, sized as 0x80034BDC sizes them: half-extents
+        /// sprite width × 0.8 × size / 16 and sprite height × size / 16 world units (the 0.8 is the game's own,
+        /// for its 512-wide screen), coloured by the particle, blended by its definition (0x8008B014).</summary>
+        ArrayMesh FxMesh()
+        {
+            var mesh = new ArrayMesh();
+            if (_fx == null || _fx.Particles.Count == 0 || _common == null) return mesh;
+            var right = _camera.GlobalTransform.Basis.X.Normalized();
+            var up = _camera.GlobalTransform.Basis.Y.Normalized();
+            // One bucket per (sprite, blend): each is a surface pair (solid texels, blended texels) as the GPU draws it.
+            var buckets = new Dictionary<(int, int), (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
+            foreach (var p in _fx.Particles)
+            {
+                var d = p.Def;
+                if (!_fxSprites.TryGetValue(d.Sprite, out var spr))
+                {
+                    var img = _common.RenderSprite(d.Sprite);
+                    spr = img == null ? (null, 1, 1) : (ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, img.Rgba)), img.Width, img.Height);
+                    _fxSprites[d.Sprite] = spr;
+                }
+                if (spr.Tex == null) continue;
+                var key = (d.Sprite, d.Blend);
+                if (!buckets.TryGetValue(key, out var b)) buckets[key] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
+                float hw = spr.W * 0.8f * p.SizeUnits / 16f / ParkTerrain.TileUnits, hh = spr.H * p.SizeUnits / 16f / ParkTerrain.TileUnits;
+                var c = new Vector3(p.X / (float)ParkTerrain.TileUnits, p.Y / (float)ParkTerrain.TileUnits, -p.Z / (float)ParkTerrain.TileUnits);
+                var col = new Color(Math.Clamp(p.R >> 8, 0, 255) / 255f, Math.Clamp(p.G >> 8, 0, 255) / 255f, Math.Clamp(p.B >> 8, 0, 255) / 255f);
+                Vector3 tl = c - right * hw + up * hh, tr = c + right * hw + up * hh, bl = c - right * hw - up * hh, br = c + right * hw - up * hh;
+                foreach (var (v, uv) in new[] { (tl, new Vector2(0, 0)), (tr, new Vector2(1, 0)), (bl, new Vector2(0, 1)), (bl, new Vector2(0, 1)), (tr, new Vector2(1, 0)), (br, new Vector2(1, 1)) })
+                { b.V.Add(v); b.C.Add(col); b.UV.Add(uv); }
+            }
+            foreach (var ((sprite, blend), b) in buckets)
+            {
+                var tex = _fxSprites[sprite].Tex;
+                // The definition's blend (0x8008B014): 0 solid; 1 the page's own mode; 2 subtract; 3 add; 4 add a quarter.
+                int mode = blend switch { 2 => 2, 3 => 1, 4 => 3, 1 => (_common.Sprites[sprite].TPage >> 5) & 3, _ => -1 };
+                void Add(Shader sh)
+                {
+                    var arrays = new Godot.Collections.Array();
+                    arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                    arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
+                    arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
+                    mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+                    var m = new ShaderMaterial { Shader = sh };
+                    m.SetShaderParameter("atlas", tex);
+                    mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, m);
+                }
+                if (mode < 0) Add(PsxShading.Shader(false));
+                else { Add(PsxShading.SemiTransparentShader(mode, false, false)); Add(PsxShading.SemiTransparentShader(mode, true, false)); }
+            }
             return mesh;
         }
 
@@ -395,6 +488,19 @@ namespace TPWGodot
             _mat?.SetShaderParameter("scroll_rows", (float)Math.Floor(_scrollClock / TPW.Sim.ParkClock.TickSeconds));
             _parkTime += delta * EntranceFlags.TimeUnitsPerSecond;
             if (_flagMat != null) _flags.Mesh = FlagMesh((long)_parkTime);
+            // Park frames: 25 a second (a frame per clock tick at PAL's 50 Hz), each worth 1/25 s of the game's time.
+            _frameClock += delta;
+            int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParticleSystem.FramesPerSecond);
+            int frames = 0;
+            while (_frameClock >= 1.0 / ParticleSystem.FramesPerSecond && frames < 10)
+            {
+                _frameClock -= 1.0 / ParticleSystem.FramesPerSecond;
+                frames++;
+                _gate?.Update(frameTime, ParkOpen);
+                _fx?.Step();
+            }
+            if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
+            _fxMesh.Mesh = FxMesh();
             float dt = (float)delta;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
@@ -431,6 +537,8 @@ namespace TPWGodot
                 _types.Visible = !_types.Visible;
             else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.O })
                 _scenery.Visible = !_scenery.Visible;
+            else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.P })
+                ParkOpen = true;   // the gates swing open; the game never shuts them again
         }
     }
 }

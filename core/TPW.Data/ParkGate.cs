@@ -42,16 +42,73 @@ namespace TPW.Data
         public int TileX { get; init; }
         public int TileZ { get; init; }
         public GatePart[] Parts { get; init; } = Array.Empty<GatePart>();
+        /// <summary>Effect emitters the gate starts with: offset from the base and the emitter template's address in
+        /// the executable (EmitterTemplate). The jungle's torch flames (0x8006E4A0: 0x80089E38 with 0x800F7918).</summary>
+        public (int X, int Y, int Z, uint Template)[] Effects { get; init; } = Array.Empty<(int, int, int, uint)>();
 
         public static readonly ParkGate[] All =
         {
-            new ParkGate { World = 0, PackEntry = 87, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(512, 0, 350, 0, 0, 0), new GatePart(1024, 0, 350, 0, 0x800, 0) } },
+            new ParkGate { World = 0, PackEntry = 87, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(512, 0, 350, 0, 0, 0), new GatePart(1024, 0, 350, 0, 0x800, 0) },
+                           Effects = new[] { (440, 440, 200, 0x800F7918u), (1130, 440, 200, 0x800F7918u) } },
             new ParkGate { World = 1, PackEntry = 86, TileX = 19, TileZ = 17, Parts = new[] { new GatePart(260, 0, 280, 0, 0, 0), new GatePart(750, 0, 280, 0, 0x800, 0) } },
             new ParkGate { World = 2, PackEntry = 85, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(1100, 600, 190, 0, 0, 0) } },
             new ParkGate { World = 3, PackEntry = 88, TileX = 18, TileZ = 16, Parts = new[] { new GatePart(800, 570, 300, 0, 0, 0) } },
         };
 
         public static ParkGate ForWorld(int world) => world >= 0 && world < All.Length ? All[world] : null;
+
+        /// <summary>A gate's moving state, updated as each world's per-frame method does once the park is open
+        /// (0x8006E5D0 jungle, 0x8006E828 halloween, 0x8006EA80 fantasy, 0x8006EC8C space).</summary>
+        public sealed class State
+        {
+            public readonly ParkGate Gate;
+            /// <summary>The swinging angle (y for the doors, z for the drawbridge, x for the hatch) and its speed.</summary>
+            public int Angle, Speed;
+            public State(ParkGate gate)
+            {
+                Gate = gate;
+                Speed = gate.World switch { 2 => unchecked((int)0xFFFFF000), 3 => 0x100, _ => 0x400 };
+            }
+
+            /// <summary>One frame, frameTime in the game's time units (EntranceFlags.TimeUnitsPerSecond; the game
+            /// caps a frame at 0x4000).</summary>
+            public void Update(int frameTime, bool parkOpen)
+            {
+                if (!parkOpen) return;
+                frameTime = Math.Min(frameTime, 0x4000);
+                int step = (int)((uint)((Speed >> 8) * frameTime) >> 12);
+                switch (Gate.World)
+                {
+                    case 0: case 1:       // doors: to 0x400, bounce back at half speed, pulled open by 0x100 a frame
+                        Angle = (ushort)(Angle + step);
+                        if ((short)Angle > 0x3FF) { Angle = 0x400; Speed = -(Speed >> 1); }
+                        Speed += 0x100;
+                        break;
+                    case 2:               // drawbridge: to -800, bounce at half, pulled by -0x400 a frame
+                        Angle = (short)(Angle + step);
+                        if (Angle < -799) { Angle = -800; Speed = -(Speed >> 1); }
+                        Speed -= 0x400;
+                        break;
+                    case 3:               // hatch: to 0x708, bounce at a quarter, pulled by 0x40 a frame
+                        Angle = (ushort)(Angle + step);
+                        if ((short)Angle > 0x6E7) { Angle = 0x708; Speed = -(Speed >> 2); }
+                        Speed += 0x40;
+                        break;
+                }
+            }
+
+            /// <summary>Part i with the current angle applied, as the frame method passes it to 0x8006E3F8.</summary>
+            public GatePart Part(int i)
+            {
+                var p = Gate.Parts[i];
+                return Gate.World switch
+                {
+                    0 or 1 => new GatePart(p.X, p.Y, p.Z, 0, i == 0 ? (short)Angle : 0x800 - (short)Angle, 0),
+                    2 => new GatePart(p.X, p.Y, p.Z, 0, 0, (short)Angle),
+                    _ => new GatePart(p.X, p.Y, p.Z, (short)Angle, 0, 0),
+                };
+            }
+        }
 
         /// <summary>A model point placed as the game places a gate part: turned by PsyQ's RotMatrix for the part's
         /// angles (for one non-zero angle: rows (c 0 s / 0 1 0 / -s 0 c) about y, (1 0 0 / 0 c -s / 0 s c) about x,
