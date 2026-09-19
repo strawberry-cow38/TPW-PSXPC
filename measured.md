@@ -2201,3 +2201,35 @@ My capture is day 25 with one. The timeline is 48,000 after the GBP 2,000 ride, 
 ⚠ The original test paired a memory value from day 27 with a screen reading from day 25. That is a
 subtler fault than a mistyped digit and looks identical in a diff, which is why "typo" was such an easy
 and wrong story to reach for. Two real numbers from two moments beat one wrong number every time.
+
+## The per-block bitmask is a VISIBILITY mask, and the group flags are a 5-bit primitive selector
+
+Two things settled at once, from the emitter 0x800115FC. Both correct earlier entries above.
+
+### The bitmask hides geometry (0x80011660)
+```
+t0 = index >> 3
+t1 = index & 7
+t2 = byte at (block + 2 + t0)        ; the per-block bit array
+if ((t2 & (1 << t1)) == 0) branch away      ; BIT CLEAR -> NOT DRAWN
+```
+The renderer itself consumes it, and a clear bit skips the item entirely. So parts of a model really are
+switchable, which is what strawberry suspected. It is used sparingly, exactly as a "hidden until needed"
+switch would be: **492 of 531 meshes have every bit set; 39 have bits cleared**, most of those one or two,
+one of them 32.
+
+⚠ This corrects the earlier dismissal of the bit array. I ruled it out as a *skinning* mechanism, which
+was right, and then stopped thinking about it, which was not — "it is not the thing I am looking for" is
+not the same as "it is nothing".
+
+### The group flags word is a 5-bit jump-table index (0x800116dc)
+```
+andi t0, t0, 0x1f ;  sll t0, 2 ;  jalr [0x80011f34 + t0*4]
+```
+All 32 entries of that table are real code pointers, resolving to 9 distinct routines. So the flags are
+**five** bits of primitive selection, not two plus three unknowns — bits 2, 3 and 4 are not a hide flag
+or anything else mysterious. Observed usage: bit 0 on 99.8% of 1,256 groups, bit 1 37.6%, bit 2 22.6%,
+bit 3 9.2%, bit 4 0.1%.
+
+⚠ I had just told the channel these three bits were unexplained and were a plausible place for a hide
+flag. They were unexplained only in fable's notes, which named the two the primitive choice made obvious.
