@@ -49,6 +49,10 @@ namespace TPW.Data
         public const string LegalScreen = "LEGAL.GFX";
         public const string AssetArchive = "FOLIO.GAZ";
         public const string SpeechStream = "ADVISOR.TPW";
+        public const string GameExecutable = "TPW.BIN";
+        /// <summary>Where the game image loads. Established two ways, and a 100.00% byte match against live RAM;
+        /// see findings/psx-assets.md.</summary>
+        public const uint GameExecutableBase = 0x80010000;
 
         public static SelfTestReport Run(DiscReader disc, bool decodeEveryImage = true)
         {
@@ -315,6 +319,7 @@ namespace TPW.Data
             long groups = 0;
             double seconds = 0;
             string firstProblem = "";
+            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             foreach (var f in disc.Files)
             {
                 if (f.IsDirectory || !f.Name.EndsWith(".STR", StringComparison.OrdinalIgnoreCase)) continue;
@@ -328,6 +333,7 @@ namespace TPW.Data
                 frames += m.Frames.Count;
                 groups += m.XaGroups;
                 seconds += m.DurationSeconds;
+                counts[f.Name] = m.Frames.Count;
 
                 string problem =
                     m.Misassembled > 0 ? $"{m.Misassembled} frames did not add up to their declared size" :
@@ -350,6 +356,23 @@ namespace TPW.Data
                 ? $"{files} files, {frames:n0} frames over {seconds:0} s, every frame assembled to its declared size; " +
                   $"{groups:n0} XA sound groups, every one's duplicated parameters agree"
                 : $"{bad} of {files} movies have a problem; first: {firstProblem}");
+
+            // The frame counts again, from a source the demuxer never touches: the game's own table.
+            var exe = disc.Find(GameExecutable);
+            if (exe == null || counts.Count == 0) return;
+            var table = StrMovie.FrameCountsFromExecutable(disc.ReadFile(exe), GameExecutableBase, counts.Keys);
+            int agree = 0;
+            string mismatch = "";
+            foreach (var (name, n) in counts)
+            {
+                if (table.TryGetValue(name, out int want) && want == n) { agree++; continue; }
+                if (mismatch.Length == 0)
+                    mismatch = table.ContainsKey(name) ? $"{name}: the game says {want} frames, the disc gave {n}"
+                                                       : $"{name} is not in the game's table";
+            }
+            r.Add("movie lengths", agree == counts.Count,
+                $"{agree}/{counts.Count} movies have exactly the frame count {GameExecutable}'s own table gives" +
+                (mismatch.Length > 0 ? "; " + mismatch : ""));
         }
 
         static bool LooksLikeTga(byte[] d)

@@ -226,6 +226,21 @@ namespace TPW.Data.Tests
             Assert.Equal(1, asm.Misassembled);
         }
 
+        // ⭐ The lookup goes THROUGH THE POINTER, so it must come up empty at the wrong load address. If it
+        // still found something there, it would be matching the name alone and checking nothing.
+        [Fact]
+        public void TheGamesFrameCountIsFoundThroughItsPointer()
+        {
+            var exe = new byte[64];
+            System.Text.Encoding.ASCII.GetBytes("GRAV.STR").CopyTo(exe, 16);   // word-aligned, NUL after it
+            BitConverter.GetBytes(0x80010000u + 16).CopyTo(exe, 32);          // the pointer to it
+            BitConverter.GetBytes(473u).CopyTo(exe, 36);                       // and the last frame index
+
+            var found = StrMovie.FrameCountsFromExecutable(exe, 0x80010000, new[] { "GRAV.STR" });
+            Assert.Equal(474, found["GRAV.STR"]);
+            Assert.Empty(StrMovie.FrameCountsFromExecutable(exe, 0x800C0000, new[] { "GRAV.STR" }));
+        }
+
         // Worked by hand at 150 sectors/s: frames complete at sectors 10, 21 and 32, so they are ready at
         // 11/150, 22/150 and 33/150 s.
         [Fact]

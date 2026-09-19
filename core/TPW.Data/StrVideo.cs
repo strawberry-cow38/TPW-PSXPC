@@ -240,6 +240,45 @@ namespace TPW.Data
             return "";
         }
 
+        /// <summary>The game's own record of how many frames each movie has, read out of its executable.
+        ///
+        /// ⭐ AN ORACLE THAT SHARES NOTHING WITH THE DEMUXER. TPW.BIN keeps {pointer to file name, last frame
+        /// index} pairs, which its player uses to know when to stop: BF.STR 113, GRAV.STR 473, MIR.STR 547,
+        /// JUG.STR 458, and 156 for each of the four endings. Those were written from the files when the disc
+        /// was built. If the demuxer drops or invents a frame, the two disagree.
+        ///
+        /// Found by locating each name as a NUL-terminated, word-aligned string, turning its file offset into
+        /// a load address, and looking for that address stored as a word. A wrong load address finds nothing,
+        /// so this re-checks the base as a side effect.
+        ///
+        /// ⭐ IT ALSO SETTLES HOW MANY WORLD MOVIES THERE ARE. The three world entries sit together in one
+        /// table, GRAV, MIR, JUG, and the word after JUG's is zero. The game knows of three, not four.</summary>
+        public static Dictionary<string, int> FrameCountsFromExecutable(byte[] exe, uint loadAddress, IEnumerable<string> names)
+        {
+            var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            if (exe == null || names == null) return result;
+            foreach (var name in names)
+            {
+                var needle = System.Text.Encoding.ASCII.GetBytes(name);
+                for (int at = 0; at + needle.Length < exe.Length && !result.ContainsKey(name); at += 4)
+                {
+                    if (exe[at + needle.Length] != 0) continue;
+                    int k = 0;
+                    while (k < needle.Length && exe[at + k] == needle[k]) k++;
+                    if (k != needle.Length) continue;
+
+                    uint addr = loadAddress + (uint)at;
+                    for (int p = 0; p + 8 <= exe.Length; p += 4)
+                    {
+                        if (BitConverter.ToUInt32(exe, p) != addr) continue;
+                        uint last = BitConverter.ToUInt32(exe, p + 4);
+                        if (last < 100_000) { result[name] = (int)last + 1; break; }
+                    }
+                }
+            }
+            return result;
+        }
+
         /// <summary>Read and demux a whole .STR: frames assembled and checked, audio decoded.
         ///
         /// ⚠ NEEDS A RAW IMAGE. Video and audio are told apart by the Mode 2 subheader, and a cooked 2048-byte
