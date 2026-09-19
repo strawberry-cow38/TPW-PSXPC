@@ -514,6 +514,35 @@ true colours: UK, France, Germany, Spain, Italy, Netherlands, Sweden, the disc's
 Code: `core/TPW.Data/TextureSheet.cs`, `Unpak.TryDecompressBlock`. `tpwcheck --sheets vram_block_hashes.json`
 reproduces the VRAM numbers through the C# path.
 
+## 5q. ✅ The park ground: the terrain routine, and the world table (2026-09-19)
+
+Read off the game's own terrain routine, **0x80012110** (hand-written; it moves the stack onto the scratchpad).
+0x800567F0 scan-converts the camera's view footprint onto the map, then this emits one textured, Gouraud
+POLY_GT4 (command 0x3C) per tile:
+
+| tile byte | meaning (from the routine) |
+|---|---|
+| +1 | height at the tile's **corner**, × 4 world units (a tile is 256) |
+| +4 bits 0-11 | sprite in the world's ground sheet |
+| +4 bits 12-13 / 14 / 15 | quarter turns / mirror down / mirror across of that texture |
+| +6 bits 0-5 | shade at the corner: index into the map's 64-entry table (`u32 N; u32 shade[N]` at the top of the map) |
+| +7 bit 0 | no ground here (on map #203, a river that drops down a waterfall; drawn by something else) |
+
+A quad blends the four corner tiles (x, z), (x+1, z), (x, z+1), (x+1, z+1) for height and shade, and takes its
+texture from (x, z). The GPU folds it on the (x+1, z)–(x, z+1) diagonal. Edge rules are odd but the game's:
+row 0 is always flat (the test is z < 1), and out-of-map tiles are flat copies of the edge.
+
+**The world table** (0x8002ED50 → records at 0x8010558C / 0x801054DC / 0x8010542C / 0x8010537C, listed by
+0x800DDDC4): world 0 = maps #203/#204, ground sheet #258 (jungle, confirmed in RAM); world 1 = #116/#117,
+#168; world 2 = #34/#35, #82; world 3 = #355/#356, #400. ⚠ A "which sheet fits" guess picks #82 for map #116
+where the game uses #168; the table is the answer, not the fit.
+
+✅ Checked: map #203's ground rendered top-down through `tpwcheck --ground 203 258` puts the rocky cliff
+textures exactly on the tiles whose corner heights fall 204 → 64, the road's lane lines run unbroken across
+tiles (turns and mirrors right), and the grass with its stone and twig decals looks like the console screenshot's.
+⚠ The world frame is **left-handed** like the models': a right-handed viewer negates z, or the park is mirrored
+(master caught it).
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is

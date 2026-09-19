@@ -35,11 +35,32 @@ namespace TPW.Data
     public readonly struct MapTile
     {
         public readonly byte Raw0, Raw1, Links, Facing;
-        public readonly ushort ModelIndex;
-        public readonly byte Appearance, Flags;
+        /// <summary>+4: the ground texture word. See <see cref="GroundSprite"/>.</summary>
+        public readonly ushort Ground;
+        /// <summary>+6: the corner shade. See <see cref="ShadeIndex"/>.</summary>
+        public readonly byte Shade;
+        public readonly byte Flags;
 
-        public MapTile(byte t, byte r1, byte links, byte facing, ushort model, byte appearance, byte flags)
-        { Raw0 = t; Raw1 = r1; Links = links; Facing = facing; ModelIndex = model; Appearance = appearance; Flags = flags; }
+        public MapTile(byte t, byte r1, byte links, byte facing, ushort ground, byte shade, byte flags)
+        { Raw0 = t; Raw1 = r1; Links = links; Facing = facing; Ground = ground; Shade = shade; Flags = flags; }
+
+        // ⭐ +4, +6 AND +7 ARE THE GROUND, FROM THE GAME'S TERRAIN ROUTINE (0x80012110). They were read as "a model
+        // index" and "an appearance variant"; the routine that draws the ground says otherwise.
+
+        /// <summary>The sprite this tile's ground wears, in the world's ground sheet: bits 0-11 of +4.</summary>
+        public int GroundSprite => Ground & 0x0FFF;
+        /// <summary>Quarter turns of the texture on the tile: bits 12-13 of +4.</summary>
+        public int GroundTurns => (Ground >> 12) & 3;
+        /// <summary>Bit 14 of +4: the texture mirrored top to bottom.</summary>
+        public bool GroundFlipV => (Ground & 0x4000) != 0;
+        /// <summary>Bit 15 of +4: the texture mirrored left to right.</summary>
+        public bool GroundFlipU => (Ground & 0x8000) != 0;
+        /// <summary>The shade at this tile's corner: an index into the map's <see cref="ParkMap.ShadeTable"/>,
+        /// bits 0-5 of +6. Like the height, it belongs to the corner, so a quad blends four of them.</summary>
+        public int ShadeIndex => Shade & 0x3F;
+        /// <summary>Flags bit 0: the terrain routine draws no ground here at all. On map #203 that is one patch
+        /// of 63 grass tiles (x 5-20, z 48-68), drawn by something else.</summary>
+        public bool NoGround => (Flags & 1) != 0;
 
         public TileType Type => (TileType)Raw0;
 
@@ -57,8 +78,10 @@ namespace TPW.Data
 
     /// <summary>A park's tile map, as stored in the archive.
     ///
-    /// ⭐ LAYOUT: `u32 N; u32 tab[N]; u32 w; u32 h; tile[w*h] (8 bytes each); u32 nbuild; …` — a FOLIO
-    /// resource, so the maps are ordinary archive entries rather than separate files.
+    /// ⭐ LAYOUT: `u32 N; u32 shade[N]; u32 w; u32 h; tile[w*h] (8 bytes each); u32 nbuild; …` — a FOLIO
+    /// resource, so the maps are ordinary archive entries rather than separate files. The game's map loader
+    /// (0x800544E0) keeps a pointer to each part: the shade table at gp+0x12D4, w and h at gp+0x1258/0x125C,
+    /// the tiles at gp+0x1254.
     ///
     /// ✅ On the shipped disc this finds **exactly eight**, which matches the eight maps tinyclaw counted
     /// independently while checking something else. All eight are 44x74 and every one decodes to **100%
@@ -75,6 +98,11 @@ namespace TPW.Data
         public int Height { get; private set; }
         public MapTile[] Tiles { get; private set; } = Array.Empty<MapTile>();
         public int TableCount { get; private set; }
+        /// <summary>The map's shade colours, 0x00BBGGRR with 128 as neutral. A tile's <see cref="MapTile.ShadeIndex"/>
+        /// picks one per corner and the GPU multiplies the ground texture by it, so this is the terrain's baked light:
+        /// map #203 fills 36 of its 64 with greys from 0x44 to 0xF0, and flat ground sits at 0x84-0x93, a touch
+        /// brighter than the texture itself.</summary>
+        public uint[] ShadeTable { get; private set; } = Array.Empty<uint>();
         /// <summary>Bytes after the tile grid: the build list. Small on a real map.</summary>
         public int TrailingBytes { get; private set; }
 
@@ -98,6 +126,8 @@ namespace TPW.Data
             if (need > d.Length) { error = $"a {w}x{h} grid needs {need:n0} bytes, entry has {d.Length:n0}"; return false; }
 
             var m = new ParkMap { Width = w, Height = h, TableCount = n, TrailingBytes = (int)(d.Length - need) };
+            m.ShadeTable = new uint[n];
+            for (int i = 0; i < n; i++) m.ShadeTable[i] = BitConverter.ToUInt32(d, 4 + i * 4);
             m.Tiles = new MapTile[w * h];
             int p = at + 8;
             for (int i = 0; i < w * h; i++, p += TileBytes)

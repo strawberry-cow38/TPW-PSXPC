@@ -418,6 +418,29 @@ static class Program
         return 1;
     }
 
+    /// <summary>--ground MAP SHEET OUT: map entry MAP's ground drawn from straight above with ground sheet SHEET,
+    /// through the real terrain builder, as raw RGBA (28 pixels a tile, z up the picture).</summary>
+    static int Ground(DiscReader disc, int mapEntry, int sheetEntry, string outPath)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        if (!ParkMap.TryParse(g.Read(g.Entries[mapEntry]), out var map, out string me)) { Console.WriteLine($"map #{mapEntry}: {me}"); return 1; }
+        if (!TextureSheet.TryParse(g.Read(g.Entries[sheetEntry]), out var sheet, out string se)) { Console.WriteLine($"sheet #{sheetEntry}: {se}"); return 1; }
+        var quads = ParkTerrain.Build(map, sheet.Sprites);
+        var sprites = new SortedDictionary<int, int>();
+        foreach (var q in quads) sprites[q.Sprite] = sprites.GetValueOrDefault(q.Sprite) + 1;
+        int skipped = 0, missing = 0;
+        foreach (var t in map.Tiles) { if (t.NoGround) skipped++; else if (t.GroundSprite >= sheet.Sprites.Count) missing++; }
+        var img = ParkTerrain.RenderTopDown(map, sheet);
+        System.IO.File.WriteAllBytes(outPath, img.Rgba);
+        Console.WriteLine($"map #{mapEntry} {map.Width}x{map.Height}, sheet #{sheetEntry} ({sheet.Sprites.Count} sprites): {quads.Count} quads, " +
+                          $"{skipped} tiles flagged no-ground, {missing} naming a sprite the sheet lacks");
+        Console.WriteLine("sprites used (sprite:quads w x h): " + string.Join("  ", System.Linq.Enumerable.Select(sprites,
+            kv => $"{kv.Key}:{kv.Value} {sheet.Sprites[kv.Key].W}x{sheet.Sprites[kv.Key].H}")));
+        Console.WriteLine($"-> {outPath} {img.Width}x{img.Height} rgba");
+        return 0;
+    }
+
     static int ModelTextures(DiscReader disc)
     {
         var g = Archive(disc);
@@ -669,6 +692,9 @@ static class Program
 
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
+            int groundAt = Array.IndexOf(args, "--ground");
+            if (groundAt >= 0 && groundAt + 3 < args.Length)
+                return Ground(disc, int.Parse(args[groundAt + 1]), int.Parse(args[groundAt + 2]), args[groundAt + 3]);
             int atlasAt = Array.IndexOf(args, "--model-atlas");
             if (atlasAt >= 0 && atlasAt + 2 < args.Length) return ModelAtlas(disc, int.Parse(args[atlasAt + 1]), args[atlasAt + 2]);
 

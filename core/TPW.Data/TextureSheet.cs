@@ -183,6 +183,48 @@ namespace TPW.Data
             return n;
         }
 
+        /// <summary>One texel as the GPU fetches it: page <paramref name="tpage"/>, palette <paramref name="clut"/>,
+        /// texel (u, v) of the page. 4-bit texels are four to a halfword, 8-bit two. Returns the 15-bit colour,
+        /// where 0 is the GPU's transparent, or -1 when the texel or its palette entry is not on this sheet.</summary>
+        public int Texel(ushort tpage, ushort clut, int u, int v)
+        {
+            bool eight = ((tpage >> 7) & 3) == 1;
+            int hx = (tpage & 0x0F) * 64 + (eight ? (u & 0xFF) >> 1 : (u & 0xFF) >> 2), hy = ((tpage >> 4) & 1) * 256 + (v & 0xFF);
+            if (!Contains(hx, hy)) return -1;
+            int word = Halfword(hx, hy);
+            int ix = eight ? (word >> ((u & 1) * 8)) & 0xFF : (word >> ((u & 3) * 4)) & 0x0F;
+            int cx = (clut & 0x3F) * 16 + ix, cy = (clut >> 6) & 0x1FF;
+            return Contains(cx, cy) ? Halfword(cx, cy) : -1;
+        }
+
+        /// <summary>A whole 256x256 texel page through one palette, at VRAM addressing (see <see cref="Texel"/>),
+        /// into <paramref name="rgba"/> at (ox, oy). Palette colour 0 is left transparent.</summary>
+        public void RenderPage(ushort tpage, ushort clut, byte[] rgba, int stride, int ox, int oy)
+        {
+            bool eight = ((tpage >> 7) & 3) == 1;
+            int px = (tpage & 0x0F) * 64, py = ((tpage >> 4) & 1) * 256;
+            int cx = (clut & 0x3F) * 16, cy = (clut >> 6) & 0x1FF;
+            int colours = eight ? 256 : 16;
+            var pal = new ushort[colours];
+            for (int i = 0; i < colours; i++) pal[i] = Contains(cx + i, cy) ? Halfword(cx + i, cy) : (ushort)0;
+
+            for (int v = 0; v < PageTexels; v++)
+                for (int u = 0; u < PageTexels; u++)
+                {
+                    int hx = px + (eight ? u >> 1 : u >> 2), hy = py + v;
+                    if (!Contains(hx, hy)) continue;
+                    int word = Halfword(hx, hy);
+                    int ix = eight ? (word >> ((u & 1) * 8)) & 0xFF : (word >> ((u & 3) * 4)) & 0x0F;
+                    ushort c = pal[ix];
+                    if (c == 0) continue;
+                    int o = ((oy + v) * stride + ox + u) * 4;
+                    rgba[o] = (byte)((c & 31) << 3);
+                    rgba[o + 1] = (byte)(((c >> 5) & 31) << 3);
+                    rgba[o + 2] = (byte)(((c >> 10) & 31) << 3);
+                    rgba[o + 3] = 255;
+                }
+        }
+
         /// <summary>Every sprite drawn with its own palette, at its place on the sheet. Space no sprite covers is
         /// left dark, and palette colour 0 is transparent, as the GPU treats it.</summary>
         public TpwImage RenderSprites(string source = "")

@@ -5,29 +5,32 @@ using TPW.Data;
 
 namespace TPWGodot
 {
-    /// <summary>A park, from its map: the first step toward drawing a park the way the game does.
+    /// <summary>A park's ground, drawn the way the game draws it.
     ///
-    /// ⚠ WHAT THIS DRAWS TODAY IS THE TILE TYPES, NOT THE GROUND'S TEXTURES. Every tile is coloured by its type
-    /// (grass, path, queue, footprint, entrance, exit, track, gate), which is an inspection view of the map
-    /// data, deliberately not dressed up as terrain. The real ground is being read out of the game's own
-    /// drawing code: the obvious reading of the tile's +4 field ("a sprite number in the world's sheet") was
-    /// tested and is wrong (in the jungle sheet, #258, sprite 198 is a water shore, while every grass tile on
-    /// the map names 198). tinyclaw measured the console's terrain as GENERATED, ~185 triangles a frame; that
-    /// is the target once the real ground goes in.
+    /// ⭐ THE GROUND IS THE GAME'S: every quad comes from <see cref="ParkTerrain"/>, which is the game's own terrain
+    /// routine (0x80012110) — per tile a POLY_GT4 whose corners sit at the corner tiles' heights, textured with the
+    /// sprite that tile's +4 names in its world's ground sheet (turned and mirrored as +4 says), and shaded per
+    /// corner from the map's shade table. What the routine skips (flags bit 0: on map #203, a river that falls
+    /// down a waterfall) is left open, because the game draws it with something else that is not read yet.
+    ///
+    /// T toggles the old inspection view, every tile coloured by its type, drawn just above the ground.
+    ///
+    /// ⚠ MIRRORED UNTIL Z WAS NEGATED, like the models. The game's world is left-handed and this one is not, so
+    /// row z sits at Godot -z; the first version laid rows along +z and master saw the park mirrored.
     ///
     /// ✅ The map itself is right: tinyclaw found map #203 in the jungle park's RAM, 27,431 of 27,552 bytes
     /// identical to the disc copy, at 0x8017A5A8.
     ///
-    /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt.</summary>
+    /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types.</summary>
     public partial class ParkView : Node3D
     {
-        MeshInstance3D _ground;
+        MeshInstance3D _ground, _types;
         Camera3D _camera;
         ParkMap _map;
         Vector3 _focus;
-        float _yaw = Mathf.Pi, _pitch = -0.85f, _distance = 30f;
+        float _yaw = 0f, _pitch = -0.85f, _distance = 30f;
         Label _info;
-        string _name = "";
+        string _infoText = "";
 
         public bool HasMap => _map != null;
 
@@ -37,10 +40,16 @@ namespace TPWGodot
         {
             _ground = new MeshInstance3D();
             AddChild(_ground);
+            _types = new MeshInstance3D { Visible = false };
+            AddChild(_types);
             _camera = new Camera3D { Fov = 50, Current = false };
             AddChild(_camera);
             Visible = false;
         }
+
+        /// <summary>Tile (x, z) at a height in world units, in Godot's frame: one tile per unit, z negated.</summary>
+        static Vector3 At(float x, float z, int heightUnits) =>
+            new Vector3(x, heightUnits / (float)ParkTerrain.TileUnits, -z);
 
         static Color TypeColour(TileType t) => t switch
         {
@@ -57,31 +66,99 @@ namespace TPWGodot
             _ => new Color(1, 0, 1),
         };
 
-        public void Load(ParkMap map, string name)
+        /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
+        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world)
         {
             _map = map;
-            _name = name;
+            int drawn = 0, open = 0;
+            _ground.Mesh = null;
+            if (ground != null)
+            {
+                var quads = ParkTerrain.Build(map, ground.Sprites);
+                drawn = quads.Count;
+                _ground.Mesh = GroundMesh(quads, ground);
+            }
+            foreach (var t in map.Tiles) if (t.NoGround) open++;
+            _types.Mesh = TypeMesh(map);
+            _types.Visible = ground == null;
+
+            _infoText = $"{name}, {ParkWorlds.Describe(world)}: {map.Width}x{map.Height} tiles, " +
+                        (ground != null ? $"ground from sheet #{world?.GroundSheet}, {drawn:n0} quads, {open} tiles left open (drawn by something not read yet)"
+                                        : "no ground sheet, tile types only") +
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types";
+
+            // Start over the path strip if there is one (the park's entrance), else the middle.
+            _focus = At(map.Width / 2f, map.Height / 2f, 256);
+            for (int i = 0; i < map.Tiles.Length; i++)
+                if (map.Tiles[i].IsWalkable) { _focus = At(i % map.Width + 0.5f, i / map.Width + 0.5f, map.Tiles[i].HeightUnits); break; }
+            UpdateCamera();
+        }
+
+        /// <summary>The ground: one atlas tile per (page, palette) the quads use, rendered as VRAM addresses it,
+        /// so each corner's texel is the game's (u, v) plus the tile's origin.</summary>
+        static ArrayMesh GroundMesh(List<GroundQuad> quads, TextureSheet sheet)
+        {
+            var tiles = new Dictionary<(ushort, ushort), int>();
+            foreach (var q in quads)
+            {
+                var key = ((ushort)(q.TPage & 0x1FF), q.Clut);
+                if (!tiles.ContainsKey(key)) tiles[key] = tiles.Count;
+            }
+            int tx = (int)Math.Ceiling(Math.Sqrt(Math.Max(1, tiles.Count))), ty = (tiles.Count + tx - 1) / tx;
+            int aw = tx * TextureSheet.PageTexels, ah = Math.Max(1, ty) * TextureSheet.PageTexels;
+            var rgba = new byte[aw * ah * 4];
+            foreach (var ((tpage, clut), t) in tiles)
+                sheet.RenderPage(tpage, clut, rgba, aw, (t % tx) * TextureSheet.PageTexels, (t / tx) * TextureSheet.PageTexels);
+
+            var verts = new List<Vector3>(quads.Count * 6);
+            var cols = new List<Color>(quads.Count * 6);
+            var uvs = new List<Vector2>(quads.Count * 6);
+            // The GPU draws a quad as triangles 0-1-2 and 1-2-3: the fold runs from (x+1, z) to (x, z+1), which is
+            // what a bent tile shows. Winding does not matter here: the ground is drawn from both sides.
+            int[] order = { 0, 1, 2, 2, 1, 3 };
+            foreach (var q in quads)
+            {
+                int t = tiles[((ushort)(q.TPage & 0x1FF), q.Clut)];
+                float ox = (t % tx) * TextureSheet.PageTexels, oy = (t / tx) * TextureSheet.PageTexels;
+                foreach (int k in order)
+                {
+                    var c = q[k];
+                    verts.Add(At(q.X + (k & 1), q.Z + (k >> 1), c.Height));
+                    cols.Add(new Color((c.Shade & 0xFF) / 255f, ((c.Shade >> 8) & 0xFF) / 255f, ((c.Shade >> 16) & 0xFF) / 255f));
+                    uvs.Add(new Vector2((ox + c.U) / aw, (oy + c.V) / ah));
+                }
+            }
+            var arrays = new Godot.Collections.Array();
+            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.TexUV] = uvs.ToArray();
+            var mesh = new ArrayMesh();
+            if (verts.Count == 0) return mesh;
+            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
+            mat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(Image.CreateFromData(aw, ah, false, Image.Format.Rgba8, rgba)));
+            mesh.SurfaceSetMaterial(0, mat);
+            return mesh;
+        }
+
+        /// <summary>The inspection view: every tile coloured by its type, a hair above the ground.</summary>
+        static ArrayMesh TypeMesh(ParkMap map)
+        {
             var verts = new List<Vector3>(map.Width * map.Height * 6);
             var cols = new List<Color>(map.Width * map.Height * 6);
-            // ⭐ THE SHAPE IS REAL: byte +1 × 4 is the height in world units, where a tile is 256 (0x800620B8,
-            // 0x800590A0). The height belongs to the tile's CORNER, so quad (x, z) spans the heights of tiles
-            // (x, z), (x+1, z), (x, z+1) and (x+1, z+1), and the last row and column are corners only, which is
-            // why the game's in-bounds test stops one short of the width and height.
-            float H(int x, int y) => map[x, y].HeightUnits / 256f;
-            for (int y = 0; y < map.Height - 1; y++)
+            const int lift = 8;   // world units (a tile is 256): enough to win the depth test, too little to see
+            for (int z = 0; z < map.Height - 1; z++)
                 for (int x = 0; x < map.Width - 1; x++)
                 {
-                    var t = map[x, y];
-                    var c = TypeColour(t.Type);
-                    // The +6 variant (1..5 on the starting maps) nudges the shade, so the map's own variation shows.
-                    float v = 1f + (t.Appearance - 3) * 0.04f;
-                    c = new Color(c.R * v, c.G * v, c.B * v);
-                    var a = new Vector3(x, H(x, y), y); var b = new Vector3(x + 1, H(x + 1, y), y);
-                    var d = new Vector3(x, H(x, y + 1), y + 1); var e = new Vector3(x + 1, H(x + 1, y + 1), y + 1);
-                    verts.AddRange(new[] { a, b, e, a, e, d });
-                    // A darker edge line would need a second pass; shade the second triangle a touch instead so
-                    // the grid still reads on slopes.
+                    var c = TypeColour(map[x, z].Type);
+                    var a = At(x, z, map[x, z].HeightUnits + lift);
+                    var b = At(x + 1, z, map[x + 1, z].HeightUnits + lift);
+                    var d = At(x, z + 1, map[x, z + 1].HeightUnits + lift);
+                    var e = At(x + 1, z + 1, map[x + 1, z + 1].HeightUnits + lift);
+                    verts.AddRange(new[] { a, b, d, d, b, e });
                     for (int k = 0; k < 3; k++) cols.Add(c);
+                    // Shade the second triangle a touch so the grid still reads on slopes.
                     var c2 = new Color(c.R * 0.93f, c.G * 0.93f, c.B * 0.93f);
                     for (int k = 0; k < 3; k++) cols.Add(c2);
                 }
@@ -100,13 +177,7 @@ namespace TPWGodot
                 VertexColorIsSrgb = true,
                 CullMode = BaseMaterial3D.CullModeEnum.Disabled,
             });
-            _ground.Mesh = mesh;
-
-            // Start over the path strip if there is one (the park's entrance), else the middle.
-            _focus = new Vector3(map.Width / 2f, 1, map.Height / 2f);
-            for (int i = 0; i < map.Tiles.Length; i++)
-                if (map.Tiles[i].IsWalkable) { _focus = new Vector3(i % map.Width + 0.5f, map.Tiles[i].HeightUnits / 256f, i / map.Width + 0.5f); break; }
-            UpdateCamera();
+            return mesh;
         }
 
         /// <summary>Set the camera outright: focus tile (x, z), yaw and pitch in radians, distance in tiles. For
@@ -116,7 +187,7 @@ namespace TPWGodot
             if (_map != null)
             {
                 int ix = Math.Clamp((int)x, 0, _map.Width - 1), iz = Math.Clamp((int)z, 0, _map.Height - 1);
-                _focus = new Vector3(x, _map[ix, iz].HeightUnits / 256f, z);
+                _focus = At(x, z, _map[ix, iz].HeightUnits);
             }
             _yaw = yaw; _pitch = pitch; _distance = distance;
             UpdateCamera();
@@ -133,15 +204,7 @@ namespace TPWGodot
             var dir = new Vector3(Mathf.Sin(_yaw) * Mathf.Cos(_pitch), Mathf.Sin(-_pitch), Mathf.Cos(_yaw) * Mathf.Cos(_pitch));
             _camera.Position = _focus + dir * _distance;
             _camera.LookAt(_focus, Vector3.Up);
-            if (_info != null && _map != null)
-            {
-                var counts = new SortedDictionary<string, int>();
-                foreach (var t in _map.Tiles) { var k = t.Type.ToString(); counts[k] = counts.GetValueOrDefault(k) + 1; }
-                var parts = new List<string>();
-                foreach (var kv in counts) parts.Add($"{kv.Key} {kv.Value}");
-                _info.Text = $"{_name}: {_map.Width}x{_map.Height} tiles ({string.Join(", ", parts)})\n" +
-                             "tile TYPES shown, not the real ground yet  ·  WASD/arrows pan, Q/E turn, wheel zoom, R/F tilt";
-            }
+            if (_info != null && _map != null) _info.Text = _infoText;
         }
 
         public override void _Process(double delta)
@@ -179,6 +242,8 @@ namespace TPWGodot
                 if (mb.ButtonIndex == MouseButton.WheelUp) { _distance = Mathf.Max(3, _distance * 0.9f); UpdateCamera(); }
                 else if (mb.ButtonIndex == MouseButton.WheelDown) { _distance = Mathf.Min(120, _distance * 1.1f); UpdateCamera(); }
             }
+            else if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.T } && _ground.Mesh != null)
+                _types.Visible = !_types.Visible;
         }
     }
 }

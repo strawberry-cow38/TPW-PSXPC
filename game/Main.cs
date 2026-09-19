@@ -36,6 +36,8 @@ namespace TPWGodot
         OptionButton _parkChoice;
         Label _parkInfo;
         System.Collections.Generic.List<(int Entry, ParkMap Map)> _maps = new();
+        /// <summary>Each world's ground sheet by archive entry, for the maps found (see <see cref="ParkWorlds"/>).</summary>
+        System.Collections.Generic.Dictionary<int, TextureSheet> _groundSheets = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
         int _autoPark = -1;
         /// <summary>From <c>--park-view=x,z,yaw,pitch,distance</c>: where the park camera starts.</summary>
@@ -323,7 +325,16 @@ namespace TPWGodot
                     _hasAdvisor = disc.Find(AdvisorSpeech.File) != null && disc.IsRawSectors;
                     var af = disc.Find(AssetSelfTest.AssetArchive);
                     if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gz, out _))
-                        foreach (var (entry, map) in ParkMap.FindAll(gz)) _maps.Add((entry.Index, map));
+                    {
+                        foreach (var (entry, map) in ParkMap.FindAll(gz))
+                        {
+                            _maps.Add((entry.Index, map));
+                            var world = ParkWorlds.ForMap(entry.Index);
+                            if (world != null && !_groundSheets.ContainsKey(world.GroundSheet) && world.GroundSheet < gz.Entries.Count &&
+                                TextureSheet.TryParse(gz.Read(gz.Entries[world.GroundSheet]), out var ground, out _))
+                                _groundSheets[world.GroundSheet] = ground;
+                        }
+                    }
                 }
                 catch (System.Exception e)
                 {
@@ -402,7 +413,7 @@ namespace TPWGodot
 
             _parkChoice.Clear();
             foreach (var (entry, _) in _maps)
-                _parkChoice.AddItem(entry == 203 ? "map #203 (jungle, tinyclaw's park)" : $"map #{entry}");
+                _parkChoice.AddItem($"map #{entry}, {ParkWorlds.Describe(ParkWorlds.ForMap(entry))}" + (entry == 203 ? " (tinyclaw's park)" : ""));
             _parkChoice.Disabled = _parkButton.Disabled = _maps.Count == 0;
             if (_autoPark >= 0)
             {
@@ -469,7 +480,10 @@ namespace TPWGodot
             {
                 int sel = System.Math.Clamp(_parkChoice.Selected, 0, _maps.Count - 1);
                 var (entry, map) = _maps[sel];
-                _park.Load(map, $"map #{entry}");
+                var world = ParkWorlds.ForMap(entry);
+                TextureSheet ground = null;
+                if (world != null) _groundSheets.TryGetValue(world.GroundSheet, out ground);
+                _park.Load(map, $"map #{entry}", ground, world);
             }
             _park.Activate(on && _park.HasMap);
             _models.Activate(!(on && _park.HasMap));

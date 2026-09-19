@@ -88,7 +88,7 @@ namespace TPW.Data
             for (int t = 0; t < tiles.Count; t++)
             {
                 var (sheet, tpage, clut) = tiles[t];
-                RenderTile(sheets[sheet].Sheet, tpage, clut, rgba, w, (t % result.TilesX) * Tile, (t / result.TilesX) * Tile);
+                sheets[sheet].Sheet.RenderPage(tpage, clut, rgba, w, (t % result.TilesX) * Tile, (t / result.TilesX) * Tile);
             }
             result.Atlas = new TpwImage { Width = w, Height = h, Rgba = rgba, Source = $"{tiles.Count} textures" };
             return result;
@@ -121,34 +121,6 @@ namespace TPW.Data
                 foreach (var sp in s.Sprites) if (sp.Clut == f.Clut) { outp.Add(k); break; }
             }
             return outp;
-        }
-
-        /// <summary>A whole 256x256 texel page through one palette, at VRAM addressing: 4-bit texels are four to a
-        /// halfword, 8-bit two. Palette colour 0 is left transparent.</summary>
-        static void RenderTile(TextureSheet s, ushort tpage, ushort clut, byte[] rgba, int stride, int ox, int oy)
-        {
-            bool eight = ((tpage >> 7) & 3) == 1;
-            int px = (tpage & 0x0F) * 64, py = ((tpage >> 4) & 1) * 256;
-            int cx = (clut & 0x3F) * 16, cy = (clut >> 6) & 0x1FF;
-            int colours = eight ? 256 : 16;
-            var pal = new ushort[colours];
-            for (int i = 0; i < colours; i++) pal[i] = s.Contains(cx + i, cy) ? s.Halfword(cx + i, cy) : (ushort)0;
-
-            for (int v = 0; v < Tile; v++)
-                for (int u = 0; u < Tile; u++)
-                {
-                    int hx = px + (eight ? u >> 1 : u >> 2), hy = py + v;
-                    if (!s.Contains(hx, hy)) continue;
-                    int word = s.Halfword(hx, hy);
-                    int ix = eight ? (word >> ((u & 1) * 8)) & 0xFF : (word >> ((u & 3) * 4)) & 0x0F;
-                    ushort c = pal[ix];
-                    if (c == 0) continue;
-                    int o = ((oy + v) * stride + ox + u) * 4;
-                    rgba[o] = (byte)((c & 31) << 3);
-                    rgba[o + 1] = (byte)(((c >> 5) & 31) << 3);
-                    rgba[o + 2] = (byte)(((c >> 10) & 31) << 3);
-                    rgba[o + 3] = 255;
-                }
         }
     }
 }
