@@ -14,10 +14,11 @@ namespace TPWGodot
     /// zero failures says the layout is self-consistent; it does not say a single one is shaped like a
     /// rollercoaster. Only a picture says that.
     ///
-    /// ⚠ NO TEXTURES YET, DELIBERATELY. Faces carry a CLUT and a page, but binding a page to file bytes is
-    /// only proven for some of them, so this draws vertex colours. A textured view built on the unproven
-    /// half would look far more finished than it is, which is the failure worth avoiding on an inspection
-    /// tool above all others.</summary>
+    /// ⭐ TEXTURED NOW, BECAUSE THE BINDING IS PROVEN. Faces carry a page, a palette and UVs; the texture
+    /// sheets carry sprite tables that name the same three. 98.1% of all 54,619 faces sit inside a sprite with
+    /// their page and palette, 94.9% in exactly one sheet (see ModelTexturing). The toggle turns textures off
+    /// to show the vertex colours alone, which is what this browser drew before and is the better view for
+    /// checking geometry.</summary>
     public partial class ModelBrowser : Node3D
     {
         readonly List<(int Entry, int Sub, TpwMesh Mesh)> _meshes = new();
@@ -35,6 +36,9 @@ namespace TPWGodot
         // ⚠ That assumption survived for hours precisely because the check that would have falsified it was
         // disabled. It was not defended by evidence, it was defended by being untestable.
         bool _reverse = false;
+        bool _textured = true;
+        List<(GazEntry Entry, TextureSheet Sheet)> _sheets = new();
+        string _texInfo = "";
 
         /// <summary>Toggle back-face culling. Off hides winding faults; on exposes them.</summary>
         public void ToggleCull() { _cull = !_cull; Show(_index); }
@@ -43,7 +47,11 @@ namespace TPWGodot
         /// than argued about. Whichever looks solid under culling is the right one.</summary>
         public void ToggleWinding() { _reverse = !_reverse; Show(_index); }
 
-        public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "reversed" : "as-file")}";
+        /// <summary>Toggle textures, to see the vertex colours on their own.</summary>
+        public void ToggleTextures() { _textured = !_textured; Show(_index); }
+
+        public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "reversed" : "as-file")} · " +
+                                    $"textures {(_textured ? "ON" : "off")}";
 
         public int Count => _meshes.Count;
 
@@ -79,6 +87,7 @@ namespace TPWGodot
         {
             var f = disc.Find(AssetSelfTest.AssetArchive);
             if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return;
+            _sheets = TextureSheet.FindAll(gaz);
 
             foreach (var e in gaz.Entries)
             {
@@ -117,56 +126,80 @@ namespace TPWGodot
             float span = Mathf.Max(maxX - minX, Mathf.Max(maxY - minY, maxZ - minZ));
             float scale = span > 0.0001f ? 1.6f / span : 1f;
 
-            var verts = new List<Vector3>(m.Faces.Count * 3);
-            var cols = new List<Color>(m.Faces.Count * 3);
-            foreach (var face in m.Faces)
+            MeshTextures tex = _textured && _sheets.Count > 0 ? ModelTexturing.Build(m, _sheets) : null;
+
+            // Two surfaces: faces with a texture, and faces without one (vertex colour only). Keeping them apart
+            // means an untextured face can never pick up a stray texel from somebody else's tile.
+            var tv = new List<Vector3>(); var tc = new List<Color>(); var tuv = new List<Vector2>();
+            var pv = new List<Vector3>(); var pc = new List<Color>();
+            for (int fi = 0; fi < m.Faces.Count; fi++)
             {
+                var face = m.Faces[fi];
                 // ⚠ A FACE INDEX OUT OF RANGE MUST SKIP THE FACE, NOT CRASH THE BROWSER. This is an
                 // inspection tool for data we are still learning; it has to survive being wrong.
                 if (face.I0 >= m.VertexCount || face.I1 >= m.VertexCount || face.I2 >= m.VertexCount) continue;
+                int tile = tex != null ? tex.FaceTile[fi] : -1;
                 // ⚠ NO Y FLIP. I assumed PSX vertices were Y-down and negated Y; master ran it and reported
-                // every model upside down. They are already in Godot's sense. The assumption was reasonable
-                // and wrong, and nothing but a picture could say which — the mesh is equally well-formed
-                // either way, so every count, bound and parse check passes in both.
-                //
-                // ⚠ WINDING IS STILL UNVERIFIED because CullMode is Disabled below: with back faces drawn,
-                // a reversed winding is invisible. Reversed here on the assumption that PSX and Godot differ,
-                // but that has NOT been confirmed and cannot be until culling is switched on.
-                // Default is file order; the toggle exists so the other can be compared, not assumed.
-                foreach (int vi in _reverse ? new[] { face.I2, face.I1, face.I0 } : new[] { face.I0, face.I1, face.I2 })
+                // every model upside down. They are already in Godot's sense.
+                // ⭐ FILE ORDER, settled with culling on (see _reverse). The corners' UVs travel with them.
+                var corners = _reverse
+                    ? new[] { (face.I2, face.U2, face.V2), (face.I1, face.U1, face.V1), (face.I0, face.U0, face.V0) }
+                    : new[] { (face.I0, face.U0, face.V0), (face.I1, face.U1, face.V1), (face.I2, face.U2, face.V2) };
+                foreach (var (vi, u, v) in corners)
                 {
-                    var v = new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]);
-                    verts.Add((v - centre) * scale);
-                    cols.Add(m.VertexColours.Length >= (vi + 1) * 3
+                    var pos = (new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]) - centre) * scale;
+                    var col = m.VertexColours.Length >= (vi + 1) * 3
                         ? Color.Color8(m.VertexColours[vi * 3], m.VertexColours[vi * 3 + 1], m.VertexColours[vi * 3 + 2])
-                        : Colors.White);
+                        : new Color(0.5f, 0.5f, 0.5f);
+                    if (tile >= 0)
+                    {
+                        tv.Add(pos); tc.Add(col);
+                        int ox = (tile % tex.TilesX) * ModelTexturing.Tile, oy = (tile / tex.TilesX) * ModelTexturing.Tile;
+                        tuv.Add(new Vector2((ox + u) / (float)tex.Atlas.Width, (oy + v) / (float)tex.Atlas.Height));
+                    }
+                    else { pv.Add(pos); pc.Add(col); }
                 }
             }
 
-            var arrays = new Godot.Collections.Array();
-            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
-            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
-            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
-
             var mesh = new ArrayMesh();
-            if (verts.Count >= 3) mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            var cull = _cull ? BaseMaterial3D.CullModeEnum.Back : BaseMaterial3D.CullModeEnum.Disabled;
+            if (tv.Count >= 3)
+            {
+                var arrays = new Godot.Collections.Array();
+                arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                arrays[(int)Godot.Mesh.ArrayType.Vertex] = tv.ToArray();
+                arrays[(int)Godot.Mesh.ArrayType.Color] = tc.ToArray();
+                arrays[(int)Godot.Mesh.ArrayType.TexUV] = tuv.ToArray();
+                mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+                var atlas = ImageTexture.CreateFromImage(Image.CreateFromData(tex.Atlas.Width, tex.Atlas.Height, false,
+                                                                              Image.Format.Rgba8, tex.Atlas.Rgba));
+                var mat = new ShaderMaterial { Shader = PsxShader(_cull) };
+                mat.SetShaderParameter("atlas", atlas);
+                mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, mat);
+            }
+            if (pv.Count >= 3)
+            {
+                var arrays = new Godot.Collections.Array();
+                arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+                arrays[(int)Godot.Mesh.ArrayType.Vertex] = pv.ToArray();
+                arrays[(int)Godot.Mesh.ArrayType.Color] = pc.ToArray();
+                mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+                mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, new StandardMaterial3D
+                {
+                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    VertexColorUseAsAlbedo = true,
+                    CullMode = cull,
+                });
+            }
             _instance.Mesh = mesh;
             // ⭐ CULLING ON BY DEFAULT, BECAUSE IT IS WHAT MAKES WINDING FALSIFIABLE AT ALL. With back faces
-            // drawn, a reversed triangle renders identically to a correct one: the check's pass and its
-            // failure are the same picture, so "looks wound correctly" cannot be said either way. Turning
-            // culling on converts an unfalsifiable impression into an observation — a wrong winding now shows
-            // as hollow or inside-out, which is visible in a second.
-            //
-            // ⚠ tinyclaw measured the console emitting park geometry at 88-90% one signed-area handedness.
-            // That is screen-space AFTER the game's own software cull (the PSX has no hardware culling), so
-            // it is not a number this browser can reproduce while it draws every face. It becomes comparable
-            // once the port culls the way the game does.
-            _instance.MaterialOverride = new StandardMaterial3D
-            {
-                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-                VertexColorUseAsAlbedo = true,
-                CullMode = _cull ? BaseMaterial3D.CullModeEnum.Back : BaseMaterial3D.CullModeEnum.Disabled,
-            };
+            // drawn, a reversed triangle renders identically to a correct one. Culling on turned an
+            // unfalsifiable impression into an observation, and master caught the inside-out models that way.
+            _instance.MaterialOverride = null;
+
+            _texInfo = tex == null ? "" :
+                $"\ntextures: {tex.Atlas.Source} from sheet #{tex.MainSheetEntry}; faces {tex.Unique} by sprite, " +
+                $"{tex.Ambiguous} shared (took the main sheet), {tex.Loose} by palette only, {tex.Unmatched} untextured";
 
             if (_info != null)
             {
@@ -179,11 +212,41 @@ namespace TPWGodot
                 _info.Text =
                     $"model {_index + 1} of {_meshes.Count}   entry #{entry} sub {sub}\n" +
                     $"{m.VertexCount:n0} vertices   {m.Faces.Count:n0} faces   {m.BoneCount} bones   {m.TrackCount} anim tracks\n" +
-                    $"texture pages: {(pages.Count > 0 ? string.Join("  ", pages) : "none")}   [{StateLabel}]";
+                    $"texture pages: {(pages.Count > 0 ? string.Join("  ", pages) : "none")}   [{StateLabel}]" + _texInfo;
             }
             GD.Print($"[tpw] model {_index + 1}/{_meshes.Count}: entry #{entry} sub {sub}, " +
                      $"{m.VertexCount} verts, {m.Faces.Count} faces");
         }
+
+        /// <summary>The GPU's texture blend, as a shader. ⚠ Three rules, each the hardware's and not a style:
+        /// palette colour 0 is TRANSPARENT (the atlas stores it as alpha 0, so discard); the texel is MODULATED by
+        /// the vertex colour with 128 as neutral, so × 2 (the models' vertex colours run 48..255 around 128,
+        /// darkening and brightening as baked light); and sampling is NEAREST, no filtering. The product is a
+        /// display-space colour, so it is converted to linear on the way out, or Godot's output encode would
+        /// brighten it a second time.</summary>
+        static Shader PsxShader(bool cull)
+        {
+            string key = cull ? "back" : "disabled";
+            if (_shaders.TryGetValue(key, out var sh)) return sh;
+            sh = new Shader
+            {
+                Code = $@"shader_type spatial;
+render_mode unshaded, cull_{key};
+uniform sampler2D atlas : filter_nearest;
+vec3 to_linear(vec3 c) {{
+    return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
+}}
+void fragment() {{
+    vec4 t = texture(atlas, UV);
+    if (t.a < 0.5) discard;
+    ALBEDO = to_linear(clamp(t.rgb * COLOR.rgb * 2.0, 0.0, 1.0));
+}}
+",
+            };
+            _shaders[key] = sh;
+            return sh;
+        }
+        static readonly Dictionary<string, Shader> _shaders = new();
 
         public void Next() => Show(_index + 1);
         public void Prev() => Show(_index - 1);

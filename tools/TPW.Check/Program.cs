@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TPW.Data;
 using TPW.Launcher;
 
@@ -315,6 +316,92 @@ static class Program
         return bad;
     }
 
+    static int ModelTextures(DiscReader disc)
+    {
+        var g = Archive(disc);
+        if (g == null) return 1;
+        var sheets = TextureSheet.FindAll(g);
+        var clutWords = new List<HashSet<ushort>>();
+        foreach (var (_, sh) in sheets) { var set = new HashSet<ushort>(); foreach (var sp in sh.Sprites) set.Add(sp.Clut); clutWords.Add(set); }
+
+        long faces = 0, inArea = 0, exact = 0, uniquelyExact = 0, spriteAny = 0, spriteOne = 0;
+        var colourHist = new long[16];
+        var listing = new List<(int Browser, int Entry, int Sub, int Faces, int Sheet, int Unique, int Unmatched)>();
+        int browserIndex = 0;
+        int meshes = 0, meshesAllExact = 0;
+        var bestSheetHist = new Dictionary<int, int>();
+        foreach (var e in g.Entries)
+        {
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                if (!c.TryExpand(bytes, i, out var data, out int start, out _)) continue;
+                if (!MeshContainer.TryParseMeshAt(data, start, out var mesh, out _)) continue;
+                meshes++;
+                if (mesh.Faces.Count > 0)
+                {
+                    var mt = ModelTexturing.Build(mesh, sheets);
+                    listing.Add((browserIndex, e.Index, i, mesh.Faces.Count, mt.MainSheetEntry, mt.Unique, mt.Unmatched));
+                    browserIndex++;
+                }
+                for (int q = 0; q < mesh.VertexColours.Length; q++) colourHist[mesh.VertexColours[q] >> 4]++;
+                var perSheet = new int[sheets.Count];
+                long meshExact = 0;
+                foreach (var f in mesh.Faces)
+                {
+                    faces++;
+                    var (cx, cy) = f.ClutOrigin; var (px, py) = f.TPageOrigin;
+                    bool anyArea = false; int hits = 0;
+                    for (int k = 0; k < sheets.Count; k++)
+                    {
+                        var sh = sheets[k].Sheet;
+                        if (sh.Contains(cx, cy)) anyArea = true;
+                        if (clutWords[k].Contains(f.Clut) && sh.Contains(px, py)) { hits++; perSheet[k]++; }
+                    }
+                    if (anyArea) inArea++;
+                    if (hits > 0) { exact++; meshExact++; }
+                    if (hits == 1) uniquelyExact++;
+
+                    // Stricter: the face's UVs must fall inside ONE sprite of the sheet that has the same page and
+                    // the same palette. Sheets for different worlds share VRAM and palette positions, so the looser
+                    // test above cannot say which world a face belongs to; this one might.
+                    int umin = Math.Min(f.U0, Math.Min(f.U1, f.U2)), umax = Math.Max(f.U0, Math.Max(f.U1, f.U2));
+                    int vmin = Math.Min(f.V0, Math.Min(f.V1, f.V2)), vmax = Math.Max(f.V0, Math.Max(f.V1, f.V2));
+                    int inSprite = 0;
+                    for (int k = 0; k < sheets.Count; k++)
+                    {
+                        bool found = false;
+                        foreach (var sp in sheets[k].Sheet.Sprites)
+                            if (sp.Clut == f.Clut && (sp.TPage & 0x1F) == (f.TPage & 0x1F) &&
+                                umin >= sp.U && umax <= sp.U + sp.W && vmin >= sp.V && vmax <= sp.V + sp.H) { found = true; break; }
+                        if (found) inSprite++;
+                    }
+                    if (inSprite > 0) spriteAny++;
+                    if (inSprite == 1) spriteOne++;
+                }
+                if (mesh.Faces.Count > 0 && meshExact == mesh.Faces.Count) meshesAllExact++;
+                int best = -1; for (int k = 0; k < sheets.Count; k++) if (perSheet[k] > 0 && (best < 0 || perSheet[k] > perSheet[best])) best = k;
+                if (best >= 0) { int id = sheets[best].Entry.Index; bestSheetHist[id] = bestSheetHist.GetValueOrDefault(id) + 1; }
+            }
+        }
+        Console.WriteLine($"{meshes} meshes, {faces:n0} faces");
+        Console.WriteLine($"  palette inside SOME sheet's area            : {inArea:n0} ({100.0 * inArea / Math.Max(1, faces):0.0}%)");
+        Console.WriteLine($"  palette is one a sheet's sprites use, on a page of that sheet: {exact:n0} ({100.0 * exact / Math.Max(1, faces):0.0}%), of which one sheet only: {uniquelyExact:n0}");
+        Console.WriteLine($"  meshes whose EVERY face matches that way     : {meshesAllExact} of {meshes}");
+        Console.WriteLine($"  UVs inside a sprite with that page and palette: {spriteAny:n0} ({100.0 * spriteAny / Math.Max(1, faces):0.0}%), in exactly one sheet: {spriteOne:n0}");
+        Console.WriteLine("  largest meshes (browser index, entry/sub, faces, main sheet, faces placed by sprite, untextured):");
+        foreach (var x in listing.OrderByDescending(x => x.Faces).Take(14))
+            Console.WriteLine($"    #{x.Browser,-4} entry {x.Entry}/{x.Sub,-3} {x.Faces,5} faces  sheet #{x.Sheet,-4} {x.Unique,5} by sprite  {x.Unmatched} untextured");
+        Console.Write("  vertex colour channel values, by 16s: ");
+        for (int q = 0; q < 16; q++) Console.Write($"{q * 16}-{q * 16 + 15}:{colourHist[q]} ");
+        Console.WriteLine();
+        Console.Write("  best sheet per mesh: ");
+        foreach (var kv in bestSheetHist.OrderByDescending(kv => kv.Value)) Console.Write($"#{kv.Key}:{kv.Value} ");
+        Console.WriteLine();
+        return 0;
+    }
+
     static int Sheets(DiscReader disc, string hashFile)
     {
         var g = Archive(disc);
@@ -469,6 +556,10 @@ static class Program
                 string json = sheetsAt + 1 < args.Length && !args[sheetsAt + 1].StartsWith("--") ? args[sheetsAt + 1] : null;
                 return Sheets(disc, json);
             }
+
+            // --model-textures: do the meshes draw from the texture sheets? A face names a page and a palette;
+            // count the faces whose palette is one a sheet's own sprite table lists, on a page of that same sheet.
+            if (Array.IndexOf(args, "--model-textures") >= 0) return ModelTextures(disc);
 
             // --advisor [dir] [--clip B:C,...]: find every clip in the advisor's speech file, print what was found,
             // and write the named clips (block:channel) as WAVs for a human to listen to.

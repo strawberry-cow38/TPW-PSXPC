@@ -42,6 +42,7 @@ namespace TPWGodot
         string _autoMovie;
         bool _quitAfterMovie;
         Button _playAdvisor;
+        OptionButton _advisorLanguage;
         bool _hasAdvisor;
         System.Collections.Generic.List<AdvisorLine> _advisorLines;
         PcmSample _pendingLine;
@@ -51,6 +52,10 @@ namespace TPWGodot
         /// <c>--quit-after-line</c> exit when it ends. For capturing it unattended.</summary>
         int _autoLine = -1, _autoLanguage;
         bool _quitAfterLine;
+        /// <summary>From <c>--models=A,B,C</c>: hide the UI and show each model for two seconds, then quit. For
+        /// capturing models unattended.</summary>
+        int[] _modelTour;
+        int _tourPos = -1, _tourFrames;
 
         /// <summary>✅ 22,050 Hz, SETTLED BY LISTENING. Master tried the selector and identified it, and also
         /// worked out what these waveforms are: mostly short chunks of the game's MUSIC, cut up so it can
@@ -161,8 +166,10 @@ namespace TPWGodot
 
             var cullBtn = new Button { Text = "Cull on/off" };
             var windBtn = new Button { Text = "Flip winding" };
+            var texBtn = new Button { Text = "Textures on/off" };
             cullBtn.Pressed += () => _models.ToggleCull();
             windBtn.Pressed += () => _models.ToggleWinding();
+            texBtn.Pressed += () => _models.ToggleTextures();
 
             var row = new HBoxContainer();
             row.AddThemeConstantOverride("separation", 8);
@@ -171,6 +178,7 @@ namespace TPWGodot
             row.AddChild(nextModel);
             row.AddChild(cullBtn);
             row.AddChild(windBtn);
+            row.AddChild(texBtn);
             _root.AddChild(row);
             _root.AddChild(_modelInfo);
 
@@ -195,6 +203,11 @@ namespace TPWGodot
             _playAdvisor = new Button { Text = "Play an advisor line", Disabled = true };
             _playAdvisor.Pressed += PlayAdvisorLine;
             soundRow.AddChild(_playAdvisor);
+            _advisorLanguage = new OptionButton();
+            foreach (var name in AdvisorSpeech.LanguageNames) _advisorLanguage.AddItem(name);
+            _advisorLanguage.AddItem("any language");
+            _advisorLanguage.Selected = 0;   // English
+            soundRow.AddChild(_advisorLanguage);
             _root.AddChild(soundRow);
 
             // ⭐ THE MOVIES. In the game they play on ENTERING A WORLD (see StrMovie.Catalogue), and there is no
@@ -222,6 +235,8 @@ namespace TPWGodot
                     _autoLanguage = parts.Length > 1 ? int.Parse(parts[1]) : 0;
                 }
                 else if (arg == "--quit-after-line") _quitAfterLine = true;
+                else if (arg.StartsWith("--models="))
+                    _modelTour = System.Array.ConvertAll(arg.Substring("--models=".Length).Split(','), int.Parse);
             }
 
             GD.Print($"[tpw] data: {_data.Message}");
@@ -324,6 +339,12 @@ namespace TPWGodot
 
             // Show the first model as soon as the parse is done, so the window is never empty.
             if (_models != null && _models.Count > 0) _models.Show(0);
+            if (_modelTour != null && _models != null && _models.Count > 0)
+            {
+                _root.Visible = false;
+                _tourPos = 0;
+                _models.Show(_modelTour[0]);
+            }
             else if (_modelInfo != null) _modelInfo.Text = "Models: none parsed.";
 
             if (_views.Count > 0)
@@ -390,7 +411,7 @@ namespace TPWGodot
             });
         }
 
-        void PlayAdvisorLine() => PlayAdvisorLine(-1, 0);
+        void PlayAdvisorLine() => PlayAdvisorLine(-1, _advisorLanguage.Selected);
 
         /// <summary>Play a line in a language, or a random audible line when <paramref name="line"/> is -1.</summary>
         void PlayAdvisorLine(int line, int language)
@@ -422,7 +443,9 @@ namespace TPWGodot
                     if (lines != null)
                     {
                         int pick = line >= 0 ? line : System.Random.Shared.Next(lines.Count);
-                        int lang = line >= 0 ? language : System.Random.Shared.Next(AdvisorSpeech.Languages);
+                        // The last choice in the list is "any language".
+                        int lang = language >= 0 && language < AdvisorSpeech.Languages
+                            ? language : System.Random.Shared.Next(AdvisorSpeech.Languages);
                         if (pick >= lines.Count) err = $"there is no line {pick}; the index has {lines.Count}";
                         else AdvisorSpeech.TryDecodeLine(disc, f, lines[pick], lang, out pcm, out coding, out err);
                     }
@@ -626,6 +649,13 @@ namespace TPWGodot
             _accum += delta;
             double tickSeconds = _data.Variant?.TickSeconds ?? ParkClock.TickSeconds;
             while (_accum >= tickSeconds) { _accum -= tickSeconds; _clock.Advance(); }
+
+            if (_tourPos >= 0 && ++_tourFrames >= 24)
+            {
+                _tourFrames = 0;
+                if (++_tourPos >= _modelTour.Length) { _tourPos = -1; GetTree().Quit(); }
+                else _models.Show(_modelTour[_tourPos]);
+            }
 
             _status.Text = _data.CanPlay
                 ? $"{_data.Variant.Name} ({_data.Variant.Region})\n{_clock}\ntick = {tickSeconds:0.####}s"

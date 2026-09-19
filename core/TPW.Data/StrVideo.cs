@@ -38,8 +38,17 @@ namespace TPW.Data
     /// A logo only proves the output is not noise. "A gravity bounce-house" catches the failure a logo
     /// cannot: a DCT close enough to give plausible shapes in roughly the right colours.
     ///
-    /// english/french/spanish/END are the same ending cutscene four times, the text burned into the picture
-    /// and the audio byte-identical.
+    /// ⚠ ENGLISH/FRENCH/SPANISH/END ARE A GAME OVER SCREEN, NOT AN ENDING, which is what fable's report and this
+    /// comment both called them. tinyclaw decoded the same frame from two of them: a boarded-up park gate under
+    /// "GAME OVER", and under **げーむおーばー** in END.STR. So they play on a LOSS, and wiring them to finishing
+    /// the game would be a bug nobody notices until they win. The text is burned into the picture; the audio is
+    /// byte-identical across all four.
+    ///
+    /// ⭐ END.STR IS THE JAPANESE ONE, and it settles an indexing question. fable's movie table maps 0 ENGLISH,
+    /// 1 FRENCH, 4 SPANISH, 7 END. Master independently identified advisor channel 7 as the Japanese voice
+    /// actor, so 7 means Japanese on both sides: the table is indexed by LANGUAGE, and the unhelpful filename is
+    /// just a filename. The hiragana, where a loanword would normally take katakana, is a choice for young
+    /// readers, and it matches that voice: slow, high, 43% pauses.
     ///
     /// ⚠ THE SECTORS ARE NOT ALL THE SAME KIND, and a reader that treats them uniformly produces corrupt
     /// frames rather than an error. The Mode 2 subheader's submode byte says which: bit 0x04 is audio and
@@ -159,7 +168,7 @@ namespace TPW.Data
         /// = 150 sectors/s.
         ///
         /// Measured on the four files whose audio runs their full length (BF, GRAV, JUG, MIR): the interleave
-        /// is exactly 8.00. The four ending files run out of audio at 8.1 s and fill the remaining audio slots
+        /// is exactly 8.00. The four game-over files run out of audio at 8.1 s and fill the remaining audio slots
         /// with empty sectors (submode 0), so their audio-sector count alone would imply 242 sectors/s. That
         /// is faster than the drive can read, and it is why the rate is fixed here rather than re-derived per
         /// file.</summary>
@@ -174,7 +183,7 @@ namespace TPW.Data
         public short[] Audio = Array.Empty<short>();
         public XaAudio.Coding AudioCoding;
         public int AudioSectors;
-        /// <summary>Sectors that are neither video nor audio. The ending files pad with these.</summary>
+        /// <summary>Sectors that are neither video nor audio. The game-over files pad with these.</summary>
         public int EmptySectors;
         /// <summary>Audio for a different file/channel number than the first audio sector. The console plays
         /// one channel, so these are skipped rather than mixed in. None on this disc.</summary>
@@ -227,10 +236,10 @@ namespace TPW.Data
             ("GRAV.STR", "space world: gravity bounce-house"),
             ("MIR.STR", "halloween world: the freaky mirror"),
             ("JUG.STR", "jungle world"),
-            ("ENGLISH.STR", "ending, English text"),
-            ("FRENCH.STR", "ending, French text"),
-            ("SPANISH.STR", "ending, Spanish text"),
-            ("END.STR", "ending (END.STR)"),
+            ("ENGLISH.STR", "game over, English"),
+            ("FRENCH.STR", "game over, French"),
+            ("SPANISH.STR", "game over, Spanish"),
+            ("END.STR", "game over, Japanese (げーむおーばー)"),
         };
 
         public static string Describe(string file)
@@ -244,7 +253,7 @@ namespace TPW.Data
         ///
         /// ⭐ AN ORACLE THAT SHARES NOTHING WITH THE DEMUXER. TPW.BIN keeps {pointer to file name, last frame
         /// index} pairs, which its player uses to know when to stop: BF.STR 113, GRAV.STR 473, MIR.STR 547,
-        /// JUG.STR 458, and 156 for each of the four endings. Those were written from the files when the disc
+        /// JUG.STR 458, and 156 for each of the four game-over screens. Those were written from the files when the disc
         /// was built. If the demuxer drops or invents a frame, the two disagree.
         ///
         /// Found by locating each name as a NUL-terminated, word-aligned string, turning its file offset into
