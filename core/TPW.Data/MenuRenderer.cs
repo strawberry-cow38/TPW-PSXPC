@@ -90,8 +90,16 @@ namespace TPW.Data
             // that look better without fixing it. The duplicate is gone from the table now, and the
             // order is the console's own.
             for (int layer = 0; layer <= 3; layer++)
+            {
                 foreach (var q in MenuLayout.Backdrop)
                     if (q.TPage != GlowPage && Depth(q) == layer) DrawQuad(p, dst, q, 0);
+                // ⚠ THE RAYS GO BEHIND THE CURTAINS, over the stage floor only. Drawn on top of
+                // everything they wash the curtains out, which is the difference between the port and
+                // the console frame -- there the drapes are barely lit while the stage is. Additive
+                // light that is never occluded is the giveaway of a fan pasted over the finished image
+                // rather than drawn into the scene.
+                if (layer == 0) DrawSpotlight(dst);
+            }
         }
 
         /// <summary>One textured quad.
@@ -163,6 +171,44 @@ namespace TPW.Data
         /// brightness and reading it as 50% would dim the whole menu. The disabled row's 0x202020 is
         /// 0x20/0x80 = a quarter.</summary>
         public const float NormalShade = 1f, DisabledShade = 0x20 / (float)0x80;
+
+        /// <summary>The sweeping light: additive Gouraud wedges, no texture.
+        ///
+        /// ⚠ ADDITIVE, SO IT CANNOT DARKEN ANYTHING and its own black vertices contribute nothing.
+        /// That is what makes the fan read as rays rather than as solid wedges -- each wedge fades from
+        /// dark yellow to black across its width, and where two meet the sum is the bright edge.</summary>
+        static void DrawSpotlight(byte[] dst)
+        {
+            foreach (var t in MenuLayout.Spotlight) FillTri(dst, t);
+        }
+
+        /// <summary>Barycentric fill. Clipped to the screen rather than to the triangle's own bounds,
+        /// because the fan's apex sits at (-103,-64) -- off the top-left corner -- and a rasteriser
+        /// that assumed on-screen vertices would drop every wedge in the sweep.</summary>
+        static void FillTri(byte[] dst, in ScreenTri t)
+        {
+            int x0 = t.X0, x1 = t.X1, x2 = t.X2, y0 = t.Y0, y1 = t.Y1, y2 = t.Y2;
+            int minX = Math.Max(0, Math.Min(x0, Math.Min(x1, x2)));
+            int maxX = Math.Min(W - 1, Math.Max(x0, Math.Max(x1, x2)));
+            int minY = Math.Max(0, Math.Min(y0, Math.Min(y1, y2)));
+            int maxY = Math.Min(H - 1, Math.Max(y0, Math.Max(y1, y2)));
+            float den = (t.Y1 - t.Y2) * (float)(t.X0 - t.X2) + (t.X2 - t.X1) * (float)(t.Y0 - t.Y2);
+            if (Math.Abs(den) < 1e-6f) return;                    // degenerate, and the fan has some
+
+            for (int y = minY; y <= maxY; y++)
+                for (int x = minX; x <= maxX; x++)
+                {
+                    float w0 = ((t.Y1 - t.Y2) * (x - t.X2) + (t.X2 - t.X1) * (y - t.Y2)) / den;
+                    float w1 = ((t.Y2 - t.Y0) * (x - t.X2) + (t.X0 - t.X2) * (y - t.Y2)) / den;
+                    float w2 = 1f - w0 - w1;
+                    if (w0 < 0 || w1 < 0 || w2 < 0) continue;
+                    int o = (y * W + x) * 4;
+                    dst[o]     = (byte)Math.Min(255, dst[o]     + (int)(w0 * t.R0 + w1 * t.R1 + w2 * t.R2));
+                    dst[o + 1] = (byte)Math.Min(255, dst[o + 1] + (int)(w0 * t.G0 + w1 * t.G1 + w2 * t.G2));
+                    dst[o + 2] = (byte)Math.Min(255, dst[o + 2] + (int)(w0 * t.B0 + w1 * t.B1 + w2 * t.B2));
+                    dst[o + 3] = 255;
+                }
+        }
 
         /// <summary>Width of a string in the menu font, for centring.</summary>
         public static int MeasureText(Prepared p, string text)
