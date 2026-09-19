@@ -858,10 +858,10 @@ namespace TPWGodot
             if (!Visible || _map == null) return;
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
             { GameCamera = !GameCamera; return; }
-            // ⭐ THE PATH TOOL, master's way. A left press on a path or an unoccupied tile (buildable or not) opens the
-            // tool and starts a ghost run there. Released on the same tile it is a click: the start sticks and the
-            // next click lays the run. Dragged to another tile it lays on release. The right button cancels the ghost,
-            // or closes the tool when there is no ghost.
+            // ⭐ THE PATH TOOL, master's way. A left click on a path or an unoccupied tile (buildable or not) opens the
+            // tool -- and only opens it. With the tool open, a press starts a ghost run: released on the same tile it
+            // is a click, the start sticks and the next click lays the run; dragged to another tile it lays on
+            // release. The right button cancels the ghost, or closes the tool when there is no ghost.
             if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _pathMode)
             {
                 if (_runStart != null) { _runStart = null; _runSticky = false; }
@@ -876,8 +876,10 @@ namespace TPWGodot
                     if (_runSticky) return;             // the finishing click lays on its release
                     var tile = TileUnderMouse();        // the cursor is not tracked while the tool is closed
                     if (tile is not { } t || !PathTool.CanStartOn(_map, t.X, t.Z)) return;
-                    if (!_pathMode) { _pathMode = true; _cursorPinned = false; RefreshInfo(); }
-                    _cursorTile = tile; _runStart = tile; _pressTile = tile;
+                    _cursorTile = tile;
+                    // The click that opens the tool only opens it; the next press starts a ghost.
+                    if (!_pathMode) { _pathMode = true; _cursorPinned = false; RefreshInfo(); return; }
+                    _runStart = tile; _pressTile = tile;
                     return;
                 }
                 if (!_pathMode) return;
