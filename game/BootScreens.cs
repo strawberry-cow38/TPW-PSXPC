@@ -262,6 +262,44 @@ namespace TPWGodot
             _big.Text = _small.Text = _note.Text = "";
         }
 
+        /// <summary>The language screen: its measured background gradient and the language name in the
+        /// game's own font.
+        ///
+        /// ⚠ STILL MISSING THE FLAGS AND THE ADVISOR. The flags are sheet 84 sprites #119-125 and the
+        /// advisor is a SKINNED MESH (entry 83 sub-mesh 10), which is a different pipeline from the 2D
+        /// quads here -- so this screen is part real and part not, and says so on it rather than
+        /// looking finished.</summary>
+        void DrawLanguage()
+        {
+            _legal.Visible = false;
+            _menuView.Visible = true;
+            string key = "lang" + _ring;
+            if (key == _menuDrawn) return;
+            _menuDrawn = key;
+
+            var frame = MenuRenderer.NewFrame();
+            // ⭐ MEASURED, not picked: one Gouraud quad running RGB(153,163,254) at the top to
+            // RGB(42,32,87) at the bottom (findings/menu-art.md).
+            for (int yy = 0; yy < MenuRenderer.H; yy++)
+            {
+                float t = yy / (float)(MenuRenderer.H - 1);
+                byte r = (byte)(153 + (42 - 153) * t), g = (byte)(163 + (32 - 163) * t), b = (byte)(254 + (87 - 254) * t);
+                for (int xx = 0; xx < MenuRenderer.W; xx++)
+                {
+                    int o = (yy * MenuRenderer.W + xx) * 4;
+                    frame[o] = r; frame[o + 1] = g; frame[o + 2] = b; frame[o + 3] = 255;
+                }
+            }
+            string name = LanguageRing.NameAt(_ring);
+            int w = MenuRenderer.MeasureText(_menuArt, name);
+            MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, 110, name);
+
+            var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);
+            _menuView.Texture = ImageTexture.CreateFromImage(img);
+            _big.Text = _small.Text = "";
+            _note.Text = "flags and advisor not drawn yet — they are sheet 84 sprites and a skinned mesh";
+        }
+
         static string Bar(int level)
             => new string('|', level) + new string('.', MainMenu.SliderSteps - level);
 
@@ -269,7 +307,8 @@ namespace TPWGodot
         {
             var s = _boot.Screen;
             _legal.Visible = s == BootScreen.Legal && _legalArt != null;
-            if (s != BootScreen.MainMenu) { _menuView.Visible = false; _menuDrawn = null; }
+            if (s != BootScreen.MainMenu && s != BootScreen.LanguageSelect)
+            { _menuView.Visible = false; _menuDrawn = null; }
             _bg.Color = Colors.Black;
             _big.Text = _small.Text = _note.Text = "";
 
@@ -292,6 +331,9 @@ namespace TPWGodot
                     _big.Text = "LEGAL.GFX";
                     _note.Text = "not decoded from this disc — running its measured 313 frames anyway";
                     break;
+                case BootScreen.LanguageSelect when _menuArt != null:
+                    DrawLanguage();
+                    return;
                 case BootScreen.LanguageSelect:
                     _bg.Color = new Color(0.05f, 0.08f, 0.16f);
                     _big.Text = $"‹  {LanguageRing.NameAt(_ring)}  ›";

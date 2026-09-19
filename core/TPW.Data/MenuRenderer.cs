@@ -13,6 +13,7 @@ namespace TPW.Data
     public static class MenuRenderer
     {
 
+
         public const int W = MenuLayout.ScreenWidth, H = MenuLayout.ScreenHeight;
 
         /// <summary>Everything the renderer needs, built once.</summary>
@@ -144,10 +145,8 @@ namespace TPW.Data
         {
             if (c == ' ') return 8;
             if (p == null || !MenuLayout.Glyph.TryGetValue(c, out int i) || i >= p.SpriteCount) return 8;
-            var sp = p.Sheet.Sprites[i];
-            // ⚠ A ROTATED GLYPH'S ADVANCE IS ITS H, not its W -- the stored rect is the turned image,
-            // so the drawn width is the stored height. Using W regardless overlaps the next letter.
-            return ((sp.Flags & 1) != 0 ? sp.H : sp.W) + 1;
+            // W is the DRAWN width whether or not the sprite is stored rotated, so the advance is W.
+            return p.Sheet.Sprites[i].W + 1;
         }
 
         /// <summary>Draw a string in the game's own font, top-left at (x, y). Returns the x it ended at.
@@ -185,25 +184,28 @@ namespace TPW.Data
                         // SIDE, not by reasoning about it -- I argued myself into a different one from
                         // the stored W/H aspect ratios and it was wrong. The picture decided.
                         //
-                        // ⚠ 'M' AND 'm' ARE STILL WRONG (both draw as N/n) AND ORIENTATION IS NOT THE
-                        // CAUSE: all four readings were rendered and M draws as N in every one of
-                        // them, so no choice here fixes it. They are the widest glyph of each case
-                        // (W=34 and W=30) and 'm' is the one whose U+W runs off the 256-texel page
-                        // edge (237+30), which the other flagged sprites do not -- so the next thing
-                        // to test is whether a glyph too wide for its page is stored split or indexed
-                        // differently, NOT another rotation.
+                        // ⚠ AND I GOT THIS WRONG TWICE BEFORE GETTING IT RIGHT, both times by
+                        // comparing variants in a picture I could not actually read -- the probe was
+                        // drawn over the curtains. Rendered on BLACK the answer was obvious in one
+                        // look: two of the readings produced a correct M that was merely MIRRORED or
+                        // UPSIDE DOWN, which named the fix immediately (a transpose is a rotation plus
+                        // a mirror, so flip the other axis). I had meanwhile written a commit saying
+                        // orientation was ruled out and the cause lay elsewhere. It did not. When a
+                        // visual comparison is inconclusive, fix the VIEW before drawing a conclusion
+                        // from it.
+                        // The sprite still DRAWS W x H; what rotation changes is where the pixels are
+                        // read from -- the stored rect is H wide and W tall, turned a quarter turn.
                         bool rot = (sp.Flags & 1) != 0;
-                        int outW = rot ? sp.H : sp.W, outH = rot ? sp.W : sp.H;
-                        for (int gy = 0; gy < outH; gy++)
+                        for (int gy = 0; gy < sp.H; gy++)
                         {
                             int dy = y + gy;
                             if (dy < 0 || dy >= H) continue;
-                            for (int gx = 0; gx < outW; gx++)
+                            for (int gx = 0; gx < sp.W; gx++)
                             {
                                 int dx = x + gx;
                                 if (dx < 0 || dx >= W) continue;
                                 int su = rot ? sp.U + gy : sp.U + gx;
-                                int sv = rot ? sp.V + (outW - 1 - gx) : sp.V + gy;
+                                int sv = rot ? sp.V + (sp.W - 1 - gx) : sp.V + gy;
                                 Blend(dst, (dy * W + dx) * 4, src, ((ay + sv) * src.Width + ax + su) * 4, additive);
                             }
                         }
