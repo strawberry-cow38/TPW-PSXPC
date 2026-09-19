@@ -1325,6 +1325,35 @@ static class Program
         return 0;
     }
 
+    /// <summary>Faces of one sub-mesh using one CLUT, with their vertex indices and UVs -- for asking
+    /// whether a suspicious group is a FAN (all sharing a vertex) and what it samples.</summary>
+    static int FaceGroup(GazArchive g, int entry, int sub, ushort clut)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            if (!c.TryParseMesh(bytes, sub, out var m, out _)) return 1;
+            var shared = new Dictionary<int,int>();
+            int n = 0;
+            foreach (var f in m.Faces)
+            {
+                if (f.Clut != clut) continue;
+                n++;
+                Console.WriteLine($"  v({f.I0},{f.I1},{f.I2})  uv({f.U0},{f.V0}) ({f.U1},{f.V1}) ({f.U2},{f.V2})  " +
+                                  $"kind=0x{f.Kind:x2} {(f.DoubleSided ? "double" : "single")}-sided");
+                foreach (int vi in new[]{ (int)f.I0, f.I1, f.I2 })
+                { shared.TryGetValue(vi, out int k); shared[vi] = k + 1; }
+            }
+            Console.WriteLine($"{n} faces on clut 0x{clut:x4}");
+            foreach (var kv in shared.OrderByDescending(k => k.Value).Take(3))
+                Console.WriteLine($"  vertex {kv.Key} appears in {kv.Value} of them" + (kv.Value == n ? "  <- a FAN around it" : ""));
+            return 0;
+        }
+        return 1;
+    }
+
     static int FaceClut(GazArchive g, int entry, int sub)
     {
         foreach (var e in g.Entries)
@@ -1525,6 +1554,10 @@ static class Program
             // Use --faceclut to ask the other question.
             // --faceclut E S: the face CLUT histogram of one sub-mesh. Answers "is this group of faces a
             // PART of a bigger mesh", which a whole-mesh fingerprint search cannot see.
+            int fgAt = Array.IndexOf(args, "--facegroup");
+            if (fgAt >= 0 && fgAt + 3 < args.Length)
+                return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
+                                 Convert.ToUInt16(args[fgAt + 3], 16));
             int fcAt = Array.IndexOf(args, "--faceclut");
             if (fcAt >= 0 && fcAt + 2 < args.Length)
                 return FaceClut(g, int.Parse(args[fcAt + 1]), int.Parse(args[fcAt + 2]));
