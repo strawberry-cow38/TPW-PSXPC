@@ -152,6 +152,8 @@ namespace TPWGodot
         string _bootFrom;
         /// <summary>The language the player picked, as the GAME's index -- never the ring position.</summary>
         int _language = 0;
+        /// <summary>Sheet 84: every pixel of the main menu and the language flags (findings/menu-art.md).</summary>
+        TextureSheet _menuSheet;
         double _accum;
 
         public override void _Ready()
@@ -452,6 +454,9 @@ namespace TPWGodot
                     if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gz, out _))
                     {
                         _modules = TrackerModule.FindAll(gz);
+                        if (MenuLayout.Sheet < gz.Entries.Count &&
+                            TextureSheet.TryParse(gz.Read(gz.Entries[MenuLayout.Sheet]), out var ms, out _))
+                            _menuSheet = ms;
                         foreach (var (entry, map) in ParkMap.FindAll(gz))
                         {
                             _maps.Add((entry.Index, map));
@@ -520,6 +525,7 @@ namespace TPWGodot
             if (!_skipBoot)
             {
                 if (_preview.Texture != null) _boot.SetLegalArt(_preview.Texture);
+                _boot.SetMenuSheet(_menuSheet);
                 if (_bootFrom != null && !_boot.StartAt(_bootFrom))
                     GD.PushWarning($"[tpw] --boot-from={_bootFrom} is not a boot screen; starting from the beginning");
                 _boot.Visible = true;

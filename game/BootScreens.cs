@@ -35,6 +35,13 @@ namespace TPWGodot
 
         ColorRect _bg;
         TextureRect _legal;
+        /// <summary>The real menu, drawn from sheet 84 into a 320x256 buffer and scaled up whole. Kept
+        /// at the PSX framebuffer size deliberately -- the art was authored for 320x256, and letting
+        /// Godot scale the finished frame keeps the pixels square instead of stretching each sprite
+        /// independently.</summary>
+        TextureRect _menuView;
+        MenuRenderer.Prepared _menuArt;
+        string _menuDrawn;
         Label _big, _small, _note;
         Texture2D _legalArt;
 
@@ -78,6 +85,15 @@ namespace TPWGodot
             };
             AddChild(_legal);
 
+            _menuView = new TextureRect
+            {
+                AnchorRight = 1, AnchorBottom = 1,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
+                Visible = false,
+            };
+            AddChild(_menuView);
+
             var box = new VBoxContainer { AnchorRight = 1, AnchorBottom = 1, Alignment = BoxContainer.AlignmentMode.Center };
             box.AddThemeConstantOverride("separation", 10);
             AddChild(box);
@@ -92,6 +108,11 @@ namespace TPWGodot
         /// for its measured 313 frames, as black, rather than being skipped -- a missing asset must not
         /// silently change the timing.</summary>
         public void SetLegalArt(Texture2D t) => _legalArt = t;
+
+        /// <summary>Hand over FOLIO entry 84. Without it the menu falls back to the labelled
+        /// placeholder rather than drawing nothing -- a disc we cannot read the sheet from must still
+        /// reach a usable menu.</summary>
+        public void SetMenuSheet(TextureSheet sheet) => _menuArt = MenuRenderer.Prepare(sheet);
 
         /// <summary>The movie finished or was skipped. The FILE decides its own length, so this is what
         /// advances the chain, not the frame count in the table.</summary>
@@ -183,6 +204,52 @@ namespace TPWGodot
             if (movie != null) { _waitingForMovie = true; WantMovie?.Invoke(movie); }
         }
 
+        /// <summary>The menu as the console drew it: the captured backdrop, then the item text in the
+        /// game's own font.
+        ///
+        /// ⚠ REDRAWN ONLY WHEN THE TEXT CHANGES. Rasterising 320x256 and uploading a texture every
+        /// frame is affordable here and would still be the wrong habit -- the backdrop is static and
+        /// the items change on a keypress. The key is the state that can alter the picture; get that
+        /// wrong and the menu stops responding while looking perfectly fine.</summary>
+        void DrawRealMenu()
+        {
+            _legal.Visible = false;
+            _bg.Color = Colors.Black;
+            _menuView.Visible = true;
+
+            var sb = new System.Text.StringBuilder(_menu.Page.ToString());
+            foreach (string it in _menu.Items) sb.Append('|').Append(it);
+            sb.Append('#').Append(_menu.Index);
+            if (_menu.Page == MenuPage.Options) sb.Append('v').Append(_menu.MusicLevel).Append(',').Append(_menu.SfxLevel);
+            string key = sb.ToString();
+            if (key == _menuDrawn) return;
+            _menuDrawn = key;
+
+            var frame = MenuRenderer.NewFrame();
+            MenuRenderer.DrawBackdrop(_menuArt, frame);
+
+            // The item list, centred, below the logo. ⚠ The Y positions are MINE, not measured: the
+            // captured frame's own text primitives were left out on purpose (they spell one menu with
+            // the highlight on one item), so where the rows sit is the one part of this screen not
+            // taken from the console. It is a placeholder with real art on top of it, and should be
+            // replaced by the real row geometry if anyone measures it.
+            int y = 150;
+            for (int i = 0; i < _menu.Items.Length; i++)
+            {
+                string label = _menu.Items[i];
+                if (_menu.Page == MenuPage.Options && i < MainMenu.OptionKinds.Length
+                    && MainMenu.OptionKinds[i] == MainMenu.OptionKind.Slider)
+                    label += "  " + Bar(i == 0 ? _menu.MusicLevel : _menu.SfxLevel);
+                int w = MenuRenderer.MeasureText(_menuArt, label);
+                MenuRenderer.DrawText(_menuArt, frame, (MenuRenderer.W - w) / 2, y, label, additive: i == _menu.Index);
+                y += 22;
+            }
+
+            var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);
+            _menuView.Texture = ImageTexture.CreateFromImage(img);
+            _big.Text = _small.Text = _note.Text = "";
+        }
+
         static string Bar(int level)
             => new string('|', level) + new string('.', MainMenu.SliderSteps - level);
 
@@ -190,6 +257,7 @@ namespace TPWGodot
         {
             var s = _boot.Screen;
             _legal.Visible = s == BootScreen.Legal && _legalArt != null;
+            if (s != BootScreen.MainMenu) { _menuView.Visible = false; _menuDrawn = null; }
             _bg.Color = Colors.Black;
             _big.Text = _small.Text = _note.Text = "";
 
@@ -225,6 +293,9 @@ namespace TPWGodot
                     _big.Text = "Now Loading…";
                     _note.Text = "placeholder — the jester animation is not identified yet";
                     break;
+                case BootScreen.MainMenu when _menuArt != null:
+                    DrawRealMenu();
+                    return;
                 case BootScreen.MainMenu:
                     _bg.Color = new Color(0.16f, 0.04f, 0.07f);
                     var sb = new System.Text.StringBuilder();
