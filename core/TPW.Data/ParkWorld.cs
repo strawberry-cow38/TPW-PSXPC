@@ -7,8 +7,9 @@ namespace TPW.Data
     public sealed class ParkWorld
     {
         public int Index { get; init; }
-        /// <summary>What it is, where that is known. Only the jungle is confirmed (tinyclaw found map #203 in the
-        /// jungle park's RAM); the rest are left unnamed rather than guessed from their colours.</summary>
+        /// <summary>What it is, where that is known: the jungle (tinyclaw found map #203 in the jungle park's RAM)
+        /// and halloween (master, from its grey graveyard ground and dark spiked fence). The rest are left unnamed
+        /// rather than guessed from their colours.</summary>
         public string Name { get; init; } = "";
         /// <summary>The maps a park in this world starts from, archive entries: record +0x00 points at a list
         /// of (map, scenery pack) pairs and +0x04 counts them.</summary>
@@ -44,7 +45,7 @@ namespace TPW.Data
         public static readonly IReadOnlyList<ParkWorld> All = new[]
         {
             new ParkWorld { Index = 0, Name = "jungle", Maps = new[] { 203, 204 }, SceneryEntry = 205, GroundSheet = 258, ExtraSheets = new[] { 169, 170 }, Music = 305 },
-            new ParkWorld { Index = 1, Maps = new[] { 116, 117 }, SceneryEntry = 118, GroundSheet = 168, ExtraSheets = new[] { 91, 92 }, Music = 302 },
+            new ParkWorld { Index = 1, Name = "halloween", Maps = new[] { 116, 117 }, SceneryEntry = 118, GroundSheet = 168, ExtraSheets = new[] { 91, 92 }, Music = 302 },
             new ParkWorld { Index = 2, Maps = new[] { 34, 35 }, SceneryEntry = 36, GroundSheet = 82, ExtraSheets = new[] { 17, 18 }, Music = 296 },
             new ParkWorld { Index = 3, Maps = new[] { 355, 356 }, SceneryEntry = 359, GroundSheet = 400, ExtraSheets = new[] { 332, 333 }, Music = 317 },
         };
