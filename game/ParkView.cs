@@ -232,7 +232,7 @@ namespace TPWGodot
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
                         "\n" + buildCounts +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, right mouse the path tool";
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, left-click the ground to lay path";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -652,7 +652,7 @@ namespace TPWGodot
             if (_info != null && _map != null)
                 _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
-                           + (_pathMode ? "\nPATH TOOL: click the start then click the end, or press at the start and drag to the end; Esc drops a run, right button puts the tool away" : "");
+                           + (_pathMode ? "\nPATH TOOL: click the start then click the end, or press at the start and drag to the end; right button cancels the ghost, then closes the tool" : "");
         }
 
         /// <summary>The tile under the mouse: march the ray from the camera through the pointer until it drops below
@@ -858,21 +858,30 @@ namespace TPWGodot
             if (!Visible || _map == null) return;
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
             { GameCamera = !GameCamera; return; }
-            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _paths != null)
+            // ⭐ THE PATH TOOL, master's way. A left press on a path or an unoccupied tile (buildable or not) opens the
+            // tool and starts a ghost run there. Released on the same tile it is a click: the start sticks and the
+            // next click lays the run. Dragged to another tile it lays on release. The right button cancels the ghost,
+            // or closes the tool when there is no ghost.
+            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _pathMode)
             {
-                _pathMode = !_pathMode; _runStart = null; _runSticky = false; _cursorPinned = false;
-                if (!_pathMode) _cursorMesh.Mesh = null;
+                if (_runStart != null) { _runStart = null; _runSticky = false; }
+                else { _pathMode = false; _cursorPinned = false; _cursorMesh.Mesh = null; }
                 RefreshInfo();
                 return;
             }
-            if (_pathMode && e is InputEventMouseButton { ButtonIndex: MouseButton.Left } lmb)
+            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left } lmb && _paths != null)
             {
                 if (lmb.Pressed)
                 {
-                    // A press starts a run, unless a clicked run is waiting for its finishing click.
-                    if (!_runSticky) { _runStart = _cursorTile; _pressTile = _cursorTile; }
+                    if (_runSticky) return;             // the finishing click lays on its release
+                    var tile = TileUnderMouse();        // the cursor is not tracked while the tool is closed
+                    if (tile is not { } t || !PathTool.CanStartOn(_map, t.X, t.Z)) return;
+                    if (!_pathMode) { _pathMode = true; _cursorPinned = false; RefreshInfo(); }
+                    _cursorTile = tile; _runStart = tile; _pressTile = tile;
+                    return;
                 }
-                else if (_runSticky)
+                if (!_pathMode) return;
+                if (_runSticky)
                 {
                     // The finishing click of a clicked run.
                     if (_runStart is { } s0 && _cursorTile is { } e0) LayPath(s0, e0);
@@ -890,7 +899,7 @@ namespace TPWGodot
             }
             if (_pathMode && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape } && _runStart != null)
             {
-                _runStart = null; _runSticky = false;   // drop the run, keep the tool
+                _runStart = null; _runSticky = false;   // drop the ghost, keep the tool
                 return;
             }
             if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Q }) { _gcam.Turn(-1); return; }

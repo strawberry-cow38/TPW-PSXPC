@@ -272,6 +272,12 @@ namespace TPW.Data
             return pieces == null || sprites == null ? null : new PathTool(pieces, sprites);
         }
 
+        /// <summary>Whether a click on tile (x, z) opens the path tool (the port's control, master's call): any tile on
+        /// the map that nothing is built on -- grass, path, the entrance road, buildable or not. Attraction footprints,
+        /// entrances and exits, queues and track do not.</summary>
+        public static bool CanStartOn(ParkMap map, int x, int z) =>
+            x >= 0 && x < map.Width - 1 && z >= 0 && z < map.Height - 1 && map[x, z].Raw0 is not (4 or 5 or 7 or 8 or 10);
+
         /// <summary>Whether the tool takes tile (x, z): on the map, not flag 0x02, grass or path.</summary>
         public static bool CanLay(ParkMap map, int x, int z) =>
             x >= 0 && x < map.Width - 1 && z >= 0 && z < map.Height - 1 && CanLay(map[x, z].Raw0, map[x, z].Flags);
