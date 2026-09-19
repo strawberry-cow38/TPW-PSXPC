@@ -130,20 +130,17 @@ namespace TPW.Sim.Tests
                 Assert.Equal(MainMenu.OptionKind.Unmeasured, MainMenu.OptionKinds[i]);
         }
 
-        /// <summary>Only "Load Game" is dimmed, and only on the root page. Asserted because "dim the
-        /// thing that does nothing" is a tempting generalisation -- "Main Game" also did nothing when
-        /// measured, and it is NOT drawn dim, so doing-nothing and being-disabled are different states
-        /// on this menu.</summary>
+        /// <summary>Nothing is drawn dim. The console dims "Load Game" and "Main Game" only because the
+        /// disc image fails the PAL LibCrypt check; clearing that flag in a running emulator turned both
+        /// bright and let Main Game load the world map. Reproducing the dimming would be reproducing a
+        /// copy-protection punishment, not the game.</summary>
         [Fact]
-        public void OnlyLoadGameIsDrawnDisabled()
+        public void NothingIsDrawnDisabled()
         {
             var m = new MainMenu();
-            Assert.False(m.IsDisabled(0));                 // Play Game
-            Assert.False(m.IsDisabled(1));                 // Options
-            Assert.True(m.IsDisabled(2));                  // Load Game
-            m.Confirm();                                   // into Play Game
-            for (int i = 0; i < m.Items.Length; i++)
-                Assert.False(m.IsDisabled(i));             // Main Game does nothing but is NOT dim
+            for (int i = 0; i < m.Items.Length; i++) Assert.False(m.IsDisabled(i));   // root page
+            m.Confirm();                                                              // into Play Game
+            for (int i = 0; i < m.Items.Length; i++) Assert.False(m.IsDisabled(i));
         }
 
         /// <summary>⚠ There is no back button: triangle and circle were both pressed on both submenus

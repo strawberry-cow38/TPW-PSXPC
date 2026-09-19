@@ -123,15 +123,28 @@ namespace TPW.Sim
             }
         }
 
-        /// <summary>Whether a row is drawn as DISABLED (dimmed).
+        /// <summary>Whether a row is drawn as DISABLED (dimmed). Nothing is -- and the reason is worth
+        /// the space, because the measurement that said otherwise was real.
         ///
-        /// ⚠ MEASURED, AND ONLY FOR THE ONE ROW IT WAS MEASURED ON. The console draws every menu item
-        /// shaded 0x808080 and "Load Game" at 0x202020 -- a quarter -- in the captured frame, which was
-        /// taken with NO MEMORY CARD SAVE PRESENT. So this records "Load Game is dim in that state",
-        /// not "Load Game is always dim". If a save is ever loadable, this is the thing that should
-        /// stop returning true, and that is a behaviour to measure rather than assume.</summary>
-        public bool IsDisabled(int index) =>
-            Page == MenuPage.Root && index < RootItems.Length && RootItems[index] == "Load Game";
+        /// ⚠ THE CONSOLE DIMS "Load Game" AND "Main Game", AND THAT IS COPY PROTECTION, NOT BEHAVIOUR.
+        /// The PAL disc carries a LibCrypt check; an image without the protection's subchannel data
+        /// fails it, the game sets a flag, and both rows are drawn at 0x202020 -- the Practice Park is
+        /// all you get. Every capture this port was built from came from such an image, so the port had
+        /// faithfully reproduced a piracy punishment as if it were the game's design.
+        ///
+        /// ⭐ Settled by flipping the flag, not by reading about it: forcing that one word to 0 in a
+        /// running emulator turned Main Game from 0x202020 to 0x808080, and pressing it loaded the
+        /// world map -- the screen this project had been treating as unreachable. A real disc gets
+        /// both rows bright, so the port does too.
+        ///
+        /// ⚠ The wrong version of this was not a guess, which is what made it stick: "Load Game is dim
+        /// because there is no save to load" is plausible, matches the observation exactly, and is
+        /// false. The innocent cause and the real one produce an identical screen, so no amount of
+        /// looking harder at that screen would have separated them. What separated them was changing
+        /// the suspected cause and watching the effect move.
+        ///
+        /// If a row should ever be dim here, it needs that kind of evidence, not a captured frame.</summary>
+        public bool IsDisabled(int index) => false;
 
         /// <summary>⚠ THERE IS NO BACK BUTTON, and this is the measurement that would be easiest to
         /// "fix" by accident. Triangle and circle were both pressed on both submenus and both were
