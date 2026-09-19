@@ -36,6 +36,10 @@ namespace TPWGodot
 
         public bool HasMap => _map != null;
 
+        /// <summary>Tiles of ground drawn past each edge of the map, as the game draws them (ParkTerrain.Build): far
+        /// enough that the park view's camera does not see the ground end.</summary>
+        const int GroundBorder = 40;
+
         public void SetInfoLabel(Label l) => _info = l;
 
         public override void _Ready()
@@ -78,7 +82,7 @@ namespace TPWGodot
             int open = 0, placed = 0, skipped = 0;
             _ground.Mesh = null;
             _scenery.Mesh = null;
-            var quads = ground != null ? ParkTerrain.Build(map, ground.Sprites) : new List<GroundQuad>();
+            var quads = ground != null ? ParkTerrain.Build(map, ground.Sprites, GroundBorder) : new List<GroundQuad>();
             if (ground != null)
             {
                 // ⭐ ONE ATLAS FOR BOTH: the scenery's textures are on the world's ground sheet too (SceneryPack).
@@ -100,7 +104,7 @@ namespace TPWGodot
             _types.Visible = ground == null;
 
             _infoText = $"{name}, {ParkWorlds.Describe(world)}: {map.Width}x{map.Height} tiles, " +
-                        (ground != null ? $"ground from sheet #{world?.GroundSheet}, {quads.Count:n0} quads, {open} tiles left to the scenery" +
+                        (ground != null ? $"ground from sheet #{world?.GroundSheet}, {quads.Count:n0} quads (with {GroundBorder} tiles past each edge), {open} tiles left to the scenery" +
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
                         "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, O scenery";

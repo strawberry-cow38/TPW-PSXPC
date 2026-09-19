@@ -150,12 +150,18 @@ namespace TPW.Data
             return true;
         }
 
-        /// <summary>Every quad inside the map: tiles 0..w-2 by 0..h-2, the last row and column being corners only.</summary>
-        public static List<GroundQuad> Build(ParkMap map, IReadOnlyList<SheetSprite> sprites)
+        /// <summary>Every quad inside the map: tiles 0..w-2 by 0..h-2, the last row and column being corners only;
+        /// plus <paramref name="border"/> tiles of the ground the game draws PAST the edge.
+        ///
+        /// ⭐ THE GROUND DOES NOT STOP AT THE MAP. The routine draws whatever tiles the view covers and clamps the
+        /// ones outside (see <see cref="TryQuadAt"/>), so beyond the edge the ground goes on as copies of the edge
+        /// tiles: tinyclaw's console screenshot shows grass continuing past the jungle's perimeter hedge, which
+        /// stands on the map's own edge. How far it goes on is the view's reach, not a map property.</summary>
+        public static List<GroundQuad> Build(ParkMap map, IReadOnlyList<SheetSprite> sprites, int border = 0)
         {
-            var quads = new List<GroundQuad>((map.Width - 1) * (map.Height - 1));
-            for (int z = 0; z < map.Height - 1; z++)
-                for (int x = 0; x < map.Width - 1; x++)
+            var quads = new List<GroundQuad>((map.Width - 1 + 2 * border) * (map.Height - 1 + 2 * border));
+            for (int z = -border; z < map.Height - 1 + border; z++)
+                for (int x = -border; x < map.Width - 1 + border; x++)
                     if (TryQuadAt(map, sprites, x, z, out var q)) quads.Add(q);
             return quads;
         }
