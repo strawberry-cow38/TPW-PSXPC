@@ -131,6 +131,10 @@ namespace TPWGodot
                 TransparentBg = true,
                 RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
                 Disable3D = false,
+                // ⚠ ITS OWN 3D WORLD. A SubViewport shares its parent's World3D unless told otherwise, so the
+                // advisor -- sized in framebuffer pixels, a few hundred units tall -- stood in the park's world
+                // too, where a unit is a tile: master found a Union Jack towering over the whole park.
+                OwnWorld3D = true,
             };
             AddChild(_advisorView);
 
