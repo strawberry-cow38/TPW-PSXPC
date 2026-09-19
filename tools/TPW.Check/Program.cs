@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TPW.Data;
 using TPW.Launcher;
 
@@ -15,6 +16,52 @@ static class Program
     /// <summary>Print candidate hashes of the legal screen as the console would hold it: 320x256, 16bpp
     /// little-endian, row-major, no padding. Several candidates because three conventions are genuinely
     /// unknown, and printing all of them says WHICH one the hardware uses rather than just pass/fail.</summary>
+    /// <summary>Parse every plain sub-entry and report. ⭐ THE FALSIFIER: a wrong layout does not fail
+    /// gracefully on a few, it fails on most, because every field feeds the walk that finds the next one.</summary>
+    static void Meshes(DiscReader disc)
+    {
+        var f = disc.Find(AssetSelfTest.AssetArchive);
+        if (f == null) { Console.WriteLine("no archive"); return; }
+        if (!GazArchive.TryParse(disc.ReadFile(f), out var gaz, out string gerr))
+        { Console.WriteLine("archive: " + gerr); return; }
+
+        int containers = 0, subs = 0, compressed = 0, ok = 0, failed = 0;
+        long faces = 0, verts = 0;
+        var pages = new SortedDictionary<int, int>();
+        string firstFail = "";
+        foreach (var e in gaz.Entries)
+        {
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes)) continue;
+            if (!MeshContainer.TryParse(bytes, out var c, out string cerr))
+            { if (firstFail.Length == 0) firstFail = $"entry #{e.Index}: {cerr}"; continue; }
+            containers++;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                subs++;
+                if (c.IsCompressed(i)) { compressed++; continue; }
+                if (c.TryParseMesh(bytes, i, out var mesh, out string merr))
+                {
+                    ok++; faces += mesh.Faces.Count; verts += mesh.VertexCount;
+                    foreach (var tp in mesh.TPages)
+                    {
+                        int key = ((tp & 0x0F) * 64) | (((tp & 0x10) != 0 ? 256 : 0) << 16);
+                        pages.TryGetValue(key, out int n); pages[key] = n + 1;
+                    }
+                }
+                else { failed++; if (firstFail.Length == 0) firstFail = $"entry #{e.Index} sub {i}: {merr}"; }
+            }
+        }
+        Console.WriteLine($"containers     : {containers}");
+        Console.WriteLine($"sub-entries    : {subs}  ({compressed} LZSS-compressed, skipped)");
+        Console.WriteLine($"meshes parsed  : {ok} ok, {failed} failed" + (firstFail.Length > 0 ? $"  first: {firstFail}" : ""));
+        Console.WriteLine($"geometry       : {verts:n0} vertices, {faces:n0} faces");
+        Console.WriteLine();
+        Console.WriteLine("texture pages referenced by meshes (x,y -> how many meshes):");
+        foreach (var kv in pages)
+            Console.WriteLine($"   {kv.Key & 0xFFFF},{(kv.Key >> 16) & 0xFFFF}  used by {kv.Value} meshes");
+    }
+
     static void VramHash(DiscReader disc)
     {
         var f = disc.Find(AssetSelfTest.LegalScreen);
@@ -124,6 +171,7 @@ static class Program
         // ⚠ THIS GOES THROUGH THE REAL DECODER ON PURPOSE. Re-implementing the conversion in a script to
         // "check the format" would test the script, which is the mistake that just shipped a broken launcher:
         // a harness that builds its own input is not testing the product.
+        bool meshes = Array.IndexOf(args, "--meshes") >= 0;
         bool vramHash = Array.IndexOf(args, "--vramhash") >= 0;
         int texAt = Array.IndexOf(args, "--tex");
         int texIndex = texAt >= 0 && texAt + 1 < args.Length ? int.Parse(args[texAt + 1]) : -1;
@@ -167,6 +215,7 @@ static class Program
                 Console.WriteLine($"wrote {limg.Width}x{limg.Height} RGBA to {rawOut}");
                 return 0;
             }
+            if (meshes) { Meshes(disc); return 0; }
             if (vramHash) { VramHash(disc); return 0; }
 
             var r = AssetSelfTest.Run(disc);
