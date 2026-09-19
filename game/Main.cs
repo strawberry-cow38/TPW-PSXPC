@@ -168,6 +168,13 @@ namespace TPWGodot
         /// <summary>The whole debug overlay. ⭐ ONE SWITCH: F3 flips it, every capture path clears it.
         /// Two switches is what produced a chrome that was hidden AND underneath at the same time.</summary>
         CanvasLayer _debugLayer;
+        /// <summary>The way back to a hidden debug menu without knowing F3: a small corner button that shows only
+        /// while the mouse moves and fades out after <see cref="MenuTabSeconds"/>, so it never sits over the game or
+        /// in a capture (captures do not move the mouse).</summary>
+        CanvasLayer _menuTabLayer;
+        Button _menuTab;
+        double _menuTabShown = -1;
+        const double MenuTabSeconds = 2.5;
         BootScreens _boot;
         /// <summary>From <c>--no-boot</c>: go straight to the debug tools. The capture paths set it
         /// too, since a capture of a model must not have 90 seconds of intro in front of it.</summary>
@@ -232,9 +239,23 @@ namespace TPWGodot
             _root.AddChild(_debugPanel);
 
             _debugPanel.AddChild(new Label { Text = "Theme Park World — Godot" });
-            _startGame = new Button { Text = "▶  Start the game (intro, then the menu)", Disabled = true };
+            _startGame = new Button { Text = "▶  Start the game (intro, then the menu)", Disabled = true,
+                                      SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
             _startGame.Pressed += StartGame;
-            _debugPanel.AddChild(_startGame);
+            var hideMenu = new Button { Text = "Hide this menu  (F3 or the ≡ corner button brings it back)" };
+            hideMenu.Pressed += () => SetDebugMenu(false);
+            var topRow = new HBoxContainer();
+            topRow.AddThemeConstantOverride("separation", 8);
+            topRow.AddChild(_startGame);
+            topRow.AddChild(hideMenu);
+            _debugPanel.AddChild(topRow);
+
+            _menuTabLayer = new CanvasLayer { Layer = 21 };
+            AddChild(_menuTabLayer);
+            _menuTab = new Button { Text = "≡ menu", Visible = false, Position = new Vector2(8, 8),
+                                    TooltipText = "Show the debug menu (F3)" };
+            _menuTab.Pressed += () => SetDebugMenu(true);
+            _menuTabLayer.AddChild(_menuTab);
             _status = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
             _debugPanel.AddChild(_status);
             _selfTest = new Label { Text = "Asset self-test: running…", AutowrapMode = TextServer.AutowrapMode.WordSmart };
@@ -1032,8 +1053,28 @@ namespace TPWGodot
         {
             if (e is not InputEventKey { Pressed: true, Echo: false, Keycode: Key.F3 }) return;
             if (_debugLayer == null) return;
-            _debugLayer.Visible = !_debugLayer.Visible;
+            SetDebugMenu(!_debugLayer.Visible);
             GetViewport().SetInputAsHandled();
+        }
+
+        /// <summary>Show or hide the debug menu: F3, the menu's own Hide button, or the corner button.</summary>
+        void SetDebugMenu(bool on)
+        {
+            if (_debugLayer == null) return;
+            _debugLayer.Visible = on;
+            if (on && _menuTab != null) { _menuTab.Visible = false; _menuTabShown = -1; }
+        }
+
+        /// <summary>Mouse movement while the menu is hidden brings the corner button up for a moment. _Input, and
+        /// never marked handled, so the game and the park view still get every motion.</summary>
+        public override void _Input(InputEvent e)
+        {
+            if (e is InputEventMouseMotion && _menuTab != null && _debugLayer != null && !_debugLayer.Visible)
+            {
+                _menuTab.Visible = true;
+                _menuTab.Modulate = Colors.White;
+                _menuTabShown = 0;
+            }
         }
 
         string _shotTarget;
@@ -1052,6 +1093,14 @@ namespace TPWGodot
 
         public override void _Process(double delta)
         {
+            // The corner menu button fades out a moment after the mouse stops, unless the pointer is on it.
+            if (_menuTabShown >= 0 && _menuTab != null)
+            {
+                _menuTabShown = _menuTab.IsHovered() ? 0 : _menuTabShown + delta;
+                if (_debugLayer.Visible || _menuTabShown > MenuTabSeconds) { _menuTab.Visible = false; _menuTabShown = -1; }
+                else if (_menuTabShown > MenuTabSeconds - 0.5)
+                    _menuTab.Modulate = new Color(1, 1, 1, (float)((MenuTabSeconds - _menuTabShown) / 0.5));
+            }
             if (_shotPath != null && ++_shotClock >= _shotFrame)
             {
                 // ⚠ Wait for the frame to be DRAWN before reading it back. Grabbing the texture inside
