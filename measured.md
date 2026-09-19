@@ -1734,3 +1734,112 @@ shared format.
 
 **Not decoded:** types 0, 2, 3, 4, 5, 7 — 660 tracks, type 3 the largest at 360.
 **Not implemented:** this is a format decode only; nothing is wired into the port.
+
+## Bone hierarchy and rest pose — DECODED (2026-09-19)
+
+The 40-byte bone record at `anim32`. Fields found by property, with controls, not by reading hex:
+
+| off | field | how it was established |
+|---|---|---|
+| +6  | parent index, -1 at root | the ONLY s16 column of 20 that is always in [-1,nbones) AND always acyclic, over 323 multi-bone meshes. s16[2] is 99.4% in range and 0% acyclic; s16[15] and s16[19] are 100% in range and constant 0 — the acyclic test is what separates them |
+| +8  | rest rotation, unit quaternion xyzw @4096 | cross-encoding: for all 2,326 bones that also carry a type-8 matrix track, this quaternion reproduces that matrix. Median error 0.000, worst 0.001 |
+| +24 | rest translation | median difference 0.0 against the mean of that bone's own type-6 keyframe translations; next best 3-wide window scores 181 |
+| +32 | scale | 4096/4096/4096 on all 3,554 bones. Read, not assumed |
+
+Structure: exactly one root in all 331 skeletons, parent index always < child index, deepest chain 9.
+Parents preceding children is what lets world transforms compose in a single forward pass.
+
+⚠ +16..+23 is NOT identified. It passes a unit-quaternion test at 100%, but a control with every
+column independently shuffled also passes at 81.7% — so the 100% is the column distributions, not a
+relationship inside the record. Unnamed on purpose.
+
+### The +4 field of a track header is NOT always a bone index
+Measured share landing inside [0,nbones): type 6 and 8 at 100%, type 0/1/7 at 100% but only 85 tracks
+between them, and type 2 at 0.0%, type 4 at 0.0%, type 5 at 7.7%, type 3 at 36.1% — chance for a field
+of that width. I shipped it labelled `BoneIndex` for every type and corrected it the same night.
+
+## Vertex→bone binding — STILL UNKNOWN, four candidates eliminated
+
+This is the last thing between the port and playing an animation. Ruled out:
+
+1. **The per-block bit array.** 491 of 531 meshes have exactly one block, so one mask cannot select
+   individual vertices. Also n0 is 192 and 239 on meshes with 13 and 55 bones — it is not a bone count.
+2. **The second vertex array (`vertA`/nvA).** Zero on 530 of 531 meshes.
+3. **Sections or groups standing for bones.** Section count equals bone count on 3.0% of meshes, group
+   count on 2.6%. The unread u16 in the section header and u32 in the group header are zero.
+4. **A bone index in the per-vertex `r12b` table.** s16[5] scores 100% "valid bone index" and is
+   CONSTANT ZERO across 4,118 vertices — vacuous. Caught by a shuffled control: assigning vertices to
+   their claimed bone put the cluster centroid no closer to that bone than a random shuffle did
+   (479.4 vs 479.4, real beat control in 0 of 68 meshes). A 100% pass rate on a constant field is the
+   failure mode to watch for here; every "valid index" claim in this file needs the variation check.
+
+Two structural findings that did hold, neither of them the binding:
+
+- **`r12` (the n8b table) is a contiguous range table.** `start[i+1] == start[i] + count[i]` across the
+  whole table, 30 of 30 meshes that have 2+ entries. count at s16[0], start at s16[1]. The first start
+  is not 0, and the last range ends on n8 in only 5 of 30, so what it partitions is not yet pinned.
+- **The trailing u32 list is a set of bone indices**, confirming fable's read of entry 39. 205 meshes,
+  every entry valid, 49 distinct values, and no repeats within a list — a set of bones, not a
+  per-vertex map.
+
+Next lead is the code, not the file: the descriptor builder 0x8002C5CC allocates the ARS work buffer
+and 0x8002CA6C copies n8 vertices into it; whatever picks a matrix for a vertex is in that path.
+
+## The animation code, read off TPW.BIN (2026-09-19)
+
+`tools/disasm.py` disassembles TPW.BIN at a virtual address. The file is raw code with no PS-EXE
+header, so the load base cannot be read out of it; it is **0x80010000**, and the tool CHECKS that
+rather than trusting it — under the right base the track dispatch at 0x800DDD78 must read as a run of
+code pointers, and it does, 15/16. A wrong base fails the check and the tool refuses rather than
+printing plausible nonsense at the wrong address.
+
+### There are TWO dispatch tables, not one
+| table | entries | what |
+|---|---|---|
+| 0x800DDD78 | 9 (types 0-8) | the SIZE functions. Types 2/4 share a handler and 3/5 share one, exactly as those pairs share a row in the size table |
+| 0x800DDDA0 | 8 (types 0-7) | the per-type EVALUATORS. Type 8 has none, which fits: it is a static rest pose, not something evaluated against a clock |
+
+Evaluators: type 0 → 0x8002ccfc, 1 → 0x8002d248, 2 → 0x8002d4a8, 3 → 0x8002d4e8, 4 → 0x8002d6f8,
+5 → 0x8002d738, 6 → 0x8002d8ec, 7 → 0x8002dd24. They are `j` targets inside one function starting at
+0x8002cbc4, so they share its frame. Alignment confirmed two ways: the type-7 slot indexes by 16 and
+type 7's stride is 16, and the type-6 slot reads a keyframe-shaped preamble at +8 and compares its
+first halfword against the clock.
+
+### Keyframe interpolation — FOUND (this was one of the two things blocking playback)
+In the type-0 evaluator at 0x8002cf28:
+```
+t     = ((now - start) << 12) / duration      ; 0..4096
+t_inv = 4096 - t
+```
+then the two bracketing records are blended with the GTE's own interpolation opcodes, **GPF (0x3D)**
+at 0x8002cf88 and **GPL (0x3E)** at 0x8002cfb4. The two records read are 0x24 apart, which is type 0's
+36-byte stride. So the game interpolates LINEARLY on a 0..4096 weight; the port's nearest-key sampling
+is a placeholder for exactly this.
+
+### The +4 header field is an index into an ARS region with 8-BYTE elements
+The type-2 evaluator is short enough to read whole:
+```
+index  = u16 at track+4
+dest   = ARS + rec[0x30] + index*8
+src    = track + 8 + clock*8          ; stride 8 = type 2's stride
+copy 8 bytes src -> dest
+```
+Type 3 does the same with its own stride. This is the mechanism behind the earlier measurement that
++4 lands inside [0,nbones) only 0.0% of the time for type 2 and 36.1% for type 3: it was never a bone
+index on those types. It indexes an 8-byte-element array.
+
+⚠ WHICH array is NOT established. rec[0x30] is an ARS offset (the record's 0x1c..0x30 are ARS-relative;
+its 0x08..0x14 are file-relative — two different bases in one record, worth not mixing up). The obvious
+guess is the vertex buffer, since vertices are 8 bytes and the index is < nvc on 100% of tracks, but
+nvc is large enough to bound almost anything, and the direct test FAILED: the 8 bytes a type-3 track
+writes are no closer to the vertex it names than to a randomly shuffled one (549.3 vs 549.1, real beat
+control in 10 of 27 meshes — chance). So the destination region is still open.
+
+### ARS and file layout, confirmed off the builder 0x8002C5CC
+ARS, in order: blocks×4, bones×32, n8 verts×8, ntracks×4, ntracks×2, then the rec[0x30] region.
+File, re-derived independently of x96parse: bone records 40 bytes (n32×5×8 at 0x8002c908), then
+r12 at n8b×12, then r12b at m12×12, then the tracks. Matches the existing walk exactly.
+
+`r12` records split cleanly: bytes 0-3 are the {count, start} range chain, and the evaluator copies
+only bytes **4..11** into ARS (`addiu $a0, $s1, 4` at 0x8002cab0), which is why the chain lives in the
+half the runtime ignores.
