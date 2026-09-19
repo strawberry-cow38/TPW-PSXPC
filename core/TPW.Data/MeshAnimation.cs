@@ -190,6 +190,17 @@ namespace TPW.Data
         }
     }
 
+    /// <summary>A position sample. Types 2/3/4/5 all carry the same 8-byte payload -- the PSX's own
+    /// {s16 x, s16 y, s16 z, s16 pad} vertex, with the pad zero on all 3,973 records on the disc.
+    /// Timed types put a time and duration in front of it; untimed types do not.</summary>
+    public readonly struct PositionKey
+    {
+        public readonly short Time, Duration;    // both 0 on an untimed type
+        public readonly short X, Y, Z;
+        public PositionKey(short time, short dur, short x, short y, short z)
+        { Time = time; Duration = dur; X = x; Y = y; Z = z; }
+    }
+
     /// <summary>What a track drives. Read off the evaluators: the types differ far more in their
     /// DESTINATION than in their record shape.</summary>
     public enum TrackTarget
@@ -264,8 +275,19 @@ namespace TPW.Data
         public int TargetIndex => Target == TrackTarget.Unknown ? -1 : Header4;
         public BoneRest Rest;                              // Type == 8
         public AnimKey[] Keys = Array.Empty<AnimKey>();    // Type == 6
+        public PositionKey[] Positions = Array.Empty<PositionKey>();   // Types 2,3,4,5
         public byte[] Raw = Array.Empty<byte>();           // everything else
-        public bool IsDecoded => Type == 8 || Type == 6;
+
+        /// <summary>Whether the records carry their own timing.
+        ///
+        /// Measured by the same chain that named the duration: types 0, 3, 5 and 6 satisfy
+        /// `Time + Duration == next.Time` on 100% of consecutive pairs (646, 2379, 1079 and 12334 of
+        /// them), while types 1, 2 and 4 score 0.0% and type 7 scores 6.4%, which is chance.
+        ///
+        /// An untimed type is one sample per tick: the evaluator indexes the record array by the clock
+        /// directly, so there is nothing to interpolate and nothing to look up.</summary>
+        public bool IsTimed => Type is 0 or 3 or 5 or 6;
+        public bool IsDecoded => Type is 2 or 3 or 4 or 5 or 6 or 8;
 
         /// <summary>The game's own blend weight for time <paramref name="t"/>: 0..4096 across the key
         /// that contains it. Straight from 0x8002da8c, integer division included, so it matches the
@@ -373,6 +395,34 @@ namespace TPW.Data
                     KeyCount = count,
                 };
                 if (type == 8) tr.Rest = new BoneRest(d.Slice(p + 8, 18));
+                else if (type == 2 || type == 4)
+                {
+                    // Untimed: one 8-byte position per tick, the evaluator indexing by the clock itself.
+                    var ps = new PositionKey[count];
+                    for (int k = 0; k < count; k++)
+                    {
+                        int o = p + hdr + k * stride;
+                        ps[k] = new PositionKey(0, 0, BitConverter.ToInt16(d.Slice(o, 2)),
+                                                BitConverter.ToInt16(d.Slice(o + 2, 2)),
+                                                BitConverter.ToInt16(d.Slice(o + 4, 2)));
+                    }
+                    tr.Positions = ps;
+                }
+                else if (type == 3 || type == 5)
+                {
+                    // Timed: 2+2 of timing in front of the same payload.
+                    var ps = new PositionKey[count];
+                    for (int k = 0; k < count; k++)
+                    {
+                        int o = p + hdr + k * stride;
+                        ps[k] = new PositionKey(BitConverter.ToInt16(d.Slice(o, 2)),
+                                                BitConverter.ToInt16(d.Slice(o + 2, 2)),
+                                                BitConverter.ToInt16(d.Slice(o + 4, 2)),
+                                                BitConverter.ToInt16(d.Slice(o + 6, 2)),
+                                                BitConverter.ToInt16(d.Slice(o + 8, 2)));
+                    }
+                    tr.Positions = ps;
+                }
                 else if (type == 6)
                 {
                     var keys = new AnimKey[count];

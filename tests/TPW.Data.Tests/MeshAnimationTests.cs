@@ -408,5 +408,73 @@ namespace TPW.Data.Tests
             Assert.Equal(100, tr.Sample(10).Tx);       // and sampling does not throw
         }
 
+        // --- position tracks ----------------------------------------------------------------
+
+        // ⭐ Types 2/4 and 3/5 carry the SAME 8-byte payload; the timed pair just puts 4 bytes of timing
+        // in front. Parsing a timed type as untimed would silently read the time as the x coordinate,
+        // which is why these are asserted against one another rather than separately.
+        [Fact]
+        public void AnUntimedPositionTrackIsOneSamplePerTick()
+        {
+            var b = new List<byte>();
+            Header(b, 2, bone: 0, count: 3);
+            b.AddRange(new byte[0x10 - 8]);        // records begin at the TYPE's header size, not at +8
+            foreach (var v in new[] { 10, 20, 30, 0, 11, 21, 31, 0, 12, 22, 32, 0 }) S16(b, v);
+
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tr, out _, out _, out _, out string e), e);
+            var t = tr[0];
+            Assert.False(t.IsTimed);
+            Assert.Equal(3, t.Positions.Length);
+            Assert.Equal(10, t.Positions[0].X);   // NOT a time: the record starts at the coordinate
+            Assert.Equal(20, t.Positions[0].Y);
+            Assert.Equal(30, t.Positions[0].Z);
+            Assert.Equal(0, t.Positions[0].Time);
+            Assert.Equal(12, t.Positions[2].X);
+        }
+
+        [Fact]
+        public void ATimedPositionTrackPutsTimingInFrontOfTheSamePayload()
+        {
+            var b = new List<byte>();
+            Header(b, 3, bone: 0, count: 2);
+            b.AddRange(new byte[0x14 - 8]);        // ditto: type 3's header is 0x14
+            foreach (var v in new[] { 5, 15, 10, 20, 30, 0, 20, 8, 11, 21, 31, 0 }) S16(b, v);
+
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tr, out _, out _, out _, out string e), e);
+            var t = tr[0];
+            Assert.True(t.IsTimed);
+            Assert.Equal(2, t.Positions.Length);
+            Assert.Equal(5, t.Positions[0].Time);
+            Assert.Equal(15, t.Positions[0].Duration);
+            Assert.Equal(10, t.Positions[0].X);      // the payload begins AFTER the timing
+            Assert.Equal(30, t.Positions[0].Z);
+            Assert.Equal(20, t.Positions[1].Time);
+            // the property that identifies the field as a duration
+            Assert.Equal(t.Positions[1].Time, t.Positions[0].Time + t.Positions[0].Duration);
+        }
+
+        // REJECTS calling a type timed when the disc says it is not. Types 1, 2, 4 and 7 fail the
+        // time+duration chain (0.0%, 0.0%, 0.0% and 6.4%); 0, 3, 5 and 6 satisfy it on every pair.
+        [Theory]
+        [InlineData(0, true)]
+        [InlineData(1, false)]
+        [InlineData(2, false)]
+        [InlineData(3, true)]
+        [InlineData(4, false)]
+        [InlineData(5, true)]
+        [InlineData(6, true)]
+        [InlineData(7, false)]
+        public void OnlyTheTypesThatChainAreTimed(int type, bool timed)
+        {
+            var b = new List<byte>();
+            Header(b, type, bone: 0, count: 0);
+            b.AddRange(new byte[64]);
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tr, out _, out _, out _, out _));
+            Assert.Equal(timed, tr[0].IsTimed);
+        }
+
     }
 }

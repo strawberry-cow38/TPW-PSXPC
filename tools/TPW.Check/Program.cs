@@ -173,6 +173,7 @@ static class Program
         int skels = 0, wellFormed = 0, maxDepth = 0, bothEncodings = 0, agree = 0, boneUnit = 0, bonesTot = 0;
         int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
         int spans = 0, spansMeet = 0;
+        int posTracks = 0, posKeys = 0, posSpans = 0, posMeet = 0, empty = 0;
         double worstAgree = 0;
         var undecoded = new SortedDictionary<int, int>();
         string firstFail = "";
@@ -268,6 +269,21 @@ static class Program
                         }
                         if (up) monotonic++;
                     }
+                    else if (t.Positions.Length > 0)
+                    {
+                        posTracks++; posKeys += t.Positions.Length;
+                        if (t.IsTimed)
+                            for (int k = 0; k + 1 < t.Positions.Length; k++)
+                            {
+                                posSpans++;
+                                if (t.Positions[k].Time + t.Positions[k].Duration == t.Positions[k + 1].Time)
+                                    posMeet++;
+                            }
+                    }
+                    // ⚠ EMPTY IS NOT UNDECODED. A type-3 track with zero records parses perfectly
+                    // and has nothing in it; filing those as undecoded overstated the remaining work by
+                    // 177 tracks and would have sent someone looking for a format that is already known.
+                    else if (t.KeyCount == 0 && t.IsDecoded) empty++;
                     else { undecoded.TryGetValue(t.Type, out int n); undecoded[t.Type] = n + 1; }
                 }
             }
@@ -285,9 +301,10 @@ static class Program
         Console.WriteLine($"binding weights    : sum to 1.0 on {sumOne} meshes, {sumBad} not");
         Console.WriteLine($"binding records    : {bindRecs}, destination is a real vertex {destOk} ({pc(destOk, bindRecs)})");
         Console.WriteLine($"quaternion vs type-8 matrix, where a bone states both: {agree}/{bothEncodings} agree ({pc(agree, bothEncodings)}), worst {worstAgree:0.000}");
+        Console.WriteLine($"position tracks    : {posTracks} (types 2/3/4/5), {posKeys} samples; timed spans meet on {posMeet}/{posSpans} ({pc(posMeet, posSpans)}); {empty} more parse to zero records");
         if (undecoded.Count > 0)
         {
-            Console.WriteLine("undecoded track types (kept as raw bytes, not skipped):");
+            Console.WriteLine("still undecoded (kept as raw bytes, not skipped):");
             foreach (var kv in undecoded) Console.WriteLine($"   type {kv.Key}: {kv.Value} tracks");
         }
         return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
