@@ -46,7 +46,12 @@ namespace TPW.Sim
     /// <summary>The ride score, 0x8008C818 (formula READ, slot meanings GUESS).</summary>
     public static class RideScore
     {
-        /// <summary>Returned when the attraction cannot be chosen at all.</summary>
+        /// <summary>Returned for an off-map centre tile or an empty shop.
+        ///
+        /// ⚠ NOT A SAFE SENTINEL, and the original has the same problem: the formula can produce -1 on
+        /// its own for an uninterested guest at a nearby ride, so "rejected" and "scored -1" are
+        /// indistinguishable. Callers must treat it as a low score rather than as a flag -- see
+        /// <see cref="VisitorDecision.ChooseTarget"/>.</summary>
         public const int Rejected = -1;
 
         /// <summary>Score one candidate for one guest.</summary>
@@ -191,7 +196,13 @@ namespace TPW.Sim
             {
                 if (!candidates[i].OpenToGuests) continue;
                 int s = RideScore.Score(guest, candidates[i], world.MapWidth, world.MapHeight, guest.RideHistory);
-                if (s == RideScore.Rejected) continue;
+                // ⚠ -1 IS NOT SKIPPED, AND THAT IS DELIBERATE. §2.2a says only "keep the max", and -1 is
+                // not a reserved value: an ordinary ride scores exactly -1 for an uninterested guest
+                // (closeness 100 against two -20 desire terms, over 13). So the original's rejection
+                // sentinel is a value its own formula can produce, and rejected entries are simply very
+                // low scores that lose to anything real. Skipping them here would have been an invention
+                // -- and would change behaviour in the one case that matters, a park where everything
+                // scores badly, by turning "go to the least bad thing" into "there is nothing to do".
                 // Ties are broken by a coin flip, so two identical rides share the crowd instead of one
                 // of them taking every guest by iteration order.
                 if (s > bestScore || (s == bestScore && rng.Next(2) == 0)) { bestScore = s; bestIndex = i; }
