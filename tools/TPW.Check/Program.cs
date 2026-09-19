@@ -2087,6 +2087,39 @@ static class Program
         {
             // --model-bounds E: sub-model 0 of entry E, its vertices' extent at rest and posed at time 0, and its
             // definition record -- where a model's origin sits relative to its footprint.
+            // --rig E: every sub-model of entry E, its bones and animation length, and each bone's transform at a few
+            // times -- for the park's build animation (entry 3, a rig per variant whose bone moves a whole ride).
+            int rigAt = Array.IndexOf(args, "--rig");
+            if (rigAt >= 0 && rigAt + 1 < args.Length)
+            {
+                var ag = Archive(disc);
+                int re = int.Parse(args[rigAt + 1]);
+                var bytes = ag.Read(ag.Entries[re]);
+                if (!MeshContainer.TryParse(bytes, out var rc, out string rce)) { Console.WriteLine($"entry {re}: {rce}"); return 1; }
+                for (int sub = 0; sub < rc.Subs.Count; sub++)
+                {
+                    if (!rc.TryParseMesh(bytes, sub, out var rm, out rce)) { Console.WriteLine($"sub {sub}: {rce}"); continue; }
+                    int len = MeshPose.AnimationLength(rm);
+                    Console.WriteLine($"sub {sub}: {rm.VertexCount} vertices, {rm.Faces.Count} faces, {rm.BoneCount} bones, {rm.TrackCount} tracks, header word {rm.HeaderWord0}, keys end {len}");
+                    foreach (var tr in rm.Tracks)
+                        Console.WriteLine($"  track type {tr.Type} target {tr.Target} index {tr.Header4} keys {tr.KeyCount} scales {tr.Scales.Length} timed {tr.IsTimed}");
+                    for (int t = 0; t <= len; t += Math.Max(1, len / 6))
+                    {
+                        var pose = MeshPose.Evaluate(rm, t);
+                        var parts = new List<string>();
+                        for (int b = 0; b < pose.Bones.Length; b++)
+                        {
+                            var (rr, x, y, z) = pose.Bones[b];
+                            parts.Add($"b{b} [{rr.M00:F2} {rr.M01:F2} {rr.M02:F2} / {rr.M10:F2} {rr.M11:F2} {rr.M12:F2} / {rr.M20:F2} {rr.M21:F2} {rr.M22:F2}] t({x:F0},{y:F0},{z:F0})");
+                        }
+                        int x0 = int.MaxValue, x1 = int.MinValue, y0 = int.MaxValue, y1 = int.MinValue, z0 = int.MaxValue, z1 = int.MinValue;
+                        foreach (var (vx, vy, vz) in pose.Vertices)
+                        { x0 = Math.Min(x0, vx); x1 = Math.Max(x1, vx); y0 = Math.Min(y0, vy); y1 = Math.Max(y1, vy); z0 = Math.Min(z0, vz); z1 = Math.Max(z1, vz); }
+                        Console.WriteLine($"  t={t}: verts x {x0}..{x1} y {y0}..{y1} z {z0}..{z1}   " + string.Join("  ", parts));
+                    }
+                }
+                return 0;
+            }
             int mbAt = Array.IndexOf(args, "--model-bounds");
             if (mbAt >= 0 && mbAt + 1 < args.Length)
             {

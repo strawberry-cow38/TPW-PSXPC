@@ -868,6 +868,7 @@ namespace TPWGodot
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
                 _park.SetToolSounds(_toolSounds, _parkSounds);
                 _park.SetHud(_commonSheet, _exe, _strings);
+                _park.SetBuildRig(v => _models != null && _models.TryGet(3, v, out var rig) ? rig : null);
                 if (_autoOpen) _park.ParkOpen = true;
                 if (_autoBuildable) _park.ShowBuildable = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.

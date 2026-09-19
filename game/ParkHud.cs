@@ -66,7 +66,7 @@ namespace TPWGodot
             QueueRedraw();
         }
 
-        public bool Ready => _sheet != null && _font != null && _prompts != null;
+        public bool CanDraw => _sheet != null && _font != null && _prompts != null;
 
         /// <summary>The labels for a tool (the game's tool number, 0x800193A4).</summary>
         public int[] ToolPrompts(int tool) => _prompts?.ForTool(tool);
@@ -75,7 +75,7 @@ namespace TPWGodot
 
         public override void _Process(double delta)
         {
-            if (!Visible || !Ready) return;
+            if (!Visible || !CanDraw) return;
             _prompts.Step(delta * TicksPerSecond);
             QueueRedraw(); _sub.QueueRedraw(); _add.QueueRedraw(); _top.QueueRedraw();
         }
@@ -146,7 +146,7 @@ namespace TPWGodot
 
         public override void _Draw()
         {
-            if (!Ready) return;
+            if (!CanDraw) return;
             var white = Psx((0x80, 0x80, 0x80));
             // The video camera, then the balance: red once there is nothing left (0x800390C8).
             Sprite(this, ParkHudLayout.CameraSprite, ParkHudLayout.CameraX, ParkHudLayout.CameraY, false, white);
@@ -173,7 +173,7 @@ namespace TPWGodot
         /// <summary>The bubble's ring, subtracted at a quarter strength (0x8003B06C).</summary>
         void PaintRing(Layer on)
         {
-            if (!Ready) return;
+            if (!CanDraw) return;
             var c = Psx((ParkHudLayout.BubbleShadowColour, ParkHudLayout.BubbleShadowColour, ParkHudLayout.BubbleShadowColour));
             int x = ParkHudLayout.BubbleX, y = ParkHudLayout.BubbleY + 2;
             int dw = _sheet.Sprites[ParkHudLayout.BubbleSprite].W;
@@ -184,7 +184,7 @@ namespace TPWGodot
         /// <summary>A changing label: the old one fading out and the new one in, both added (0x80037CE8).</summary>
         void PaintFlips(Layer on)
         {
-            if (!Ready) return;
+            if (!CanDraw) return;
             for (int b = 0; b < HudPrompts.Buttons; b++)
             {
                 var (_, label, previous, fade, flipping) = _prompts.State(b);
@@ -199,7 +199,7 @@ namespace TPWGodot
         /// <summary>The number of messages, centred on the bubble.</summary>
         void PaintCount(Layer on)
         {
-            if (!Ready) return;
+            if (!CanDraw) return;
             Text(on, Messages.ToString(System.Globalization.CultureInfo.InvariantCulture),
                  ParkHudLayout.BubbleX + ParkHudLayout.BubbleTextX, ParkHudLayout.BubbleY + ParkHudLayout.BubbleTextY, 1, false,
                  Psx((0x80, 0x80, 0x80)));

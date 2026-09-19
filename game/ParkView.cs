@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using TPW.Data;
+using TPW.Sim;
 
 namespace TPWGodot
 {
@@ -221,7 +222,7 @@ namespace TPWGodot
             StopPlacing();
             foreach (var m in _placed) m.QueueFree();
             _placed.Clear();
-            _placedBoxes.Clear();
+            _attractionsPlaced.Clear();
             _selection.Clear();
             _selectionMesh.Mesh = null;
             _gateBox = null; _gateRect = null;
@@ -800,7 +801,7 @@ namespace TPWGodot
             var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
             AddChild(inst);
             _placed.Add(inst);
-            RegisterPlaced(rec, x, z, rot & 3);
+            RegisterPlaced(rec, x, z, rot & 3, inst);
             RebuildGround();
             return true;
         }
@@ -920,7 +921,7 @@ namespace TPWGodot
             var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
             AddChild(inst);
             _placed.Add(inst);
-            RegisterPlaced(rec, o.X, o.Z, _placeRot);
+            RegisterPlaced(rec, o.X, o.Z, _placeRot, inst);
             RebuildGround();
             // The placed sound. A shop or sideshow's tool then closes (0x8001C5C8 switches to tool 0; only the
             // features' tool, 15, reopens itself). A flat or tour ride's hands over to the queue tool (0x8001C92C /
@@ -1016,9 +1017,6 @@ namespace TPWGodot
         public void PinHover(int x, int z) => _hoverPin = (x, z);
         (int X, int Z)? _hoverPin;
 
-        /// <summary>The attractions placed, with their box sites, in the order placed (the order the game's own list
-        /// walks them to find the one under the cursor).</summary>
-        readonly List<(AttractionDefinition Rec, int Ox, int Oz, int Rot, BoxSite Box)> _placedBoxes = new();
         readonly Dictionary<int, int> _attractionHeights = new();
         /// <summary>The park gate as the hover sees it: a rectangle and height per world (0x800F2398 + world × 5:
         /// x, z, width, height, depth), its base the ground at the rectangle's corner (0x800611A0).</summary>
@@ -1038,7 +1036,7 @@ namespace TPWGodot
             return ParkCamera.GroundHeight(_map, (ox + (w >> 1)) * u + u / 2, (oz + (d >> 1)) * u + u / 2);
         }
 
-        void RegisterPlaced(AttractionDefinition rec, int ox, int oz, int rot)
+        void RegisterPlaced(AttractionDefinition rec, int ox, int oz, int rot, MeshInstance3D inst)
         {
             var (w, d) = rec.Footprint(rot);
             int u = ParkTerrain.TileUnits;
@@ -1048,7 +1046,106 @@ namespace TPWGodot
                 Height = _attractionHeights.TryGetValue(rec.Entry, out int h) ? h : 0, Type = rec.Type,
             };
             box.Cx = box.X0 + box.W / 2; box.Cz = box.Z0 + box.D / 2;
-            _placedBoxes.Add((rec, ox, oz, rot, box));
+            // Placed (status 0), then built: 0x80062894 zeroes the build clock, sets status 1 and takes the next
+            // build variant (0x8006268C: a counter that runs 0..7 and round again, one per placement, never reset).
+            var a = new PlacedAttraction { Rec = rec, Inst = inst, Rest = inst.Transform, Box = box, Ox = ox, Oz = oz, Rot = rot };
+            a.Status = AttractionLifecycle.Enter(AttractionStatus.JustPlaced, a);
+            a.Status = AttractionLifecycle.Enter(AttractionStatus.UnderConstruction, a);
+            a.Variant = _buildVariant;
+            _buildVariant = (_buildVariant + 1) & 7;
+            _attractionsPlaced.Add(a);
+        }
+
+        /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
+        /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
+        /// list walks them to find the one under the cursor.</summary>
+        sealed class PlacedAttraction : IAttractionWorld
+        {
+            public AttractionDefinition Rec;
+            public MeshInstance3D Inst;
+            public Transform3D Rest;
+            public BoxSite Box;
+            public int Ox, Oz, Rot;
+            public AttractionStatus Status;
+            /// <summary>The build animation: which of the eight rigs (A+0x6D) and its clock, in 1/4096 ticks (A+0x60).</summary>
+            public int Variant, Clock;
+            public bool IsRide => Rec.IsRide;
+            public bool BuildAnimationComplete { get; set; }
+            public int Reliability { get; set; } = 100;
+            public int CyclesRun { get; set; }
+            public int CyclesPerLoad => 1;
+            public bool IsEmpty => true;
+            public bool MechanicAssigned => false;
+            public void PostMessage(int id) { }
+            public void EjectEveryone() { }
+            public void ClearSmoke() { }
+        }
+        readonly List<PlacedAttraction> _attractionsPlaced = new();
+        int _buildVariant;
+        Func<int, TPW.Data.Mesh> _buildRigSource;
+        readonly TPW.Data.Mesh[] _buildRigs = new TPW.Data.Mesh[8];
+
+        /// <summary>The build animation's rigs: the eight sub-models of archive entry 3, one per variant (a cube
+        /// whose bone 1 carries the whole animation). Looked up when first wanted, since the models load in the
+        /// background.</summary>
+        public void SetBuildRig(Func<int, TPW.Data.Mesh> variantRig) { _buildRigSource = variantRig; Array.Clear(_buildRigs); }
+
+        TPW.Data.Mesh BuildRig(int variant) => _buildRigs[variant] ??= _buildRigSource?.Invoke(variant);
+
+        /// <summary>One park frame of every placed attraction: the status tick, and under construction the build
+        /// clock first (0x800658D8). The clock gains the frame's time, at most four ticks' worth, and the build is
+        /// done once it reaches the rig's length (the game reads it from the rig's record, 0x800300B8; the sub-model's
+        /// first word, which is also where its keys end: 61 ticks, 81 for variant 4, about a second at 25 frames a
+        /// second). The game halves the time in one display mode (0x80053D98, mode 3), which nothing in this build
+        /// calls the mode setter with.</summary>
+        void StepAttractions(int frameTime)
+        {
+            foreach (var a in _attractionsPlaced)
+            {
+                if (a.Status == AttractionStatus.UnderConstruction)
+                {
+                    a.Clock += Math.Min(frameTime, 0x4000);
+                    a.BuildAnimationComplete = a.Clock >= (BuildRig(a.Variant)?.HeaderWord0 ?? 0) << 12;
+                    if (a.BuildAnimationComplete) a.Clock = 0;
+                }
+                var next = AttractionLifecycle.Tick(a.Status, a);
+                if (next != a.Status) a.Status = AttractionLifecycle.Enter(next, a);
+            }
+        }
+
+        /// <summary>Draw each attraction under construction moved by its build rig (0x800659C4): the rig's bone 1,
+        /// posed at the build clock's whole ticks, applied to the whole model about a pivot at (width × 128, 0,
+        /// height × 128) from the model's origin (its unturned footprint's corner) -- the TURNED footprint's width
+        /// (slot 0x64) and, as the game has it, the model's height in tiles (slot 0x6C) where its depth would
+        /// centre it -- and then the attraction's own placement. The rigs grow the model from about a tenth of its
+        /// size with a springy overshoot, some turning it and hopping it up on the way. The clock is eased between
+        /// park frames here. Anything else stands at rest.</summary>
+        void PoseAttractions(double sinceFrame)
+        {
+            int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParticleSystem.FramesPerSecond);
+            foreach (var a in _attractionsPlaced)
+            {
+                if (a.Status != AttractionStatus.UnderConstruction || BuildRig(a.Variant) is not { } rig)
+                {
+                    if (a.Inst.Transform != a.Rest) a.Inst.Transform = a.Rest;
+                    continue;
+                }
+                int clock = a.Clock + (int)(Math.Min(frameTime, 0x4000) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
+                var pose = MeshPose.Evaluate(rig, clock >> 12);
+                if (pose.Bones.Length < 2) { a.Inst.Transform = a.Rest; continue; }
+                var (r, tx, ty, tz) = pose.Bones[1];
+                var (w, _) = a.Rec.Footprint(a.Rot);
+                float u = ParkTerrain.TileUnits;
+                // In the game's model frame (corner at the origin, z down the map): v -> R (v - p) + t + p.
+                var p = new Vector3(w * u / 2, 0, a.Box.Height * u / 2);
+                var c = new Vector3(a.Rec.Width * u / 2, 0, a.Rec.Depth * u / 2);   // where the port centres the mesh
+                var R = new Basis(new Vector3(r.M00, r.M10, r.M20), new Vector3(r.M01, r.M11, r.M21), new Vector3(r.M02, r.M12, r.M22));
+                var gameShift = R * (c - p) + new Vector3(tx, ty, tz) + p - c;
+                // Into the port's mesh frame, z negated and in tiles.
+                var flip = new Basis(new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, -1));
+                var local = new Transform3D(flip * R * flip, new Vector3(gameShift.X, gameShift.Y, -gameShift.Z) / u);
+                a.Inst.Transform = a.Rest * local;
+            }
         }
 
         /// <summary>The object the hover box goes round this frame, or null. As 0x80052324 picks it: with no tool
@@ -1059,10 +1156,10 @@ namespace TPWGodot
             if (_map == null || _pathMode || _placing >= 0 || _queue != null || (_picker != null && _picker.Visible)) return null;
             if ((_hoverPin ?? TileUnderMouse()) is not { } t) return null;
             BoxSite hit = null;
-            foreach (var (rec, ox, oz, rot, box) in _placedBoxes)
+            foreach (var a in _attractionsPlaced)
             {
-                var (w, d) = rec.Footprint(rot);
-                if (t.X >= ox && t.X < ox + w && t.Z >= oz && t.Z < oz + d) { hit = box; break; }
+                var (w, d) = a.Rec.Footprint(a.Rot);
+                if (t.X >= a.Ox && t.X < a.Ox + w && t.Z >= a.Oz && t.Z < a.Oz + d) { hit = a.Box; break; }
             }
             if (!ParkOpen && _gateRect is { } g && _gateBox != null && t.X >= g.X && t.X < g.X + g.W && t.Z >= g.Z && t.Z < g.Z + g.D)
                 hit = _gateBox;
@@ -1425,11 +1522,13 @@ void fragment() {
                 _fx?.Step();
                 _selection.Step();
                 _selection.Hover(hovered);
+                StepAttractions(frameTime);
             }
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
             _selectionMesh.Mesh = SelectionMesh();
-            _hudLayer.Visible = Visible && _hud.Ready;
-            if (_hud.Ready) _hud.SetPrompts(CurrentTool() is int tool && tool != 0 ? _hud.ToolPrompts(tool) : IdlePrompts(hovered));
+            PoseAttractions(_frameClock);
+            _hudLayer.Visible = Visible && _hud.CanDraw;
+            if (_hud.CanDraw) _hud.SetPrompts(CurrentTool() is int tool && tool != 0 ? _hud.ToolPrompts(tool) : IdlePrompts(hovered));
             _fxMesh.Mesh = FxMesh();
             if (_pathMode)
             {
