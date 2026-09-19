@@ -170,6 +170,8 @@ static class Program
     static int Anim(GazArchive gaz)
     {
         int rests = 0, orthonormal = 0, keys = 0, unit = 0, tracks = 0, monotonic = 0, parsed = 0, animFail = 0;
+        int skels = 0, wellFormed = 0, maxDepth = 0, bothEncodings = 0, agree = 0, boneUnit = 0, bonesTot = 0;
+        double worstAgree = 0;
         var undecoded = new SortedDictionary<int, int>();
         string firstFail = "";
         foreach (var e in gaz.Entries)
@@ -188,6 +190,39 @@ static class Program
                 }
                 if (mesh.Tracks == null) continue;
                 parsed++;
+
+                // ⭐ THE CROSS-ENCODING CHECK, and the reason to trust the field offsets at all.
+                // The file states a bone's rest rotation twice in two unrelated forms: a quaternion in
+                // the 40-byte bone record, and -- for some bones -- a 3x3 matrix in a type-8 track.
+                // Nothing makes those agree except reading both correctly. A wrong offset, a wrong
+                // component order or a wrong bone index all break the agreement, so this is a far
+                // stronger statement than either being individually well-formed.
+                var sk = mesh.Skeleton;
+                if (sk != null && sk.Count > 0)
+                {
+                    skels++;
+                    if (sk.IsWellFormed())
+                    {
+                        wellFormed++;
+                        foreach (int dep in sk.Depths()) if (dep > maxDepth) maxDepth = dep;
+                    }
+                    foreach (var bone in sk.Bones)
+                    { bonesTot++; if (Math.Abs(bone.QuatLength() - 1f) < 0.01f) boneUnit++; }
+
+                    foreach (var t in mesh.Tracks)
+                    {
+                        if (t.Type != 8 || t.BoneIndex < 0 || t.BoneIndex >= sk.Count) continue;
+                        var q = sk.Bones[t.BoneIndex].ToMatrix();
+                        double err2 = Math.Max(Math.Max(Math.Abs(q.M00 - t.Rest.M00), Math.Abs(q.M01 - t.Rest.M01)),
+                                   Math.Max(Math.Max(Math.Abs(q.M02 - t.Rest.M02), Math.Abs(q.M10 - t.Rest.M10)),
+                                   Math.Max(Math.Max(Math.Abs(q.M11 - t.Rest.M11), Math.Abs(q.M12 - t.Rest.M12)),
+                                   Math.Max(Math.Max(Math.Abs(q.M20 - t.Rest.M20), Math.Abs(q.M21 - t.Rest.M21)),
+                                                     Math.Abs(q.M22 - t.Rest.M22)))));
+                        bothEncodings++;
+                        if (err2 < 0.05) agree++;
+                        if (err2 > worstAgree) worstAgree = err2;
+                    }
+                }
                 foreach (var t in mesh.Tracks)
                 {
                     if (t.Type == 8) { rests++; if (t.Rest.IsOrthonormal()) orthonormal++; }
@@ -214,12 +249,16 @@ static class Program
         Console.WriteLine($"type 8 rest poses  : {rests}, orthonormal {orthonormal} ({pc(orthonormal, rests)})");
         Console.WriteLine($"type 6 keyframes   : {keys}, unit quaternion {unit} ({pc(unit, keys)})");
         Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
+        Console.WriteLine($"skeletons          : {skels}, single-rooted and parent-before-child {wellFormed} ({pc(wellFormed, skels)}), deepest chain {maxDepth}");
+        Console.WriteLine($"bone rest rotations: {bonesTot}, unit quaternion {boneUnit} ({pc(boneUnit, bonesTot)})");
+        Console.WriteLine($"quaternion vs type-8 matrix, where a bone states both: {agree}/{bothEncodings} agree ({pc(agree, bothEncodings)}), worst {worstAgree:0.000}");
         if (undecoded.Count > 0)
         {
             Console.WriteLine("undecoded track types (kept as raw bytes, not skipped):");
             foreach (var kv in undecoded) Console.WriteLine($"   type {kv.Key}: {kv.Value} tracks");
         }
-        return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic);
+        return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
+             + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree);
     }
 
     static GazArchive Archive(DiscReader disc)

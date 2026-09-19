@@ -53,6 +53,9 @@ namespace TPW.Data
         /// <summary>Animation tracks, walked after the faces. See <see cref="MeshAnimation"/>.
         /// Empty when TrackCount is 0 or the walk failed; <see cref="AnimationError"/> says which.</summary>
         public List<AnimTrack> Tracks = new();
+
+        /// <summary>The bone hierarchy and rest pose. Empty when the walk failed.</summary>
+        public Skeleton Skeleton = new();
         /// <summary>Where the track walk stopped. Should land on the trailing u32 index list.</summary>
         public int TrackBytesEnd;
         /// <summary>Null when the tracks parsed. Non-null leaves Tracks empty rather than half-filled.</summary>
@@ -241,9 +244,10 @@ namespace TPW.Data
             int m12 = BitConverter.ToInt32(d, b + 0x0C);
             int n8b = BitConverter.ToInt32(d, b + 0x20);
             if (MeshAnimation.TryParse(d, b, p, m.BoneCount, m.TrackCount, m12, n8b,
-                                       out var tracks, out int trackEnd, out string animErr))
+                                       out var tracks, out var skel, out int trackEnd, out string animErr))
             {
                 m.Tracks = tracks;
+                m.Skeleton = skel;
                 m.TrackBytesEnd = trackEnd;
             }
             else m.AnimationError = animErr;
