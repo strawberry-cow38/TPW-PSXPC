@@ -1884,3 +1884,34 @@ scatter loop, not a skin-matrix palette.
 ⚠ Still open: bytes 4..11 of each r12b record (the builder copies bytes 4..11 of the **r12** records into
 ARS at 0x8002cab0, which is a different table — don't mix them), and the exact indexing of the source
 region by a track's +4 field. The binding itself does not depend on either.
+
+## What every track type writes to — COMPLETE (2026-09-19)
+
+The eight evaluators differ mainly in their DESTINATION, which is why types 2/4 share a size row and
+3/5 share one: same record shape, different target. Destinations read off the code; the ranges are the
+independent check, and they separate cleanly in both directions rather than one bound being loose.
+
+| type | stride | +4 field indexes | destination | measured |
+|---|---|---|---|---|
+| 0 | 36 | a bone | interpolated pose | +4 < nbones 100% (50 tracks) |
+| 1 | 32 | a bone | — | 1 track only |
+| 2 | 8 | a scatter SOURCE | ARS + rec[0x30] | +4 < n8b 100%, but < n8b only 11.8% for type 4 |
+| 3 | 12 | a scatter SOURCE | ARS + rec[0x30] | +4 < n8b 100%, < n8 97.7% |
+| 4 | 8 | a VERTEX | ARS + rec[0x1c], direct | +4 < n8 100%, < n8b 11.8% |
+| 5 | 12 | a VERTEX | ARS + rec[0x1c], direct | +4 < n8 100%, < n8b 0.6% |
+| 6 | 20 | a bone | bone pose | proven by the quaternion cross-check |
+| 7 | 16 | a bone | — | +4 < nbones 100% (34 tracks) |
+| 8 | 32 | a bone | static rest pose, no evaluator | proven by the cross-check |
+
+Types 2/3 write to sp+0xb0 (= ARS + rec[0x30], the scatter sources) and types 4/5 to sp+0xa8
+(= ARS + rec[0x1c], the vertex buffer itself) — 0x8002d4b8 and 0x8002d50c against 0x8002d708 and
+0x8002d75c. So **types 4 and 5 are direct vertex animation that bypasses the scatter entirely**, and
+types 2 and 3 move the scatter's source points, which then reach vertices through the weighted runs.
+
+That accounts for 751 of the 836 tracks previously filed as undecoded: their destination and index
+space are now known, and only their per-record payload past the first 8 bytes is not.
+
+⚠ Do not infer a shared meaning from a shared row in the size table. Types 2 and 4 have identical
+strides and headers and write to different arrays; so do 3 and 5. The size table is about how far to
+step, and nothing else. This is the second time that table has invited a wrong inference — the first
+was types 1 and 8, which share a size and not a format.
