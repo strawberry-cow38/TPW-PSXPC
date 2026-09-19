@@ -5,14 +5,21 @@ namespace TPW.Sim.Tests
 {
     public class MoneyTests
     {
-        // ⭐ REJECTS TREATING A STORED VALUE AS POUNDS. tinyclaw measured a HUD reading $48,040 while memory
-        // held 480800. Every economy number in the game is out by 10x if this is missed, and still looks like
-        // money, which is why it needs a type rather than a convention.
+        // ⭐ REJECTS TREATING A STORED VALUE AS POUNDS. Memory holds 480800 for a balance of GBP 48,080.
+        // Every economy number in the game is out by 10x if this is missed, and still looks like money,
+        // which is why it needs a type rather than a convention.
+        //
+        // ⚠ This asserted 48,040 and was red, because the figure was mistyped in chat and the citation
+        // carried the typo in. The comment said "a HUD reading of $48,040" long after the assertion was
+        // corrected, which left the prose contradicting the line under it. 48,080 reconciles three ways
+        // and 48,040 reconciles none: fixtures/park_with_ride.json holds money = 480800; the park opened
+        // with 50,000 and bought a GBP 2,000 ride; and gate_total moves +400 per admission, GBP 40 each,
+        // with two admissions on the clock. 50,000 - 2,000 + 80 = 48,080.
         [Fact]
         public void TheGameStoresTenTimesWhatItDisplays()
         {
             Assert.Equal(500000, Money.FromPounds(50_000).Raw);
-            Assert.Equal(48_080, Money.FromRaw(480_800).Pounds);   // was 48,040: a typo quoted in from chat (tinyclaw caught it)
+            Assert.Equal(48_080, Money.FromRaw(480_800).Pounds);
         }
 
         [Fact]
