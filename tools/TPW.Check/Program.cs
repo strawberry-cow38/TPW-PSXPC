@@ -1348,6 +1348,22 @@ static class Program
         return 0;
     }
 
+    static int WorldMapDump(GazArchive g)
+    {
+        int e = StringTable.EntryByLanguage[0];
+        if (e >= g.Entries.Count) { Console.WriteLine("English table missing"); return 1; }
+        if (!StringTable.TryParse(g.Read(g.Entries[e]), e, out var en, out string err))
+        { Console.WriteLine("English table: " + err); return 1; }
+        foreach (var i in WorldMap.Islands)
+        {
+            string name = WorldMap.NameOf(i, en);
+            Console.WriteLine($"world {i.World} ({ParkWorlds.All[i.World].Name,-9}) park {i.Park}  " +
+                              $"id {i.NameId,4}  maps {string.Join(",", ParkWorlds.All[i.World].Maps)}  {name}");
+        }
+        Console.WriteLine($"at most {WorldMap.MaxOpenParks} parks open at once (string 318)");
+        return 0;
+    }
+
     static int LangNames(GazArchive g)
     {
         string[] want = { "English", "Fran", "Deutsch", "Italiano", "Espa", "Nederlands", "Svenska" };
@@ -1428,6 +1444,9 @@ static class Program
             int fmAt = Array.IndexOf(args, "--findmesh");
             if (fmAt >= 0 && fmAt + 2 < args.Length)
                 return FindMesh(g, int.Parse(args[fmAt + 1]), int.Parse(args[fmAt + 2]));
+            // --worldmap: the eight parks with their names resolved through the real string table, which
+            // is the end-to-end check that the island table was transcribed at the right offsets.
+            if (Array.IndexOf(args, "--worldmap") >= 0) return WorldMapDump(g);
             if (Array.IndexOf(args, "--langnames") >= 0) return LangNames(g);
             // --grepstr <text>: search the ID table and the English table together, so a hit shows both
             // the symbolic name the developers gave a string and what it actually says.
