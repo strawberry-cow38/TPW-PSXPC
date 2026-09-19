@@ -2012,3 +2012,38 @@ So the strides are not arbitrary and the pairs that share a size row are the sam
 Type 6 is the same idea again with a 16-byte payload (translation + quaternion) aimed at a bone, and
 type 0 the same with 32 bytes. Types 1 and 7 are bone-shaped but untimed, and their record layout is
 NOT established — 1 track and 34 tracks respectively, too few to read a property off.
+
+## The bones→vertices link: still open, and it may not exist (2026-09-19)
+
+Everything else in the animation pipeline closes. Vertices are fully accounted for **without bones**:
+position tracks drive scatter sources, the weighted runs spread those into the vertex buffer, and types
+4/5 write vertices directly. Posing 30 animated meshes at two times moves 24 of them.
+
+Bones are equally well accounted for on their own side: types 0/1/6/7 all write into the ARS bone-matrix
+region (ARS + rec[0x24]), and type 8 supplies the rest pose. What is NOT established is anything reading
+those matrices to move a vertex.
+
+Ruled out as a per-vertex bone index, each with its own measurement:
+- the per-block bit array (491 of 531 meshes have ONE block, so one mask cannot select vertices);
+- the second vertex array (zero on 530 of 531);
+- section or group counts standing for bones (3.0% and 2.6%, and their unread header bytes are zero);
+- a bone index inside the per-vertex table (the candidate field is constant zero — a shuffled control
+  scored identically, 479.4 vs 479.4).
+
+**Leading hypothesis, NOT established: TPW bones do not deform a skin at all.** They position separate
+sub-meshes — riders, carriages, attached props — while deformation is entirely vertex animation. It fits
+what is measured: the vertex path needs no bones to be complete; the trailing u32 list is a SET of bone
+indices with no repeats (205 meshes, every entry valid), which is the shape of "these bones carry
+attachments" rather than a per-vertex map; and a container holds many sub-entries that a parent could
+place independently.
+
+What would settle it, cheapest first:
+1. Find any read of ARS + rec[0x24] outside the track evaluators. If the only readers are the evaluators
+   that WRITE bone poses, nothing consumes them within the mesh and the hypothesis is close to proved.
+2. Pose a model on hardware with a bone track running and diff the ARS vertex buffer between two frames;
+   if it does not change while the bone matrices do, bones are not reaching vertices.
+
+⚠ A detector note: my first search for GTE matrix loads used the wrong opcode bits (0x4a6 instead of
+0x246) and returned 78 hits inside functions that set no matrix at all. The corrected pattern gives 304,
+and the disassembler cross-check is what caught it — capstone does not decode GTE control ops, so it
+prints them as raw bytes, which is itself the tell that a hit is real.
