@@ -58,9 +58,27 @@ namespace TPWGodot
         /// pitch registers for voices 0-7, which are the MUSIC voices, so that measurement was of a tracker
         /// note's playback speed rather than a sample's base rate. A correct reading of the wrong voices.
         ///
-        /// And the music waveforms carry a per-sample rate of their own, so one flat constant is right for
-        /// perhaps one of them and slightly wrong for the rest — wrong in the way that sounds fine rather
-        /// than broken, which is exactly why it survived a listen.</summary>
+        /// ✅ AND THE TWO FIGURES ARE NOT IN CONFLICT — they describe different things, which is the whole
+        /// resolution. **8363 Hz is the tracker BASE**, exactly as the XM instrument headers said, and the
+        /// pitches heard on the music voices are NOTES played from it. tinyclaw checked the console's actual
+        /// pitch values against the base and every one lands on a semitone within 0.2%:
+        ///
+        ///     0x0817 = 22,297.6 Hz     8363 * 2^(17/12) = 22,326.5     -0.13%
+        ///     0x0610 = 16,709.8 Hz     8363 * 2^(12/12) = 16,726.0     -0.10%
+        ///     0x0308 =  8,354.9 Hz     8363 * 2^( 0/12) =  8,363.0     -0.10%
+        ///
+        /// So 22,050 is roughly a note seventeen semitones above the base, which is why it sounds right for
+        /// a preview while 8363 sounds "too slow": these samples are written to be played UP. Both numbers
+        /// were correct; the question "what is the sample rate" had two answers and no one had separated
+        /// them.
+        ///
+        /// ⭐ It also dissolved an anomaly filed as noise. tinyclaw had recorded "22050, consistently +1.1%"
+        /// and written the 1.1% off as emulator drift. 22050 * 1.011 = 22,292 — a musical interval, not
+        /// drift. **A residual that sits at the same value every time is a signal nobody has identified yet.**
+        ///
+        /// ⚠ One value still does not fit: 0x0400 sits 1.24% off the nearest semitone while everything else
+        /// is inside 0.2%. It is exactly 11,025 Hz — an SFX base rate — on a music voice. Unexplained, and
+        /// not built on.</summary>
         public const int ConfirmedRateHz = 22050;
 
         /// <summary>The two rates the 132 sound EFFECTS actually use. Not yet wired: this browser plays the
