@@ -346,6 +346,18 @@ So the map's proper use is as an **oracle** — check a face's CLUT against what
 for that rectangle — rather than as the mechanism. Building it as the mechanism produces something
 that works for one park, looks finished, and quietly has no answer for any asset nobody photographed.
 
+⭐ **THE REAL PATH IS A FIELD READ, NOT A DERIVATION.** fable's folio analysis gives the `0x96`
+container's face record as **`{i0, i1, i2, 3x(u,v), clut}`** — 14 bytes — under a
+**`{nfaces, tpage}`** header, and the emitter at **`0x800115FC`** copies `clut` and `tpage` straight
+into the GPU poly words. So the palette for a triangle is stored on the triangle. Nothing is inferred,
+nothing is matched, and no capture is involved: read the field, use it.
+
+⭐ **AND THAT MAKES THE CAPTURE MAP THE TEST FOR IT.** If reading CLUTs off faces reproduces the 177
+`(rect → clut)` pairs logged off the live GPU, the implementation is verified against real hardware
+behaviour rather than against itself — which is the difference between a decoder that is correct and
+one that is merely self-consistent. **177 ready-made fixtures.** That is the right relationship
+between the two artefacts, and it is the opposite of using the map to produce the colours.
+
 ## 6. What would settle it
 
 Structural guessing has stopped paying: the last three hypotheses each died on a falsifier, which is
