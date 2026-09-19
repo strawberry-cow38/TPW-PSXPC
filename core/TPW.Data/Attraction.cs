@@ -157,6 +157,17 @@ namespace TPW.Data
 
         static bool InMap(ParkMap m, int x, int z) => x >= 0 && x < m.Width - 1 && z >= 0 && z < m.Height - 1;
 
+        /// <summary>Whether the tile outside a door may take the attraction's own path piece (every exit, and the
+        /// entrance of anything that is not a ride). The game tests it as it tests the ride's queue piece and the
+        /// footprint (0x80064558 → 0x8004D718), so path already there refuses the whole placement.
+        ///
+        /// ⚠ THE PORT'S DEPARTURE, master's call (the PC version does it): the path piece may land on path already
+        /// there (path, or path and queue), and placing then joins that path to the door (<see cref="PathTool.LayDoors"/>
+        /// lays path over path as the path tool does, linking it) instead of the blueprint going red. The no-build
+        /// flags (0x01 no ground, 0x02 nothing may be built) still refuse; a ride's queue piece keeps the game's rule.</summary>
+        static bool PathPieceAllows(MapTile t) =>
+            ParkBuild.TileAllows(t) || (t.Raw0 is 2 or 13 && (t.Flags & (0x01 | 0x02)) == 0);
+
         /// <summary>The markers for an attraction with its footprint's corner at (ox, oz), and whether it may be placed.</summary>
         public static List<Marker> Ghost(ParkMap map, AttractionDefinition a, int ox, int oz, int rot, out bool placeable)
         {
@@ -174,13 +185,13 @@ namespace TPW.Data
                 }
             if (a.EntranceTile(ox, oz, rot) is { } e && InMap(map, e.X, e.Z))
             {
-                bool ok = ParkBuild.TileAllows(map[e.X, e.Z]);
+                bool ok = a.IsRide ? ParkBuild.TileAllows(map[e.X, e.Z]) : PathPieceAllows(map[e.X, e.Z]);
                 placeable &= ok;
                 list.Add(new Marker(e.X, e.Z, ok ? (a.IsRide ? RideEntrance : OtherEntrance) : Refused, a.EntranceTurn(rot)));
             }
             if (a.ExitTile(ox, oz, rot) is { } x2 && InMap(map, x2.X, x2.Z))
             {
-                bool ok = ParkBuild.TileAllows(map[x2.X, x2.Z]);
+                bool ok = PathPieceAllows(map[x2.X, x2.Z]);
                 placeable &= ok;
                 list.Add(new Marker(x2.X, x2.Z, ok ? ExitMarker : Refused, a.ExitTurn(rot)));
             }
