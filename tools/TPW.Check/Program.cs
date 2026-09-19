@@ -1466,6 +1466,47 @@ static class Program
     /// on-screen period can be tested against both readings of the cycle.</summary>
     /// <summary>Does a track's LAST key duplicate its FIRST? The game's handler reads key[count] --
     /// one past the last -- so the array may carry a loop-closing sentinel this parser stops before.</summary>
+    /// <summary>Across the whole disc: what TIME does the record at track+8 carry -- the one the
+    /// parser skips? If a keyed track's animation really begins there, it should be 0.</summary>
+    static int FirstRecord(GazArchive g)
+    {
+        var times = new SortedDictionary<int,int>();
+        int tracks = 0, matchesLast = 0, hasLast = 0;
+        foreach (var e in g.Entries)
+        {
+            byte[] bytes;
+            try { bytes = g.Read(e); } catch { continue; }
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int sub = 0; sub < c.Subs.Count; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m, out _) || m.Tracks == null) continue;
+                if (!c.TryExpand(bytes, sub, out var exp, out _, out _)) continue;
+                foreach (var tr in m.Tracks)
+                {
+                    if (tr.Type != 0 && tr.Type != 6) continue;          // the TIMED keyed types
+                    if (tr.Keys == null || tr.Keys.Length == 0) continue;
+                    int off = tr.FileOffset + 8;
+                    if (off + 20 > exp.Length) continue;
+                    tracks++;
+                    int t = BitConverter.ToInt16(exp, off);
+                    times.TryGetValue(t, out int n); times[t] = n + 1;
+                    var first = AnimKey.FromBlock(exp.AsSpan(off + 4, 16), 0, 1);
+                    var last = tr.Keys[tr.Keys.Length - 1];
+                    hasLast++;
+                    if (Math.Abs(first.Qx - last.Qx) < 1e-4 && Math.Abs(first.Qy - last.Qy) < 1e-4 &&
+                        Math.Abs(first.Qz - last.Qz) < 1e-4 && Math.Abs(first.Qw - last.Qw) < 1e-4)
+                        matchesLast++;
+                }
+            }
+        }
+        Console.WriteLine($"{tracks} timed keyed tracks examined");
+        Console.WriteLine("time carried by the record at track+8:");
+        foreach (var kv in times.Take(6)) Console.WriteLine($"   t = {kv.Key}: {kv.Value} tracks");
+        if (times.Count > 6) Console.WriteLine($"   ... {times.Count} distinct times in all");
+        Console.WriteLine($"{matchesLast} of {hasLast} carry the SAME rotation as the track's last key");
+        return 0;
+    }
+
     static int KeyEnds(GazArchive g, int entry, int sub)
     {
         foreach (var e in g.Entries)
@@ -1754,6 +1795,7 @@ static class Program
             int pdAt = Array.IndexOf(args, "--posedelta");
             if (pdAt >= 0 && pdAt + 2 < args.Length)
                 return PoseDelta(g, int.Parse(args[pdAt + 1]), int.Parse(args[pdAt + 2]));
+            if (Array.IndexOf(args, "--firstrecord") >= 0) return FirstRecord(g);
             int keAt = Array.IndexOf(args, "--keyends");
             if (keAt >= 0 && keAt + 2 < args.Length) return KeyEnds(g, int.Parse(args[keAt + 1]), int.Parse(args[keAt + 2]));
             int ahAt = Array.IndexOf(args, "--animheaders");

@@ -331,6 +331,22 @@ namespace TPW.Data
         public byte Type;
         public int KeyCount;
 
+        /// <summary>Where this track starts in the (expanded) entry, so a caller can reach the bytes
+        /// this parser does not turn into keys -- notably the key-sized slot AFTER the last key. See
+        /// <see cref="TrailingSlotOffset"/>.</summary>
+        public int FileOffset;
+
+        /// <summary>Offset of the key-sized record that follows the last key, or -1 for types without
+        /// keys. The game's handlers read key[COUNT] there (type 0 at 0x8002cdac, type 6 at
+        /// 0x8002d95c), and the track's own size leaves exactly one key's worth of room for it: type 6
+        /// is stride 20 with header 0x1C and keys starting at +8, so 20*count + 28 - (8 + 20*count) =
+        /// 20 bytes spare; type 0 is 36 with header 0x2C, leaving 36. That is not slack, it is a
+        /// record.</summary>
+        public int TrailingSlotOffset => KeyCount <= 0 ? -1 : FileOffset + 8 + KeySizes(Type) * KeyCount;
+
+        /// <summary>Bytes per key for the types that have them, 0 otherwise.</summary>
+        public static int KeySizes(byte type) => type switch { 0 => 36, 1 => 32, 6 => 20, 7 => 16, _ => 0 };
+
         /// <summary>The raw u16 at +4 in the track header. NOT always a bone index -- see
         /// <see cref="BoneIndex"/>.</summary>
         public int Header4;
@@ -445,6 +461,20 @@ namespace TPW.Data
         /// A shared row in a size table is not a shared layout. (Types 2/4 and 3/5 are the same
         /// trap again, and there the shared size hides a different TARGET rather than a different
         /// layout -- see <see cref="AnimTrack.Target"/>.)</summary>
+        /// <summary>Where a track's records start: 8 bytes in, ALWAYS.
+        ///
+        /// ⭐ Every type's Header below is exactly 8 + Stride, all nine of them, because the 8-byte
+        /// header is followed by count + 1 records -- not count. The game's handlers read from track+8
+        /// and bound the search at key[count] (type 0 at 0x8002cdac, type 6 at 0x8002d95c), so the
+        /// extra record is the LAST one, and reading from +Header silently dropped the FIRST.
+        ///
+        /// ⭐ That dropped record is the loop closer: in every track of the language advisor it carries
+        /// time 0 and the same rotation as the key at t=126, so the clip begins and ends on one pose and
+        /// loops seamlessly. Without it the clip appeared to start at t=25 with nothing covering the
+        /// head of the timeline, which is why 200 of the disc's 251 animated sub-meshes snapped at their
+        /// loop and the console -- measured across 22 consecutive frames -- does not.</summary>
+        const int KeyBase = 8;   // NOT USED BY THE PARSE -- see the note above; the reading is not adopted yet.
+
         static readonly (int Stride, int Header)[] Sizes =
         {
             (36, 0x2C), (32, 0x28), (8, 0x10), (12, 0x14),
@@ -500,6 +530,7 @@ namespace TPW.Data
                     Type = type,
                     Header4 = BitConverter.ToUInt16(d.Slice(p + 4, 2)),
                     KeyCount = count,
+                    FileOffset = p,
                 };
                 if (type == 8) tr.Rest = new BoneRest(d.Slice(p + 8, 18));
                 else if (type == 2 || type == 4)
