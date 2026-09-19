@@ -15,6 +15,7 @@ namespace TPWGodot
     public partial class Main : Node
     {
         ParkClock _clock;
+        ParkFinances _finances;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -220,6 +221,11 @@ namespace TPWGodot
                 : GameDataLocator.Identify(dataPath);
 
             _clock = new ParkClock();
+            // ⚠ OPENING BALANCE IS NOT ESTABLISHED and is very likely per-level, so this starts at
+            // zero rather than at an invented figure. With no staff and no loans nothing charges it, so
+            // zero is inert here -- but it is a placeholder, not a reading, and the moment wages or a
+            // loan exist the real number has to come from the level record.
+            _finances = new ParkFinances(Money.Zero);
 
             // ⚠ INSET FROM THE EDGES. Anchored full-rect with no offsets, the first label sits ON the top
             // edge and is clipped by it -- which looked like a missing widget rather than a margin bug.
@@ -1202,7 +1208,10 @@ namespace TPWGodot
             // still carries in its weather. Accumulate real time and spend it in whole ticks.
             _accum += delta;
             double tickSeconds = _data.Variant?.TickSeconds ?? ParkClock.TickSeconds;
-            while (_accum >= tickSeconds) { _accum -= tickSeconds; _clock.Advance(); }
+            // The calendar advances on the DAY edge, which OnTick tests for -- see ParkFinances. It is
+            // inside this loop and not outside it because spending several ticks in one frame must roll
+            // several days, and a check after the loop would see only the last one.
+            while (_accum >= tickSeconds) { _accum -= tickSeconds; _clock.Advance(); _finances.OnTick(_clock); }
 
             if (_tourPos >= 0 && ++_tourFrames >= _tourHold)
             {
@@ -1217,6 +1226,8 @@ namespace TPWGodot
 
             _status.Text = _data.CanPlay
                 ? $"{_data.Variant.Name} ({_data.Variant.Region})\n{_clock}\ntick = {tickSeconds:0.####}s"
+                  + $"\nyear {_finances.Calendar.Year}  month {_finances.Calendar.Month + 1}  day {_finances.Calendar.Day + 1}"
+                  + $"   balance {_finances.Bank.Balance}   months run {_finances.MonthsRun}"
                 : $"No playable game data.\n{_data.Message}";
         }
     }
