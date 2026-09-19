@@ -83,6 +83,11 @@ namespace TPW.Data.Tests
         [Fact]
         public void BlocksAreCutTopToBottom()
         {
+            // ⚠ THE MARKER NEEDS TWO PIXELS. It used to be one byte, b + 1, read back from the first pixel, and for
+            // the last block that byte is 16 = 0x10, whose LOW nibble (the first 4-bit pixel) is 0. The test went
+            // red on block 15 ("the last block comes back empty", tinyclaw's nightly) with the decoder fine: the
+            // marker could not be represented. Now the low nibble is the first pixel and the high nibble the
+            // second, so 1..16 are all distinct and block 15 cannot be mistaken for block 0.
             var d = new byte[SpriteBank.Bytes];
             for (int b = 0; b < SpriteBank.Blocks; b++) d[b * SpriteBank.BlockBytes] = (byte)(b + 1);
             Assert.True(SpriteBank.TryDecode(d, out var bank, out _));
@@ -91,7 +96,9 @@ namespace TPW.Data.Tests
                 var blk = SpriteBank.Block(bank, b);
                 Assert.Equal(SpriteBank.Width, blk.Width);
                 Assert.Equal(SpriteBank.BlockHeight, blk.Height);
-                Assert.Equal((byte)((b + 1) * 17), blk.Rgba[0]);
+                int marker = b + 1;
+                Assert.Equal((byte)((marker & 0x0F) * 17), blk.Rgba[0]);   // first pixel: low nibble
+                Assert.Equal((byte)((marker >> 4) * 17), blk.Rgba[4]);     // second pixel: high nibble
             }
             Assert.Null(SpriteBank.Block(bank, 16));
             Assert.Null(SpriteBank.Block(null, 0));

@@ -64,6 +64,13 @@ namespace TPWGodot
 
         public int Count => _meshes.Count;
 
+        /// <summary>Show or hide the browser, taking the camera back when shown (the park view has its own).</summary>
+        public void Activate(bool on)
+        {
+            Visible = on;
+            if (on && _camera != null) _camera.Current = true;
+        }
+
         /// <summary>The browser index of the first model in archive entry <paramref name="entry"/>, or -1.</summary>
         public int IndexOfEntry(int entry) => _meshes.FindIndex(x => x.Entry == entry);
 

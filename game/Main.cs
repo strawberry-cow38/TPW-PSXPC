@@ -31,6 +31,13 @@ namespace TPWGodot
         readonly System.Random _rng = new();
         OptionButton _rate;
         MoviePlayer _player;
+        ParkView _park;
+        Button _parkButton;
+        OptionButton _parkChoice;
+        Label _parkInfo;
+        System.Collections.Generic.List<(int Entry, ParkMap Map)> _maps = new();
+        /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
+        int _autoPark = -1;
         OptionButton _movieChoice;
         Button _playMovie;
         System.Collections.Generic.List<string> _movieFiles = new();
@@ -175,6 +182,16 @@ namespace TPWGodot
             windBtn.Pressed += () => _models.ToggleWinding();
             texBtn.Pressed += () => _models.ToggleTextures();
 
+            // ⭐ THE PARK VIEW. A park's map, drawn; see ParkView for what it does and does not show yet.
+            _park = new ParkView();
+            AddChild(_park);
+            _parkInfo = new Label { Text = "" };
+            _park.SetInfoLabel(_parkInfo);
+            _parkButton = new Button { Text = "Park view", Disabled = true, ToggleMode = true };
+            _parkButton.Toggled += on => ShowPark(on);
+            _parkChoice = new OptionButton { Disabled = true };
+            _parkChoice.ItemSelected += i => { if (_parkButton.ButtonPressed) ShowPark(true); };
+
             var row = new HBoxContainer();
             row.AddThemeConstantOverride("separation", 8);
             row.AddChild(_next);
@@ -183,8 +200,11 @@ namespace TPWGodot
             row.AddChild(cullBtn);
             row.AddChild(windBtn);
             row.AddChild(texBtn);
+            row.AddChild(_parkButton);
+            row.AddChild(_parkChoice);
             _root.AddChild(row);
             _root.AddChild(_modelInfo);
+            _root.AddChild(_parkInfo);
 
             _audio = new AudioStreamPlayer();
             AddChild(_audio);
@@ -242,6 +262,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--models="))
                     _modelTourSpec = arg.Substring("--models=".Length).Split(',');
                 else if (arg == "--cull-on") _tourCull = true;
+                else if (arg.StartsWith("--park=")) _autoPark = int.Parse(arg.Substring("--park=".Length));
             }
 
             GD.Print($"[tpw] data: {_data.Message}");
@@ -295,6 +316,9 @@ namespace TPWGodot
                         if (!df.IsDirectory && df.Name.EndsWith(".STR", System.StringComparison.OrdinalIgnoreCase))
                             movies.Add(df.Name);
                     _hasAdvisor = disc.Find(AdvisorSpeech.File) != null && disc.IsRawSectors;
+                    var af = disc.Find(AssetSelfTest.AssetArchive);
+                    if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gz, out _))
+                        foreach (var (entry, map) in ParkMap.FindAll(gz)) _maps.Add((entry.Index, map));
                 }
                 catch (System.Exception e)
                 {
@@ -371,6 +395,16 @@ namespace TPWGodot
             }
             else _playSound.Text = "No sound decoded";
 
+            _parkChoice.Clear();
+            foreach (var (entry, _) in _maps)
+                _parkChoice.AddItem(entry == 203 ? "map #203 (jungle, tinyclaw's park)" : $"map #{entry}");
+            _parkChoice.Disabled = _parkButton.Disabled = _maps.Count == 0;
+            if (_autoPark >= 0)
+            {
+                int i = _maps.FindIndex(m => m.Entry == _autoPark);
+                if (i >= 0) { _parkChoice.Selected = i; _root.Visible = false; ShowPark(true); }
+            }
+
             _playAdvisor.Disabled = !_hasAdvisor;
             if (!_hasAdvisor) _playAdvisor.Text = "No advisor speech on this disc";
             else if (_autoLine >= 0) PlayAdvisorLine(_autoLine, _autoLanguage);
@@ -418,6 +452,19 @@ namespace TPWGodot
                 _pendingMovieError = err;
                 CallDeferred(nameof(StartPendingMovie));
             });
+        }
+
+        void ShowPark(bool on)
+        {
+            if (on && _maps.Count > 0)
+            {
+                int sel = System.Math.Clamp(_parkChoice.Selected, 0, _maps.Count - 1);
+                var (entry, map) = _maps[sel];
+                _park.Load(map, $"map #{entry}");
+            }
+            _park.Activate(on && _park.HasMap);
+            _models.Activate(!(on && _park.HasMap));
+            if (!on) _parkInfo.Text = "";
         }
 
         void PlayAdvisorLine() => PlayAdvisorLine(-1, _advisorLanguage.Selected);

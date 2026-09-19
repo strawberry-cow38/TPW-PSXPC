@@ -12,7 +12,7 @@ namespace TPW.Sim.Tests
         public void TheGameStoresTenTimesWhatItDisplays()
         {
             Assert.Equal(500000, Money.FromPounds(50_000).Raw);
-            Assert.Equal(48_040, Money.FromRaw(480_800).Pounds);
+            Assert.Equal(48_080, Money.FromRaw(480_800).Pounds);   // was 48,040: a typo quoted in from chat (tinyclaw caught it)
         }
 
         [Fact]
