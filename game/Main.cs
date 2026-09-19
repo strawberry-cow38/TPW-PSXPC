@@ -102,11 +102,18 @@ namespace TPWGodot
             prevModel.Pressed += () => _models.Prev();
             nextModel.Pressed += () => _models.Next();
 
+            var cullBtn = new Button { Text = "Cull on/off" };
+            var windBtn = new Button { Text = "Flip winding" };
+            cullBtn.Pressed += () => _models.ToggleCull();
+            windBtn.Pressed += () => _models.ToggleWinding();
+
             var row = new HBoxContainer();
             row.AddThemeConstantOverride("separation", 8);
             row.AddChild(_next);
             row.AddChild(prevModel);
             row.AddChild(nextModel);
+            row.AddChild(cullBtn);
+            row.AddChild(windBtn);
             _root.AddChild(row);
             _root.AddChild(_modelInfo);
 

@@ -26,6 +26,17 @@ namespace TPWGodot
         Label _info;
         int _index = -1;
         float _spin;
+        bool _cull = true;
+        bool _reverse = true;
+
+        /// <summary>Toggle back-face culling. Off hides winding faults; on exposes them.</summary>
+        public void ToggleCull() { _cull = !_cull; Show(_index); }
+
+        /// <summary>Toggle triangle order, so both windings can be compared against the same model rather
+        /// than argued about. Whichever looks solid under culling is the right one.</summary>
+        public void ToggleWinding() { _reverse = !_reverse; Show(_index); }
+
+        public string StateLabel => $"cull {(_cull ? "ON" : "off")} · order {(_reverse ? "reversed" : "as-file")}";
 
         public int Count => _meshes.Count;
 
@@ -114,7 +125,7 @@ namespace TPWGodot
                 // ⚠ WINDING IS STILL UNVERIFIED because CullMode is Disabled below: with back faces drawn,
                 // a reversed winding is invisible. Reversed here on the assumption that PSX and Godot differ,
                 // but that has NOT been confirmed and cannot be until culling is switched on.
-                foreach (int vi in new[] { face.I2, face.I1, face.I0 })
+                foreach (int vi in _reverse ? new[] { face.I2, face.I1, face.I0 } : new[] { face.I0, face.I1, face.I2 })
                 {
                     var v = new Vector3(m.Vertices[vi * 3], m.Vertices[vi * 3 + 1], m.Vertices[vi * 3 + 2]);
                     verts.Add((v - centre) * scale);
@@ -132,11 +143,21 @@ namespace TPWGodot
             var mesh = new ArrayMesh();
             if (verts.Count >= 3) mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
             _instance.Mesh = mesh;
+            // ⭐ CULLING ON BY DEFAULT, BECAUSE IT IS WHAT MAKES WINDING FALSIFIABLE AT ALL. With back faces
+            // drawn, a reversed triangle renders identically to a correct one: the check's pass and its
+            // failure are the same picture, so "looks wound correctly" cannot be said either way. Turning
+            // culling on converts an unfalsifiable impression into an observation — a wrong winding now shows
+            // as hollow or inside-out, which is visible in a second.
+            //
+            // ⚠ tinyclaw measured the console emitting park geometry at 88-90% one signed-area handedness.
+            // That is screen-space AFTER the game's own software cull (the PSX has no hardware culling), so
+            // it is not a number this browser can reproduce while it draws every face. It becomes comparable
+            // once the port culls the way the game does.
             _instance.MaterialOverride = new StandardMaterial3D
             {
                 ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
                 VertexColorUseAsAlbedo = true,
-                CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+                CullMode = _cull ? BaseMaterial3D.CullModeEnum.Back : BaseMaterial3D.CullModeEnum.Disabled,
             };
 
             if (_info != null)
@@ -150,7 +171,7 @@ namespace TPWGodot
                 _info.Text =
                     $"model {_index + 1} of {_meshes.Count}   entry #{entry} sub {sub}\n" +
                     $"{m.VertexCount:n0} vertices   {m.Faces.Count:n0} faces   {m.BoneCount} bones   {m.TrackCount} anim tracks\n" +
-                    $"texture pages: {(pages.Count > 0 ? string.Join("  ", pages) : "none")}";
+                    $"texture pages: {(pages.Count > 0 ? string.Join("  ", pages) : "none")}   [{StateLabel}]";
             }
             GD.Print($"[tpw] model {_index + 1}/{_meshes.Count}: entry #{entry} sub {sub}, " +
                      $"{m.VertexCount} verts, {m.Faces.Count} faces");
