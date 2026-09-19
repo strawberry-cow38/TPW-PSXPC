@@ -334,6 +334,18 @@ namespace TPW.Data
                 : !channelsOk ? $"first block has {first.Count} lines, expected one per channel ({AdvisorSpeech.Channels})"
                 : unmarked > 0 ? $"{unmarked} lines did not end on the marker sector"
                 : problem);
+
+            // ⭐ The game's own index against the scan, which never reads it. Each record's sector plus the
+            // language must land exactly where the scan found that line starting.
+            var af = disc.Find(AssetArchive);
+            if (af == null || !GazArchive.TryParse(disc.ReadFile(af), out var gaz, out _)) return;
+            if (!AdvisorSpeech.TryReadIndex(gaz, out var lines, out string ierr)) { r.Add("advisor index", false, ierr); return; }
+            int agree = 0;
+            foreach (var c in first)
+                if (c.Line < lines.Count && lines[c.Line].FirstSector + c.Language == c.FirstSector) agree++;
+            r.Add("advisor index", agree == first.Count && first.Count > 0,
+                $"{lines.Count} lines in the game's index (FOLIO #{AdvisorSpeech.IndexEntry}); in the first block, " +
+                $"{agree}/{first.Count} line starts agree with where the scan found them");
         }
 
         /// <summary>Every movie, demuxed in full.

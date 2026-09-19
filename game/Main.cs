@@ -43,7 +43,7 @@ namespace TPWGodot
         bool _quitAfterMovie;
         Button _playAdvisor;
         bool _hasAdvisor;
-        System.Collections.Generic.List<AdvisorClip> _advisorClips;
+        System.Collections.Generic.List<AdvisorLine> _advisorLines;
         PcmSample _pendingLine;
         XaAudio.Coding _pendingLineCoding;
         string _pendingLineError;
@@ -397,10 +397,10 @@ namespace TPWGodot
             if (_player.IsPlaying) return;
             string path = _data.SourcePath;
             _playAdvisor.Disabled = true;
-            _playAdvisor.Text = _advisorClips == null ? "Finding the advisor's lines…" : "Loading…";
+            _playAdvisor.Text = "Loading…";
 
-            // ⚠ OFF THE MAIN THREAD. The first press reads the subheader of every one of the file's 169,344 sectors
-            // to find where each line starts; later presses reuse that list and read only the one line.
+            // ⚠ OFF THE MAIN THREAD. The first press reads the game's index of lines out of the archive, the way
+            // the game finds them; later presses reuse it and read only the one line.
             Task.Run(() =>
             {
                 PcmSample pcm = null;
@@ -410,20 +410,20 @@ namespace TPWGodot
                 {
                     using var disc = DiscReader.Open(path);
                     var f = disc.Find(AdvisorSpeech.File);
-                    var clips = _advisorClips;
-                    if (clips == null && AdvisorSpeech.TryScan(disc, f, out var found, out err)) clips = _advisorClips = found;
-                    if (clips != null)
+                    var lines = _advisorLines;
+                    if (lines == null)
                     {
-                        AdvisorClip clip;
-                        if (line >= 0) clip = clips.Find(c => c.Line == line && c.Language == language);
-                        else
-                        {
-                            // Skip the few near-empty lines: a random pick should be something you can hear.
-                            var audible = clips.FindAll(c => c.Sectors >= 5);
-                            clip = audible[System.Random.Shared.Next(audible.Count)];
-                        }
-                        if (clip.Sectors == 0) err = $"no line {line} in language {language}";
-                        else AdvisorSpeech.TryDecode(disc, f, clip, out pcm, out coding, out err);
+                        var af = disc.Find(AssetSelfTest.AssetArchive);
+                        if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gaz, out err)
+                            && AdvisorSpeech.TryReadIndex(gaz, out var found, out err))
+                            lines = _advisorLines = found;
+                    }
+                    if (lines != null)
+                    {
+                        int pick = line >= 0 ? line : System.Random.Shared.Next(lines.Count);
+                        int lang = line >= 0 ? language : System.Random.Shared.Next(AdvisorSpeech.Languages);
+                        if (pick >= lines.Count) err = $"there is no line {pick}; the index has {lines.Count}";
+                        else AdvisorSpeech.TryDecodeLine(disc, f, lines[pick], lang, out pcm, out coding, out err);
                     }
                 }
                 catch (System.Exception e) { err = e.Message; }
@@ -458,7 +458,8 @@ namespace TPWGodot
             _audio.Play();
             if (_quitAfterLine) _audio.Finished += () => GetTree().Quit();
             double secs = pcm.SampleCount / (double)_pendingLineCoding.Channels / _pendingLineCoding.SampleRate;
-            _playAdvisor.Text = $"Play an advisor line ({_advisorClips?.Count ?? 0:n0})  —  now: {pcm.Source}, {secs:0.0}s";
+            _playAdvisor.Text = $"Play an advisor line ({_advisorLines?.Count ?? 0} lines × {AdvisorSpeech.Languages} languages)" +
+                                $"  —  now: {pcm.Source}, {secs:0.0}s";
             GD.Print($"[tpw] playing {pcm.Source}: {_pendingLineCoding}, {secs:0.00}s");
         }
 

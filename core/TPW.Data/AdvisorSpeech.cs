@@ -27,6 +27,21 @@ namespace TPW.Data
         public override string ToString() => $"line {Line} language {Language} (block {Block} channel {Channel})";
     }
 
+    /// <summary>One record of the game's own index of advisor lines (FOLIO entry 405).</summary>
+    public readonly struct AdvisorLine
+    {
+        public readonly int Line;
+        /// <summary>Sector index within ADVISOR.TPW where this line starts in language 0. Language g starts g
+        /// sectors later, on channel (this mod 32) + g.</summary>
+        public readonly int FirstSector;
+        /// <summary>Eight bytes, one per language, 1..63. Meaning unknown: they track the line's length (r ≈ 0.5)
+        /// without being it.</summary>
+        public readonly byte[] PerLanguage;
+
+        public AdvisorLine(int line, int firstSector, byte[] perLanguage)
+        { Line = line; FirstSector = firstSector; PerLanguage = perLanguage; }
+    }
+
     /// <summary>ADVISOR.TPW: the advisor's voice. 346 MB, two thirds of the disc, and all of it speech.
     ///
     /// ⭐ LAYOUT (MEASURED, every sector of it): XA-ADPCM, mono, 18,900 Hz, 4-bit, in **32 interleaved
@@ -46,8 +61,15 @@ namespace TPW.Data
     /// So a block holds four lines, each recorded in eight languages side by side, and the game picks one
     /// language's channel. Which language is which number is not yet known.
     ///
-    /// ⚠ WHAT EACH LINE SAYS IS NOT IN HERE. The file has no index; FOLIO entry 405 is where the game keeps
-    /// it (per fable), and it has not been read yet. Until then a line is identified only by where it sits.
+    /// ⭐ THE GAME'S INDEX IS FOLIO ENTRY 405, and it agrees with the scan completely. 452 records of 12 bytes:
+    /// a u32 sector where the line starts in language 0, then eight bytes, one per language (meaning unknown).
+    /// Checked against the scan, which never reads it: the record's sector is the scanned start of
+    /// (line, language 0) for 452 of 452 lines, and start + g is the scanned start of language g for 3,616
+    /// of 3,616. So the port finds a line the way the game does, through the index, and the scan is the
+    /// cross-check rather than the route.
+    ///
+    /// ⚠ WHAT EACH LINE SAYS IS STILL UNKNOWN. The index maps a line number to sectors; which game event
+    /// asks for which line number lives in the code.
     ///
     /// ✅ The rate, 18,900 Hz, is not just the coding byte's say-so. One sector in 32 at the drive's 150
     /// sectors/s is 4.6875 sectors/s per channel, × 4032 samples = exactly 18,900 samples/s. The interleave
@@ -57,6 +79,57 @@ namespace TPW.Data
     {
         public const string File = "ADVISOR.TPW";
         public const int Channels = 32;
+        public const int Languages = 8;
+        /// <summary>The FOLIO.GAZ entry holding the game's index of lines.</summary>
+        public const int IndexEntry = 405;
+        public const int IndexRecordBytes = 12;
+
+        /// <summary>Read the game's index of lines out of the asset archive.</summary>
+        public static bool TryReadIndex(GazArchive gaz, out List<AdvisorLine> lines, out string error)
+        {
+            lines = new List<AdvisorLine>();
+            error = null;
+            if (gaz == null || gaz.Entries.Count <= IndexEntry) { error = $"no archive entry {IndexEntry}"; return false; }
+            var d = gaz.Read(gaz.Entries[IndexEntry]);
+            if (d.Length == 0 || d.Length % IndexRecordBytes != 0)
+            { error = $"entry {IndexEntry} is {d.Length:n0} bytes, not a whole number of {IndexRecordBytes}-byte records"; return false; }
+            int prev = -1;
+            for (int i = 0; i < d.Length / IndexRecordBytes; i++)
+            {
+                int at = i * IndexRecordBytes;
+                int sector = BitConverter.ToInt32(d, at);
+                // Lines are laid down in order, so the index must climb. A misread record size would not.
+                if (sector <= prev) { error = $"record {i} starts at sector {sector}, not after record {i - 1}'s {prev}"; lines.Clear(); return false; }
+                prev = sector;
+                var per = new byte[Languages];
+                Buffer.BlockCopy(d, at + 4, per, 0, Languages);
+                lines.Add(new AdvisorLine(i, sector, per));
+            }
+            return true;
+        }
+
+        /// <summary>Decode a line in one language the way the game finds it: from the index's sector plus the
+        /// language, every 32nd sector, until the marker that ends every line.</summary>
+        public static bool TryDecodeLine(DiscReader disc, DiscFile file, AdvisorLine line, int language,
+                                         out PcmSample pcm, out XaAudio.Coding coding, out string error)
+        {
+            pcm = null; coding = default; error = null;
+            if (language < 0 || language >= Languages) { error = $"language {language} is not 0..{Languages - 1}"; return false; }
+            int sectors = file.Length / DiscReader.UserDataSize;
+            int first = line.FirstSector + language, n = 0;
+            for (int k = first; k < sectors; k += Channels)
+            {
+                var raw = disc.ReadRawSector(file.Lba + k);
+                if (raw == null || !StrVideo.IsAudioSector(raw) || raw[17] == 255) break;
+                n++;
+            }
+            if (n == 0) { error = $"line {line.Line} has no audio in language {language} at sector {first}"; return false; }
+            // Four lines to a block, and a block starts on a multiple of 32, so the channel is first mod 32.
+            var clip = new AdvisorClip(line.Line / 4, first % Channels, first, n);
+            if (!TryDecode(disc, file, clip, out pcm, out coding, out error)) return false;
+            pcm.Source = $"advisor line {line.Line} language {language}";
+            return true;
+        }
 
         /// <summary>Find every clip, from the sector subheaders alone. Reads the whole file's subheaders, so run
         /// it off the main thread: 169,344 sectors.
