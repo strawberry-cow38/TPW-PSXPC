@@ -184,6 +184,14 @@ namespace TPW.Data
                         // ⚠ THE ORIENTATION BELOW WAS CHOSEN BY RENDERING ALL FOUR READINGS SIDE BY
                         // SIDE, not by reasoning about it -- I argued myself into a different one from
                         // the stored W/H aspect ratios and it was wrong. The picture decided.
+                        //
+                        // ⚠ 'M' AND 'm' ARE STILL WRONG (both draw as N/n) AND ORIENTATION IS NOT THE
+                        // CAUSE: all four readings were rendered and M draws as N in every one of
+                        // them, so no choice here fixes it. They are the widest glyph of each case
+                        // (W=34 and W=30) and 'm' is the one whose U+W runs off the 256-texel page
+                        // edge (237+30), which the other flagged sprites do not -- so the next thing
+                        // to test is whether a glyph too wide for its page is stored split or indexed
+                        // differently, NOT another rotation.
                         bool rot = (sp.Flags & 1) != 0;
                         int outW = rot ? sp.H : sp.W, outH = rot ? sp.W : sp.H;
                         for (int gy = 0; gy < outH; gy++)
