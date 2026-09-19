@@ -2114,3 +2114,19 @@ times, require the vertices to differ — passed the whole way through, because 
 the origin DO differ between two times. A check that the pose CHANGES cannot see a pose that changes
 wrongly. The rendered contact sheet showed it immediately once I looked, and I had looked at it before
 the fix and not registered the spikes as a fault.
+
+## Some models have NO geometry until they are animated (2026-09-19)
+
+Across the 30 meshes that scatter, **1,103 of 4,433 vertices (25%) sit at exactly (0,0,0) in the file**,
+and two meshes are 100% zero: e0067 (58 vertices, 85 faces) and e0150 (67 vertices). Their shape does not
+exist in the geometry at all — every vertex is placed by the animation. e0069 is 87% zero, e0223 79%,
+e0054 60%.
+
+Consequences worth knowing before drawing anything:
+- **A static render of an animated model is not a render of the model.** Drawing the file's rest pose for
+  e0067 draws a crumpled point at the origin, which looks like a broken parse.
+- **"Vertex is at the origin" cannot be used as an error signal** on these meshes, because it is the
+  normal resting state of a quarter of their vertices. A check built on it passes while a real collapse
+  is happening, which is exactly what happened here.
+
+Posed at t=0, e0067 has zero vertices left at the origin and renders as a coherent solid.
