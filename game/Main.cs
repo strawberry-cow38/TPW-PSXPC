@@ -45,6 +45,8 @@ namespace TPWGodot
         bool _parkStartedMusic;
         Button _musicButton;
         OptionButton _musicChoice;
+        /// <summary>The common sheet (#416): guests, the flags by the bus stops, the loading font.</summary>
+        TextureSheet _commonSheet;
         /// <summary>Each world's scenery pack by archive entry.</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _sceneryPacks = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
@@ -462,6 +464,9 @@ namespace TPWGodot
                     if (af != null && GazArchive.TryParse(disc.ReadFile(af), out var gz, out _))
                     {
                         _modules = TrackerModule.FindAll(gz);
+                        if (EntranceFlags.CommonSheet < gz.Entries.Count &&
+                            TextureSheet.TryParse(gz.Read(gz.Entries[EntranceFlags.CommonSheet]), out var common, out _))
+                            _commonSheet = common;
                         if (MenuLayout.Sheet < gz.Entries.Count &&
                             TextureSheet.TryParse(gz.Read(gz.Entries[MenuLayout.Sheet]), out var ms, out _))
                             _menuSheet = ms;
@@ -684,7 +689,7 @@ namespace TPWGodot
                 TextureSheet ground = null;
                 SceneryPack scenery = null;
                 if (world != null) { _groundSheets.TryGetValue(world.GroundSheet, out ground); _sceneryPacks.TryGetValue(world.SceneryEntry, out scenery); }
-                _park.Load(map, $"map #{entry}", ground, world, scenery);
+                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet);
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.
                 int mi = world != null ? _modules.FindIndex(m => m.Entry == world.Music) : -1;
                 if (mi >= 0 && _autoMusic < 0)

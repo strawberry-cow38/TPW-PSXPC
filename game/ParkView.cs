@@ -26,7 +26,11 @@ namespace TPWGodot
     /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types, O scenery.</summary>
     public partial class ParkView : Node3D
     {
-        MeshInstance3D _ground, _types, _scenery;
+        MeshInstance3D _ground, _types, _scenery, _flags;
+        /// <summary>The flag sprite (EntranceFlags) as its own texture, and its size in texels.</summary>
+        ShaderMaterial _flagMat;
+        int _flagW, _flagH;
+        double _parkTime;   // the park's time accumulator, in the game's time units (EntranceFlags.TimeUnitsPerSecond)
         /// <summary>The material ground and scenery share; its scroll_rows advances one row per park frame.</summary>
         ShaderMaterial _mat;
         double _scrollClock;
@@ -53,6 +57,8 @@ namespace TPWGodot
             AddChild(_types);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
+            _flags = new MeshInstance3D();
+            AddChild(_flags);
             // The game's own field of view: projection distance H = 256 (SetGeomScreen at 0x80054C44, from
             // gp+0x700) about the centre of its 512x256 PAL screen (0x800BA6A4 → 0x800BB3B4 sets 512x256 and puts
             // the projection centre at half of it), so the vertical view is 2·atan(128 / 256) = 53.13°.
@@ -82,9 +88,19 @@ namespace TPWGodot
 
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
         /// <param name="scenery">The world's scenery pack, or null for bare ground.</param>
-        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery)
+        /// <param name="common">The common sheet (#416), for the entrance flags; null leaves them out.</param>
+        public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery, TextureSheet common = null)
         {
             _map = map;
+            _flagMat = null;
+            _flags.Mesh = null;
+            if (common != null && EntranceFlags.Sprite < common.Sprites.Count)
+            {
+                var img = common.RenderSprite(EntranceFlags.Sprite);
+                _flagW = img.Width; _flagH = img.Height;
+                _flagMat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
+                _flagMat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, img.Rgba)));
+            }
             int open = 0, placed = 0, skipped = 0;
             _ground.Mesh = null;
             _scenery.Mesh = null;
@@ -217,6 +233,46 @@ namespace TPWGodot
             }
         }
 
+        /// <summary>The eight entrance flags at time t (EntranceFlags): both sets, each quad as the GPU's two triangles.</summary>
+        ArrayMesh FlagMesh(long t)
+        {
+            var verts = new List<Vector3>(8 * 24);
+            var cols = new List<Color>(8 * 24);
+            var uvs = new List<Vector2>(8 * 24);
+            void Set((int X, int Y, int Z)[] at, int phase)
+            {
+                var g = EntranceFlags.Grid(phase);
+                foreach (var pos in at)
+                    for (int q = 0; q < 4; q++)
+                    {
+                        var (u0, v0, u1, v1) = EntranceFlags.QuadTexels(q, _flagW, _flagH);
+                        // Grid corners in the game's order, each with its texel: (u0,v0) (u0,v1) (u1,v0) (u1,v1).
+                        int[] corner = { EntranceFlags.Quads[q * 4], EntranceFlags.Quads[q * 4 + 1], EntranceFlags.Quads[q * 4 + 2], EntranceFlags.Quads[q * 4 + 3] };
+                        var tex = new[] { new Vector2(u0, v0), new Vector2(u0, v1), new Vector2(u1, v0), new Vector2(u1, v1) };
+                        foreach (int k in new[] { 0, 1, 2, 2, 1, 3 })
+                        {
+                            var v = g[corner[k]];
+                            var w = EntranceFlags.Place(pos, v);
+                            verts.Add(new Vector3(w.X / (float)ParkTerrain.TileUnits, w.Y / (float)ParkTerrain.TileUnits, -w.Z / (float)ParkTerrain.TileUnits));
+                            float grey = Math.Clamp(EntranceFlags.Grey(v.Z), 0, 255) / 255f;
+                            cols.Add(new Color(grey, grey, grey));
+                            uvs.Add(new Vector2((tex[k].X + 0.5f) / _flagW, (tex[k].Y + 0.5f) / _flagH));
+                        }
+                    }
+            }
+            Set(EntranceFlags.SetA, EntranceFlags.PhaseA(t));
+            Set(EntranceFlags.SetB, EntranceFlags.PhaseB(t));
+            var arrays = new Godot.Collections.Array();
+            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.TexUV] = uvs.ToArray();
+            var mesh = new ArrayMesh();
+            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            mesh.SurfaceSetMaterial(0, _flagMat);
+            return mesh;
+        }
+
         static Color Shade(uint bgr) => new Color((bgr & 0xFF) / 255f, ((bgr >> 8) & 0xFF) / 255f, ((bgr >> 16) & 0xFF) / 255f);
 
         static ArrayMesh Surface(List<Vector3> verts, List<Color> cols, List<Vector2> uvs, List<float> rects, Material mat)
@@ -307,6 +363,8 @@ namespace TPWGodot
             // PAL's 50 Hz: derived, like ParkClock.TickSeconds, whose assumption it shares.
             _scrollClock += delta;
             _mat?.SetShaderParameter("scroll_rows", (float)Math.Floor(_scrollClock / TPW.Sim.ParkClock.TickSeconds));
+            _parkTime += delta * EntranceFlags.TimeUnitsPerSecond;
+            if (_flagMat != null) _flags.Mesh = FlagMesh((long)_parkTime);
             float dt = (float)delta;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
