@@ -158,6 +158,19 @@ namespace TPW.Data
             // 16-colour tables" and was measuring the wrong entries with a signature the real palettes do not
             // carry. Palettes are 32 bytes of arbitrary colour and cannot be told from any other 32 bytes, so
             // there is nothing here that could fail on a wrong answer. See Clut.
+            // ⭐ THIS ONE CAN FAIL, unlike the sheet count: it asserts WHICH entries are banks, not just how
+            // many. The two indices were established by content-hash binding against live hardware, so a disc
+            // that disagrees is telling us something rather than passing quietly.
+            var banks = new List<int>();
+            foreach (var e in gaz.Entries) if (SpriteBank.LooksLikeBank(e)) banks.Add(e.Index);
+            bool expected = banks.Count == 2 && banks[0] == 0x104 && banks[1] == 0x10C;
+            int decoded = 0;
+            foreach (int bi in banks) if (SpriteBank.TryDecode(gaz.Read(gaz.Entries[bi]), out _, out _)) decoded++;
+            r.Add("sprite banks", expected && decoded == banks.Count,
+                expected
+                    ? $"{decoded}/{banks.Count} decoded at 0x104 and 0x10C, {SpriteBank.Width}x{SpriteBank.Height} 4bpp"
+                    : $"expected banks at 0x104 and 0x10C, found [{string.Join(", ", banks.ConvertAll(b => "0x" + b.ToString("x")))}]");
+
             CheckAudio(gaz, r);
 
             // Decode anything that is actually an image. Today that is TGA only; as formats are cracked they

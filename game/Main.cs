@@ -23,6 +23,9 @@ namespace TPWGodot
         Button _playSound;
         PcmSample _sample;
         System.Collections.Generic.List<PcmSample> _sounds = new();
+        System.Collections.Generic.List<TpwImage> _views = new();
+        int _view;
+        Button _next;
         readonly System.Random _rng = new();
         OptionButton _rate;
 
@@ -77,6 +80,14 @@ namespace TPWGodot
             };
             _root.AddChild(_preview);
 
+            // ⭐ A WAY TO LOOK AT THINGS. Every image fault today -- a 180 rotation, a residual mirror, the
+            // wrong channel order -- was found by a person looking at the screen while every headless check
+            // passed. So the port gets a button that cycles through what it has decoded, rather than making
+            // someone rebuild to see the next asset.
+            _next = new Button { Text = "Next image", Disabled = true };
+            _next.Pressed += ShowNext;
+            _root.AddChild(_next);
+
             _audio = new AudioStreamPlayer();
             AddChild(_audio);
             _playSound = new Button { Text = "Play a sound from your disc", Disabled = true };
@@ -125,6 +136,7 @@ namespace TPWGodot
                 SelfTestReport report;
                 TpwImage legal = null;
                 System.Collections.Generic.List<PcmSample> sounds = new();
+                var views = new System.Collections.Generic.List<TpwImage>();
                 try
                 {
                     using var disc = DiscReader.Open(path);
@@ -133,7 +145,9 @@ namespace TPWGodot
                     var f = disc.Find(AssetSelfTest.LegalScreen);
                     // ⚠ NOT the spec TGA path. This file is a VRAM block in a TGA wrapper: BGR channel
                     // order, and the descriptor's origin bits do not apply. See Tga.TryDecodeVramBlock.
-                    if (f != null && Tga.TryDecodeVramBlock(disc.ReadFile(f), out var img, out _)) legal = img;
+                    if (f != null && Tga.TryDecodeVramBlock(disc.ReadFile(f), out var img, out _))
+                    { legal = img; legal.Source = "LEGAL.GFX"; views.Add(legal); }
+                    views.AddRange(SpriteBlocks(disc));
                     sounds = AllSounds(disc);
                 }
                 catch (System.Exception e)
@@ -146,6 +160,7 @@ namespace TPWGodot
                 // PackedByteArray anyway, so say so here rather than relying on that.
                 // Published before CallDeferred, so the main thread sees a fully built list when it runs.
                 _sounds = sounds;
+                _views = views;
                 _sample = sounds.Count > 0 ? sounds[0] : null;
                 CallDeferred(nameof(ApplySelfTest), ReportToText(report), report.AllOk,
                     legal?.Rgba ?? System.Array.Empty<byte>(), legal?.Width ?? 0, legal?.Height ?? 0);
@@ -177,12 +192,18 @@ namespace TPWGodot
             _preview.Texture = ImageTexture.CreateFromImage(image);
             GD.Print($"[tpw] legal screen decoded from the user's disc: {w}x{h}");
 
+            if (_views.Count > 0)
+            {
+                _next.Disabled = false;
+                _next.Text = $"Next image  (1/{_views.Count}: {_views[0].Source})";
+            }
+
             if (_sample != null && _sample.SampleCount > 0)
             {
                 _playSound.Disabled = false;
                 _playSound.Text = $"Play a random sound from your disc ({_sounds.Count} available)";
                 GD.Print($"[tpw] decoded {_sounds.Count} waveforms; longest {_sample.SampleCount:n0} samples" +
-                         $" ({_sample.SampleCount / (double)TrackerBaseHz:0.00}s at the {TrackerBaseHz} Hz tracker base)");
+                         $" ({_sample.SampleCount / (double)ConfirmedRateHz:0.00}s at {ConfirmedRateHz} Hz)");
             }
             else _playSound.Text = "No sound decoded";
         }
@@ -219,6 +240,33 @@ namespace TPWGodot
             // than whichever 13-millisecond click happens to come first in the archive.
             all.Sort((x, y) => y.SampleCount.CompareTo(x.SampleCount));
             return all;
+        }
+
+        /// <summary>Every block of every sprite bank, as separate images. One bank is 1024 pixels tall, which
+        /// is unreadable in a preview; a block is 256x64 and is the unit the hardware uploads anyway.</summary>
+        static System.Collections.Generic.List<TpwImage> SpriteBlocks(DiscReader disc)
+        {
+            var outp = new System.Collections.Generic.List<TpwImage>();
+            var f = disc.Find(AssetSelfTest.AssetArchive);
+            if (f == null || !GazArchive.TryParse(disc.ReadFile(f), out var gaz, out _)) return outp;
+            foreach (var (entry, bank) in SpriteBank.DecodeAll(gaz))
+                for (int b = 0; b < SpriteBank.Blocks; b++)
+                {
+                    var blk = SpriteBank.Block(bank, b);
+                    if (blk != null) outp.Add(blk);
+                }
+            return outp;
+        }
+
+        void ShowNext()
+        {
+            if (_views.Count == 0) return;
+            _view = (_view + 1) % _views.Count;
+            var v = _views[_view];
+            var image = Image.CreateFromData(v.Width, v.Height, false, Image.Format.Rgba8, v.Rgba);
+            _preview.Texture = ImageTexture.CreateFromImage(image);
+            _next.Text = $"Next image  ({_view + 1}/{_views.Count}: {v.Source})";
+            GD.Print($"[tpw] showing {v.Source} ({v.Width}x{v.Height})");
         }
 
         void PlaySample()
