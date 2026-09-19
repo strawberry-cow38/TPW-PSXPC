@@ -45,7 +45,14 @@ namespace TPWGodot
         {
             // Above the browsers' UI and the 3D view. ⚠ The black backdrop also STOPS mouse input, or a
             // click meant to skip the movie falls through and presses whatever button is underneath.
-            Layer = 10;
+            //
+            // ⚠ 11, NOT 10, AND IT MUST STAY ABOVE BootScreens. Both were on 10, and two CanvasLayers on
+            // the same layer fall back to TREE ORDER -- BootScreens is added second, so its full-screen
+            // black ColorRect sat on top and both boot movies played to an entirely black window. The
+            // audio ran, the decoder reported its frames, every self-test passed: the only symptom was
+            // that nothing could be seen, which is why this survived. A movie is the whole screen while
+            // it plays, so it belongs above the chain that starts it.
+            Layer = 11;
             _back = new ColorRect { Color = Colors.Black, MouseFilter = Control.MouseFilterEnum.Stop };
             _back.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
             AddChild(_back);
