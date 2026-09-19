@@ -77,6 +77,8 @@ namespace TPWGodot
         /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
         /// queue building.</summary>
         string _autoQueue;
+        /// <summary>From <c>--park-hover=x,z</c>: the cursor held on that tile, for captures of the hover box.</summary>
+        string _autoHover;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -491,6 +493,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
+                else if (arg.StartsWith("--park-hover=")) _autoHover = arg.Substring("--park-hover=".Length);
                 else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
@@ -737,6 +740,11 @@ namespace TPWGodot
                     {
                         var v = System.Array.ConvertAll(_autoGhost.Split(','), int.Parse);
                         if (v.Length == 4) _park.PinGhost(v[0], v[1], v[2], v[3]);
+                    }
+                    if (_autoHover != null)
+                    {
+                        var v = System.Array.ConvertAll(_autoHover.Split(','), int.Parse);
+                        if (v.Length == 2) _park.PinHover(v[0], v[1]);
                     }
                     if (_autoQueue != null)
                     {

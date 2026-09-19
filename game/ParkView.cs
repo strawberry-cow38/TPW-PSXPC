@@ -123,6 +123,8 @@ namespace TPWGodot
             AddChild(_ghostModel);
             _ghostMarks = new MeshInstance3D();
             AddChild(_ghostMarks);
+            _selectionMesh = new MeshInstance3D();
+            AddChild(_selectionMesh);
             _pickerLayer = new CanvasLayer { Layer = 5 };
             AddChild(_pickerLayer);
             _picker = new PanelContainer { Visible = false, AnchorLeft = 1, AnchorRight = 1, AnchorBottom = 1,
@@ -215,6 +217,23 @@ namespace TPWGodot
             StopPlacing();
             foreach (var m in _placed) m.QueueFree();
             _placed.Clear();
+            _placedBoxes.Clear();
+            _selection.Clear();
+            _selectionMesh.Mesh = null;
+            _gateBox = null; _gateRect = null;
+            // The gate's hover rectangle and height (0x800F2398 + world × 5, read by the gate object's slots
+            // 0x4C / 0x64 / 0x6C / 0x74: x, z, width, height in tiles, depth).
+            int gr = world != null ? (int)(GateHoverRects - AssetSelfTest.GameExecutableBase) + world.Index * 5 : -1;
+            if (exe != null && gr >= 0 && gr + 5 <= exe.Length)
+            {
+                int u = ParkTerrain.TileUnits, gx = exe[gr], gz = exe[gr + 1], gw = exe[gr + 2], gh = exe[gr + 3], gd = exe[gr + 4];
+                _gateRect = (gx, gz, gw, gd);
+                _gateBox = new BoxSite
+                {
+                    X0 = gx * u, Z0 = gz * u, W = gw * u, D = gd * u, Height = gh,
+                    Y0 = ParkCamera.GroundHeight(map, gx * u, gz * u), Cx = gx * u + gw * u / 2, Cz = gz * u + gd * u / 2,
+                };
+            }
             _fxMesh.Mesh = null;
             ParkOpen = false;
             _flagMat = null;
@@ -777,6 +796,7 @@ namespace TPWGodot
             var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
             AddChild(inst);
             _placed.Add(inst);
+            RegisterPlaced(rec, x, z, rot & 3);
             RebuildGround();
             return true;
         }
@@ -840,6 +860,18 @@ namespace TPWGodot
             if (mesh?.Tracks != null) { try { posed = MeshPose.Evaluate(mesh, 0).Vertices; } catch { posed = null; } }
             m = mesh == null ? null : ModelMesh.Build(mesh, posed, _modelSheets, true, false, false, centre, 1f / ParkTerrain.TileUnits, out _);
             _attractionMeshes[entry] = m;
+            // Its height for the hover box (0x80062C6C): the model's extent in y at its current frame (time 0 here).
+            if (mesh != null && mesh.VertexCount > 0)
+            {
+                int minY = int.MaxValue, maxY = int.MinValue;
+                for (int i = 0; i < mesh.VertexCount; i++)
+                {
+                    int y = posed != null && i < posed.Length ? posed[i].Y : mesh.Vertices[i * 3 + 1];
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+                _attractionHeights[entry] = SelectionBox.HeightTiles(minY, maxY);
+            }
             return m;
         }
 
@@ -853,13 +885,13 @@ namespace TPWGodot
             return (c.X - (w >> 1), c.Z - (d >> 1));
         }
 
-        /// <summary>Where an attraction with its footprint's corner at (ox, oz) stands: the footprint's centre on the
-        /// ground, turned a quarter per rotation step (the game's y turn, negated with z).</summary>
+        /// <summary>Where an attraction with its footprint's corner at (ox, oz) stands: the footprint's centre, at its
+        /// base height (<see cref="BaseHeight"/>), turned a quarter per rotation step (the game's y turn, negated with z).</summary>
         Transform3D AttractionTransform(AttractionDefinition rec, int ox, int oz, int rot)
         {
             var (w, d) = rec.Footprint(rot);
             int cx = ox * ParkTerrain.TileUnits + w * ParkTerrain.TileUnits / 2, cz = oz * ParkTerrain.TileUnits + d * ParkTerrain.TileUnits / 2;
-            float y = ParkCamera.GroundHeight(_map, cx, cz) / (float)ParkTerrain.TileUnits;
+            float y = BaseHeight(rec, ox, oz, rot) / (float)ParkTerrain.TileUnits;
             var basis = new Basis(Vector3.Up, -rot * Mathf.Pi / 2);
             return new Transform3D(basis, new Vector3(cx / (float)ParkTerrain.TileUnits, y, -cz / (float)ParkTerrain.TileUnits));
         }
@@ -884,6 +916,7 @@ namespace TPWGodot
             var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
             AddChild(inst);
             _placed.Add(inst);
+            RegisterPlaced(rec, o.X, o.Z, _placeRot);
             RebuildGround();
             // The placed sound. A shop or sideshow's tool then closes (0x8001C5C8 switches to tool 0; only the
             // features' tool, 15, reopens itself). A flat or tour ride's hands over to the queue tool (0x8001C92C /
@@ -967,6 +1000,121 @@ namespace TPWGodot
             _gcam.CursorZ = t.Z * ParkTerrain.TileUnits + ParkTerrain.TileUnits / 2;
             _gcam.TargetYaw = turn * ParkCamera.QuarterTurn;
         }
+
+        /// <summary>What the hover box needs to know of one object (SelectionBox): footprint corner and size and base
+        /// height in world units, its height in tiles, its footprint's centre.</summary>
+        sealed class BoxSite { public int X0, Z0, W, D, Y0, Height, Cx, Cz; }
+        const uint GateHoverRects = 0x800F2398;
+
+        /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
+        public void PinHover(int x, int z) => _hoverPin = (x, z);
+        (int X, int Z)? _hoverPin;
+
+        /// <summary>The attractions placed, with their box sites, in the order placed (the order the game's own list
+        /// walks them to find the one under the cursor).</summary>
+        readonly List<(AttractionDefinition Rec, int Ox, int Oz, int Rot, BoxSite Box)> _placedBoxes = new();
+        readonly Dictionary<int, int> _attractionHeights = new();
+        /// <summary>The park gate as the hover sees it: a rectangle and height per world (0x800F2398 + world × 5:
+        /// x, z, width, height, depth), its base the ground at the rectangle's corner (0x800611A0).</summary>
+        BoxSite _gateBox;
+        (int X, int Z, int W, int D)? _gateRect;
+        readonly SelectionFades<BoxSite> _selection = new();
+        MeshInstance3D _selectionMesh;
+        ShaderMaterial _selectionMat;
+
+        /// <summary>An attraction's base height (the object's +0x5A): the ground under the cursor tile it was placed
+        /// from, which 0x8001C454 hands it with its corner (the cursor less half the turned footprint). The model
+        /// stands at it and the hover box starts from it.</summary>
+        int BaseHeight(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var (w, d) = rec.Footprint(rot);
+            int u = ParkTerrain.TileUnits;
+            return ParkCamera.GroundHeight(_map, (ox + (w >> 1)) * u + u / 2, (oz + (d >> 1)) * u + u / 2);
+        }
+
+        void RegisterPlaced(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var (w, d) = rec.Footprint(rot);
+            int u = ParkTerrain.TileUnits;
+            var box = new BoxSite
+            {
+                X0 = ox * u, Z0 = oz * u, W = w * u, D = d * u, Y0 = BaseHeight(rec, ox, oz, rot),
+                Height = _attractionHeights.TryGetValue(rec.Entry, out int h) ? h : 0,
+            };
+            box.Cx = box.X0 + box.W / 2; box.Cz = box.Z0 + box.D / 2;
+            _placedBoxes.Add((rec, ox, oz, rot, box));
+        }
+
+        /// <summary>The object the hover box goes round this frame, or null. As 0x80052324 picks it: with no tool
+        /// open, the first attraction whose turned footprint holds the tile under the cursor; and while the park is
+        /// closed, the park gate when the cursor is in its rectangle (you open the park there).</summary>
+        BoxSite HoverTarget()
+        {
+            if (_map == null || _pathMode || _placing >= 0 || _queue != null || (_picker != null && _picker.Visible)) return null;
+            if ((_hoverPin ?? TileUnderMouse()) is not { } t) return null;
+            BoxSite hit = null;
+            foreach (var (rec, ox, oz, rot, box) in _placedBoxes)
+            {
+                var (w, d) = rec.Footprint(rot);
+                if (t.X >= ox && t.X < ox + w && t.Z >= oz && t.Z < oz + d) { hit = box; break; }
+            }
+            if (!ParkOpen && _gateRect is { } g && _gateBox != null && t.X >= g.X && t.X < g.X + g.W && t.Z >= g.Z && t.Z < g.Z + g.D)
+                hit = _gateBox;
+            return hit;
+        }
+
+        /// <summary>The hover boxes, every one still fading, built as 0x8001A70C builds them and breathing with the
+        /// park's time. Each band side is one-sided (the game draws it only when it faces the camera, NCLIP), so its
+        /// triangles keep the game's corner order and the material culls back faces; the lid is drawn both ways.</summary>
+        ArrayMesh SelectionMesh()
+        {
+            var verts = new List<Vector3>();
+            var cols = new List<Color>();
+            int pulse = SelectionBox.Pulse((long)_parkTime);
+            float u = ParkTerrain.TileUnits;
+            Vector3 P(SelectionBox.Corner c) => new(c.X / u, c.Y / u, -c.Z / u);
+            Color C(SelectionBox.Corner c) => new(c.R / 255f, c.G / 255f, c.B / 255f);
+            void Tri(SelectionBox.Corner a, SelectionBox.Corner b, SelectionBox.Corner c)
+            {
+                verts.Add(P(a)); verts.Add(P(b)); verts.Add(P(c));
+                cols.Add(C(a)); cols.Add(C(b)); cols.Add(C(c));
+            }
+            foreach (var (box, fade) in _selection.Active)
+                foreach (var q in SelectionBox.Build(box.X0, box.Y0, box.Z0, box.W, box.D, box.Height, box.Cx, box.Cz, fade, pulse))
+                {
+                    Tri(q.V0, q.V1, q.V2); Tri(q.V1, q.V3, q.V2);
+                    if (!q.Culled) { Tri(q.V0, q.V2, q.V1); Tri(q.V1, q.V2, q.V3); }
+                }
+            if (verts.Count == 0) return null;
+            var arrays = new Godot.Collections.Array();
+            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
+            var mesh = new ArrayMesh();
+            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            _selectionMat ??= new ShaderMaterial { Shader = new Shader { Code = SelectionShader } };
+            mesh.SurfaceSetMaterial(0, _selectionMat);
+            return mesh;
+        }
+
+        /// <summary>The GPU's additive blend (B + F, clamped) done where the GPU does it, in DISPLAY space: the box reads
+        /// what is behind it and adds its colour to that. A plain additive blend adds in linear space and turns the
+        /// game's pale yellow-green glow into a dull one.</summary>
+        const string SelectionShader = @"shader_type spatial;
+render_mode unshaded, blend_mix, depth_draw_never, cull_back;
+uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
+vec3 to_linear(vec3 c) {
+    return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
+}
+vec3 to_display(vec3 c) {
+    return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, c * 12.92, lessThan(c, vec3(0.0031308)));
+}
+void fragment() {
+    vec3 behind = texture(screen_tex, SCREEN_UV).rgb;
+    ALBEDO = to_linear(clamp(to_display(max(behind, vec3(0.0))) + COLOR.rgb, 0.0, 1.0));
+    ALPHA = 1.0;
+}
+";
 
         /// <summary>The queue tool's ghost: from the queue's end toward the tile under the mouse, each tile wearing the
         /// marker for its verdict (0x8001D9D0 with kind 4, drawn as every marker is).</summary>
@@ -1213,6 +1361,7 @@ namespace TPWGodot
             _frameClock += delta;
             int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParticleSystem.FramesPerSecond);
             int frames = 0;
+            var hovered = HoverTarget();
             while (_frameClock >= 1.0 / ParticleSystem.FramesPerSecond && frames < 10)
             {
                 _frameClock -= 1.0 / ParticleSystem.FramesPerSecond;
@@ -1229,8 +1378,11 @@ namespace TPWGodot
                         if (i < _openingFx.Count && _openingFx[i].T != null)
                             _fx?.Add(_openingFx[i].T, _openingFx[i].X, _openingFx[i].Y, _openingFx[i].Z);
                 _fx?.Step();
+                _selection.Step();
+                _selection.Hover(hovered);
             }
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
+            _selectionMesh.Mesh = SelectionMesh();
             _fxMesh.Mesh = FxMesh();
             if (_pathMode)
             {
