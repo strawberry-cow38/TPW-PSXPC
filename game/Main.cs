@@ -138,16 +138,12 @@ namespace TPWGodot
         /// music bank. Recorded so the next person does not inherit 22,050 for them.</summary>
         public static readonly int[] EffectRatesHz = { 11025, 8000 };
         VBoxContainer _root;
-        /// <summary>Everything debug, inside <see cref="_root"/>. F3 toggles THIS; the capture paths hide
-        /// <see cref="_root"/> itself.
-        ///
-        /// ⚠ TWO LEVELS ON PURPOSE. A capture (--models=, --park=) must leave a COMPLETELY clean frame, so
-        /// it hides the outer node and takes the "press F3" hint with it. If F3 toggled the same node the
-        /// captures hide, then either the hint would be burned into every captured frame or pressing F3
-        /// during a capture would silently un-hide the whole panel mid-recording.</summary>
+        /// <summary>The grouped tabs inside <see cref="_root"/>. Kept as its own node for layout; it is
+        /// <see cref="_root"/>'s visibility that F3 and the captures both act on.</summary>
         VBoxContainer _debugPanel;
-        /// <summary>The one line left on screen when the panel is closed, so the key is discoverable.</summary>
-        Label _hint;
+        /// <summary>The whole debug overlay. ⭐ ONE SWITCH: F3 flips it, every capture path clears it.
+        /// Two switches is what produced a chrome that was hidden AND underneath at the same time.</summary>
+        CanvasLayer _debugLayer;
         BootScreens _boot;
         /// <summary>From <c>--no-boot</c>: go straight to the debug tools. The capture paths set it
         /// too, since a capture of a model must not have 90 seconds of intro in front of it.</summary>
@@ -181,14 +177,30 @@ namespace TPWGodot
                 OffsetLeft = 8, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8,
             };
             _root.AddThemeConstantOverride("separation", 6);
-            AddChild(_root);
+            // ⚠ ON ITS OWN LAYER, ABOVE THE BOOT. A Control parented straight to a Node draws on canvas
+            // layer 0, and BootScreens is a CanvasLayer at 10 -- so the debug chrome was rendered
+            // UNDERNEATH the boot screens and F3 did nothing visible at all. Measured: the top-left of
+            // a frame with the panel open was the menu's own red with zero lit pixels over it.
+            _debugLayer = new CanvasLayer { Layer = 20 };
+            AddChild(_debugLayer);
+            // An opaque-ish backing, or the debug text reads on top of whatever the game is drawing and
+            // both become unreadable. It is a child of the LAYER, not of _root, because _root is a
+            // VBoxContainer and anything parented to it joins the column.
+            _debugLayer.AddChild(new ColorRect { Color = new Color(0.04f, 0.04f, 0.05f, 0.94f),
+                                                 AnchorRight = 1, AnchorBottom = 1 });
+            _debugLayer.AddChild(_root);
 
             // ⭐ THE DEBUG MENU. What used to be here was every label, every button and the legal-screen
             // preview stacked in one flat column, always on screen -- the port's whole UI was its debug
             // output. None of it is deleted: this is the same controls, grouped by what they inspect and
-            // put behind one key, so the window can eventually show the game instead.
-            _hint = new Label { Text = "F3 — debug menu", Modulate = new Color(1, 1, 1, 0.45f) };
-            _root.AddChild(_hint);
+            // put behind one key, so the window can show the game instead.
+            //
+            // ⚠ ONE LEVEL OF VISIBILITY NOW, NOT TWO. This briefly had an outer node the captures hid
+            // and an inner panel F3 toggled, plus an always-on "F3 — debug menu" hint. That was right
+            // when the window had nothing in it but debug output, and the boot chain made it wrong: the
+            // hint would burn over the game, and F3 toggled a panel inside a node the boot had hidden,
+            // so it did nothing. The LAYER's visibility is the debug overlay now -- captures clear it,
+            // F3 flips it, and it draws above everything with its own backing.
             _debugPanel = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
             _debugPanel.AddThemeConstantOverride("separation", 8);
             _root.AddChild(_debugPanel);
@@ -511,7 +523,7 @@ namespace TPWGodot
                 if (_bootFrom != null && !_boot.StartAt(_bootFrom))
                     GD.PushWarning($"[tpw] --boot-from={_bootFrom} is not a boot screen; starting from the beginning");
                 _boot.Visible = true;
-                _root.Visible = false;       // the debug chrome stays available on F3
+                _debugLayer.Visible = false;       // the debug chrome stays available on F3
             }
 
             // Show the first model as soon as the parse is done, so the window is never empty.
@@ -522,7 +534,7 @@ namespace TPWGodot
             if (_modelTour != null && _models != null && _models.Count > 0)
             {
                 if (_tourCull) _models.ToggleCull();
-                _root.Visible = false;
+                _debugLayer.Visible = false;
                 _tourPos = 0;
                 _models.Show(_modelTour[0]);
             }
@@ -566,7 +578,7 @@ namespace TPWGodot
                 int i = _maps.FindIndex(m => m.Entry == _autoPark);
                 if (i >= 0)
                 {
-                    _parkChoice.Selected = i; _root.Visible = false; ShowPark(true);
+                    _parkChoice.Selected = i; _debugLayer.Visible = false; ShowPark(true);
                     if (_parkView != null && _parkView.Length == 5) _park.SetView(_parkView[0], _parkView[1], _parkView[2], _parkView[3], _parkView[4]);
                 }
             }
@@ -931,8 +943,8 @@ namespace TPWGodot
         public override void _UnhandledInput(InputEvent e)
         {
             if (e is not InputEventKey { Pressed: true, Echo: false, Keycode: Key.F3 }) return;
-            if (_debugPanel == null) return;
-            _debugPanel.Visible = !_debugPanel.Visible;
+            if (_debugLayer == null) return;
+            _debugLayer.Visible = !_debugLayer.Visible;
             GetViewport().SetInputAsHandled();
         }
 
