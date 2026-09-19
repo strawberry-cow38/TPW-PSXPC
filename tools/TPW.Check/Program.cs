@@ -156,6 +156,72 @@ static class Program
         return failed;
     }
 
+    /// <summary>Animation tracks on the real disc.
+    ///
+    /// ⭐ THE ORACLE IS A PROPERTY, NOT A COUNT. The unit tests parse nine hand-written s16 and prove the
+    /// stride arithmetic; they cannot tell a correct stride from one that is wrong by a multiple of the
+    /// record size, because both produce numbers. These can: a type-8 record read at the RIGHT offset is a
+    /// rotation matrix and a type-6 record holds a UNIT quaternion, and neither survives a misread. Anything
+    /// under 100% here means the walk is landing off the records, however plausible the totals look.
+    ///
+    /// Undecoded types are listed rather than ignored, so the remaining work is visible and a type that
+    /// silently vanished from the walk cannot be mistaken for a type that does not occur.
+    /// Exit contribution is the number of records that failed a property.</summary>
+    static int Anim(GazArchive gaz)
+    {
+        int rests = 0, orthonormal = 0, keys = 0, unit = 0, tracks = 0, monotonic = 0, parsed = 0, animFail = 0;
+        var undecoded = new SortedDictionary<int, int>();
+        string firstFail = "";
+        foreach (var e in gaz.Entries)
+        {
+            var bytes = gaz.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            for (int i = 0; i < c.SubCount; i++)
+            {
+                if (!c.TryExpand(bytes, i, out var data, out int start, out _)) continue;
+                if (!MeshContainer.TryParseMeshAt(data, start, out var mesh, out _)) continue;
+                if (mesh.AnimationError != null)
+                {
+                    animFail++;
+                    if (firstFail.Length == 0) firstFail = $"entry #{e.Index} sub {i}: {mesh.AnimationError}";
+                    continue;
+                }
+                if (mesh.Tracks == null) continue;
+                parsed++;
+                foreach (var t in mesh.Tracks)
+                {
+                    if (t.Type == 8) { rests++; if (t.Rest.IsOrthonormal()) orthonormal++; }
+                    else if (t.Type == 6)
+                    {
+                        tracks++;
+                        bool up = true;
+                        for (int k = 0; k < t.Keys.Length; k++)
+                        {
+                            keys++;
+                            float q = t.Keys[k].QuatLength();
+                            if (q > 0.97f && q < 1.03f) unit++;
+                            if (k > 0 && t.Keys[k].Time < t.Keys[k - 1].Time) up = false;
+                        }
+                        if (up) monotonic++;
+                    }
+                    else { undecoded.TryGetValue(t.Type, out int n); undecoded[t.Type] = n + 1; }
+                }
+            }
+        }
+        string pc(int a, int b) => b == 0 ? "n/a" : $"{100.0 * a / b:0.0}%";
+        Console.WriteLine($"meshes with tracks : {parsed}  ({animFail} failed to walk" +
+                          (firstFail.Length > 0 ? $", first: {firstFail}" : "") + ")");
+        Console.WriteLine($"type 8 rest poses  : {rests}, orthonormal {orthonormal} ({pc(orthonormal, rests)})");
+        Console.WriteLine($"type 6 keyframes   : {keys}, unit quaternion {unit} ({pc(unit, keys)})");
+        Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
+        if (undecoded.Count > 0)
+        {
+            Console.WriteLine("undecoded track types (kept as raw bytes, not skipped):");
+            foreach (var kv in undecoded) Console.WriteLine($"   type {kv.Key}: {kv.Value} tracks");
+        }
+        return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic);
+    }
+
     static GazArchive Archive(DiscReader disc)
     {
         var f = disc.Find(AssetSelfTest.AssetArchive);
@@ -629,6 +695,7 @@ static class Program
             catch (Exception e) { Console.WriteLine("could not read: " + e.Message); return 1; }
             if (!GazArchive.TryParse(gb, out var g, out string ge)) { Console.WriteLine("archive: " + ge); return 1; }
             if (Array.IndexOf(args, "--mapping") >= 0) { Mapping(g); return 0; }
+            if (Array.IndexOf(args, "--anim") >= 0) return Anim(g);
             return Meshes(g);
         }
 

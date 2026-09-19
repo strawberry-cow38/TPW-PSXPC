@@ -49,6 +49,14 @@ namespace TPW.Data
         public int FaceBytesEnd;
         /// <summary>True when the sub-entry was LZSS-expanded (SubLz) before the walk.</summary>
         public bool WasCompressed;
+
+        /// <summary>Animation tracks, walked after the faces. See <see cref="MeshAnimation"/>.
+        /// Empty when TrackCount is 0 or the walk failed; <see cref="AnimationError"/> says which.</summary>
+        public List<AnimTrack> Tracks = new();
+        /// <summary>Where the track walk stopped. Should land on the trailing u32 index list.</summary>
+        public int TrackBytesEnd;
+        /// <summary>Null when the tracks parsed. Non-null leaves Tracks empty rather than half-filled.</summary>
+        public string AnimationError;
     }
 
     /// <summary>A `0x96` archive entry: a container of skinned meshes.
@@ -227,6 +235,19 @@ namespace TPW.Data
             }
 
             m.FaceBytesEnd = p;
+
+            // Bones and animation tracks follow the faces. A failure here is recorded, not fatal:
+            // the geometry above is already good and callers that only draw should still get it.
+            int m12 = BitConverter.ToInt32(d, b + 0x0C);
+            int n8b = BitConverter.ToInt32(d, b + 0x20);
+            if (MeshAnimation.TryParse(d, b, p, m.BoneCount, m.TrackCount, m12, n8b,
+                                       out var tracks, out int trackEnd, out string animErr))
+            {
+                m.Tracks = tracks;
+                m.TrackBytesEnd = trackEnd;
+            }
+            else m.AnimationError = animErr;
+
             mesh = m;
             return true;
         }
