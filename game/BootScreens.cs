@@ -271,7 +271,7 @@ namespace TPWGodot
                 y += RowStep;
             }
 
-            var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);
+            var img = Image.CreateFromData(MenuRenderer.W, MenuLayout.VisibleHeight, false, Image.Format.Rgba8, MenuRenderer.Visible(frame));
             _menuView.Texture = ImageTexture.CreateFromImage(img);
             _big.Text = _small.Text = _note.Text = "";
         }
@@ -294,7 +294,7 @@ namespace TPWGodot
             var frame = MenuRenderer.NewFrame();
             MenuRenderer.DrawLanguageScreen(_menuArt, frame, _ring);
 
-            var img = Image.CreateFromData(MenuRenderer.W, MenuRenderer.H, false, Image.Format.Rgba8, frame);
+            var img = Image.CreateFromData(MenuRenderer.W, MenuLayout.VisibleHeight, false, Image.Format.Rgba8, MenuRenderer.Visible(frame));
             _menuView.Texture = ImageTexture.CreateFromImage(img);
             _big.Text = _small.Text = "";
             _note.Text = "real flag art, drawn flat — the console waves it on a mesh the advisor holds";

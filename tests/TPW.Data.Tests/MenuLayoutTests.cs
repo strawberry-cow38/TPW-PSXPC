@@ -118,5 +118,23 @@ namespace TPW.Data.Tests
             Assert.Equal(LanguageRing.Count, LanguageRing.FlagSprite.Distinct().Count());
             Assert.All(LanguageRing.FlagSprite, i => Assert.True(i > 0));
         }
+
+        [Fact]
+        public void TheConsoleShowsTheTopTwoHundredAndFortyRowsOnly()
+        {
+            Assert.True(MenuLayout.VisibleHeight < MenuLayout.ScreenHeight);
+            var frame = MenuRenderer.NewFrame();
+            // Mark a row the console shows and a row it crops, then check Visible() keeps one and
+            // drops the other -- a length check alone would pass on a buffer copied from the wrong end.
+            frame[((MenuLayout.VisibleHeight - 1) * MenuLayout.ScreenWidth) * 4] = 0x11;
+            frame[(MenuLayout.VisibleHeight * MenuLayout.ScreenWidth) * 4] = 0x22;
+            var vis = MenuRenderer.Visible(frame);
+            Assert.Equal(MenuLayout.ScreenWidth * MenuLayout.VisibleHeight * 4, vis.Length);
+            Assert.Equal(0x11, vis[(MenuLayout.VisibleHeight - 1) * MenuLayout.ScreenWidth * 4]);
+            Assert.DoesNotContain((byte)0x22, vis);
+            // Drawing still uses the full height: the ring's slots and the menu rows must stay inside
+            // the DRAWING area, not the visible one, or the coordinates stop matching the console.
+            Assert.All(MenuRenderer.RingSlots, s2 => Assert.True(s2.Baseline < MenuLayout.ScreenHeight));
+        }
 }
 }

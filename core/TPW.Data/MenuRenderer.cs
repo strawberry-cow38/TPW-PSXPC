@@ -44,6 +44,17 @@ namespace TPW.Data
             return new Prepared { Atlas = PageAtlas.Build(sheet, uses), Sheet = sheet, SpriteCount = sheet.Sprites.Count };
         }
 
+        /// <summary>The console's visible window over a drawn frame: the top
+        /// <see cref="MenuLayout.VisibleHeight"/> rows. Present this, not the whole buffer.</summary>
+        public static byte[] Visible(byte[] frame)
+        {
+            int n = W * MenuLayout.VisibleHeight * 4;
+            if (frame == null || frame.Length <= n) return frame;
+            var outp = new byte[n];
+            Array.Copy(frame, outp, n);
+            return outp;
+        }
+
         /// <summary>A fresh transparent frame.</summary>
         public static byte[] NewFrame() => new byte[W * H * 4];
 

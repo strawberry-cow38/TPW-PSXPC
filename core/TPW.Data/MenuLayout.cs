@@ -58,6 +58,21 @@ namespace TPW.Data
         /// rows is thrown away before Godot scales it.</summary>
         public const int ScreenWidth = 512, ScreenHeight = 256;
 
+        /// <summary>How many of those rows the console actually DISPLAYS: the top 240. The drawing area
+        /// is 256 tall and the bottom 16 rows are never shown.
+        ///
+        /// ⭐ MEASURED, and the direction matters: the crop is at the BOTTOM, not split between top and
+        /// bottom. Two independent landmarks on two different screens put the offset at zero -- the
+        /// language ring's chevrons occupy display-list rows 192..216 and appear at displayed rows
+        /// 192..214, and the menu's three text baselines at 160/192/224 land on the same rows of the
+        /// captured frame. A centred crop would have shifted both by 8.
+        ///
+        /// ⚠ Drawing must still use the full 256, because the coordinates in the display list are
+        /// drawing-area coordinates. Only the PRESENTATION is 240. Rendering 240 and clipping there
+        /// would move nothing on screen but would silently drop anything the console draws below the
+        /// fold and relies on being there when the display window moves.</summary>
+        public const int VisibleHeight = 240;
+
         /// <summary>The FOLIO entry every one of these quads samples.</summary>
         public const int Sheet = 84;
 
