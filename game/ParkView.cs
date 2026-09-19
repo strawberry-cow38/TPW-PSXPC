@@ -736,53 +736,13 @@ namespace TPWGodot
         /// where the tool takes path and red where it refuses.</summary>
         ArrayMesh CursorMesh()
         {
-            var mesh = new ArrayMesh();
-            if (_cursorTile is not { } cur || _paths == null || _common == null) return mesh;
+            if (_cursorTile is not { } cur || _paths == null || _common == null) return new ArrayMesh();
             var run = _runStart is { } st ? PathTool.Run(st.X, st.Z, cur.X, cur.Z) : new List<(int X, int Z)> { cur };
-            // ⭐ THE GAME'S GHOST (0x8001D9D0 → 0x800553B0): each tile of the run wears a marker sprite from the common
-            // sheet chosen by the tool's own verdict, drawn semi-transparent (the markers' texels all carry the GPU's
-            // blend bit, their page is mode 0: half and half) over the ground, neutral grey. The game also pulses the
-            // markers' brightness and lays a dim quad under them; not yet.
-            var byMarker = new Dictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
-            const int lift = 12;
-            var grey = new Color(0.5f, 0.5f, 0.5f);
-            foreach (var (x, z, sprite, _) in _paths.Ghost(_map, run))
-            {
-                if (!byMarker.TryGetValue(sprite, out var b)) byMarker[sprite] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
-                var a = At(x, z, _map[x, z].HeightUnits + lift);
-                var p1 = At(x + 1, z, _map[x + 1, z].HeightUnits + lift);
-                var d = At(x, z + 1, _map[x, z + 1].HeightUnits + lift);
-                var e = At(x + 1, z + 1, _map[x + 1, z + 1].HeightUnits + lift);
-                b.V.AddRange(new[] { a, p1, d, d, p1, e });
-                b.UV.AddRange(new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1) });
-                for (int k = 0; k < 6; k++) b.C.Add(grey);
-            }
-            foreach (var (sprite, b) in byMarker)
-            {
-                if (!_markerTex.TryGetValue(sprite, out var tex))
-                {
-                    var img = sprite < _common.Sprites.Count ? _common.RenderSprite(sprite) : null;
-                    tex = img == null ? null : ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, img.Rgba));
-                    _markerTex[sprite] = tex;
-                }
-                if (tex == null) continue;
-                foreach (bool blended in new[] { false, true })
-                {
-                    var arrays = new Godot.Collections.Array();
-                    arrays.Resize((int)Godot.Mesh.ArrayType.Max);
-                    arrays[(int)Godot.Mesh.ArrayType.Vertex] = b.V.ToArray();
-                    arrays[(int)Godot.Mesh.ArrayType.Color] = b.C.ToArray();
-                    arrays[(int)Godot.Mesh.ArrayType.TexUV] = b.UV.ToArray();
-                    mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
-                    // The blend is the sprite's own page's (its record's tpage, bits 5-6): mode 0, half and half, for
-                    // every marker on the disc, read rather than assumed.
-                    int mode = (_common.Sprites[sprite].TPage >> 5) & 3;
-                    var m = new ShaderMaterial { Shader = PsxShading.SemiTransparentShader(mode, blended, false) };
-                    m.SetShaderParameter("atlas", tex);
-                    mesh.SurfaceSetMaterial(mesh.GetSurfaceCount() - 1, m);
-                }
-            }
-            return mesh;
+            // The game's ghost (0x8001D9D0 → 0x800553B0): each tile of the run wears the marker sprite for the tool's
+            // verdict, drawn by MarkerMesh as the game draws any marker.
+            var marks = new List<AttractionPlacement.Marker>();
+            foreach (var (x, z, sprite, _) in _paths.Ghost(_map, run)) marks.Add(new AttractionPlacement.Marker(x, z, sprite, 0));
+            return MarkerMesh(marks);
         }
         readonly Dictionary<int, ImageTexture> _markerTex = new();
 
@@ -898,27 +858,67 @@ namespace TPWGodot
             PlaySfx(ToolSound.Lay);
         }
 
-        /// <summary>Ground markers from the common sheet, each on its tile, turned a quarter per step (0 north, 1 west,
-        /// 2 south, 3 east: the sprite's top edge on that side), drawn half and half as 0x800553B0 draws them.</summary>
+        /// <summary>The underlay every marker has (0x800553B0: common-sheet sprite 171 at shade 0x40).</summary>
+        const int MarkerUnderlay = 171;
+
+        /// <summary>Ground markers from the common sheet (the path ghost, the ride blueprint), drawn as 0x800553B0 draws
+        /// them.
+        ///
+        /// ⭐ THEY RIPPLE (master). Per tile, two semi-transparent quads (each sprite's page decides the blend):
+        /// <list type="bullet">
+        /// <item>an underlay, sprite 171 at flat shade 0x40 (half brightness), on the ground, each corner pushed along x
+        /// AND z by its wave value / 8;</item>
+        /// <item>the marker, its corners raised off the ground by the wave value + 0x40 world units, each corner's shade
+        /// 0x80 + (sin a >> 8) + (sin b >> 8), so the brightness runs across the tile rather than flashing.</item>
+        /// </list>
+        /// A corner's wave value is 32·(1 + sin a) + 32·(1 + sin b) (the amplitudes at 0x80102D68 / 0x80102D74), where
+        /// a = (x + z)·0x200 + phase A and b = (x + z)·0x200 + phase B, x and z the corner's tile: two waves running
+        /// along the diagonal. The phases advance with the park's time (0x80057DE4): A by 128·frame time / 4096, B by
+        /// -64·frame time / 4096 (0x80102D6C, 0x80102D78), so they are drawn at the render rate from the park clock.
+        /// Markers are turned a quarter per step (0 north, 1 west, 2 south, 3 east: the sprite's top edge on that side).</summary>
         ArrayMesh MarkerMesh(IEnumerable<AttractionPlacement.Marker> marks)
         {
             var mesh = new ArrayMesh();
             if (_common == null) return mesh;
-            var byMarker = new Dictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
-            const int lift = 12;
-            var grey = new Color(0.5f, 0.5f, 0.5f);
+            int phaseA = (int)(((long)(_parkTime * 128 / 4096)) & 0xFFF), phaseB = (int)(((long)(-_parkTime * 64 / 4096)) & 0xFFF);
+            (int Value, int Shade) Wave(int cx, int cz)
+            {
+                int a = ((cx + cz) * 0x200 + phaseA) & 0xFFF, b = ((cx + cz) * 0x200 + phaseB) & 0xFFF;
+                int sa = EntranceFlags.Sin(a), sb = EntranceFlags.Sin(b);
+                int value = (32 * (4096 + sa) >> 12) + (32 * (4096 + sb) >> 12);
+                return (value, 0x80 + (sa >> 8) + (sb >> 8));
+            }
+            var bySprite = new Dictionary<int, (List<Vector3> V, List<Color> C, List<Vector2> UV)>();
+            (List<Vector3> V, List<Color> C, List<Vector2> UV) Bucket(int sprite)
+            {
+                if (!bySprite.TryGetValue(sprite, out var b)) bySprite[sprite] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
+                return b;
+            }
+            float u = ParkTerrain.TileUnits;
             var uvs = new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) };
+            var dim = new Color(0x40 / 255f, 0x40 / 255f, 0x40 / 255f);
             foreach (var mk in marks)
             {
                 int x = mk.X, z = mk.Z;
                 if (x < 0 || z < 0 || x >= _map.Width - 1 || z >= _map.Height - 1) continue;
-                if (!byMarker.TryGetValue(mk.Sprite, out var b)) byMarker[mk.Sprite] = b = (new List<Vector3>(), new List<Color>(), new List<Vector2>());
-                var c0 = At(x, z, _map[x, z].HeightUnits + lift);
-                var c1 = At(x + 1, z, _map[x + 1, z].HeightUnits + lift);
-                var c2 = At(x, z + 1, _map[x, z + 1].HeightUnits + lift);
-                var c3 = At(x + 1, z + 1, _map[x + 1, z + 1].HeightUnits + lift);
-                // The UV each corner takes for the turn: the sprite's top edge (v = 0) lies on the north, west, south
-                // or east side of the tile.
+                (int X, int Z)[] corners = { (x, z), (x + 1, z), (x, z + 1), (x + 1, z + 1) };
+                var waves = new (int Value, int Shade)[4];
+                var ground = new Vector3[4];
+                var raised = new Vector3[4];
+                for (int k = 0; k < 4; k++)
+                {
+                    var (cx, cz) = corners[k];
+                    waves[k] = Wave(cx, cz);
+                    int h = _map[cx, cz].HeightUnits, shift = waves[k].Value >> 3;
+                    ground[k] = new Vector3((cx * u + shift) / u, (h + 4) / u, -(cz * u + shift) / u);
+                    raised[k] = new Vector3(cx, (h + waves[k].Value + 0x40) / u, -cz);
+                }
+                // The underlay: the whole sprite on the tile, dim.
+                var ub = Bucket(MarkerUnderlay);
+                ub.V.AddRange(new[] { ground[0], ground[1], ground[2], ground[2], ground[1], ground[3] });
+                ub.UV.AddRange(new[] { uvs[0], uvs[1], uvs[2], uvs[2], uvs[1], uvs[3] });
+                for (int k = 0; k < 6; k++) ub.C.Add(dim);
+                // The marker, turned: the UV each corner takes puts the sprite's top edge on the turn's side.
                 Vector2 u0, u1, u2, u3;
                 switch (mk.Turns & 3)
                 {
@@ -927,12 +927,19 @@ namespace TPWGodot
                     case 3: u1 = uvs[0]; u3 = uvs[1]; u0 = uvs[2]; u2 = uvs[3]; break;
                     default: u0 = uvs[0]; u1 = uvs[1]; u2 = uvs[2]; u3 = uvs[3]; break;
                 }
-                b.V.AddRange(new[] { c0, c1, c2, c2, c1, c3 });
-                b.UV.AddRange(new[] { u0, u1, u2, u2, u1, u3 });
-                for (int k = 0; k < 6; k++) b.C.Add(grey);
+                var mb = Bucket(mk.Sprite);
+                mb.V.AddRange(new[] { raised[0], raised[1], raised[2], raised[2], raised[1], raised[3] });
+                mb.UV.AddRange(new[] { u0, u1, u2, u2, u1, u3 });
+                foreach (int k in new[] { 0, 1, 2, 2, 1, 3 })
+                {
+                    float g = Math.Clamp(waves[k].Shade, 0, 255) / 255f;
+                    mb.C.Add(new Color(g, g, g));
+                }
             }
-            foreach (var (sprite, b) in byMarker)
+            // The underlays first, so the raised markers draw over them.
+            foreach (int sprite in System.Linq.Enumerable.OrderBy(bySprite.Keys, k => k == MarkerUnderlay ? 0 : 1))
             {
+                var b = bySprite[sprite];
                 if (!_markerTex.TryGetValue(sprite, out var tex))
                 {
                     var img = sprite < _common.Sprites.Count ? _common.RenderSprite(sprite) : null;
