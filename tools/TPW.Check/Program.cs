@@ -171,6 +171,7 @@ static class Program
     {
         int rests = 0, orthonormal = 0, keys = 0, unit = 0, tracks = 0, monotonic = 0, parsed = 0, animFail = 0;
         int skels = 0, wellFormed = 0, maxDepth = 0, bothEncodings = 0, agree = 0, boneUnit = 0, bonesTot = 0;
+        int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
         double worstAgree = 0;
         var undecoded = new SortedDictionary<int, int>();
         string firstFail = "";
@@ -197,6 +198,26 @@ static class Program
                 // Nothing makes those agree except reading both correctly. A wrong offset, a wrong
                 // component order or a wrong bone index all break the agreement, so this is a far
                 // stronger statement than either being individually well-formed.
+                // ⭐ THE BINDING'S OWN ORACLE. Weights reaching a vertex must sum to 1.0 and the runs must
+                // tile the record table exactly. Both are properties a merely plausible table fails.
+                var bd = mesh.Binding;
+                // ⚠ Runs and records are SEPARATE populations. 209 meshes carry records with no run
+                // table, and the game skips the whole blend loop when the run count is zero (beqz on
+                // mesh+0x20 at 0x8002e2f4) -- so those meshes do not scatter at all, and scoring them as
+                // tiling failures would be measuring the wrong thing. Counted apart.
+                if (bd != null && bd.Records.Length > 0)
+                {
+                    if (bd.SourceCount == 0) { noRuns++; }
+                    else
+                    {
+                        binds++;
+                        if (bd.RunsTileTheTable()) tiled++;
+                    }
+                    if (bd.WeightsSumToOne(mesh.VertexCount)) sumOne++; else sumBad++;
+                    foreach (var r in bd.Records)
+                    { bindRecs++; if (r.Vertex < mesh.VertexCount) destOk++; }
+                }
+
                 var sk = mesh.Skeleton;
                 if (sk != null && sk.Count > 0)
                 {
@@ -251,6 +272,9 @@ static class Program
         Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
         Console.WriteLine($"skeletons          : {skels}, single-rooted and parent-before-child {wellFormed} ({pc(wellFormed, skels)}), deepest chain {maxDepth}");
         Console.WriteLine($"bone rest rotations: {bonesTot}, unit quaternion {boneUnit} ({pc(boneUnit, bonesTot)})");
+        Console.WriteLine($"vertex binding     : {binds} meshes scatter, runs tile the table {tiled} ({pc(tiled, binds)}); {noRuns} more carry records but no runs and do not scatter");
+        Console.WriteLine($"binding weights    : sum to 1.0 on {sumOne} meshes, {sumBad} not");
+        Console.WriteLine($"binding records    : {bindRecs}, destination is a real vertex {destOk} ({pc(destOk, bindRecs)})");
         Console.WriteLine($"quaternion vs type-8 matrix, where a bone states both: {agree}/{bothEncodings} agree ({pc(agree, bothEncodings)}), worst {worstAgree:0.000}");
         if (undecoded.Count > 0)
         {
@@ -258,7 +282,8 @@ static class Program
             foreach (var kv in undecoded) Console.WriteLine($"   type {kv.Key}: {kv.Value} tracks");
         }
         return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
-             + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree);
+             + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree)
+             + (binds - tiled) + sumBad + (bindRecs - destOk);
     }
 
     static GazArchive Archive(DiscReader disc)

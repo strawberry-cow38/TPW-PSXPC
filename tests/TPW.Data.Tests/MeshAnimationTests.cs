@@ -27,7 +27,7 @@ namespace TPW.Data.Tests
             b.AddRange(new byte[32 - 18]);                     // rest of the 32-byte record
 
             Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
-                                               out var tracks, out _, out int end, out string err), err);
+                                               out var tracks, out _, out _, out int end, out string err), err);
             var t = Assert.Single(tracks);
             Assert.Equal(8, t.Type);
             Assert.Equal(7, t.BoneIndex);
@@ -50,7 +50,7 @@ namespace TPW.Data.Tests
             foreach (var v in new[] { 1000, 0, 0, 0, 4096, 0, 0, 0, 4096 }) S16(b, v);   // first row short
             b.AddRange(new byte[32 - 18]);
 
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _, out _));
             Assert.False(tracks[0].Rest.IsOrthonormal());
         }
 
@@ -67,7 +67,7 @@ namespace TPW.Data.Tests
             foreach (var v in new[] { 25, 2, -5, 6, 7, 0, 0, 0, 0, 4096 }) S16(b, v);
 
             Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
-                                               out var tracks, out _, out int end, out string err), err);
+                                               out var tracks, out _, out _, out int end, out string err), err);
             var t = Assert.Single(tracks);
             Assert.Equal(6, t.Type);
             Assert.Equal(3, t.BoneIndex);
@@ -93,7 +93,7 @@ namespace TPW.Data.Tests
             foreach (var v in new[] { 10, 0, 100, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);
             foreach (var v in new[] { 30, 0, 200, 0, 0, 0, 0, 0, 0, 4096 }) S16(b, v);
 
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _, out _));
             var t = tracks[0];
             Assert.Equal(100, t.SampleNearest(0).Tx);     // before the first key
             Assert.Equal(100, t.SampleNearest(14).Tx);    // nearer the first
@@ -114,7 +114,7 @@ namespace TPW.Data.Tests
             Header(b, 1, bone: 0, count: 0);
             b.AddRange(new byte[32]);
 
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tracks, out _, out _, out _, out _));
             Assert.Equal(1, tracks[0].Type);
             Assert.False(tracks[0].IsDecoded);
             Assert.Equal(32 + 8, tracks[0].Raw.Length);     // handed back whole, not dropped
@@ -137,7 +137,7 @@ namespace TPW.Data.Tests
         {
             var b = new List<byte>();
             Header(b, 6, bone: 0, count: 50);      // claims 50 keys, supplies none
-            Assert.False(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out _, out _, out _, out string err));
+            Assert.False(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out _, out _, out _, out _, out string err));
             Assert.Contains("past the end", err);
         }
 
@@ -148,7 +148,7 @@ namespace TPW.Data.Tests
             var b = new List<byte>();
             Header(b, 9, bone: 0, count: 0);
             b.AddRange(new byte[32]);
-            Assert.False(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out _, out _, out _, out string err));
+            Assert.False(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out _, out _, out _, out _, out string err));
             Assert.Contains("unknown track type", err);
         }
         // --- the skeleton -------------------------------------------------------------------
@@ -173,7 +173,7 @@ namespace TPW.Data.Tests
             BoneRec(b, 0, 0, 0, 2048, 3547, 10, 0, 0);   // child, ~60 degrees about Z
 
             Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0,
-                                               out _, out var sk, out _, out string err), err);
+                                               out _, out var sk, out _, out _, out string err), err);
             Assert.Equal(2, sk.Count);
             Assert.True(sk.Bones[0].IsRoot);
             Assert.Equal(-1, sk.Bones[0].Parent);
@@ -198,7 +198,7 @@ namespace TPW.Data.Tests
             var b = new List<byte>();
             BoneRec(b, p0, 0, 0, 0, 4096, 0, 0, 0);
             BoneRec(b, p1, 0, 0, 0, 4096, 0, 0, 0);
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0, out _, out var sk, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0, out _, out var sk, out _, out _, out _));
             Assert.Equal(ok, sk.IsWellFormed());
         }
 
@@ -213,7 +213,7 @@ namespace TPW.Data.Tests
             BoneRec(b, -1, 0, 0, 2896, 2896, 0, 0, 0);   // 90 deg about Z: q=(0,0,sin45,cos45)
             BoneRec(b, 0, 0, 0, 0, 4096, 10, 0, 0);      // child offset 10 along x
 
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0, out _, out var sk, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0, out _, out var sk, out _, out _, out _));
             var w = sk.RestWorld();
             Assert.Equal(0f, w[0].X, 3);
             Assert.Equal(0f, w[1].X, 2);      // NOT 10 -- that would be the un-rotated offset
@@ -229,7 +229,7 @@ namespace TPW.Data.Tests
         {
             var b = new List<byte>();
             BoneRec(b, -1, 0, 0, 2896, 2896, 0, 0, 0);   // 90 deg about Z
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 1, 0, 0, 0, out _, out var sk, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 1, 0, 0, 0, out _, out var sk, out _, out _, out _));
             var m = sk.Bones[0].ToMatrix();
             Assert.Equal(0f, m.M00, 2); Assert.Equal(-1f, m.M01, 2);
             Assert.Equal(1f, m.M10, 2); Assert.Equal(0f, m.M11, 2);
@@ -250,7 +250,7 @@ namespace TPW.Data.Tests
             var b = new List<byte>();
             Header(b, type, bone: 4, count: 0);
             b.AddRange(new byte[64]);
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tr, out _, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0, out var tr, out _, out _, out _, out _));
             Assert.Equal(4, tr[0].Header4);                         // the raw field is always kept
             Assert.Equal(addressesABone ? 4 : -1, tr[0].BoneIndex);
         }
@@ -266,7 +266,7 @@ namespace TPW.Data.Tests
             BoneRec(b, -1, 0, 0, 2896, 2896, 0, 0, 0);   // parent: 90 deg about Z
             BoneRec(b, 0, 2896, 0, 0, 2896, 0, 0, 0);    // child:  90 deg about X
 
-            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0, out _, out var sk, out _, out _));
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 2, 0, 0, 0, out _, out var sk, out _, out _, out _));
             var r = sk.RestWorld()[1].R;
             // Rz(90)*Rx(90) = [[0,0,1],[1,0,0],[0,1,0]]. The reverse product is
             // [[0,-1,0],[0,0,-1],[1,0,0]], which differs in exactly these cells.

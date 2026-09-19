@@ -237,10 +237,11 @@ namespace TPW.Data
         public static bool TryParse(ReadOnlySpan<byte> d, int meshBase, int faceBytesEnd,
                                     int boneCount, int trackCount, int m12, int n8b,
                                     out List<AnimTrack> tracks, out Skeleton skeleton,
-                                    out int end, out string error)
+                                    out VertexBinding binding, out int end, out string error)
         {
             tracks = new List<AnimTrack>(trackCount);
             skeleton = new Skeleton();
+            binding = new VertexBinding();
             error = null;
             int p = Align4(faceBytesEnd);
 
@@ -248,6 +249,9 @@ namespace TPW.Data
             var bones = new Bone[boneCount];
             for (int i = 0; i < boneCount; i++) bones[i] = new Bone(d.Slice(p + i * 40, 40));
             skeleton.Bones = bones;
+
+            if (!VertexBinding.TryParse(d, p + boneCount * 40, n8b, m12, out binding, out error))
+            { end = p; return false; }
 
             p += boneCount * 40 + n8b * 12 + m12 * 12;
             p = Align4(p);

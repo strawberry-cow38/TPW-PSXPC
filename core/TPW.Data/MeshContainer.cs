@@ -56,6 +56,9 @@ namespace TPW.Data
 
         /// <summary>The bone hierarchy and rest pose. Empty when the walk failed.</summary>
         public Skeleton Skeleton = new();
+
+        /// <summary>How animated sources scatter into vertices. Not a bone-per-vertex map.</summary>
+        public VertexBinding Binding = new();
         /// <summary>Where the track walk stopped. Should land on the trailing u32 index list.</summary>
         public int TrackBytesEnd;
         /// <summary>Null when the tracks parsed. Non-null leaves Tracks empty rather than half-filled.</summary>
@@ -244,10 +247,11 @@ namespace TPW.Data
             int m12 = BitConverter.ToInt32(d, b + 0x0C);
             int n8b = BitConverter.ToInt32(d, b + 0x20);
             if (MeshAnimation.TryParse(d, b, p, m.BoneCount, m.TrackCount, m12, n8b,
-                                       out var tracks, out var skel, out int trackEnd, out string animErr))
+                                       out var tracks, out var skel, out var bind, out int trackEnd, out string animErr))
             {
                 m.Tracks = tracks;
                 m.Skeleton = skel;
+                m.Binding = bind;
                 m.TrackBytesEnd = trackEnd;
             }
             else m.AnimationError = animErr;
