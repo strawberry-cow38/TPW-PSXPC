@@ -227,7 +227,14 @@ namespace TPW.Data
         /// on all seven letters of "Options". The glyph bitmaps evidently carry two columns of padding
         /// each side. I had used W + 1, which is five pixels too wide PER LETTER, so "Play Game" came
         /// out 40 pixels over-long -- visible immediately beside the real thing as text that is "much
-        /// more spread out", which is exactly how it was reported.</summary>
+        /// more spread out", which is exactly how it was reported.
+        ///
+        /// ⭐ AND THE GAME'S OWN TEXT ROUTINES ARE NOW LOCATED, which is where this would be settled
+        /// exactly rather than measured. The title screen's draw is ovl2 0x8011534C; two of the five
+        /// sub-draws it calls (0x80114C20 and 0x80114EDC) are text, and they go through main-image
+        /// helpers 0x800E9A44 (string width), 0x800E9A38, 0x800E9070 and 0x800E95F0 (draw string).
+        /// The -4 is computed inside 0x800E9A44, as is the real centring rule -- so anyone wanting the
+        /// row positions and alignment exactly right should read those four rather than re-measure.</summary>
         public const int Advance = -4, SpaceWidth = 8;
 
         static int GlyphWidth(Prepared p, char c)
