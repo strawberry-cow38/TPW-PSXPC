@@ -14,6 +14,7 @@ as a lead, not a fact.
 | `economy.md` + `economy.json` | the BANK object, every flow of money, wages, prices |
 | `rides.md` + `rides.json` + `records.json` | building-type table, all 197 definition records, queues, throughput, breakdowns |
 | `parkopen.md` | what gates guest arrival |
+| `disc-check.md` | why Main Game and Load Game are greyed: a disc check at boot, not save data |
 | `psyq-named-functions.json` | 219 Sony PsyQ library functions located in the image by signature |
 
 ## Facts verified on the running console, not just read
