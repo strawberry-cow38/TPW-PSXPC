@@ -83,6 +83,7 @@ public class MainWindow : Window
     readonly ComboBox _branches = new() { MinWidth = 180 };
     readonly TextBlock _buildState = new() { Foreground = TextDim, FontSize = 12, TextWrapping = TextWrapping.Wrap };
     readonly TextBlock _latestState = new() { Foreground = TextDim, FontSize = 12, TextWrapping = TextWrapping.Wrap };
+    readonly TextBlock _launcherVersion = new() { Foreground = TextDim, FontSize = 12, VerticalAlignment = VerticalAlignment.Center };
     string _branch = DefaultBranch;
 
     readonly string _baseDir = AppContext.BaseDirectory;
@@ -93,6 +94,15 @@ public class MainWindow : Window
     // process is lost on every upgrade. The checkbox WRITES the file; the file is what anything else reads.
     string BranchFile => Path.Combine(_baseDir, "branch.txt");
     string ConsoleFile => Path.Combine(_baseDir, "debug_console.txt");
+    /// <summary>Whether to run Godot's console build.
+    ///
+    /// ⚠ DEFAULTED TO ON, AND THAT WAS THE "LAUNCHER SPAMS COMMAND PROMPTS" BUG. A first-time user with
+    /// no debug_console.txt got the *_console build of Godot, which opens a terminal window beside the
+    /// game -- so the port looked broken-by-default to everyone who had never found this checkbox.
+    /// Debug output is a thing you opt INTO. ⚠ And the default lived in TWO places, spelled `?? "1"`
+    /// twice: the checkbox read one and the launch path read the other, so changing one would have
+    /// left the game still opening a console while the box showed unticked. One property now.</summary>
+    bool WantConsole => LauncherRules.WantConsole(TryRead(ConsoleFile));
     string DataPathFile => Path.Combine(_baseDir, "game_data_path.txt");
     // ⚠ "BUILT" MEANS *WE* BUILT THIS EXACT COMMIT -- nothing else is evidence. Do not infer it from
     // game/.godot or a bin/ folder existing: a repo can ship a committed, machine-specific .godot with stale
@@ -143,7 +153,14 @@ public class MainWindow : Window
             await WithBusy(RefreshAsync);
         };
 
-        var checkUpdate = new Button { Content = "Check for update", MinWidth = 130 };
+        // ⚠ THIS BUTTON ALREADY EXISTED AND WAS REPORTED MISSING, because it sat inside a COLLAPSED
+        // "Options" expander -- shipped is not the same as findable. Now on the surface.
+        //
+        // ⚠ AND IT IS RENAMED. "Check for update" beside an action button that says "Update" described
+        // two different things with one word: the action button updates the GAME (clone/fetch/build),
+        // this one replaces the LAUNCHER. The ONE BUTTON rule below is about install/update/play of the
+        // game being stages of one intent; the launcher updating itself is not one of those stages.
+        var checkUpdate = new Button { Content = "Check for launcher update", MinWidth = 170 };
         checkUpdate.Click += async (_, _) => await WithBusy(async () =>
         {
             if (!await CheckSelfUpdateAsync()) Log($"Launcher is up to date (v{LauncherVersion}).");
@@ -154,7 +171,7 @@ public class MainWindow : Window
         {
             Header = "Options", Foreground = TextBody,
             Content = new StackPanel { Spacing = 8, Margin = new Thickness(0, 8, 0, 0),
-                Children = { _console, checkUpdate, OpenFolderButton() } },
+                Children = { _console, OpenFolderButton() } },
         };
 
         var actions = new StackPanel
@@ -172,7 +189,10 @@ public class MainWindow : Window
             Content = new StackPanel
             {
                 Margin = new Thickness(18), Spacing = 12,
-                Children = { head, sub, dataCard, actions, _buildState, _latestState, options, Card(_log) },
+                Children = { head, sub, dataCard, actions, _buildState, _latestState,
+                             new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8,
+                                              Children = { checkUpdate, _launcherVersion } },
+                             options, Card(_log) },
             },
         };
 
@@ -204,6 +224,7 @@ public class MainWindow : Window
     async Task InitAsync()
     {
         Log($"TPW launcher v{LauncherVersion}");
+        _launcherVersion.Text = $"launcher v{LauncherVersion}";
         // ⚠ If a handoff is underway this process is closing; doing anything further -- especially hashing a
         // 500 MB disc -- races the swap and wastes the user's time on a launcher that is going away.
         if (await CheckSelfUpdateAsync()) return;
@@ -214,7 +235,7 @@ public class MainWindow : Window
         // Restore what the user chose last time. A remembered game-data path matters most: re-hashing a
         // 500 MB image on every launch is slow, and re-asking for it is worse.
         _branch = TryRead(BranchFile) ?? DefaultBranch;
-        _console.IsChecked = (TryRead(ConsoleFile) ?? "1") == "1";
+        _console.IsChecked = WantConsole;
         _console.IsCheckedChanged += (_, _) => TryWrite(ConsoleFile, _console.IsChecked == true ? "1" : "0");
         _gameDataPath = TryRead(DataPathFile);
 
@@ -371,7 +392,7 @@ public class MainWindow : Window
 
         // ⚠ READ THE PREFERENCE FROM DISK, not from the checkbox. Play can run on a launcher whose window was
         // never shown, and the file is also what survives a self-update. The checkbox writes it; this reads it.
-        bool wantConsole = (TryRead(ConsoleFile) ?? "1") == "1";
+        bool wantConsole = WantConsole;
         // Ask core which binary to run, and then LOG WHAT WE DID rather than what was asked for.
         var choice = LauncherRules.GodotExeFor(godot, wantConsole, File.Exists);
         if (!choice.Satisfied)
@@ -392,7 +413,12 @@ public class MainWindow : Window
             return;
         }
 
-        var psi = new ProcessStartInfo(choice.Path) { UseShellExecute = false, WorkingDirectory = projectDir };
+        // ⚠ CreateNoWindow IS NOT REDUNDANT WITH UseShellExecute = false. On Windows a console-subsystem
+        // child still gets a console window allocated for it; suppressing that is a separate flag, and
+        // without it every git, dotnet and Godot call flashes a black window. Tied to the preference here
+        // rather than hardcoded, so ticking "Debug console" still gets you the console it promises.
+        var psi = new ProcessStartInfo(choice.Path)
+        { UseShellExecute = false, WorkingDirectory = projectDir, CreateNoWindow = !wantConsole };
         psi.ArgumentList.Add("--path");
         psi.ArgumentList.Add(projectDir);
         // The port reads the user's own game data from here. Never bundled, never redistributed.
@@ -540,7 +566,9 @@ public class MainWindow : Window
 
     async Task<string> Capture(string exe, string[] args)
     {
-        var psi = new ProcessStartInfo(exe) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+        // CreateNoWindow: see the note in the play path. Redirecting output does NOT imply no window.
+        var psi = new ProcessStartInfo(exe)
+        { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, CreateNoWindow = true };
         foreach (string a in args) psi.ArgumentList.Add(a);
         try
         {
@@ -649,6 +677,9 @@ public class MainWindow : Window
         {
             WorkingDirectory = wd, UseShellExecute = false,
             RedirectStandardOutput = true, RedirectStandardError = true,
+            // The clone/fetch/build path: a dozen calls, so a dozen flashing windows without this.
+            // Output is already redirected into the launcher's own log, which is where it belongs.
+            CreateNoWindow = true,
         };
         foreach (string a in args) psi.ArgumentList.Add(a);
 

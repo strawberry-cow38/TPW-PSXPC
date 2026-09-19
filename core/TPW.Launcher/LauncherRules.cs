@@ -45,6 +45,20 @@ namespace TPW.Launcher
             return new GodotChoice(resolved, false);
         }
 
+        /// <summary>Whether to run Godot's CONSOLE build, given the contents of debug_console.txt
+        /// (null when the file does not exist).
+        ///
+        /// ⚠ THE DEFAULT IS OFF, AND IT USED TO BE ON. With no preference file -- i.e. for every
+        /// first-time user -- the launcher picked the *_console build of Godot, which opens a terminal
+        /// window beside the game. The port therefore looked broken-by-default to anyone who had never
+        /// found the checkbox, and the checkbox was itself inside a collapsed expander. Debug output is
+        /// opt-in.
+        ///
+        /// ⚠ AND ONLY "1" IS ON. Not "true", not "yes", not "anything non-empty" -- an unreadable or
+        /// half-written file must fall back to the quiet default rather than to the noisy one, because
+        /// the failure mode of guessing wrong here is the bug above.</summary>
+        public static bool WantConsole(string fileContents) => (fileContents ?? "0").Trim() == "1";
+
         /// <summary>Should the launcher replace itself with the published build?
         ///
         /// ⚠ STRICTLY GREATER, never "different". An equal version must not trigger an update or the launcher

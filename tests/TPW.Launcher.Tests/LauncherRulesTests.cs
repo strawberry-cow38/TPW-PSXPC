@@ -205,6 +205,31 @@ namespace TPW.Launcher.Tests
             Assert.Contains("hash matches", v.Reason);
         }
 
+        // ⭐ THE DEFAULT IS THE WHOLE POINT OF THIS TEST. It shipped defaulting to ON, which gave every
+        // first-time user a terminal window beside the game and read as "the launcher spams command
+        // prompts". A test that only checked "1" -> true and "0" -> false would have passed throughout.
+        [Fact]
+        public void NoConsolePreferenceMeansNoConsole()
+        {
+            Assert.False(LauncherRules.WantConsole(null));    // no file at all: the first-run case
+            Assert.False(LauncherRules.WantConsole(""));      // present but empty
+            Assert.False(LauncherRules.WantConsole("   "));
+        }
+
+        // Anything that is not exactly "1" falls back to quiet. A half-written or corrupt file must not
+        // be able to turn the console on, since that is the failure this whole rule exists to prevent.
+        [Theory]
+        [InlineData("1", true)]
+        [InlineData("1\n", true)]
+        [InlineData(" 1 ", true)]
+        [InlineData("0", false)]
+        [InlineData("true", false)]
+        [InlineData("yes", false)]
+        [InlineData("01", false)]
+        [InlineData("garbage", false)]
+        public void OnlyAnExplicitOneTurnsTheConsoleOn(string contents, bool expected)
+            => Assert.Equal(expected, LauncherRules.WantConsole(contents));
+
         [Fact]
         public void NoPublishedHashAcceptsButSaysTheStrongCheckDidNotRun()
         {
