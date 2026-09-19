@@ -174,6 +174,7 @@ static class Program
         int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
         int spans = 0, spansMeet = 0;
         int posTracks = 0, posKeys = 0, posSpans = 0, posMeet = 0, empty = 0;
+        int posable = 0, moved = 0; long movedVerts = 0;
         double worstAgree = 0;
         var undecoded = new SortedDictionary<int, int>();
         string firstFail = "";
@@ -218,6 +219,22 @@ static class Program
                     if (bd.WeightsSumToOne(mesh.VertexCount)) sumOne++; else sumBad++;
                     foreach (var r in bd.Records)
                     { bindRecs++; if (r.Vertex < mesh.VertexCount) destOk++; }
+                }
+
+                // ⭐ THE END-TO-END CHECK, and the one the unit tests structurally cannot make. Every
+                // property above can hold while the pipeline as a whole moves nothing -- a pose that runs
+                // and outputs the rest position is indistinguishable from a correct one field by field.
+                // So: pose each animated mesh at two times and require the vertices to actually DIFFER.
+                if (mesh.Tracks != null && mesh.Binding != null && mesh.Binding.SourceCount > 0
+                    && mesh.VertexCount > 0)
+                {
+                    posable++;
+                    var a0 = MeshPose.Evaluate(mesh, 0);
+                    var a1 = MeshPose.Evaluate(mesh, 64);
+                    int diff = 0;
+                    for (int v = 0; v < a0.Vertices.Length && v < a1.Vertices.Length; v++)
+                        if (a0.Vertices[v] != a1.Vertices[v]) diff++;
+                    if (diff > 0) { moved++; movedVerts += diff; }
                 }
 
                 var sk = mesh.Skeleton;
@@ -301,6 +318,7 @@ static class Program
         Console.WriteLine($"binding weights    : sum to 1.0 on {sumOne} meshes, {sumBad} not");
         Console.WriteLine($"binding records    : {bindRecs}, destination is a real vertex {destOk} ({pc(destOk, bindRecs)})");
         Console.WriteLine($"quaternion vs type-8 matrix, where a bone states both: {agree}/{bothEncodings} agree ({pc(agree, bothEncodings)}), worst {worstAgree:0.000}");
+        Console.WriteLine($"posed end to end   : {posable} meshes evaluated at two times, {moved} ({pc(moved, posable)}) actually move, {movedVerts:n0} vertex differences");
         Console.WriteLine($"position tracks    : {posTracks} (types 2/3/4/5), {posKeys} samples; timed spans meet on {posMeet}/{posSpans} ({pc(posMeet, posSpans)}); {empty} more parse to zero records");
         if (undecoded.Count > 0)
         {
