@@ -26,7 +26,15 @@ namespace TPWGodot
     /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types, O scenery.</summary>
     public partial class ParkView : Node3D
     {
-        MeshInstance3D _ground, _types, _scenery, _flags, _build;
+        MeshInstance3D _ground, _types, _scenery, _flags, _build, _cursorMesh;
+        /// <summary>The path tool (right mouse button): a cursor on the ground under the mouse; press the left button
+        /// to start a run, release to lay it (PathTool, the game's rules). The ground sheet and scroll rectangles are
+        /// kept to rebuild the ground after laying.</summary>
+        PathTool _paths;
+        bool _pathMode;
+        (int X, int Z)? _cursorTile, _runStart;
+        TextureSheet _groundSheet;
+        Scrolling _scroll;
         /// <summary>The flag sprite (EntranceFlags) as its own texture, and its size in texels.</summary>
         ShaderMaterial _flagMat;
         int _flagW, _flagH;
@@ -88,6 +96,8 @@ namespace TPWGodot
             AddChild(_types);
             _build = new MeshInstance3D { Visible = false };
             AddChild(_build);
+            _cursorMesh = new MeshInstance3D();
+            AddChild(_cursorMesh);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
             _flags = new MeshInstance3D();
@@ -145,6 +155,7 @@ namespace TPWGodot
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _fx = new ParticleSystem();
             _openingFx.Clear();
+            _pathMode = false; _runStart = null; _cursorTile = null; _cursorMesh.Mesh = null; _paths = null; _cursorPinned = false;
             _fxMesh.Mesh = null;
             ParkOpen = false;
             _flagMat = null;
@@ -169,6 +180,11 @@ namespace TPWGodot
                     foreach (var pl in map.Scenery)
                         if (pl.Model < scenery.Models.Count)
                             foreach (var t in scenery.Models[pl.Model].Textures) uses.Add((t.TPage, t.Clut));
+                // Every path piece the tool can lay, so a path laid later has its texture in the atlas.
+                _paths = exe != null && world != null ? PathTool.Create(exe, AssetSelfTest.GameExecutableBase, world.Index) : null;
+                if (_paths != null)
+                    foreach (int ps in _paths.Sprites)
+                        if (ps < ground.Sprites.Count) uses.Add((ground.Sprites[ps].TPage, ground.Sprites[ps].Clut));
                 var gate = world != null ? ParkGate.ForWorld(world.Index) : null;
                 if (gate != null && gatePack != null && gatePack.Models.Count > 0)
                     foreach (var t in gatePack.Models[0].Textures) uses.Add((t.TPage, t.Clut));
@@ -183,6 +199,8 @@ namespace TPWGodot
                 _matCull.SetShaderParameter("atlas", atlasTex);
                 _ground.Mesh = GroundMesh(quads, atlas, scroll, _mat);
                 _atlas = atlas;
+                _groundSheet = ground;
+                _scroll = scroll;
                 if (scenery != null) _scenery.Mesh = SceneryMesh(map, scenery, atlas, scroll, _mat, _matCull, out placed, out skipped);
                 if (gate != null)
                 {
@@ -211,7 +229,7 @@ namespace TPWGodot
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
                                         : "no ground sheet, tile types only") +
                         "\n" + buildCounts +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera";
+                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, right mouse the path tool";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -630,7 +648,95 @@ namespace TPWGodot
         {
             if (_info != null && _map != null)
                 _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
-                                                  : "\ncamera: free; G for the game's own");
+                                                  : "\ncamera: free; G for the game's own")
+                           + (_pathMode ? "\nPATH TOOL: left button press, drag, release to lay a straight run; right button to put it away" : "");
+        }
+
+        /// <summary>The tile under the mouse: march the ray from the camera through the pointer until it drops below
+        /// the ground as drawn (ParkCamera.GroundHeight). Null off the map or when the ray never meets the ground.</summary>
+        (int X, int Z)? TileUnderMouse()
+        {
+            var mp = GetViewport().GetMousePosition();
+            Vector3 from = _camera.ProjectRayOrigin(mp), dir = _camera.ProjectRayNormal(mp);
+            float u = ParkTerrain.TileUnits;
+            for (float t = 0; t < 400; t += 0.05f)
+            {
+                var p = from + dir * t;
+                int gx = (int)Math.Floor(p.X * u), gz = (int)Math.Floor(-p.Z * u);
+                if (p.Y * u > ParkCamera.GroundHeight(_map, gx, gz)) continue;
+                int tx = gx >> 8, tz = gz >> 8;
+                return tx >= 0 && tx < _map.Width - 1 && tz >= 0 && tz < _map.Height - 1 ? (tx, tz) : null;
+            }
+            return null;
+        }
+
+        /// <summary>The path cursor: the tile under the mouse, or the run from the pressed tile to it, each tile green
+        /// where the tool takes path and red where it refuses.</summary>
+        ArrayMesh CursorMesh()
+        {
+            var mesh = new ArrayMesh();
+            if (_cursorTile is not { } cur) return mesh;
+            var tiles = _runStart is { } st ? PathTool.Run(st.X, st.Z, cur.X, cur.Z) : new List<(int X, int Z)> { cur };
+            var verts = new List<Vector3>(); var cols = new List<Color>();
+            const int lift = 14;
+            bool blocked = false;
+            foreach (var (x, z) in tiles)
+            {
+                // A run stops at the first tile that refuses, so everything after it is refused too.
+                blocked |= !PathTool.CanLay(_map, x, z);
+                var c = blocked ? new Color(0.95f, 0.2f, 0.2f, 0.6f) : new Color(0.25f, 0.95f, 0.35f, 0.6f);
+                var a = At(x, z, _map[x, z].HeightUnits + lift);
+                var b = At(x + 1, z, _map[x + 1, z].HeightUnits + lift);
+                var d = At(x, z + 1, _map[x, z + 1].HeightUnits + lift);
+                var e = At(x + 1, z + 1, _map[x + 1, z + 1].HeightUnits + lift);
+                verts.AddRange(new[] { a, b, d, d, b, e });
+                for (int k = 0; k < 6; k++) cols.Add(c);
+            }
+            var arrays = new Godot.Collections.Array();
+            arrays.Resize((int)Godot.Mesh.ArrayType.Max);
+            arrays[(int)Godot.Mesh.ArrayType.Vertex] = verts.ToArray();
+            arrays[(int)Godot.Mesh.ArrayType.Color] = cols.ToArray();
+            mesh.AddSurfaceFromArrays(Godot.Mesh.PrimitiveType.Triangles, arrays);
+            mesh.SurfaceSetMaterial(0, new StandardMaterial3D
+            {
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                VertexColorUseAsAlbedo = true,
+                VertexColorIsSrgb = true,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+            });
+            return mesh;
+        }
+
+        /// <summary>Lay a run of path as the tool would, from tile (x0, z0) toward (x1, z1). For captures: the mouse
+        /// does the same interactively. Returns how many tiles took path.</summary>
+        public int LayRun(int x0, int z0, int x1, int z1)
+        {
+            if (_paths == null || _map == null) return 0;
+            int laid = _paths.Lay(_map, PathTool.Run(x0, z0, x1, z1));
+            if (laid > 0) RebuildGround();
+            return laid;
+        }
+
+        /// <summary>Show the path cursor pinned at tile (x, z), with a run from (sx, sz) when given, instead of
+        /// following the mouse. For captures.</summary>
+        public void PinPathCursor(int x, int z, int sx = -1, int sz = -1)
+        {
+            if (_paths == null) return;
+            _pathMode = true; _cursorPinned = true;
+            _cursorTile = (x, z);
+            _runStart = sx >= 0 ? (sx, sz) : null;
+            RefreshInfo();
+        }
+        bool _cursorPinned;
+
+        /// <summary>After the map changes: the ground again from the map as it now is, and the overlays that read it.</summary>
+        void RebuildGround()
+        {
+            if (_groundSheet == null || _atlas == null) return;
+            _ground.Mesh = GroundMesh(ParkTerrain.Build(_map, _groundSheet.Sprites, GroundBorder), _atlas, _scroll, _mat);
+            _types.Mesh = TypeMesh(_map);
+            _build.Mesh = BuildMesh(_map, out _);
         }
 
         /// <summary>Set the camera outright: focus tile (x, z), yaw and pitch in radians, distance in tiles. For
@@ -695,6 +801,11 @@ namespace TPWGodot
             }
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
             _fxMesh.Mesh = FxMesh();
+            if (_pathMode)
+            {
+                if (!_cursorPinned) _cursorTile = TileUnderMouse();
+                _cursorMesh.Mesh = CursorMesh();
+            }
             float dt = (float)delta;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
@@ -739,6 +850,25 @@ namespace TPWGodot
             if (!Visible || _map == null) return;
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
             { GameCamera = !GameCamera; return; }
+            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true } && _paths != null)
+            {
+                _pathMode = !_pathMode; _runStart = null; _cursorPinned = false;
+                if (!_pathMode) _cursorMesh.Mesh = null;
+                RefreshInfo();
+                return;
+            }
+            if (_pathMode && e is InputEventMouseButton { ButtonIndex: MouseButton.Left } lmb)
+            {
+                if (lmb.Pressed) _runStart = _cursorTile;
+                else if (_runStart is { } start && _cursorTile is { } end)
+                {
+                    int laid = _paths.Lay(_map, PathTool.Run(start.X, start.Z, end.X, end.Z));
+                    _runStart = null;
+                    if (laid > 0) RebuildGround();
+                }
+                else _runStart = null;
+                return;
+            }
             if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Q }) { _gcam.Turn(-1); return; }
             if (_gameCam && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.E }) { _gcam.Turn(1); return; }
             if (!_gameCam && e is InputEventMouseButton { Pressed: true } mb)

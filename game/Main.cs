@@ -61,6 +61,9 @@ namespace TPWGodot
         /// <summary>From <c>--park-gamecam</c>: start the park view on the game's own camera (its G key), seeded from
         /// <c>--park-view</c>'s focus and nearest quarter turn.</summary>
         bool _autoGameCam;
+        /// <summary>From <c>--park-lay=x0,z0,x1,z1;...</c>: runs of path laid as the path tool would, and from
+        /// <c>--park-pathcursor=x,z[,sx,sz]</c> its cursor pinned there. For captures of path building.</summary>
+        string _autoLay, _autoPathCursor;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -460,6 +463,8 @@ namespace TPWGodot
                 else if (arg == "--park-open") _autoOpen = true;
                 else if (arg == "--park-buildable") _autoBuildable = true;
                 else if (arg == "--park-gamecam") _autoGameCam = true;
+                else if (arg.StartsWith("--park-lay=")) _autoLay = arg.Substring("--park-lay=".Length);
+                else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
@@ -670,6 +675,17 @@ namespace TPWGodot
                     _parkChoice.Selected = i; _debugLayer.Visible = false; ShowPark(true);
                     if (_parkView != null && _parkView.Length == 5) _park.SetView(_parkView[0], _parkView[1], _parkView[2], _parkView[3], _parkView[4]);
                     if (_autoGameCam) _park.GameCamera = true;
+                    if (_autoLay != null)
+                        foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(run.Split(','), int.Parse);
+                            if (v.Length == 4) GD.Print($"[tpw] --park-lay {run}: {_park.LayRun(v[0], v[1], v[2], v[3])} tiles took path");
+                        }
+                    if (_autoPathCursor != null)
+                    {
+                        var v = System.Array.ConvertAll(_autoPathCursor.Split(','), int.Parse);
+                        if (v.Length >= 2) _park.PinPathCursor(v[0], v[1], v.Length >= 4 ? v[2] : -1, v.Length >= 4 ? v[3] : -1);
+                    }
                 }
             }
 

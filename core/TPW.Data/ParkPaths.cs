@@ -96,7 +96,7 @@ namespace TPW.Data
         }
 
         /// <summary>The tile fields the path code changes, worked on in place.</summary>
-        sealed class Layer
+        internal sealed class Layer
         {
             readonly ParkMap _map;
             readonly Piece[] _pieces;
@@ -216,6 +216,90 @@ namespace TPW.Data
                 if (IsPath(nw) && IsPath(At(x, z - 1)) && IsPath(At(x - 1, z)))
                 { _links[t] |= NorthWest; _links[nw] |= SouthEast; Wear(nw); }
             }
+
+            /// <summary>The path tool's run (0x8001BD30 → 0x8001B924, then the 0x80 and 0x81 passes): path on each
+            /// tile in order until one refuses, which ends the run; then every tile laid is linked; then each picks
+            /// its piece.</summary>
+            public int LayRun(System.Collections.Generic.IReadOnlyList<(int X, int Z)> run)
+            {
+                var laid = new System.Collections.Generic.List<(int X, int Z)>();
+                foreach (var (x, z) in run)
+                {
+                    int t = At(x, z);
+                    if (t < 0 || !PathTool.CanLay(_type[t], _map.Tiles[t].Flags)) break;
+                    if (_type[t] != 2 && _type[t] != 13) _type[t] = 2;   // 0x8004E034: path over path (or path and queue) stays
+                    laid.Add((x, z));
+                }
+                foreach (var (x, z) in laid) Link(x, z);
+                foreach (var (x, z) in laid) Wear(z * _w + x);
+                return laid.Count;
+            }
+
+            /// <summary>Write the changed tiles back into <paramref name="map"/>'s own tile array.</summary>
+            public void WriteInto(ParkMap map)
+            {
+                for (int i = 0; i < map.Tiles.Length; i++)
+                {
+                    var t = map.Tiles[i];
+                    if (t.Raw0 != _type[i] || t.Links != _links[i] || t.Ground != _ground[i])
+                        map.Tiles[i] = new MapTile(_type[i], t.Raw1, _links[i], t.Facing, _ground[i], t.Shade, t.Flags);
+                }
+            }
+        }
+
+    }
+
+    /// <summary>The path tool, as the game's (0x8001BD30): a press starts a run, the run follows the cursor along
+    /// whichever axis it has moved further on (x only if strictly further, else z), and the second press lays it.
+    ///
+    /// ⭐ WHERE PATH MAY GO IS NOT WHERE A BUILDING MAY GO. The tool's own check (0x8004F360) refuses a tile with
+    /// flag 0x02, takes grass and path (and path-and-queue) and nothing else, and has NO slope test: path follows
+    /// the ground. (It also refuses when the bank cannot pay; the port has no bank yet.)</summary>
+    public sealed class PathTool
+    {
+        readonly ParkPaths.Piece[] _pieces;
+        readonly int[] _sprites;
+
+        /// <summary>The world's sixteen path sprites, for the atlas.</summary>
+        public System.Collections.Generic.IReadOnlyList<int> Sprites => _sprites;
+
+        PathTool(ParkPaths.Piece[] pieces, int[] sprites) { _pieces = pieces; _sprites = sprites; }
+
+        public static PathTool Create(byte[] exe, uint baseAddress, int world)
+        {
+            var pieces = ParkPaths.ReadPieces(exe, baseAddress);
+            var sprites = ParkPaths.ReadPathSprites(exe, baseAddress, world);
+            return pieces == null || sprites == null ? null : new PathTool(pieces, sprites);
+        }
+
+        /// <summary>Whether the tool takes tile (x, z): on the map, not flag 0x02, grass or path.</summary>
+        public static bool CanLay(ParkMap map, int x, int z) =>
+            x >= 0 && x < map.Width - 1 && z >= 0 && z < map.Height - 1 && CanLay(map[x, z].Raw0, map[x, z].Flags);
+
+        internal static bool CanLay(byte type, byte flags) => (flags & 0x02) == 0 && (type == 0 || type == 2 || type == 13);
+
+        /// <summary>The tiles of the run from the start toward the cursor, start first.</summary>
+        public static System.Collections.Generic.List<(int X, int Z)> Run(int x0, int z0, int x1, int z1)
+        {
+            if (Math.Abs(z1 - z0) < Math.Abs(x1 - x0)) z1 = z0; else x1 = x0;
+            var run = new System.Collections.Generic.List<(int, int)>();
+            int dx = Math.Sign(x1 - x0), dz = Math.Sign(z1 - z0);
+            for (int x = x0, z = z0; ; x += dx, z += dz)
+            {
+                run.Add((x, z));
+                if (x == x1 && z == z1) break;
+            }
+            return run;
+        }
+
+        /// <summary>Lay a run on <paramref name="map"/> in place, as the game does it. Returns how many tiles took
+        /// path (the run stops at the first that refuses).</summary>
+        public int Lay(ParkMap map, System.Collections.Generic.IReadOnlyList<(int X, int Z)> run)
+        {
+            var layer = new ParkPaths.Layer(map, _pieces, _sprites);
+            int n = layer.LayRun(run);
+            layer.WriteInto(map);
+            return n;
         }
     }
 }
