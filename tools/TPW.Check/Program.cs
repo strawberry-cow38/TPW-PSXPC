@@ -172,6 +172,7 @@ static class Program
         int rests = 0, orthonormal = 0, keys = 0, unit = 0, tracks = 0, monotonic = 0, parsed = 0, animFail = 0;
         int skels = 0, wellFormed = 0, maxDepth = 0, bothEncodings = 0, agree = 0, boneUnit = 0, bonesTot = 0;
         int binds = 0, tiled = 0, sumOne = 0, bindRecs = 0, destOk = 0, noRuns = 0, sumBad = 0;
+        int spans = 0, spansMeet = 0;
         double worstAgree = 0;
         var undecoded = new SortedDictionary<int, int>();
         string firstFail = "";
@@ -254,6 +255,13 @@ static class Program
                         for (int k = 0; k < t.Keys.Length; k++)
                         {
                             keys++;
+                            // ⭐ What identifies the second field as a DURATION rather than an unnamed
+                            // number: each key's span must end exactly where the next one starts.
+                            if (k + 1 < t.Keys.Length)
+                            {
+                                spans++;
+                                if (t.Keys[k].Time + t.Keys[k].Duration == t.Keys[k + 1].Time) spansMeet++;
+                            }
                             float q = t.Keys[k].QuatLength();
                             if (q > 0.97f && q < 1.03f) unit++;
                             if (k > 0 && t.Keys[k].Time < t.Keys[k - 1].Time) up = false;
@@ -269,6 +277,7 @@ static class Program
                           (firstFail.Length > 0 ? $", first: {firstFail}" : "") + ")");
         Console.WriteLine($"type 8 rest poses  : {rests}, orthonormal {orthonormal} ({pc(orthonormal, rests)})");
         Console.WriteLine($"type 6 keyframes   : {keys}, unit quaternion {unit} ({pc(unit, keys)})");
+        Console.WriteLine($"keyframe spans     : {spans} consecutive pairs, key.Time+key.Duration == next.Time on {spansMeet} ({pc(spansMeet, spans)})");
         Console.WriteLine($"type 6 tracks      : {tracks}, time non-decreasing {monotonic} ({pc(monotonic, tracks)})");
         Console.WriteLine($"skeletons          : {skels}, single-rooted and parent-before-child {wellFormed} ({pc(wellFormed, skels)}), deepest chain {maxDepth}");
         Console.WriteLine($"bone rest rotations: {bonesTot}, unit quaternion {boneUnit} ({pc(boneUnit, bonesTot)})");
@@ -283,7 +292,7 @@ static class Program
         }
         return animFail + (rests - orthonormal) + (keys - unit) + (tracks - monotonic)
              + (skels - wellFormed) + (bonesTot - boneUnit) + (bothEncodings - agree)
-             + (binds - tiled) + sumBad + (bindRecs - destOk);
+             + (binds - tiled) + sumBad + (bindRecs - destOk) + (spans - spansMeet);
     }
 
     static GazArchive Archive(DiscReader disc)

@@ -41,19 +41,49 @@ namespace TPW.Data
     public readonly struct AnimKey
     {
         public readonly short Time;             // non-decreasing within a track: 1091/1091 tracks
-        public readonly short Field1;           // 0..380. Bounded, NOT identified. Do not rely on it.
+
+        /// <summary>How long this key lasts, in the same units as <see cref="Time"/>.
+        ///
+        /// ⚠ This shipped as an unidentified "Field1". It is the divisor in the game's own blend at
+        /// 0x8002da94 -- t = ((now - start) &lt;&lt; 12) / duration -- and the file proves it: across all
+        /// 12,334 consecutive keyframe pairs on the disc, Time + Duration equals the next key's Time
+        /// exactly, residual zero on every pair.</summary>
+        public readonly short Duration;
         public readonly short Tx, Ty, Tz;       // translation, the file's own s16 units
         public readonly float Qx, Qy, Qz, Qw;   // unit quaternion
         public AnimKey(ReadOnlySpan<byte> d)
         {
             const float S = 1f / 4096f;
             static short H(ReadOnlySpan<byte> b, int i) => BitConverter.ToInt16(b.Slice(i * 2, 2));
-            Time = H(d, 0); Field1 = H(d, 1);
+            Time = H(d, 0); Duration = H(d, 1);
             Tx = H(d, 2); Ty = H(d, 3); Tz = H(d, 4);
             // H(d,5) is zero in all 13,425 keyframes on the disc.
             Qx = H(d, 6) * S; Qy = H(d, 7) * S; Qz = H(d, 8) * S; Qw = H(d, 9) * S;
         }
         public float QuatLength() => MathF.Sqrt(Qx * Qx + Qy * Qy + Qz * Qz + Qw * Qw);
+
+        AnimKey(short time, short dur, short tx, short ty, short tz,
+                float qx, float qy, float qz, float qw)
+        { Time = time; Duration = dur; Tx = tx; Ty = ty; Tz = tz; Qx = qx; Qy = qy; Qz = qz; Qw = qw; }
+
+        /// <summary>Blend a toward b by w/4096. Translation is linear; rotation is a normalised linear
+        /// blend, with b negated when the two quaternions point opposite ways so the blend takes the
+        /// short way round -- without that, a pair more than 180 degrees apart sweeps the long arc.</summary>
+        public static AnimKey Lerp(in AnimKey a, in AnimKey b, int w)
+        {
+            float f = w / 4096f, g = 1f - f;
+            float bx = b.Qx, by = b.Qy, bz = b.Qz, bw = b.Qw;
+            if (a.Qx * bx + a.Qy * by + a.Qz * bz + a.Qw * bw < 0f) { bx = -bx; by = -by; bz = -bz; bw = -bw; }
+            float qx = a.Qx * g + bx * f, qy = a.Qy * g + by * f,
+                  qz = a.Qz * g + bz * f, qw = a.Qw * g + bw * f;
+            float len = MathF.Sqrt(qx * qx + qy * qy + qz * qz + qw * qw);
+            if (len > 1e-6f) { qx /= len; qy /= len; qz /= len; qw /= len; }
+            return new AnimKey(a.Time, a.Duration,
+                (short)MathF.Round(a.Tx * g + b.Tx * f),
+                (short)MathF.Round(a.Ty * g + b.Ty * f),
+                (short)MathF.Round(a.Tz * g + b.Tz * f),
+                qx, qy, qz, qw);
+        }
     }
 
     /// <summary>
@@ -237,9 +267,38 @@ namespace TPW.Data
         public byte[] Raw = Array.Empty<byte>();           // everything else
         public bool IsDecoded => Type == 8 || Type == 6;
 
-        /// <summary>Pose at time t, holding the ends. Nearest-key; the game interpolates
-        /// (0x8002CBC4 composes matrices per frame) but the interpolation is not decoded,
-        /// so this deliberately does not pretend to smooth.</summary>
+        /// <summary>The game's own blend weight for time <paramref name="t"/>: 0..4096 across the key
+        /// that contains it. Straight from 0x8002da8c, integer division included, so it matches the
+        /// hardware's rounding rather than being tidier than it. -1 when no key contains t.</summary>
+        public int BlendWeight(int t)
+        {
+            for (int i = 0; i < Keys.Length; i++)
+            {
+                int start = Keys[i].Time, dur = Keys[i].Duration;
+                if (dur > 0 && t >= start && t < start + dur) return ((t - start) << 12) / dur;
+            }
+            return -1;
+        }
+
+        /// <summary>Interpolated pose at time t, the way the game does it: find the key whose span
+        /// contains t, blend it toward the next by <see cref="BlendWeight"/>. The console applies that
+        /// weight through the GTE's GPF/GPL opcodes, which is a LINEAR interpolation -- so this is an
+        /// nlerp, not a slerp. The hardware has no slerp, and matching it means not being cleverer than
+        /// it. Ends are held: before the first key and past the last, the nearest comes back unblended.</summary>
+        public AnimKey Sample(int t)
+        {
+            if (Keys.Length == 0) return default;
+            if (t <= Keys[0].Time) return Keys[0];
+            for (int i = 0; i < Keys.Length - 1; i++)
+            {
+                int start = Keys[i].Time, dur = Keys[i].Duration;
+                if (dur > 0 && t >= start && t < start + dur)
+                    return AnimKey.Lerp(Keys[i], Keys[i + 1], ((t - start) << 12) / dur);
+            }
+            return Keys[^1];
+        }
+
+        /// <summary>Nearest key, no blending, for callers wanting the raw authored pose.</summary>
         public AnimKey SampleNearest(int t)
         {
             if (Keys.Length == 0) return default;

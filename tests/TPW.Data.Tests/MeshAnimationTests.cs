@@ -315,5 +315,98 @@ namespace TPW.Data.Tests
             Assert.NotEqual(t2[0].Target, t4[0].Target);
         }
 
+        // --- interpolation ------------------------------------------------------------------
+
+        static List<byte> SixTrack(params (int t, int dur, int tx, int qz, int qw)[] keys)
+        {
+            var b = new List<byte>();
+            Header(b, 6, bone: 0, count: keys.Length);
+            b.AddRange(new byte[20]);                      // preamble
+            foreach (var k in keys)
+                foreach (var v in new[] { k.t, k.dur, k.tx, 0, 0, 0, 0, 0, k.qz, k.qw }) S16(b, v);
+            return b;
+        }
+        static AnimTrack One(List<byte> b)
+        {
+            Assert.True(MeshAnimation.TryParse(b.ToArray(), 0, 0, 0, 1, 0, 0,
+                                               out var tr, out _, out _, out _, out string e), e);
+            return tr[0];
+        }
+
+        // ⭐ Worked by hand against the game's own arithmetic at 0x8002da8c:
+        // ((t - start) << 12) / duration, INTEGER division. 5<<12 == 20480, over 20 is 1024.
+        // REJECTS a float divide dressed up as the hardware's, and REJECTS an off-by-one span.
+        [Theory]
+        [InlineData(10, 0)]        // the key's own start
+        [InlineData(15, 1024)]     // a quarter through a span of 20
+        [InlineData(20, 2048)]     // halfway
+        [InlineData(29, 3891)]     // 19<<12 / 20 -- integer division truncates, 3891.2 is not 3892
+        [InlineData(9, -1)]        // before any key
+        [InlineData(30, -1)]       // exactly at the end: the span is [start, start+dur)
+        public void TheBlendWeightIsTheGamesOwnIntegerArithmetic(int t, int expected)
+            => Assert.Equal(expected, One(SixTrack((10, 20, 0, 0, 4096))).BlendWeight(t));
+
+        [Fact]
+        public void ADurationIsHowLongTheKeyLastsAndMeetsTheNextKey()
+        {
+            var tr = One(SixTrack((10, 20, 100, 0, 4096), (30, 15, 200, 0, 4096)));
+            Assert.Equal(10, tr.Keys[0].Time);
+            Assert.Equal(20, tr.Keys[0].Duration);
+            Assert.Equal(30, tr.Keys[1].Time);
+            // The property that identified the field: every key meets the next one exactly.
+            Assert.Equal(tr.Keys[1].Time, tr.Keys[0].Time + tr.Keys[0].Duration);
+        }
+
+        // REJECTS returning a key instead of blending, and REJECTS blending the wrong way round.
+        [Fact]
+        public void SamplingBlendsBetweenTheBracketingKeys()
+        {
+            var tr = One(SixTrack((0, 100, 0, 0, 4096), (100, 50, 400, 0, 4096)));
+            Assert.Equal(0, tr.Sample(0).Tx);
+            Assert.Equal(100, tr.Sample(25).Tx);     // a quarter of the way to 400
+            Assert.Equal(200, tr.Sample(50).Tx);     // halfway -- NOT 0 and NOT 400
+            Assert.Equal(300, tr.Sample(75).Tx);
+            Assert.Equal(400, tr.Sample(100).Tx);    // past the last key's start: held
+            Assert.Equal(0, tr.Sample(-5).Tx);       // before the first: held
+        }
+
+        // ⭐ REJECTS blending quaternions without the sign fix. q and -q are the SAME rotation, so a
+        // naive componentwise blend of a pair that point opposite ways collapses toward zero instead of
+        // rotating between them. Here the two keys are the same rotation written with opposite signs:
+        // every sample must stay that rotation, and a unit quaternion throughout.
+        [Fact]
+        public void BlendingTakesTheShortWayRoundBetweenOppositeSignQuaternions()
+        {
+            var tr = One(SixTrack((0, 100, 0, 2896, 2896), (100, 50, 0, -2896, -2896)));
+            for (int t = 0; t <= 100; t += 10)
+            {
+                var k = tr.Sample(t);
+                Assert.Equal(1f, k.QuatLength(), 3);
+                Assert.Equal(0.7071f, MathF.Abs(k.Qz), 2);   // still the same rotation, not collapsed
+            }
+        }
+
+        // ⚠ THE TEST ABOVE CANNOT CATCH A MISSING RENORMALISATION. Its two keys are the same rotation
+        // with flipped signs, so after the sign fix the blend is exact and already unit length -- dropping
+        // the normalise passed all 45 tests. Two rotations 90 degrees apart is what exposes it: a straight
+        // componentwise average of those has length cos(45) = 0.924, which would scale the pose.
+        [Fact]
+        public void BlendingTwoDifferentRotationsStaysUnitLength()
+        {
+            // identity -> 90 degrees about Z
+            var tr = One(SixTrack((0, 100, 0, 0, 4096), (100, 50, 0, 2896, 2896)));
+            for (int t = 0; t <= 100; t += 10)
+                Assert.Equal(1f, tr.Sample(t).QuatLength(), 3);
+            Assert.InRange(tr.Sample(50).QuatLength(), 0.999f, 1.001f);
+        }
+
+        [Fact]
+        public void AZeroDurationKeyIsNotDividedBy()
+        {
+            var tr = One(SixTrack((10, 0, 100, 0, 4096), (10, 0, 200, 0, 4096)));
+            Assert.Equal(-1, tr.BlendWeight(10));      // no span contains anything
+            Assert.Equal(100, tr.Sample(10).Tx);       // and sampling does not throw
+        }
+
     }
 }
