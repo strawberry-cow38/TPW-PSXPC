@@ -1464,6 +1464,37 @@ static class Program
 
     /// <summary>Header +0x00 and the keys' end time for every sub-mesh of one entry, so a measured
     /// on-screen period can be tested against both readings of the cycle.</summary>
+    /// <summary>Does a track's LAST key duplicate its FIRST? The game's handler reads key[count] --
+    /// one past the last -- so the array may carry a loop-closing sentinel this parser stops before.</summary>
+    static int KeyEnds(GazArchive g, int entry, int sub)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            if (!c.TryParseMesh(bytes, sub, out var m, out _)) return 1;
+            int shown = 0, dup = 0, timed = 0;
+            foreach (var tr in m.Tracks)
+            {
+                if (tr.Keys == null || tr.Keys.Length < 2) continue;
+                timed++;
+                var a = tr.Keys[0];
+                var z = tr.Keys[tr.Keys.Length - 1];
+                bool same = a.Qx == z.Qx && a.Qy == z.Qy && a.Qz == z.Qz && a.Qw == z.Qw &&
+                            a.Tx == z.Tx && a.Ty == z.Ty && a.Tz == z.Tz;
+                if (same) dup++;
+                if (shown++ < 4)
+                    Console.WriteLine($"  track type {tr.Type} keys {tr.Keys.Length}: " +
+                                      $"first t={a.Time} q=({a.Qx},{a.Qy},{a.Qz},{a.Qw})  " +
+                                      $"last t={z.Time} q=({z.Qx},{z.Qy},{z.Qz},{z.Qw})  {(same ? "SAME POSE" : "different")}");
+            }
+            Console.WriteLine($"{dup} of {timed} tracks end on a duplicate of their first key");
+            return 0;
+        }
+        return 1;
+    }
+
     static int AnimHeaders(GazArchive g, int entry)
     {
         foreach (var e in g.Entries)
@@ -1723,6 +1754,8 @@ static class Program
             int pdAt = Array.IndexOf(args, "--posedelta");
             if (pdAt >= 0 && pdAt + 2 < args.Length)
                 return PoseDelta(g, int.Parse(args[pdAt + 1]), int.Parse(args[pdAt + 2]));
+            int keAt = Array.IndexOf(args, "--keyends");
+            if (keAt >= 0 && keAt + 2 < args.Length) return KeyEnds(g, int.Parse(args[keAt + 1]), int.Parse(args[keAt + 2]));
             int ahAt = Array.IndexOf(args, "--animheaders");
             if (ahAt >= 0 && ahAt + 1 < args.Length) return AnimHeaders(g, int.Parse(args[ahAt + 1]));
             int fgAt = Array.IndexOf(args, "--facegroup");

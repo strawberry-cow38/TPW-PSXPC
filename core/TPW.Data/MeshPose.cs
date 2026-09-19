@@ -58,9 +58,21 @@ namespace TPW.Data
         /// frames 134 and 238), so this is not a case of the cloth being driven by something else while
         /// the body animates. One clock, smooth, and we cannot reproduce it yet.
         ///
-        /// So something in the model above is wrong -- most likely how the LAST key is evaluated, or a
-        /// per-key duration doing work this reader has not accounted for. Whoever picks it up: the
-        /// contradiction is the lead, and "interpolate across the wrap" is already excluded.</summary>
+        /// ⭐ THE LEAD, and it is specific: BOTH handlers read KEY[COUNT] -- one record PAST the last
+        /// key this parser reads. Type 0 at 0x8002cdac computes count * 0x24 and type 6 at 0x8002d95c
+        /// computes count * 20, each added to the key base at track+8, then loads the halfword there and
+        /// compares it against the current time. Those strides are 36 and 20 bytes, which match this
+        /// project's own decode of those types exactly (4-byte header plus two blocks, and plus one),
+        /// so the arithmetic is not being misread.
+        ///
+        /// If that extra record carries a POSE rather than just a time, the game blends the last real
+        /// key into it -- and if it holds key[0]'s pose, the loop closes smoothly and this whole
+        /// contradiction dissolves. That is the thing to check: read the bytes at
+        /// trackBase + 8 + count * stride and compare them against key[0].
+        ///
+        /// ⚠ Do not test this the way I did first. Comparing our OWN first and last keys says nothing:
+        /// they are keys[0] and keys[count-1], and the record in question is keys[count], which this
+        /// parser never reads. One of 18 tracks matching was a coincidence, not evidence.</summary>
         public static int AnimationLength(Mesh mesh)
         {
             int end = 0;
