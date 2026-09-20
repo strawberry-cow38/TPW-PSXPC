@@ -813,7 +813,10 @@ static class Program
         return 0;
     }
 
-    static int ModelAtlas(DiscReader disc, int want, string outPath)
+    /// <summary>⚠ `want` is a BROWSER INDEX, not an archive entry, and the two are nowhere near each other
+    /// (browser #220 is entry 135). Pass `wantEntry` to select by entry instead, which is what anyone
+    /// chasing a specific ride actually has.</summary>
+    static int ModelAtlas(DiscReader disc, int want, string outPath, int wantEntry = -1)
     {
         var g = Archive(disc);
         if (g == null) return 1;
@@ -821,12 +824,13 @@ static class Program
         int index = 0;
         foreach (var e in g.Entries)
         {
+            if (wantEntry >= 0 && e.Index != wantEntry) { }
             var bytes = g.Read(e);
             if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
             for (int i = 0; i < c.SubCount; i++)
             {
                 if (!c.TryParseMesh(bytes, i, out var m, out _) || m.Faces.Count == 0) continue;
-                if (index++ != want) continue;
+                if (wantEntry >= 0 ? e.Index != wantEntry : index++ != want) continue;
                 var t = ModelTexturing.Build(m, sheets);
                 // Keep only the texels some face actually samples (inside its UV triangle); everything else is
                 // greyed out. Transparent texels that faces DO sample stay transparent, so they show as holes.
@@ -969,6 +973,38 @@ static class Program
                 }
         }
         return 0;
+    }
+
+    /// <summary>How one mesh's faces were textured: the matcher's own verdict counts, and every face it
+    /// could not place inside a sprite. Those are the faces that streak — a face whose UVs fall outside any
+    /// sprite of the page samples whatever else is on that page.</summary>
+    static int FaceMatch(GazArchive g, int entry, int sub)
+    {
+        if (g == null) return 1;
+        var sheets = TextureSheet.FindAll(g);
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) return 1;
+            if (!c.TryParseMesh(bytes, sub, out var m, out string err)) { Console.WriteLine(err); return 1; }
+            var tex = ModelTexturing.Build(m, sheets);
+            Console.WriteLine($"entry {entry} sub {sub}: {m.Faces.Count} faces, main sheet #{tex.MainSheetEntry}");
+            Console.WriteLine($"  unique {tex.Unique}  ambiguous {tex.Ambiguous}  loose {tex.Loose}  unmatched {tex.Unmatched}");
+            int shown = 0;
+            for (int f = 0; f < m.Faces.Count && shown < 24; f++)
+            {
+                if (tex.FaceTile.Length > f && tex.FaceTile[f] >= 0) continue;
+                var fa = m.Faces[f];
+                int lu = Math.Min(fa.U0, Math.Min(fa.U1, fa.U2)), hu = Math.Max(fa.U0, Math.Max(fa.U1, fa.U2));
+                int lv = Math.Min(fa.V0, Math.Min(fa.V1, fa.V2)), hv = Math.Max(fa.V0, Math.Max(fa.V1, fa.V2));
+                Console.WriteLine($"  face {f,4}: page {fa.TPage:X4} clut {fa.Clut:X4} u {lu}..{hu} v {lv}..{hv}");
+                shown++;
+            }
+            return 0;
+        }
+        Console.WriteLine($"no entry {entry}");
+        return 1;
     }
 
     static int ModelTextures(DiscReader disc)
@@ -2305,6 +2341,13 @@ static class Program
             // --model-textures: do the meshes draw from the texture sheets? A face names a page and a palette;
             // count the faces whose palette is one a sheet's own sprite table lists, on a page of that same sheet.
             if (Array.IndexOf(args, "--model-textures") >= 0) return ModelTextures(disc);
+            // --facematch E [SUB]: how ONE mesh's faces were textured, and which ones the matcher could not
+            // place. The whole-disc report only lists the largest meshes, so a streaking face on a specific
+            // ride is invisible in it.
+            int fmAt2 = Array.IndexOf(args, "--facematch");
+            if (fmAt2 >= 0 && fmAt2 + 1 < args.Length)
+                return FaceMatch(Archive(disc), int.Parse(args[fmAt2 + 1]),
+                                 fmAt2 + 2 < args.Length && int.TryParse(args[fmAt2 + 2], out int fs) ? fs : 0);
             if (Array.IndexOf(args, "--names") >= 0) return Names(disc);
             // --music DIR: every module rebuilt as a standard .xm with its bank's waveforms, for any tracker.
             int musicAt = Array.IndexOf(args, "--music");
@@ -2397,7 +2440,13 @@ static class Program
             if (groundAt >= 0 && groundAt + 3 < args.Length)
                 return Ground(disc, int.Parse(args[groundAt + 1]), int.Parse(args[groundAt + 2]), args[groundAt + 3]);
             int atlasAt = Array.IndexOf(args, "--model-atlas");
-            if (atlasAt >= 0 && atlasAt + 2 < args.Length) return ModelAtlas(disc, int.Parse(args[atlasAt + 1]), args[atlasAt + 2]);
+            if (atlasAt >= 0 && atlasAt + 2 < args.Length)
+            {
+                string sel = args[atlasAt + 1];
+                return sel.StartsWith("e")
+                    ? ModelAtlas(disc, -1, args[atlasAt + 2], int.Parse(sel.Substring(1)))
+                    : ModelAtlas(disc, int.Parse(sel), args[atlasAt + 2]);
+            }
 
             // --advisor [dir] [--clip B:C,...]: find every clip in the advisor's speech file, print what was found,
             // and write the named clips (block:channel) as WAVs for a human to listen to.
