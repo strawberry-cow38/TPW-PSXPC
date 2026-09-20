@@ -289,6 +289,35 @@ namespace TPWGodot
         /// <summary>Which row the pointer is over, or -1. The game highlights a row and takes CROSS on it.</summary>
         public int ContextPick = -1;
 
+        /// <summary>The context list's geometry, in PSX units. ⭐ ONE COPY, used by the painter AND by the
+        /// hit test below — a menu whose drawn rows and clickable rows come from two sets of numbers goes
+        /// wrong the first time either is touched.</summary>
+        public const int ContextRowPitch = 14, ContextPadY = 6, ContextWidth = 180;
+
+        /// <summary>Which row a point in SCREEN pixels is over, or −1 for none — including a point inside the
+        /// menu's padding, which is the menu but not a row. Mirrors PaintContext's mapping exactly: the
+        /// anchor comes back into PSX space through the same divisions.</summary>
+        public int ContextRowAt(Vector2 screen)
+        {
+            if (ContextRows == null || ContextRows.Count == 0) return -1;
+            float ax = ContextAt.X / Sx, ay = ContextAt.Y / Sy;      // the menu's own corner, PSX units
+            float px = screen.X / Sx, py = screen.Y / Sy;
+            if (px < ax || px > ax + ContextWidth) return -1;
+            float top = ay + ContextPadY;
+            int row = (int)((py - top) / ContextRowPitch);
+            return py < top || row < 0 || row >= ContextRows.Count ? -1 : row;
+        }
+
+        /// <summary>Whether a point in SCREEN pixels is anywhere over the open context list, padding included.</summary>
+        public bool ContextHit(Vector2 screen)
+        {
+            if (ContextRows == null || ContextRows.Count == 0) return false;
+            float ax = ContextAt.X / Sx, ay = ContextAt.Y / Sy;
+            float px = screen.X / Sx, py = screen.Y / Sy;
+            return px >= ax && px <= ax + ContextWidth
+                && py >= ay && py <= ay + ContextRows.Count * ContextRowPitch + ContextPadY * 2;
+        }
+
         /// <summary>The list, drawn as the game draws one (findings/panel.md §1): a framed box with its rows
         /// centred and the block centred vertically, pitch = line height + 2, the picked row bright and the
         /// rest dim, and "Not Available" when it is empty.
@@ -299,9 +328,9 @@ namespace TPWGodot
         void PaintContext(CanvasItem on)
         {
             if (ContextRows == null || ContextRows.Count == 0) return;
-            const int rowPitch = 14, padY = 6, width = 180;
             int rows = Math.Max(1, ContextRows.Count);
-            int h = rows * rowPitch + padY * 2;
+            int h = rows * ContextRowPitch + ContextPadY * 2;
+            const int width = ContextWidth;
             // ContextAt arrives in SCREEN pixels (the caller has a mouse, not a PSX pen), so it comes back
             // into PSX space here, where every other coordinate in this file already lives.
             int px = (int)(ContextAt.X / Sx), py = (int)(ContextAt.Y / Sy);
@@ -314,7 +343,7 @@ namespace TPWGodot
             for (int i = 0; i < ContextRows.Count; i++)
             {
                 var c = Psx(i == ContextPick ? ((byte)0x80, (byte)0x80, (byte)0x80) : ((byte)0x40, (byte)0x40, (byte)0x40));
-                Text(on, ContextRows[i], px + width / 2, py + padY + i * rowPitch + rowPitch - 2, 1, false, c);
+                Text(on, ContextRows[i], px + width / 2, py + ContextPadY + i * ContextRowPitch + ContextRowPitch - 2, 1, false, c);
             }
         }
 

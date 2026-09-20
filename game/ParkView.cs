@@ -2856,6 +2856,10 @@ void fragment() {
             }
             if (_placing >= 0) UpdatePlacementGhost();
             float dt = (float)delta;
+            // ⚠ THE KEYBOARD IS POLLED, SO THE MODAL GATE IN _UnhandledInput CANNOT SEE IT. The mouse is
+            // event-driven and stops at that gate; these keys are read straight from the device every frame,
+            // so they need their own check or the camera drives around behind a panel that covers the screen.
+            if (_panelFor != null || _contextFor != null) return;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
             if (Input.IsKeyPressed(Key.S) || Input.IsKeyPressed(Key.Down)) move.Y += 1;
@@ -2894,9 +2898,73 @@ void fragment() {
             if (changed) UpdateCamera();
         }
 
+        /// <summary>Input while the attraction panel or the context list is up. Returns true when the event
+        /// has been dealt with and must not reach the park.
+        ///
+        /// ⚠ EVERY mouse event returns true, not just the ones that do something. A click on the panel's
+        /// background is still a click on the panel; letting the unhandled ones through is exactly the
+        /// bug this exists to stop.</summary>
+        bool ModalInput(InputEvent e)
+        {
+            if (e is InputEventMouseMotion mm)
+            {
+                _hud.ContextPick = _contextFor != null ? _hud.ContextRowAt(mm.Position) : -1;
+                return true;
+            }
+            if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape })
+            {
+                CloseModal();
+                return true;
+            }
+            if (e is not InputEventMouseButton { Pressed: true } mb) return false;
+
+            // The right button closes, the way CIRCLE does (0x80089010's logical table, panel.md §0).
+            if (mb.ButtonIndex == MouseButton.Right) { CloseModal(); return true; }
+            if (mb.ButtonIndex != MouseButton.Left) return true;
+
+            if (_contextFor != null)
+            {
+                int row = _hud.ContextRowAt(mb.Position);
+                if (row >= 0)
+                {
+                    var cmds = ContextCommands(_contextFor);
+                    if (row < cmds.Count) _contextChose = cmds[row];
+                    CloseModal();
+                }
+                else if (!_hud.ContextHit(mb.Position)) CloseModal();   // clicking away dismisses it
+                return true;
+            }
+            return true;    // the panel fills the screen: every click on it belongs to it
+        }
+
+        /// <summary>The command the context list was last used to pick, for the readout and for tests. The
+        /// commands themselves are not wired yet — see findings/panel.md §3 for what each one does.</summary>
+        public int ContextChose => _contextChose;
+        int _contextChose = -1;
+
+        void CloseModal()
+        {
+            _panelFor = null;
+            _contextFor = null;
+            _contextAt = null;
+            _hud.ContextPick = -1;
+            RefreshInfo();
+        }
+
         public override void _UnhandledInput(InputEvent e)
         {
             if (!Visible || _map == null) return;
+
+            // ⭐⭐ THE PANEL IS A MODAL AND MUST EAT THE MOUSE. In the game it is a blocking task, not an
+            // overlay (findings/panel.md §0) — the park gets no input at all while it is up. The port drew it
+            // as an overlay and left the park listening underneath, so a click meant for the panel also
+            // placed an attraction, moved the camera or laid a path behind it. Nothing below this line may
+            // see a mouse event while a panel or a context list is open.
+            if (_panelFor != null || _contextFor != null)
+            {
+                if (ModalInput(e)) return;
+            }
+
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.G })
             { GameCamera = !GameCamera; return; }
             // Attraction placement: Tab opens the picker; while placing, , and . turn it a quarter each way and R turns
