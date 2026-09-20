@@ -677,13 +677,29 @@ kinds **40 to 51** are the big family, and for those it nudges the point by the 
 low two bits — dir 0 → x−1, dir 1 → x−1 z−2, dir 2 → z−1, dir 3 → x−2 z−1 — which is a 2-tile piece
 being placed by its corner. Everything else goes in unmoved.
 
+### What the descriptor's two bytes actually do (READ)
+⚠ **+6 IS NOT A MODEL INDEX — IT IS THE PIECE'S TURN.** 0x800A4F34 hands the byte to slot 18 of the piece's
+class record (0x800E5C90, a proper 8-byte-per-slot vtable whose slot 1 is the constructor that writes it),
+and slot 18 is `0x80063294` — three instructions: `sb a1, 108(a0)`. It lands at **piece +0x6C**, and its
+consumer (0x80062BB8) reads it and branches: **0 or 2 → the record's WIDTH (0x8006A798), 1 or 3 → its
+DEPTH**. That is a rotation, which is also why every group of four carries a permutation of 0..3 rather
+than four different numbers.
+
+⭐ **+1, THE CLASS, IS WHAT PICKS THE MESH.** Further down the same routine: for `class == 11` or
+`class == 99` the piece gets **nothing** (those two draw no model), and otherwise it calls
+`0x800A6088(owner, class)`, which is four instructions — `visual = owner[0xDC + class × 4]` — and the
+result is stowed at **piece +0x4C** by 0x800A61C0. The owner comes from 0x80031114 (a dereference of the
+piece's +0x18 and 0x800307DC), so the mesh a piece draws is **the owner's class-indexed model slot**.
+
+⚠ What that owner's +0xDC table is filled from is NOT read yet, and it is the one thing still between the
+port and drawing the real pieces. It is a LIST rather than a flat array where other code touches it
+(0x8009FD48 passes `s5+0xDC` to 0x800A0ACC/0x800A0AC4), so "class indexes the ride's sub-models in order"
+is a GUESS and an untested one.
+
 ⚠ Two things that follow from the table and are NOT settled. With the window at entry 36 or 40, kinds
 40..51 index entries 76..91, and the table stops at 79 — so either those two branches never see a big
-kind, or the first global is not what it looks like. And **which mesh "model 0..3" means is still open**:
-0x800A4F34 hands the byte to a function off the piece's class record (`+0x90` an offset, `+0x94` the
-function) and that call has not been followed. A coaster's own archive entry does carry the candidates
-(Chac Atak, entry 212: a station, a sloped slab, a pylon, a cube block, an open trough, a pyramid cap,
-then four cars), but which four of those are models 0..3 is a guess until that function is read.
+kind, or the first global is not what it looks like. And the mesh comes from the CLASS, not
+from +6 — see the section above, which followed that call.
 
 ⚠ Also not traced: whether the bill is the confirm's `unit × (pieces − 4)` or the per-press charge.
 What is known: the piece price is `defPrice(8, kind)` and the charge is `unit × (pieces − 4)`, or − 5
