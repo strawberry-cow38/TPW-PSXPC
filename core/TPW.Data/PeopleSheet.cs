@@ -48,10 +48,27 @@ namespace TPW.Data
         /// entries 272, 272, 273, 273, 270, 270, 271, 271. A guest's type byte indexes this directly.</summary>
         public static readonly int[] GuestBlocks = { 0, 0, 1, 1, 2, 2, 3, 3 };
 
-        /// <summary>The staff of every world (263, 264, 266, 274), as indices into <see cref="Blocks"/>.</summary>
+        /// <summary>The staff of every world (263, 264, 266, 274), as indices into <see cref="Blocks"/>.
+        /// ⚠ USE THE NAMED ONES BELOW, NOT THIS IN ENUM ORDER — see <see cref="Mechanic"/>.</summary>
         public static readonly int[] StaffBlocks = { 8, 9, 10, 11 };
 
-        /// <summary>The costumed character each world has one of (267, 265, 259, 275), by world.</summary>
+        /// <summary>Which sprite block each job wears (tinyclaw, read off the game): **263 mechanic, 264
+        /// guard, 266 cleaner, 274 researcher**, as indices into <see cref="Blocks"/>.
+        ///
+        /// ⚠ NAMED BECAUSE THE ORDER IS A TRAP. These are not in job order, and code that indexed
+        /// <see cref="StaffBlocks"/> by an enum happened to be right for the mechanic and the cleaner while
+        /// silently drawing a GUARD as a researcher — the kind of wrong that looks fine until somebody knows
+        /// the uniforms. Say the job, never the position.
+        ///
+        /// ⚠ AND THERE ARE FOUR OUTFITS FOR FIVE JOBS: an entertainer is not uniformed at all. Theirs is the
+        /// per-world costume in <see cref="CostumeBlocks"/>.</summary>
+        public const int Mechanic = 8, Guard = 9, Cleaner = 10, Researcher = 11;
+
+        /// <summary>The costume each world has one of (267, 265, 259, 275), by world — the ENTERTAINER's
+        /// outfit, and the one a guest takes on after buying from a costume shop (master: "entertainers are
+        /// pictured here. those costumed guests. when guests buy costumes from costume shops they get that
+        /// appearance"). It is a per-world look rather than a per-job uniform, which is why four uniforms
+        /// cover five jobs.</summary>
         public static readonly int[] CostumeBlocks = { 4, 5, 7, 6 };
 
         readonly TextureSheet _sheet;
