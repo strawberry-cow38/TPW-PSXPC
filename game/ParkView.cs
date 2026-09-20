@@ -346,6 +346,7 @@ namespace TPWGodot
             _guests?.Clear();
             _guests = new ParkGuests(map, this);
             _guestSprites ??= GuestSprites.From(_modelSheets);
+            _guestSprites?.SetCommonSheet(_commonSheet);
             var cli = System.Environment.GetCommandLineArgs();
             GuestSprites.Debug = Array.IndexOf(cli, "--guest-debug") >= 0;
             _cameraDebug = Array.IndexOf(cli, "--camera-debug") >= 0;
@@ -1119,6 +1120,8 @@ namespace TPWGodot
             + $"\n{_guests.QueueWaitReport()}"
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"
             + (_guests.HiddenGuests != (_guests.Rides?.Totals().Riding ?? 0) ? " ⚠ SWALLOWED GUESTS" : "")
+            + $"; stale queue purpose {_guests.StaleQueuePurpose}"
+            + (_guests.StaleQueuePurpose > 0 ? " ⚠ THESE WILL FREEZE" : "")
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
@@ -1496,6 +1499,31 @@ namespace TPWGodot
                 if (bone < 0 || bone >= pose.Bones.Length) continue;
                 var b = pose.Bones[bone];
                 var seat = xform * ((new Vector3(b.X, b.Y, -b.Z) - centre) * scale);
+                // ⭐ WHICH HEAD, FROM THE SEAT'S OWN ORIENTATION. The original composes R = Mcam.R x Bone.R
+                // and reads three angles off it: facing = ratan2(R31, R33), band = asin(-R32), roll =
+                // ratan2(R12, R22) (findings/rider-positions.md §8.4). Rewritten here in Godot's frame,
+                // with every sign traced rather than guessed:
+                //   * the model->Godot map negates z, so a bone axis (x,y,z) is (x, y, -z) here;
+                //   * Godot's camera basis Z points TOWARD the viewer, PSX camera z points INTO the screen,
+                //     so psx_z(v) = -Dot(v, camZ);
+                //   * facing = atan2(R31, R33) + half turn, and R31/R33 are both psx_z of a bone axis, so
+                //     the two negations cancel the half turn: atan2(Dot(sx, camZ), Dot(sz, camZ));
+                //   * band's -R32 is psx_z of the seat's UP negated, i.e. +Dot(sy, camZ) -- how far the
+                //     seat's up axis leans toward the viewer, which is the elevation the bands mean;
+                //   * roll's R22 is the psx_y of the seat's up, and psx y is DOWN, hence the minus.
+                // ⚠ The handedness conversion is the part that can be plausibly wrong, so this is checked
+                // by looking at the picture, not by re-reading the algebra.
+                var cam = _camera.GlobalTransform.Basis;
+                var seatBasis = xform.Basis * new Basis(
+                    new Vector3(b.R.M00, b.R.M10, -b.R.M20),
+                    new Vector3(b.R.M01, b.R.M11, -b.R.M21),
+                    new Vector3(b.R.M02, b.R.M12, -b.R.M22));
+                float lean = Mathf.Clamp(seatBasis.Y.Normalized().Dot(cam.Z), -1f, 1f);
+                int a4096 = (int)Math.Round(Mathf.Asin(lean) / Mathf.Tau * 4096f);
+                int band = Math.Clamp((a4096 + 256) >> 9, 0, 2);
+                int yaw = (int)Math.Round(Mathf.Atan2(seatBasis.X.Dot(cam.Z), seatBasis.Z.Dot(cam.Z)) / Mathf.Tau * 4096f);
+                int facing = ((yaw + 256) >> 9) & 7;
+                float roll = Mathf.Atan2(seatBasis.Y.Dot(cam.X), -seatBasis.Y.Dot(cam.Y));
                 // ⚠ FACING IS THE ONE PART NOT TAKEN FROM THE GAME YET. The original picks the sprite from
                 // the octant of the COMPOSED camera x ride x bone rotation; this faces each rider away from
                 // the ride's middle, which agrees for anything that spins and is a stand-in for anything
@@ -1503,7 +1531,7 @@ namespace TPWGodot
                 // axes the game calls forward.
                 var outward = seat - hub;
                 if (outward.LengthSquared() < 1e-6f) outward = xform.Basis.Z;
-                _guests.DrawRider(riders[i], seat, outward.Normalized());
+                _guests.DrawRiderHead(riders[i], seat, facing, band, roll, outward.Normalized());
                 if (_logRides && _riderLogTick % 25 == 0)
                     GD.Print($"[tpw] rider {i} of {a.Rec.Entry} -> seat bone {bone} at {seat} (tick {tick})");
             }
@@ -3005,7 +3033,14 @@ void fragment() {
         ParkHud _hud;
 
         /// <summary>Give the HUD the common sheet, the executable's tables and the language's strings.</summary>
-        public void SetHud(TextureSheet common, byte[] exe, StringTable strings) => _hud?.Setup(common, exe, strings);
+        public void SetHud(TextureSheet common, byte[] exe, StringTable strings)
+        {
+            _hud?.Setup(common, exe, strings);
+            // Riders are heads out of this same sheet, so the guests need it too (GuestSprites.SetCommonSheet).
+            _guests?.SetCommonSheet(common);
+            _commonSheet = common;
+        }
+        TextureSheet _commonSheet;
 
         /// <summary>What the HUD shows of the park: the balance in pounds and the date (day and month 1-based).</summary>
         public void SetHudStatus(long pounds, int day, int month, int year)

@@ -204,6 +204,15 @@ namespace TPWGodot
                 _r.Riders.RemoveAt(0);
                 g.Hidden = false;
                 _place(g);                                    // puts it at the exit AND shows it again
+                // ⚠⚠ THE QUEUE PURPOSE OUTLIVES THE QUEUE, AND IT FREEZES THE GUEST. A guest joins a queue
+                // with purpose QueueWalk and nothing here cleared it, so it walked out of the ride's exit
+                // still wearing it -- and the arrival handler promotes ANY guest whose purpose is QueueWalk
+                // or QueueShuffle straight back to WaitingInQueue, a queue it is no longer in, with no
+                // target and no route. Master caught it with the hover readout, which said so in one line:
+                //   guest #7843: Wander for 40 ticks; purpose QueueWalk; no target ⚠ no route
+                // It is off the ride and done with the queue, so it is Finished: go back to standing around.
+                g.V.Purpose = Purpose.Finished;
+                g.V.InQueue = false;
                 g.V.SetState((VisitorState)22);              // 22: unloading, which applies the ride's effect
                 _r.Served++;
             }
