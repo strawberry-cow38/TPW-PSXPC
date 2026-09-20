@@ -1,0 +1,199 @@
+{
+  "scope": "Audit-tool mutations ONLY; no stinkbomb simulation established or implemented.",
+  "source_sha256": "a601a7a52bc497d2e5dd76b9572b2be9a2428383e38911eeced2d9560f2d047e",
+  "test_sha256": "267553a55dda1cbad8f41db2aa3076afeaa3632fef0acba634c7ff21684cdce0",
+  "unchanged_control": {
+    "status": "passed",
+    "executed": 8,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nOK\n"
+  },
+  "mutations": [
+    {
+      "name": "omit tail word",
+      "old": "len(data) - 3, 4",
+      "new": "len(data) - 4, 4",
+      "status": "killed",
+      "executed": 8,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_direct_calls_include_jumps_and_final_word",
+        "test_stinkbomb_audit.AuditTests.test_literal_callback_is_distinct_from_a_call"
+      ],
+      "output": "F.F.....\n======================================================================\nFAIL: test_direct_calls_include_jumps_and_final_word (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 14, in test_direct_calls_include_jumps_and_final_word\n    self.assertEqual([0x80010004, 0x8001000C], audit.direct_calls(data, target))\nAssertionError: Lists differ: [2147549188, 2147549196] != [2147549188]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n2147549196\n\n- [2147549188, 2147549196]\n+ [2147549188]\n\n======================================================================\nFAIL: test_literal_callback_is_distinct_from_a_call (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 20, in test_literal_callback_is_distinct_from_a_call\n    self.assertEqual([0x80010004], audit.literals(data, 0x8008C2B4))\nAssertionError: Lists differ: [2147549188] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n2147549188\n\n- [2147549188]\n+ []\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "ignore tail jumps",
+      "old": "w >> 26 in (2, 3)",
+      "new": "w >> 26 == 3",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_direct_calls_include_jumps_and_final_word"
+      ],
+      "output": "F.......\n======================================================================\nFAIL: test_direct_calls_include_jumps_and_final_word (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 14, in test_direct_calls_include_jumps_and_final_word\n    self.assertEqual([0x80010004, 0x8001000C], audit.direct_calls(data, target))\nAssertionError: Lists differ: [2147549188, 2147549196] != [2147549188]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n2147549196\n\n- [2147549188, 2147549196]\n+ [2147549188]\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "lose high target bits",
+      "old": "(pc & 0xF0000000)",
+      "new": "(pc & 0)",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_direct_calls_include_jumps_and_final_word"
+      ],
+      "output": "F.......\n======================================================================\nFAIL: test_direct_calls_include_jumps_and_final_word (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 14, in test_direct_calls_include_jumps_and_final_word\n    self.assertEqual([0x80010004, 0x8001000C], audit.direct_calls(data, target))\nAssertionError: Lists differ: [2147549188, 2147549196] != []\n\nFirst list contains 2 additional elements.\nFirst extra element 0:\n2147549188\n\n- [2147549188, 2147549196]\n+ []\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "ignore callback pointers",
+      "old": "if w == target",
+      "new": "if w == target + 4",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_literal_callback_is_distinct_from_a_call"
+      ],
+      "output": "..F.....\n======================================================================\nFAIL: test_literal_callback_is_distinct_from_a_call (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 20, in test_literal_callback_is_distinct_from_a_call\n    self.assertEqual([0x80010004], audit.literals(data, 0x8008C2B4))\nAssertionError: Lists differ: [2147549188] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n2147549188\n\n- [2147549188]\n+ []\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "miss ORI id loads",
+      "old": "w >> 26 in (9, 13)",
+      "new": "w >> 26 == 9",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_immediate_scan_has_a_negative_control"
+      ],
+      "output": ".F......\n======================================================================\nFAIL: test_immediate_scan_has_a_negative_control (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 26, in test_immediate_scan_has_a_negative_control\n    self.assertEqual([('0x80010000', 5), ('0x80010004', 6)],\nAssertionError: Lists differ: [('0x80010000', 5), ('0x80010004', 6)] != [('0x80010000', 5)]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n('0x80010004', 6)\n\n- [('0x80010000', 5), ('0x80010004', 6)]\n+ [('0x80010000', 5)]\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "accept nonliteral id arithmetic",
+      "old": "and (w >> 21) & 31 == 0 and",
+      "new": "and",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_immediate_scan_has_a_negative_control"
+      ],
+      "output": ".F......\n======================================================================\nFAIL: test_immediate_scan_has_a_negative_control (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 26, in test_immediate_scan_has_a_negative_control\n    self.assertEqual([('0x80010000', 5), ('0x80010004', 6)],\nAssertionError: Lists differ: [('0x80010000', 5), ('0x80010004', 6)] != [('0x80010000', 5), ('0x80010004', 6), ('0x80010008', 5)]\n\nSecond list contains 1 additional elements.\nFirst extra element 2:\n('0x80010008', 5)\n\n- [('0x80010000', 5), ('0x80010004', 6)]\n+ [('0x80010000', 5), ('0x80010004', 6), ('0x80010008', 5)]\n?                                      +++++++++++++++++++\n\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "restore bad size guard",
+      "old": "if off + 8 > len(data):",
+      "new": "if off + 0x40 > len(data):",
+      "status": "killed",
+      "executed": 8,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_record_exclusions_are_classified",
+        "test_stinkbomb_audit.AuditTests.test_short_record_uses_only_fields_actually_read"
+      ],
+      "output": "....F.F.\n======================================================================\nFAIL: test_record_exclusions_are_classified (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 47, in test_record_exclusions_are_classified\n    self.assertEqual('attraction', audit.record(data)[0])\nAssertionError: 'attraction' != 'truncated'\n- attraction\n+ truncated\n\n\n======================================================================\nFAIL: test_short_record_uses_only_fields_actually_read (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 36, in test_short_record_uses_only_fields_actually_read\n    self.assertEqual('attraction', kind)\nAssertionError: 'attraction' != 'truncated'\n- attraction\n+ truncated\n\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "exclude type 8",
+      "old": "1 <= kind <= 8",
+      "new": "1 <= kind < 8",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_record_exclusions_are_classified"
+      ],
+      "output": "....F...\n======================================================================\nFAIL: test_record_exclusions_are_classified (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 47, in test_record_exclusions_are_classified\n    self.assertEqual('attraction', audit.record(data)[0])\nAssertionError: 'attraction' != 'other_type'\n- attraction\n+ other_type\n\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "misread name offset",
+      "old": "text_id=word(data, off + 4)",
+      "new": "text_id=word(data, off)",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_short_record_uses_only_fields_actually_read"
+      ],
+      "output": "......F.\n======================================================================\nFAIL: test_short_record_uses_only_fields_actually_read (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 37, in test_short_record_uses_only_fields_actually_read\n    self.assertEqual(337, rec['text_id'])\nAssertionError: 337 != 2\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "case-sensitive names",
+      "old": "delinquen|litter|vomit|fart', re.I)",
+      "new": "delinquen|litter|vomit|fart')",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_raw_search_recovers_caption_and_symbol"
+      ],
+      "output": "...F....\n======================================================================\nFAIL: test_raw_search_recovers_caption_and_symbol (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 56, in test_raw_search_recovers_caption_and_symbol\n    self.assertEqual(['stink bomb', 'STR_ADVMES_ADD_PRANK_SBOMB'],\nAssertionError: Lists differ: ['stink bomb', 'STR_ADVMES_ADD_PRANK_SBOMB'] != ['stink bomb']\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n'STR_ADVMES_ADD_PRANK_SBOMB'\n\n- ['stink bomb', 'STR_ADVMES_ADD_PRANK_SBOMB']\n+ ['stink bomb']\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit last text entry",
+      "old": "for i in range(count):",
+      "new": "for i in range(count - 1):",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_text_offsets_and_last_entry"
+      ],
+      "output": ".......F\n======================================================================\nFAIL: test_text_offsets_and_last_entry (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 62, in test_text_offsets_and_last_entry\n    self.assertEqual([dict(id=0, offset=12, text='First'), dict(id=1, offset=18, text='Last')],\nAssertionError: Lists differ: [{'id[15 chars] 12, 'text': 'First'}, {'id': 1, 'offset': 18, 'text': 'Last'}] != [{'id[15 chars] 12, 'text': 'First'}]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n{'id': 1, 'offset': 18, 'text': 'Last'}\n\n- [{'id': 0, 'offset': 12, 'text': 'First'},\n?                                          ^\n\n+ [{'id': 0, 'offset': 12, 'text': 'First'}]\n?                                          ^\n\n-  {'id': 1, 'offset': 18, 'text': 'Last'}]\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "count Action8 as a post",
+      "old": "if op == 7:",
+      "new": "if op == 8:",
+      "status": "killed",
+      "executed": 8,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_stinkbomb_audit.AuditTests.test_rule_posts_have_a_nonposting_control"
+      ],
+      "output": ".....F..\n======================================================================\nFAIL: test_rule_posts_have_a_nonposting_control (test_stinkbomb_audit.AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-stink/tools/test_stinkbomb_audit.py\", line 72, in test_rule_posts_have_a_nonposting_control\n    self.assertEqual([dict(rule=0, word_offset=0, message=117)], r['posts'])\nAssertionError: Lists differ: [{'rule': 0, 'word_offset': 0, 'message': 117}] != [{'rule': 0, 'word_offset': 2, 'message': 118}]\n\nFirst differing element 0:\n{'rule': 0, 'word_offset': 0, 'message': 117}\n{'rule': 0, 'word_offset': 2, 'message': 118}\n\n- [{'message': 117, 'rule': 0, 'word_offset': 0}]\n?                ^                            ^\n\n+ [{'message': 118, 'rule': 0, 'word_offset': 2}]\n?                ^                            ^\n\n\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nFAILED (failures=1)\n"
+    }
+  ],
+  "final_unchanged_control": {
+    "status": "passed",
+    "executed": 8,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK\n"
+  },
+  "source_unchanged": true,
+  "killed": 12,
+  "survivors": 0,
+  "invalid": 0
+}
