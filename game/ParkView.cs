@@ -1075,7 +1075,15 @@ namespace TPWGodot
                         // report: the rider count, the status and the queue length all look healthy.
                         + QueueHeadReport(a)
                         + (a.Rec.Shop != null || a.Rec.SideShow != null
-                            ? $", sells at {Money.FromPounds(a.SalePrice)}: took {a.Takings} ({a.Profit} profit) "
+                            ? $", default {Money.FromPounds(a.Rec.Shop?.DefaultPrice ?? a.Rec.SideShow?.PlayPrice ?? 0)}"
+                              + $" cost {Money.FromPounds(a.Rec.Shop?.UnitCost ?? 0)}"
+                              // ⚠ THE BASE WANT, NOT A CEILING. unitCost x 1.25 is what a guest with an
+                              // average need and no happiness will pay; the real want is that times the
+                              // need factor and times (happiness + 100)/100, so a hungry, happy guest
+                              // pays a multiple of it. Labelling this a ceiling made every shop look
+                              // unsellable at its own default.
+                              + $" base want {Money.FromPounds((a.Rec.Shop?.UnitCost ?? 0) * 5 / 4)}"
+                              + $", sells at {Money.FromPounds(a.SalePrice)}: took {a.Takings} ({a.Profit} profit) "
                               + $"from {a.Served} sales over {a.Visits} visits, satisfaction {a.Satisfaction}"
                             : ""));
             }
