@@ -215,7 +215,39 @@ entry for type-0x12 objects alone). **0x233 "Upgrade 3" never appears** — the 
 2. **0x2E "Ticket Price" is the park gate's**, not a ride's. And **0x363 "Stock"** is the track ride's
 Upgrades/Addons readout, not a shop's.
 
-## 4c. ⚠ OPEN: the 19px overhang (flagged 2026-09-20, master could not confirm)
+## 4c. SETTLED on the console: there is no overhang (tinyclaw, 2026-09-20)
+
+**Measured off the real game's framebuffer**, pcsx_rearmed headless, PAL SCPH-5502, from
+`practice.state`. Route: from the park's root radial, **△ opens the catalogue list** (Rides 15, Track
+Rides 2, Roller Coasters 2, Shops 20, Sideshows 10, Features 45) and **✕ on that opens a panel** —
+the PURCHASE panel, which is the list route this report's §0 says shares the loop. Classified every
+pixel of six scanlines and one column:
+
+| axis | reading |
+|---|---|
+| horizontal | black 0..34, panel **35..474**, black 475..511 |
+| vertical | black 0..30, panel **31..221**, black 222..239 |
+
+⭐ **35 from the left and 37 from the right, exactly as §4c read them — and NOTHING IS DRAWN OUTSIDE
+THE BACKDROP.** Not one pixel left of x=35 on any row. So the rendered answer to the question is: the
+left frame does not poke out, and the border can be drawn.
+
+⚠ **AND IT SAYS THE FRAME RECTS ARE PANEL-RELATIVE.** The left frame's content begins at x=**51**,
+and 35 + 16 = 51. The three "proofs of absolute" in §1 — the name at 156, the slider labels at 370,
+the tab rows centred on 254 — are coincidences of a 512-wide layout, not evidence of the origin.
+
+⚠ **Honest limit:** this is the purchase panel, not the ride Details page, and the two may not share
+a rect set. What they do share is the backdrop, and the backdrop is what the question was about. A
+Details-page shot would still be worth having.
+
+The globals were also read out of live RAM at the same time and match the static reads exactly: the
+info frame (16, 64, 280, 152) at 0x80102B30, the control frame (280, 80, 180, 110) at 0x80102B40, and
+the two four-stop gradients immediately before them — a brown/tan ramp at 0x80102B0C and the grey
+0x20..0x80 backdrop ramp at 0x80102B1C. ⚠ There is **no word equal to 35** anywhere in
+0x80100000..0x80110000 of live RAM, which fits this report's own reading that a widget's rect lives at
++8/+10/+20/+22 on the object.
+
+## 4c-old. The question as it stood (kept for the reasoning)
 
 **The left info frame starts 19px LEFT of the panel's own rect** — frame x = 16 (global 0x80102B30),
 panel x = 35 (0x800446C4) — and both were re-read and are what the binary says. Asked master to check the
