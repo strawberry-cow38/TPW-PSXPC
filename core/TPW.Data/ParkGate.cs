@@ -116,14 +116,18 @@ namespace TPW.Data
             }
 
             /// <summary>Part i with the current angle applied, as the frame method passes it to 0x8006E3F8.</summary>
-            public GatePart Part(int i)
+            public GatePart Part(int i) => Part(i, (short)Angle);
+
+            /// <summary>Part i at any angle, so a host drawing faster than the game's 25 frames a second can put it
+            /// between two of them rather than stepping.</summary>
+            public GatePart Part(int i, int angle)
             {
                 var p = Gate.Parts[i];
                 return Gate.World switch
                 {
-                    0 or 1 => new GatePart(p.X, p.Y, p.Z, 0, i == 0 ? (short)Angle : 0x800 - (short)Angle, 0),
-                    2 => new GatePart(p.X, p.Y, p.Z, 0, 0, (short)Angle),
-                    _ => new GatePart(p.X, p.Y, p.Z, (short)Angle, 0, 0),
+                    0 or 1 => new GatePart(p.X, p.Y, p.Z, 0, i == 0 ? angle : 0x800 - angle, 0),
+                    2 => new GatePart(p.X, p.Y, p.Z, 0, 0, angle),
+                    _ => new GatePart(p.X, p.Y, p.Z, angle, 0, 0),
                 };
             }
         }

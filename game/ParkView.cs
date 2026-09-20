@@ -79,6 +79,8 @@ namespace TPWGodot
         TextureSheet _common;
         double _frameClock;
         int _gateAngleDrawn = int.MinValue;
+        /// <summary>The gate's swing at the last two park frames, to draw the angle between them.</summary>
+        int _gateAnglePrev, _gateAngleCur;
         /// <summary>Whether the park is open: the gates only open then (0x800541AC).</summary>
         public bool ParkOpen { get; set; }
         /// <summary>The material ground and scenery share; its scroll_rows advances one row per park frame.</summary>
@@ -278,6 +280,7 @@ namespace TPWGodot
             _map = map;
             _common = common;
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
+            _gateAnglePrev = _gateAngleCur = 0;
             _fx = new ParticleSystem();
             _openingFx.Clear();
             _pathMode = false; _runStart = null; _cursorTile = null; _cursorMesh.Mesh = null; _paths = null; _cursorPinned = false;
@@ -523,14 +526,14 @@ namespace TPWGodot
         }
 
         /// <summary>The gate's moving parts at the gate state's angle (ParkGate.State.Part), textured from the park atlas.</summary>
-        ArrayMesh GateMesh()
+        ArrayMesh GateMesh(int angle)
         {
             var both = new Buffers(); var single = new Buffers();
             float aw = _atlas.Image.Width, ah = _atlas.Image.Height;
             int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
             for (int i = 0; i < _gate.Gate.Parts.Length; i++)
             {
-                var part = _gate.Part(i);
+                var part = _gate.Part(i, angle);
                 foreach (var poly in _gateModel.Polygons)
                 {
                     var tex = _gateModel.Textures[poly.Texture];
@@ -1644,7 +1647,12 @@ void fragment() {
                     _gcam.Step(_map, frameTime);
                     TakeGameCamera();
                 }
-                _gate?.Update(frameTime, ParkOpen);
+                if (_gate != null)
+                {
+                    _gateAnglePrev = _gateAngleCur;
+                    _gate.Update(frameTime, ParkOpen);
+                    _gateAngleCur = (short)_gate.Angle;
+                }
                 if (_gate != null)
                     foreach (int i in _gate.TakeDueEffects())
                         if (i < _openingFx.Count && _openingFx[i].T != null)
@@ -1655,7 +1663,16 @@ void fragment() {
                 foreach (var t in _hoverAlso) _selection.Hover(TargetAt(t));
                 StepAttractions(frameTime);
             }
-            if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
+            // ⭐ THE GATE MOVES BETWEEN PARK FRAMES TOO. Its swing is worked out 25 times a second like everything
+            // else in the game, but the port draws far more often than that, and a gate stepping at 25 while the
+            // camera and the ride animations run at the window's rate reads as a low frame rate (master reported
+            // exactly that). So it is drawn at the angle it is passing through right now.
+            if (_gate != null)
+            {
+                float f = Mathf.Clamp((float)(_frameClock * ParticleSystem.FramesPerSecond), 0f, 1f);
+                int angle = Mathf.RoundToInt(Mathf.Lerp(_gateAnglePrev, _gateAngleCur, f));
+                if (angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(angle); _gateAngleDrawn = angle; }
+            }
             _selectionMesh.Mesh = SelectionMesh();
             PoseAttractions(_frameClock);
             _hud.Cost = PendingCost();
