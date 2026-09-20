@@ -2099,8 +2099,132 @@ static class Program
         return 0;
     }
 
+    /// <summary>A park the statistics can read, held still except for the calendar. Every answer is a
+    /// FIELD, so a test can say "a closed park with thirsty guests and no drinks shop" and then check that
+    /// the advisor says so, instead of hoping a live park wanders into the state.</summary>
+    sealed class SilentPark : IParkStatisticsWorld
+    {
+        public uint Day;
+        public bool Open, Statistics = true, Idle = true, QueueEmpty = true;
+        public int Guests;
+        public readonly List<ushort> Said = new();
+
+        public bool StatisticsEnabled => Statistics;
+        public bool AdvisorIdle => Idle;
+        public bool AdvisorQueueEmpty => QueueEmpty;
+        public bool ParkOpen => Open;
+        public uint TotalDays => Day;
+        public uint Month => Day / 30 % 12;
+        public uint Year => Day / 365;
+        public int VisitorCount => Guests;
+        public IEnumerable<Visitor> Visitors => Array.Empty<Visitor>();
+        public int LiveLitterCount => 0;
+        public readonly List<StatisticAttraction> Rides = new();
+        public IEnumerable<StatisticAttraction> Attractions => Rides;
+        public IEnumerable<StatisticDefinition> Definitions => Array.Empty<StatisticDefinition>();
+        public IEnumerable<StatisticStaff> Staff => Array.Empty<StatisticStaff>();
+        public int BalanceRaw => 50000;
+        public int MapWidthTiles => 128;
+        public int MapHeightTiles => 128;
+        public bool IsPathTile(int x, int y) => false;
+        public StaffKind? HeldStaffKind => null;
+        public bool MechanicsOnStrike => false;
+        public bool AnyResearchActive => false;
+        public int LastMonthWagesRaw => 0;
+        public int LastMonthIncomeRaw => 0;
+        public bool IsDefinitionAvailable(StatisticDefinition d) => true;
+        public int AvailableLevelCount(StatisticDefinition d) => 1;
+        public void PostMessage(ushort id) => Said.Add(id);
+        public void ApplyRuleAction8(short id) { }
+    }
+
+    /// <summary>Records what the advisor did with what the rules gave him.</summary>
+    sealed class Bench : IParkAdvisorHost
+    {
+        public int TicksLeft;
+        public readonly List<string> Captions = new();
+        public readonly List<int> Spoken = new();
+        public readonly List<byte> Gestures = new();
+        readonly Random _rng = new(1);
+
+        public bool VoicePlaying => TicksLeft > 0;
+        public void StopVoice() => TicksLeft = 0;
+        public void Speak(int line) { Spoken.Add(line); TicksLeft = 20; }
+        public void ShowCaption(int textId, byte param, uint value) => Captions.Add($"0x{textId:X3}");
+        public void HideCaption() { }
+        public int Random(int n) => _rng.Next(n);
+    }
+
+    /// <summary>Run a park forward and report what the advisor notices.
+    ///
+    /// ⭐⭐ IT TESTS ONE NAMED RULE, NOT "SOMETHING HAPPENED". Rule 0 fires when the calendar is past month
+    /// six AND the park is shut AND at least one ride is built, and it posts message 0 -- "People want to
+    /// come in but your park is closed." So the park is put in exactly that state and the test asks for
+    /// exactly that message. "The advisor said something" would have passed with the rules wired to a
+    /// timer; this cannot.
+    ///
+    /// ⭐ TWO CONTROLS, EACH REJECTING A DIFFERENT WRONG WIRING:
+    ///   OPEN   -- the same park with the gate open. Rule 0's second condition now fails, so message 0 must
+    ///             NOT appear. This is what fails if the port posts messages without testing conditions.
+    ///   OFF    -- the same closed park with the statistics flag cleared. NOTHING may be posted. This is
+    ///             what fails if the messages come from anywhere but the rules -- which is the bug being
+    ///             fixed here, where they came from nowhere at all and silence was the symptom.</summary>
+    static int Advisor(int days)
+    {
+        (int Posted, int Delivered, bool SaidZero, int Lines, int Distinct) Run(bool open, bool statistics)
+        {
+            var park = new SilentPark { Open = open, Guests = 40, Statistics = statistics };
+            park.Rides.Add(new StatisticAttraction(AttractionType.Ride, 0, AttractionStatus.Running));
+            var stats = new ParkStatistics(0, ParkStatisticRules.All);
+            var advisor = new ParkAdvisor();
+            if (!statistics) advisor.Flags &= ~AdvisorFlags.Statistics;
+            var bench = new Bench();
+            int seen = 0;
+            for (long tick = 0; tick < (long)days * ParkClock.TicksPerDay; tick++)
+            {
+                park.Day = (uint)(tick / ParkClock.TicksPerDay);
+                park.Idle = advisor.Idle;
+                park.QueueEmpty = advisor.QueueEmpty;
+                if (bench.TicksLeft > 0) bench.TicksLeft--;
+                advisor.Tick(1, bench, stats, park);
+                for (; seen < park.Said.Count; seen++) advisor.Post(park.Said[seen]);
+            }
+            return (park.Said.Count, advisor.Delivered, park.Said.Contains((ushort)0),
+                    bench.Spoken.Count, bench.Spoken.Distinct().Count());
+        }
+
+        var shut = Run(open: false, statistics: true);
+        var open = Run(open: true, statistics: true);
+        var off = Run(open: false, statistics: false);
+
+        Console.WriteLine($"{days} days ({(long)days * ParkClock.TicksPerDay} ticks), one ride built");
+        Console.WriteLine($"  shut, statistics on : {shut.Posted,3} posted, {shut.Delivered,3} delivered, "
+                          + $"{shut.Lines,3} lines ({shut.Distinct} distinct), message 0: {shut.SaidZero}");
+        Console.WriteLine($"  OPEN, statistics on : {open.Posted,3} posted, {open.Delivered,3} delivered, "
+                          + $"{open.Lines,3} lines ({open.Distinct} distinct), message 0: {open.SaidZero}"
+                          + "   <- control: rule 0's condition must fail");
+        Console.WriteLine($"  shut, statistics OFF: {off.Posted,3} posted, {off.Delivered,3} delivered, "
+                          + $"{off.Lines,3} lines ({off.Distinct} distinct), message 0: {off.SaidZero}"
+                          + "   <- control: nothing may be posted");
+
+        int bad = 0;
+        if (!shut.SaidZero) { Console.WriteLine("FAIL: rule 0 never fired on a shut park with a ride."); bad++; }
+        if (shut.Delivered == 0) { Console.WriteLine("FAIL: rules fired and the advisor delivered none."); bad++; }
+        if (open.SaidZero) { Console.WriteLine("FAIL: message 0 on an OPEN park. Conditions are not being tested."); bad++; }
+        if (off.Posted != 0) { Console.WriteLine("FAIL: the statistics-off control posted messages."); bad++; }
+        if (shut.Lines > 1 && shut.Distinct < 2)
+            { Console.WriteLine("FAIL: every take was the same line; the rotation is not turning."); bad++; }
+        Console.WriteLine(bad == 0 ? "PASS" : $"FAIL ({bad})");
+        return bad;
+    }
+
     static int Main(string[] args)
     {
+        int advisorAt = Array.IndexOf(args, "--advisor");
+        if (advisorAt >= 0)
+            return Advisor(advisorAt + 1 < args.Length && int.TryParse(args[advisorAt + 1], out int advisorDays)
+                           ? advisorDays : 60);
+
         // --gaz <file> [--mapping]: the archive reports on a FOLIO.GAZ already pulled off the disc, for a
         // machine that holds the archive but not the image. Same code from the archive down as the disc
         // route, so a pass here is a pass on the real thing. Exit code is the number of failed meshes.

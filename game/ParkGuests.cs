@@ -123,6 +123,11 @@ namespace TPWGodot
         /// rather than a scan: the entrance machine asks about a Visitor several times per guest tick.</summary>
         readonly Dictionary<Visitor, Guest> _byVisitor = new();
         readonly List<Staffer> _staff = new();
+
+        /// <summary>The park's people, for anything outside this class that needs to read them — the
+        /// advisor's statistics, which count visitors and staff by kind and grade.</summary>
+        public IEnumerable<Visitor> VisitorList { get { foreach (var g in _guests) yield return g.V; } }
+        public IEnumerable<StaffMember> StaffList { get { foreach (var s in _staff) yield return s.S; } }
         ParkStaffWorld _staffWorld;
         readonly Node3D _parent;
         readonly Random _rng;

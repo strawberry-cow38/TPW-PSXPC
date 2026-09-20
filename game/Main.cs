@@ -47,6 +47,7 @@ namespace TPWGodot
         readonly System.Random _rng = new();
         OptionButton _rate;
         MoviePlayer _player;
+        AdvisorVoice _advisorVoice;
         ParkView _park;
         Button _parkButton;
         OptionButton _parkChoice;
@@ -88,7 +89,7 @@ namespace TPWGodot
         string _autoLay, _autoPathCursor;
         /// <summary>From <c>--park-place=entry,x,z,rot;...</c>: attractions placed at load (footprint corner, quarter
         /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
-        string _autoPlace, _autoGhost, _autoDelete, _autoReplace, _autoEditQueue, _autoTile;
+        string _autoPlace, _autoGhost, _autoDelete, _autoReplace, _autoEditQueue, _autoTile, _autoSay;
         bool _logRides;
         int _forcedGuests = -1;
         string _autoHire;
@@ -485,6 +486,8 @@ namespace TPWGodot
             // world to enter yet, so for now they play from here: pick one, press play, any key skips.
             _player = new MoviePlayer();
             AddChild(_player);
+            _advisorVoice = new AdvisorVoice();
+            AddChild(_advisorVoice);
             _player.Finished += OnMovieFinished;
 
             // ⭐ THE BOOT CHAIN. Built here but not started until the self-test has run, so the legal
@@ -574,6 +577,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-lay=")) _autoLay = arg.Substring("--park-lay=".Length);
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg.StartsWith("--park-delete=")) _autoDelete = arg.Substring("--park-delete=".Length);
+                else if (arg.StartsWith("--advisor-say=")) _autoSay = arg.Substring("--advisor-say=".Length);
                 else if (arg.StartsWith("--park-replace=")) _autoReplace = arg.Substring("--park-replace=".Length);
                 else if (arg.StartsWith("--park-editqueue=")) _autoEditQueue = arg.Substring("--park-editqueue=".Length);
                 else if (arg.StartsWith("--park-tile=")) _autoTile = arg.Substring("--park-tile=".Length);
@@ -984,6 +988,19 @@ namespace TPWGodot
                     // one of them EDITS what those built. Ordered before the queue, --park-delete reported
                     // "nothing there" and --park-editqueue reported -1 — both of which read like a broken
                     // command rather than a command run too early. Twice, on two different hooks.
+                    // --advisor-say=ID[;ID...]: hand the advisor a message directly.
+                    // ⚠ THIS IS A WAY IN, NOT A SHORTCUT PAST THE MACHINE. It posts to the same queue the
+                    // rules post to and nothing else, so what follows -- the dedupe, the 50-tick arrival,
+                    // the caption, the take rotation, the statistics freezing while he talks -- is the real
+                    // path. It exists because the rules that fire early are rare: proving the port's wiring
+                    // by waiting for one means rendering tens of thousands of frames.
+                    if (_autoSay != null)
+                        foreach (var id in _autoSay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                            if (ushort.TryParse(id, out ushort said))
+                            {
+                                _park.Advisor.Post(said);
+                                GD.Print($"[tpw] --advisor-say {said}: queued");
+                            }
                     if (_autoDelete != null)
                         foreach (var del in _autoDelete.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
                         {
@@ -1157,6 +1174,13 @@ namespace TPWGodot
                 _park.NoGate = _noGate;
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe, _busPack);
                 _park.SetToolSounds(_toolSounds, _parkSounds, _uiSounds, _guestSounds);
+                // The advisor's voice, in the language the front end picked. ⚠ AFTER Load, like NoGate
+                // above: Load builds the advisor's world, and a delegate set before it would be dropped.
+                _advisorVoice.DiscPath = _hasAdvisor ? _data.SourcePath : null;
+                _advisorVoice.Language = _language;
+                _park.AdvisorSpeak = _advisorVoice.Speak;
+                _park.AdvisorStop = _advisorVoice.Stop;
+                _park.AdvisorVoicePlaying = () => _advisorVoice.Playing;
                 _park.SetHud(_commonSheet, _exe, _strings);
                 _park.SetBuildRig(v => _models != null && _models.TryGet(3, v, out var rig) ? rig : null);
                 _park.LogRides = _logRides;

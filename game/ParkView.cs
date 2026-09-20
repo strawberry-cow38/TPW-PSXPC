@@ -26,7 +26,7 @@ namespace TPWGodot
     /// identical to the disc copy, at 0x8017A5A8.
     ///
     /// Controls: WASD / arrows pan, Q/E turn, mouse wheel or +/- zoom, R/F tilt, T tile types, O scenery.</summary>
-    public partial class ParkView : Node3D
+    public partial class ParkView : Node3D, TPW.Sim.IParkAdvisorHost
     {
         MeshInstance3D _ground, _types, _scenery, _flags, _build, _cursorMesh;
         /// <summary>The path tool (right mouse button): a cursor on the ground under the mouse; press the left button
@@ -464,7 +464,30 @@ namespace TPWGodot
             // ⭐ The game's camera is the default, and this is the earliest it CAN be: the setter carries the
             // free camera's focus and turn across, so it needs both the map and the focus chosen just above.
             GameCamera = true;
+
+            // The advisor's world, built once the map exists because half of what it reads is the map.
+            _statistics = null;
+            _advisorWorld = new ParkAdvisorWorld(
+                () => _map, () => _bank, () => _finances,
+                () => (uint)ParkDay, () => ParkOpen,
+                () => _guests?.VisitorList ?? System.Linq.Enumerable.Empty<TPW.Sim.Visitor>(),
+                () => _attractionsPlaced.Select(a => new TPW.Sim.StatisticAttraction(
+                          a.Type, a.Rec.Entry, a.Status, (byte)a.Rec.FeatureFlags)),
+                StaffStats,
+                () => _attractions.Select(x => new TPW.Sim.StatisticDefinition(
+                          (TPW.Sim.AttractionType)x.Rec.Type, x.Rec.Entry)),
+                () => _advisor.Idle);
         }
+
+        /// <summary>The park's staff as the statistics want them. ⚠ Patrol areas are not modelled, so
+        /// HasPatrolArea is false for everyone — a stand-in, and named as one in ParkAdvisorWorld.Gaps.</summary>
+        IEnumerable<TPW.Sim.StatisticStaff> StaffStats()
+            => _guests == null ? System.Linq.Enumerable.Empty<TPW.Sim.StatisticStaff>()
+                               // ⚠ GRADE IS 0 FOR EVERYONE. The port's StaffMember has no pay grade at all,
+                               // so the five "grade percent" statistics (slots 40..44) all answer about a
+                               // park of untrained staff. Named in ParkAdvisorWorld.Gaps rather than left
+                               // to look like a measurement.
+                               : _guests.StaffList.Select(m => new TPW.Sim.StatisticStaff(m.Kind, 0));
 
         /// <summary>The ground: every quad textured from the atlas at the game's (u, v) on its page.</summary>
         static ArrayMesh GroundMesh(List<GroundQuad> quads, PageAtlas atlas, Scrolling scroll, Material mat)
@@ -2391,6 +2414,66 @@ namespace TPWGodot
         /// first word, which is also where its keys end: 61 ticks, 81 for variant 4, about a second at 25 frames a
         /// second). The game halves the time in one display mode (0x80053D98, mode 3), which nothing in this build
         /// calls the mode setter with.</summary>
+        /// <summary>⭐ THE ADVISOR'S ONE TICK. `ParkStatistics.Tick` refreshes one of the 72 slots per call
+        /// and, once the first 288-call sweep is done, runs ONE rule per call — so this belongs on the sim
+        /// tick and nowhere else. Until today nothing called it at all: the 72 statistics and 125 rules were
+        /// ported and tested and the park never ran them, which is why the advisor had nothing to say.</summary>
+        void StepAdvisor()
+        {
+            if (_advisorWorld == null || _map == null) return;
+            _statistics ??= new TPW.Sim.ParkStatistics(_advisorWorld.TotalDays, TPW.Sim.ParkStatisticRules.All);
+            // ⚠ ONE TICK PER CALL, NOT ONE PER ELAPSED TICK. The original reads a running counter and passes
+            // the difference (0x80013180), which is only ever 1 here because this loop IS the sim tick. The
+            // clamp in ParkAdvisor exists for the original's irregular caller and is inert for ours; if the
+            // advisor's arrival ever looks twice as fast as the console's, that counter is in FRAMES and
+            // this should pass 2. Nobody has watched it, so it passes what it can prove.
+            var was = _advisor.State;
+            _advisor.Tick(1, this, _statistics, _advisorWorld);
+            // The advisor changes state a handful of times per message, so logging every change is cheap and
+            // it is the only external sign of a machine whose whole job is to wait.
+            if (_advisor.State != was)
+                GD.Print($"[advisor] {was} -> {_advisor.State} (tick {_advisorTicks}, queue {(_advisor.QueueEmpty ? "empty" : "waiting")})");
+            _advisorTicks++;
+            // Whatever the rules posted this tick goes to the advisor, who decides when it is said.
+            while (_advisorWorld.TakeMessage() is { } id) _advisor.Post(id);
+            if (_hud != null) _hud.Messages = _advisor.Delivered;
+        }
+
+        // ── the advisor's host: how a message actually reaches the player ──────────────────────────────
+        /// <summary>⚠ FALSE WITHOUT A DISC, AND THAT IS LOAD-BEARING. `Speaking` lasts exactly as long as the
+        /// recording, so a park with no advisor audio moves him straight on to leaving — which is what the
+        /// original does with speech switched off, not a failure mode this port invented.</summary>
+        bool TPW.Sim.IParkAdvisorHost.VoicePlaying => AdvisorVoicePlaying?.Invoke() ?? false;
+        void TPW.Sim.IParkAdvisorHost.StopVoice() => AdvisorStop?.Invoke();
+        void TPW.Sim.IParkAdvisorHost.Speak(int line) => AdvisorSpeak?.Invoke(line);
+        void TPW.Sim.IParkAdvisorHost.HideCaption() { if (_hud != null) _hud.AdvisorCaption = null; }
+        int TPW.Sim.IParkAdvisorHost.Random(int n) => n <= 0 ? 0 : System.Random.Shared.Next(n);
+
+        void TPW.Sim.IParkAdvisorHost.ShowCaption(int textId, byte param, uint value)
+        {
+            // ⚠ THE PAYLOAD IS DROPPED, LOUDLY. 0x800141BC substitutes the message's two fields into the
+            // string; what its format codes are has not been read. No rule-posted message carries a payload
+            // (0x80014118 builds them with the present byte zero), so this is exact for everything the
+            // statistics can say and wrong for anything another system posts — hence the warning.
+            if (param != 0 || value != 0)
+                GD.PushWarning($"[advisor] message text {textId} has a payload ({param}, {value}) and no formatter");
+            string text = _catalogueNames?[textId];
+            if (_hud != null) _hud.AdvisorCaption = text;
+            GD.Print($"[advisor] {_advisor.State} says text 0x{textId:X3}: {text ?? "(no string table)"}");
+        }
+
+        /// <summary>Set by Main: play ADVISOR.TPW line n, stop it, and whether it is still running. Left
+        /// null the park is silent and the advisor simply mimes.</summary>
+        public System.Action<int> AdvisorSpeak;
+        public System.Action AdvisorStop;
+        public System.Func<bool> AdvisorVoicePlaying;
+
+        readonly TPW.Sim.ParkAdvisor _advisor = new();
+        long _advisorTicks;
+        public TPW.Sim.ParkAdvisor Advisor => _advisor;
+        TPW.Sim.ParkStatistics _statistics;
+        ParkAdvisorWorld _advisorWorld;
+
         void StepAttractions(int frameTime)
         {
             foreach (var a in _attractionsPlaced)
@@ -3215,6 +3298,7 @@ void fragment() {
                 _selection.Hover(hovered);
                 foreach (var t in _hoverAlso) _selection.Hover(TargetAt(t));
                 StepAttractions(frameTime);
+                StepAdvisor();
                 // ⚠ ONE CALL EACH, AND THEY ARE NOT THE SAME CLOCK IN THE ORIGINAL. The search runs
                 // once a VIDEO frame (0x800EC8C4 from the game-mode tick) and the guests move once a
                 // SIM tick; this loop is the sim tick, so the search currently gets half the slices it

@@ -26,6 +26,9 @@ namespace TPWGodot
         public long Pounds;
         public int Day = 1, Month = 1, Year = 2000;
         public int Messages;
+        /// <summary>What the advisor is saying, or null. Set from <see cref="TPW.Sim.ParkAdvisor"/>; a
+        /// message whose caption id is the no-text sentinel leaves this null and is spoken only.</summary>
+        public string AdvisorCaption;
         /// <summary>What the open tool is about to charge, in pounds; zero draws nothing.</summary>
         public int Cost;
 
@@ -55,7 +58,7 @@ namespace TPWGodot
             _top = Make(CanvasItemMaterial.BlendModeEnum.Mix);
             _sub.Paint = PaintRing;
             _add.Paint = PaintFlips;
-            _top.Paint = on => { PaintCount(on); PaintPanel(on); PaintContext(on); };
+            _top.Paint = on => { PaintCount(on); PaintAdvisor(on); PaintPanel(on); PaintContext(on); };
         }
 
         public void Setup(TextureSheet common, byte[] exe, StringTable strings)
@@ -381,6 +384,54 @@ namespace TPWGodot
         /// ⚠ THE FRAME IS THE FILL ONLY SO FAR. The game's frame is a gouraud quad UNDER sprite corners
         /// (0x169 + 0x148) and stretched edges (0x173, 0x161) — the gradient and the geometry here are the
         /// game's, the ornamental border is not drawn yet. It is the next thing, not a design choice.</summary>
+        /// <summary>The advisor's caption: his words across the bottom of the screen, wrapped.
+        ///
+        /// ⚠ THE BOX IS A STAND-IN AND THE WORDS ARE NOT. The string, when it appears, how long it stays and
+        /// when it is suppressed are all read (0x80013EFC, 0x80038C8C); the game's own text box is drawn by
+        /// 0x800385AC, which has not been disassembled, so its art is this file's invention. Wrapping is
+        /// this port's too — nothing says the original wraps rather than pre-splitting its strings.</summary>
+        void PaintAdvisor(CanvasItem on)
+        {
+            if (string.IsNullOrEmpty(AdvisorCaption) || _font == null) return;
+            var lines = Wrap(AdvisorCaption, AdvisorTextWidth);
+            int h = lines.Count * HudFont.LineHeight + AdvisorPadY * 2;
+            int py = ParkHudLayout.ScreenHeight - AdvisorBottomGap - h;
+            // ⚠ CENTRE ON THE WINDOW, NOT ON THE PSX RECT. The HUD anchors its corners to the screen's
+            // edges, so PSX x=256 is the middle of a 4:3 view and NOT the middle of a 16:9 one. The caption
+            // belongs under the park, so its centre is the window's, expressed back in PSX pixels for Text.
+            int cx = (int)(Screen.X / Sx) / 2;
+            float y = py * Sy, w = AdvisorWidth * Sx, hh = h * Sy, x = Screen.X / 2f - w / 2f;
+            on.DrawRect(new Rect2(x, y, w, hh), Rgb((0x10, 0x10, 0x18)) with { A = 0.82f });
+            on.DrawRect(new Rect2(x, y, w, Math.Max(1f, Sy)), Rgb((0xE7, 0x80, 0x1A)));
+            on.DrawRect(new Rect2(x, y + hh - Math.Max(1f, Sy), w, Math.Max(1f, Sy)), Rgb((0xE8, 0xCA, 0x2D)));
+            var white = Psx((0x80, 0x80, 0x80));
+            for (int i = 0; i < lines.Count; i++)
+                Text(on, lines[i], cx,
+                     py + AdvisorPadY + i * HudFont.LineHeight + HudFont.LineHeight - 3, 1, false, white);
+        }
+
+        const int AdvisorWidth = 424, AdvisorTextWidth = 404, AdvisorPadY = 5, AdvisorBottomGap = 16;
+
+        /// <summary>Greedy wrap at <paramref name="width"/> PSX pixels, measured with the game's own
+        /// advances. A single word wider than the line is left long rather than broken mid-word.</summary>
+        System.Collections.Generic.List<string> Wrap(string text, int width)
+        {
+            var lines = new System.Collections.Generic.List<string>();
+            var line = new System.Text.StringBuilder();
+            foreach (var word in text.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                string candidate = line.Length == 0 ? word : line + " " + word;
+                if (line.Length > 0 && _font.Width(candidate, _sheet) > width)
+                {
+                    lines.Add(line.ToString());
+                    line.Clear().Append(word);
+                }
+                else { line.Clear().Append(candidate); }
+            }
+            if (line.Length > 0) lines.Add(line.ToString());
+            return lines;
+        }
+
         void PaintContext(CanvasItem on)
         {
             if (ContextRows == null || ContextRows.Count == 0) return;
