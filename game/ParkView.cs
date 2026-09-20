@@ -3388,8 +3388,27 @@ void fragment() {
                     if (gone > 0) { _guests?.MapChanged(); RebuildGround(); }
                     StartQueue(a.Rec, a.Ox, a.Oz, a.Rot);
                     break;
+                case PanelLabel.BuildTrack:
+                case PanelLabel.EditTrack:
+                    // The game shares one handler between them too (0x8003BC90, panel.md §3a) — the label is
+                    // what differs, exactly as with Build/Edit Queue.
+                    // ⚠ UNLIKE EDIT QUEUE, this does NOT take the existing track away first. Master's
+                    // clear-it-first rule was given for queues; applying it to track by analogy would throw
+                    // away a coaster layout on a misclick, so it waits to be asked for.
+                    StartTrack(a.Rec, a.Ox, a.Oz, a.Rot);
+                    break;
                 case PanelLabel.Delete:
                     DeleteAttraction(a);
+                    break;
+                // ⚠ NOT WIRED, AND THEY SAY SO RATHER THAN DOING NOTHING. A command that silently no-ops is
+                // indistinguishable from one that is broken — three of today's real bugs were exactly that
+                // shape. Edit Pylons is a SEPARATE tool in the game (its own handler, 0x8003BCC4) and the
+                // port has none; Call Mechanic needs staff dispatch that does not exist here yet.
+                case PanelLabel.EditPylons:
+                    GD.PushWarning("[tpw] Edit Pylons: the port has no pylon tool (game handler 0x8003BCC4)");
+                    break;
+                case PanelLabel.CallMechanic:
+                    GD.PushWarning("[tpw] Call Mechanic: no staff dispatch in the port yet");
                     break;
             }
         }
