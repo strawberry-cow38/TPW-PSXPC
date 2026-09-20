@@ -95,6 +95,8 @@ namespace TPWGodot
         /// <summary>From <c>--park-slider=speed,75</c>: move a slider on the selected attraction and report
         /// what it actually became, so the clamping is provable without a mouse.</summary>
         string _autoSlider;
+        /// <summary>From <c>--park-context=x,z</c>: the right button's command list opened on that tile.</summary>
+        string _autoContext;
         /// <summary>From <c>--park-picker[=tab]</c>: the purchase catalogue open on that category, for captures.</summary>
         int _autoPicker = -1;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
@@ -545,6 +547,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-hover=")) _autoHover = arg.Substring("--park-hover=".Length);
                 else if (arg.StartsWith("--park-select=")) _autoSelect = arg.Substring("--park-select=".Length);
                 else if (arg.StartsWith("--park-slider=")) _autoSlider = arg.Substring("--park-slider=".Length);
+                else if (arg.StartsWith("--park-context=")) _autoContext = arg.Substring("--park-context=".Length);
                 else if (arg == "--park-picker") _autoPicker = 0;
                 else if (arg.StartsWith("--park-picker=")) _autoPicker = int.Parse(arg.Substring("--park-picker=".Length));
                 else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
@@ -838,6 +841,12 @@ namespace TPWGodot
                     {
                         var v = System.Array.ConvertAll(_autoSelect.Split(','), int.Parse);
                         if (v.Length >= 2) GD.Print($"[panel] select {v[0]},{v[1]}: {(_park.SelectAttraction(v[0], v[1]) ? "selected" : "nothing there")}");
+                    }
+                    if (_autoContext != null)
+                    {
+                        var v = System.Array.ConvertAll(_autoContext.Split(','), int.Parse);
+                        if (v.Length >= 2)
+                            GD.Print($"[panel] context {v[0]},{v[1]}: {(_park.ShowContext(v[0], v[1], new Vector2(430, 250)) ? "open" : "nothing there")}");
                     }
                     if (_autoSlider != null)
                     {

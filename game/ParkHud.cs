@@ -55,7 +55,7 @@ namespace TPWGodot
             _top = Make(CanvasItemMaterial.BlendModeEnum.Mix);
             _sub.Paint = PaintRing;
             _add.Paint = PaintFlips;
-            _top.Paint = PaintCount;
+            _top.Paint = on => { PaintCount(on); PaintContext(on); };
         }
 
         public void Setup(TextureSheet common, byte[] exe, StringTable strings)
@@ -145,6 +145,45 @@ namespace TPWGodot
         }
 
         string Label(int id) => _strings?[id] ?? "";
+
+        /// <summary>The context list the right button opens on an attraction: the command labels, already
+        /// resolved to words, and where the cursor was. Empty means nothing is open.
+        ///
+        /// ⭐ IT IS THE SAME LIST AS THE PANEL'S OPTIONS PAGE — the game fills both from 0x8004A0B4 — so
+        /// whatever appears here will appear there when the panel is drawn.</summary>
+        public System.Collections.Generic.List<string> ContextRows = new();
+        public Vector2 ContextAt;
+        /// <summary>Which row the pointer is over, or -1. The game highlights a row and takes CROSS on it.</summary>
+        public int ContextPick = -1;
+
+        /// <summary>The list, drawn as the game draws one (findings/panel.md §1): a framed box with its rows
+        /// centred and the block centred vertically, pitch = line height + 2, the picked row bright and the
+        /// rest dim, and "Not Available" when it is empty.
+        ///
+        /// ⚠ THE FRAME IS THE FILL ONLY SO FAR. The game's frame is a gouraud quad UNDER sprite corners
+        /// (0x169 + 0x148) and stretched edges (0x173, 0x161) — the gradient and the geometry here are the
+        /// game's, the ornamental border is not drawn yet. It is the next thing, not a design choice.</summary>
+        void PaintContext(CanvasItem on)
+        {
+            if (ContextRows == null || ContextRows.Count == 0) return;
+            const int rowPitch = 14, padY = 6, width = 180;
+            int rows = Math.Max(1, ContextRows.Count);
+            int h = rows * rowPitch + padY * 2;
+            // ContextAt arrives in SCREEN pixels (the caller has a mouse, not a PSX pen), so it comes back
+            // into PSX space here, where every other coordinate in this file already lives.
+            int px = (int)(ContextAt.X / Sx), py = (int)(ContextAt.Y / Sy);
+            float x = Left(px), y = py * Sy, w = width * Sx, hh = h * Sy;
+            // The frame's own gradient: orange at the top, yellow at the bottom (DAT_80102AEC / DAT_80102AE4).
+            var top = Psx((0xE7, 0x80, 0x1A));
+            var bottom = Psx((0xE8, 0xCA, 0x2D));
+            on.DrawPrimitive(new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + hh), new Vector2(x, y + hh) },
+                             new[] { top, top, bottom, bottom }, new[] { Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero });
+            for (int i = 0; i < ContextRows.Count; i++)
+            {
+                var c = Psx(i == ContextPick ? ((byte)0x80, (byte)0x80, (byte)0x80) : ((byte)0x40, (byte)0x40, (byte)0x40));
+                Text(on, ContextRows[i], px + width / 2, py + padY + i * rowPitch + rowPitch - 2, 1, false, c);
+            }
+        }
 
         public override void _Draw()
         {

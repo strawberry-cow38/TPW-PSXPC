@@ -1546,6 +1546,17 @@ namespace TPWGodot
             return (_panelFor.SpeedSlider, _panelFor.CyclesPerLoad);
         }
 
+        /// <summary>Open the context list on the attraction at a tile, as the right button does, at a fixed
+        /// place on screen. For captures — a right-click cannot be simulated headlessly and I am not shipping
+        /// a menu I have not seen.</summary>
+        public bool ShowContext(int x, int z, Vector2 at)
+        {
+            _contextFor = AttractionAt((x, z));
+            _contextAt = _contextFor != null ? at : null;
+            RefreshInfo();
+            return _contextFor != null;
+        }
+
         /// <summary>Select the attraction on a tile, as a click on it does. For captures, so the panel can be
         /// driven headlessly the way every other tool in this port is.</summary>
         public bool SelectAttraction(int x, int z)
@@ -2213,8 +2224,10 @@ namespace TPWGodot
         static bool HasQueue(PlacedAttraction a) => false;
         static bool HasTrack(PlacedAttraction a) => false;
 
-        /// <summary>The attraction whose context list is open (master: right button), or null.</summary>
+        /// <summary>The attraction whose context list is open (master: right button), or null, and where on
+        /// screen the click was — the list pops up at the cursor, as the game's does.</summary>
         PlacedAttraction _contextFor;
+        Vector2? _contextAt;
 
         /// <summary>The attraction whose panel is open, or null. ⚠ SELECTION ONLY SO FAR: the panel itself is
         /// not drawn yet, and what it shows per attraction type is being read off the disc rather than
@@ -2668,6 +2681,17 @@ void fragment() {
             _selectionMesh.Mesh = SelectionMesh();
             PoseAttractions(_frameClock);
             _hud.Cost = PendingCost();
+            // The right button's context list, handed to the HUD as words at a place on screen.
+            if (_hud.ContextRows.Count > 0 || _contextFor != null)
+            {
+                _hud.ContextRows.Clear();
+                if (_contextFor != null)
+                {
+                    foreach (int id in ContextCommands(_contextFor))
+                        _hud.ContextRows.Add(_catalogueNames?[id] ?? $"#{id}");
+                    if (_contextAt is { } ca) _hud.ContextAt = ca;
+                }
+            }
             _hudLayer.Visible = Visible && _hud.CanDraw;
             if (_hud.CanDraw) _hud.SetPrompts(CurrentTool() is int tool && tool != 0 ? _hud.ToolPrompts(tool) : IdlePrompts(hovered));
             _fxMesh.Mesh = FxMesh();
@@ -2851,7 +2875,13 @@ void fragment() {
                 && !_pathMode && _placing < 0 && _queue == null && _track == null)
             {
                 var hit = TileUnderMouse() is { } ct ? AttractionAt(ct) : null;
-                if (hit != null || _contextFor != null) { _contextFor = hit; RefreshInfo(); return; }
+                if (hit != null || _contextFor != null)
+                {
+                    _contextFor = hit;
+                    _contextAt = hit != null ? GetViewport().GetMousePosition() : null;
+                    RefreshInfo();
+                    return;
+                }
             }
             if (_pathMode && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape } && _runStart != null)
             {
