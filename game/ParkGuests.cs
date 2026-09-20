@@ -1,0 +1,255 @@
+using System;
+using System.Collections.Generic;
+using Godot;
+using TPW.Data;
+using TPW.Sim;
+
+namespace TPWGodot
+{
+    /// <summary>The park's map as the pathfinder reads it (TPW.Sim.IPathMap).
+    ///
+    /// ⚠ THE SIM DELIBERATELY CANNOT SEE TPW.Data. TPW.Sim has no reference to it, which is what keeps
+    /// the whole simulation testable with no engine and no archive; this adapter is the seam. Three
+    /// bytes of a tile and one park-wide flag are all the search wants.</summary>
+    sealed class ParkPathMap : IPathMap
+    {
+        readonly ParkMap _map;
+        public ParkPathMap(ParkMap map) => _map = map;
+
+        public int Width => _map.Width;
+        public int Height => _map.Height;
+        public bool ParkIsOpen { get; set; }
+        public int TypeAt(int x, int y) => _map[x, y].Raw0;
+        public int LinkBitsAt(int x, int y) => _map[x, y].Links;
+        public int FlagsAt(int x, int y) => _map[x, y].Flags;
+    }
+
+    /// <summary>One guest in the park: the simulation's <see cref="Visitor"/>, where it is standing, and
+    /// the box that stands there.
+    ///
+    /// ⚠ POSITION IS 8.8 WORLD UNITS, the game's own, where a tile is 256 and a tile centre is
+    /// `tile &lt;&lt; 8 | 0x80`. Not Godot metres and not tiles. The pathfinder, the waypoints and the
+    /// walk speed are all in these units, and converting early is how they stop agreeing.</summary>
+    sealed class Guest : IPathClient
+    {
+        public Visitor V;
+        public int X, Z;
+        public MeshInstance3D Inst;
+
+        /// <summary>Where the walk is up to: the waypoint pool index of the next corner, or
+        /// <see cref="WaypointPool.NoChain"/>.</summary>
+        public int WaypointHead { get; set; } = WaypointPool.NoChain;
+
+        /// <summary>The last thing the pathfinder said, or null while a request is outstanding.
+        ///
+        /// ⚠ NULL IS A REAL STATE and it is the common one. A request can sit unanswered for up to two
+        /// hundred frames, and a REFUSED request is never answered at all - see the note on Step.</summary>
+        public PathMessage? Answer;
+
+        /// <summary>True between asking for a route and hearing about it.</summary>
+        public bool Waiting;
+
+        public void OnPathMessage(PathMessage message) { Answer = message; Waiting = false; }
+    }
+
+    /// <summary>The guests in a park: spawning them, asking the pathfinder for routes, and walking them.
+    ///
+    /// ⭐ THIS IS THE SEAM EVERYTHING ELSE WAS WAITING ON. The visitor state machines, the queue chain
+    /// and the staff classes were all written against interfaces with nothing behind them; this is the
+    /// first thing that puts a Visitor in an actual park and moves it. It deliberately does the SMALLEST
+    /// honest thing - spawn, route, walk, repeat - because the value is in proving the pathfinder and
+    /// the movement against a real map, not in wiring every state at once.
+    ///
+    /// ⚠ WHAT IS NOT WIRED YET, so nobody reads more into this than it does: the guests do not decide
+    /// (VisitorDecision), do not have needs (VisitorNeeds), do not queue or ride (VisitorQueue) and do
+    /// not enter or leave through the turnstile. They pick a random reachable path tile and walk to it.
+    /// Every one of those machines exists and is tested; they are not connected here.</summary>
+    sealed class ParkGuests
+    {
+        /// <summary>A tile centre in 8.8 world units.</summary>
+        public static int Centre(int tile) => (tile << 8) | 0x80;
+
+        readonly ParkMap _map;
+        readonly ParkPathMap _pathMap;
+        readonly WaypointPool _waypoints = new();
+        readonly Pathfinder _finder;
+        readonly List<Guest> _guests = new();
+        readonly Node3D _parent;
+        readonly Random _rng;
+        readonly SimRandom _dice;
+        readonly List<(int X, int Z)> _walkable = new();
+
+        /// <summary>The flags a guest walks with: paths, queues, the gate and the tiles beside it.
+        ///
+        /// ⚠ NOT grass. A guest that may cross grass will, at double cost, and the park's paths stop
+        /// meaning anything. behaviour.md's call sites decide this per request; this is the plain
+        /// "walk about the park" set.</summary>
+        public const PathFlags WalkFlags = PathFlags.Path | PathFlags.Queue | PathFlags.GateSide;
+
+        sealed class SimRandom : IRandomSource
+        {
+            readonly Random _r;
+            public SimRandom(Random r) => _r = r;
+            public int Next(int n) => _r.Next(n);
+        }
+
+        public ParkGuests(ParkMap map, Node3D parent, int seed = 12345)
+        {
+            _map = map;
+            _parent = parent;
+            _rng = new Random(seed);
+            _dice = new SimRandom(_rng);
+            _pathMap = new ParkPathMap(map);
+            _finder = new Pathfinder(_pathMap, _waypoints, _dice);
+
+            for (int x = 0; x < map.Width; x++)
+                for (int z = 0; z < map.Height; z++)
+                    if (map[x, z].IsWalkable) _walkable.Add((x, z));
+        }
+
+        public int Count => _guests.Count;
+        public int FreeNodes => _finder.FreeNodes;
+        public int FreeWaypoints => _waypoints.FreeCount;
+        public int Outstanding => _finder.ActiveRequests;
+        public bool ParkIsOpen { get => _pathMap.ParkIsOpen; set => _pathMap.ParkIsOpen = value; }
+
+        /// <summary>Put a guest on a walkable tile. Returns null when the park has nowhere to stand -
+        /// a park with no paths laid, which is the state every park starts in.</summary>
+        public Guest Spawn()
+        {
+            if (_walkable.Count == 0) return null;
+            var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
+
+            var g = new Guest
+            {
+                V = Visitor.Spawn(_dice, 0),
+                X = Centre(tx),
+                Z = Centre(tz),
+                Inst = new MeshInstance3D
+                {
+                    Mesh = new BoxMesh { Size = new Vector3(0.18f, 0.42f, 0.18f) },
+                    MaterialOverride = new StandardMaterial3D
+                    {
+                        AlbedoColor = Color.FromHsv((float)_rng.NextDouble(), 0.55f, 0.95f),
+                        ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    },
+                },
+            };
+            _parent.AddChild(g.Inst);
+            _guests.Add(g);
+            Place(g);
+            return g;
+        }
+
+        /// <summary>Bring the park up to a target headcount, at most one a tick.
+        ///
+        /// ⚠ A STAND-IN, not the game's rule. Real arrivals come from TPW.Sim.BusArrivals, which works
+        /// out a rate from what is BUILT - a park with nothing in it gets nobody, which is the single
+        /// most surprising fact in the whole economy. One a tick is a placeholder so there is something
+        /// to look at, and it is deliberately not dressed up as the real thing.</summary>
+        public void Populate(int target)
+        {
+            if (_guests.Count < target) Spawn();
+        }
+
+        /// <summary>One park frame of the pathfinder (0x800EC8C4). Separate from <see cref="Tick"/>
+        /// because the search runs per FRAME and the guests move per TICK, and in the original those
+        /// are not the same rate.</summary>
+        public void RunPathfinder() => _finder.RunFrame();
+
+        /// <summary>One sim tick of every guest.</summary>
+        public void Tick()
+        {
+            foreach (var g in _guests)
+            {
+                if (g.WaypointHead != WaypointPool.NoChain) { Walk(g); continue; }
+                if (g.Waiting) continue;                       // the answer has not come back yet
+                AskForARoute(g);
+            }
+        }
+
+        void AskForARoute(Guest g)
+        {
+            if (_walkable.Count == 0) return;
+            var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
+
+            // ⚠ A REFUSAL IS NOT A FAILURE AND GETS NO MESSAGE. Ten searches may be outstanding at
+            // once; the eleventh is simply declined, and so is any request made with the node pool
+            // empty. The guest must retry rather than wait, or a busy park quietly freezes everyone
+            // who happened to ask on a crowded frame - which is exactly what the original's own
+            // callers do (state 23 retries next tick).
+            if (!_finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return;
+
+            g.Waiting = true;
+            g.Answer = null;
+        }
+
+        void Walk(Guest g)
+        {
+            int speed = Math.Max(1, g.V.WalkSpeed);
+            int budget = speed;
+
+            while (budget > 0 && g.WaypointHead != WaypointPool.NoChain)
+            {
+                var (wx, wz) = _waypoints.Decode(g.WaypointHead);
+                int dx = wx - g.X, dz = wz - g.Z;
+                int dist = Math.Abs(dx) + Math.Abs(dz);
+
+                if (dist == 0 || dist <= budget)
+                {
+                    g.X = wx; g.Z = wz;
+                    budget -= dist;
+                    int next = _waypoints.Next(g.WaypointHead);
+                    _waypoints.Free(g.WaypointHead);
+                    g.WaypointHead = next < 0 ? WaypointPool.NoChain : next;
+                    continue;
+                }
+
+                // Step along the longer axis first, the way a tile grid is walked: the chain's corners
+                // are axis-aligned, so this is a straight line in practice.
+                if (Math.Abs(dx) >= Math.Abs(dz)) g.X += Math.Sign(dx) * budget;
+                else g.Z += Math.Sign(dz) * budget;
+                budget = 0;
+            }
+            Place(g);
+        }
+
+        void Place(Guest g)
+        {
+            float u = ParkTerrain.TileUnits;
+            int gh = ParkCamera.GroundHeight(_map, g.X, g.Z);
+            g.Inst.Position = new Vector3(g.X / u, gh / u + 0.21f, -g.Z / u);
+        }
+
+        /// <summary>Take every guest out of the park, and their routes with them. Called when the map
+        /// changes underneath them.</summary>
+        public void Clear()
+        {
+            foreach (var g in _guests)
+            {
+                if (g.WaypointHead != WaypointPool.NoChain) _waypoints.FreeChain(g.WaypointHead);
+                g.Inst?.QueueFree();
+            }
+            _guests.Clear();
+        }
+
+        /// <summary>A build item has been put down: the original wipes both pools and drops every
+        /// search without a word (0x800EBBE4), leaving walkers pointing at freed waypoints. Reproduced,
+        /// with the heads cleared HERE rather than in the pool - the sim keeps the original's bug, and
+        /// the host is the right place to decline to inherit it.</summary>
+        public void OnBuildItemPlaced()
+        {
+            _finder.ResetAfterBuildItemPlaced();
+            foreach (var g in _guests) { g.WaypointHead = WaypointPool.NoChain; g.Waiting = false; }
+        }
+
+        /// <summary>Rebuild the walkable list after the map changes.</summary>
+        public void MapChanged()
+        {
+            _walkable.Clear();
+            for (int x = 0; x < _map.Width; x++)
+                for (int z = 0; z < _map.Height; z++)
+                    if (_map[x, z].IsWalkable) _walkable.Add((x, z));
+        }
+    }
+}

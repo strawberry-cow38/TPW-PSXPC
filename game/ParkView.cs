@@ -285,6 +285,8 @@ namespace TPWGodot
             if (exe != null && world != null) map = ParkPaths.LayStartingPaths(map, exe, AssetSelfTest.GameExecutableBase, world.Index);
             _map = map;
             _common = common;
+            _guests?.Clear();
+            _guests = new ParkGuests(map, this);
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _gateAnglePrev = _gateAngleCur = _gateRecentAt = 0;
             Array.Clear(_gateRecent);
@@ -992,6 +994,9 @@ namespace TPWGodot
             if (!ok || !CanAfford(rec)) { PlaySfx(ToolSound.Refused); return; }
             AttractionPlacement.Place(_map, rec, o.X, o.Z, _placeRot);
             _paths?.LayDoors(_map, rec, o.X, o.Z, _placeRot);
+            // 0x800EBBE4: putting a build item down wipes both pathfinder pools and drops every search.
+            _guests?.OnBuildItemPlaced();
+            _guests?.MapChanged();
             var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
             AddChild(inst);
             _placed.Add(inst);
@@ -1175,6 +1180,13 @@ namespace TPWGodot
             public void ClearSmoke() { }
         }
         readonly List<PlacedAttraction> _attractionsPlaced = new();
+
+        /// <summary>The park's guests. Null until a map is loaded.</summary>
+        ParkGuests _guests;
+        /// <summary>How many guests to put in the park when one loads. ⚠ A STAND-IN for the bus
+        /// arrivals (TPW.Sim.BusArrivals), which compute a real arrival rate from what is built and are
+        /// not wired to this yet.</summary>
+        const int DebugGuestCount = 24;
         int _buildVariant;
         Func<int, TPW.Data.Mesh> _buildRigSource;
         readonly TPW.Data.Mesh[] _buildRigs = new TPW.Data.Mesh[8];
@@ -1670,6 +1682,14 @@ void fragment() {
                 _selection.Hover(hovered);
                 foreach (var t in _hoverAlso) _selection.Hover(TargetAt(t));
                 StepAttractions(frameTime);
+                // ⚠ ONE CALL EACH, AND THEY ARE NOT THE SAME CLOCK IN THE ORIGINAL. The search runs
+                // once a VIDEO frame (0x800EC8C4 from the game-mode tick) and the guests move once a
+                // SIM tick; this loop is the sim tick, so the search currently gets half the slices it
+                // would on hardware. It does not matter while ExpansionsPerSlice is unbounded and every
+                // search finishes the frame it starts, and it will matter the moment that is set.
+                _guests?.Populate(DebugGuestCount);
+                _guests?.RunPathfinder();
+                _guests?.Tick();
             }
             // ⭐ THE GATE MOVES BETWEEN PARK FRAMES TOO. Its swing is worked out 25 times a second like everything
             // else in the game, but the port draws far more often than that, and a gate stepping at 25 while the
