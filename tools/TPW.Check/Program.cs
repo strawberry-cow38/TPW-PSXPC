@@ -2198,7 +2198,12 @@ static class Program
         public int LiveLitterCount => 0;
         public readonly List<StatisticAttraction> Rides = new();
         public IEnumerable<StatisticAttraction> Attractions => Rides;
-        public IEnumerable<StatisticDefinition> Definitions => Array.Empty<StatisticDefinition>();
+        /// <summary>⚠⚠ NOT EMPTY, AND THAT IS THE POINT. This returned Array.Empty and the harness passed
+        /// three controls over 300 simulated days while BuiltVariety's inner loop -- the one that indexes a
+        /// 50-slot array by definition index -- executed ZERO times, because it gives up as soon as a type
+        /// has no definitions. A stub that returns nothing is a silent skip on every loop that reads it.</summary>
+        public readonly List<StatisticDefinition> Defs = new();
+        public IEnumerable<StatisticDefinition> Definitions => Defs;
         public IEnumerable<StatisticStaff> Staff => Array.Empty<StatisticStaff>();
         public int BalanceRaw => 50000;
         public int MapWidthTiles => 128;
@@ -2252,6 +2257,9 @@ static class Program
         {
             var park = new SilentPark { Open = open, Guests = 40, Statistics = statistics };
             park.Rides.Add(new StatisticAttraction(AttractionType.Ride, 0, AttractionStatus.Running));
+            // A catalogue for it to be counted against, so the variety statistics actually run.
+            for (int d = 0; d < 6; d++) park.Defs.Add(new StatisticDefinition(AttractionType.Ride, d));
+            for (int d = 0; d < 3; d++) park.Defs.Add(new StatisticDefinition(AttractionType.Shop, d));
             var stats = new ParkStatistics(0, ParkStatisticRules.All);
             var advisor = new ParkAdvisor();
             if (!statistics) advisor.Flags &= ~AdvisorFlags.Statistics;
