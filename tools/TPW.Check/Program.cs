@@ -2374,6 +2374,24 @@ static class Program
             // --model-atlas N OUT: the atlas the model browser builds for model N (browser order), as raw RGBA, so
             // the texels a face samples can be looked at directly rather than through a render.
             if (Array.IndexOf(args, "--scenery") >= 0) return Scenery(disc);
+            // --buildings: the placements 0x8005439C searches for, i.e. the ones whose flag byte has a bit
+            // set. That routine IS the "building table" lookup the turnstile needs, and the table it walks
+            // (count gp+0x12D8, records gp+0x12DC) is the map's own build list - the same one ParkMap already
+            // parses as Scenery. So the entrance buildings are simply the flagged placements.
+            if (Array.IndexOf(args, "--buildings") >= 0)
+            {
+                var gb = Archive(disc);
+                if (gb == null) return 1;
+                foreach (var (entry, map) in ParkMap.FindAll(gb))
+                {
+                    var flagged = map.Scenery.Where(pl => pl.Flags != 0).ToList();
+                    if (flagged.Count == 0) continue;
+                    Console.WriteLine($"map #{entry.Index}: {flagged.Count} flagged of {map.Scenery.Count} placements");
+                    foreach (var pl in flagged)
+                        Console.WriteLine($"    flags 0x{pl.Flags:X2}  tile {pl.X},{pl.Z}  y {pl.Y}  model {pl.Model}  turns {pl.Turns}");
+                }
+                return 0;
+            }
             // --semi-list: models with semi-transparent faces (MeshFace.SemiTransparent), and their blend modes.
             if (Array.IndexOf(args, "--semi-list") >= 0)
             {
