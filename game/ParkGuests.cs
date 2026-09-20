@@ -53,6 +53,11 @@ namespace TPWGodot
         /// sprite at whatever the camera happened to be doing on its last step.</summary>
         public int DirX, DirZ;
 
+        /// <summary>How many ticks this walker has had its in-queue bit set without boarding. A
+        /// DIAGNOSTIC of the port's own — "some guests get straight on and others are stuck for ever"
+        /// is a statement about TIME IN THE QUEUE, and nothing else in the readout measures it.</summary>
+        public long QueuedTicks;
+
         /// <summary>Not drawn, and not walked - somebody else owns it. A guest on a ride (state 21).</summary>
         public bool Hidden;
 
@@ -718,6 +723,12 @@ namespace TPWGodot
             _ticking = true;
             foreach (var g in _guests)
             {
+                // ⚠ COUNTED BEFORE THE HIDDEN SKIP, so a guest that boards stops counting rather than
+                // freezing its total at whatever it had. The bit is the queue's own (V+0x5C bit), so
+                // this measures exactly what the queue thinks, not what the port thinks.
+                if (g.V.InQueue) { g.QueuedTicks++; if (g.QueuedTicks > QueuedWorst) { QueuedWorst = g.QueuedTicks; QueuedWorstState = g.V.State.ToString(); } }
+                else g.QueuedTicks = 0;
+
                 // On a ride: the ride owns it entirely (state 21).
                 if (g.Hidden) continue;
                 // ⚠ A FAILED SEARCH MUST BE ANSWERED OR THE PARK LOCKS UP. The guest asked, the search
@@ -787,6 +798,26 @@ namespace TPWGodot
             _ticking = false;
             DrainLeavers();
             TickStaff();
+        }
+
+        /// <summary>The longest any guest has held its in-queue bit without boarding, and what it was
+        /// doing at that point. ⚠ A LONG TIME IS NORMAL ON A BUSY RIDE — what is not normal is one guest
+        /// far above the rest, which is what "stuck for ever while later joiners get on" looks like.</summary>
+        public long QueuedWorst { get; private set; }
+        public string QueuedWorstState { get; private set; } = "";
+
+        /// <summary>The spread of time-in-queue right now, worst first: one outlier against a pack is
+        /// the signature of a stuck guest; an evenly long list is just a popular ride.</summary>
+        public string QueueWaitReport()
+        {
+            var waits = new List<(long T, VisitorState S)>();
+            foreach (var g in _guests) if (g.V.InQueue) waits.Add((g.QueuedTicks, g.V.State));
+            if (waits.Count == 0) return $"nobody queueing; worst ever {QueuedWorst} ticks in {QueuedWorstState}";
+            waits.Sort((a, b) => b.T.CompareTo(a.T));
+            var parts = new List<string>();
+            for (int i = 0; i < waits.Count && i < 6; i++) parts.Add($"{waits[i].T}/{waits[i].S}");
+            return $"queueing now ({waits.Count}): {string.Join(" ", parts)}"
+                 + (waits.Count > 6 ? " ..." : "") + $"; worst ever {QueuedWorst} ticks in {QueuedWorstState}";
         }
 
         long _now;
@@ -1096,6 +1127,7 @@ namespace TPWGodot
         /// actually means.</summary>
         void RebuildAreas()
         {
+            _gateAreaCache = -1;
             int w = _map.Width, h = _map.Height;
             _area = new int[w, h];
             var parent = new int[w * h];
@@ -1179,7 +1211,18 @@ namespace TPWGodot
         /// <summary>The tile the reachability check measures from: where a guest stands after walking in.</summary>
         public (int X, int Z) GateTile { get; private set; } = (-1, -1);
 
+        int _gateAreaCache = -1;
+
+        /// <summary>⚠ CACHED PER FLOOD FILL. The fallback branch walks the whole map, and this is now
+        /// called from the on-screen readout once per attraction per refresh — which turned a diagnostic
+        /// into a per-frame map scan the first time it was put in front of a human.</summary>
         int GateArea()
+        {
+            if (_gateAreaCache >= 0) return _gateAreaCache;
+            return _gateAreaCache = GateAreaUncached();
+        }
+
+        int GateAreaUncached()
         {
             if (_entrance != null)
             {

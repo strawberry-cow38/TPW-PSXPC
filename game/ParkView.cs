@@ -1016,6 +1016,7 @@ namespace TPWGodot
             + $"\n{_guests.GateReport()}"
             + $"\n{_guests.Reachability()}"
             + $"\n{_guests.StrandedReport()}"
+            + $"\n{_guests.QueueWaitReport()}"
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
@@ -1100,10 +1101,18 @@ namespace TPWGodot
             }
         }
 
+        string _infoLive = "";
+
         void RefreshInfo()
         {
+            // ⭐ THE PARK'S OWN COUNTERS ON SCREEN, not only in a capture's log. Everything that found a
+            // bug today — the queue waits, the ride's queue head, which attractions are unreachable —
+            // was invisible to the person actually PLAYING the game, who is the one who sees the
+            // symptom first. F3 now shows it.
+            if (_info != null && _map != null && _guests != null && HasMap)
+                _infoLive = "\n" + GuestReport();
             if (_info != null && _map != null)
-                _info.Text = _infoText + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
+                _info.Text = _infoText + _infoLive + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
                            + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "")
                            + (_queue != null ? $"\nQUEUE TOOL ({_queue.Points.Count}/{QueueRun.MaxPoints - 1} corners): click to lay the queue toward the pointer; it goes on from its end, "
