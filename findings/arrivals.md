@@ -172,6 +172,46 @@ transport.md §2.5's tile survey confirms.
 (0x80067274..0x800673FC) was listed; none is an audio call. A negative worth the words it took to make
 it checkable.
 
+## 2.8 `Score` itself: a die roll per attraction, and per kind (SOURCED, 2026-09-20)
+
+⚠ **THIS REPLACES "S = 10 + Σ per-attraction terms".** That shape was not wrong so much as it was only
+the term, and the term is the smallest part of it. The routine is 0x80067400:
+
+```
+if the attraction list is empty: return 0                 ; 0x8006743C  — before the base is added
+S = 10                                                    ; 0x80067444
+per attraction:
+  roll    = rand(10) + 20                                 ; 0x80067448..0x80067450  RE-ROLLED EACH TIME
+  divisor = 2 ; young = 0 ; ageUnit = 2024                ; 0x80067454 / 0x8006745C / 0x80067480
+  type    = virtual call, class record slot +0x80         ; 0x80067458..0x80067470
+  switch (type − 1), jump table 0x800E1564:               ; 0x80067484..0x8006749C
+    1 coaster / 3 ride / 6 track / 7 tour → 0x800674C8:
+        age = 0x8009EDBC(att) ; B = slot +0x1A8 ; C = 0x8009F5E0(att)
+        term = C * B                                      ; 0x80067518, delay slot at 0x80067528 — ALWAYS
+        if (age << 12) / 2024 < 4: young = 20             ; 0x800674F8..0x80067530
+    5 sideshow → 0x800674A4:  term = slot +0x1A8          ; no level to multiply by
+    2 feature  → 0x80067534:  divisor = 10
+    4 shop     → 0x80067538:  nothing
+  S += (roll + term + young) / divisor                    ; 0x80067538..0x80067558
+```
+
+The getters: **age** = 0x8009EDBC = now (0x80066AC8 → 0x80066E78) − `attraction+0xF4`; **level** =
+0x8009F5E0 = the byte at `attraction+0xF6`, whose setter is the next routine along (0x8009F5EC);
+**intensity** = the class record's slot at +0x1A8.
+
+⭐ **THE ROLL IS WHERE A NEW PARK'S SCORE LIVES.** A freshly built ride is level 0, so `level × intensity`
+is exactly zero, and the whole of its contribution is `(20..29) / 2` = **10..14** — which is precisely the
+figure §1 recorded for a 16-day-old level-0 ride. A port that models only the term scores the bare 10, the
+head-count floors, and the bus turns up on time with nobody on it forever while every number looks healthy.
+That is exactly what happened to this one.
+
+⭐ **AND IT CLOSES §4's OPEN PATTERN.** Batch sizes of 5, 5, 4, 6, 3 and 6 guests with the park unchanged
+needed no mechanism beyond this: the score is re-rolled per attraction on every call.
+
+⭐ **THE KINDS ARE DELIBERATELY UNEQUAL.** A feature divides by ten rather than two, so it is worth a fifth
+of a ride; a shop contributes nothing but the roll; a sideshow adds its intensity outright. Any single
+formula for all seven types is wrong for at least three of them.
+
 ## 3. Head-count per bus: `Arrivals` 0x80067274 (SOURCED)
 
 ```
