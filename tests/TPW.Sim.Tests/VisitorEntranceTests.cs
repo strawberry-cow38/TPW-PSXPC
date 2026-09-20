@@ -23,7 +23,7 @@ namespace TPW.Sim.Tests
 
         /// <summary>Only <see cref="FreeWaypoints"/> and <see cref="NowTick"/> are reached: message 6 is
         /// the one queue message the turnstile sends, and that is all it touches.</summary>
-        sealed class QueueStub : IQueueWorld
+        internal sealed class QueueStub : IQueueWorld
         {
             public World Owner;
             public int Freed;
@@ -55,7 +55,7 @@ namespace TPW.Sim.Tests
         /// <summary>One park: two lanes, an entrance building at tile (20, 5), two exits, a £40 fee.
         /// Messages are ROUTED the way a host would route them, so the turnstile's message 6 really
         /// lands in VisitorQueue.OnMessage and its message 9 in VisitorEntrance.OnMessage.</summary>
-        sealed class World : IEntranceWorld, IArrivalWorld
+        internal class World : IEntranceWorld, IArrivalWorld
         {
             public World() { Queue = new QueueStub { Owner = this }; }
             public readonly QueueStub Queue;

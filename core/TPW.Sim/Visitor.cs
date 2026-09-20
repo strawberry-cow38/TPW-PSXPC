@@ -15,9 +15,12 @@ namespace TPW.Sim
         /// <summary>Pushed by Idle roll 1; immediately becomes <see cref="RandomWander"/> (§2.7).</summary>
         Wander = 1,
         RandomWander = 5,
+        /// <summary>READ: state 2, advances the waypoint chain or runs VisitorArrival (§2.3).</summary>
+        WalkToDestination = 2,
         /// <summary>Make major decision (§2.2) -- pick a ride, shop or exit.</summary>
         MajorDecision = 6,
-        /// <summary>Walking to a bin, purpose 19 (§2.1 roll 3).</summary>
+        /// <summary>READ: state 11 waits for a path response. Idle uses it for a bin (purpose 19),
+        /// but entrance, queue and off-path wander requests use the same state (§2.7, §2.10).</summary>
         WalkToBin = 11,
         /// <summary>Watching an entertainer (§2.9); pushed by the needs update, not by Idle.</summary>
         WatchEntertainer = 28,
@@ -124,10 +127,9 @@ namespace TPW.Sim
     /// and <see cref="NeedB"/> here rather than hunger and thirst. Naming a guess after a real need is
     /// how a guess becomes a fact nobody rechecks.
     ///
-    /// ⚠ THE STATE STACK IS A STACK, and Idle uses both operations on it: rolls 0 and 1 PUSH (so the
-    /// guest returns to Idle afterwards) while rolls 3 and 4 and the leave check SET (which zeroes the
-    /// stack and does not return). Collapsing the two loses the distinction between "go and do this,
-    /// then carry on" and "stop being idle".</summary>
+    /// ⚠ THE STATE STACK IS A STACK, and Idle uses both operations on it: rolls 0 and 1 PUSH while
+    /// rolls 3 and 4 and the leave check SET (which zeroes the stack). A later SET can discard a push:
+    /// state 1 immediately SETS 5 (§2.7), so wandering does not return by popping Idle's frame.</summary>
     public sealed class Visitor
     {
         /// <summary>Spawn a guest with the constructor's own rolls (§2.12, ctor 0x8008C534).</summary>
@@ -180,16 +182,20 @@ namespace TPW.Sim
         /// <summary>V+0x5A, 0..100. Above 92 the guest is sick.</summary>
         public int Nausea { get => _nausea; set => _nausea = Stat.Clamp(value); }
         int _nausea;
-        /// <summary>V+0x5B -- an unidentified need. GUESS-low "hunger"; do not rely on that.</summary>
+        /// <summary>V+0x5B -- GUESS-high "hunger" from the decoded food coefficients and bubble art
+        /// (findings/visitor-rest.md). The semantic name remains an inference.</summary>
         public int NeedA { get => _needa; set => _needa = Stat.Clamp(value); }
         int _needa;
         /// <summary>V+0x5C -- GUESS-low "boredom". +5 when no ride can be found.</summary>
         public int Boredom { get => _boredom; set => _boredom = Stat.Clamp(value); }
         int _boredom;
-        /// <summary>V+0x5D -- ride-related desire. Above 97 the guest speeds up to 30.</summary>
+        /// <summary>V+0x5D -- the earlier report calls this ride-related desire; GUESS-high "toilet need"
+        /// in rides.md §0, supported by bubble 0x3B's artwork (findings/visitor-rest.md). The existing
+        /// field name is retained. READ: above 97 the guest speeds up to 30.</summary>
         public int RideDesire { get => _ridedesire; set => _ridedesire = Stat.Clamp(value); }
         int _ridedesire;
-        /// <summary>V+0x5E -- the other unidentified need.</summary>
+        /// <summary>V+0x5E -- GUESS-high "thirst" from the decoded drink coefficients and bubble art
+        /// (findings/visitor-rest.md). The semantic name remains an inference.</summary>
         public int NeedB { get => _needb; set => _needb = Stat.Clamp(value); }
         int _needb;
         /// <summary>V+0x5F, 0..100. At 99 the guest goes home.</summary>
@@ -258,8 +264,12 @@ namespace TPW.Sim
 
         /// <summary>V+0x50: `now + rand(300)` at spawn. The needs update refuses to stop a guest for an
         /// entertainer until the clock passes it, so a guest that has just walked in does not immediately
-        /// stand and watch a show. Its meaning beyond that gate is unknown.</summary>
+        /// stand and watch a show. State 28 resets it to now+900 on finishing (§2.8).</summary>
         public long EntertainerNotBefore { get; set; }
+
+        /// <summary>READ: V+0x4C, the entertainer selected by the influence pass (0x800900E4).
+        /// Separate from the attraction target: watching interrupts a journey without losing it.</summary>
+        public StaffMember WatchedEntertainer { get; set; }
 
         /// <summary>P+0x2C: why the guest is walking somewhere, consumed on arrival.</summary>
         public Purpose Purpose { get; set; } = Purpose.Spent;
@@ -277,7 +287,8 @@ namespace TPW.Sim
 
         /// <summary>P+0x2B bit 0x20 (0x80094050 sets, 0x8009403C reads): the one retry a guest whose
         /// path to the exit failed is allowed. Message 2 with purpose 14 sets it after re-requesting with
-        /// grass flags; message 1 clears it (0x8008F97C); a second failure with it set goes to Idle (§2.10).</summary>
+        /// grass flags; message 1 clears it (0x8008F97C); a second failure with it set goes to Idle (§2.10).
+        /// Off-path wander also sets this bit on an accepted centre request (0x80092E18..20).</summary>
         public bool ExitPathRetried { get; set; }
 
         readonly System.Collections.Generic.Stack<VisitorState> _stack = new();

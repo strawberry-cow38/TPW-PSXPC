@@ -1,0 +1,1466 @@
+{
+  "date": "2026-09-20",
+  "distinct_mutations": 208,
+  "executions": 217,
+  "killed": 208,
+  "survived": 0,
+  "invalid": 0,
+  "mutations": [
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit early equality",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingWaitsThroughTheDeadline(now: 60)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit ignores deadline",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingWaitsThroughTheDeadline(now: 59)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit ignores allocation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.AllocationFailureStillEndsVomitingWithoutPlacementDice"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit skips placement",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit keeps nausea",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit keeps animation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit pops",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit remains sick",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit wide x",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitPositionWrapsAsSignedHalfwords"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit wide y",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitPositionWrapsAsSignedHalfwords"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit offset bound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit offset subtraction",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit wrong kind",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch animation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch bonus",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch cooldown",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch base duration",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch skill duration",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 9, deadline: 368)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch skill mask",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 7, deadline: 728)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch skips animation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch skips facing",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch reversed x",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch reversed y",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 0, dy: -1, facing: 4)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch ignores performance",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch ignores timeout",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: True, now: 9)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch requires both end conditions",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch ends at equality",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch sets idle",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch omits pop",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch omits bonus",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch leaves animation two",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch keeps target",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch omits cooldown",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "watch absolute cooldown",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EitherEndConditionResumesTheJourneyAndPaysTheBonus(performing: False, now: 7)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "facing negative x",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "facing positive x",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "facing positive y",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2688, ty: 3200, x: 2688, y: 2701, facing: 0)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "facing negative y",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2688, ty: 2400, x: 2688, y: 2675, facing: 4)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "facing y priority",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingFacesTheEntertainerOnEveryTick(dx: 1, dy: -9, facing: 6)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "influence raw state two",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.InfluenceUsesTheRawMovingStateNumbersBeforeInterrupting(state: 1, happy: 55, nausea: 32)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "influence raw state three",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.StandingInSomethingUnpleasantIsCheaperThanWalkingThroughIt"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch no queue gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EveryGateBlocksSelectionIndependently(gate: \"queue\")"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch no depth gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.AGuestStopsForAnEntertainerOnlyWhenAllFourGatesPass"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch depth one blocked",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch no cooldown gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EveryGateBlocksSelectionIndependently(gate: \"deadline\")"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch cooldown equality",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EveryGateBlocksSelectionIndependently(gate: \"deadline\")"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch no current state gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EveryGateBlocksSelectionIndependently(gate: \"watching\")"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch ignores influence bit",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.EveryGateBlocksSelectionIndependently(gate: \"flag\")"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch last equal wins",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch chooses farthest",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch first only",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch no distance update",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch skips target assignment",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch sets instead of pushes",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 0, deadline: 308)"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch skips state push",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.AGuestStopsForAnEntertainerOnlyWhenAllFourGatesPass"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch ignores empty list",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.AnEmptyEntertainerListCannotPushAWatch"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch absolute deadline",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.AGuestStopsForAnEntertainerOnlyWhenAllFourGatesPass"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "watch no skill mask",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.TheNearestEntertainerWinsAndTiesKeepListOrder(skill: 9, deadline: 368)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant StepRollBound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant KeepDirectionRollBound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 20, x: 3200, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant RerollBelow",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 20, x: 3200, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant RingRollBound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant RingBaseRadius",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant CentreRollBound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.CentreFallbackUsesTheReportsMapCentreAndPushesElevenOnAcceptance"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant CentreOffset",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant CentreAttempts",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant PathFlags",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander constant SecondaryPathFlags",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander one pushes five",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.StateOneOnlySetsFiveAndClearsTheStack"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander one skips transition",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.StateOneOnlySetsFiveAndClearsTheStack"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander skips state one gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.StateOneOnlySetsFiveAndClearsTheStack"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander swaps terrain arms",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander extra step",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ignores map edge",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnEdgeOrNonPathNeighbourCannotBecomeAWaypoint(x: 43, y: 73, link: 4)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ignores path predicate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnEdgeOrNonPathNeighbourCannotBecomeAWaypoint(x: 10, y: 10, link: 4)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ignores links",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander reads neighbour links",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander weighted even when keeping",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 20, x: 3200, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander rerolls equality",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 20, x: 3200, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander rolls keep when blocked",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander always new turn row",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 19, x: 2944, y: 2944)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander missing row die",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander conventional weight boundary",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander no x step",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander no y step",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 16, x: 2688, y: 2944)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander omits centres",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander no waypoint",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ring no purpose",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander path no purpose",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ZeroStepsOrAnIsolatedTileStillEntersThreeWithAnEmptyChain(steps: 9)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander request no purpose",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.CentreFallbackUsesTheReportsMapCentreAndPushesElevenOnAcceptance"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander path no state three",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ZeroStepsOrAnIsolatedTileStillEntersThreeWithAnEmptyChain(steps: 9)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ring no state three",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ring skip failed allocation gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.RingAllocationFailureReturnsToIdle"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ring skips idle",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.RingAllocationFailureReturnsToIdle"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander y centre uses width",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander x centre uses height",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander fallback no map gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.InvalidCentreCandidatesUseAnAttemptWithoutARequest(offMap: True)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander fallback no path gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.InvalidCentreCandidatesUseAnAttemptWithoutARequest(offMap: False)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander no retry flag",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.CentreFallbackUsesTheReportsMapCentreAndPushesElevenOnAcceptance"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander no request timestamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.CentreFallbackUsesTheReportsMapCentreAndPushesElevenOnAcceptance"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander request sets eleven",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.CentreFallbackUsesTheReportsMapCentreAndPushesElevenOnAcceptance"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander ignores path acceptance",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander failure stays five",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExactlyFourRefusalsReturnToIdleUnderTheRetainedReport"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander forgets old chain",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ZeroStepsOrAnIsolatedTileStillEntersThreeWithAnEmptyChain(steps: 9)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander forward allocation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 20, x: 3200, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander rollback partial allocation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.ExhaustionKeepsTheFarEndOfTheWalkAndReusesTheOldChain"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander omits encode",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander omits links",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EightyPercentKeepsTheLastDirectionWhenItIsStillAvailable(keepRoll: 20, x: 3200, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander skips head update",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander skips installation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dx entry 0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 4, x: 2944, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dx entry 1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 16, x: 2688, y: 2944)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dx entry 2",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dx entry 3",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 1, x: 2688, y: 2432)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dy entry 0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 4, x: 2944, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dy entry 1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 16, x: 2688, y: 2944)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dy entry 2",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 64, x: 2432, y: 2688)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander Dy entry 3",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 1, x: 2688, y: 2432)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander LinkBits entry 0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 1, x: 2688, y: 2432)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander LinkBits entry 1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 1, x: 2688, y: 2432)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander LinkBits entry 2",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 1, x: 2688, y: 2432)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander LinkBits entry 3",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.LinksComeFromTheCurrentTileInTheDecodedDirectionOrder(bit: 1, x: 2688, y: 2432)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 0, end0: 100, end1: 140, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 0, end0: 100, end1: 140, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 2",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 0, end0: 100, end1: 140, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 3",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 0, end0: 100, end1: 140, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 4",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 5",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 6",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 7",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 1, end0: 40, end1: 140, end2: 180)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 8",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 2, end0: 10, end1: 50, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 9",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 2, end0: 10, end1: 50, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 10",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 2, end0: 10, end1: 50, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 11",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 2, end0: 10, end1: 50, end2: 150)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 12",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 3, end0: 40, end1: 50, end2: 90)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 13",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 3, end0: 40, end1: 50, end2: 90)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 14",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 3, end0: 40, end1: 50, end2: 90)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "wander TurnWeights entry 15",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.EveryTurnTableRowHasItsOriginalRollPartitions(row: 3, end0: 40, end1: 50, end2: 90)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk wrong step shift",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk empty chain stays three",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AdvancingFreesOneHeadAndAnEmptyThreeReturnsToTheArrivalHandler"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk ignores facing",
+      "status": "KILLED",
+      "executions": 2,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk arithmetic shift",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.StepUsesTheUnsignedLowWordOfTheMultiply"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk wide multiply",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.StepUsesTheUnsignedLowWordOfTheMultiply"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk spawn speed",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk omits timescale",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk no x clamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk no y clamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk omits position write",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk one coordinate arrives",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2688, ty: 2400, x: 2688, y: 2675, facing: 4)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk omits reached state two",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.StepUsesTheUnsignedLowWordOfTheMultiply"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk no lower x bound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 0, y: 128, tx: -64, ty: 128)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk no lower y bound",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 128, y: 0, tx: 128, ty: -64)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk upper x equality",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 11263, y: 128, tx: 11328, ty: 128)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk upper y equality",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 128, y: 18943, tx: 128, ty: 19008)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk off-map skips cleanup",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 11263, y: 128, tx: 11328, ty: 128)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk off-map skips idle",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 11263, y: 128, tx: 11328, ty: 128)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "walk off-map commits position",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 11263, y: 128, tx: 11328, ty: 128)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "advance skips free",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AdvancingFreesOneHeadAndAnEmptyThreeReturnsToTheArrivalHandler"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "advance skips successor",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AdvancingFreesOneHeadAndAnEmptyThreeReturnsToTheArrivalHandler"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "advance drops successor",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AdvancingFreesOneHeadAndAnEmptyThreeReturnsToTheArrivalHandler"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "advance skips animation",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AdvancingFreesOneHeadAndAnEmptyThreeReturnsToTheArrivalHandler"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "advance skips state three",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AdvancingFreesOneHeadAndAnEmptyThreeReturnsToTheArrivalHandler"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "free head only",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 11263, y: 128, tx: 11328, ty: 128)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "free leaves dangling head",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.AnOffMapStepFreesTheWholeChainWithoutMoving(x: 11263, y: 128, tx: 11328, ty: 128)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure no state gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.PathMessagesAreIgnoredOutsideEleven(id: 2, purpose: 3)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure ignores purpose",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.EveryOtherFailurePurposeTakesTheWanderPenalty(purpose: 6)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure never runs",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.QueuePathFailureEitherDropsTheTargetOrSynchronouslyRemovesTheGuest(queued: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure ignores membership",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.QueuePathFailureEitherDropsTheTargetOrSynchronouslyRemovesTheGuest(queued: False)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure skips removal",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.QueuePathFailureEitherDropsTheTargetOrSynchronouslyRemovesTheGuest(queued: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure keeps target",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.QueuePathFailureEitherDropsTheTargetOrSynchronouslyRemovesTheGuest(queued: False)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message queue failure skips idle",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.QueuePathFailureEitherDropsTheTargetOrSynchronouslyRemovesTheGuest(queued: False)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message ready misroute",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.ReadyPathClearsRetryAndSetsThreeWithAnimationThirteen"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message failed misroute",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.EveryOtherFailurePurposeTakesTheWanderPenalty(purpose: 6)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message thrown out misroute",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 4, before: 28, after: 28, freed: 0, removed: 1, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message admit misroute",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 9, before: 28, after: 47, freed: 0, removed: 0, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message shuffle missing stagger",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 6, before: 44, after: 43, freed: 1, removed: 0, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message shuffle missing state",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 6, before: 44, after: 43, freed: 1, removed: 0, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message removal misroute",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 7, before: 28, after: 58, freed: 1, removed: 0, target: True, queue: False)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message ejection misroute",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 10, before: 28, after: 0, freed: 1, removed: 0, target: False, queue: False)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id PathReady",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.ReadyPathClearsRetryAndSetsThreeWithAnimationThirteen"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id PathFailed",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.EveryOtherFailurePurposeTakesTheWanderPenalty(purpose: 6)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id ThrownOut",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 4, before: 28, after: 28, freed: 0, removed: 1, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id Shuffle",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 6, before: 44, after: 43, freed: 1, removed: 0, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id RemovedFromQueue",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 7, before: 28, after: 58, freed: 1, removed: 0, target: True, queue: False)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id Admit",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 9, before: 28, after: 47, freed: 0, removed: 0, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorMessages.cs",
+      "rule": "message raw id Ejected",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 10, before: 28, after: 0, freed: 1, removed: 0, target: False, queue: False)"
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "delegated VisitorQueue.cs omit world.FreeWaypoints(guest); #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 6, before: 44, after: 43, freed: 1, removed: 0, target: True, queue: True)"
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "delegated VisitorQueue.cs omit world.FreeWaypoints(guest); #1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 7, before: 28, after: 58, freed: 1, removed: 0, target: True, queue: False)"
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "delegated VisitorQueue.cs omit world.FreeWaypoints(guest); #2",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 10, before: 28, after: 0, freed: 1, removed: 0, target: False, queue: False)"
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "delegated VisitorQueue.cs omit guest.InQueue = false; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 7, before: 28, after: 58, freed: 1, removed: 0, target: True, queue: False)"
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "delegated VisitorQueue.cs omit guest.InQueue = false; #1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 10, before: 28, after: 0, freed: 1, removed: 0, target: False, queue: False)"
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "delegated VisitorQueue.cs omit guest.HasTarget = false; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 10, before: 28, after: 0, freed: 1, removed: 0, target: False, queue: False)"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit guest.HasTarget = false; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.SpecialFailurePurposesKeepTheirOwnRows(purpose: 22, state: 0, target: False)"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit guest.HasTarget = false; #1",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.EveryOtherFailurePurposeTakesTheWanderPenalty(purpose: 6)"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit guest.ExitPathRetried = false; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorEntranceTests.Message1StartsWalkingAndClearsTheRetryFlagOnlyFromEleven"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit guest.WaitUntil = world.NowTick; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.ExitFailureKeepsTheEntrancesOneAcceptedRetryRule"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit guest.ExitPathRetried = true; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.ExitFailureKeepsTheEntrancesOneAcceptedRetryRule"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit guest.Animation = VisitorQueue.AnimationWander; #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorEntranceTests.Message1StartsWalkingAndClearsTheRetryFlagOnlyFromEleven"
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "delegated VisitorEntrance.cs omit world.RemoveFromPark(guest); #0",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.TheWholeTableDispatchesRawIds(id: 4, before: 28, after: 28, freed: 0, removed: 1, target: True, queue: True)"
+    },
+    {
+      "file": "Visitor.cs",
+      "rule": "refinement raw arrival state two",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.InfluenceUsesTheRawMovingStateNumbersBeforeInterrupting(state: 2, happy: 53, nausea: 35)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "refinement watch raw x",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingSomeoneOnTheSameTileFacesFourDespiteTheirRawOffsets"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "refinement watch raw y",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.WatchingSomeoneOnTheSameTileFacesFourDespiteTheirRawOffsets"
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "refinement watch before penalties",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.InfluenceUsesTheRawMovingStateNumbersBeforeInterrupting(state: 2, happy: 53, nausea: 35)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "refinement no candidate gate",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnEdgeOrNonPathNeighbourCannotBecomeAWaypoint(x: 43, y: 73, link: 4)"
+    },
+    {
+      "file": "VisitorWander.cs",
+      "rule": "refinement skips ring result",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWanderTests.AnOffPathGuestFirstTriesTheReportedRing(roll: 4, radius: 8)"
+    },
+    {
+      "file": "VisitorWalking.cs",
+      "rule": "refinement normalised diagonal",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorWalkingTests.EachAxisGetsTheTruncatedCurrentSpeedStep(tx: 2400, ty: 2400, x: 2675, y: 2675, facing: 2)"
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "refinement vomit entry animation value",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorIdleTests.VomitEntryWritesAnimationTwelveAlongsideItsSixtyTickDeadline"
+    },
+    {
+      "file": "VisitorIdle.cs",
+      "rule": "refinement vomit entry animation write",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.VisitorIdleTests.VomitEntryWritesAnimationTwelveAlongsideItsSixtyTickDeadline"
+    }
+  ]
+}

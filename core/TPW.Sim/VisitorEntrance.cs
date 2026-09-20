@@ -159,8 +159,7 @@ namespace TPW.Sim
         IEnumerable<Visitor> Guests { get; }
         /// <summary>Every staff member (list 0x800536D8, next 0x8005DFB0).</summary>
         IEnumerable<StaffMember> Staff { get; }
-        /// <summary>Call the guest's vtable slot 40 with a message. The host routes the id: 6, 7 and 10
-        /// to <see cref="VisitorQueue.OnMessage"/>, the rest to <see cref="VisitorEntrance.OnMessage"/>.
+        /// <summary>Call the guest's vtable slot 40 through <see cref="VisitorMessages.OnMessage"/>.
         /// Delivery is synchronous, as it is in the original.</summary>
         void DeliverMessage(Visitor guest, int id, int param1, int param2);
         /// <summary>Slot 40 on a staff member: a guard waiting in 46 gets message 9 like a guest.</summary>

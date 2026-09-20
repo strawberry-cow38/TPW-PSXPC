@@ -96,9 +96,8 @@ namespace TPW.Sim
             {
                 case 0: return RollDecision(guest, world, rng);
                 case 1:
-                    // Push, not set: the guest comes back to Idle when the wander ends. State 1 turns
-                    // into 5 immediately (§2.7) -- modelled as entering Wander, which the wander handler
-                    // resolves.
+                    // READ: Idle PUSHES 1, but 1 then SETS 5 and discards that stack (§2.7).
+                    // The wander's purpose-1 arrival eventually sets Idle; it does not pop this push.
                     guest.PushState(VisitorState.Wander);
                     return IdleAction.Wander;
                 case 2:
@@ -172,12 +171,13 @@ namespace TPW.Sim
 
         static IdleAction RollVomit(Visitor guest, IVisitorWorld world, IRandomSource rng)
         {
-            // ⚠ OR, NOT AND -- a guest with a settled stomach is still sick one roll in four when this
-            // branch comes up. That is the original's behaviour and it is why vomit appears in parks
-            // with nothing nauseating in them.
+            // ⚠ DO NOT FIX: §2.1 says OR, so a settled stomach can still be sick. The binary instead
+            // requires nausea > 92 AND rand(4)==0 (0x8008D5D8..5F8). Keep the report's rule here;
+            // findings/visitor-rest.md records the disagreement rather than silently changing it.
             if (guest.Nausea <= VomitNausea && rng.Next(4) != 0) return IdleAction.Nothing;
 
             guest.WaitUntil = world.NowTick + 60;
+            guest.Animation = VisitorActivity.VomitAnimation;
             guest.SetState(VisitorState.Vomiting);
             return IdleAction.Vomit;
         }

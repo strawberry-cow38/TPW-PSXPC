@@ -1,5 +1,9 @@
 # Theme Park World (PSX, SLES-026.88) — person state BEHAVIOUR
 
+The [visitor remainder reading](visitor-rest.md) records the decoded shop need coefficients,
+influence producers, wander tables and binary disagreements found on 2026-09-20. This report's
+earlier READ/GUESS statements are retained for comparison.
+
 Companion to `ai_out.txt` (the state MAP). Everything here is read from `TPW.BIN` loaded at 0x80010000.
 Helper scripts beside this file: `ann.py START END` (annotated disassembly), `fn.py ADDR` (whole
 function), `leaf.py ADDR` (to first `jr ra`), `census.py` (every SetState/PushState/PopState site).

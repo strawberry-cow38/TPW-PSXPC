@@ -1,22 +1,23 @@
 using System;
+using System.Collections.Generic;
 
 namespace TPW.Sim
 {
     /// <summary>The tile-influence bits a guest standing somewhere picks up (§2.9).
     ///
-    /// ⚠ WHICH OBJECTS SET WHICH BIT IS NOT ESTABLISHED. behaviour.md guesses scenery = 1,
-    /// entertainer = 2, litter/ugly = 4 and says so; the bits are modelled here, the mapping is the
-    /// host's to supply. The values are the OR of +0x14 over every object in list 0x80103860 whose
-    /// radius squared covers the guest.</summary>
+    /// behaviour.md's original producer labels remain GUESS. READ refinement: the entertainer writes
+    /// 2 at 0x80095A34..38 through 0x800961D8; bit 1's producer remains NOT ESTABLISHED.
+    /// See findings/visitor-rest.md. Values are ORed over covering objects in list 0x80103860.</summary>
     [Flags]
     public enum TileInfluence
     {
         None = 0,
         /// <summary>Bit 1: +6 happiness. GUESS "something nice to look at".</summary>
         Pleasant = 1,
-        /// <summary>Bit 2: an entertainer's area.</summary>
+        /// <summary>READ: bit 2 is written by the entertainer, 0x80095A34..38.</summary>
         Entertainer = 2,
-        /// <summary>Bit 4: costs happiness and adds nausea, worse while walking.</summary>
+        /// <summary>READ: bit 4 costs happiness and adds nausea. Idle roll 5's particle sets it
+        /// (0x8008C32C..330); its visual identity and the old "all litter" label remain GUESS.</summary>
         Unpleasant = 4,
     }
 
@@ -32,9 +33,10 @@ namespace TPW.Sim
         (int Litter, int Vomit) LitterNearby(Visitor guest);
         /// <summary>True while the guest is queueing, which blocks the entertainer push.</summary>
         bool InQueue(Visitor guest);
-        /// <summary>Claim the nearest entertainer. Returns false if none; otherwise gives the watch
-        /// length, which the original computes as 300 + 60 * (entertainer+0x3C &amp; 7).</summary>
-        bool TryWatchEntertainer(Visitor guest, out int watchTicks);
+        /// <summary>READ: entertainers in list 0x80053768 order, with abs(dx)+abs(dy) in whole tiles
+        /// (slot 10, 0x800939B0; distance 0x80090078..B8). No performance-state or distance cutoff here.
+        /// The sim chooses the nearest; equal distances keep the first. This does not claim staff.</summary>
+        IEnumerable<(StaffMember Entertainer, int Distance)> EntertainersWithDistances(Visitor guest);
     }
 
     /// <summary>Per-tick needs update -- vtable slot 41, 0x8008FE60 (§2.9).
@@ -104,7 +106,7 @@ namespace TPW.Sim
             {
                 // ⚠ WORSE WHILE WALKING. Standing in something unpleasant costs 1 happiness and 2
                 // nausea; walking through it costs 3 and 5. States 2 and 3 are the moving ones.
-                bool walking = guest.State == VisitorState.Wander || guest.State == VisitorState.WalkToBin;
+                bool walking = guest.State == VisitorState.WalkToDestination || guest.State == VisitorState.WalkToWaypoint;
                 guest.Happiness = Stat.Sub(guest.Happiness, walking ? 3 : 1);
                 guest.Nausea = Stat.Add(guest.Nausea, walking ? 5 : 2);
             }
@@ -121,9 +123,19 @@ namespace TPW.Sim
             if (world.NowTick <= guest.EntertainerNotBefore) return;
             if (guest.State == VisitorState.WatchEntertainer) return;
 
-            if (!world.TryWatchEntertainer(guest, out int watchTicks)) return;
+            StaffMember nearest = null;
+            int distance = int.MaxValue;
+            foreach (var candidate in world.EntertainersWithDistances(guest))
+                if (nearest == null || candidate.Distance < distance)
+                {
+                    nearest = candidate.Entertainer;
+                    distance = candidate.Distance;
+                }
+            if (nearest == null) return;
+            guest.WatchedEntertainer = nearest;
             guest.PushState(VisitorState.WatchEntertainer);
-            guest.WaitUntil = world.NowTick + watchTicks;
+            guest.WaitUntil = world.NowTick + VisitorActivity.WatchBaseTicks
+                + VisitorActivity.WatchSkillTicks * (nearest.Skill & VisitorActivity.WatchSkillMask);
         }
 
         static void LitterAndNeedPenalties(Visitor guest, INeedsWorld world)
