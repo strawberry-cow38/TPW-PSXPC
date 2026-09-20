@@ -136,6 +136,53 @@ therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below
      Its `recOff+0x40 > size` guard excludes **47 short Feature records**; direct headers
      give **244** type-1..8 definitions. All 83 ride definitions were already included.
 
+10. **Other ride classes, breakdown disagreement (2026-09-20; READ, submitted for review).**
+    §6.2/§7 say track/coaster reliability <10 goes directly to **5**. The image instead passes
+    **4** at **0x800A6754** and **0x800B0B34**, through the unchanged shared SetStatus slot 57.
+    Both pass 5 only at exactly zero reliability while already in 4 (0x800A6758..788,
+    0x800B0B38..6C). Track's nonzero-low test has no status gate; coaster's admits **2 or 10**
+    (0x800B0A88..9C). **The port keeps this report's direct-5/running-only rule** in
+    `OtherRideWear`, explicitly labelled as retained, pending acceptance of the disagreement.
+11. **Other ride classes, wear scheduling disagreement (READ).** §6's status-2-only account
+    does not cover the actual callers. Tour Update calls wear whenever riders !=0
+    (0x800A0EAC..ED4); track movement calls it while moving/unloading and in its controller
+    path (0x800A8E30..EA8); coaster calls it from loading with riders and a connected track
+    (0x800B0DF8..E48) and from status 4 (0x800B1054..109C). **The port retains the report's
+    running-only gate.** Newly established: tour's two masks combine to every **32** ticks
+    (0x800A1FFC then 0x8009DD74); track adds `(pieceCount<<12)/30` as a **third wear term**
+    and averages three, while tour/coaster average speed and load (0x800A8994..9E0).
+12. **Tour dispatch disagreement and seat discovery (READ).** §7's queue-empty departure
+    omits **0x800A12D4**, which returns if the vehicle is occupied. The binary's partly
+    filled last vehicle waits for more guests; an empty spare instead sets a retirement
+    request (0x800A27C0, readers 0x800A2B14/0x800A2B54). **The port keeps the report's
+    queue-only departure gate**, with the omitted binary condition documented beside it.
+    Vehicle capacity is literal **3** at 0x800A335C, after reading and discarding record+0xD4;
+    it is separate from the common record's eight-seat maximum. Actual trips count vehicle
+    destination arrivals, not the cached model-animation length.
+13. **Coaster slot 86 and object distinction (READ).** Slot 86 at 0x800AD78C calls the shared
+    `{2,10,11}` predicate and vetoes zero **outer+0x104**, the track-connection flag set by
+    0x800ADEA0..EF4. It adds no status. The “32 cars of 0x40” in §7 are route pieces; passenger
+    trains are **eight 0x88-byte objects** constructed at outer+0x9A0 (0x800B1ACC →
+    0x800B1AFC..BB8). The port leaves route geometry to the world rather than introducing a
+    competing model of that disputed layout. Coaster duration=1 is a disc slider value,
+    **not a fixed trip time**: trains independently finish at the return-segment predicate
+    0x800B2220..2C8. Track has both `2*duration` running ticks (0x800A69B0..A38) and per-vehicle
+    duration laps (0x800AA99C..AAA3C). Full traces: [ride-classes.md](ride-classes.md).
+14. **Shared wear precision flag (READ).** §6.1's pseudocode clamps reliability before its
+    new lifetime band is calculated. The image calculates the band from the **unclamped**
+    value (0x8009DDB4..DF0), using signed division by **15*4096** on raw reliability,
+    truncating toward zero; only afterward does it clamp reliability (0x8009DE60..70).
+    The new class port does not replace the shared arithmetic. Exact speed/load term
+    instructions, including `0xCCC` and the unshifted square, are recorded in ride-classes.md §5.
+
+15. **Coaster maximum-capacity override (READ).** §1.3's shared slot-99 → per-level seat word
+    mapping is not the coaster implementation. **0x800AD728** returns
+    `min(u8(record+0xD2),8) * 0x800AD610()`; the latter is a station-model attachment count,
+    falling back from zero to one. Coaster wear divides load by this virtual maximum at
+    0x800B07A0 / 0x800B0804. The data's common seat words remain recorded as read, but they
+    do not establish that denominator. This port consumes already-computed load terms and
+    does not silently change the existing definition/slider maximum implementation.
+
 ## 1. The building-type table — settled
 
 ### 1.1 Type enum, pools, classes (READ)
@@ -518,7 +565,10 @@ would in any case re-trip on the next tick because nothing resets A+0x68 except 
 Live check: poke A+0x68 to 1 and A+0xB4 to 0x10000 (16.0) on a running ride; within 4 ticks the
 lifetime hits 0, message 0x99 appears and the status goes 2 → 4.
 
-## 7. The other ride classes (partly read)
+## 7. The other ride classes — original inventory and completed control trace
+
+The following is the **original partly-read inventory**, preserved so the disagreements in
+§0 items 10–15 remain reviewable. Its status-5 and “32 cars” claims are disputed by the new trace.
 - **TourRide** (0x800E586C): loads one guest per 20 ticks into a transport object (`outer+0x108`,
   0x800A3298 "vehicle available"), dispatches when the queue empties (0x800A27C0/0x800A3368),
   unloads one per 20 ticks (0x800A2464). Own wear slot 103 (0x800A1FE8) and rate (0x800A1CA4).
@@ -528,8 +578,12 @@ lifetime hits 0, message 0x99 appears and the status goes 2 → 4.
 - **RollerCoaster** (0x800E65A0): 32 car sub-objects of 0x40 at outer+0x18C; overrides slot 86
   (0x800AD78C), tick-2/10/11 (0x800B0D68/0x800B0DC8/0x800B0F90), loads at 0x800B025C, wear rate
   0x800B05D0 (reads speed and capacity), breakdown → **5** (0x800B0A68).
-I did not trace these beyond the addresses above; the status model, sliders, wear structure and
-lifetime are shared through the queued-ride base.
+The original investigation did not trace these beyond the addresses above. The new
+[ride-class report](ride-classes.md) traces their loading, departure, trip completion, unloading,
+wear and coaster slot 86, and records the exact boundaries of the C# control port.
+Its key result: **track has a short tick gate followed by per-vehicle lap completion; coaster
+trains finish independently by route progress; tour vehicles count destination arrivals.**
+None uses the flat ride's phase-counted run formula. The common sliders do not imply common clocks.
 
 ## 8. Live checks (in the order I would run them)
 1. `A+0x6E` of a freshly placed ride goes 0 → 1 → 10 and then loops 10 → 2 → 11 → 10; a shop goes
@@ -552,6 +606,7 @@ lifetime are shared through the queued-ride base.
 - What `mgr+4` (set A/B) is and who sets it; which coaster/track/tour records each scenario exposes.
 - Record header bytes +0x09, +0x14..+0x17, +0x20 and the per-level words +0x24/+0x28 (`f48`/`f4C`).
 - Whether the UI ever offers the (out-of-data) third upgrade to level 3.
-- Statuses 8/9 (dead), the Coaster's slot-86 override, and everything inside the track/coaster
-  loading code beyond the SetState(21)/(22) sites.
+- Statuses 8/9 (dead); complete track/coaster geometry, movement and park-adapter integration.
+  Slot 86, loading/dispatch control and completion/unloading conditions are now READ in
+  [ride-classes.md](ride-classes.md); the disagreements in §0 remain pending review.
 - The shop product parameters at record +0x30..+0x36 and the feature flag byte +0x2E bits 1–3.

@@ -14,6 +14,7 @@ as a lead, not a fact.
 | `economy.md` + `economy.json` | the BANK object, every flow of money, wages, prices |
 | `rides.md` + `rides.json` + locally generated `records.json` | building-type table, 197 definitions selected by the original parser, queues, throughput, breakdowns; phase report corrects the full count to 244 |
 | `animation-phases.md` + `ride-phase-lengths.md` | 88-byte runtime descriptor, disc lengths for 83 rides, conditional run times for 59 flat rides; reproducible extractor and mutation checks in `tools/` |
+| `ride-classes.md` | Tour/track/coaster loading, trip control, unloading, wear, coaster connection veto; binary disagreements retained for review in rides.md §0; controller ports and mutation runner |
 | `parkopen.md` | what gates guest arrival |
 | `disc-check.md` | why Main Game and Load Game are greyed: a disc check at boot, not save data |
 | `psyq-named-functions.json` | 219 Sony PsyQ library functions located in the image by signature |
