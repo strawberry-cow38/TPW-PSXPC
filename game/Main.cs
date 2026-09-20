@@ -81,6 +81,8 @@ namespace TPWGodot
         string _autoQueue;
         /// <summary>From <c>--park-hover=x,z</c>: the cursor held on that tile, for captures of the hover box.</summary>
         string _autoHover;
+        /// <summary>From <c>--park-picker[=tab]</c>: the purchase catalogue open on that category, for captures.</summary>
+        int _autoPicker = -1;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
         /// <summary>Each world's scenery pack by archive entry.</summary>
@@ -495,6 +497,8 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-hover=")) _autoHover = arg.Substring("--park-hover=".Length);
+                else if (arg == "--park-picker") _autoPicker = 0;
+                else if (arg.StartsWith("--park-picker=")) _autoPicker = int.Parse(arg.Substring("--park-picker=".Length));
                 else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
@@ -743,6 +747,7 @@ namespace TPWGodot
                         var v = System.Array.ConvertAll(_autoGhost.Split(','), int.Parse);
                         if (v.Length == 4) _park.PinGhost(v[0], v[1], v[2], v[3]);
                     }
+                    if (_autoPicker >= 0) _park.ShowPicker(_autoPicker);
                     if (_autoHover != null)
                     {
                         var v = System.Array.ConvertAll(_autoHover.Split(','), int.Parse);
@@ -863,12 +868,14 @@ namespace TPWGodot
                 SceneryPack gateModels = null;
                 var gateInfo = world != null ? ParkGate.ForWorld(world.Index) : null;
                 if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
+                _park.SetCatalogue(_exe, _strings);
                 _park.SetAttractions(world != null && _attractionsByWorld.TryGetValue(world.Index, out var al) ? al : null,
                                      ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
                 _park.SetToolSounds(_toolSounds, _parkSounds);
                 _park.SetHud(_commonSheet, _exe, _strings);
                 _park.SetBuildRig(v => _models != null && _models.TryGet(3, v, out var rig) ? rig : null);
+                _park.SetBank(_finances.Bank);
                 if (_autoOpen) _park.ParkOpen = true;
                 if (_autoBuildable) _park.ShowBuildable = true;
                 // ⭐ Entering a park starts its world's music, looping, as 0x80058694 does in the game.

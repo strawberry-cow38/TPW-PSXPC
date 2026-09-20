@@ -44,7 +44,13 @@ namespace TPWGodot
         readonly List<MeshInstance3D> _placed = new();
         CanvasLayer _pickerLayer;
         PanelContainer _picker;
-        VBoxContainer _pickerList;
+        TabContainer _pickerTabs;
+        /// <summary>The picker's buttons with the attraction each stands for, so their prices can be greyed when
+        /// the bank cannot pay for them.</summary>
+        readonly List<(Button Button, int Index)> _pickerButtons = new();
+        BuildCatalogue _catalogue;
+        StringTable _catalogueNames;
+        Bank _bank;
         /// <summary>The build tools' sound group (SoundGroup 7): the path tool's own sounds, and the placement tools'
         /// refusal. Group 8 holds the placement tools' other sounds (placed, cancelled, turned).</summary>
         SoundGroup _toolSounds, _parkSounds;
@@ -133,12 +139,10 @@ namespace TPWGodot
             _pickerLayer = new CanvasLayer { Layer = 5 };
             AddChild(_pickerLayer);
             _picker = new PanelContainer { Visible = false, AnchorLeft = 1, AnchorRight = 1, AnchorBottom = 1,
-                                           OffsetLeft = -300, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8 };
+                                           OffsetLeft = -420, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8 };
             _pickerLayer.AddChild(_picker);
-            var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
-            _picker.AddChild(scroll);
-            _pickerList = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-            scroll.AddChild(_pickerList);
+            _pickerTabs = new TabContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+            _picker.AddChild(_pickerTabs);
             _scenery = new MeshInstance3D();
             AddChild(_scenery);
             _flags = new MeshInstance3D();
@@ -191,16 +195,73 @@ namespace TPWGodot
             _attractionMesh = meshFor;
             _modelSheets = sheets;
             _attractionMeshes.Clear();
-            foreach (var c in _pickerList.GetChildren()) c.QueueFree();
-            for (int i = 0; i < _attractions.Count; i++)
+            BuildPicker();
+        }
+
+        /// <summary>The purchase catalogue's categories and the names for their labels (<see cref="BuildCatalogue"/>).
+        /// Call before <see cref="SetAttractions"/>, which lays the picker out from them.</summary>
+        public void SetCatalogue(byte[] exe, StringTable names)
+        {
+            _catalogue = BuildCatalogue.Read(exe, AssetSelfTest.GameExecutableBase);
+            _catalogueNames = names;
+        }
+
+        /// <summary>The park's bank: placing charges it (<see cref="PlaceAttraction"/>), and what it cannot pay for
+        /// cannot be picked. Null leaves everything free, as the port was before.</summary>
+        public void SetBank(Bank bank) { _bank = bank; RefreshPickerPrices(); }
+
+        /// <summary>The picker, a tab per catalogue category in the game's own order, holding that category's
+        /// attractions. A category the park has nothing for is left out, as the game leaves it out (0x8007D290).</summary>
+        void BuildPicker()
+        {
+            foreach (var c in _pickerTabs.GetChildren()) c.QueueFree();
+            _pickerButtons.Clear();
+            var cats = _catalogue?.Categories;
+            for (int c = 0; cats != null && c < cats.Count; c++)
             {
-                int k = i;
-                var (rec, name) = _attractions[i];
-                string kind = rec.Type switch { 3 => "ride", 4 => "shop", 5 => "sideshow", 2 => "feature", 1 => "coaster", 6 => "track ride", 7 => "tour ride", _ => "?" };
-                var b = new Button { Text = $"{name}  ({kind}, {rec.Width}x{rec.Depth}, £{rec.Price:n0})", Alignment = HorizontalAlignment.Left };
-                b.Pressed += () => StartPlacing(k);
-                _pickerList.AddChild(b);
+                var cat = cats[c];
+                var items = new List<int>();
+                for (int i = 0; i < _attractions.Count; i++) if (_attractions[i].Rec.Type == cat.Type) items.Add(i);
+                if (items.Count == 0) continue;
+                var scroll = new ScrollContainer
+                {
+                    Name = _catalogueNames?[cat.LabelId] ?? $"type {cat.Type}",
+                    HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                };
+                var box = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+                scroll.AddChild(box);
+                _pickerTabs.AddChild(scroll);
+                foreach (int i in items)
+                {
+                    int k = i;
+                    var (rec, name) = _attractions[i];
+                    var b = new Button { Text = PickerText(rec, name), Alignment = HorizontalAlignment.Left };
+                    b.Pressed += () => StartPlacing(k);
+                    box.AddChild(b);
+                    _pickerButtons.Add((b, k));
+                }
             }
+            RefreshPickerPrices();
+        }
+
+        static string PickerText(AttractionDefinition rec, string name) =>
+            $"{name}  ({rec.Width}x{rec.Depth}, {HudText.Money(rec.Price)})";
+
+        /// <summary>What the bank cannot pay for is greyed: the game works out the same thing every frame while a
+        /// blueprint is up (0x8001C22C: affordable if balance − price × 10 ≥ 0).</summary>
+        void RefreshPickerPrices()
+        {
+            foreach (var (b, k) in _pickerButtons)
+                if (k >= 0 && k < _attractions.Count) b.Disabled = !CanAfford(_attractions[k].Rec);
+        }
+
+        bool CanAfford(AttractionDefinition rec) => _bank == null || _bank.Balance >= Money.FromPounds(rec.Price);
+
+        void Charge(AttractionDefinition rec)
+        {
+            if (_bank == null) return;
+            _bank.Spend(Money.FromPounds(rec.Price));
+            RefreshPickerPrices();
         }
 
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
@@ -798,6 +859,7 @@ namespace TPWGodot
             if (!ok) return false;
             AttractionPlacement.Place(_map, rec, x, z, rot & 3);
             _paths?.LayDoors(_map, rec, x, z, rot & 3);
+            Charge(rec);
             var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
             AddChild(inst);
             _placed.Add(inst);
@@ -915,7 +977,7 @@ namespace TPWGodot
             if (PlacementCorner() is not { } o) return;
             var rec = _attractions[_placing].Rec;
             AttractionPlacement.Ghost(_map, rec, o.X, o.Z, _placeRot, out bool ok);
-            if (!ok) { PlaySfx(ToolSound.Refused); return; }
+            if (!ok || !CanAfford(rec)) { PlaySfx(ToolSound.Refused); return; }
             AttractionPlacement.Place(_map, rec, o.X, o.Z, _placeRot);
             _paths?.LayDoors(_map, rec, o.X, o.Z, _placeRot);
             var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
@@ -927,6 +989,9 @@ namespace TPWGodot
             // features' tool, 15, reopens itself). A flat or tour ride's hands over to the queue tool (0x8001C92C /
             // 0x8001CAFC switch to tool 3).
             PlaySfx(PlaceSound.Placed);
+            // ⭐ AND IT IS PAID FOR, right after the placed sound: 0x8001C5C8 calls 0x8001C2E0, which spends the
+            // price the blueprint carries (+8, from 0x8006AD58) times ten, the game's money unit (economy.md §4.6).
+            Charge(rec);
             int rot = _placeRot;
             StopPlacing();
             if (rec.IsRide) StartQueue(rec, o.X, o.Z, rot);
@@ -1012,6 +1077,14 @@ namespace TPWGodot
         const uint GateHoverRects = 0x800F2398;
         /// <summary>The park gate's type (its slot 0x84, 0x8006238C).</summary>
         const int GateType = 0x12;
+
+        /// <summary>Open the picker on one of its tabs, as Tab does. For captures.</summary>
+        public void ShowPicker(int tab = 0)
+        {
+            if (_attractions.Count == 0) return;
+            _picker.Visible = true;
+            if (tab >= 0 && tab < _pickerTabs.GetTabCount()) _pickerTabs.CurrentTab = tab;
+        }
 
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
@@ -1592,7 +1665,11 @@ void fragment() {
             // store) and plays group 8 sound 9; the blueprint is drawn from that byte the same frame (0x80064558).
             // The game only turns one way, the way . and R do; , is master's.
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Tab } && _attractions.Count > 0)
-            { _picker.Visible = !_picker.Visible; return; }
+            {
+                _picker.Visible = !_picker.Visible;
+                if (_picker.Visible) RefreshPickerPrices();   // the bank may have moved since it was last open
+                return;
+            }
             if (_placing >= 0)
             {
                 if (e is InputEventKey { Pressed: true, Echo: false } key && key.Keycode is Key.Comma or Key.Period or Key.R)

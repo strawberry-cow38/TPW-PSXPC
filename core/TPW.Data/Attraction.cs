@@ -104,9 +104,17 @@ namespace TPW.Data
         }
     }
 
-    /// <summary>Each world's attractions for the port's picker: flat rides (both sets), shops and sideshows, as
-    /// archive entries. From the theme tables 0x8002ED50 builds (findings/rides_themes.json); coasters, track and
-    /// tour rides come from scenario data the port has not read yet.</summary>
+    /// <summary>Each world's attractions for the port's picker: flat rides, shops, sideshows and features, as
+    /// archive entries. From the theme tables 0x8002ED50 builds (findings/rides_themes.json).
+    ///
+    /// ⚠ BOTH SETS AT ONCE. A park draws from ONE of the two sets the theme holds (the level manager's +4, which
+    /// the scenario picks and nothing traced writes), so the game offers 8 rides where this offers 14. The port
+    /// shows the union until the scenario loader is read; the entries themselves are the game's.
+    ///
+    /// ⚠ COASTERS, TRACK RIDES AND TOUR RIDES ARE NOT HERE. Their arrays in the theme table are filled at run
+    /// time by the scenario loader (rides.md §1.2), not built from the constants, so which of them a park offers
+    /// is scenario data the port has not read. Their catalogue tabs simply do not appear, which is what the game
+    /// does with a category whose count is zero (BuildCatalogue).</summary>
     public static class AttractionCatalog
     {
         static readonly int[][] Rides =
@@ -131,12 +139,39 @@ namespace TPW.Data
             new[] { 388, 393, 391, 380, 389, 394 },
         };
 
+        /// <summary>Type 2, the features: toilets, the staff room, fountains, trees and the rest of the scenery
+        /// (13, 14, 12, 13 per theme, the counts the theme table declares). The two sets hold the same features
+        /// bar one of Space's, so this is set A.</summary>
+        static readonly int[][] Features =
+        {
+            new[] { 197, 195, 185, 193, 179, 200, 201, 181, 180, 188, 173, 194, 191 },
+            new[] { 109, 107, 105, 98, 106, 110, 95, 96, 99, 100, 101, 111, 103, 104 },
+            new[] { 32, 31, 30, 19, 26, 29, 20, 21, 23, 24, 25, 28 },
+            new[] { 353, 352, 350, 351, 343, 344, 334, 336, 337, 340, 341, 345, 346 },
+        };
+
+        /// <summary>A world's entries of one attraction type, in the theme table's own order; empty for a type
+        /// whose list is scenario data (1 coasters, 6 track rides, 7 tour rides).</summary>
+        public static IReadOnlyList<int> ForWorld(int world, int type)
+        {
+            if (world < 0 || world >= Rides.Length) return Array.Empty<int>();
+            return type switch
+            {
+                3 => Rides[world],
+                4 => Shops[world],
+                5 => Sideshows[world],
+                2 => Features[world],
+                _ => Array.Empty<int>(),
+            };
+        }
+
         public static IEnumerable<int> ForWorld(int world)
         {
             if (world < 0 || world >= Rides.Length) yield break;
             foreach (var e in Rides[world]) yield return e;
             foreach (var e in Shops[world]) yield return e;
             foreach (var e in Sideshows[world]) yield return e;
+            foreach (var e in Features[world]) yield return e;
         }
     }
 
