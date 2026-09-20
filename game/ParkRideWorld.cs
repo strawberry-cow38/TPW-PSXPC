@@ -224,13 +224,33 @@ namespace TPWGodot
 
         public void CountGuestServed(Visitor g) { if (_runtime != null) _runtime.Served++; }
 
-        // ⚠ SHOPS ARE NOT WIRED. fable is porting the purchase routines (§2.5); until that lands a
-        // shop has infinite stock, sells nothing and takes no money. Every one of these is a stub and
-        // says so, rather than quietly returning a plausible number.
+        // ⚠ SHOPS ARE NOT WIRED. The purchase routines are ported (TPW.Sim.VisitorPurchase) but nothing
+        // in the park calls them yet: BuyAtShop and PlaySideShow are the only doors in and both are
+        // empty. Stock is the same stand-in it was.
         public bool TargetHasStock(Visitor g) => true;
         public void ConsumeStock(Visitor g, int units) { }
         public int StockLevel(Visitor g) => 100;
         public void BuyAtShop(Visitor g) { }
         public void PlaySideShow(Visitor g) { }
+
+        // ⚠ THESE THROW ON PURPOSE. IShopWorld's shop half needs real record bytes, real panel sliders
+        // and the real bank; every one of them has a plausible-looking neutral value (price 0, quality
+        // 0, an empty product) and every one of those would make the purchase code agree with itself
+        // and sell things for nothing. Nothing reaches them while the two doors above are empty, so a
+        // throw costs nothing today and names the gap loudly the moment someone opens one.
+        static Exception NotWired([System.Runtime.CompilerServices.CallerMemberName] string member = null)
+            => new NotSupportedException($"IShopWorld.{member}: the park has no shop wiring yet. "
+                                       + "Wire it rather than giving this a default - see ParkRideWorld.");
+        public ShopProduct Product(Visitor g) => throw NotWired();
+        public int SalePrice(Visitor g) => throw NotWired();
+        public int QualitySlider(Visitor g) => throw NotWired();
+        public int SecondSlider(Visitor g) => throw NotWired();
+        public void BookSale(Visitor g, ShopSale sale) => throw NotWired();
+        public SideShowGame Game(Visitor g) => throw NotWired();
+        public void BookPlay(Visitor g, SideShowPlay play) => throw NotWired();
+        public void RecordSatisfaction(Visitor g, int amount) => throw NotWired();
+        public void PostEvent(int id, int value) => throw NotWired();
+        public bool TrySpawnProp(Visitor g) => throw NotWired();
+        public void ReleaseModel(Visitor g) => throw NotWired();
     }
 }

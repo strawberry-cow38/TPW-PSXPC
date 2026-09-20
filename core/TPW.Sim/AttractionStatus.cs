@@ -142,7 +142,12 @@ namespace TPW.Sim
                     return world.IsRide ? status : AttractionStatus.Running;
 
                 case AttractionStatus.Running:
-                    if (world.CyclesRun >= world.CyclesPerLoad) return AttractionStatus.Unloading;
+                    // ⚠ ONLY A RIDE UNLOADS. The phase-counted 2 → 11 move lives in the RIDE classes'
+                    // status-2 tick (0x8009CA60 and its siblings at each ride vtable's +0x23C); the Shop,
+                    // Feature and SideShow vtables carry 0x80065B78 in that slot instead, which counts
+                    // nothing. Without this guard a shop whose record asks for zero cycles unloads on the
+                    // tick it opens.
+                    if (world.IsRide && world.CyclesRun >= world.CyclesPerLoad) return AttractionStatus.Unloading;
                     return status;
 
                 case AttractionStatus.Unloading:

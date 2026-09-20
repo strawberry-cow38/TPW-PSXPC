@@ -846,7 +846,6 @@ namespace TPWGodot
             var sb = new System.Text.StringBuilder();
             foreach (var a in _attractionsPlaced)
             {
-                if (!a.IsRide) continue;
                 int len = PhaseTicks(a);
                 sb.Append($"\n  {a.Rec.Entry}: status {(int)a.Status} {a.Status}, "
                         + $"tick {(len > 0 ? a.Cycle.Accumulator >> RideCycle.FixedShift : 0)}/{len}, "
@@ -1570,6 +1569,13 @@ namespace TPWGodot
                     a.BuildAnimationComplete = a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
                 else if (a.Status == AttractionStatus.Running && a.IsRide)
                     a.Cycle.RunTick(a, a.CyclesPerLoad, frameTime, halfSpeed: false);
+                // ⭐ A SHOP ANIMATES TOO, AND THE FINDINGS SAID IT DID NOT. Every class's status-2 tick
+                // sits at its vtable's +0x23C: for the rides that is the phase-counting tick, but Shop
+                // (0x800E6A8C), Feature (0x800DCA5C) and SideShow (0x800E6D64) all carry 0x80065B78 —
+                // a wrapper whose whole body is the same animation clock, with the completion discarded.
+                // So they run their model and never count a cycle. See findings/rides.md §0 item 9.
+                else if (a.Status == AttractionStatus.Running)
+                    a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
 
                 // Wear runs on the ride's own tick and can send it to 4 or 5; the lifecycle's tick then
                 // sees the status it left behind.
@@ -1606,7 +1612,7 @@ namespace TPWGodot
                 // it. A count taken off the simulation cannot see a view that has stopped listening to it
                 // (it was exactly that blindness that let "8 riding" print over a jammed-looking park), so
                 // the check for "does the ride move on screen" has to touch a.Inst.
-                if (_logRides && a.IsRide && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
+                if (_logRides && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
                 {
                     var box = drawn.GetAabb();
                     GD.Print($"[tpw] frame {Engine.GetFramesDrawn()}: {a.Rec.Entry} tick {a.Cycle.Accumulator >> RideCycle.FixedShift}, "
@@ -1622,7 +1628,7 @@ namespace TPWGodot
             get
             {
                 foreach (var a in _attractionsPlaced)
-                    if (a.IsRide && a.Status == AttractionStatus.Running && a.Cycle.Accumulator > 0) return true;
+                    if (a.Status == AttractionStatus.Running && a.Cycle.Accumulator > 0) return true;
                 return false;
             }
         }
@@ -1648,12 +1654,12 @@ namespace TPWGodot
                 if (a.Status != AttractionStatus.UnderConstruction || BuildRig(a.Variant) is not { } rig)
                 {
                     if (a.Inst.Transform != a.Rest) a.Inst.Transform = a.Rest;
-                    // ⭐ A RUNNING RIDE PLAYS ITS OWN MODEL. The cycle clock's whole ticks ARE the
+                    // ⭐ A RUNNING ATTRACTION PLAYS ITS OWN MODEL — a shop as much as a ride. The cycle clock's whole ticks ARE the
                     // animation's frames - the same halfword is the phase length it races and the end of
                     // the model's keys - so the thing on screen is the thing the sim is counting. It
                     // holds its last pose through loading and unloading, which is where guests get on
                     // and off; only status 2 advances the clock (StepAttractions).
-                    if (a.IsRide && a.Cycle.Accumulator > 0 && PhaseTicks(a) is int len && len > 1)
+                    if (a.Cycle.Accumulator > 0 && PhaseTicks(a) is int len && len > 1)
                     {
                         int t = a.Cycle.Accumulator
                               + (int)(Math.Min(frameTime, RideCycle.MaxDelta) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));

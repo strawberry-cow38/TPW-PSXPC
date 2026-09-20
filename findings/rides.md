@@ -101,6 +101,44 @@ therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below
    running does not wear, so the floor in the wear step is defensive code and nothing can drive a ride
    below about 9.8 points.
 
+9. **§3's status table: "Shops/features: nothing" on the status-2 tick is WRONG (2026-09-20, READ).**
+   Every class's status-2 tick is the word at its **vtable + 0x23C**, and reading that word out of all
+   seven class vtables settles it:
+
+   | class | vtable | +0x23C |
+   |---|---|---|
+   | NonPathedRide | 0x800E5514 | **0x8009CA60** — the phase-counting tick §3 already names |
+   | TourRide | 0x800E586C | 0x800A1334 |
+   | PathedRide (track) | 0x800E5FE8 | 0x800A6960 |
+   | RollerCoaster | 0x800E65A0 | 0x800B0D68 |
+   | **Shop** | 0x800E6A8C | **0x80065B78** |
+   | **Feature** | 0x800DCA5C | **0x80065B78** |
+   | **SideShow** | 0x800E6D64 | **0x80065B78** |
+   | base | 0x800E1068 | 0x80065B78 |
+
+   NonPathedRide's slot landing exactly on the address §3 gives for the ride tick is what makes the
+   offset certain rather than inferred. And 0x80065B78 is not a stub: it is six instructions
+   (0x80065B78..0x80065B94) whose whole body is `jal 0x800658D8` — **the animation clock** — with the
+   completion it returns discarded.
+
+   So a shop, a feature and a sideshow run their model's animation for as long as they are open, and
+   count nothing while doing it. Two consequences the port had wrong:
+
+   - **They animate.** Measured over every attraction model on the disc by posing it at each whole tick
+     of its own animation and counting vertices that move: **37 of 37 shops (type 4) and 31 of 33
+     sideshows (type 5)** — the Balloon Shop moves 78 of its 101 vertices, the Fries Shop 53 of 57. A
+     port that animates only rides leaves every shop in the park a statue.
+
+     ⚠ **Features are the exception, and it is in the DATA, not the code.** Type 2 shares this exact
+     tick, and **0 of 91** feature models carry a moving vertex. So "features animate" is true of the
+     code and empty in practice; do not read a still feature as a bug. For comparison the rides: 58 of
+     59 type 3, 6 of 8 type 6, 3 of 12 type 1, 1 of 4 type 7.
+   - **They must never take the 2 → 11 unload branch**, because nothing increments their A+0xF2. A shop
+     whose record asks for zero cycles would otherwise leave for 11 on the tick it opened — the port's
+     `AttractionLifecycle.Tick` did exactly that until this was read.
+
+   The same slot in the **track-piece** class vtable at 0x800E5C90 is also 0x80065B78.
+
 9. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
    (41→18→21→22→23) and the mechanic states 56/16/14/17/58 and 57/52/54 all matched what the ride
    side does.

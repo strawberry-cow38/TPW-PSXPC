@@ -193,6 +193,23 @@ namespace TPW.Sim.Tests
             Assert.False(AttractionLifecycle.OpenToGuests(AttractionStatus.Dead8));
         }
 
+        // REJECTS the phase-counted unload applying to anything but a ride. Every class's status-2 tick
+        // is the word at its vtable + 0x23C: NonPathedRide 0x800E5514 -> 0x8009CA60 (counts phases, and
+        // moves to 11), but Shop 0x800E6A8C, Feature 0x800DCA5C and SideShow 0x800E6D64 all -> 0x80065B78,
+        // whose whole body is the animation clock with its completion DISCARDED. A shop counts nothing and
+        // never unloads, so the ride's test must not run on it -- a shop asking for zero cycles would
+        // otherwise leave for 11 on the tick it opened.
+        [Theory]
+        [InlineData(0)] [InlineData(1)] [InlineData(3)]
+        public void OnlyARideEverLeavesRunningForUnloading(int cyclesPerLoad)
+        {
+            var shop = new World { IsRide = false, CyclesPerLoad = cyclesPerLoad, CyclesRun = cyclesPerLoad + 5 };
+            Assert.Equal(AttractionStatus.Running, AttractionLifecycle.Tick(AttractionStatus.Running, shop));
+
+            var ride = new World { IsRide = true, CyclesPerLoad = cyclesPerLoad, CyclesRun = cyclesPerLoad + 5 };
+            Assert.Equal(AttractionStatus.Unloading, AttractionLifecycle.Tick(AttractionStatus.Running, ride));
+        }
+
         // The numbers are the interface: they index the game's own jump tables.
         [Fact]
         public void TheStatusNumbersMatchTheJumpTable()
