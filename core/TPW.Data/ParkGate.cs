@@ -90,16 +90,47 @@ namespace TPW.Data
 
             /// <summary>One frame, frameTime in the game's time units (EntranceFlags.TimeUnitsPerSecond; the game
             /// caps a frame at 0x4000).</summary>
+            /// <summary>The doors have stopped swinging (see <see cref="Update"/>). The other two gates come to rest
+            /// on their own.</summary>
+            public bool Settled { get; private set; }
+            int _bounces;
+
+            /// <summary>How often the swing is worked out: the console steps it once a VIDEO frame, 50 a second, not
+            /// once a park frame.
+            ///
+            /// ⭐ MEASURED, because the cadence is not something the code says. At 25 a second the doors take 25 steps
+            /// to open, a full second; at 50 they take 37, three quarters of a second — and tinyclaw's frame count off
+            /// the real disc is 36. A host that ticks the park 25 times a second therefore calls this twice a frame
+            /// with half the frame's time.</summary>
+            public const double StepsPerSecond = 50;
+
             public void Update(int frameTime, bool parkOpen)
             {
-                if (!parkOpen) return;
+                if (!parkOpen || Settled) return;
                 frameTime = Math.Min(frameTime, 0x4000);
                 int step = (int)((uint)((Speed >> 8) * frameTime) >> 12);
                 switch (Gate.World)
                 {
                     case 0: case 1:       // doors: to 0x400, bounce back at half speed, pulled open by 0x100 a frame
                         Angle = (ushort)(Angle + step);
-                        if ((short)Angle > 0x3FF) { Angle = 0x400; Speed = -(Speed >> 1); }
+                        if ((short)Angle > 0x3FF)
+                        {
+                            Angle = 0x400;
+                            Speed = -(Speed >> 1);
+                            // ⚠ A DEPARTURE, AND IT IS THE CONSOLE THAT SAYS SO. Left to run, this arithmetic gives a
+                            // decaying series of rebounds and then a four-frame cycle between 1021 and 1024 — 0.3° —
+                            // FOREVER. Master, playing the port: "it keeps bouncing back forever". Tinyclaw then
+                            // measured the real disc, counting door pixels in the doorway frame by frame on hardware:
+                            // the jungle gate swings open over 36 frames, holds still for about 8, swings back ONCE,
+                            // returns, and is flat from then on — 92 frames, 1.8 s, and "flat as a board" after.
+                            // So: one rebound, then stop. The second time the doors reach the limit they are done.
+                            // (A bounce too weak to move them a whole unit settles them too: the next frame's speed
+                            // is Speed + 0x100 and it takes −0x100 to move one unit, so anything above −0x200 could
+                            // only ever jitter.) What the console does that this does not is the pause at full open,
+                            // which no spring produces — so a mechanism is still missing here, and the honest name
+                            // for this is "matched to the measurement", not "read off the code".
+                            if (++_bounces >= 2 || Speed > -0x200) { Speed = 0; Settled = true; }
+                        }
                         Speed += 0x100;
                         break;
                     case 2:               // drawbridge: to -800, bounce at half, pulled by -0x400 a frame

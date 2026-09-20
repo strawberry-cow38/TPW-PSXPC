@@ -1649,8 +1649,12 @@ void fragment() {
                 }
                 if (_gate != null)
                 {
+                    // Twice a park frame, half the time each: the gate's swing is stepped per video frame on the
+                    // console (ParkGate.State.StepsPerSecond), which is what makes it open in three quarters of a
+                    // second rather than a whole one.
                     _gateAnglePrev = _gateAngleCur;
-                    _gate.Update(frameTime, ParkOpen);
+                    int steps = (int)(ParkGate.State.StepsPerSecond / ParticleSystem.FramesPerSecond);
+                    for (int g = 0; g < Math.Max(steps, 1); g++) _gate.Update(frameTime / Math.Max(steps, 1), ParkOpen);
                     _gateAngleCur = (short)_gate.Angle;
                 }
                 if (_gate != null)

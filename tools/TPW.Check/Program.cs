@@ -2089,6 +2089,25 @@ static class Program
             // definition record -- where a model's origin sits relative to its footprint.
             // --rig E: every sub-model of entry E, its bones and animation length, and each bone's transform at a few
             // times -- for the park's build animation (entry 3, a rig per variant whose bone moves a whole ride).
+            // --gatesim W N: run THE PORT'S OWN ParkGate.State for world W over N park frames and print the angle,
+            // so "does the swing settle" is answered by the shipped code rather than by a model of it.
+            int gsimAt = Array.IndexOf(args, "--gatesim");
+            if (gsimAt >= 0 && gsimAt + 2 < args.Length)
+            {
+                int w = int.Parse(args[gsimAt + 1]), n = int.Parse(args[gsimAt + 2]);
+                var gate = ParkGate.ForWorld(w);
+                if (gate == null) { Console.WriteLine($"no gate for world {w}"); return 1; }
+                var st = new ParkGate.State(gate);
+                int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParkGate.State.StepsPerSecond);
+                Console.WriteLine($"world {w}: frame time {frameTime}, speed {st.Speed}");
+                for (int f = 0; f < n; f++)
+                {
+                    st.Update(frameTime, true);
+                    if (f < 40 || f % 10 == 0 || f >= n - 12)
+                        Console.WriteLine($"  f{f,4}  angle {(short)st.Angle,6}  ({(short)st.Angle * 90.0 / 1024:F1} deg)  speed {st.Speed}");
+                }
+                return 0;
+            }
             int rigAt = Array.IndexOf(args, "--rig");
             if (rigAt >= 0 && rigAt + 1 < args.Length)
             {
