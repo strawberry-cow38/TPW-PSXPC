@@ -76,9 +76,24 @@ namespace TPW.Sim
         long NowTick { get; }
         /// <summary>P+0x18 / P+0x1A, the guest's position in 8.8 (256 per tile).</summary>
         (int X, int Y) Position(Visitor guest);
-        /// <summary>The entrance building for a lane: 0x8005439C(1, lane == 0 ? 1 : 2), the
-        /// building-table entry flagged 0x04000000, the second call taking the one with the larger x
-        /// (§2.6). Its tile x and y are the halfwords at +4 and +8 (0x800591B8, 0x800591CC).
+        /// <summary>The entrance building for a lane. Its tile x and y are the halfwords at +4 and +8
+        /// (0x800591B8, 0x800591CC).
+        ///
+        /// ⚠ THE ARGUMENT MAPPING HERE USED TO READ `lane == 0 ? 1 : 2` AND IT IS THE OTHER WAY ROUND.
+        /// Read at the call site (0x80059168): v0 is preloaded with **2** in the prologue and only
+        /// overwritten with 1 when the lane is NON-zero (0x80059198 branches PAST `addiu v0,zero,1`
+        /// when s5 == 0). So lane 0 passes 2 and lane 1 passes 1. In the search itself (0x800543D4..)
+        /// argument 1 keeps the entry with the LARGER x and argument 2 the smaller — both decided in
+        /// branch delay slots, which is where this is easy to get backwards.
+        ///
+        /// Net: **lane 0 is the entrance building with the SMALLER x, lane 1 the larger.** On map 203
+        /// that is (19,13) for lane 0 and (23,14) for lane 1; map 34 has the identical pair. The
+        /// outcome matches what the old prose said even though its argument mapping did not, which is
+        /// why this is recorded rather than quietly corrected.
+        ///
+        /// The entry is the map's own build-list record flagged 0x04000000 — that is
+        /// <see cref="TPW.Data.SceneryPlacement.Flags"/> bit 2, and the table 0x8005439C walks is the
+        /// same one the map loader fills at 0x80054584, so a host already holding a parsed map has it.</summary>
         /// ⚠ THE ORIGINAL DOES NOT NULL-TEST IT (0x800591B0 branches on the lane, not the result), so a
         /// park with no entrance building read through address 4. A host without one may throw.</summary>
         MapTile EntranceTile(int lane);
