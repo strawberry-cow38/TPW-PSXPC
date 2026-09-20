@@ -20,11 +20,17 @@ namespace TPWGodot
     /// ⭐ GUESTS ONLY. Which person a guest is drawn as is the game's (PeopleSheet.GuestBlocks); the staff
     /// and the world's costumed character are in the same sheet and are not guests.
     ///
-    /// ⚠ THE SIZE IS NOT SOURCED YET. The game's sprite call takes a divisor per axis and scales
-    /// ((size − 1) &lt;&lt; 8) / divisor (0x80055470), so what a guest measures on screen is the caller's to
-    /// choose and this has not found the guest's call site. <see cref="TilesPerTexel"/> is therefore set
-    /// to make a guest about four tenths of a tile tall, which is what the sheet looks like next to a
-    /// path, and it is one number to change when a frame of the real thing turns up to measure.</summary>
+    /// ⚠ THE SIZE IS CHECKED, NOT READ. The game's sprite call takes a divisor per axis and scales
+    /// ((size − 1) &lt;&lt; 8) / divisor (0x80055470), so what a person measures on screen is the caller's to
+    /// choose, and this has not found that call site. What it has is a frame off the real disc (tinyclaw,
+    /// hardware): a guard standing at a Crazy Ape, 20 x 16 px on a 512 x 240 picture. The ride is four
+    /// tiles across and spans about 120 px there, so a tile is ~30 px at that depth and the guard is
+    /// ~0.53 of a tile tall. The guard's own sprites are 25-28 texels tall against a guest's 19, so a
+    /// guest comes out at ~0.39 of a tile. <see cref="TilesPerTexel"/> draws one at 0.43 — inside the
+    /// error of a measurement whose figure may be partly hidden by the ride's platform, so it stands.
+    ///
+    /// ⚠ What would settle it properly: a frame with a GUEST on a path, and a clean pixels-per-tile off
+    /// something with a known footprint in the same shot.</summary>
     public sealed class GuestSprites
     {
         /// <summary>World size of one sprite texel, in tiles. ⚠ Chosen, not measured — see the class note.</summary>
