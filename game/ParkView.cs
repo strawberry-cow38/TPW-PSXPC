@@ -2505,13 +2505,15 @@ namespace TPWGodot
         {
             if (_advisorWorld == null || _map == null) return;
             _statistics ??= new TPW.Sim.ParkStatistics(_advisorWorld.TotalDays, TPW.Sim.ParkStatisticRules.All);
-            // ⚠ ONE TICK PER CALL, NOT ONE PER ELAPSED TICK. The original reads a running counter and passes
-            // the difference (0x80013180), which is only ever 1 here because this loop IS the sim tick. The
-            // clamp in ParkAdvisor exists for the original's irregular caller and is inert for ours; if the
-            // advisor's arrival ever looks twice as fast as the console's, that counter is in FRAMES and
-            // this should pass 2. Nobody has watched it, so it passes what it can prove.
+            // ⭐ THE COUNTER IS IN FRAMES, AND THE HEDGE PAID OFF. This passed 1 per sim tick with a note
+            // saying "if his arrival ever looks twice as fast as the console's, that counter is in FRAMES
+            // and this should pass 2". It is: 0x80013180's elapsed value comes from 0x80050560, which
+            // accumulates the VSYNC counter (0x800BB380 -> [0x80103A50], incremented by the VSync callback
+            // at 0x800BB068). So his 50 are 50 FRAMES -- one PAL second to arrive, not two. A sim tick is
+            // ParkClock.FramesPerTick frames, so passing that reproduces the console's frame count exactly.
+            // findings/advisor-presentation.md §0 (fable's trace, two methods).
             var was = _advisor.State;
-            _advisor.Tick(1, this, _statistics, _advisorWorld);
+            _advisor.Tick(TPW.Sim.ParkClock.FramesPerTick, this, _statistics, _advisorWorld);
             // The advisor changes state a handful of times per message, so logging every change is cheap and
             // it is the only external sign of a machine whose whole job is to wait.
             if (_advisor.State != was)

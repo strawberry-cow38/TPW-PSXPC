@@ -13,22 +13,23 @@ This is that machine: when he speaks, what he picks, how he says it, and what st
 last call, **clamps it to 50**, and dispatches on the state byte at `+2` through the 6-entry table at
 `0x800DB960`. State 0 always steps by exactly 1.
 
-⚠ The counter's unit is not established. If it counts frames rather than ticks, every duration below
-is half what it looks like. Nobody has watched it run.
+✅ **The counter is VSYNC FRAMES** (`advisor-presentation.md` §0: `0x80050560` accumulates
+`0x800BB380` → `[0x80103A50]`, which the VSync callback at `0x800BB068` increments). So every duration
+below is in frames: arriving and leaving are **one PAL second each**, away is **two**.
 
 | state | handler | what it is |
 |---:|---|---|
 | 0 | `0x80013208` | boot; posts message 189 or 206 (both caption-less) and settles to idle |
 | 1 | `0x80013298` | **idle — the only state that refreshes statistics or runs rules** |
-| 2 | `0x800133C4` | arriving: 50 ticks, rising 24/tick to 1200 and turning 655/tick to 0x8000 |
+| 2 | `0x800133C4` | arriving: 50 frames, SCALE 24/frame to 1200 and SPIN 655/frame to 0x8000 — he grows from nothing while turning four times |
 | 3 | `0x8001345C` | speaking: **until the recording ends**, no timer |
-| 4 | `0x80013518` | leaving: the same 50 ticks, both back down |
-| 5 | `0x800135AC` | away for 100 ticks, then idle |
+| 4 | `0x80013518` | leaving: the same 50 frames, both unwound |
+| 5 | `0x800135AC` | away for 100 frames, then idle |
 
 ⭐⭐ **THE FREEZE IS THE FINDING.** `0x800132A0` tests flag bit 3 and calls the statistics loop, and
 it is reached in state 1 alone. A park's whole sense of what is wrong with it therefore stops the
 moment the advisor opens his mouth and does not resume until he has gone and served out his pause —
-**about 200 ticks plus the length of the recording, per message.** A port that ticks the rules every
+**about 200 frames — four seconds — plus the length of the recording, per message.** A port that ticks the rules every
 frame is not merely cosmetically different: it runs the advice engine several seconds per message
 faster than the console can, and it turns a character who visits into a notification feed.
 
@@ -53,8 +54,9 @@ them. **46 records caption nothing at all** and are voice-only by design.
 ⭐ **AND HE DOES NOT STAND THE SAME WAY EITHER.** Starting to arrive calls `0x8001404C`, which rolls
 `rand(5)` **in a loop until it differs from the last value** and stores it at `+0x1B1`.
 
-⚠ `mood` is carried, not understood. It takes seven values (7,8,9,11,13,14,16), is identical across
-every take of a message, and is latched into `+0x184` — whose reader has not been found. Its two
+✅ `mood` **is his FACE** (`advisor-presentation.md` §1.2): it picks a sub-mesh of FOLIO entry 0, attached
+to the body clip's first listed bone, and 16 means no face at all. It is identical across every take of a
+message because it is latched from the message, not the take. Its two
 remaining values, 10 and 12, appear ONLY on takes past `count`: **four records (22, 62, 63, 77) hold
 a take that was recorded and then cut.**
 
@@ -111,9 +113,16 @@ and draws the caption the string table gives for text 0x3CF.
 
 ## 6. What is not read
 
-* what consumes `mood` (`+0x184`)
-* the caption formatter's codes (`0x800141BC`)
-* the text box's own art (`0x800385AC`); the port's box is its own invention, the words are not
-* whether the elapsed counter is in ticks or frames
-* where the queue's read cursor advances (`0x80013E6C` not disassembled); the port advances it on
-  delivery, the only placement that neither repeats a message nor drops one
+Everything below is now in `advisor-presentation.md`:
+
+* what consumes `mood` (`+0x184`) — **read**: a face sub-mesh of FOLIO entry 0, attached to the body
+  clip's bone (advisor-presentation.md §1.2, §2); `+0x1B1` selects the body clip; `+0xE8`/`+0xEC` are a
+  uniform scale and a spin in the screen plane, drawn by `0x800136F4` from the renderer, not the tick (§1)
+* the caption formatter's codes (`0x800141BC`) — **read**: there are none; it stores text id, card kind
+  and object pointer (§4)
+* the text box's own art (`0x800385AC`) — **read**: it is not a box; the caption becomes a card in the
+  HUD's message list, readable in a 260-px box only when the list is opened with L2 (§3)
+* whether the elapsed counter is in ticks or frames — **read: VSync frames** (§0): arrive/leave are
+  1.0 s each, the pause 2.0 s, and §1's "about 200 ticks" is 4 s
+* where the queue's read cursor advances — **read** (`0x80013E6C`, advisor-presentation.md §0): on
+  delivery, when the arrival completes, exactly where the port advances it
