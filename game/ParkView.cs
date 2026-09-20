@@ -3106,6 +3106,12 @@ void fragment() {
             {
                 case PanelLabel.BuildQueue:
                 case PanelLabel.EditQueue:
+                    // ⭐ EDIT TAKES THE OLD QUEUE AWAY FIRST (master's rule). The two share one handler in the
+                    // game (0x8003BC5C) and differ only in their label, so the port keeps one branch and lets
+                    // the map decide: whatever queue is actually there goes, and the run starts clean from the
+                    // door. Build Queue on a ride that has none removes nothing, which is the same code path.
+                    int gone = _paths?.RemoveQueue(_map, a.Rec, a.Ox, a.Oz, a.Rot) ?? 0;
+                    if (gone > 0) { _guests?.MapChanged(); RebuildGround(); }
                     StartQueue(a.Rec, a.Ox, a.Oz, a.Rot);
                     break;
                 case PanelLabel.Delete:
@@ -3143,6 +3149,17 @@ void fragment() {
             RebuildGround();
             PlaySfx(PlaceSound.Demolished);
             RefreshInfo();
+        }
+
+        /// <summary>Run the context list's Edit Queue on the attraction at a tile — the old queue goes and the
+        /// tool opens on a clean run. Returns how many queue tiles were taken away. A test hook.</summary>
+        public int EditQueueAt(int x, int z)
+        {
+            if (AttractionAt((x, z)) is not { } a) return -1;
+            int gone = _paths?.RemoveQueue(_map, a.Rec, a.Ox, a.Oz, a.Rot) ?? 0;
+            if (gone > 0) { _guests?.MapChanged(); RebuildGround(); }
+            StartQueue(a.Rec, a.Ox, a.Oz, a.Rot);
+            return gone;
         }
 
         /// <summary>Delete whatever is on a tile, as the context list's Delete does. A test hook: a right

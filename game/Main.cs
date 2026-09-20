@@ -79,7 +79,7 @@ namespace TPWGodot
         string _autoLay, _autoPathCursor;
         /// <summary>From <c>--park-place=entry,x,z,rot;...</c>: attractions placed at load (footprint corner, quarter
         /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
-        string _autoPlace, _autoGhost, _autoDelete, _autoReplace;
+        string _autoPlace, _autoGhost, _autoDelete, _autoReplace, _autoEditQueue;
         bool _logRides;
         int _forcedGuests = -1;
         string _autoHire;
@@ -551,6 +551,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg.StartsWith("--park-delete=")) _autoDelete = arg.Substring("--park-delete=".Length);
                 else if (arg.StartsWith("--park-replace=")) _autoReplace = arg.Substring("--park-replace=".Length);
+                else if (arg.StartsWith("--park-editqueue=")) _autoEditQueue = arg.Substring("--park-editqueue=".Length);
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
@@ -914,6 +915,17 @@ namespace TPWGodot
                             if (held) hover = (c[0], c[1]); else clicks.Add((c[0], c[1]));
                         }
                         if (v.Length == 4) GD.Print($"[tpw] --park-queue {_autoQueue}: {_park.QueueAt(v[0], v[1], v[2], v[3], clicks, hover)?.ToString() ?? "not placed"}");
+                    }
+                    // ⚠ AFTER --park-queue, because it edits what that built. It sat before it at first and
+                    // reported -1 -- "no attraction there" -- which reads like a broken command rather than a
+                    // command run too early.
+                    if (_autoEditQueue != null)
+                    {
+                        foreach (var eq in _autoEditQueue.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(eq.Split(','), int.Parse);
+                            if (v.Length == 2) GD.Print($"[tpw] --park-editqueue {eq}: removed {_park.EditQueueAt(v[0], v[1])} queue tiles");
+                        }
                     }
                     // Last, because the ride it names may have been placed by --park-queue.
                     if (_autoBreak >= 0)

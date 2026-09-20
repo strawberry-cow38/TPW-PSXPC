@@ -650,6 +650,42 @@ namespace TPW.Data
             layer.WriteInto(map);
         }
 
+        /// <summary>Take away the queue a ride already has: from the tile outside its entrance, every QUEUE tile
+        /// (type 4) reachable across the four sides, each dropped the way the tool's own undo drops one
+        /// (<see cref="Layer.RemoveQueueTile"/>, 0x8004FBEC — the links go from the neighbour too, and the tile is
+        /// grass again). Returns how many went.
+        ///
+        /// ⚠ **THE JOIN TILE IS NOT A QUEUE TILE AND IS LEFT ALONE.** Where a run ended ON a path, that tile became
+        /// **13** — path AND queue, the only thing that ever bridges the two (see <see cref="QueueRun"/>). It is a
+        /// PATH tile, the path is not the queue's to delete, and a fresh run can join it again. So the walk stops at
+        /// 13 rather than treating it as part of the queue, and the park keeps its path.
+        ///
+        /// ⚠ It walks the MAP, not a remembered run: the tool's QueueRun is gone the moment the tool closes, and a
+        /// queue can also be a shape the current run never laid.</summary>
+        public int RemoveQueue(ParkMap map, AttractionDefinition a, int ox, int oz, int rot)
+        {
+            if (a.EntranceTile(ox, oz, rot) is not { } e) return 0;
+            var layer = NewLayer(map);
+            var seen = new System.Collections.Generic.HashSet<(int, int)>();
+            var stack = new System.Collections.Generic.Stack<(int X, int Z)>();
+            stack.Push((e.X, e.Z));
+            int gone = 0;
+            while (stack.Count > 0)
+            {
+                var (x, z) = stack.Pop();
+                if (!seen.Add((x, z))) continue;
+                if (x < 0 || z < 0 || x >= map.Width || z >= map.Height) continue;
+                // PathQueueOverlap (13), the join, and everything else stop the walk.
+                if (map[x, z].Type != TileType.QueuePath) continue;
+                layer.RemoveQueueTile(x, z);
+                gone++;
+                stack.Push((x + 1, z)); stack.Push((x - 1, z));
+                stack.Push((x, z + 1)); stack.Push((x, z - 1));
+            }
+            layer.WriteInto(map);
+            return gone;
+        }
+
         /// <summary>The queue tool for a ride just placed with its footprint's corner at (ox, oz): its run starts on
         /// the queue piece outside the entrance (0x8001DDD8, which asks the ride for that tile, 0x8009D240).</summary>
         public QueueRun StartQueue(AttractionDefinition a, int ox, int oz, int rot)
