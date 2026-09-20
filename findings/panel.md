@@ -13,13 +13,19 @@ The panel is ONE class family with **four pages behind a tab menu** — Details,
 — run as a **blocking modal task**, not a HUD overlay. The same loop serves both the in-park route and
 the "Ride Information" list route.
 
-⚠⚠ **"CIRCLE opens it" IS RETRACTED — 2026-09-20.** tinyclaw pressed ○ on two different selected objects
-at four delays in the real game on an emulator, and **every frame came back byte-identical to a
-do-nothing control**. Re-reading 0x80038D80 against that: it does not test a CIRCLE bit at all. It asks
-`0x8008974C(0)` and `0x800898A8(0)` — **logical button 0**, and the logical table at 0x800E35C0 does not
-decode as a plain index→button map (idx 0 reads 0x0040/0x0200, DOWN and R2 as raw pad bits, so it is
-pairs of something else). The original claim mapped logical 0 to CIRCLE without reading that table. The
-route 0x80038D80 → 0x80038900 stands; **which button reaches it does not.**
+⚠⚠ **"CIRCLE opens it" IS DOWNGRADED TO UNPROVEN — 2026-09-20.** Not refuted: *never established*.
+0x80038D80 does not test a CIRCLE bit. It asks `0x8008974C(0)` and `0x800898A8(0)` — **logical button
+0** — and the logical table at 0x800E35C0 does not decode as a plain index→button map (idx 0 reads
+0x0040/0x0200, DOWN and R2 as raw pad bits, so it holds pairs of something else). **The claim mapped
+logical 0 to CIRCLE without ever reading that table.** The route 0x80038D80 → 0x80038900 stands; which
+button reaches it was asserted, not read.
+
+⚠ **And the live test does NOT settle it either way.** tinyclaw pressed ○ in the real game and got
+frames byte-identical to a do-nothing control — but in a state with an object already selected and the
+root menu up, which is not the state this dispatcher describes, and §0 itself says the buttons mean
+different things once a menu is open. Their run is good evidence about THAT state and says nothing about
+this one. ⭐ Worth copying as method: they proved the instrument first — ✕, △, L1/R1 and Start all did
+their jobs from the same save, so the three zeros are real zeros and not a pad that never arrived.
 
 ⭐ **CROSS → the context list IS confirmed live**, by the same test: ✕ on a park gate gives a list
 containing "Open", and ✕ on a placed shop gives a list containing only "Delete" — no queue built, so no
