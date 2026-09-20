@@ -1064,11 +1064,40 @@ namespace TPWGodot
         string QueueHeadReport(PlacedAttraction a)
         {
             if (_guests?.Rides is not { } rw || rw.RuntimeFor(a.Rec.Entry) is not { } run) return "";
-            if (run.Queue.Count == 0) return ", queue empty";
+            string worst = a.BlockedWorst > 0
+                ? $"; worst stall {a.BlockedWorst} ticks with the head in {a.BlockedWorstState}" : "";
+            if (run.Queue.Count == 0) return ", queue empty" + worst;
             var head = run.Queue[0];
             bool boardable = head.V.State == (VisitorState)18;
             return $", queue {run.Queue.Count} head in {head.V.State}"
-                 + (boardable ? " (BOARDABLE)" : " ⚠ NOT BOARDABLE — the ride cannot load past it");
+                 + (boardable ? " (BOARDABLE)" : " ⚠ NOT BOARDABLE — the ride cannot load past it") + worst;
+        }
+
+        /// <summary>Count how long a ride has sat in Loading with a queue it cannot board from.
+        ///
+        /// ⭐ A SNAPSHOT CANNOT CATCH A STALL and this is the difference between an instrument that
+        /// MIGHT see the bug and one that will. The head passes through non-boardable states every time
+        /// anybody boards — that is normal and lasts a few ticks. What matters is the LONGEST it ever
+        /// stayed that way, which a reading taken at capture time has no way to know.</summary>
+        void NoteLoadingStall(PlacedAttraction a)
+        {
+            if (_guests?.Rides is not { } rw || rw.RuntimeFor(a.Rec.Entry) is not { } run) return;
+            // ⚠⚠ "NOT BOARDABLE" IS NOT "STUCK", AND CONFLATING THEM MAKES THE NUMBER USELESS. The
+            // head is legitimately non-boardable for the whole time it is WALKING to the queue, which on
+            // a big park is hundreds of ticks — measured at 309 on a park that was working perfectly.
+            // A stall is a head that is not boardable AND not going anywhere: no waypoint chain left and
+            // no search outstanding. That is the state nothing will ever move it out of.
+            var h = run.Queue.Count > 0 ? run.Queue[0] : null;
+            bool blocked = a.Status == AttractionStatus.Loading && h != null
+                        && h.V.State != (VisitorState)18
+                        && h.WaypointHead == WaypointPool.NoChain && !h.Waiting;
+            if (!blocked) { a.BlockedFor = 0; return; }
+            a.BlockedFor++;
+            if (a.BlockedFor > a.BlockedWorst)
+            {
+                a.BlockedWorst = a.BlockedFor;
+                a.BlockedWorstState = h.V.State.ToString();
+            }
         }
 
         void RefreshInfo()
@@ -1725,6 +1754,11 @@ namespace TPWGodot
             /// entrance is not reachable on the mechanic's own flags, and aiming at it made every claim
             /// end in a failed path and a released ride. The port aims at a walkable tile touching the
             /// footprint instead; what the game asks the object for is its slot 42, not followed.</summary>
+            /// <summary>How long this ride has been unable to board its queue head, now and at worst.
+            /// A DIAGNOSTIC of the port's own, not a field the game has.</summary>
+            public int BlockedFor, BlockedWorst;
+            public string BlockedWorstState = "";
+
             public int JobDoorX, JobDoorZ;
             int IRideJob.DoorX => JobDoorX;
             int IRideJob.DoorZ => JobDoorZ;
@@ -2071,12 +2105,14 @@ namespace TPWGodot
                 {
                     var load = new ParkRideWorld.LoadAdapter(run, Math.Max(1, a.MaxSeats),
                         () => _clockTicks, () => (int)(_clockTicks / TPW.Sim.ParkClock.TicksPerDay),
-                        g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
+                        g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot), rw, _guests.Dice);
                     var after = a.Status == AttractionStatus.Loading
                         ? TPW.Sim.RideLoading.Load(load, ref a.QueueEmptySince)
                         : TPW.Sim.RideLoading.Unload(load);
                     if (after != a.Status) a.Status = AttractionLifecycle.Enter(after, a);
                 }
+
+                NoteLoadingStall(a);
 
                 var next = AttractionLifecycle.Tick(a.Status, a);
                 if (next != a.Status) a.Status = AttractionLifecycle.Enter(next, a);

@@ -115,8 +115,12 @@ namespace TPWGodot
             readonly Action<Guest> _place;
             readonly int _capacity;
 
-            public LoadAdapter(RideRuntime r, int capacity, Func<long> now, Func<int> days, Action<Guest> placeAtExit)
-            { _r = r; _capacity = capacity; _now = now; _days = days; _place = placeAtExit; }
+            readonly IQueueWorld _queue;
+            readonly IRandomSource _dice;
+
+            public LoadAdapter(RideRuntime r, int capacity, Func<long> now, Func<int> days, Action<Guest> placeAtExit,
+                               IQueueWorld queue = null, IRandomSource dice = null)
+            { _r = r; _capacity = capacity; _now = now; _days = days; _place = placeAtExit; _queue = queue; _dice = dice; }
 
             public long NowTick => _now();
             public int Riders => _r.Riders.Count;
@@ -138,14 +142,32 @@ namespace TPWGodot
                 if (g.Inst != null) g.Inst.Visible = false;
             }
 
-            /// <summary>Message 6 to everyone still queued. ⚠ The real one carries a per-guest
-            /// `rand(3)` stagger; here they are simply told to shuffle, and the stagger that matters
-            /// most - the per-guest decision phase - is already in the sim.</summary>
+                /// <summary>Message 6 to everyone still queued, through the queue's own handler.
+            ///
+            /// ⚠⚠ THE STAGGER IS NOT COSMETIC — IT IS WHAT UNSTICKS THE QUEUE. Setting state 19 directly
+            /// leaves V+0x2C holding whatever the FIDGET timer last wrote (0..300 ticks, VisitorQueue's
+            /// Wait), and Shuffle refuses to move a guest until that deadline passes. Message 6 overwrites
+            /// it with 3 x rand(3) — at most six ticks — which is the whole difference between a queue
+            /// that shuffles up and one that boards a group and then stops.
+            ///
+            /// MEASURED on map 203: worst genuine stall 236 ticks with the head sitting in ShuffleForward,
+            /// going nowhere, inside the 0..300 the fidget roll can produce.
+            ///
+            /// ⭐ AND THE MESSAGE IS GATED ON STATE 18, which the hand-rolled version also skipped: a
+            /// shuffle that reaches a guest already loading or already walking is dropped (0x8008FB98).
+            /// Falls back to the old direct set only when no queue world was supplied.</summary>
             public void ShuffleTheRestForward()
             {
                 foreach (var g in _r.Queue)
-                    if (g.V.State == VisitorState.WaitingInQueue) g.V.SetState(VisitorState.ShuffleForward);
+                {
+                    if (_queue != null && _dice != null)
+                        VisitorQueue.OnMessage(g.V, _queue, QueueMessage.Shuffle,
+                                               _dice.Next(3), (int)VisitorState.ShuffleForward);
+                    else if (g.V.State == VisitorState.WaitingInQueue)
+                        g.V.SetState(VisitorState.ShuffleForward);
+                }
             }
+
 
             public void UnloadFirstRider()
             {

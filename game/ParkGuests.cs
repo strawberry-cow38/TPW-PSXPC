@@ -857,6 +857,23 @@ namespace TPWGodot
             return;
         notTheGate:
 
+            // ⭐⭐ A QUEUE ARRIVAL OWNS ITSELF, AND IT MUST COME BEFORE THE GUARDS BELOW. Purposes 3
+            // and 10 mean the guest was walking to its place IN the queue; what decides where it goes
+            // next is its in-queue bit, not whether it still has a target. Both guards below clear the
+            // target and RETURN — so one arrival that found no target left the guest sitting in
+            // WalkToWaypoint for ever, and RideLoading.Load boards only a head in 18. The ride then
+            // takes nobody at all, with a full queue and a healthy-looking status.
+            //
+            // MEASURED before this line existed: "worst stall 309 ticks with the head in
+            // WalkToWaypoint" on a park that still served 48 guests — it recovers only when the stuck
+            // guest eventually gives up and someone else reaches the front.
+            if (g.V.Purpose == Purpose.QueueWalk || g.V.Purpose == Purpose.QueueShuffle)
+            {
+                _rides?.SetGuest(g);
+                g.V.SetState(VisitorState.WaitingInQueue);
+                return;
+            }
+
             if (!g.V.HasTarget || _rides == null) { g.V.HasTarget = false; return; }
             if (!_rides.SetGuest(g)) { g.V.HasTarget = false; return; }
 
@@ -869,12 +886,6 @@ namespace TPWGodot
             // chooses 18 or 19 by whether the guest is standing on it. Here it always waits, and the
             // ride's own "shuffle everyone up" is what moves the queue. The difference shows as a
             // queue that closes up in steps rather than continuously.
-            if (g.V.Purpose == Purpose.QueueWalk || g.V.Purpose == Purpose.QueueShuffle)
-            {
-                g.V.SetState(VisitorState.WaitingInQueue);
-                return;
-            }
-
             if (!VisitorQueue.HasQueue(_rides.TargetType(g.V))) { g.V.HasTarget = false; return; }
             g.V.SetState(VisitorState.JoiningQueue);
         }
