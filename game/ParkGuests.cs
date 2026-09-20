@@ -104,6 +104,9 @@ namespace TPWGodot
         readonly WaypointPool _waypoints = new();
         readonly Pathfinder _finder;
         readonly List<Guest> _guests = new();
+        /// <summary>The sim passes a Visitor where the park needs the body that carries it. One map
+        /// rather than a scan: the entrance machine asks about a Visitor several times per guest tick.</summary>
+        readonly Dictionary<Visitor, Guest> _byVisitor = new();
         readonly List<Staffer> _staff = new();
         ParkStaffWorld _staffWorld;
         readonly Node3D _parent;
@@ -266,6 +269,7 @@ namespace TPWGodot
             g.OnArrive = w => Arrived((Guest)w);
             _parent.AddChild(g.Inst);
             _guests.Add(g);
+            _byVisitor[g.V] = g;
             Place(g);
             return g;
         }
@@ -330,6 +334,115 @@ namespace TPWGodot
             Place(st);
             return st;
         }
+
+        /// <summary>Take a guest out of the park entirely: the sim's RemoveFromPark (0x800519B0 then
+        /// 0x80051D74 — out of the guest manager and every staff list told).
+        /// ⚠ NO STAFF LIST IS TOLD, because no staff list holds guests yet.</summary>
+        void RemoveGuest(Guest g)
+        {
+            FreeChain(g);
+            _byVisitor.Remove(g.V);
+            _guests.Remove(g);
+            g.Inst?.QueueFree();
+        }
+
+        /// <summary>The park as an arriving or leaving guest reads it. Built lazily because it needs the
+        /// bank, which the host owns.</summary>
+        public ParkEntranceWorld Entrance => _entrance;
+        ParkEntranceWorld _entrance;
+
+        /// <summary>Give the guests a turnstile. Until this is called they appear inside the park for
+        /// free, which is the stand-in the bus arrivals were built against.</summary>
+        public void SetEntrance(ParkFinances finances, Func<BusRoute> bus)
+        {
+            _entrance = new ParkEntranceWorld(_map, () => _now, finances, bus, _dice,
+                (g, tx, tz, flags) => Ask(g, tx, tz, (PathFlags)flags),
+                (g, x, y) => SetSingleWaypoint(g, x, y),
+                FreeChain,
+                () => _guests, () => System.Linq.Enumerable.Select(_staff, s => s.S),
+                v => _byVisitor.TryGetValue(v, out var g) ? g : null,
+                () => _rideTargets?.Invoke() ?? (IReadOnlyList<GuestTarget>)System.Array.Empty<GuestTarget>(),
+                RemoveGuest);
+            _entrance.SetQueueWorld(() => _rides);
+        }
+
+        /// <summary>Whether this guest is in the turnstile machine rather than loose in the park. The
+        /// entrance states are not contiguous, so they are listed rather than ranged.</summary>
+        static bool AtTheGate(Guest g) => g.V.State is VisitorState.SpawnToGate or VisitorState.WalkToLaneSlot
+            or VisitorState.ShuffleInLane or VisitorState.LaneFront or VisitorState.PayEntryFee
+            or VisitorState.WalkIn or VisitorState.AtGate or VisitorState.LeavingPark
+            or VisitorState.PickLane or VisitorState.WalkOut;
+
+        /// <summary>One tick of a guest that is arriving or leaving (TPW.Sim.VisitorEntrance, §2.6).
+        ///
+        /// ⭐ 44 AND 46 DO NOTHING HERE ON PURPOSE. A guest at the front of a lane waits for the LANE's
+        /// tick to send it to pay, and one in 46 waits for the admit routine's message 9. Giving either
+        /// a per-tick handler would let a guest admit itself.</summary>
+        void RunEntrance(Guest g)
+        {
+            switch (g.V.State)
+            {
+                case VisitorState.SpawnToGate: VisitorEntrance.SpawnToGate(g.V, _entrance); break;
+                case VisitorState.PickLane: VisitorEntrance.PickLane(g.V, _entrance); break;
+                case VisitorState.WalkToLaneSlot: VisitorEntrance.WalkToLaneSlot(g.V, _entrance); break;
+                case VisitorState.ShuffleInLane: VisitorEntrance.ShuffleInLane(g.V, _entrance); break;
+                case VisitorState.PayEntryFee:
+                    // The two ways to be turned away are different facts: one is a guest who cannot
+                    // afford £40, the other one who looked at what is built and decided it was not
+                    // worth it. A park that charges too much and a park with nothing in it look the
+                    // same from the headcount and nothing else here separates them.
+                    switch (VisitorEntrance.PayEntryFee(g.V, _entrance, _dice))
+                    {
+                        case PayOutcome.CannotAfford: _refusedEntry++; _brokeAtGate++; break;
+                        case PayOutcome.Refused: _refusedEntry++; break;
+                    }
+                    break;
+                case VisitorState.WalkIn: VisitorEntrance.WalkIn(g.V, _entrance); break;
+                case VisitorState.LeavingPark: VisitorEntrance.Leave(g.V, _entrance); break;
+                case VisitorState.WalkOut: VisitorEntrance.WalkOut(g.V, _entrance, _dice); break;
+            }
+        }
+
+        /// <summary>Put a guest down where the bus does and start it through the turnstile: the map's
+        /// own spawn tile, state 36. ⚠ Without an entrance wired this is Spawn(), which puts a guest
+        /// INSIDE the park for free — the stand-in the arrivals were built against.</summary>
+        public Guest SpawnAtGate()
+        {
+            if (_entrance == null || _map.SpawnTiles.Count == 0) return Spawn();
+            var (sx, sz) = _map.SpawnTiles[_rng.Next(_map.SpawnTiles.Count)];
+            var g = Spawn((sx, sz));
+            if (g == null) return null;
+            g.V.SetState(VisitorState.SpawnToGate);
+            return g;
+        }
+
+        int _refusedEntry, _brokeAtGate;
+
+        /// <summary>What the gate is doing: how many guests are in each entrance state, plus the two
+        /// lane counters and the fees taken. For a caption on a capture — the turnstile's whole job is
+        /// invisible from the guest count, because a guest stuck OUTSIDE still counts as a guest.</summary>
+        public string GateReport()
+        {
+            if (_entrance == null) return "no gate";
+            int outside = 0, lanes = 0, paying = 0, inside = 0, leaving = 0;
+            foreach (var g in _guests)
+                switch (g.V.State)
+                {
+                    case VisitorState.SpawnToGate: case VisitorState.PickLane: case VisitorState.AtGate: outside++; break;
+                    case VisitorState.WalkToLaneSlot: case VisitorState.ShuffleInLane: case VisitorState.LaneFront: lanes++; break;
+                    case VisitorState.PayEntryFee: paying++; break;
+                    case VisitorState.WalkIn: inside++; break;
+                    case VisitorState.LeavingPark: case VisitorState.WalkOut: leaving++; break;
+                }
+            return $"gate: {outside} outside, {lanes} in a lane, {paying} paying, {inside} walking in, "
+                 + $"{leaving} leaving; lanes {_entrance.LaneCount(0)}/{_entrance.LaneCount(1)}, "
+                 + $"{_entrance.Counter_McAi1C} paid, {_refusedEntry} turned back ({_brokeAtGate} broke)";
+        }
+
+        /// <summary>How many guests are standing in the two turnstile lanes right now — the number the
+        /// bus load is capped by (`20 - lanes`, 0x80059150). ⚠ ZERO WHEN NO TURNSTILE IS WIRED, which is
+        /// the honest answer then and a bug the moment one is.</summary>
+        public int LanesWaiting => _entrance == null ? 0 : _entrance.LaneCount(0) + _entrance.LaneCount(1);
 
         ParkStaffWorld StaffWorld() => _staffWorld ??= new ParkStaffWorld(
             () => _now,
@@ -513,6 +626,15 @@ namespace TPWGodot
             // The rides a guest can be standing at change whenever something is built, and the scripted
             // harness does not always say so. Refreshing here means the two can never disagree.
             if (_rides != null && _rideTargets != null) _rides.SetRides(_rideTargets());
+            if (_entrance != null)
+            {
+                // ⚠ BOTH LANES EVERY TICK. LaneTick's own first act is `now & 31 == lane`, so the
+                // turn-taking lives in the sim; calling one lane per tick here would halve its rate and
+                // look like a tuning choice.
+                Turnstile.Admit(_entrance);
+                Turnstile.LaneTick(_entrance, 0);
+                Turnstile.LaneTick(_entrance, 1);
+            }
             foreach (var g in _guests)
             {
                 // On a ride: the ride owns it entirely (state 21).
@@ -524,6 +646,17 @@ namespace TPWGodot
                 // is what this code did until the readout showed 10/10 searches out and not one
                 // waypoint ever allocated. behaviour.md §2.10's own answer is the fix - drop the
                 // target, take the happiness hit, wander.
+                // ⚠ A GUEST AT THE GATE MUST NOT BE WANDERED. The failure path below drops the
+                // target and sends the guest off to walk about, which for one queueing at a turnstile
+                // loses its place and its state. The entrance machine has its own answer for both
+                // messages (VisitorEntrance.OnMessage) and it is the one that must run.
+                if (_entrance != null && AtTheGate(g) && g.Answer is { } em)
+                {
+                    g.Answer = null;
+                    VisitorEntrance.OnMessage(g.V, _entrance,
+                        em == PathMessage.Found ? EntranceMessage.PathReady : EntranceMessage.PathFailed, _dice);
+                    continue;
+                }
                 if (g.Answer == PathMessage.Failed)
                 {
                     g.Answer = null;
@@ -538,6 +671,11 @@ namespace TPWGodot
                 }
                 if (g.WaypointHead != WaypointPool.NoChain) { Walk(g); continue; }
                 if (g.Waiting) continue;                       // the answer has not come back yet
+                // ⚠ AFTER THE WALK AND THE WAIT, NOT BEFORE THEM. Every entrance state ends by asking
+                // for a route, so running this while the guest still had a chain to walk re-asked every
+                // tick: the guest never moved, and ten of them held all ten request slots for ever.
+                // Same failure as the unanswered search above, reached from the other direction.
+                if (_entrance != null && AtTheGate(g)) { RunEntrance(g); continue; }
                 if (RunQueueState(g)) continue;
                 AskForARoute(g);
             }
@@ -584,6 +722,29 @@ namespace TPWGodot
         /// purposes, which are not connected yet.</summary>
         void Arrived(Guest g)
         {
+            // ⭐ THE GATE'S ARRIVALS COME FIRST AND DO NOT TOUCH A RIDE. Slot 35's table (0x800E3A94)
+            // is keyed on PURPOSE, and 11..16 belong to the entrance — the ride arm below would clear
+            // the target of a guest that was only walking to its place in a turnstile lane.
+            switch (g.V.Purpose)
+            {
+                case Purpose.Turnstile11:
+                case Purpose.Turnstile12:
+                    VisitorEntrance.ArriveAtLaneSlot(g.V, _entrance, g.V.Purpose == Purpose.Turnstile12);
+                    return;
+                case Purpose.Turnstile14: VisitorEntrance.ArriveAtExitPoint(g.V, _entrance); return;
+                case Purpose.Turnstile15: VisitorEntrance.ArriveAtSpawnPoint(g.V, _entrance); return;
+                case Purpose.Turnstile16: VisitorEntrance.ArriveAtGate(g.V, _entrance, _dice); break;
+                default: goto notTheGate;
+            }
+            // ⭐ ARRIVAL IS SELF-CANCELLING and 14 and 15 are the exceptions (VisitorArrival.Tick). A
+            // guest that keeps 11, 12 or 16 arrives again the next time its chain empties and picks a
+            // second lane; one that loses 14 or 15 stops being on its way out. This line is the whole
+            // guard — there is no other.
+            if (g.V.Purpose != Purpose.Turnstile14 && g.V.Purpose != Purpose.Turnstile15)
+                g.V.Purpose = Purpose.Spent;
+            return;
+        notTheGate:
+
             if (!g.V.HasTarget || _rides == null) { g.V.HasTarget = false; return; }
             if (!_rides.SetGuest(g)) { g.V.HasTarget = false; return; }
 

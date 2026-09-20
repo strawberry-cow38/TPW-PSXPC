@@ -305,6 +305,10 @@ namespace TPWGodot
             _guests.SetBrain(GuestTargets);
             _guests.SetRideWorld(GuestTargets);
             _guests.SetRideJobs(RideJobs);
+            // ⭐ THE GATE, AND IT HAS TO BE RE-WIRED ON EVERY LOAD. ParkGuests is rebuilt above, so an
+            // entrance wired once at boot would be silently dropped the first time a park is opened and
+            // every guest would go back to appearing inside the fence.
+            if (_finances != null && !NoGate) _guests.SetEntrance(_finances, () => _bus);
             _guests.LogStaff = _logRides;
             _guests.MapChanged();
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
@@ -654,11 +658,15 @@ namespace TPWGodot
             int catalogue = Math.Max(1, _attractions.Count);
             int capacity = 25 + 75 * kinds.Count / catalogue;
             int score = TPW.Sim.BusLoad.ParkScore(draws, _guests.Dice);
-            int count = TPW.Sim.BusLoad.HeadCount(score, capacity, _guests.Count, 0, BusDivisor);
-            // Exit point 0's tile, the same one for the whole load (see ParkGuests.Spawn).
-            (int X, int Z)? at = _map.SpawnTiles.Count > 0 ? _map.SpawnTiles[0] : null;
-            for (int i = 0; i < count; i++) _guests.Spawn(at);
-            GD.Print($"[bus] arrived: score {score} capacity {capacity} -> {count} guests at {at}");
+            // ⭐ THE LANE COUNT IS REAL NOW. It was 0 while nothing queued at a turnstile, which was
+            // correct then; with the gate wired, `20 - lanes` caps the load by how many are already
+            // standing in one, and leaving the 0 there would let a jammed gate keep filling.
+            int count = TPW.Sim.BusLoad.HeadCount(score, capacity, _guests.Count, _guests.LanesWaiting, BusDivisor);
+            // ⭐ THEY GET OFF OUTSIDE. SpawnAtGate puts each one on the map's own spawn tile in state 36
+            // and the turnstile walks it in; with no entrance wired it falls back to appearing INSIDE the
+            // park for nothing, which is what this did before.
+            for (int i = 0; i < count; i++) _guests.SpawnAtGate();
+            GD.Print($"[bus] arrived: score {score} capacity {capacity} lanes {_guests.LanesWaiting} -> {count} guests");
         }
 
         /// <summary>[0x80102E50], the divisor the draw is scaled by.</summary>
@@ -666,6 +674,22 @@ namespace TPWGodot
 
         /// <summary>The bus's fixed depth and height, straight out of the draw (0x80057CB0: 256 and 1900).</summary>
         public const int BusY = 256, BusZ = 1900;
+
+        /// <summary>The park's books, handed over by Main so the turnstile can bank an entry fee. Null
+        /// until it is, and the gate simply is not wired then.</summary>
+        ParkFinances _finances;
+
+        /// <summary>--park-nogate: guests appear inside the fence and pay nothing, the way they did
+        /// before the turnstile existed. A CONTROL, not a rule — it exists so the gate's effect on the
+        /// bank can be measured against its own absence in the same binary.</summary>
+        public bool NoGate { get; set; }
+
+        /// <summary>Give the park its books and wire the turnstile to them. Safe before or after a load.</summary>
+        public void SetFinances(ParkFinances finances)
+        {
+            _finances = finances;
+            if (_guests != null && finances != null && !NoGate) _guests.SetEntrance(finances, () => _bus);
+        }
 
         TPW.Sim.BusRoute _bus;
         MeshInstance3D _busMesh;
@@ -954,6 +978,7 @@ namespace TPWGodot
             + $"{_guests.Outstanding}/{Pathfinder.MaxRequests} searches out, "
             + $"{_guests.FreeNodes}/{Pathfinder.NodePoolSize} nodes and "
             + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free"
+            + $"\n{_guests.GateReport()}"
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")

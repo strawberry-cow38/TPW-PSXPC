@@ -16,6 +16,7 @@ namespace TPWGodot
     {
         ParkClock _clock;
         ParkFinances _finances;
+        bool _noGate;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -355,6 +356,9 @@ namespace TPWGodot
 
             // ⭐ THE PARK VIEW. A park's map, drawn; see ParkView for what it does and does not show yet.
             _park = new ParkView();
+            // ⚠ AFTER THE PARK EXISTS. _finances is built long before this line, so wiring the gate
+            // there fired on a null park and the turnstile was never connected at all.
+            _park.SetFinances(_finances);
             AddChild(_park);
             _parkInfo = new Label { Text = "" };
             _park.SetInfoLabel(_parkInfo);
@@ -539,6 +543,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
+                else if (arg == "--park-nogate") _noGate = true;
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-break=")) _autoBreak = int.Parse(arg.Substring("--park-break=".Length));
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
@@ -979,6 +984,11 @@ namespace TPWGodot
                 _park.SetAttractions(world != null && _attractionsByWorld.TryGetValue(world.Index, out var al) ? al : null,
                                      ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets,
                                      (ae, sub) => _models != null && _models.TryGet(ae, sub, out var sm) ? sm : null);
+                // ⚠ BEFORE THE LOAD, NOT AT CONSTRUCTION. The command line is not parsed until long
+                // after `new ParkView()`, so setting this there left the control permanently off — and
+                // a --park-nogate run reported the gate's own numbers back at me, which is exactly what
+                // a working control would have made impossible. The check is that it prints "no gate".
+                _park.NoGate = _noGate;
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe, _busPack);
                 _park.SetToolSounds(_toolSounds, _parkSounds);
                 _park.SetHud(_commonSheet, _exe, _strings);
