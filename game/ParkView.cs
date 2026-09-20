@@ -147,7 +147,7 @@ namespace TPWGodot
             _pickerLayer = new CanvasLayer { Layer = 5 };
             AddChild(_pickerLayer);
             _picker = new PanelContainer { Visible = false, AnchorLeft = 1, AnchorRight = 1, AnchorBottom = 1,
-                                           OffsetLeft = -420, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8 };
+                                           OffsetLeft = -520, OffsetTop = 8, OffsetRight = -8, OffsetBottom = -8 };
             _pickerLayer.AddChild(_picker);
             _pickerTabs = new TabContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
             _picker.AddChild(_pickerTabs);

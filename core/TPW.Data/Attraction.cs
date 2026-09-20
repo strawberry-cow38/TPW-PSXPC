@@ -202,10 +202,13 @@ namespace TPW.Data
     /// the scenario picks and nothing traced writes), so the game offers 8 rides where this offers 14. The port
     /// shows the union until the scenario loader is read; the entries themselves are the game's.
     ///
-    /// ⚠ COASTERS, TRACK RIDES AND TOUR RIDES ARE NOT HERE. Their arrays in the theme table are filled at run
-    /// time by the scenario loader (rides.md §1.2), not built from the constants, so which of them a park offers
-    /// is scenario data the port has not read. Their catalogue tabs simply do not appear, which is what the game
-    /// does with a category whose count is zero (BuildCatalogue).</summary>
+    /// ⚠ THE COASTERS, TRACK RIDES AND TOUR RIDES ARE DERIVED, NOT READ. Their arrays in the theme table are
+    /// filled at run time by the scenario loader (rides.md §1.2) rather than built from constants, so which ones
+    /// a given scenario offers is not in TPW.BIN. What IS certain is the disc's own census: twelve coasters,
+    /// eight track rides and four tour rides, and each theme's assets occupy one contiguous stretch of archive
+    /// entries — Wonderland 19..74, Halloween 95..160, Lost Kingdom 170..250, Space 330..400. Sorting the census
+    /// into those stretches gives exactly THREE coasters, TWO track rides and ONE tour ride per theme, four times
+    /// over, which is not what a wrong grouping produces. So the port offers those, and says they are derived.</summary>
     public static class AttractionCatalog
     {
         static readonly int[][] Rides =
@@ -222,6 +225,30 @@ namespace TPW.Data
             new[] { 65, 71, 62, 68, 60, 69, 64, 67 },
             new[] { 385, 381, 383, 387, 382, 386, 384, 390 },
         };
+        /// <summary>Type 1, the roller coasters: three a theme (see the class note).</summary>
+        static readonly int[][] Coasters =
+        {
+            new[] { 212, 213, 219 },
+            new[] { 125, 126, 127 },
+            new[] { 44, 46, 47 },
+            new[] { 367, 368, 373 },
+        };
+
+        /// <summary>Type 6, the track rides: two a theme.</summary>
+        static readonly int[][] TrackRides =
+        {
+            new[] { 215, 228 },
+            new[] { 130, 143 },
+            new[] { 41, 57 },
+            new[] { 363, 378 },
+        };
+
+        /// <summary>Type 7, the tour rides: one a theme.</summary>
+        static readonly int[][] TourRides =
+        {
+            new[] { 208 }, new[] { 142 }, new[] { 56 }, new[] { 372 },
+        };
+
         static readonly int[][] Sideshows =
         {
             new[] { 248, 229, 244, 243, 245, 246 },
@@ -252,6 +279,9 @@ namespace TPW.Data
                 4 => Shops[world],
                 5 => Sideshows[world],
                 2 => Features[world],
+                1 => Coasters[world],
+                6 => TrackRides[world],
+                7 => TourRides[world],
                 _ => Array.Empty<int>(),
             };
         }
@@ -263,6 +293,9 @@ namespace TPW.Data
             foreach (var e in Shops[world]) yield return e;
             foreach (var e in Sideshows[world]) yield return e;
             foreach (var e in Features[world]) yield return e;
+            foreach (var e in Coasters[world]) yield return e;
+            foreach (var e in TrackRides[world]) yield return e;
+            foreach (var e in TourRides[world]) yield return e;
         }
     }
 
