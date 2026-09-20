@@ -460,6 +460,25 @@ namespace TPWGodot
 
         int _refusedEntry, _brokeAtGate, _verdicts, _sumMin, _sumMax;
 
+        readonly Dictionary<int, int> _strandedBy = new();
+        readonly HashSet<Visitor> _strandedGuests = new();
+        readonly Dictionary<(VisitorState, Purpose), int> _strandedStates = new();
+        readonly Dictionary<string, int> _strandedTiles = new();
+
+        /// <summary>Where the stranded route failures are coming FROM: the piece each failing guest was
+        /// standing in, and how many distinct guests are doing it. A big number from two guests in the
+        /// wrong piece is a different fault from the same number spread over everyone.</summary>
+        public string StrandedReport()
+        {
+            if (_strandedBy.Count == 0) return "no stranded failures";
+            var parts = new List<string>();
+            foreach (var kv in _strandedBy) parts.Add($"piece {kv.Key}: {kv.Value}");
+            var st = new List<string>();
+            foreach (var kv in _strandedStates) st.Add($"{kv.Key.Item1}/{kv.Key.Item2}x{kv.Value}");
+            return $"stranded from {string.Join(", ", parts)} — {_strandedGuests.Count} distinct guests, in {string.Join(" ", st)}"
+                 + $"; standing on {string.Join(" ", _strandedTiles.Keys)}";
+        }
+
         /// <summary>What the gate is doing: how many guests are in each entrance state, plus the two
         /// lane counters and the fees taken. For a caption on a capture — the turnstile's whole job is
         /// invisible from the guest count, because a guest stuck OUTSIDE still counts as a guest.</summary>
@@ -699,9 +718,20 @@ namespace TPWGodot
                 if (_entrance != null && AtTheGate(g) && g.Answer is { } em)
                 {
                     g.Answer = null;
-                    VisitorEntrance.OnMessage(g.V, _entrance,
-                        em == PathMessage.Found ? EntranceMessage.PathReady : EntranceMessage.PathFailed, _dice);
-                    continue;
+                    // ⭐ THE RETURN VALUE IS THE WHOLE POINT. behaviour.md §2.10's message-2 table is by
+                    // PURPOSE: 11 re-enters 42, 15 re-enters 36, 14 gets one retry — and "any other",
+                    // which includes 9, the walk out, is `happiness −rand(15), boredom +rand(2), target
+                    // := 0, state 5` — the ordinary wander below, exactly.
+                    //
+                    // ⚠ SWALLOWING IT ORPHANS THE GUEST. Both leaving states walk in state 11, so a
+                    // leaver whose route to the exit failed stayed in 11 with nothing owning it: outside
+                    // the fence, retrying for ever. MEASURED as 1123 route failures from four guests,
+                    // every one of them in WalkToBin, before this line read the answer.
+                    if (VisitorEntrance.OnMessage(g.V, _entrance,
+                            em == PathMessage.Found ? EntranceMessage.PathReady : EntranceMessage.PathFailed, _dice))
+                        continue;
+                    if (em == PathMessage.Found) continue;   // handled by the walk below
+                    g.Answer = PathMessage.Failed;           // fall into the shared "any other" row
                 }
                 if (g.Answer == PathMessage.Failed)
                 {
@@ -710,7 +740,20 @@ namespace TPWGodot
                     g.V.Happiness = Stat.Sub(g.V.Happiness, _rng.Next(15));
                     g.V.Boredom = Stat.Add(g.V.Boredom, _rng.Next(2));
                     RouteFailed++;
-                    if (SameArea(g)) RouteFailedSameArea++; else RouteFailedStranded++;
+                    if (SameArea(g)) RouteFailedSameArea++;
+                    else
+                    {
+                        RouteFailedStranded++;
+                        // ⚠ "STRANDED" IS A COUNT, NOT A DIAGNOSIS. It says the two ends are in
+                        // different pieces; it does not say WHICH guests, and a handful of guests in
+                        // the wrong piece retrying for ever produce the same number as a broken park.
+                        // Without this the figure cannot be acted on.
+                        _strandedBy[AreaAt(g.X >> 8, g.Z >> 8)] = _strandedBy.GetValueOrDefault(AreaAt(g.X >> 8, g.Z >> 8)) + 1;
+                        _strandedGuests.Add(g.V);
+                        _strandedTiles[$"{_map[g.X >> 8, g.Z >> 8].Type}@({g.X >> 8},{g.Z >> 8})"] = 1;
+                        var k = (g.V.State, g.V.Purpose);
+                        _strandedStates[k] = _strandedStates.GetValueOrDefault(k) + 1;
+                    }
                     g.TargetTileX = g.TargetTileZ = -1;
                     Wander(g);
                     continue;
@@ -1117,7 +1160,16 @@ namespace TPWGodot
             int gate = GateArea();
             var bad = new List<string>();
             foreach (var t in targets)
-                if (AreaAt(t.DoorX, t.DoorZ) != gate) bad.Add($"#{t.Id} at ({t.DoorX},{t.DoorZ}) in piece {AreaAt(t.DoorX, t.DoorZ)}");
+            {
+                if (AreaAt(t.DoorX, t.DoorZ) != gate) bad.Add($"#{t.Id} door ({t.DoorX},{t.DoorZ}) in piece {AreaAt(t.DoorX, t.DoorZ)}");
+                // ⭐ THE EXIT IS ITS OWN QUESTION AND IT IS THE ONE THAT STRANDS PEOPLE. A ride whose
+                // door is reachable takes guests in happily and then puts them down on the far side; if
+                // THAT tile is not joined to the park they stand there failing every route, waiting out
+                // the decision cooldown between each one. From outside it reads as "guests freeze at the
+                // exit of rides for a while after they get off", which is exactly how it was reported.
+                if (t.ExitX >= 0 && AreaAt(t.ExitX, t.ExitZ) != gate)
+                    bad.Add($"#{t.Id} EXIT ({t.ExitX},{t.ExitZ}) in piece {AreaAt(t.ExitX, t.ExitZ)}");
+            }
             // ⭐ THE PIECE NUMBERS ARE THE DIAGNOSIS, not decoration. All the strays sharing ONE piece
             // means the paths are fine and it is the GATE that is not joined to them; each in its own
             // means the runs never met. Without them "unreachable" says only that something is wrong.

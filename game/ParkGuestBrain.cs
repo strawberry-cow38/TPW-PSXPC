@@ -25,6 +25,11 @@ namespace TPWGodot
         /// <summary>The footprint's centre tile, which is what the score measures distance to.</summary>
         public int CentreX, CentreZ;
 
+        /// <summary>Where a rider is PUT DOWN when it gets off, or (-1,-1) when the record has no exit.
+        /// ⭐ A SEPARATE TILE FROM THE DOOR AND A SEPARATE CONNECTIVITY QUESTION: a ride whose entrance
+        /// is reachable can still strand everyone it unloads, because they leave through the other side.</summary>
+        public int ExitX = -1, ExitZ = -1;
+
         /// <summary>Record +0x2E bit 1 on a feature: staff may rest here (READ, 0x8002433C via the
         /// wrapper 0x80024110). Staff state 49 searches the object list for the NEAREST one of these
         /// whose status byte is also non-zero (0x800660DC).</summary>

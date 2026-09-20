@@ -980,6 +980,7 @@ namespace TPWGodot
             + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free"
             + $"\n{_guests.GateReport()}"
             + $"\n{_guests.Reachability()}"
+            + $"\n{_guests.StrandedReport()}"
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
@@ -1882,6 +1883,8 @@ namespace TPWGodot
                     Built = a.Status != AttractionStatus.JustPlaced,
                     DoorX = door.X, DoorZ = door.Z,
                     CentreX = cx, CentreZ = cz,
+                    ExitX = a.Rec.ExitTile(a.Ox, a.Oz, a.Rot)?.X ?? -1,
+                    ExitZ = a.Rec.ExitTile(a.Ox, a.Oz, a.Rot)?.Z ?? -1,
                 });
             }
             return _guestTargets;
