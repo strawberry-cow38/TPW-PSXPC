@@ -88,6 +88,19 @@ namespace TPWGodot
         float Sy => Screen.Y / ParkHudLayout.ScreenHeight;
         float Sx => Screen.Y / 384f;
         float Left(float psxX) => psxX * Sx;
+
+        /// <summary>⭐ THE HUD SPREADS, THE PANEL CENTRES. Every other coordinate in this file belongs to the
+        /// park HUD, which anchors to the screen's edges — Left() from the left, Right() from the right — so
+        /// it spreads correctly across a window wider than the PSX's 4:3. The attraction panel is not a HUD:
+        /// it is a modal laid out on a 512-wide PSX screen and centred there (its rect's centre, x=255, is
+        /// where the tab menu's rows centre too). Anchored from the left it sits hard against that edge — a
+        /// 960-wide window left 49px on its left and 292px on its right. This is the slack to shift it by, so
+        /// the panel keeps the game's scale and proportions at any resolution and any aspect from 4:3 up.</summary>
+        float PanelDx => Mathf.Max(0f, (Screen.X - ParkHudLayout.ScreenWidth * Sx) / 2f);
+
+        /// <summary>The shift in force while the panel paints; 0 for everything else, including the context
+        /// menu, which is pinned to the cursor and must not move with it.</summary>
+        float _panelDx;
         float Right(float psxX) => Screen.X - (ParkHudLayout.ScreenWidth - psxX) * Sx;
 
         /// <summary>A sprite of the common sheet, upright, every texel that shows fully there (the HUD's opaque
@@ -134,7 +147,7 @@ namespace TPWGodot
             var tex = Tex(s);
             if (tex == null) return;
             var sp = _sheet.Sprites[s];
-            float x = (right ? Right(px) : Left(px)) + sp.OffsetX * Sx, y = (py + sp.OffsetY) * Sy;
+            float x = (right ? Right(px) : Left(px)) + _panelDx + sp.OffsetX * Sx, y = (py + sp.OffsetY) * Sy;
             float w = sp.W * Sx, h = sp.H * Sy;
             var pts = new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + h), new Vector2(x, y + h) };
             var uv = mirror ? new[] { new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) }
@@ -181,6 +194,12 @@ namespace TPWGodot
         void PaintPanel(CanvasItem on)
         {
             if (Panel == null) return;
+            _panelDx = PanelDx;
+            try { PaintPanelAt(on); } finally { _panelDx = 0f; }
+        }
+
+        void PaintPanelAt(CanvasItem on)
+        {
             var dim = Psx((0x40, 0x40, 0x40));
             var lit = Psx((0x80, 0x80, 0x80));
             // GUESS: the panel's own rect is READ (0x800446C4 writes 35/31/440/191 to the same +8/+10/+20/+22
@@ -245,7 +264,7 @@ namespace TPWGodot
         /// <summary>A rectangle in PSX coordinates, shaded top colour to bottom colour.</summary>
         void Quad(CanvasItem on, int px, int py, int pw, int ph, Color top, Color bottom)
         {
-            float x = Left(px), y = py * Sy, w = pw * Sx, h = ph * Sy;
+            float x = Left(px) + _panelDx, y = py * Sy, w = pw * Sx, h = ph * Sy;
             on.DrawPrimitive(new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + h), new Vector2(x, y + h) },
                              new[] { top, top, bottom, bottom }, new[] { Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero });
         }
