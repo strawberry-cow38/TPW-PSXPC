@@ -30,9 +30,14 @@ namespace TPWGodot
     /// ⚠ POSITION IS 8.8 WORLD UNITS, the game's own, where a tile is 256 and a tile centre is
     /// `tile &lt;&lt; 8 | 0x80`. Not Godot metres and not tiles. The pathfinder, the waypoints and the
     /// walk speed are all in these units, and converting early is how they stop agreeing.</summary>
-    sealed class Guest : IPathClient
+    /// <summary>Somebody the park walks along a waypoint chain and draws out of the people sheet.
+    ///
+    /// ⭐ STAFF AND GUESTS ARE THE SAME BODY. In the original they share the Person base (P+0x..), the
+    /// same pathfinder, the same waypoint pool and the same eight drawn facings; only the state machine
+    /// hanging off them differs. Splitting that here would mean two copies of the walk loop, and the
+    /// first time one was fixed they would begin to disagree.</summary>
+    abstract class Walker : IPathClient
     {
-        public Visitor V;
         public int X, Z;
         public MeshInstance3D Inst;
 
@@ -40,11 +45,11 @@ namespace TPWGodot
         /// as the camera sees it, and how far through the five-frame stride it is.</summary>
         public int Block, Facing, Frame, Walked;
 
-        /// <summary>Where the walk is up to: the waypoint pool index of the next corner, or
-        /// <see cref="WaypointPool.NoChain"/>.</summary>
-        /// <summary>On a ride: not drawn, and not walked. The ride owns it (state 21).</summary>
+        /// <summary>Not drawn, and not walked - somebody else owns it. A guest on a ride (state 21).</summary>
         public bool Hidden;
 
+        /// <summary>Where the walk is up to: the waypoint pool index of the next corner, or
+        /// <see cref="WaypointPool.NoChain"/>.</summary>
         public int WaypointHead { get; set; } = WaypointPool.NoChain;
 
         /// <summary>The last thing the pathfinder said, or null while a request is outstanding.
@@ -56,7 +61,20 @@ namespace TPWGodot
         /// <summary>True between asking for a route and hearing about it.</summary>
         public bool Waiting;
 
+        /// <summary>Tiles per park frame in 8.8 units; the walk loop's budget.</summary>
+        public abstract int WalkSpeed { get; }
+
+        /// <summary>What to do when the chain runs out. Set once, because the walk loop can reach the
+        /// end of a chain in the middle of a frame's budget and carries on afterwards.</summary>
+        public Action<Walker> OnArrive;
+
         public void OnPathMessage(PathMessage message) { Answer = message; Waiting = false; }
+    }
+
+    sealed class Guest : Walker
+    {
+        public Visitor V;
+        public override int WalkSpeed => V.WalkSpeed;
     }
 
     /// <summary>The guests in a park: spawning them, asking the pathfinder for routes, and walking them.
@@ -141,7 +159,7 @@ namespace TPWGodot
 
         /// <summary>One waypoint straight to a point, for the shuffle-forward step, which moves a guest
         /// one place up a queue rather than asking the pathfinder for a route.</summary>
-        bool SetSingleWaypoint(Guest g, int x, int z)
+        bool SetSingleWaypoint(Walker g, int x, int z)
         {
             FreeChain(g);
             int i = _waypoints.Alloc();
@@ -152,7 +170,7 @@ namespace TPWGodot
             return true;
         }
 
-        int FreeChain(Guest g)
+        int FreeChain(Walker g)
         {
             if (g.WaypointHead != WaypointPool.NoChain) _waypoints.FreeChain(g.WaypointHead);
             g.WaypointHead = WaypointPool.NoChain;
@@ -208,6 +226,7 @@ namespace TPWGodot
             // (PeopleSheet.GuestBlocks). Staff and the world's costumed character are NOT in it.
             g.V.VisitorType = _rng.Next(TPW.Data.PeopleSheet.GuestBlocks.Length);
             g.Block = TPW.Data.PeopleSheet.GuestBlocks[g.V.VisitorType];
+            g.OnArrive = w => Arrived((Guest)w);
             _parent.AddChild(g.Inst);
             _guests.Add(g);
             Place(g);
@@ -388,9 +407,9 @@ namespace TPWGodot
             g.Answer = null;
         }
 
-        void Walk(Guest g)
+        void Walk(Walker g)
         {
-            int speed = Math.Max(1, g.V.WalkSpeed);
+            int speed = Math.Max(1, g.WalkSpeed);
             int budget = speed;
             int fromX = g.X, fromZ = g.Z;
 
@@ -409,7 +428,7 @@ namespace TPWGodot
                     g.WaypointHead = next < 0 ? WaypointPool.NoChain : next;
                     // Arrived: the guest wants something else now. The real machine does this through
                     // the arrival purposes (TPW.Sim.VisitorArrival), which are not wired here yet.
-                    if (g.WaypointHead == WaypointPool.NoChain) Arrived(g);
+                    if (g.WaypointHead == WaypointPool.NoChain) g.OnArrive?.Invoke(g);
                     continue;
                 }
 
@@ -423,7 +442,7 @@ namespace TPWGodot
             Place(g);
         }
 
-        void Place(Guest g)
+        void Place(Walker g)
         {
             g.Inst.Visible = !g.Hidden;
             if (g.Hidden) return;
@@ -443,7 +462,7 @@ namespace TPWGodot
         /// <summary>A step of the walk: the facing the camera sees and how far through the stride, from
         /// how far the guest has actually moved. ⚠ The port's own timing — the game advances its frames
         /// on the animation clock, which this has not traced.</summary>
-        void Stride(Guest g, int fromX, int fromZ)
+        void Stride(Walker g, int fromX, int fromZ)
         {
             int dx = g.X - fromX, dz = g.Z - fromZ;
             if (dx == 0 && dz == 0) return;

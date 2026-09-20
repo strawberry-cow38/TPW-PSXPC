@@ -76,6 +76,7 @@ namespace TPWGodot
         /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
         string _autoPlace, _autoGhost;
         bool _logRides;
+        int _forcedGuests = -1;
         /// <summary>From <c>--park-queue=entry,x,z,rot:cx,cz:cx,cz...[:~hx,hz]</c>: a ride placed at load, then its queue
         /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
         /// queue building.</summary>
@@ -518,6 +519,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-lay=")) _autoLay = arg.Substring("--park-lay=".Length);
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg == "--park-log-rides") _logRides = true;
+                else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-track=")) _autoTrack = arg.Substring("--park-track=".Length);
@@ -927,6 +929,7 @@ namespace TPWGodot
                 _park.SetHud(_commonSheet, _exe, _strings);
                 _park.SetBuildRig(v => _models != null && _models.TryGet(3, v, out var rig) ? rig : null);
                 _park.LogRides = _logRides;
+                _park.ForcedGuests = _forcedGuests;
                 _park.SetBank(_finances.Bank);
                 if (_autoOpen) _park.ParkOpen = true;
                 if (_autoBuildable) _park.ShowBuildable = true;

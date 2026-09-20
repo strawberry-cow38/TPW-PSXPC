@@ -1639,6 +1639,13 @@ namespace TPWGodot
         /// arrivals (TPW.Sim.BusArrivals), which compute a real arrival rate from what is built and are
         /// not wired to this yet.</summary>
         const int DebugGuestCount = 24;
+
+        /// <summary>--park-guests=N: keep N guests in the park regardless of the bus. A TEST HOOK, not a
+        /// rule — the bus is the arrivals and this does not touch it. It exists because the arrival path
+        /// currently delivers nobody (every attraction is handed upgrade level 0, so the park draw is the
+        /// bare base score of 10 and the head count floors to zero), and a park with no guests in it
+        /// cannot be used to test queueing, riding, wear or staff.</summary>
+        public int ForcedGuests { get; set; } = -1;
         int _buildVariant;
         Func<int, TPW.Data.Mesh> _buildRigSource;
         readonly TPW.Data.Mesh[] _buildRigs = new TPW.Data.Mesh[8];
@@ -2233,7 +2240,8 @@ void fragment() {
                 if (_guests != null) _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
                 _clockTicks++;
                 // The stand-in only runs where there is no bus: once the bus is on the road it is the arrivals.
-                if (_bus == null) _guests?.Populate(DebugGuestCount);
+                if (ForcedGuests >= 0) _guests?.Populate(ForcedGuests);
+                else if (_bus == null) _guests?.Populate(DebugGuestCount);
                 _guests?.RunPathfinder();
                 _guests?.Tick();
             }
