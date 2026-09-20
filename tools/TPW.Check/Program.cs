@@ -2361,6 +2361,76 @@ static class Program
             if (bnAt >= 0 && bnAt + 1 < args.Length) return Bones(g, int.Parse(args[bnAt + 1]));
             if (Array.IndexOf(args, "--seatbones") >= 0) return SeatBones(g);
             if (Array.IndexOf(args, "--seats") >= 0) return Seats(g);
+            if (Array.IndexOf(args, "--headdepth") >= 0)
+            {
+                // Which of the 88 rider-head sprites are 8-bit? RenderSprites lays an 8-bit sprite into the
+                // atlas at DOUBLE x (xx*2), so a UV rect computed as if it were 4-bit is half as wide and at
+                // half the offset -- it lands on whatever is next door, which in sheet 416 is the HUD font.
+                if (!TextureSheet.TryParse(g.Read(g.Entries[416]), out var sh416, out string e416))
+                { Console.WriteLine(e416); return 1; }
+                int eight = 0, four = 0;
+                foreach (var row in TPW.Sim.RiderSprites.Table)
+                    foreach (int sid in row)
+                    {
+                        if (sid <= 0 || sid >= sh416.Sprites.Count) continue;
+                        if (sh416.Sprites[sid].EightBit) { eight++; if (eight <= 12) Console.WriteLine($"  sprite {sid}: 8-bit, U {sh416.Sprites[sid].U} W {sh416.Sprites[sid].W}"); }
+                        else four++;
+                    }
+                Console.WriteLine($"-- head sprites: {eight} eight-bit, {four} four-bit");
+                Console.WriteLine($"sheet 416: VramX {sh416.VramX} VramY {sh416.VramY} "
+                                  + $"{sh416.WidthTexels}x{sh416.HeightTexels}, {sh416.Sprites.Count} sprites");
+                foreach (int probe in new[] { 110, 121, 66, 132, 143, 77, 88, 99 })
+                {
+                    if (probe >= sh416.Sprites.Count) { Console.WriteLine($"  {probe}: OUT OF RANGE"); continue; }
+                    var q = sh416.Sprites[probe];
+                    int col = (q.PageX - sh416.VramX) / 64, rw = (q.PageY - sh416.VramY) / 256;
+                    Console.WriteLine($"  {probe}: page ({q.PageX},{q.PageY}) col {col} row {rw} "
+                                      + $"uv ({q.U},{q.V}) {q.W}x{q.H} -> atlas ({col * TextureSheet.PageTexels + q.U},"
+                                      + $"{rw * TextureSheet.PageTexels + q.V})");
+                }
+                Console.WriteLine($"PageTexels = {TextureSheet.PageTexels}");
+                // ⭐ THE PORT'S OWN RECT, SAMPLED OUT OF THE PORT'S OWN ATLAS. GuestSprites.DrawHead builds
+                // a UV rect from (PageX,PageY,U,V,W,H); if that disagrees with where RenderSprites actually
+                // put the sprite, the quad samples a neighbour -- and in this sheet the neighbours are the
+                // HUD FONT. So crop every head at the computed rect and lay them out: anything that is not
+                // a head is a rect this code got wrong.
+                int stripAt = Array.IndexOf(args, "--headstrip");
+                if (stripAt >= 0 && stripAt + 1 < args.Length)
+                {
+                    var atlas0 = sh416.RenderSprites("common");
+                    var ids = new List<int>();
+                    foreach (var row in TPW.Sim.RiderSprites.Table)
+                        for (int k = 0; k < 11; k++) { int v = row[k == 10 ? 16 : k]; if (!ids.Contains(v)) ids.Add(v); }
+                    int cw = 0, ch = 0;
+                    foreach (int v in ids) { var q0 = sh416.Sprites[v]; cw += q0.W + 2; ch = Math.Max(ch, q0.H); }
+                    var strip = new byte[cw * ch * 4];
+                    int ox2 = 0;
+                    foreach (int v in ids)
+                    {
+                        var q0 = sh416.Sprites[v];
+                        int sx = (q0.PageX - sh416.VramX) / 64 * TextureSheet.PageTexels + q0.U;
+                        int sy = (q0.PageY - sh416.VramY) / TextureSheet.PageTexels * TextureSheet.PageTexels + q0.V;
+                        for (int yy = 0; yy < q0.H; yy++)
+                            for (int xx = 0; xx < q0.W; xx++)
+                            {
+                                int si = ((sy + yy) * atlas0.Width + sx + xx) * 4;
+                                int di = (yy * cw + ox2 + xx) * 4;
+                                if (si + 3 < atlas0.Rgba.Length) Array.Copy(atlas0.Rgba, si, strip, di, 4);
+                            }
+                        ox2 += q0.W + 2;
+                    }
+                    System.IO.File.WriteAllBytes(args[stripAt + 1], strip);
+                    Console.WriteLine($"headstrip -> {args[stripAt + 1]} {cw}x{ch} rgba ({ids.Count} heads)");
+                }
+                int outAt = Array.IndexOf(args, "--headdepth") + 1;
+                if (outAt < args.Length && !args[outAt].StartsWith("--"))
+                {
+                    var atlas = sh416.RenderSprites("common");
+                    System.IO.File.WriteAllBytes(args[outAt], atlas.Rgba);
+                    Console.WriteLine($"atlas -> {args[outAt]} {atlas.Width}x{atlas.Height} rgba");
+                }
+                return 0;
+            }
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
