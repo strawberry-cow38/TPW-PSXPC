@@ -16,6 +16,20 @@ namespace TPW.Sim
     /// z = 2640 (10.31 tiles) — the gate's two turnstile lanes, the same two the lane counters count.
     /// **Arrivals walk to point 1, leavers to point 0** (state 47 asks for `1 - V+0x28`), which is what stops
     /// the queue and the leavers walking through each other.</summary>
+    /// <remarks>
+    /// ⭐ **THEY SIT ON THE GATE'S OWN CENTRE LINE, WHICH IS HOW YOU KNOW THEY BELONG TO IT.** The gate's
+    /// rectangle (0x800F2398, five bytes a world) puts world 0's arch at tile x 18, z 16, six wide — so its
+    /// centre x is 18 + 6/2 = **21.0**, exactly <see cref="Table"/>'s 5376. That looked like a contradiction
+    /// at first (the arch is at z 16 and these are at z 6.33 and 10.31) and it is not: the z values are a
+    /// SEQUENCE along the approach, not a second opinion about where the gate is.
+    ///
+    /// Along z: the spawn/exit tiles at **5**, point 0 at **6.33**, the bus stop at **7.42**, point 1 at
+    /// **10.31**, the arch at **16..19**. Which matches the direction rule exactly — leavers take point 0,
+    /// nearest the bus on their way out, and arrivals take point 1, further in toward the arch.
+    ///
+    /// ⚠ NOT THE SAME THING AS THE ENTRANCE BUILDING. The turnstile needs `EntranceTile(lane)`, the
+    /// building-table entry flagged 0x04000000, and that table is NOT PARSED ANYWHERE in this port.
+    /// </remarks>
     public static class ParkPoints
     {
         /// <summary>Table 0x800E0D28, in world units (256 to the tile).</summary>
