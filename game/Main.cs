@@ -140,6 +140,9 @@ namespace TPWGodot
         /// <summary>--fullscreen: take the whole screen. The default is a window, which is what master
         /// wants to develop against — a fullscreen Godot is a nuisance to alt-tab out of all day.</summary>
         bool _fullscreen;
+        /// <summary>--psx-snap: start with the PSX vertex grid on. The F3 option is the normal route.</summary>
+        bool _psxSnap;
+        CheckBox _snapBox;
         Button _playAdvisor;
         OptionButton _advisorLanguage;
         bool _hasAdvisor;
@@ -423,7 +426,19 @@ namespace TPWGodot
             Row(modelTab, prevModel, nextModel, cullBtn, windBtn, texBtn, animBtn, nextAnimBtn);
             modelTab.AddChild(_modelInfo);
 
+            // ⭐ A GRAPHICS OPTION, OFF BY DEFAULT (master). The PSX snapped every vertex to a whole pixel;
+            // this turns that on. Registered before any material exists — see PsxShading.RegisterGlobals.
+            PsxShading.RegisterGlobals();
+            _snapBox = new CheckBox { Text = "PSX vertex snapping (the wobble)", ButtonPressed = false };
+            var snapBox = _snapBox;
+            snapBox.Toggled += on =>
+            {
+                PsxShading.SetSnap(on);
+                GD.Print($"[tpw] psx vertex snapping {(on ? "ON, grid 256x120" : "off")}");
+            };
+
             var parkTab = Tab(tabs, "Park");
+            parkTab.AddChild(snapBox);
             Row(parkTab, _parkButton, _parkChoice);
             parkTab.AddChild(_parkInfo);
 
@@ -543,6 +558,9 @@ namespace TPWGodot
                 else if (arg == "--cull-on") _tourCull = true;
                 else if (arg == "--model-play") _tourPlay = true;
                 else if (arg.StartsWith("--tour-frames=")) _tourHold = System.Math.Max(1, int.Parse(arg.Substring("--tour-frames=".Length)));
+                // Turns the graphics option on from the command line. It is OFF by default (master), and a
+                // still capture is the only way to test a shader that has no UI in a headless run.
+                else if (arg == "--psx-snap") _psxSnap = true;
                 else if (arg == "--fullscreen") _fullscreen = true;
                 else if (arg == "--windowed") { }        // still accepted: it is what the capture scripts pass
                 else if (arg == "--no-boot") _skipBoot = true;
@@ -604,6 +622,16 @@ namespace TPWGodot
             bool capturing = _shotPath != null
                              || System.Array.Exists(OS.GetCmdlineArgs(), a => a.StartsWith("--write-movie"));
             if (_fullscreen && !capturing) DisplayServer.WindowSetMode(DisplayServer.WindowMode.Fullscreen);
+
+            // ⚠ AFTER THE ARGUMENT LOOP, because it reads one. Set beside the checkbox where it is BUILT and
+            // --psx-snap can never apply: the UI is constructed before the arguments are parsed. That is the
+            // fourth hook today ordered before the thing it depends on, so it is called out rather than moved
+            // quietly -- the failure is always silent and always looks like the flag doing nothing.
+            if (_psxSnap)
+            {
+                PsxShading.SetSnap(true);
+                if (_snapBox != null) _snapBox.SetPressedNoSignal(true);
+            }
 
             GD.Print($"[tpw] data: {_data.Message}");
             GD.Print($"[tpw] launcher said variant={variant}, we identified {_data.Variant?.Id ?? "(none)"}");

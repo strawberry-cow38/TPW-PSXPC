@@ -13,6 +13,28 @@ namespace TPWGodot
         /// darkening and brightening as baked light); and sampling is NEAREST, no filtering. The product is a
         /// display-space colour, so it is converted to linear on the way out, or Godot's output encode would
         /// brighten it a second time.</summary>
+        /// <summary>The PSX vertex grid, as a global shader parameter. OFF by default — it is a graphics
+        /// option (master), not the port's default look.
+        ///
+        /// ⚠⚠ CALL THIS BEFORE THE FIRST MATERIAL IS BUILT. A `global uniform` a material references before
+        /// the name exists is bound to nothing and never picks it up later, so the option would silently do
+        /// nothing for every material made in the meantime. Registering is idempotent.</summary>
+        public const string SnapParam = "psx_snap";
+
+        public static void RegisterGlobals()
+        {
+            if (RenderingServer.GlobalShaderParameterGetList().Contains(SnapParam)) return;
+            RenderingServer.GlobalShaderParameterAdd(SnapParam, RenderingServer.GlobalShaderParameterType.Vec2,
+                                                    Vector2.Zero);
+        }
+
+        /// <summary>Turn the snapping on at the PSX's own grid (half of 512x240), or off.</summary>
+        public static void SetSnap(bool on)
+        {
+            RegisterGlobals();
+            RenderingServer.GlobalShaderParameterSet(SnapParam, on ? new Vector2(256, 120) : Vector2.Zero);
+        }
+
         public static Shader Shader(bool cull) => Shader(cull ? "back" : "disabled");
 
         /// <summary>The same by cull mode NAME, because "true" cannot say FRONT — and front is what a
@@ -43,8 +65,11 @@ varying vec3 uvw;
 // other slides the texture between them. A port with only the affine half still looks too clean.
 //
 // The grid is HALF the framebuffer because clip space spans -1..1 across the full width: 512x240 -> 256x120.
-// Set either component to 0 to turn it off.
-uniform vec2 psx_snap = vec2(256.0, 120.0);
+// It is a GLOBAL uniform so one write reaches every material at once, and it is OFF (0,0) by default —
+// master wants it as a graphics option you turn on, not as the way the port looks out of the box.
+// ⚠ The global must be REGISTERED BEFORE ANY MATERIAL USING IT IS CREATED, or the materials bind to a
+// name that does not exist yet and never pick it up. See PsxShading.RegisterGlobals.
+global uniform vec2 psx_snap;
 vec3 to_linear(vec3 c) {{
     return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
 }}
