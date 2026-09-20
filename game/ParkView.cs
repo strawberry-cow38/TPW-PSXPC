@@ -2383,7 +2383,8 @@ namespace TPWGodot
                 {
                     var load = new ParkRideWorld.LoadAdapter(run, Math.Max(1, a.MaxSeats),
                         () => _clockTicks, () => (int)(_clockTicks / TPW.Sim.ParkClock.TicksPerDay),
-                        g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot), rw, _guests.Dice);
+                        g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot), rw, _guests.Dice)
+                    { PlaceAtDoor = g => _guests.PlaceAtDoor(g, a.Rec, a.Ox, a.Oz, a.Rot) };
                     var after = a.Status == AttractionStatus.Loading
                         ? TPW.Sim.RideLoading.Load(load, ref a.QueueEmptySince)
                         : TPW.Sim.RideLoading.Unload(load);

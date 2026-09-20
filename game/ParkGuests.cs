@@ -1128,6 +1128,21 @@ namespace TPWGodot
         /// ⚠ THE EXIT IS NOT THE ENTRANCE. A ride with a separate exit puts guests out the other side,
         /// which is what stops the queue and the people leaving from walking through each other. A
         /// shop or a feature has no exit tile at all and the door is right.</summary>
+        /// <summary>Put a guest at the ride's DOOR, which is where it should be standing the moment it
+        /// boards. ⚠ WITHOUT THIS A GUEST VANISHED AT THE HEAD OF THE QUEUE — several tiles short of the
+        /// thing it was getting on — because boarding hides it where it happened to be standing. The
+        /// hide is immediate and correct; the position it was hidden AT was not.</summary>
+        public void PlaceAtDoor(Guest g, AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var (w, d) = rec.Footprint(rot);
+            var door = rec.EntranceTile(ox, oz, rot)
+                    ?? rec.ExitTile(ox, oz, rot)
+                    ?? (ox + w / 2, oz + d / 2);
+            g.X = Centre(door.X);
+            g.Z = Centre(door.Z);
+            Place(g);
+        }
+
         public void PlaceAtExit(Guest g, AttractionDefinition rec, int ox, int oz, int rot)
         {
             var (w, d) = rec.Footprint(rot);

@@ -145,11 +145,17 @@ namespace TPWGodot
             public int TotalDays => _days();
             public Visitor QueueHead => _r.Queue.Count > 0 ? _r.Queue[0].V : null;
 
+            public Action<Guest> PlaceAtDoor;
+
             public void BoardQueueHead()
             {
                 var g = _r.Queue[0];
                 _r.Queue.RemoveAt(0);
                 _r.Riders.Add(g);
+                // ⚠ MOVE IT TO THE DOOR BEFORE HIDING IT. The hide below is immediate and right, but it
+                // hid the guest WHERE IT WAS STANDING — at the head of the queue, several tiles short of
+                // the ride — so people popped out of existence beside the thing they were boarding.
+                PlaceAtDoor?.Invoke(g);
                 g.V.SetState((VisitorState)21);              // 21: loading, the ride owns it now
                 // ⚠ HIDE IT HERE, NOT ON THE NEXT MOVE. A boarded guest is skipped by the walk loop,
                 // so nothing would ever draw it again - it would simply stand frozen at the head of
