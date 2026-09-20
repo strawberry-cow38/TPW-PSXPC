@@ -136,12 +136,15 @@ namespace TPW.Sim
         bool TryPathToEntrance(Visitor guest);
         /// <summary>Ride slot 26 for the leave point, then 0x800EC9F4 to its tile centre, flags (0x11, 0).</summary>
         bool TryPathToLeavePoint(Visitor guest);
-        /// <summary>Type 2 only: vtable slot 54 is non-zero.</summary>
+        /// <summary>Type 2 only: vtable slot 54 is non-zero. READ (0x80023F0C → 0x80024348): for a
+        /// feature that is the RECORD's flag `rec+0x2E &amp; 1`, "guests may use it" -- a property of the
+        /// definition, not of the stock. A toilet at zero still answers true here and is still used.</summary>
         bool TargetHasStock(Visitor guest);
-        /// <summary>Type 2 only: 0x800241E8(building, units). GUESS: consumes that much stock.</summary>
+        /// <summary>Type 2 only: 0x800241E8(building, units). READ: takes <paramref name="units"/> off
+        /// the feature's capacity byte, floored at zero (<see cref="FeatureStock.Subtract"/>).</summary>
         void ConsumeStock(Visitor guest, int units);
-        /// <summary>Type 2 only: 0x800241BC(building). GUESS: remaining stock as a percentage; the
-        /// handler only compares it against 50.</summary>
+        /// <summary>Type 2 only: 0x800241BC(building). READ: the feature's capacity byte, 0..100
+        /// (<see cref="FeatureStock.Level"/>); the handler only compares it against 50.</summary>
         int StockLevel(Visitor guest);
     }
 
@@ -547,9 +550,15 @@ namespace TPW.Sim
             world.CountGuestServed(guest);
         }
 
-        /// <summary>Type 2 (0x8008F248). behaviour.md calls it "a shop with a stock check"; Attractions.cs
-        /// has type 2 as Feature (toilets, bins, benches...), and debug.md's slider labels put V+0x5D down
-        /// as a toilet need. GUESS either way; the arithmetic is READ.</summary>
+        /// <summary>Type 2 (0x8008F248). behaviour.md calls it "a shop with a stock check"; rides.md §0
+        /// item 1 corrects that to a FEATURE (toilets, bins, benches...) whose "stock" is the capacity
+        /// byte in <see cref="FeatureStock"/>, and debug.md's slider labels put V+0x5D down as a toilet
+        /// need. The arithmetic is READ.
+        ///
+        /// ⚠ NOTHING HERE REFUSES, CLOSES OR REPORTS AN EMPTY FEATURE. The stock test at the top is the
+        /// record flag (slot 54), not the byte; a feature at zero is used anyway (the subtract floors),
+        /// the need is zeroed anyway, and the only consequence is the low-stock arm below. No status
+        /// change, no message: by exhaustion of the byte's callers (findings/shop-stock.md §3).</summary>
         static UnloadOutcome UseFeature(Visitor guest, IQueueWorld world)
         {
             if (!world.TargetHasStock(guest))

@@ -17,8 +17,13 @@ namespace TPWGodot
         /// <summary>The queue tiles walked out from the entrance, nearest the ride first. Rebuilt when
         /// the map changes, because the player can lay more queue at any time.</summary>
         public List<QueueTile> Path = new();
-        /// <summary>How many guests this attraction has served.</summary>
+        /// <summary>How many guests this attraction has served (A+0x14, the "Users" line on a toilet's
+        /// card).</summary>
         public int Served;
+        /// <summary>A feature's capacity byte and last-cleaned stamp, placed full (TPW.Sim.FeatureStock).
+        /// Only a type-2 feature reads it; it is allocated for every runtime because the runtime does
+        /// not know its type, and an unused full byte costs nothing.</summary>
+        public readonly FeatureStock Stock = new();
     }
 
     /// <summary>The park as the queue-and-ride chain reads it (behaviour.md §2.4).
@@ -224,12 +229,33 @@ namespace TPWGodot
 
         public void CountGuestServed(Visitor g) { if (_runtime != null) _runtime.Served++; }
 
-        // ⚠ SHOPS ARE NOT WIRED. The purchase routines are ported (TPW.Sim.VisitorPurchase) but nothing
-        // in the park calls them yet: BuyAtShop and PlaySideShow are the only doors in and both are
-        // empty. Stock is the same stand-in it was.
-        public bool TargetHasStock(Visitor g) => true;
-        public void ConsumeStock(Visitor g, int units) { }
-        public int StockLevel(Visitor g) => 100;
+        // ---- the type-2 feature's stock (findings/shop-stock.md) ------------------------------------
+        //
+        // ⭐ A SHOP HAS NO STOCK TO WIRE. The three members below are the FEATURE's: the visitor's
+        // type-2 arm is their only caller, and the type-4 arm never asks. A shop's object holds prices,
+        // sliders and counters and nothing that runs out (shop-stock.md §2), so nothing here fakes a
+        // level for one.
+        //
+        // ⚠ RUNTIMES ARE KEYED BY DEFINITION ENTRY, NOT BY PLACED INSTANCE (SetRides uses t.Id =
+        // a.Rec.Entry), so two Small Toilets share one queue and now one capacity byte. That is a
+        // pre-existing property of this world's id scheme and it is wrong for stock the same way it
+        // was already wrong for queues; it is not widened here because the id reaches into the guest's
+        // target and history. Flagged so it is fixed on purpose rather than found by a guest.
+
+        /// <summary>Slot 54: the record's "guests may use it" flag, 0 for anything but a feature
+        /// (GuestTargets already folds the type in). Not the byte -- an empty toilet still answers true,
+        /// exactly as 0x80023F0C does.</summary>
+        public bool TargetHasStock(Visitor g) => _target != null && _target.Usable != 0;
+        /// <summary>0x800241E8: off the capacity byte, floored at zero.</summary>
+        public void ConsumeStock(Visitor g, int units) => _runtime?.Stock.Subtract(units);
+        /// <summary>0x800241BC: the capacity byte. ⚠ 100 for a target this world does not know, which
+        /// is the placement value, not a stand-in -- a guest cannot reach the type-2 arm with no
+        /// target, and the byte a feature starts with IS 100.</summary>
+        public int StockLevel(Visitor g) => _runtime?.Stock.Level ?? FeatureStock.Full;
+
+        // ⚠ SHOPS AND SIDESHOWS ARE NOT WIRED. The purchase routines are ported
+        // (TPW.Sim.VisitorPurchase) and this world implements IShopWorld, but these two are the only
+        // doors into it and both are empty, so a shop sells nothing and takes no money.
         public void BuyAtShop(Visitor g) { }
         public void PlaySideShow(Visitor g) { }
 

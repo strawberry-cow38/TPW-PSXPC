@@ -17,6 +17,7 @@ as a lead, not a fact.
 | `animation-phases.md` + `ride-phase-lengths.md` | 88-byte runtime descriptor, disc lengths for 83 rides, conditional run times for 59 flat rides; reproducible extractor and mutation checks in `tools/` |
 | `ride-panel.md` + `ride-panel-mutations.json` | speed/capacity/duration settings, upgrade gates and costs, intensity consumers, retained source disagreements; restoring mutation sweep |
 | `ride-classes.md` | Tour/track/coaster loading, trip control, unloading, wear, coaster connection veto; binary disagreements retained for review in rides.md §0; controller ports and mutation runner |
+| `shop-stock.md` + `shop-stock-mutations.json` | a shop has NO stock; the feature's cleanliness byte (signed, clamped), its consumption, the handyman's free refill, the absent shop employee, every low-stock surface; binary disagreements with behaviour.md/rides.md retained in §0 |
 | `parkopen.md` | what gates guest arrival |
 | `disc-check.md` | why Main Game and Load Game are greyed: a disc check at boot, not save data |
 | `psyq-named-functions.json` | 219 Sony PsyQ library functions located in the image by signature |

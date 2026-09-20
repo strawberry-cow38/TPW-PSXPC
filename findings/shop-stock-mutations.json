@@ -1,0 +1,152 @@
+{
+  "date": "2026-09-20",
+  "distinct_mutations": 20,
+  "executions": 20,
+  "killed": 20,
+  "survived": 0,
+  "invalid": 0,
+  "not_run": 26,
+  "filter": "FullyQualifiedName~FeatureStock|FullyQualifiedName~Handyman|FullyQualifiedName~VisitorQueue",
+  "mutations": [
+    {
+      "file": "FeatureStock.cs",
+      "rule": "placement not full",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.PlacementIsFullWithAZeroStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "placement stamps a day",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.PlacementIsFullWithAZeroStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "full is 99",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SubtractReadsTheUnitsAsASignedByteAndStoresTheLowByte(level: 100, units: 128, expected: -28)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "set clamps an int not a byte",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.FromSaveClampsTheByteButNotTheStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "set stores the raw byte",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.FromSaveClampsTheByteButNotTheStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "set skips the sign clamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.FromSaveClampsTheByteButNotTheStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "set skips the upper clamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SetClampsAsASignedByte(value: 127, expected: 100)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "set upper clamp off by one",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SetClampsAsASignedByte(value: 101, expected: 100)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "subtract reads units as an int",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SubtractReadsTheUnitsAsASignedByteAndStoresTheLowByte(level: 100, units: 128, expected: -28)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "subtract adds",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SubtractReadsTheUnitsAsASignedByteAndStoresTheLowByte(level: 100, units: 128, expected: -28)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "subtract clamps at full",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SubtractReadsTheUnitsAsASignedByteAndStoresTheLowByte(level: 100, units: 128, expected: -28)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "subtract wraps below zero",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SubtractTakesUnitsOffAndFloorsAtZero(level: 20, units: 26, expected: 0)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "subtract stores a wide difference",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.SubtractReadsTheUnitsAsASignedByteAndStoresTheLowByte(level: 100, units: 128, expected: -28)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "refill partial",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.RefillSetsFullAndStampsTheDay(level: 100, day: 999)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "refill no stamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.RefillSetsFullAndStampsTheDay(level: 100, day: 999)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "refill stamps zero",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.RefillSetsFullAndStampsTheDay(level: 100, day: 999)"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "load restores the byte unclamped",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.FromSaveClampsTheByteButNotTheStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "load skips the byte",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.FromSaveClampsTheByteButNotTheStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "load clamps the stamp",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.FromSaveClampsTheByteButNotTheStamp"
+    },
+    {
+      "file": "FeatureStock.cs",
+      "rule": "dirtiness counts unusable features",
+      "status": "KILLED",
+      "executions": 1,
+      "example_failing_test": "TPW.Sim.Tests.FeatureStockTests.ParkDirtinessIsZeroWithNoUsableFeature"
+    }
+  ]
+}
