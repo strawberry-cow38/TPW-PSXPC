@@ -6,7 +6,8 @@ namespace TPW.Sim;
 /// Capture supplies the established record representations (save.md), including encoded histories;
 /// it can use VisitorSaveRanges.Capture, LitterPool.SaveCounts and ResearchSystem.SaveTopics.
 /// Restoring always starts from a fresh map/pools. Assets, object IDs, catalogue definitions,
-/// compressed-history reconstruction, RNG initialization and geometry remain host responsibilities.
+/// RNG initialization and geometry remain host responsibilities. For histories/totals, delegate
+/// to ParkScore.CaptureBank/RestoreBank and ParkHistory.Capture/Restore (findings/rating.md).
 /// Implementations must retain the existing findings' behaviours where save.md §0 records a dispute.</summary>
 public interface IParkSaveHost
 {

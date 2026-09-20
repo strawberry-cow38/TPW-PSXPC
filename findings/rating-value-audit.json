@@ -1,0 +1,54 @@
+{
+  "image_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "empty_control": {
+    "rows": [],
+    "raw_value": 0,
+    "price_calls": [],
+    "instructions": 84,
+    "rows_visited": 0,
+    "rows_skipped": 0
+  },
+  "populated_control": {
+    "rows": [
+      [
+        3,
+        17,
+        2
+      ],
+      [
+        4,
+        19,
+        0
+      ],
+      [
+        2,
+        23,
+        0
+      ]
+    ],
+    "raw_value": 1515,
+    "price_calls": [
+      [
+        3,
+        17
+      ],
+      [
+        4,
+        19
+      ],
+      [
+        2,
+        23
+      ]
+    ],
+    "instructions": 162,
+    "rows_visited": 3,
+    "rows_skipped": 0
+  },
+  "controls": {
+    "empty": true,
+    "populated": true,
+    "selector_is_definition": true
+  },
+  "limitation": "Iterator, type getter and 101-pound price getter are stubs. Original selector load, sum, Money conversion and division execute. The port intentionally retains the conflicting findings level contract."
+}
