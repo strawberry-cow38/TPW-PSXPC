@@ -1743,6 +1743,30 @@ namespace TPWGodot
         /// x, z, width, height, depth), its base the ground at the rectangle's corner (0x800611A0).</summary>
         BoxSite _gateBox;
         (int X, int Z, int W, int D)? _gateRect;
+
+        bool InGate((int X, int Z) t)
+            => _gateRect is { } g && t.X >= g.X && t.X < g.X + g.W && t.Z >= g.Z && t.Z < g.Z + g.D;
+
+        /// <summary>Open the park, the way the game's own "Open Park" does (0x80075ABC): it takes the entrance
+        /// position, plays effect 0x78, calls OpenPark (0x80054144) and then points the camera at that position.
+        /// This runs the same sequence from a click on the gate.
+        ///
+        /// ⚠ THE GAME'S TRIGGER IS THE PARK MENU, NOT THE GATE. findings/parkopen.md §2.1: "Open Park" is entry
+        /// 12 of the menu table at 0x800F4884, and the builder inserts it ONLY while IsOpen() == 0. The gate
+        /// click is master's, and it is the same action behind a different door. The port has no park menu yet.
+        ///
+        /// ⚠ Effect 0x78 is NOT played, because it is not a (group, sound) and nothing has identified it —
+        /// parkopen.md marks it GUESS-high as the jingle. Better silent than the wrong noise.
+        ///
+        /// ⭐ And it is one-way: the game never shuts the gates again (ClosePark's only live caller is game
+        /// start), so there is no closing click.</summary>
+        void OpenParkAtGate()
+        {
+            if (ParkOpen || _gateRect is not { } g) return;
+            ParkOpen = true;
+            SwingGameCamera((g.X + g.W / 2, g.Z + g.D / 2), 0);
+            RefreshInfo();
+        }
         readonly SelectionFades<BoxSite> _selection = new();
         MeshInstance3D _selectionMesh;
         ShaderMaterial _selectionMat;
@@ -2468,8 +2492,7 @@ namespace TPWGodot
                 var (w, d) = a.Rec.Footprint(a.Rot);
                 if (t.X >= a.Ox && t.X < a.Ox + w && t.Z >= a.Oz && t.Z < a.Oz + d) { hit = a.Box; break; }
             }
-            if (!ParkOpen && _gateRect is { } g && _gateBox != null && t.X >= g.X && t.X < g.X + g.W && t.Z >= g.Z && t.Z < g.Z + g.D)
-                hit = _gateBox;
+            if (!ParkOpen && _gateBox != null && InGate(t)) hit = _gateBox;
             return hit;
         }
 
@@ -3391,6 +3414,9 @@ void fragment() {
                     // its panel; clicking bare ground with nothing selected closes it again.
                     if (HoverTarget() != null)
                     {
+                        // ⭐ CLICK THE GATE TO OPEN THE PARK. The gate is already the hover box while the park
+                        // is shut, and clicking it did nothing because AttractionAt finds no attraction there.
+                        if (!ParkOpen && tile is { } gt && InGate(gt)) { OpenParkAtGate(); return; }
                         if (tile is { } sel) { _panelFor = AttractionAt(sel); RefreshInfo(); }
                         return;
                     }
