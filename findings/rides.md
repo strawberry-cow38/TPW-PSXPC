@@ -76,7 +76,32 @@ therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below
    and [ride-phase-lengths.md](ride-phase-lengths.md). Item 9 corrects the remaining pointer and clock
    claims in this earlier audit.
 
-8. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
+8. **§6.1's heavy-load term, disambiguated (2026-09-20).** The report writes the full-load bonus as
+   `((L − 0.8)×4096/64)²/4096`, which under integer arithmetic gives either zero or a number in the
+   millions depending on where the fixed point is taken to be, and neither matches the report's own
+   stated "+0.035 at full load". The reading that works is
+
+   ```
+   if L >= 0.8:  t = (L − 0.8) / 64      # raw 20.12 units, so (L − 3277) / 64
+                 L += t * t              # NOT divided again
+   ```
+
+   At full load `t = (4096 − 3277)/64 = 12`, `t² = 144`, and 144/4096 = **0.035** — the report's own
+   figure. It then reproduces all three of §6.1's worked rates exactly: **3.84** (speed 50, full),
+   **1.25** (speed 50, empty) and **5.09** (speed 100, full), and the quoted loss of **0.120** per four
+   ticks. Four independent checks on one reading.
+
+   Marked **GUESS-high**, not READ: 0x800A0250 itself was not traced past its vtable calls
+   (slots 0x320, 0x328, 0x330, 0x2C8 at 0x800A02AC..0x800A034C). It is the arithmetic that reproduces
+   every number the report states, which is a strong constraint and is not the same as having read it.
+
+   Two related facts worth keeping: the speed slider stops being linear at 100 (it is averaged with
+   1.0, so 100 is not twice 50 — `s = (s + 4096)/2`), and **reliability zero is unreachable**, which
+   §6.2 already says in passing. The breakdown test runs before the wear step and a ride that is not
+   running does not wear, so the floor in the wear step is defensive code and nothing can drive a ride
+   below about 9.8 points.
+
+9. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
    (41→18→21→22→23) and the mechanic states 56/16/14/17/58 and 57/52/54 all matched what the ride
    side does.
 
