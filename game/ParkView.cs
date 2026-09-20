@@ -621,10 +621,14 @@ namespace TPWGodot
         /// TPW.Sim.BusLoad works it out from what is built, and an empty park gets a bus with nobody on it,
         /// which is the point of the whole design.
         ///
-        /// ⚠ TWO INPUTS ARE STAND-INS: an attraction's UPGRADE LEVEL (the port does not track upgrades yet, so
-        /// every ride counts as level 0 — which is what a freshly built one IS, so this is only wrong once
-        /// upgrades exist) and the gate's LANE COUNT (0, so the `20 − lanes` cap never bites). Neither is
-        /// guessed here; both are named in BusLoad.</summary>
+        /// ⚠ ONE INPUT IS A STAND-IN AND ONE ONLY LOOKS LIKE ONE. The UPGRADE LEVEL is a stand-in: the port
+        /// does not track upgrades, so every ride counts as level 0 — which is what a freshly built one IS
+        /// (placement sets 0 and the upgrade path is `if level >= 3 return; level++`), so it is only wrong
+        /// once upgrades exist. The LANE COUNT is 0 and that is CORRECT: `0x80059150(i)` reads
+        /// `[gp+0x12F4 + i*4]`, a pair of counters zeroed at game start and incremented as a guest enters a
+        /// turnstile lane (0x8005929C), so `20 − lanes` caps the bus by how many are already IN the gate.
+        /// With no turnstile queue in the port there is nobody in one, and zero is the honest answer rather
+        /// than a placeholder.</summary>
         void BusArrived()
         {
             if (_guests == null) return;
