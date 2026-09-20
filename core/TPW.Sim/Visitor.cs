@@ -105,7 +105,15 @@ namespace TPW.Sim
     /// never touches them directly: 0x80092190 adds, 0x800921C0 subtracts and 0x800924F0 sets, and all
     /// three clamp. That matters because several effects push the same stat repeatedly -- a guest next
     /// to three litter piles takes -3 happiness three times -- and a byte that wrapped would turn a
-    /// miserable guest delighted at exactly the wrong moment.</summary>
+    /// miserable guest delighted at exactly the wrong moment.
+    ///
+    /// ⚠ EACH HELPER CLAMPS ONE END ONLY (READ for the purchase port). The add (0x80092190) tests
+    /// `slti 0x65` and nothing else, so a NEGATIVE delta can leave the byte below zero; the subtract
+    /// (0x800921C0) tests `bgez` and nothing else, so subtracting a negative can leave it above 100;
+    /// only the set (0x800924F0) clamps both ways. The port's <see cref="Add"/> and <see cref="Sub"/>
+    /// clamp both ends, and every Visitor stat clamps again on assignment, which agrees with the
+    /// original for every non-negative delta. The one ported call that passes a negative delta to the
+    /// add is the sideshow's ±10 (VisitorPurchase.PlaySideShow), where the divergence is noted.</summary>
     public static class Stat
     {
         public const int Min = 0;
@@ -219,6 +227,16 @@ namespace TPW.Sim
         /// ⚠ WHAT READS IT IS NOT ESTABLISHED. It is carried because the handlers write it, and it is
         /// named by its bit so nobody mistakes the name for a meaning.</summary>
         public bool Flag1 { get; set; }
+
+        /// <summary>P+0x2B bit 0x10 (0x80092360 reads it, 0x80094050 sets it): set when a kind-3
+        /// purchase (a balloon, by the shop's name) spawned and attached a prop, and read by the same arm
+        /// to refuse a second one the happiness (VisitorPurchase). Nothing else in the ported code
+        /// touches it; named by its bit, like <see cref="Flag1"/>.</summary>
+        public bool Flag10 { get; set; }
+
+        /// <summary>P+0x2B bit 0x80 (0x80094050 at 0x8008EB60): set by a kind-2 purchase alongside
+        /// VisitorType := 8. What reads it is not established.</summary>
+        public bool Flag80 { get; set; }
 
         /// <summary>P+0x2E bits 3-7: 11 idle/walk, 12 vomit, 13 wander (§1). That it is an animation id
         /// is GUESS-medium; the values the handlers write are READ.</summary>

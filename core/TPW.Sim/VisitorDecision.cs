@@ -107,10 +107,17 @@ namespace TPW.Sim
             return score;
         }
 
-        /// <summary>The guest's ride preference, from its visitor type (0x800F79E8).</summary>
+        /// <summary>The guest's ride preference, from its visitor type: `lhu 0x800F79E8[type × 8]`
+        /// (0x8008C760..0x8008C774, READ).
+        ///
+        /// ⚠ DO NOT FIX: TYPE 8 READS PAST THE TABLE. A costume purchase writes type 8 (VisitorPurchase,
+        /// kind 2) and the lookup does not check it, so a costumed guest's preference is whatever word
+        /// follows the eight rows -- see VisitorTables.CostumePreference. An earlier version of this
+        /// function returned 0 for it, which is a tidier table and a different guest.</summary>
         public static int Preference(Visitor guest)
         {
             int t = guest.VisitorType;
+            if (t == GuestSpending.CostumeVisitorType) return VisitorTables.CostumePreference;
             return t >= 0 && t < VisitorTables.TypePreference.Length ? VisitorTables.TypePreference[t] : 0;
         }
 

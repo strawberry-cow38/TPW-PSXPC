@@ -67,8 +67,13 @@ namespace TPW.Sim
         UsedFeature,
         /// <summary>A type-2 building with no stock: nothing happened, back to Idle.</summary>
         FeatureEmpty,
-        /// <summary>Type 4 or 5: the purchase routine ran (§2.5, host-side), back to Idle.</summary>
+        /// <summary>Type 4 or 5: the purchase routine ran (§2.5, VisitorPurchase) and money moved,
+        /// back to Idle.</summary>
         Bought,
+        /// <summary>Type 4 or 5: the purchase routine ran and the guest did not buy or play (too dear,
+        /// or could not afford it). Back to Idle just the same; the state-22 handler ignores the routine's
+        /// return value. Distinguished here for tests, not by the original.</summary>
+        DidNotBuy,
         /// <summary>No target, or a type the table has no arm for. The common effects still applied and
         /// the guest is in 23.</summary>
         NothingToUnload,
@@ -89,7 +94,7 @@ namespace TPW.Sim
     /// ⚠ THE PATHFINDER AND THE MEMBER LIST STAY WITH THE HOST. The slot ARITHMETIC is here
     /// (<see cref="VisitorQueue.WalkSlot"/>), because it is read and testable; the list it walks, the
     /// waypoint pool and 0x800EC9F4 are not, and the host answers only what they answered.</summary>
-    public interface IQueueWorld
+    public interface IQueueWorld : IShopWorld
     {
         long NowTick { get; }
         /// <summary>The target's slot-16 type, or 0 with no target.</summary>
@@ -131,8 +136,6 @@ namespace TPW.Sim
         bool TryPathToEntrance(Visitor guest);
         /// <summary>Ride slot 26 for the leave point, then 0x800EC9F4 to its tile centre, flags (0x11, 0).</summary>
         bool TryPathToLeavePoint(Visitor guest);
-        /// <summary>0x80063164: target+0x14 += 1. GUESS-high "guests served".</summary>
-        void CountGuestServed(Visitor guest);
         /// <summary>Type 2 only: vtable slot 54 is non-zero.</summary>
         bool TargetHasStock(Visitor guest);
         /// <summary>Type 2 only: 0x800241E8(building, units). GUESS: consumes that much stock.</summary>
@@ -140,10 +143,6 @@ namespace TPW.Sim
         /// <summary>Type 2 only: 0x800241BC(building). GUESS: remaining stock as a percentage; the
         /// handler only compares it against 50.</summary>
         int StockLevel(Visitor guest);
-        /// <summary>Type 4: the purchase routine 0x8008E5EC (§2.5). Out of this chain's scope.</summary>
-        void BuyAtShop(Visitor guest);
-        /// <summary>Type 5: the purchase routine 0x8008EE78 (§2.5). Out of this chain's scope.</summary>
-        void PlaySideShow(Visitor guest);
     }
 
     /// <summary>States 41, 19, 18, 21, 22, 23 and 58: from "I have chosen a ride" to "I am walking away
@@ -501,17 +500,23 @@ namespace TPW.Sim
                 case (int)AttractionType.Feature:
                     return UseFeature(guest, world);
 
+                // The two purchase routines (§2.5, VisitorPurchase) roll their own dice AFTER the three
+                // above: rand(25) on a sale, rand(100) on a play, nothing on a refusal.
                 case (int)AttractionType.Shop:
-                    world.BuyAtShop(guest);
+                {
+                    bool bought = VisitorPurchase.BuyAtShop(guest, world, rng);
                     guest.HasTarget = false;
                     guest.SetState(VisitorState.Idle);
-                    return UnloadOutcome.Bought;
+                    return bought ? UnloadOutcome.Bought : UnloadOutcome.DidNotBuy;
+                }
 
                 case (int)AttractionType.SideShow:
-                    world.PlaySideShow(guest);
+                {
+                    bool played = VisitorPurchase.PlaySideShow(guest, world, rng);
                     guest.SetState(VisitorState.Idle);
                     guest.HasTarget = false;
-                    return UnloadOutcome.Bought;
+                    return played ? UnloadOutcome.Bought : UnloadOutcome.DidNotBuy;
+                }
 
                 default:
                     return UnloadOutcome.NothingToUnload;
