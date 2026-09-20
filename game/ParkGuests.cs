@@ -92,6 +92,8 @@ namespace TPWGodot
     sealed class Guest : Walker
     {
         public Visitor V;
+        // Save's V+0x63 has unknown semantics; retain its byte, never invent behaviour for it.
+        public byte Unknown63;
         public override int WalkSpeed => V.WalkSpeed;
     }
 
@@ -107,7 +109,7 @@ namespace TPWGodot
     /// (VisitorDecision), do not have needs (VisitorNeeds), do not queue or ride (VisitorQueue) and do
     /// not enter or leave through the turnstile. They pick a random reachable path tile and walk to it.
     /// Every one of those machines exists and is tested; they are not connected here.</summary>
-    sealed class ParkGuests
+    sealed partial class ParkGuests
     {
         /// <summary>A tile centre in 8.8 world units.</summary>
         public static int Centre(int tile) => (tile << 8) | 0x80;
@@ -1164,6 +1166,15 @@ namespace TPWGodot
                 g.Inst?.QueueFree();
             }
             _guests.Clear();
+            _byVisitor.Clear();
+            _leaving.Clear();
+            foreach (var st in _staff)
+            {
+                FreeChain(st);
+                st.Inst?.QueueFree();
+            }
+            _staff.Clear();
+            _finder.ResetAfterBuildItemPlaced();
         }
 
         /// <summary>A build item has been put down: the original wipes both pools and drops every

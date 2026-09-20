@@ -181,7 +181,7 @@ namespace TPWGodot
 
         /// <summary>McAi+0x1C += 1. ⚠ READ that it increments; "admissions" is a GUESS, so the port
         /// counts it under the same doubt rather than giving it a confident name.</summary>
-        public int Counter_McAi1C { get; private set; }
+        public int Counter_McAi1C { get; internal set; }
         public void CountAdmission() => Counter_McAi1C++;
 
         /// <summary>What the fee verdict sums. ⭐ NOT EVERY ATTRACTION COUNTS. The game asks each object's

@@ -1,0 +1,777 @@
+{
+  "original_sha256": {
+    "ParkSaveHost.cs": "60fb791e59b288e611953d34d36974f17036da6d32fba83f67d20ea20c74cc31",
+    "ParkGuests.cs": "8a51e6b2183314f49e2d3a94e65ac39aae57aab0dcd68ea23e7d2a4b855b7f7b",
+    "Main.cs": "5b4a9de58e0cf6790805e1d60fab166c190974cecfe828ee9a6a4ac5c92b1768"
+  },
+  "mutations": [
+    {
+      "name": "capture x",
+      "file": "ParkSaveHost.cs",
+      "old": "X = checked((byte)a.Ox)",
+      "new": "X = checked((byte)(a.Ox + 1))",
+      "status": "killed",
+      "detail": "fsets may be wrong\n  ok   volume: 18 directory entries\n  ok   boot executable: SLES_026.88, 49,152 bytes\n  ok   legal screen: 320x256 RGBA, 327,680 bytes; TGA footer at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.FormatException: Cannot restore attraction 220 at (13,24).\n   at TPWGodot.ParkView.RestoreSavedAttraction(AttractionSave s) in /home/ec2-user/tpwport-savehost/game/ParkSaveHost.cs:line 274\n   at TPWGodot.ParkSaveHost.RestoreAttraction(AttractionSave saved) in /home/ec2-user/tpwport-savehost/game/ParkSaveHost.cs:line 107\n   at TPW.Sim.ParkSaving.Load(ReadOnlySpan`1 bytes, ParkSaveLayout layout, IParkSaveHost host) in /home/ec2-user/tpwport-savehost/core/TPW.Sim/ParkSaveHost.cs:line 65\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 889\n"
+    },
+    {
+      "name": "capture rotation",
+      "file": "ParkSaveHost.cs",
+      "old": "Rotation = checked((byte)a.Rot)",
+      "new": "Rotation = 0",
+      "status": "killed",
+      "detail": "fsets may be wrong\n  ok   volume: 18 directory entries\n  ok   boot executable: SLES_026.88, 49,152 bytes\n  ok   legal screen: 320x256 RGBA, 327,680 bytes; TGA footer at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.FormatException: Cannot restore attraction 217 at (26,29).\n   at TPWGodot.ParkView.RestoreSavedAttraction(AttractionSave s) in /home/ec2-user/tpwport-savehost/game/ParkSaveHost.cs:line 274\n   at TPWGodot.ParkSaveHost.RestoreAttraction(AttractionSave saved) in /home/ec2-user/tpwport-savehost/game/ParkSaveHost.cs:line 107\n   at TPW.Sim.ParkSaving.Load(ReadOnlySpan`1 bytes, ParkSaveLayout layout, IParkSaveHost host) in /home/ec2-user/tpwport-savehost/core/TPW.Sim/ParkSaveHost.cs:line 65\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 889\n"
+    },
+    {
+      "name": "capture level",
+      "file": "ParkSaveHost.cs",
+      "old": "s.Level = checked((byte)a.Level)",
+      "new": "s.Level = 0",
+      "status": "killed",
+      "detail": "5,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: distinct upgraded levels\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 142\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "capture raw bank",
+      "file": "ParkSaveHost.cs",
+      "old": "BalanceRaw = checked((int)Finances.Bank.Balance.Raw)",
+      "new": "BalanceRaw = checked((int)Finances.Bank.Balance.Pounds)",
+      "status": "killed",
+      "detail": ",385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: raw bank tenths/reference\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 144\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "capture calendar day",
+      "file": "ParkSaveHost.cs",
+      "old": "Day = checked((byte)cal.Day)",
+      "new": "Day = 0",
+      "status": "killed",
+      "detail": "165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: calendar day/reference\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 145\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "capture open",
+      "file": "ParkSaveHost.cs",
+      "old": "Open = park.ParkOpen ? (byte)1 : (byte)0",
+      "new": "Open = 0",
+      "status": "killed",
+      "detail": "at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: open flag/entry fee\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 147\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "capture fee",
+      "file": "ParkSaveHost.cs",
+      "old": "EntryFeePounds = checked((ushort)Guests.SaveEntrance.EntryFee.Pounds)",
+      "new": "EntryFeePounds = 40",
+      "status": "killed",
+      "detail": "at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: open flag/entry fee\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 147\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "capture guests",
+      "file": "ParkSaveHost.cs",
+      "old": "VisitorCount = checked((byte)Guests.Count)",
+      "new": "VisitorCount = 0",
+      "status": "killed",
+      "detail": "5, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: guest/staff/admission counts\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 148\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "capture staff position",
+      "file": "ParkSaveHost.cs",
+      "old": "X = checked((short)st.X)",
+      "new": "X = 0",
+      "status": "killed",
+      "detail": "0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 63,\n        \"serviced\": 819\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 69,\n        \"capacity\": 5,\n        \"duration\": 6,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 68,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [\n          [\n            11,\n            26\n          ],\n          [\n            8,\n            26\n          ]\n        ],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 19,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 0,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 0,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 0,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 0,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 0,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": true,\n        \"remaining\": 0,\n        \"payment\": 530,\n        \"months\": -2\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      901,\n      945,\n      989,\n      1033,\n      1077,\n      1116,\n      1121,\n      1165,\n      1209,\n      1253,\n      1258,\n      1297,\n      1341,\n      1385,\n      1429,\n      1473,\n      1517,\n      1561,\n      1605,\n      1640,\n      1649,\n      1693,\n      1737,\n      1781,\n      1825,\n      1869,\n      1913,\n      1957\n    ],\n    \"queues\": [\n      1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "capture hire day",
+      "file": "ParkSaveHost.cs",
+      "old": "HireDay = st.HiredDay",
+      "new": "HireDay = 0",
+      "status": "killed",
+      "detail": "2 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[tpw] --park-place 217,26,29,2: placed\n[tpw] --park-place 237,10,36,3: placed\n[tpw] --park-place 195,30,38,1: placed\n[tpw] --park-hire 0,20,20: hired\n[tpw] --park-hire 1,21,20: hired\n[tpw] --park-hire 2,22,20: hired\n[tpw] --park-hire 3,23,20: hired\n[tpw] --park-hire 4,24,20: hired\n[tpw] --park-lay 21,19,21,44: 26 tiles took path\n[tpw] --park-queue 220,12,24,1: not placed\n[tpw] --park-upgrade 217: level 1, bank \u00a345,650 -> \u00a345,450\n[save-proof] admissions gate: 0 outside, 0 in a lane, 0 paying, 1 walking in, 0 leaving; lanes 0/0, 2 paid, 0 turned back (0 broke), 0 actually left; intensity sum 125 over 2 attractions, fee \u00a37 (at roll time the sum ran 125..125 over 2 rolls)\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: staff wire blocks must follow save.md independently of StaffKind enum order\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkSaveProof.Seed(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 34\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1045\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "staff order",
+      "file": "ParkSaveHost.cs",
+      "old": "StaffKind.Guard, StaffKind.Researcher, StaffKind.Mechanic",
+      "new": "StaffKind.Mechanic, StaffKind.Researcher, StaffKind.Guard",
+      "status": "killed",
+      "detail": "en: 320x256 RGBA, 327,680 bytes; TGA footer at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[tpw] --park-place 217,26,29,2: placed\n[tpw] --park-place 237,10,36,3: placed\n[tpw] --park-place 195,30,38,1: placed\n[tpw] --park-hire 0,20,20: hired\n[tpw] --park-hire 1,21,20: hired\n[tpw] --park-hire 2,22,20: hired\n[tpw] --park-hire 3,23,20: hired\n[tpw] --park-hire 4,24,20: hired\n[tpw] --park-lay 21,19,21,44: 26 tiles took path\n[tpw] --park-queue 220,12,24,1: not placed\n[tpw] --park-upgrade 217: level 1, bank \u00a345,650 -> \u00a345,450\n[save-proof] admissions gate: 0 outside, 0 in a lane, 0 paying, 1 walking in, 0 leaving; lanes 0/0, 2 paid, 0 turned back (0 broke), 0 actually left; intensity sum 125 over 2 attractions, fee \u00a37 (at roll time the sum ran 125..125 over 2 rolls)\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: staff wire blocks must follow save.md independently of StaffKind enum order\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkSaveProof.Seed(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 34\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1045\n"
+    },
+    {
+      "name": "restore fee empty",
+      "file": "ParkSaveHost.cs",
+      "old": "public void SetEntryFee(Money fee) => Guests.SaveEntrance.EntryFee = fee;",
+      "new": "public void SetEntryFee(Money fee) { }",
+      "status": "killed",
+      "detail": "25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[tpw] --park-place 217,26,29,2: placed\n[tpw] --park-place 237,10,36,3: placed\n[tpw] --park-place 195,30,38,1: placed\n[tpw] --park-hire 0,20,20: hired\n[tpw] --park-hire 1,21,20: hired\n[tpw] --park-hire 2,22,20: hired\n[tpw] --park-hire 3,23,20: hired\n[tpw] --park-hire 4,24,20: hired\n[tpw] --park-lay 21,19,21,44: 26 tiles took path\n[tpw] --park-queue 220,12,24,1: not placed\n[tpw] --park-upgrade 217: level 1, bank \u00a345,650 -> \u00a345,450\n[save-proof] admissions gate: 0 outside, 0 in a lane, 0 paying, 1 walking in, 0 leaving; lanes 0/0, 2 paid, 0 turned back (0 broke), 0 actually left; intensity sum 125 over 2 attractions, fee \u00a340 (at roll time the sum ran 125..125 over 2 rolls)\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: open flag/entry fee\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 147\n   at TPWGodot.ParkView.SeedSaveProof(ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 136\n   at TPWGodot.ParkSaveProof.Seed(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 31\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1045\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "restore level empty",
+      "file": "ParkSaveHost.cs",
+      "old": "a.Level = s.Level;",
+      "new": "a.Level = 0;",
+      "status": "killed",
+      "detail": "5,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: distinct upgraded levels\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 142\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "restore staff empty",
+      "file": "ParkSaveHost.cs",
+      "old": "var st = Guests.Hire(StaffOrder[block], saved.X >> 8, saved.Y >> 8);",
+      "new": "if (saved.HireDay >= 0) return; var st = Guests.Hire(StaffOrder[block], saved.X >> 8, saved.Y >> 8);",
+      "status": "killed",
+      "detail": "5, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: guest/staff/admission counts\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 148\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "restore bank empty",
+      "file": "ParkSaveHost.cs",
+      "old": "Finances.Bank.Receive(Money.FromRaw(saved.BalanceRaw) - Finances.Bank.Balance);",
+      "new": "/* dropped bank restore */",
+      "status": "killed",
+      "detail": ",385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: raw bank tenths/reference\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 144\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "restore admissions empty",
+      "file": "ParkSaveHost.cs",
+      "old": "Guests.SaveEntrance.Counter_McAi1C = unchecked((int)saved.Admissions);",
+      "new": "/* dropped admission restore */",
+      "status": "killed",
+      "detail": "ies\n  ok   boot executable: SLES_026.88, 49,152 bytes\n  ok   legal screen: 320x256 RGBA, 327,680 bytes; TGA footer at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: guest/staff/admission counts\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 148\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\n"
+    },
+    {
+      "name": "restore paths empty",
+      "file": "ParkSaveHost.cs",
+      "old": "public void PlacePath(int x, int y) => park.RestorePath(x, y);",
+      "new": "public void PlacePath(int x, int y) { }",
+      "status": "killed",
+      "detail": "1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  },\n  \"after\": {\n    \"attractions\": [\n      {\n        \"entry\": 195,\n        \"type\": 2,\n        \"x\": 30,\n        \"z\": 38,\n        \"rotation\": 1,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 0,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 63,\n        \"serviced\": 819\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 69,\n        \"capacity\": 5,\n        \"duration\": 6,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 68,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [\n          [\n            11,\n            26\n          ],\n          [\n            8,\n            26\n          ]\n        ],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 19,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 5261,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 5517,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 5773,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 6029,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 6285,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": true,\n        \"remaining\": 0,\n        \"payment\": 530,\n        \"months\": -2\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      1116,\n      1258,\n      1640\n    ],\n    \"queues\": [\n      1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "restore queue empty",
+      "file": "ParkSaveHost.cs",
+      "old": "int count = s.Bytes[0x91];",
+      "new": "int count = 0;",
+      "status": "killed",
+      "detail": ": 2,\n        \"x\": 30,\n        \"z\": 38,\n        \"rotation\": 1,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 0,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 63,\n        \"serviced\": 819\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 69,\n        \"capacity\": 5,\n        \"duration\": 6,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 68,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 19,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 5261,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 5517,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 5773,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 6029,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 6285,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": true,\n        \"remaining\": 0,\n        \"payment\": 530,\n        \"months\": -2\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      901,\n      945,\n      989,\n      1033,\n      1077,\n      1116,\n      1121,\n      1165,\n      1209,\n      1253,\n      1258,\n      1297,\n      1341,\n      1385,\n      1429,\n      1473,\n      1517,\n      1561,\n      1605,\n      1640,\n      1649,\n      1693,\n      1737,\n      1781,\n      1825,\n      1869,\n      1913,\n      1957\n    ],\n    \"queues\": [\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "restore sliders empty",
+      "file": "ParkSaveHost.cs",
+      "old": "TPW.Sim.RidePanel.RestoreSliders(a, s.Sliders);",
+      "new": "/* dropped sliders */",
+      "status": "killed",
+      "detail": "acity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 63,\n        \"serviced\": 819\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 50,\n        \"capacity\": 2,\n        \"duration\": 5,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 50,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [\n          [\n            11,\n            26\n          ],\n          [\n            8,\n            26\n          ]\n        ],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 19,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 5261,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 5517,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 5773,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 6029,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 6285,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": true,\n        \"remaining\": 0,\n        \"payment\": 530,\n        \"months\": -2\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      901,\n      945,\n      989,\n      1033,\n      1077,\n      1116,\n      1121,\n      1165,\n      1209,\n      1253,\n      1258,\n      1297,\n      1341,\n      1385,\n      1429,\n      1473,\n      1517,\n      1561,\n      1605,\n      1640,\n      1649,\n      1693,\n      1737,\n      1781,\n      1825,\n      1869,\n      1913,\n      1957\n    ],\n    \"queues\": [\n      1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "restore feature stock empty",
+      "file": "ParkSaveHost.cs",
+      "old": "FeatureStock.FromSave(unchecked((sbyte)s.Bytes[14]), ParkSaveHost.Get32(s.Bytes, 8))",
+      "new": "new FeatureStock()",
+      "status": "killed",
+      "detail": "pacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 100,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 69,\n        \"capacity\": 5,\n        \"duration\": 6,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 68,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [\n          [\n            11,\n            26\n          ],\n          [\n            8,\n            26\n          ]\n        ],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 19,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 5261,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 5517,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 5773,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 6029,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 6285,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": true,\n        \"remaining\": 0,\n        \"payment\": 530,\n        \"months\": -2\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      901,\n      945,\n      989,\n      1033,\n      1077,\n      1116,\n      1121,\n      1165,\n      1209,\n      1253,\n      1258,\n      1297,\n      1341,\n      1385,\n      1429,\n      1473,\n      1517,\n      1561,\n      1605,\n      1640,\n      1649,\n      1693,\n      1737,\n      1781,\n      1825,\n      1869,\n      1913,\n      1957\n    ],\n    \"queues\": [\n      1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "restore shop price",
+      "file": "ParkSaveHost.cs",
+      "old": "a.SalePrice = unchecked((ushort)ParkSaveHost.Get16(s.Bytes, 12));",
+      "new": "a.SalePrice = 0;",
+      "status": "killed",
+      "detail": "pacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 63,\n        \"serviced\": 819\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 69,\n        \"capacity\": 5,\n        \"duration\": 6,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 68,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [\n          [\n            11,\n            26\n          ],\n          [\n            8,\n            26\n          ]\n        ],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 5261,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 5517,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 5773,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 6029,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 6285,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": true,\n        \"remaining\": 0,\n        \"payment\": 530,\n        \"months\": -2\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      901,\n      945,\n      989,\n      1033,\n      1077,\n      1116,\n      1121,\n      1165,\n      1209,\n      1253,\n      1258,\n      1297,\n      1341,\n      1385,\n      1429,\n      1473,\n      1517,\n      1561,\n      1605,\n      1640,\n      1649,\n      1693,\n      1737,\n      1781,\n      1825,\n      1869,\n      1913,\n      1957\n    ],\n    \"queues\": [\n      1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "restore unknown visitor byte empty",
+      "file": "ParkSaveHost.cs",
+      "old": "guest.Unknown63 = value;",
+      "new": "/* dropped visitor byte */",
+      "status": "killed",
+      "detail": "er declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: visitor ranges/unknown byte were not connected to live visitors\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 151\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    },
+    {
+      "name": "repaid loan slot released",
+      "file": "ParkSaveHost.cs",
+      "old": "loan.Taken ? (byte)0 : (byte)1",
+      "new": "loan.Remaining.Raw > 0 ? (byte)0 : (byte)1",
+      "status": "killed",
+      "detail": "apacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 18,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 63,\n        \"serviced\": 819\n      },\n      {\n        \"entry\": 217,\n        \"type\": 3,\n        \"x\": 26,\n        \"z\": 29,\n        \"rotation\": 2,\n        \"level\": 1,\n        \"status\": 3,\n        \"built\": 813,\n        \"speed\": 69,\n        \"capacity\": 5,\n        \"duration\": 6,\n        \"reliability\": 307200,\n        \"lifetime\": 43,\n        \"served\": 19,\n        \"queue\": [],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 220,\n        \"type\": 3,\n        \"x\": 12,\n        \"z\": 24,\n        \"rotation\": 1,\n        \"level\": 2,\n        \"status\": 3,\n        \"built\": 812,\n        \"speed\": 68,\n        \"capacity\": 4,\n        \"duration\": 5,\n        \"reliability\": 303104,\n        \"lifetime\": 42,\n        \"served\": 18,\n        \"queue\": [\n          [\n            11,\n            26\n          ],\n          [\n            8,\n            26\n          ]\n        ],\n        \"price\": 0,\n        \"takings\": 0,\n        \"profit\": 0,\n        \"visits\": 0,\n        \"satisfaction\": 0,\n        \"quality\": 0,\n        \"second\": 0,\n        \"stock\": 0,\n        \"serviced\": 0\n      },\n      {\n        \"entry\": 237,\n        \"type\": 4,\n        \"x\": 10,\n        \"z\": 36,\n        \"rotation\": 3,\n        \"level\": 0,\n        \"status\": 2,\n        \"built\": 814,\n        \"speed\": 0,\n        \"capacity\": 0,\n        \"duration\": 0,\n        \"reliability\": 0,\n        \"lifetime\": 0,\n        \"served\": 20,\n        \"queue\": [],\n        \"price\": 19,\n        \"takings\": 1234,\n        \"profit\": -321,\n        \"visits\": 11,\n        \"satisfaction\": 847,\n        \"quality\": 61,\n        \"second\": 43,\n        \"stock\": 0,\n        \"serviced\": 0\n      }\n    ],\n    \"guests\": 9,\n    \"staff\": [\n      {\n        \"kind\": 0,\n        \"x\": 5261,\n        \"z\": 5495,\n        \"hired\": 803,\n        \"skill\": 0,\n        \"striking\": false\n      },\n      {\n        \"kind\": 1,\n        \"x\": 5517,\n        \"z\": 5495,\n        \"hired\": 804,\n        \"skill\": 1,\n        \"striking\": false\n      },\n      {\n        \"kind\": 2,\n        \"x\": 5773,\n        \"z\": 5495,\n        \"hired\": 805,\n        \"skill\": 2,\n        \"striking\": false\n      },\n      {\n        \"kind\": 3,\n        \"x\": 6029,\n        \"z\": 5495,\n        \"hired\": 806,\n        \"skill\": 3,\n        \"striking\": false\n      },\n      {\n        \"kind\": 4,\n        \"x\": 6285,\n        \"z\": 5495,\n        \"hired\": 807,\n        \"skill\": 4,\n        \"striking\": true\n      }\n    ],\n    \"bank\": 314159,\n    \"totalDays\": 836,\n    \"day\": 16,\n    \"month\": 3,\n    \"year\": 2,\n    \"totalMonths\": 27,\n    \"open\": true,\n    \"fee\": 70,\n    \"admissions\": 2,\n    \"loans\": [\n      {\n        \"taken\": true,\n        \"remaining\": 24680,\n        \"payment\": 730,\n        \"months\": 19\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      },\n      {\n        \"taken\": false,\n        \"remaining\": 0,\n        \"payment\": 0,\n        \"months\": 0\n      }\n    ],\n    \"paths\": [\n      810,\n      811,\n      814,\n      815,\n      854,\n      855,\n      856,\n      857,\n      858,\n      859,\n      901,\n      945,\n      989,\n      1033,\n      1077,\n      1116,\n      1121,\n      1165,\n      1209,\n      1253,\n      1258,\n      1297,\n      1341,\n      1385,\n      1429,\n      1473,\n      1517,\n      1561,\n      1605,\n      1640,\n      1649,\n      1693,\n      1737,\n      1781,\n      1825,\n      1869,\n      1913,\n      1957\n    ],\n    \"queues\": [\n      1152,\n      1153,\n      1154,\n      1155,\n      1481\n    ]\n  }\n}"
+    },
+    {
+      "name": "staff cleanup empty",
+      "file": "ParkGuests.cs",
+      "old": "_staff.Clear();",
+      "new": "/* retained old staff */",
+      "status": "killed",
+      "detail": "false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\n[save-proof] after {\"attractions\":[{\"entry\":195,\"type\":2,\"x\":30,\"z\":38,\"rotation\":1,\"level\":0,\"status\":2,\"built\":0,\"speed\":0,\"capacity\":0,\"duration\":0,\"reliability\":0,\"lifetime\":0,\"served\":18,\"queue\":[],\"price\":0,\"takings\":0,\"profit\":0,\"visits\":0,\"satisfaction\":0,\"quality\":0,\"second\":0,\"stock\":63,\"serviced\":819},{\"entry\":217,\"type\":3,\"x\":26,\"z\":29,\"rotation\":2,\"level\":1,\"status\":3,\"built\":813,\"speed\":69,\"capacity\":5,\"duration\":6,\"reliability\":307200,\"lifetime\":43,\"served\":19,\"queue\":[],\"price\":0,\"takings\":0,\"profit\":0,\"visits\":0,\"satisfaction\":0,\"quality\":0,\"second\":0,\"stock\":0,\"serviced\":0},{\"entry\":220,\"type\":3,\"x\":12,\"z\":24,\"rotation\":1,\"level\":2,\"status\":3,\"built\":812,\"speed\":68,\"capacity\":4,\"duration\":5,\"reliability\":303104,\"lifetime\":42,\"served\":18,\"queue\":[[11,26],[8,26]],\"price\":0,\"takings\":0,\"profit\":0,\"visits\":0,\"satisfaction\":0,\"quality\":0,\"second\":0,\"stock\":0,\"serviced\":0},{\"entry\":237,\"type\":4,\"x\":10,\"z\":36,\"rotation\":3,\"level\":0,\"status\":2,\"built\":814,\"speed\":0,\"capacity\":0,\"duration\":0,\"reliability\":0,\"lifetime\":0,\"served\":20,\"queue\":[],\"price\":19,\"takings\":1234,\"profit\":-321,\"visits\":11,\"satisfaction\":847,\"quality\":61,\"second\":43,\"stock\":0,\"serviced\":0}],\"guests\":9,\"staff\":[{\"kind\":0,\"x\":5261,\"z\":5495,\"hired\":803,\"skill\":0,\"striking\":false},{\"kind\":1,\"x\":5517,\"z\":5495,\"hired\":804,\"skill\":1,\"striking\":false},{\"kind\":2,\"x\":5773,\"z\":5495,\"hired\":805,\"skill\":2,\"striking\":false},{\"kind\":3,\"x\":6029,\"z\":5495,\"hired\":806,\"skill\":3,\"striking\":false},{\"kind\":4,\"x\":6285,\"z\":5495,\"hired\":807,\"skill\":4,\"striking\":true}],\"bank\":314159,\"totalDays\":836,\"day\":16,\"month\":3,\"year\":2,\"totalMonths\":27,\"open\":true,\"fee\":70,\"admissions\":2,\"loans\":[{\"taken\":true,\"remaining\":24680,\"payment\":730,\"months\":19},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":true,\"remaining\":0,\"payment\":530,\"months\":-2},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859,901,945,989,1033,1077,1116,1121,1165,1209,1253,1258,1297,1341,1385,1429,1473,1517,1561,1605,1640,1649,1693,1737,1781,1825,1869,1913,1957],\"queues\":[1152,1153,1154,1155,1481]}\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: reload retained old people/nodes\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 50\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1046\n"
+    },
+    {
+      "name": "save before construction",
+      "file": "Main.cs",
+      "old": "if (_autoPlace != null)",
+      "new": "if (_parkSavePath != null) SaveParkFile();\n                    if (_autoPlace != null)",
+      "status": "killed",
+      "detail": " at 165,385, after the 163,858 bytes the header declares\n  ok   asset archive: 422 entries, 422 aligned to 0x800, none overlapping or out of bounds\n  ok   container sizes: 268/268 containers agree with the table on their own size\n  ok   compressed meshes: 25/25 LZSS sub-entries expand to exactly their declared size, 25 walk as meshes\n  ok   texture sheets: 29 sheets (12 raw filling their entries exactly, 17 compressed expanding block by block to exactly each entry's last byte); 4,409/4,409 sprites' palettes inside their own sheet\n  ok   sprite banks: 2/2 decoded at 0x104 and 0x10C, 256x1024 4bpp\n  ok   sound banks: 9/9 banks paired with their waveform body, 192 waveforms decoded, 1 empty slots\n  ok   music patterns: 9 modules in the game's own packing, 187 patterns each decoding to exactly its declared rows and bytes\n  ok   music modules: 9 XM modules, 9 whose instrument count matches the paired bank's waveform count\n  ok   speech stream: cooked image \u2014 sector form cannot be checked\n  FAIL movies: 8 of 8 movies have a problem; first: BF.STR: cooked image: without the Mode 2 subheaders, video and audio sectors cannot be told apart\n  ok   text: 8 language tables of 1,031 strings each; the executable's language map matches; 244/244 attraction records named\n\n[tpw] legal screen decoded from the user's disc: 320x256\n[tpw] model 1/556: entry #0 sub 0, 193 verts, 301 faces\n[tpw] decoded 192 waveforms; longest 38,220 samples (1.73s at 22050 Hz)\n[tpw] music: module #305, 10 channels, 38 patterns, speed 6 tempo 125, rendered at 44100 Hz\n[save-proof] fresh {\"attractions\":[],\"guests\":0,\"staff\":[],\"bank\":500000,\"totalDays\":0,\"day\":0,\"month\":0,\"year\":0,\"totalMonths\":0,\"open\":false,\"fee\":400,\"admissions\":0,\"loans\":[{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0},{\"taken\":false,\"remaining\":0,\"payment\":0,\"months\":0}],\"paths\":[810,811,814,815,854,855,856,857,858,859],\"queues\":[]}\n[tpw] --park-load /home/ec2-user/tpwport-savehost/game/obj/savehost-proof/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: four placed models\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 141\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1047\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\n     at: cleanup (core/object/object.cpp:2641)\n"
+    }
+  ],
+  "test_sha256": {
+    "game/ParkSaveProof.cs": "7100310f141c3a5fe553e402baa784eddf29ba7a4242416c3e6ce25be1443731",
+    "tools/prove_savehost.py": "0b9de0bfbaf9f552a59252fc898e836581f07ae580ef7428db739a3e7cc22554"
+  },
+  "baseline": {
+    "before": {
+      "attractions": [
+        {
+          "entry": 195,
+          "type": 2,
+          "x": 30,
+          "z": 38,
+          "rotation": 1,
+          "level": 0,
+          "status": 2,
+          "built": 0,
+          "speed": 0,
+          "capacity": 0,
+          "duration": 0,
+          "reliability": 0,
+          "lifetime": 0,
+          "served": 18,
+          "queue": [],
+          "price": 0,
+          "takings": 0,
+          "profit": 0,
+          "visits": 0,
+          "satisfaction": 0,
+          "quality": 0,
+          "second": 0,
+          "stock": 63,
+          "serviced": 819
+        },
+        {
+          "entry": 217,
+          "type": 3,
+          "x": 26,
+          "z": 29,
+          "rotation": 2,
+          "level": 1,
+          "status": 3,
+          "built": 813,
+          "speed": 69,
+          "capacity": 5,
+          "duration": 6,
+          "reliability": 307200,
+          "lifetime": 43,
+          "served": 19,
+          "queue": [],
+          "price": 0,
+          "takings": 0,
+          "profit": 0,
+          "visits": 0,
+          "satisfaction": 0,
+          "quality": 0,
+          "second": 0,
+          "stock": 0,
+          "serviced": 0
+        },
+        {
+          "entry": 220,
+          "type": 3,
+          "x": 12,
+          "z": 24,
+          "rotation": 1,
+          "level": 2,
+          "status": 3,
+          "built": 812,
+          "speed": 68,
+          "capacity": 4,
+          "duration": 5,
+          "reliability": 303104,
+          "lifetime": 42,
+          "served": 18,
+          "queue": [
+            [
+              11,
+              26
+            ],
+            [
+              8,
+              26
+            ]
+          ],
+          "price": 0,
+          "takings": 0,
+          "profit": 0,
+          "visits": 0,
+          "satisfaction": 0,
+          "quality": 0,
+          "second": 0,
+          "stock": 0,
+          "serviced": 0
+        },
+        {
+          "entry": 237,
+          "type": 4,
+          "x": 10,
+          "z": 36,
+          "rotation": 3,
+          "level": 0,
+          "status": 2,
+          "built": 814,
+          "speed": 0,
+          "capacity": 0,
+          "duration": 0,
+          "reliability": 0,
+          "lifetime": 0,
+          "served": 20,
+          "queue": [],
+          "price": 19,
+          "takings": 1234,
+          "profit": -321,
+          "visits": 11,
+          "satisfaction": 847,
+          "quality": 61,
+          "second": 43,
+          "stock": 0,
+          "serviced": 0
+        }
+      ],
+      "guests": 9,
+      "staff": [
+        {
+          "kind": 0,
+          "x": 5261,
+          "z": 5495,
+          "hired": 803,
+          "skill": 0,
+          "striking": false
+        },
+        {
+          "kind": 1,
+          "x": 5517,
+          "z": 5495,
+          "hired": 804,
+          "skill": 1,
+          "striking": false
+        },
+        {
+          "kind": 2,
+          "x": 5773,
+          "z": 5495,
+          "hired": 805,
+          "skill": 2,
+          "striking": false
+        },
+        {
+          "kind": 3,
+          "x": 6029,
+          "z": 5495,
+          "hired": 806,
+          "skill": 3,
+          "striking": false
+        },
+        {
+          "kind": 4,
+          "x": 6285,
+          "z": 5495,
+          "hired": 807,
+          "skill": 4,
+          "striking": true
+        }
+      ],
+      "bank": 314159,
+      "totalDays": 836,
+      "day": 16,
+      "month": 3,
+      "year": 2,
+      "totalMonths": 27,
+      "open": true,
+      "fee": 70,
+      "admissions": 2,
+      "loans": [
+        {
+          "taken": true,
+          "remaining": 24680,
+          "payment": 730,
+          "months": 19
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        },
+        {
+          "taken": true,
+          "remaining": 0,
+          "payment": 530,
+          "months": -2
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        }
+      ],
+      "paths": [
+        810,
+        811,
+        814,
+        815,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        901,
+        945,
+        989,
+        1033,
+        1077,
+        1116,
+        1121,
+        1165,
+        1209,
+        1253,
+        1258,
+        1297,
+        1341,
+        1385,
+        1429,
+        1473,
+        1517,
+        1561,
+        1605,
+        1640,
+        1649,
+        1693,
+        1737,
+        1781,
+        1825,
+        1869,
+        1913,
+        1957
+      ],
+      "queues": [
+        1152,
+        1153,
+        1154,
+        1155,
+        1481
+      ]
+    },
+    "fresh": {
+      "attractions": [],
+      "guests": 0,
+      "staff": [],
+      "bank": 500000,
+      "totalDays": 0,
+      "day": 0,
+      "month": 0,
+      "year": 0,
+      "totalMonths": 0,
+      "open": false,
+      "fee": 400,
+      "admissions": 0,
+      "loans": [
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        }
+      ],
+      "paths": [
+        810,
+        811,
+        814,
+        815,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859
+      ],
+      "queues": []
+    },
+    "after": {
+      "attractions": [
+        {
+          "entry": 195,
+          "type": 2,
+          "x": 30,
+          "z": 38,
+          "rotation": 1,
+          "level": 0,
+          "status": 2,
+          "built": 0,
+          "speed": 0,
+          "capacity": 0,
+          "duration": 0,
+          "reliability": 0,
+          "lifetime": 0,
+          "served": 18,
+          "queue": [],
+          "price": 0,
+          "takings": 0,
+          "profit": 0,
+          "visits": 0,
+          "satisfaction": 0,
+          "quality": 0,
+          "second": 0,
+          "stock": 63,
+          "serviced": 819
+        },
+        {
+          "entry": 217,
+          "type": 3,
+          "x": 26,
+          "z": 29,
+          "rotation": 2,
+          "level": 1,
+          "status": 3,
+          "built": 813,
+          "speed": 69,
+          "capacity": 5,
+          "duration": 6,
+          "reliability": 307200,
+          "lifetime": 43,
+          "served": 19,
+          "queue": [],
+          "price": 0,
+          "takings": 0,
+          "profit": 0,
+          "visits": 0,
+          "satisfaction": 0,
+          "quality": 0,
+          "second": 0,
+          "stock": 0,
+          "serviced": 0
+        },
+        {
+          "entry": 220,
+          "type": 3,
+          "x": 12,
+          "z": 24,
+          "rotation": 1,
+          "level": 2,
+          "status": 3,
+          "built": 812,
+          "speed": 68,
+          "capacity": 4,
+          "duration": 5,
+          "reliability": 303104,
+          "lifetime": 42,
+          "served": 18,
+          "queue": [
+            [
+              11,
+              26
+            ],
+            [
+              8,
+              26
+            ]
+          ],
+          "price": 0,
+          "takings": 0,
+          "profit": 0,
+          "visits": 0,
+          "satisfaction": 0,
+          "quality": 0,
+          "second": 0,
+          "stock": 0,
+          "serviced": 0
+        },
+        {
+          "entry": 237,
+          "type": 4,
+          "x": 10,
+          "z": 36,
+          "rotation": 3,
+          "level": 0,
+          "status": 2,
+          "built": 814,
+          "speed": 0,
+          "capacity": 0,
+          "duration": 0,
+          "reliability": 0,
+          "lifetime": 0,
+          "served": 20,
+          "queue": [],
+          "price": 19,
+          "takings": 1234,
+          "profit": -321,
+          "visits": 11,
+          "satisfaction": 847,
+          "quality": 61,
+          "second": 43,
+          "stock": 0,
+          "serviced": 0
+        }
+      ],
+      "guests": 9,
+      "staff": [
+        {
+          "kind": 0,
+          "x": 5261,
+          "z": 5495,
+          "hired": 803,
+          "skill": 0,
+          "striking": false
+        },
+        {
+          "kind": 1,
+          "x": 5517,
+          "z": 5495,
+          "hired": 804,
+          "skill": 1,
+          "striking": false
+        },
+        {
+          "kind": 2,
+          "x": 5773,
+          "z": 5495,
+          "hired": 805,
+          "skill": 2,
+          "striking": false
+        },
+        {
+          "kind": 3,
+          "x": 6029,
+          "z": 5495,
+          "hired": 806,
+          "skill": 3,
+          "striking": false
+        },
+        {
+          "kind": 4,
+          "x": 6285,
+          "z": 5495,
+          "hired": 807,
+          "skill": 4,
+          "striking": true
+        }
+      ],
+      "bank": 314159,
+      "totalDays": 836,
+      "day": 16,
+      "month": 3,
+      "year": 2,
+      "totalMonths": 27,
+      "open": true,
+      "fee": 70,
+      "admissions": 2,
+      "loans": [
+        {
+          "taken": true,
+          "remaining": 24680,
+          "payment": 730,
+          "months": 19
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        },
+        {
+          "taken": true,
+          "remaining": 0,
+          "payment": 530,
+          "months": -2
+        },
+        {
+          "taken": false,
+          "remaining": 0,
+          "payment": 0,
+          "months": 0
+        }
+      ],
+      "paths": [
+        810,
+        811,
+        814,
+        815,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        901,
+        945,
+        989,
+        1033,
+        1077,
+        1116,
+        1121,
+        1165,
+        1209,
+        1253,
+        1258,
+        1297,
+        1341,
+        1385,
+        1429,
+        1473,
+        1517,
+        1561,
+        1605,
+        1640,
+        1649,
+        1693,
+        1737,
+        1781,
+        1825,
+        1869,
+        1913,
+        1957
+      ],
+      "queues": [
+        1152,
+        1153,
+        1154,
+        1155,
+        1481
+      ]
+    },
+    "file_bytes": 4881,
+    "occupied_reload": true,
+    "wrong_map_control": true,
+    "no_load_control": true,
+    "missing_file_control": true
+  },
+  "restored_sha256": {
+    "ParkSaveHost.cs": "60fb791e59b288e611953d34d36974f17036da6d32fba83f67d20ea20c74cc31",
+    "ParkGuests.cs": "8a51e6b2183314f49e2d3a94e65ac39aae57aab0dcd68ea23e7d2a4b855b7f7b",
+    "Main.cs": "5b4a9de58e0cf6790805e1d60fab166c190974cecfe828ee9a6a4ac5c92b1768"
+  },
+  "restored": true,
+  "summary": {
+    "killed": 25,
+    "survived": 0,
+    "invalid": 0,
+    "total": 25
+  },
+  "restored_build_exit": 0,
+  "post_review_main_recheck": {
+    "reason": "Final review moved delayed save after delayed break, preserving same-frame edit order.",
+    "main_sha256": "cca55e9ebddaf085d7c7af4521522f2258e7cd424125c765532fba8ad3467366",
+    "save_before_construction": "killed",
+    "detail": "of/park.save: loaded\nWARNING: [tpw] asset self-test reported failures \u2014 see the log above.\n     at: void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (res://Main.cs:786)\n     C# backtrace (most recent call first):\n         [0] void Godot.GD.PushWarning(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:396)\n         [1] void TPWGodot.Main.ApplySelfTest(string, bool, System.Byte[], int, int) (/home/ec2-user/tpwport-savehost/game/Main.cs:786)\n         [2] bool TPWGodot.Main.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (/home/ec2-user/tpwport-savehost/game/.godot/mono/temp/obj/Debug/Godot.SourceGenerators/Godot.SourceGenerators.ScriptMethodsGenerator/TPWGodot.Main_ScriptMethods.generated.cs:157)\n         [3] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)\n[park-save] FAILED: System.InvalidOperationException: SAVE PROOF rejects: four placed models\n   at TPWGodot.ParkSaveProof.Require(Boolean ok, String rejects) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 17\n   at TPWGodot.ParkView.CheckSaveProof() in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 141\n   at TPWGodot.ParkSaveProof.Check(ParkView park, ParkSaveHost host) in /home/ec2-user/tpwport-savehost/game/ParkSaveProof.cs:line 42\n   at TPWGodot.Main.ApplySelfTest(String text, Boolean ok, Byte[] rgba, Int32 w, Int32 h) in /home/ec2-user/tpwport-savehost/game/Main.cs:line 1047\n",
+    "restored_build_exit": 0
+  }
+}
