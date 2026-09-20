@@ -1,0 +1,1759 @@
+{
+  "source": "core/TPW.Sim/RidePanel.cs",
+  "original_sha256": "71bd0b5563384fb41277a1ab0f36dc7252007a4ba497785169fb98fb89b48aff",
+  "filter": "FullyQualifiedName~RidePanel|FullyQualifiedName~RideSliderEffects",
+  "mutations": [
+    {
+      "exit_code": 1,
+      "seconds": 7.66,
+      "summary": "Failed!  - Failed:    13, Passed:    65, Skipped:     0, Total:    78, Duration: 188 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: True, expected: True, requests: 1) [4 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 0, strike: False, queue: True, expected: False, requests: 0) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: True, queue: True, expected: False, requests: 0) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 80, max: 100, seats: 8, cmin: 1, cmax: 10, speed: 90, capacity: 4, duration: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.FirstPanelUpdateCanRaiseIggysDuration [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "placement retains old level",
+      "old": "world.Level = 0;",
+      "new": "world.Level = 1;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.65,
+      "summary": "Failed!  - Failed:     6, Passed:    72, Skipped:     0, Total:    78, Duration: 258 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: Running) [14 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: BrokenDown) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: ClosedByPlayer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: True, expected: True, requests: 1) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "placement does not initialize lifetime",
+      "old": "world.Lifetime = world.ReadLevel(0).Lifetime;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.89,
+      "summary": "Failed!  - Failed:     8, Passed:    70, Skipped:     0, Total:    78, Duration: 264 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [10 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [15 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 80, max: 100, seats: 8, cmin: 1, cmax: 10, speed: 90, capacity: 4, duration: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.FirstPanelUpdateCanRaiseIggysDuration [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "placement skips reset",
+      "old": "            ResetForLevel(world);\n            world.Lifetime",
+      "new": "            world.Lifetime",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.8,
+      "summary": "Failed!  - Failed:     3, Passed:    75, Skipped:     0, Total:    78, Duration: 230 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [19 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [82 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "default reset keeps old effects",
+      "old": "world.ClearRideEffects();",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.99,
+      "summary": "Failed!  - Failed:     3, Passed:    75, Skipped:     0, Total:    78, Duration: 236 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [19 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "default reset keeps reliability",
+      "old": "world.ReliabilityFixed = RideWear.FullReliability;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.6,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 177 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [10 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "default reset keeps cycle count",
+      "old": "world.CyclesRun = 0;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.47,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 270 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [11 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "default reset keeps closing progress",
+      "old": "world.ClosingProgress = 0;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.82,
+      "summary": "Failed!  - Failed:     1, Passed:    77, Skipped:     0, Total:    78, Duration: 244 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "default reads level zero forever",
+      "old": "var level = world.ReadLevel(world.Level);",
+      "new": "var level = world.ReadLevel(0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.87,
+      "summary": "Failed!  - Failed:     8, Passed:    70, Skipped:     0, Total:    78, Duration: 204 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 80, max: 100, seats: 8, cmin: 1, cmax: 10, speed: 90, capacity: 4, duration: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [27 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "capacity default is full maximum",
+      "old": "world.MaximumSeats >> 1",
+      "new": "world.MaximumSeats",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.17,
+      "summary": "Failed!  - Failed:     1, Passed:    77, Skipped:     0, Total:    78, Duration: 202 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "capacity uses record instead of virtual maximum",
+      "old": "world.MaximumSeats >> 1",
+      "new": "level.MaxSeats >> 1",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.22,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 195 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [6 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "capacity default has no floor",
+      "old": "Math.Max(MinimumDefault, world.MaximumSeats >> 1)",
+      "new": "(world.MaximumSeats >> 1)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.73,
+      "summary": "Failed!  - Failed:     3, Passed:    75, Skipped:     0, Total:    78, Duration: 194 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [12 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 80, max: 100, seats: 8, cmin: 1, cmax: 10, speed: 90, capacity: 4, duration: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "speed hardcoded fifty",
+      "old": "level.SpeedMin + ((level.SpeedMax - level.SpeedMin) >> 1)",
+      "new": "50",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.15,
+      "summary": "Failed!  - Failed:     7, Passed:    71, Skipped:     0, Total:    78, Duration: 465 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [28 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [4 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 80, max: 100, seats: 8, cmin: 1, cmax: 10, speed: 90, capacity: 4, duration: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "speed loses minimum offset",
+      "old": "level.SpeedMin + ((level.SpeedMax - level.SpeedMin) >> 1)",
+      "new": "((level.SpeedMax - level.SpeedMin) >> 1)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.06,
+      "summary": "Failed!  - Failed:     5, Passed:    73, Skipped:     0, Total:    78, Duration: 261 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "speed midpoint rounds up",
+      "old": "(level.SpeedMax - level.SpeedMin) >> 1",
+      "new": "(level.SpeedMax - level.SpeedMin + 1) >> 1",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.4,
+      "summary": "Failed!  - Failed:     6, Passed:    72, Skipped:     0, Total:    78, Duration: 167 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PlacementDerivesAllDefaultsFromLevelZero [11 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 80, max: 100, seats: 8, cmin: 1, cmax: 10, speed: 90, capacity: 4, duration: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.FirstPanelUpdateCanRaiseIggysDuration [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [4 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "duration default is full maximum",
+      "old": "level.CyclesMax >> 1",
+      "new": "level.CyclesMax",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.7,
+      "summary": "Failed!  - Failed:     3, Passed:    75, Skipped:     0, Total:    78, Duration: 242 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 2, max: 5, seats: 11, cmin: 30, cmax: 45, speed: 3, capacity: 5, duration: 22) [16 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.FirstPanelUpdateCanRaiseIggysDuration [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "duration default clamps to level minimum",
+      "old": "Math.Max(MinimumDefault, level.CyclesMax >> 1)",
+      "new": "Math.Max(level.CyclesMin, level.CyclesMax >> 1)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.11,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 259 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [16 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "duration default loses floor",
+      "old": "Math.Max(MinimumDefault, level.CyclesMax >> 1)",
+      "new": "(level.CyclesMax >> 1)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.81,
+      "summary": "Failed!  - Failed:     6, Passed:    72, Skipped:     0, Total:    78, Duration: 264 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: -1, c: 0, d: -9, es: 1, ec: 1, ed: 1) [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 0, cmin: 1, cmax: 0, speed: 50, capacity: 1, duration: 1) [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.DefaultArithmeticIsLiteral(min: 1, max: 100, seats: 1, cmin: 1, cmax: 1, speed: 50, capacity: 1, duration: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "default floor two",
+      "old": "MinimumDefault = 1",
+      "new": "MinimumDefault = 2",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 12.65,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 203 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [31 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "panel ignores third level",
+      "old": "i < PanelLevelCount",
+      "new": "i < PanelLevelCount - 1",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.83,
+      "summary": "Failed!  - Failed:     1, Passed:    77, Skipped:     0, Total:    78, Duration: 317 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "panel reads current level as initial bound",
+      "old": "var first = world.ReadLevel(0);",
+      "new": "var first = world.ReadLevel(world.Level);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.2,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 284 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "speed lower bound uses maximum",
+      "old": "Math.Min(speedMin, level.SpeedMin)",
+      "new": "Math.Max(speedMin, level.SpeedMin)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.24,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 235 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [22 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "speed upper bound uses minimum",
+      "old": "Math.Max(speedMax, level.SpeedMax)",
+      "new": "Math.Min(speedMax, level.SpeedMax)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.93,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 283 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "duration lower bound uses maximum",
+      "old": "Math.Min(cyclesMin, level.CyclesMin)",
+      "new": "Math.Max(cyclesMin, level.CyclesMin)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.7,
+      "summary": "Failed!  - Failed:     2, Passed:    76, Skipped:     0, Total:    78, Duration: 234 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "duration upper bound uses minimum",
+      "old": "Math.Max(cyclesMax, level.CyclesMax)",
+      "new": "Math.Min(cyclesMax, level.CyclesMax)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.69,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 253 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [23 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "capacity bound uses minimum",
+      "old": "Math.Max(seats, level.MaxSeats)",
+      "new": "Math.Min(seats, level.MaxSeats)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.39,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 237 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [7 ms]"
+      ],
+      "compile_error": false,
+      "name": "no coaster virtual capacity override",
+      "old": "if (world.Type == AttractionType.RollerCoaster) seats = world.MaximumSeats;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.45,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 166 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [24 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.PanelUsesTheUnionOfAllThreeLevelsEvenWhenLocked [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.AnUpgradedRideStillIncludesLevelZeroInItsPanelBounds [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "coaster override applied to every ride",
+      "old": "if (world.Type == AttractionType.RollerCoaster) seats = world.MaximumSeats;",
+      "new": "seats = world.MaximumSeats;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.43,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 182 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "capacity hidden at two",
+      "old": "seats > 1",
+      "new": "seats > 2",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.04,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 258 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [11 ms]"
+      ],
+      "compile_error": false,
+      "name": "duration shown on coaster",
+      "old": "world.Type != AttractionType.RollerCoaster);",
+      "new": "true);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.09,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 281 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: -1, c: 0, d: -9, es: 1, ec: 1, ed: 1) [11 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.FirstPanelUpdateCanRaiseIggysDuration [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "widget lacks lower clamp",
+      "old": "Math.Min(Max, Math.Max(Min, value))",
+      "new": "Math.Min(Max, value)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.5,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 425 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [65 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.WidgetGetterHasSignedHalfwordSemantics [6 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "widget lacks upper clamp",
+      "old": "Math.Min(Max, Math.Max(Min, value))",
+      "new": "Math.Max(Min, value)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.08,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 269 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.WidgetGetterHasSignedHalfwordSemantics [8 ms]"
+      ],
+      "compile_error": false,
+      "name": "widget reverses clamp order",
+      "old": "Math.Min(Max, Math.Max(Min, value))",
+      "new": "Math.Max(Min, Math.Min(Max, value))",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.96,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 216 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.WidgetGetterHasSignedHalfwordSemantics [26 ms]"
+      ],
+      "compile_error": false,
+      "name": "widget uses unsigned getter",
+      "old": "unchecked((short)Math.Min",
+      "new": "unchecked((ushort)Math.Min",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.12,
+      "summary": "Failed!  - Failed:     7, Passed:    73, Skipped:     0, Total:    80, Duration: 222 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [24 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: -1, c: 0, d: -9, es: 1, ec: 1, ed: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [6 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [10 ms]"
+      ],
+      "compile_error": false,
+      "name": "apply ignores speed",
+      "old": "world.SpeedSlider = ranges.Speed.Clamp(speed);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.69,
+      "summary": "Failed!  - Failed:     5, Passed:    75, Skipped:     0, Total:    80, Duration: 220 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [28 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: -1, c: 0, d: -9, es: 1, ec: 1, ed: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CapacityControlsLoadingAndDurationCanEndAnExistingRun [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CoasterUsesVirtualSeatsAndStillWritesHiddenDuration [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "apply ignores capacity",
+      "old": "world.Capacity = ranges.Capacity.Clamp(capacity);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.67,
+      "summary": "Failed!  - Failed:     8, Passed:    72, Skipped:     0, Total:    80, Duration: 299 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [39 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: -1, c: 0, d: -9, es: 1, ec: 1, ed: 1) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SpeedDoesNotChangeFlatPhaseTime [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CapacityControlsLoadingAndDurationCanEndAnExistingRun [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.FirstPanelUpdateCanRaiseIggysDuration [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [6 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "apply ignores duration",
+      "old": "world.CyclesPerLoad = ranges.Duration.Clamp(duration);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.72,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 347 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [30 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "apply clamps capacity to current level",
+      "old": "ranges.Capacity.Clamp(capacity)",
+      "new": "Math.Min(world.MaximumSeats, ranges.Capacity.Clamp(capacity))",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.81,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 415 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 200, c: 50, d: 30, es: 100, ec: 14, ed: 10) [78 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: -1, c: 0, d: -9, es: 1, ec: 1, ed: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ApplyClampsTheWidgetButDoesNotRestartTheRide(s: 82, c: 9, d: 7, es: 82, ec: 9, ed: 7) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "apply restarts animation",
+      "old": "world.SpeedSlider = ranges.Speed.Clamp(speed);",
+      "new": "world.CyclesRun = 0; world.SpeedSlider = ranges.Speed.Clamp(speed);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.38,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 219 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SaveNarrowsButRestoreDoesNotClamp [8 ms]"
+      ],
+      "compile_error": false,
+      "name": "save speed truncates to byte",
+      "old": "unchecked((ushort)world.SpeedSlider)",
+      "new": "unchecked((byte)world.SpeedSlider)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.84,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 227 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SaveNarrowsButRestoreDoesNotClamp [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "save capacity uses duration",
+      "old": "unchecked((byte)world.Capacity)",
+      "new": "unchecked((byte)world.CyclesPerLoad)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.65,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 186 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SaveNarrowsButRestoreDoesNotClamp [8 ms]"
+      ],
+      "compile_error": false,
+      "name": "save duration uses capacity",
+      "old": "unchecked((byte)world.CyclesPerLoad)",
+      "new": "unchecked((byte)world.Capacity)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.76,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 462 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RestoreZeroExtendsBothSavedBytes [9 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SaveNarrowsButRestoreDoesNotClamp [16 ms]"
+      ],
+      "compile_error": false,
+      "name": "restore speed sign extends",
+      "old": "world.SpeedSlider = saved.Speed;",
+      "new": "world.SpeedSlider = (short)saved.Speed;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.68,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 265 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RestoreZeroExtendsBothSavedBytes [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "restore capacity sign extends",
+      "old": "world.Capacity = saved.Capacity;",
+      "new": "world.Capacity = (sbyte)saved.Capacity;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.93,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 437 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RestoreZeroExtendsBothSavedBytes [28 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SaveNarrowsButRestoreDoesNotClamp [16 ms]"
+      ],
+      "compile_error": false,
+      "name": "restore duration sign extends",
+      "old": "world.CyclesPerLoad = saved.Duration;",
+      "new": "world.CyclesPerLoad = (sbyte)saved.Duration;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.54,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 273 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RestoreZeroExtendsBothSavedBytes [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SaveNarrowsButRestoreDoesNotClamp [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "restore clamps values",
+      "old": "world.SpeedSlider = saved.Speed;",
+      "new": "world.SpeedSlider = Ranges(world).Speed.Clamp(saved.Speed);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.34,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 282 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.UpgradeOfferSeparatesLifetimeResearchAndPanelLimit(level: 2, life: 45, research: 4, expected: False) [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "panel offers third upgrade",
+      "old": "world.Level + 1 < PanelLevelCount",
+      "new": "world.Level + 1 <= PanelLevelCount",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.76,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 258 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.UpgradeOfferSeparatesLifetimeResearchAndPanelLimit(level: 0, life: 0, research: 3, expected: False) [16 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: True, expected: True, requests: 1) [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "offer ignores lifetime",
+      "old": "&& world.Lifetime != 0",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.13,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 258 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.UpgradeOfferSeparatesLifetimeResearchAndPanelLimit(level: 0, life: -1, research: 3, expected: True) [7 ms]"
+      ],
+      "compile_error": false,
+      "name": "offer requires positive lifetime",
+      "old": "world.Lifetime != 0",
+      "new": "world.Lifetime > 0",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.52,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 262 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.UpgradeOfferSeparatesLifetimeResearchAndPanelLimit(level: 1, life: 45, research: 2, expected: False) [9 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.UpgradeOfferSeparatesLifetimeResearchAndPanelLimit(level: 0, life: 45, research: 1, expected: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "offer accepts research equality",
+      "old": "world.Level + 1 < world.ResearchedLevelCount",
+      "new": "world.Level + 1 <= world.ResearchedLevelCount",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.55,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 257 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: True, expected: True, requests: 1) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [20 ms]"
+      ],
+      "compile_error": false,
+      "name": "request ignores offer gates",
+      "old": "!CanOfferUpgrade(world) || ",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.67,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 196 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 0, strike: False, queue: True, expected: False, requests: 0) [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "request ignores no mechanics",
+      "old": " || world.MechanicCount == 0",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.66,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 299 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: True, queue: True, expected: False, requests: 0) [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "request ignores strike",
+      "old": " || world.MechanicsOnStrike",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.7,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 275 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: True, expected: True, requests: 1) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [12 ms]"
+      ],
+      "compile_error": false,
+      "name": "request does not enqueue",
+      "old": "return world.TryEnqueueUpgrade();",
+      "new": "return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.73,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 255 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "request ignores queue failure",
+      "old": "return world.TryEnqueueUpgrade();",
+      "new": "world.TryEnqueueUpgrade(); return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.89,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 195 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: Running) [20 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: BrokenDown) [3 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: ClosedByPlayer) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "request blocks zero reliability",
+      "old": "if (!CanOfferUpgrade(world)",
+      "new": "if (world.ReliabilityFixed == 0 || !CanOfferUpgrade(world)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.49,
+      "summary": "Failed!  - Failed:     6, Passed:    74, Skipped:     0, Total:    80, Duration: 260 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: Running) [75 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: BrokenDown) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ARequestLeavesTheCurrentRideAlone(status: ClosedByPlayer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: True, expected: True, requests: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.RequestRequiresMechanicsAndAcceptsTheQueueResult(mechanics: 1, strike: False, queue: False, expected: False, requests: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [13 ms]"
+      ],
+      "compile_error": false,
+      "name": "request completes immediately",
+      "old": "return world.TryEnqueueUpgrade();",
+      "new": "CompleteUpgrade(world); return world.TryEnqueueUpgrade();",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.0,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 206 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [16 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MissingFourthBlockFailsExplicitly [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion stops at two",
+      "old": "BinaryUpgradeLimit = 3",
+      "new": "BinaryUpgradeLimit = 2",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.65,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 228 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [12 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion accepts level three",
+      "old": "if (world.Level >= BinaryUpgradeLimit)",
+      "new": "if (world.Level > BinaryUpgradeLimit)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.06,
+      "summary": "Failed!  - Failed:     7, Passed:    73, Skipped:     0, Total:    80, Duration: 256 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [9 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [13 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MissingFourthBlockFailsExplicitly [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [17 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion does not increment",
+      "old": "world.Level++;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.38,
+      "summary": "Failed!  - Failed:     6, Passed:    74, Skipped:     0, Total:    80, Duration: 251 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [17 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [12 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [14 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion increments twice",
+      "old": "world.Level++;",
+      "new": "world.Level += 2;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.89,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 217 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [12 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion keeps lifetime from new block",
+      "old": "world.Level++;",
+      "new": "world.Level++; world.Lifetime = world.ReadLevel(world.Level).Lifetime;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.91,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 220 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MissingFourthBlockFailsExplicitly [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion reapplies panel gates",
+      "old": "if (world.Level >= BinaryUpgradeLimit)",
+      "new": "if (!CanOfferUpgrade(world) || world.Level >= BinaryUpgradeLimit)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.06,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 281 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [37 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion charges before reset",
+      "old": "            ResetForLevel(world);\n            world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds));",
+      "new": "            world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds));\n            ResetForLevel(world);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.47,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 152 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [26 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [10 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion charges previous level",
+      "old": "world.ReadLevel(world.Level).PricePounds",
+      "new": "world.ReadLevel(world.Level - 1).PricePounds",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.22,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 165 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [37 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [10 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion halves price",
+      "old": "world.ReadLevel(world.Level).PricePounds",
+      "new": "world.ReadLevel(world.Level).PricePounds / 2",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.77,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 145 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [28 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion charges price difference",
+      "old": "world.ReadLevel(world.Level).PricePounds",
+      "new": "(world.ReadLevel(world.Level).PricePounds - world.ReadLevel(world.Level - 1).PricePounds)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.01,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 189 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [25 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [10 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [8 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion treats pounds as raw",
+      "old": "Money.FromPounds(world.ReadLevel(world.Level).PricePounds)",
+      "new": "Money.FromRaw(world.ReadLevel(world.Level).PricePounds)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.37,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 173 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [44 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [4 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion omits payment",
+      "old": "world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds));",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.27,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 163 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [7 ms]"
+      ],
+      "compile_error": false,
+      "name": "failed payment blocks success",
+      "old": "world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds));",
+      "new": "if (!world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds))) return false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.37,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 153 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [30 ms]"
+      ],
+      "compile_error": false,
+      "name": "silent completion has no payment",
+      "old": "world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds));",
+      "new": "if (!silent) world.TrySpend(Money.FromPounds(world.ReadLevel(world.Level).PricePounds));",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.16,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 281 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SilentCompletionStillPaysAndIgnoresRequestGates [52 ms]"
+      ],
+      "compile_error": false,
+      "name": "silent completion still shows effect",
+      "old": "if (!silent) world.ShowUpgradeEffect",
+      "new": "world.ShowUpgradeEffect",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.04,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 212 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [21 ms]"
+      ],
+      "compile_error": false,
+      "name": "completion omits effect",
+      "old": "if (!silent) world.ShowUpgradeEffect(world.Level >= BinaryUpgradeLimit);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.37,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 207 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [11 ms]"
+      ],
+      "compile_error": false,
+      "name": "final effect starts at level two",
+      "old": "world.ShowUpgradeEffect(world.Level >= BinaryUpgradeLimit)",
+      "new": "world.ShowUpgradeEffect(world.Level >= 2)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.48,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 196 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.SecondNormalUpgradeUsesItsBlockButNotTheFinalSound [20 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionCanReachThreeButNeverFour [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.SlidersAndUpgradeFeedExistingWear [1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.CompletionResetsFirstAndChargesFullNewLevelEvenIfSpendFails [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "wear multiplier stays at level zero",
+      "old": "world.ReadLevel(world.Level).WearMultiplier",
+      "new": "world.ReadLevel(0).WearMultiplier",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.66,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 164 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [23 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity is cached base",
+      "old": "=> RideSliderEffects.Intensity(world.BaseIntensity, world.SpeedSlider, world.CyclesPerLoad);",
+      "new": "=> world.BaseIntensity;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.34,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 188 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [16 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity ignores speed setting",
+      "old": "Intensity(world.BaseIntensity, world.SpeedSlider, world.CyclesPerLoad)",
+      "new": "Intensity(world.BaseIntensity, 50, world.CyclesPerLoad)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.57,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 236 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [4 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity ignores duration setting",
+      "old": "Intensity(world.BaseIntensity, world.SpeedSlider, world.CyclesPerLoad)",
+      "new": "Intensity(world.BaseIntensity, world.SpeedSlider, 5)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.66,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 242 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate wrong id",
+      "old": "new(id, (int)world.Type, Intensity(world),",
+      "new": "new(0, (int)world.Type, Intensity(world),",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.95,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 233 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate wrong type",
+      "old": "new(id, (int)world.Type, Intensity(world),",
+      "new": "new(id, 3, Intensity(world),",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.44,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 171 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [8 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate enables desire terms",
+      "old": "0, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "new": "1, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.27,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 241 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [14 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate sets need B attribute",
+      "old": "0, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "new": "0, 50, 0, openToGuests, distanceTiles, centreTileValid)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.25,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 208 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [13 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate sets need A attribute",
+      "old": "0, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "new": "0, 0, 50, openToGuests, distanceTiles, centreTileValid)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.65,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 193 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [7 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate assumes open",
+      "old": "0, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "new": "0, 0, 0, true, distanceTiles, centreTileValid)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.2,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 214 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate discards distance",
+      "old": "0, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "new": "0, 0, 0, openToGuests, 0, centreTileValid)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.37,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 214 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate assumes valid centre",
+      "old": "0, 0, 0, openToGuests, distanceTiles, centreTileValid)",
+      "new": "0, 0, 0, openToGuests, distanceTiles, true)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.45,
+      "summary": "Failed!  - Failed:    13, Passed:    67, Skipped:     0, Total:    80, Duration: 267 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 80, d: 6, expected: 57) [19 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 200, d: 5, expected: 75) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 1, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 7, expected: 75) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 50, d: 5, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 1, d: 1, expected: 33) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 5, expected: 60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: -60, s: 100, d: 5, expected: -60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 60, s: 524288, d: 5, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntermediateTruncationIsObservable [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.RetainedCommonFormulaIncludesDurationDivisionByFive [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [2 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity fixed shift wrong",
+      "old": "FixedShift = 12",
+      "new": "FixedShift = 11",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.08,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 171 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 1, expected: 45) [4 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 50, d: 5, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [4 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 60, s: 524288, d: 5, expected: 45) [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity minimum factor one unit low",
+      "old": "MinimumFactor = 0xC00",
+      "new": "MinimumFactor = 0xBFF",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.99,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 324 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 200, d: 5, expected: 75) [19 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 7, expected: 75) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [5 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity maximum factor one unit low",
+      "old": "MaximumFactor = 0x1400",
+      "new": "MaximumFactor = 0x13FF",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.68,
+      "summary": "Failed!  - Failed:     6, Passed:    74, Skipped:     0, Total:    80, Duration: 336 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 80, d: 6, expected: 57) [4 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 50, min: 10, max: 1000, expected: 500) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 75, min: 10, max: 999, expected: 749) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: -60, s: 100, d: 5, expected: -60) [5 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 268435456, s: 100, d: 5, expected: 0) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntermediateTruncationIsObservable [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity speed divisor ninety nine",
+      "old": "SpeedDivisor = 100",
+      "new": "SpeedDivisor = 99",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.64,
+      "summary": "Failed!  - Failed:    11, Passed:    69, Skipped:     0, Total:    80, Duration: 189 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 80, d: 6, expected: 57) [10 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 200, d: 5, expected: 75) [1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 1, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 50, d: 5, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 1, d: 1, expected: 33) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 5, expected: 60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: -60, s: 100, d: 5, expected: -60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 60, s: 524288, d: 5, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntermediateTruncationIsObservable [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.RetainedCommonFormulaIncludesDurationDivisionByFive [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity duration divisor one",
+      "old": "DurationDivisor = 5",
+      "new": "DurationDivisor = 1",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.79,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 292 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 95, s: 200, d: 10, expected: 100) [21 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity ceiling ninety nine",
+      "old": "MaximumIntensity = 100",
+      "new": "MaximumIntensity = 99",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.92,
+      "summary": "Failed!  - Failed:     5, Passed:    75, Skipped:     0, Total:    80, Duration: 284 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 50, d: 5, expected: 45) [11 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 1, d: 1, expected: 33) [9 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 60, s: 524288, d: 5, expected: 45) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.RetainedCommonFormulaIncludesDurationDivisionByFive [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity loses speed floor",
+      "old": "unchecked(speed << FixedShift) / SpeedDivisor,\n                MinimumFactor, MaximumFactor",
+      "new": "unchecked(speed << FixedShift) / SpeedDivisor,\n                0, MaximumFactor",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.03,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 322 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 1, expected: 45) [26 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 1, d: 1, expected: 33) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.RetainedCommonFormulaIncludesDurationDivisionByFive [12 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity loses duration floor",
+      "old": "unchecked(duration << FixedShift) / DurationDivisor,\n                MinimumFactor, MaximumFactor",
+      "new": "unchecked(duration << FixedShift) / DurationDivisor,\n                0, MaximumFactor",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.17,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 263 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 200, d: 5, expected: 75) [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity loses speed ceiling",
+      "old": "unchecked(speed << FixedShift) / SpeedDivisor,\n                MinimumFactor, MaximumFactor",
+      "new": "unchecked(speed << FixedShift) / SpeedDivisor,\n                MinimumFactor, int.MaxValue",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.37,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 355 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.FactorsClampIndependentlyInFixedPoint(b: 60, s: 100, d: 7, expected: 75) [13 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.IntensityReachesOnlySlot53AndTheExistingTasteScore [7 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity loses duration ceiling",
+      "old": "unchecked(duration << FixedShift) / DurationDivisor,\n                MinimumFactor, MaximumFactor",
+      "new": "unchecked(duration << FixedShift) / DurationDivisor,\n                MinimumFactor, int.MaxValue",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.18,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 223 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 268435456, s: 100, d: 5, expected: 0) [38 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity factors multiplied after base",
+      "old": "int combined = unchecked(speedFactor * durationFactor) >> FixedShift;\n            return Math.Min(MaximumIntensity, unchecked(baseIntensity * combined) >> FixedShift);",
+      "new": "return Math.Min(MaximumIntensity, (int)(((long)baseIntensity * speedFactor * durationFactor) >> 24));",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.72,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 249 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: -60, s: 100, d: 5, expected: -60) [12 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity adds lower clamp",
+      "old": "return Math.Min(MaximumIntensity, unchecked(baseIntensity * combined) >> FixedShift);",
+      "new": "return Math.Clamp(unchecked(baseIntensity * combined) >> FixedShift, 0, MaximumIntensity);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.18,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 202 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.IntensityKeepsSignedWordArithmetic(b: 268435456, s: 100, d: 5, expected: 0) [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "intensity widens base product",
+      "old": "unchecked(baseIntensity * combined) >> FixedShift",
+      "new": "(int)(((long)baseIntensity * combined) >> FixedShift)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.82,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 109 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 100, expected: 20) [5 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 80, expected: 18) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 120, expected: 22) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "tour speed wrong centre",
+      "old": "Math.Clamp(speed - 100, -50, 50)",
+      "new": "Math.Clamp(speed - 90, -50, 50)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.95,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 151 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 0, expected: 15) [25 ms]"
+      ],
+      "compile_error": false,
+      "name": "tour speed ignores lower limit",
+      "old": "Math.Clamp(speed - 100, -50, 50)",
+      "new": "Math.Min(speed - 100, 50)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.38,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 123 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 200, expected: 25) [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "tour speed ignores upper limit",
+      "old": "Math.Clamp(speed - 100, -50, 50)",
+      "new": "Math.Max(speed - 100, -50)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.02,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 205 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 0, expected: 15) [26 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 80, expected: 18) [7 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 200, expected: 25) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 20, speed: 120, expected: 22) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "tour speed wrong divisor",
+      "old": "Math.Clamp(speed - 100, -50, 50) / 10",
+      "new": "Math.Clamp(speed - 100, -50, 50) / 5",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.36,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 151 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 1, speed: 100, expected: 2) [4 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 32767, speed: 150, expected: 2) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "tour speed wrong floor",
+      "old": "=> Math.Max(2, (int)unchecked",
+      "new": "=> Math.Max(1, (int)unchecked",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.67,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 117 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TourSpeedIsACappedOffsetAndSignedHalfword(b: 32767, speed: 150, expected: 2) [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "tour speed loses signed narrowing",
+      "old": "(int)unchecked((short)(baseSpeed + Math.Clamp(speed - 100, -50, 50) / 10))",
+      "new": "(baseSpeed + Math.Clamp(speed - 100, -50, 50) / 10)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.65,
+      "summary": "Failed!  - Failed:     6, Passed:    74, Skipped:     0, Total:    80, Duration: 162 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: 19, expected: 0) [6 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: 5140, expected: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: 20, expected: 1) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: 100, expected: 5) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: -20, expected: 255) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: 99, expected: 4) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "track speed wrong divisor",
+      "old": "((byte)(speed / 20))",
+      "new": "((byte)(speed / 10))",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.22,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 287 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: 5140, expected: 1) [3 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.TrackSpeedDividesByTwentyThenNarrows(speed: -20, expected: 255) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "track speed loses byte wrap",
+      "old": "public static byte TrackVehicleSpeed(int speed) => unchecked((byte)(speed / 20));",
+      "new": "public static int TrackVehicleSpeed(int speed) => speed / 20;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.66,
+      "summary": "Failed!  - Failed:     4, Passed:    76, Skipped:     0, Total:    80, Duration: 197 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 0, min: 10, max: 1000, expected: 10) [10 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 100, min: -100, max: 2147483647, expected: -1) [12 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 50, min: 10, max: 1000, expected: 500) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 75, min: 10, max: 999, expected: 749) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "coaster velocity ignores slider",
+      "old": "unchecked(maximumAt100 * speed) / SpeedDivisor",
+      "new": "maximumAt100",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.41,
+      "summary": "Failed!  - Failed:     2, Passed:    78, Skipped:     0, Total:    80, Duration: 226 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 0, min: 10, max: 1000, expected: 10) [3 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 1, s: 50, min: 10, max: 1000, expected: 10) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "coaster velocity ignores minimum",
+      "old": "=> Math.Max(minimum, Math.Min(velocity, unchecked(maximumAt100 * speed) / SpeedDivisor));",
+      "new": "=> Math.Min(velocity, unchecked(maximumAt100 * speed) / SpeedDivisor);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.91,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 243 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 0, min: 10, max: 1000, expected: 10) [13 ms]"
+      ],
+      "compile_error": false,
+      "name": "coaster velocity reverses clamp order",
+      "old": "Math.Max(minimum, Math.Min(velocity, unchecked(maximumAt100 * speed) / SpeedDivisor))",
+      "new": "Math.Min(unchecked(maximumAt100 * speed) / SpeedDivisor, Math.Max(minimum, velocity))",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.71,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 215 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.CoasterMinimumWinsAfterScaledMaximum(v: 900, s: 100, min: -100, max: 2147483647, expected: -1) [13 ms]"
+      ],
+      "compile_error": false,
+      "name": "coaster velocity widens product",
+      "old": "unchecked(maximumAt100 * speed) / SpeedDivisor",
+      "new": "(int)((long)maximumAt100 * speed / SpeedDivisor)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.83,
+      "summary": "Failed!  - Failed:     6, Passed:    74, Skipped:     0, Total:    80, Duration: 233 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 40960, duration: 20, coaster: False, expected: 0) [3 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 8192, duration: 2, coaster: False, expected: 96) [3 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 4096, duration: 1, coaster: True, expected: 91) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 8192, duration: 2, coaster: True, expected: 64) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: -4096, duration: 1, coaster: False, expected: 102) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 4096, duration: 1, coaster: False, expected: 99) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "forecast ignores nine",
+      "old": "(9 * duration)",
+      "new": "duration",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.0,
+      "summary": "Failed!  - Failed:     3, Passed:    77, Skipped:     0, Total:    80, Duration: 233 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 40960, duration: 20, coaster: False, expected: 0) [3 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 8192, duration: 2, coaster: False, expected: 96) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 8192, duration: 2, coaster: True, expected: 64) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "forecast ignores duration",
+      "old": "(9 * duration)",
+      "new": "9",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.76,
+      "summary": "Failed!  - Failed:     5, Passed:    75, Skipped:     0, Total:    80, Duration: 189 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 8192, duration: 2, coaster: False, expected: 96) [4 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 4096, duration: 1, coaster: True, expected: 91) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 8192, duration: 2, coaster: True, expected: 64) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: -4096, duration: 1, coaster: False, expected: 102) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 4096, duration: 1, coaster: False, expected: 99) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "forecast swaps class shifts",
+      "old": "(coaster ? 12 : 15)",
+      "new": "(coaster ? 15 : 12)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.01,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 276 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: 40960, duration: 20, coaster: False, expected: 0) [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "forecast no upper cap",
+      "old": "100 - Math.Min(100, unchecked(wearPrediction * (9 * duration)) >> (coaster ? 12 : 15))",
+      "new": "100 - (unchecked(wearPrediction * (9 * duration)) >> (coaster ? 12 : 15))",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.48,
+      "summary": "Failed!  - Failed:     1, Passed:    79, Skipped:     0, Total:    80, Duration: 315 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RideSliderEffectsTests.ProjectedReliabilityKeepsClassSpecificShift(wear: -4096, duration: 1, coaster: False, expected: 102) [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "forecast clamps negative deduction",
+      "old": "100 - Math.Min(100, unchecked(wearPrediction * (9 * duration)) >> (coaster ? 12 : 15))",
+      "new": "100 - Math.Clamp(unchecked(wearPrediction * (9 * duration)) >> (coaster ? 12 : 15), 0, 100)",
+      "status": "killed"
+    }
+  ],
+  "status": "passed",
+  "restoration": "top-level try/finally, signal handlers, durable backup and recovery journal",
+  "previous_runs": [
+    {
+      "status": "interrupted",
+      "baseline": {
+        "exit_code": 0,
+        "seconds": 8.9,
+        "summary": "Passed!  - Failed:     0, Passed:  1074, Skipped:     0, Total:  1074, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+        "failed_tests": [],
+        "compile_error": false
+      },
+      "restored": true,
+      "error": "signal 15"
+    }
+  ],
+  "baseline": {
+    "exit_code": 0,
+    "seconds": 9.59,
+    "summary": "Passed!  - Failed:     0, Passed:  1076, Skipped:     0, Total:  1076, Duration: 832 ms - TPW.Sim.Tests.dll (net8.0)",
+    "failed_tests": [],
+    "compile_error": false
+  },
+  "final_verification": {
+    "exit_code": 0,
+    "seconds": 7.86,
+    "summary": "Passed!  - Failed:     0, Passed:  1076, Skipped:     0, Total:  1076, Duration: 915 ms - TPW.Sim.Tests.dll (net8.0)",
+    "failed_tests": [],
+    "compile_error": false
+  },
+  "killed": 115,
+  "survived": [],
+  "invalid": [],
+  "mutation_count": 115,
+  "restored_sha256": "71bd0b5563384fb41277a1ab0f36dc7252007a4ba497785169fb98fb89b48aff",
+  "restored": true
+}
