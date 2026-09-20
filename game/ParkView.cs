@@ -3525,7 +3525,13 @@ void fragment() {
             // ⚠ THE KEYBOARD IS POLLED, SO THE MODAL GATE IN _UnhandledInput CANNOT SEE IT. The mouse is
             // event-driven and stops at that gate; these keys are read straight from the device every frame,
             // so they need their own check or the camera drives around behind a panel that covers the screen.
-            if (_panelFor != null || _contextFor != null) return;
+            //
+            // ⚠⚠ THE PANEL ONLY, NOT THE RIGHT-CLICK LIST. The panel IS the screen, so driving behind it is
+            // meaningless; a context list is a small popup over a park you can still see, and freezing the
+            // camera under it is just a control that stopped working. Worse, PlaceGameCamera below eases the
+            // game camera toward its target yaw -- so blocking here did not merely refuse NEW input, it
+            // stranded a turn that was already in flight halfway round.
+            if (_panelFor != null) return;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
             if (Input.IsKeyPressed(Key.S) || Input.IsKeyPressed(Key.Down)) move.Y += 1;
@@ -3575,7 +3581,9 @@ void fragment() {
             if (e is InputEventMouseMotion mm)
             {
                 _hud.ContextPick = _contextFor != null ? _hud.ContextRowAt(mm.Position) : -1;
-                return true;
+                // Swallowed under the panel, which owns the whole screen. Under a context list the park is
+                // still there and still wants to know where the mouse is.
+                return _panelFor != null;
             }
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape })
             {
