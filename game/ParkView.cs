@@ -1891,6 +1891,16 @@ namespace TPWGodot
                 Profit += Money.FromPounds(sale.Price - sale.UnitCost);
             }
 
+            /// <summary>MEASURED: entry 243 on map 203 took £770 (£145 profit) from 77 plays over 77
+            /// visits. 77 x £10 is the £770 exactly, and the £625 between takings and profit is prizes
+            /// paid out — so the win roll and the payout both run.
+            ///
+            /// ⭐ AND THE PRICE IS THE WHOLE STORY, in one park: every guest that visited the £10
+            /// sideshow played it (77 of 77), while the £60 shop beside it sold to NOBODY in 70 visits.
+            /// Same guests, same walk, same tick.
+            ///
+            /// ⚠ Bank.Spend does not refuse, so a prize larger than the balance takes the park
+            /// negative. Whether the game allows that is NOT established.</summary>
             public void BookPlay(SideShowPlay play)
             {
                 if (Bank == null) return;
