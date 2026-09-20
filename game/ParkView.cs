@@ -37,6 +37,8 @@ namespace TPWGodot
         /// models come from, and the one being placed, turned by , . or R. Placed ones stay as model instances.</summary>
         List<(AttractionDefinition Rec, string Name)> _attractions = new();
         Func<int, TPW.Data.Mesh> _attractionMesh;
+        /// <summary>A ride's sub-model by (entry, sub), for the track pieces a coaster is drawn from.</summary>
+        Func<int, int, TPW.Data.Mesh> _attractionSub;
         List<(GazEntry Entry, TextureSheet Sheet)> _modelSheets;
         readonly Dictionary<int, ArrayMesh> _attractionMeshes = new();
         int _placing = -1, _placeRot;
@@ -199,10 +201,11 @@ namespace TPWGodot
         /// <summary>The world's attractions for the picker, their models and the sheets that texture them. Call before
         /// <see cref="Load"/>, which puts their ground pads' textures in the park atlas.</summary>
         public void SetAttractions(List<(AttractionDefinition Rec, string Name)> list, Func<int, TPW.Data.Mesh> meshFor,
-                                   List<(GazEntry Entry, TextureSheet Sheet)> sheets)
+                                   List<(GazEntry Entry, TextureSheet Sheet)> sheets, Func<int, int, TPW.Data.Mesh> subFor = null)
         {
             _attractions = list ?? new();
             _attractionMesh = meshFor;
+            _attractionSub = subFor;
             _modelSheets = sheets;
             _attractionMeshes.Clear();
             BuildPicker();
@@ -945,7 +948,7 @@ namespace TPWGodot
             foreach (var c in clicks)
             {
                 if (_track == null) break;
-                if (c.X < 0) { if (_track.Undo(_map)) RebuildGround(); continue; }
+                if (c.X < 0) { if (_track.Undo(_map)) { RebuildGround(); RebuildTrackPieces(); } continue; }
                 _cursorTile = c;
                 last = PressTrack(c);
             }
@@ -1112,11 +1115,11 @@ namespace TPWGodot
                 case TrackRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
                 case TrackRun.Step.Placed:
                     Charge(TrackRun.PiecePrice[_track.World]);
-                    RebuildGround(); PlaySfx(ToolSound.Lay); RefreshInfo();
+                    RebuildGround(); RebuildTrackPieces(); PlaySfx(ToolSound.Lay); RefreshInfo();
                     break;
                 case TrackRun.Step.Closed:
                     Charge(TrackRun.PiecePrice[_track.World]);
-                    RebuildGround(); PlaySfx(ToolSound.Lay); PlaySfx(ToolSound.Connected);
+                    RebuildGround(); RebuildTrackPieces(); PlaySfx(ToolSound.Lay); PlaySfx(ToolSound.Connected);
                     CloseTrack(false);
                     break;
             }
@@ -1136,6 +1139,79 @@ namespace TPWGodot
         TrackRun _track;
         /// <summary>Which world's park is loaded, for the track price (TrackRun.PiecePrice).</summary>
         int _worldIndex = -1;
+
+        /// <summary>The laid track, drawn from the ride's own pieces: a support at every pylon and the flat piece
+        /// along every tile between them (TrackRun.PickPieces picks which sub-models those are).
+        ///
+        /// ⚠ The port arranges them; the game's own arrangement — which piece for a corner, for a slope, and how
+        /// it banks — is the table this has not found yet (TrackRun.Pieces).</summary>
+        void RebuildTrackPieces()
+        {
+            _trackPieces ??= AddNode(new Node3D());
+            foreach (var c in _trackPieces.GetChildren()) c.QueueFree();
+            if (_track == null || _attractionSub == null) return;
+            var bounds = new List<(int W, int H, int D, int Verts)>();
+            for (int sub = 0; ; sub++)
+            {
+                var m = _attractionSub(_track.Ride.Entry, sub);
+                if (m == null) break;
+                int x0 = int.MaxValue, x1 = int.MinValue, y0 = int.MaxValue, y1 = int.MinValue, z0 = int.MaxValue, z1 = int.MinValue;
+                for (int v = 0; v < m.VertexCount; v++)
+                {
+                    int vx = m.Vertices[v * 3], vy = m.Vertices[v * 3 + 1], vz = m.Vertices[v * 3 + 2];
+                    x0 = Math.Min(x0, vx); x1 = Math.Max(x1, vx);
+                    y0 = Math.Min(y0, vy); y1 = Math.Max(y1, vy);
+                    z0 = Math.Min(z0, vz); z1 = Math.Max(z1, vz);
+                }
+                bounds.Add(m.VertexCount == 0 ? (0, 0, 0, 0) : (x1 - x0, y1 - y0, z1 - z0, m.VertexCount));
+                if (sub > 40) break;
+            }
+            var pieces = TrackRun.PickPieces(bounds);
+            GD.Print($"[track] entry {_track.Ride.Entry} subs {bounds.Count} straight {pieces.Straight} support {pieces.Support} pylons {_track.Pylons.Count}");
+            if (!pieces.Any) return;
+            var last = _track.Start;
+            foreach (var p in _track.Pylons)
+            {
+                foreach (var (x, z) in TrackRun.Span(last, p)) AddTrackPiece(pieces.Straight, x, z);
+                AddTrackPiece(pieces.Support, p.X, p.Z);
+                last = p;
+            }
+            GD.Print($"[track] drew {_trackPieces.GetChildCount()} pieces");
+        }
+
+        void AddTrackPiece(int sub, int x, int z)
+        {
+            if (sub < 0) return;
+            int key = _track.Ride.Entry * 64 + sub;
+            if (!_trackMeshes.TryGetValue(key, out var mesh))
+            {
+                var m = _attractionSub(_track.Ride.Entry, sub);
+                if (m == null) { _trackMeshes[key] = null; return; }
+                int x0 = int.MaxValue, x1 = int.MinValue, z0 = int.MaxValue, z1 = int.MinValue, y0 = int.MaxValue;
+                for (int v = 0; v < m.VertexCount; v++)
+                {
+                    int vx = m.Vertices[v * 3], vy = m.Vertices[v * 3 + 1], vz = m.Vertices[v * 3 + 2];
+                    x0 = Math.Min(x0, vx); x1 = Math.Max(x1, vx); z0 = Math.Min(z0, vz); z1 = Math.Max(z1, vz);
+                    y0 = Math.Min(y0, vy);
+                }
+                var centre = new Vector3((x0 + x1) / 2f, y0, -(z0 + z1) / 2f);
+                mesh = ModelMesh.Build(m, null, _modelSheets, true, false, false, centre, 1f / ParkTerrain.TileUnits, out _);
+                _trackMeshes[key] = mesh;
+            }
+            if (mesh == null) return;
+            int u = ParkTerrain.TileUnits;
+            int gh = ParkCamera.GroundHeight(_map, x * u + u / 2, z * u + u / 2);
+            _trackPieces.AddChild(new MeshInstance3D
+            {
+                Mesh = mesh,
+                Position = new Vector3(x + 0.5f, gh / (float)u, -(z + 0.5f)),
+            });
+        }
+
+        readonly Dictionary<int, ArrayMesh> _trackMeshes = new();
+        Node3D _trackPieces;
+
+        T AddNode<T>(T node) where T : Node { AddChild(node); return node; }
 
         /// <summary>The builder's ghost: the pylon under the cursor and the track it would assemble from the last
         /// one, in ground markers.</summary>
@@ -2046,8 +2122,8 @@ void fragment() {
                 if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
                 {
                     bool all = Input.IsKeyPressed(Key.Shift);
-                    if (all) { _track.UndoAll(_map); RebuildGround(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
-                    else if (_track.Undo(_map)) { RebuildGround(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
+                    if (all) { _track.UndoAll(_map); RebuildGround(); RebuildTrackPieces(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
+                    else if (_track.Undo(_map)) { RebuildGround(); RebuildTrackPieces(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
                     else CloseTrack(true);
                     return;
                 }

@@ -120,6 +120,48 @@ namespace TPW.Data
         /// <summary>Take the whole track back (builder 8's Undo All).</summary>
         public void UndoAll(ParkMap map) { while (Undo(map)) { } }
 
+        /// <summary>Which of a ride's sub-models are its track.
+        ///
+        /// ⭐ THE GAME'S PIECE TABLE IS READ (rides.md): 80 descriptors of 8 bytes at 0x800F8A30 = 20 piece
+        /// types x 4 directions, each carrying a class (+1), the direction (+5) and a model 0..3 (+6). A piece's
+        /// kind indexes it directly below 40; kinds 40..51 are the 2-tile family and pick their base through two
+        /// gp globals.
+        ///
+        /// ⚠ WHAT "MODEL 0..3" IS A MODEL OF IS NOT READ YET: the byte is handed to a function off the piece's
+        /// class record (+0x90 an offset, +0x94 the function) and that call has not been followed. So until it is,
+        /// the port picks pieces by MEASURING the sub-models: a car is small and long (under two thirds of a tile
+        /// wide) and always in a matching set at the end of the list, the station is the biggest thing there, and
+        /// the track is the one-tile piece that is flat and not merely a block.</summary>
+        public readonly struct Pieces
+        {
+            public readonly int Straight, Support;
+            public Pieces(int straight, int support) { Straight = straight; Support = support; }
+            public bool Any => Straight >= 0;
+        }
+
+        /// <summary>Pick the track pieces out of a ride's sub-models, given each one's extent in world units
+        /// and how many vertices it has.
+        ///
+        /// The cars are thrown out by being NARROW (Chac Atak's sleds are 0.58 of a tile across, Dino Karts'
+        /// 0.34, while no track piece is under three quarters), anything over two and a half tiles is a station
+        /// or a set piece, and of what is left the track is the FLATTEST piece that is more than a box: a trough
+        /// has ten vertices and twelve faces where a plain support block has eight and a decorative cap has
+        /// five. The support is simply the tallest of them.</summary>
+        public static Pieces PickPieces(IReadOnlyList<(int W, int H, int D, int Verts)> subs)
+        {
+            int straight = -1, support = -1;
+            double straightH = double.MaxValue, supportH = -1;
+            for (int i = 1; i < subs.Count; i++)      // sub 0 is the station: the attraction itself draws that
+            {
+                var (w, h, d, verts) = subs[i];
+                double tw = w / 256.0, th = h / 256.0, td = d / 256.0;
+                if (Math.Min(tw, td) < 0.7 || Math.Max(tw, td) > 2.6) continue;
+                if (th > supportH) { supportH = th; support = i; }
+                if (verts > 8 && th < straightH) { straightH = th; straight = i; }
+            }
+            return new Pieces(straight, support);
+        }
+
         static void Mark(ParkMap map, int x, int z, byte type)
         {
             if (x < 0 || z < 0 || x >= map.Width || z >= map.Height) return;

@@ -624,8 +624,52 @@ override tests, so an unfinished track is unqueueable rather than merely unattra
 ⭐ **WHERE THE RAILS LEAVE THE STATION** (0x800A6550, off the ride's own tile at +0x60/+0x64, by its turn
 at +0x74): rot 0 → (x−2, z+1), rot 1 → (x+1, z+4), rot 2 → (x+4, z+1), rot 3 → (x+1, z−2).
 
-⚠ What is NOT traced: how the track between two pylons is drawn (which sub-model, what slope), and
-whether the bill is the confirm's `unit × (pieces − 4)` or the per-press charge.
+### The pieces the track is made of (READ)
+⭐ **THERE IS A PIECE TABLE, AND IT IS PLAIN DATA IN THE EXE: 80 descriptors of 8 bytes at 0x800F8A30.**
+(⚠ my earlier note said 0x80108A30 and "RAM-resident, loader not found" — that was an address typo: the
+routine builds it from `lui 0x8010` + `addiu -0x75D0`, which is 0x800F8A30, and the table is in the image.
+Nothing loads it at runtime because nothing has to.)
+
+| byte | meaning |
+| --- | --- |
+| +0 | 0 for the small pieces, 1 for the big ones |
+| +1 | class: 0, 1, 2, 3, 6, 8, 9, 0x0B, 0x0C, and 0x63 (99) |
+| +2 +3 +4 | size — `2,2,2` for the small pieces and `4,3,4` for the big ones (half-tiles: 1×1×1 and 2×1.5×2 tiles) |
+| +5 | direction, 0..3 |
+| +6 | model, 0..3 |
+| +7 | 0x80 on all eighty |
+
+They run in groups of four that share everything but +5 and +6, so the table is **20 piece types × 4
+directions**, and a direction picks which of four models is drawn.
+
+**How a kind reaches its descriptor** (0x800A4DE0, called through 0x800A4F10 with the kind the piece
+stores at +0xBC): `descriptor = base + kind × 8`, and the base is 0x800F8A30 for **kind < 40**. For
+kind ≥ 40 the base is chosen by two gp globals — `gp+0x124C` (0x801038A0, four branches, 0..3) and
+`gp+0x1250` (0x801038A4, zero / non-zero):
+
+| gp+0x124C | base when gp+0x1250 == 0 | base when != 0 |
+| --- | --- | --- |
+| 0 | 0x800F8A30 (entry 0) | 0x800F8A70 (entry 8) |
+| 1 | 0x800F8AD0 (entry 20) | 0x800F8A90 (entry 12) |
+| 2 | 0x800F8B30 (entry 40) | 0x800F8AF0 (entry 24) |
+| 3 | 0x800F8B50 (entry 36) | 0x800F8B50 (entry 36) |
+
+so the first global slides a window over the same eighty descriptors.
+
+⭐ **ONLY KINDS 40..51 TAKE THAT PATH.** The generator (0x800A796C) opens with `sltiu (kind − 40), 12`:
+kinds **40 to 51** are the big family, and for those it nudges the point by the direction in the kind's
+low two bits — dir 0 → x−1, dir 1 → x−1 z−2, dir 2 → z−1, dir 3 → x−2 z−1 — which is a 2-tile piece
+being placed by its corner. Everything else goes in unmoved.
+
+⚠ Two things that follow from the table and are NOT settled. With the window at entry 36 or 40, kinds
+40..51 index entries 76..91, and the table stops at 79 — so either those two branches never see a big
+kind, or the first global is not what it looks like. And **which mesh "model 0..3" means is still open**:
+0x800A4F34 hands the byte to a function off the piece's class record (`+0x90` an offset, `+0x94` the
+function) and that call has not been followed. A coaster's own archive entry does carry the candidates
+(Chac Atak, entry 212: a station, a sloped slab, a pylon, a cube block, an open trough, a pyramid cap,
+then four cars), but which four of those are models 0..3 is a guess until that function is read.
+
+⚠ Also not traced: whether the bill is the confirm's `unit × (pieces − 4)` or the per-press charge.
 What is known: the piece price is `defPrice(8, kind)` and the charge is `unit × (pieces − 4)`, or − 5
 in one branch (economy.md §4.6); the type-8 records that price it are the named specials (Water Jump,
 Mammoth Tunnel, Piranha, Firepit); and a ride's own archive entry carries 6 to 13 sub-models, which is

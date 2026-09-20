@@ -472,9 +472,13 @@ namespace TPWGodot
                 else if (arg == "--quit-after-movie") _quitAfterMovie = true;
                 else if (arg.StartsWith("--shot="))
                 {
-                    var spec = arg.Substring("--shot=".Length).Split(':');
-                    _shotPath = spec[0];
-                    if (spec.Length > 1 && int.TryParse(spec[1], out int f)) _shotFrame = f;
+                    // ⚠ A WINDOWS PATH HAS A COLON IN IT ("C:\\..."), so only the LAST colon can be the frame,
+                    // and only when what follows it is a number. Splitting on the first wrote a file called "C".
+                    var spec = arg.Substring("--shot=".Length);
+                    int colon = spec.LastIndexOf(':');
+                    if (colon > 1 && int.TryParse(spec.Substring(colon + 1), out int f))
+                    { _shotFrame = f; spec = spec.Substring(0, colon); }
+                    _shotPath = spec;
                 }
                 else if (arg.StartsWith("--advisor-line="))
                 {
@@ -896,7 +900,8 @@ namespace TPWGodot
                 if (gateInfo != null) _gatePacks.TryGetValue(gateInfo.PackEntry, out gateModels);
                 _park.SetCatalogue(_exe, _strings);
                 _park.SetAttractions(world != null && _attractionsByWorld.TryGetValue(world.Index, out var al) ? al : null,
-                                     ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets);
+                                     ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets,
+                                     (ae, sub) => _models != null && _models.TryGet(ae, sub, out var sm) ? sm : null);
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
                 _park.SetToolSounds(_toolSounds, _parkSounds);
                 _park.SetHud(_commonSheet, _exe, _strings);
@@ -1242,7 +1247,11 @@ namespace TPWGodot
                 else if (_menuTabShown > MenuTabSeconds - 0.5)
                     _menuTab.Modulate = new Color(1, 1, 1, (float)((MenuTabSeconds - _menuTabShown) / 0.5));
             }
-            if (_shotPath != null && ++_shotClock >= _shotFrame)
+            // ⚠ DON'T COUNT FRAMES THE PARK ISN'T UP FOR. The asset self-test runs first and takes as long as
+            // the box feels like; counting through it shot the menu twice and looked like the park had failed
+            // to draw. With --park, the clock starts when the park is actually on screen.
+            bool parkUp = _autoPark < 0 || (_park?.Visible ?? false);
+            if (_shotPath != null && parkUp && ++_shotClock >= _shotFrame)
             {
                 // ⚠ Wait for the frame to be DRAWN before reading it back. Grabbing the texture inside
                 // _Process reads the previous frame at best and an empty one at worst, which looks

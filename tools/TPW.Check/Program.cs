@@ -2087,6 +2087,34 @@ static class Program
         {
             // --model-bounds E: sub-model 0 of entry E, its vertices' extent at rest and posed at time 0, and its
             // definition record -- where a model's origin sits relative to its footprint.
+            // --subbounds E: every sub-model of entry E with its extent in tiles, which is how a station, a piece
+            // of track and a car tell themselves apart without a table.
+            int sbAt = Array.IndexOf(args, "--subbounds");
+            if (sbAt >= 0 && sbAt + 1 < args.Length)
+            {
+                var ag2 = Archive(disc);
+                int se2 = int.Parse(args[sbAt + 1]);
+                var bytes2 = ag2.Read(ag2.Entries[se2]);
+                if (!MeshContainer.TryParse(bytes2, out var c2, out string ce2)) { Console.WriteLine($"entry {se2}: {ce2}"); return 1; }
+                Console.WriteLine($"entry {se2}: {c2.Subs.Count} sub-models (256 units = one tile)");
+                for (int sub = 0; sub < c2.Subs.Count; sub++)
+                {
+                    if (!c2.TryParseMesh(bytes2, sub, out var m2, out _)) { Console.WriteLine($"  sub {sub}: unreadable"); continue; }
+                    int x0 = int.MaxValue, x1 = int.MinValue, y0 = int.MaxValue, y1 = int.MinValue, z0 = int.MaxValue, z1 = int.MinValue;
+                    for (int v = 0; v < m2.VertexCount; v++)
+                    {
+                        int vx = m2.Vertices[v * 3], vy = m2.Vertices[v * 3 + 1], vz = m2.Vertices[v * 3 + 2];
+                        x0 = Math.Min(x0, vx); x1 = Math.Max(x1, vx);
+                        y0 = Math.Min(y0, vy); y1 = Math.Max(y1, vy);
+                        z0 = Math.Min(z0, vz); z1 = Math.Max(z1, vz);
+                    }
+                    if (m2.VertexCount == 0) { Console.WriteLine($"  sub {sub}: empty"); continue; }
+                    Console.WriteLine($"  sub {sub,2}: {m2.VertexCount,4} verts {m2.Faces.Count,4} faces   " +
+                                      $"x {x0,5}..{x1,-5} y {y0,5}..{y1,-5} z {z0,5}..{z1,-5}   " +
+                                      $"{(x1 - x0) / 256.0:F2} x {(y1 - y0) / 256.0:F2} x {(z1 - z0) / 256.0:F2} tiles");
+                }
+                return 0;
+            }
             // --rig E: every sub-model of entry E, its bones and animation length, and each bone's transform at a few
             // times -- for the park's build animation (entry 3, a rig per variant whose bone moves a whole ride).
             // --gatesim W N: run THE PORT'S OWN ParkGate.State for world W over N park frames and print the angle,
