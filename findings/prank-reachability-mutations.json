@@ -1,0 +1,419 @@
+{
+  "scope": "SEARCH/DOMAIN AUDIT ONLY; no prank simulation port.",
+  "prior_rejected_runs": [
+    {
+      "source_sha256": "f9f4ae77b0e803d3087f7b7829237d2ec9debf49ec7c7585c535eaeb82b33732",
+      "tests_sha256": "5af0750c0f643ddb580c05a9549ac19bc23d85715e0182e10c112da1cd4f3958",
+      "killed": 22,
+      "survivors": 0,
+      "invalid": 2,
+      "rejected": [
+        {
+          "name": "omit final replay row",
+          "old": "enumerate(captions):",
+          "new": "enumerate(captions[:-1]):",
+          "status": "invalid",
+          "executed": 18,
+          "failed": 1,
+          "errors": 1,
+          "skipped": 0,
+          "failing_tests": [
+            "test_prank_reachability.ReachabilityTests.test_replay_actual_domain_and_suppressed_rows"
+          ],
+          "output": "....E....F........\n======================================================================\nERROR: test_first_caption_exact_ordinal (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 68, in test_first_caption_exact_ordinal\n    self.assertEqual(224, audit.first_caption([44, 45, 44, 303], 303, 221))\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 117, in first_caption\n    raise ValueError('caption has no in-table termination witness')\nValueError: caption has no in-table termination witness\n\n======================================================================\nFAIL: test_replay_actual_domain_and_suppressed_rows (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 24, in valid\n    return function(*args)\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 143, in replay_domain\n    replay_id=first_caption(captions, caption, start)))\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 117, in first_caption\n    raise ValueError('caption has no in-table termination witness')\nValueError: caption has no in-table termination witness\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 82, in test_replay_actual_domain_and_suppressed_rows\n    result = self.valid(audit.replay_domain, audit.Image(self.original))\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 26, in valid\n    self.fail('Rejected valid evidence: ' + str(exc))\nAssertionError: Rejected valid evidence: caption has no in-table termination witness\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1, errors=1)\n"
+        },
+        {
+          "name": "short overlay copy off by one",
+          "old": "256 - token, 2",
+          "new": "255 - token, 2",
+          "status": "invalid",
+          "executed": 18,
+          "failed": 0,
+          "errors": 1,
+          "skipped": 0,
+          "failing_tests": [],
+          "output": ".......E..........\n======================================================================\nERROR: test_overlay_bad_extents_fail (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 180, in test_overlay_bad_extents_fail\n    audit.overlay_decode(b'\\x01\\xff')\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 270, in overlay_decode\n    output.append(output[-distance])\nIndexError: bytearray index out of range\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (errors=1)\n"
+        }
+      ]
+    }
+  ],
+  "source_sha256": "b09077d3d3ffabd5fee2cdf5bbeae9858a640dd43be1b81ae6b871fab113c174",
+  "tests_sha256": "561f5e5f2d1d6727f23ea7668c7644a7bca19d5c12689ddf4f321caede53ba97",
+  "unchanged_control": {
+    "status": "passed",
+    "executed": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.004s\n\nOK\n"
+  },
+  "mutations": [
+    {
+      "name": "omit final tutorial table entry",
+      "old": "for index in range(count):",
+      "new": "for index in range(count - 1):",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_all_fourteen_tutorial_targets_and_default"
+      ],
+      "output": ".F................\n======================================================================\nFAIL: test_all_fourteen_tutorial_targets_and_default (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 46, in test_all_fourteen_tutorial_targets_and_default\n    self.assertEqual([221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227, 228],\nAssertionError: Lists differ: [221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227, 228] != [221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227]\n\nFirst list contains 1 additional elements.\nFirst extra element 13:\n228\n\n- [221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227, 228]\n?                                                                 -----\n\n+ [221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.004s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "lose jump delay literal",
+      "old": "value = literal\n            elif delay != 0:",
+      "new": "value = default\n            elif delay != 0:",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_all_fourteen_tutorial_targets_and_default"
+      ],
+      "output": ".F................\n======================================================================\nFAIL: test_all_fourteen_tutorial_targets_and_default (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 46, in test_all_fourteen_tutorial_targets_and_default\n    self.assertEqual([221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227, 228],\nAssertionError: Lists differ: [221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227, 228] != [290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 228]\n\nFirst differing element 0:\n221\n290\n\n- [221, 222, 290, 290, 223, 224, 290, 290, 225, 226, 290, 290, 227, 228]\n+ [290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 290, 228]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "accept unknown switch arm",
+      "old": "raise ValueError('unknown switch arm instruction')",
+      "new": "return dict(id=default, exit=submit, instructions=visited)",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_switch_unknowns_fail_closed (reason='unknown switch arm')"
+      ],
+      "output": ".................\n======================================================================\nFAIL: test_switch_unknowns_fail_closed (test_prank_reachability.ReachabilityTests) (reason='unknown switch arm')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 63, in test_switch_unknowns_fail_closed\n    audit.literal_arm(image, base, setter, submit, 290)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit final replay row",
+      "old": "enumerate(captions):",
+      "new": "enumerate(captions[:-1]):",
+      "status": "killed",
+      "executed": 18,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_first_caption_exact_ordinal",
+        "test_prank_reachability.ReachabilityTests.test_replay_actual_domain_and_suppressed_rows"
+      ],
+      "output": "....F....F........\n======================================================================\nFAIL: test_first_caption_exact_ordinal (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 24, in valid\n    return function(*args)\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 117, in first_caption\n    raise ValueError('caption has no in-table termination witness')\nValueError: caption has no in-table termination witness\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 68, in test_first_caption_exact_ordinal\n    self.assertEqual(224, self.valid(audit.first_caption, [44, 45, 44, 303], 303, 221))\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 26, in valid\n    self.fail('Rejected valid evidence: ' + str(exc))\nAssertionError: Rejected valid evidence: caption has no in-table termination witness\n\n======================================================================\nFAIL: test_replay_actual_domain_and_suppressed_rows (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 24, in valid\n    return function(*args)\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 143, in replay_domain\n    replay_id=first_caption(captions, caption, start)))\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 117, in first_caption\n    raise ValueError('caption has no in-table termination witness')\nValueError: caption has no in-table termination witness\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 82, in test_replay_actual_domain_and_suppressed_rows\n    result = self.valid(audit.replay_domain, audit.Image(self.original))\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 26, in valid\n    self.fail('Rejected valid evidence: ' + str(exc))\nAssertionError: Rejected valid evidence: caption has no in-table termination witness\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "return last caption match",
+      "old": "enumerate(captions):",
+      "new": "reversed(list(enumerate(captions))):",
+      "status": "killed",
+      "executed": 18,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_first_caption_exact_ordinal",
+        "test_prank_reachability.ReachabilityTests.test_replay_actual_domain_and_suppressed_rows"
+      ],
+      "output": "....F....F........\n======================================================================\nFAIL: test_first_caption_exact_ordinal (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 67, in test_first_caption_exact_ordinal\n    self.assertEqual(221, self.valid(audit.first_caption, [44, 45, 44, 303], 44, 221))\nAssertionError: 221 != 223\n\n======================================================================\nFAIL: test_replay_actual_domain_and_suppressed_rows (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 88, in test_replay_actual_domain_and_suppressed_rows\n    self.assertIn(237, result['conservative_ids'])\nAssertionError: 237 not found in [221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 239, 240, 241, 242, 243, 244, 245, 247, 248, 250, 257, 258, 267, 269, 270, 273, 276, 278, 279, 280, 282, 283, 284, 287, 288]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "lose replay ordinal base",
+      "old": "return start + index",
+      "new": "return index",
+      "status": "killed",
+      "executed": 18,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_first_caption_exact_ordinal",
+        "test_prank_reachability.ReachabilityTests.test_replay_actual_domain_and_suppressed_rows"
+      ],
+      "output": "....F....F........\n======================================================================\nFAIL: test_first_caption_exact_ordinal (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 67, in test_first_caption_exact_ordinal\n    self.assertEqual(221, self.valid(audit.first_caption, [44, 45, 44, 303], 44, 221))\nAssertionError: 221 != 0\n\n======================================================================\nFAIL: test_replay_actual_domain_and_suppressed_rows (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 86, in test_replay_actual_domain_and_suppressed_rows\n    self.assertEqual((221, 288), (min(result['ids']), max(result['ids'])))\nAssertionError: Tuples differ: (221, 288) != (0, 67)\n\nFirst differing element 0:\n221\n0\n\n- (221, 288)\n+ (0, 67)\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "invent result for missing caption",
+      "old": "raise ValueError('caption has no in-table termination witness')",
+      "new": "return start",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_missing_caption_is_not_a_negative"
+      ],
+      "output": ".....F............\n======================================================================\nFAIL: test_missing_caption_is_not_a_negative (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 76, in test_missing_caption_is_not_a_negative\n    audit.first_caption([44, 45], 864, 221)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "include captionless cards",
+      "old": "creates_card=caption != sentinel",
+      "new": "creates_card=True",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_replay_actual_domain_and_suppressed_rows"
+      ],
+      "output": ".........F........\n======================================================================\nFAIL: test_replay_actual_domain_and_suppressed_rows (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 83, in test_replay_actual_domain_and_suppressed_rows\n    self.assertEqual((221, 68, 68, 28, 40, 41),\nAssertionError: Tuples differ: (221, 68, 68, 28, 40, 41) != (221, 68, 68, 0, 41, 41)\n\nFirst differing element 3:\n28\n0\n\n- (221, 68, 68, 28, 40, 41)\n?               -----\n\n+ (221, 68, 68, 0, 41, 41)\n?                 ++++\n\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit final schedule row",
+      "old": "range(len(schedule) // 12):",
+      "new": "range(len(schedule) // 12 - 1):",
+      "status": "killed",
+      "executed": 18,
+      "failed": 9,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_malformed_inputs_are_not_silence (reason='outside')",
+        "test_prank_reachability.ReachabilityTests.test_vm_malformed_inputs_are_not_silence (reason='outside')",
+        "test_prank_reachability.ReachabilityTests.test_vm_malformed_inputs_are_not_silence (reason='opcode')",
+        "test_prank_reachability.ReachabilityTests.test_vm_malformed_inputs_are_not_silence (reason='opcode')",
+        "test_prank_reachability.ReachabilityTests.test_vm_malformed_inputs_are_not_silence (reason='outside cache')",
+        "test_prank_reachability.ReachabilityTests.test_vm_operand_wrap",
+        "test_prank_reachability.ReachabilityTests.test_vm_posts_and_action_control",
+        "test_prank_reachability.ReachabilityTests.test_vm_unreferenced_words_counted",
+        "test_prank_reachability.ReachabilityTests.test_vm_writes_cannot_rewrite_schedule"
+      ],
+      "output": ".............FFFF\n======================================================================\nFAIL: test_vm_malformed_inputs_are_not_silence (test_prank_reachability.ReachabilityTests) (reason='outside')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 137, in test_vm_malformed_inputs_are_not_silence\n    audit.decode_programs(sched, code)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_vm_malformed_inputs_are_not_silence (test_prank_reachability.ReachabilityTests) (reason='outside')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 137, in test_vm_malformed_inputs_are_not_silence\n    audit.decode_programs(sched, code)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_vm_malformed_inputs_are_not_silence (test_prank_reachability.ReachabilityTests) (reason='opcode')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 137, in test_vm_malformed_inputs_are_not_silence\n    audit.decode_programs(sched, code)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_vm_malformed_inputs_are_not_silence (test_prank_reachability.ReachabilityTests) (reason='opcode')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 137, in test_vm_malformed_inputs_are_not_silence\n    audit.decode_programs(sched, code)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_vm_malformed_inputs_are_not_silence (test_prank_reachability.ReachabilityTests) (reason='outside cache')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 137, in test_vm_malformed_inputs_are_not_silence\n    audit.decode_programs(sched, code)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_vm_operand_wrap (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 111, in test_vm_operand_wrap\n    self.assertEqual([65535], result['ids'])\nAssertionError: Lists differ: [65535] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n65535\n\n- [65535]\n+ []\n\n======================================================================\nFAIL: test_vm_posts_and_action_control (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 101, in test_vm_posts_and_action_control\n    self.assertEqual([117, 118, 119], result['ids'])\nAssertionError: Lists differ: [117, 118, 119] != [117]\n\nFirst list contains 2 additional elements.\nFirst extra element 1:\n118\n\n- [117, 118, 119]\n+ [117]\n\n======================================================================\nFAIL: test_vm_unreferenced_words_counted (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 116, in test_vm_unreferenced_words_counted\n    self.assertEqual([120], result['ids'])\nAssertionError: Lists differ: [120] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n120\n\n- [120]\n+ []\n\n======================================================================\nFAIL: test_vm_writes_cannot_rewrite_schedule (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 122, in test_vm_writes_cannot_rewrite_schedule\n    self.assertEqual([[142], [140, 182]], [w['object_offsets'] for w in result['writes']])\nAssertionError: Lists differ: [[142], [140, 182]] != []\n\nFirst list contains 2 additional elements.\nFirst extra element 0:\n[142]\n\n- [[142], [140, 182]]\n+ []\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=9)\n"
+    },
+    {
+      "name": "mistake Action8 for Post",
+      "old": "if op == 7:",
+      "new": "if op == 8:",
+      "status": "killed",
+      "executed": 18,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_operand_wrap",
+        "test_prank_reachability.ReachabilityTests.test_vm_posts_and_action_control",
+        "test_prank_reachability.ReachabilityTests.test_vm_unreferenced_words_counted"
+      ],
+      "output": "..............FFF.\n======================================================================\nFAIL: test_vm_operand_wrap (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 111, in test_vm_operand_wrap\n    self.assertEqual([65535], result['ids'])\nAssertionError: Lists differ: [65535] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n65535\n\n- [65535]\n+ []\n\n======================================================================\nFAIL: test_vm_posts_and_action_control (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 101, in test_vm_posts_and_action_control\n    self.assertEqual([117, 118, 119], result['ids'])\nAssertionError: Lists differ: [117, 118, 119] != [118]\n\nFirst differing element 0:\n117\n118\n\nFirst list contains 2 additional elements.\nFirst extra element 1:\n118\n\n- [117, 118, 119]\n+ [118]\n\n======================================================================\nFAIL: test_vm_unreferenced_words_counted (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 116, in test_vm_unreferenced_words_counted\n    self.assertEqual([120], result['ids'])\nAssertionError: Lists differ: [120] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n120\n\n- [120]\n+ []\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "lose post halfword mask",
+      "old": "id=args[0] & 0xffff",
+      "new": "id=args[0]",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_operand_wrap"
+      ],
+      "output": "..............F...\n======================================================================\nFAIL: test_vm_operand_wrap (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 111, in test_vm_operand_wrap\n    self.assertEqual([65535], result['ids'])\nAssertionError: Lists differ: [65535] != [-1]\n\nFirst differing element 0:\n65535\n-1\n\n- [65535]\n+ [-1]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "hide unreferenced code",
+      "old": "unreferenced_code_words=len(words) - len(covered)",
+      "new": "unreferenced_code_words=0",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_unreferenced_words_counted"
+      ],
+      "output": "................F.\n======================================================================\nFAIL: test_vm_unreferenced_words_counted (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 117, in test_vm_unreferenced_words_counted\n    self.assertEqual(3, result['unreferenced_code_words'])\nAssertionError: 3 != 0\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit backing counter store",
+      "old": "if op == 6 and args[0] >= 51:",
+      "new": "if False:",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_writes_cannot_rewrite_schedule"
+      ],
+      "output": ".................F\n======================================================================\nFAIL: test_vm_writes_cannot_rewrite_schedule (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 122, in test_vm_writes_cannot_rewrite_schedule\n    self.assertEqual([[142], [140, 182]], [w['object_offsets'] for w in result['writes']])\nAssertionError: Lists differ: [[142], [140, 182]] != [[142], [140]]\n\nFirst differing element 1:\n[140, 182]\n[140]\n\n- [[142], [140, 182]]\n?             -----\n\n+ [[142], [140]]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "allow write to scheduler cursor",
+      "old": "off >= 184 for off in offsets",
+      "new": "off > 184 for off in offsets",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_writes_cannot_rewrite_schedule"
+      ],
+      "output": ".................F\n======================================================================\nFAIL: test_vm_writes_cannot_rewrite_schedule (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 124, in test_vm_writes_cannot_rewrite_schedule\n    audit.decode_programs(schedule(0), words(6, 71, 0, 0))\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit cache index bound",
+      "old": "not 0 <= args[0] < 72",
+      "new": "False",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_vm_malformed_inputs_are_not_silence (reason='outside cache')"
+      ],
+      "output": ".................\n======================================================================\nFAIL: test_vm_malformed_inputs_are_not_silence (test_prank_reachability.ReachabilityTests) (reason='outside cache')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 137, in test_vm_malformed_inputs_are_not_silence\n    audit.decode_programs(sched, code)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "interpret permutation as unsigned",
+      "old": "b - 256 if b & 128 else b",
+      "new": "b",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_staff_signed_byte_and_all_offsets"
+      ],
+      "output": "...........F......\n======================================================================\nFAIL: test_staff_signed_byte_and_all_offsets (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 141, in test_staff_signed_byte_and_all_offsets\n    self.assertEqual([49, 50, 54, 65458], audit.staff_ids([255, 0, 4, 128], [50]))\nAssertionError: Lists differ: [49, 50, 54, 65458] != [50, 54, 178, 305]\n\nFirst differing element 0:\n49\n50\n\n- [49, 50, 54, 65458]\n+ [50, 54, 178, 305]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "lose staff halfword wrap",
+      "old": "((b - 256 if b & 128 else b) + off) & 0xffff",
+      "new": "((b - 256 if b & 128 else b) + off)",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_staff_signed_byte_and_all_offsets"
+      ],
+      "output": "...........F......\n======================================================================\nFAIL: test_staff_signed_byte_and_all_offsets (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 141, in test_staff_signed_byte_and_all_offsets\n    self.assertEqual([49, 50, 54, 65458], audit.staff_ids([255, 0, 4, 128], [50]))\nAssertionError: Lists differ: [49, 50, 54, 65458] != [-78, 49, 50, 54]\n\nFirst differing element 0:\n49\n-78\n\n- [49, 50, 54, 65458]\n+ [-78, 49, 50, 54]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit staff offset alternatives",
+      "old": "for b in permutation for off in offsets",
+      "new": "for b in permutation for off in offsets[:1]",
+      "status": "killed",
+      "executed": 18,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_actual_staff_tables",
+        "test_prank_reachability.ReachabilityTests.test_staff_signed_byte_and_all_offsets"
+      ],
+      "output": "F..........F......\n======================================================================\nFAIL: test_actual_staff_tables (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 151, in test_actual_staff_tables\n    self.assertEqual(list(range(30, 45)) + list(range(50, 55)), result['paths'][str(0x8006813C)])\nAssertionError: Lists differ: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 53, 54] != [30, 31, 32, 33, 34]\n\nFirst list contains 15 additional elements.\nFirst extra element 5:\n35\n\n- [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 53, 54]\n+ [30, 31, 32, 33, 34]\n\n======================================================================\nFAIL: test_staff_signed_byte_and_all_offsets (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 142, in test_staff_signed_byte_and_all_offsets\n    self.assertEqual([30, 34, 35, 39, 40, 44, 50, 54], audit.staff_ids([0, 4], [30, 35, 40, 50]))\nAssertionError: Lists differ: [30, 34, 35, 39, 40, 44, 50, 54] != [30, 34]\n\nFirst list contains 6 additional elements.\nFirst extra element 2:\n35\n\n- [30, 34, 35, 39, 40, 44, 50, 54]\n+ [30, 34]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "omit balloon detection",
+      "old": "PRANKS = {117, 118, 119}",
+      "new": "PRANKS = {117, 118}",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_first_caption_exact_ordinal"
+      ],
+      "output": "....F.............\n======================================================================\nFAIL: test_first_caption_exact_ordinal (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 71, in test_first_caption_exact_ordinal\n    self.assertEqual([117, 118, 119], audit.hits([116, 117, 118, 119, 120]))\nAssertionError: Lists differ: [117, 118, 119] != [117, 118]\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n119\n\n- [117, 118, 119]\n?          -----\n\n+ [117, 118]\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "accept truncated archive data",
+      "old": "if off + size > len(archive):",
+      "new": "if False:",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_archive_extents"
+      ],
+      "output": "..F...............\n======================================================================\nFAIL: test_archive_extents (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 162, in test_archive_extents\n    audit.archive_entry(archive[:-1], 0)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "reverse overlay literal flag",
+      "old": "if flags & 1 == 0:",
+      "new": "if flags & 1 != 0:",
+      "status": "killed",
+      "executed": 18,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_overlay_all_back_reference_forms",
+        "test_prank_reachability.ReachabilityTests.test_overlay_bad_extents_fail",
+        "test_prank_reachability.ReachabilityTests.test_overlay_literal_and_terminator"
+      ],
+      "output": "......FFF.........\n======================================================================\nFAIL: test_overlay_all_back_reference_forms (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 24, in valid\n    return function(*args)\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 268, in overlay_decode\n    raise ValueError('invalid overlay back reference')\nValueError: invalid overlay back reference\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 172, in test_overlay_all_back_reference_forms\n    self.assertEqual((b'A' * 16, 10), self.valid(audit.overlay_decode,\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 26, in valid\n    self.fail('Rejected valid evidence: ' + str(exc))\nAssertionError: Rejected valid evidence: invalid overlay back reference\n\n======================================================================\nFAIL: test_overlay_bad_extents_fail (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 182, in test_overlay_bad_extents_fail\n    audit.overlay_decode(b'\\x01\\xff')\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 258, in overlay_decode\n    token = byte()\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 246, in byte\n    raise ValueError('truncated overlay')\nValueError: truncated overlay\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 185, in test_overlay_bad_extents_fail\n    self.assertIn('back reference', str(exc))\nAssertionError: 'back reference' not found in 'truncated overlay'\n\n======================================================================\nFAIL: test_overlay_literal_and_terminator (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 24, in valid\n    return function(*args)\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 268, in overlay_decode\n    raise ValueError('invalid overlay back reference')\nValueError: invalid overlay back reference\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 166, in test_overlay_literal_and_terminator\n    self.assertEqual((b'ABC', 6), self.valid(audit.overlay_decode, b'\\x08ABC\\x00\\x00TRAIL'))\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 26, in valid\n    self.fail('Rejected valid evidence: ' + str(exc))\nAssertionError: Rejected valid evidence: invalid overlay back reference\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "short overlay copy off by one",
+      "old": "256 - token, 2",
+      "new": "255 - token, 2",
+      "status": "killed",
+      "executed": 18,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_overlay_all_back_reference_forms",
+        "test_prank_reachability.ReachabilityTests.test_overlay_bad_extents_fail"
+      ],
+      "output": "......FF..........\n======================================================================\nFAIL: test_overlay_all_back_reference_forms (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 175, in test_overlay_all_back_reference_forms\n    self.assertEqual((b'ABAB', 6), self.valid(audit.overlay_decode, b'\\x0cAB\\xfe\\x00\\x00'))\nAssertionError: Tuples differ: (b'ABAB', 6) != (b'ABBB', 6)\n\nFirst differing element 0:\nb'ABAB'\nb'ABBB'\n\n- (b'ABAB', 6)\n?      ^\n\n+ (b'ABBB', 6)\n?      ^\n\n\n======================================================================\nFAIL: test_overlay_bad_extents_fail (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 182, in test_overlay_bad_extents_fail\n    audit.overlay_decode(b'\\x01\\xff')\n  File \"/home/ec2-user/tpwport-prank2/tools/audit_prank_reachability.py\", line 270, in overlay_decode\n    output.append(output[-distance])\nIndexError: bytearray index out of range\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 184, in test_overlay_bad_extents_fail\n    self.assertIsInstance(exc, ValueError, 'Invalid distance must fail explicitly, not index the output')\nAssertionError: IndexError('bytearray index out of range') is not an instance of <class 'ValueError'> : Invalid distance must fail explicitly, not index the output\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "extended overlay length off by one",
+      "old": "byte() + 8 if nibble == 5",
+      "new": "byte() + 7 if nibble == 5",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_overlay_all_back_reference_forms"
+      ],
+      "output": "......F...........\n======================================================================\nFAIL: test_overlay_all_back_reference_forms (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 172, in test_overlay_all_back_reference_forms\n    self.assertEqual((b'A' * 16, 10), self.valid(audit.overlay_decode,\nAssertionError: Tuples differ: (b'AAAAAAAAAAAAAAAA', 10) != (b'AAAAAAAAAAAAAAA', 10)\n\nFirst differing element 0:\nb'AAAAAAAAAAAAAAAA'\nb'AAAAAAAAAAAAAAA'\n\n- (b'AAAAAAAAAAAAAAAA', 10)\n?                   -\n\n+ (b'AAAAAAAAAAAAAAA', 10)\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "ordinary overlay length off by one",
+      "old": "else nibble + 3",
+      "new": "else nibble + 2",
+      "status": "killed",
+      "executed": 18,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_reachability.ReachabilityTests.test_overlay_all_back_reference_forms"
+      ],
+      "output": "......F...........\n======================================================================\nFAIL: test_overlay_all_back_reference_forms (test_prank_reachability.ReachabilityTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-prank2/tools/test_prank_reachability.py\", line 172, in test_overlay_all_back_reference_forms\n    self.assertEqual((b'A' * 16, 10), self.valid(audit.overlay_decode,\nAssertionError: Tuples differ: (b'AAAAAAAAAAAAAAAA', 10) != (b'AAAAAAAAAAAAAAA', 10)\n\nFirst differing element 0:\nb'AAAAAAAAAAAAAAAA'\nb'AAAAAAAAAAAAAAA'\n\n- (b'AAAAAAAAAAAAAAAA', 10)\n?                   -\n\n+ (b'AAAAAAAAAAAAAAA', 10)\n\n----------------------------------------------------------------------\nRan 18 tests in 0.003s\n\nFAILED (failures=1)\n"
+    }
+  ],
+  "final_unchanged_control": {
+    "status": "passed",
+    "executed": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nOK\n"
+  },
+  "source_unchanged": true,
+  "killed": 24,
+  "survivors": 0,
+  "invalid": 0
+}

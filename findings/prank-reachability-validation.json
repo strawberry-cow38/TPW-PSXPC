@@ -1,0 +1,59 @@
+{
+  "commands": [
+    {
+      "command": "python3 tools/test_prank_reachability.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.005s\n\nOK\n"
+    },
+    {
+      "command": "python3 tools/mutate_prank_reachability.py",
+      "exit_code": 0,
+      "stdout": "omit final tutorial table entry killed tests: 18 skipped: 0\nlose jump delay literal killed tests: 18 skipped: 0\naccept unknown switch arm killed tests: 18 skipped: 0\nomit final replay row killed tests: 18 skipped: 0\nreturn last caption match killed tests: 18 skipped: 0\nlose replay ordinal base killed tests: 18 skipped: 0\ninvent result for missing caption killed tests: 18 skipped: 0\ninclude captionless cards killed tests: 18 skipped: 0\nomit final schedule row killed tests: 18 skipped: 0\nmistake Action8 for Post killed tests: 18 skipped: 0\nlose post halfword mask killed tests: 18 skipped: 0\nhide unreferenced code killed tests: 18 skipped: 0\nomit backing counter store killed tests: 18 skipped: 0\nallow write to scheduler cursor killed tests: 18 skipped: 0\nomit cache index bound killed tests: 18 skipped: 0\ninterpret permutation as unsigned killed tests: 18 skipped: 0\nlose staff halfword wrap killed tests: 18 skipped: 0\nomit staff offset alternatives killed tests: 18 skipped: 0\nomit balloon detection killed tests: 18 skipped: 0\naccept truncated archive data killed tests: 18 skipped: 0\nreverse overlay literal flag killed tests: 18 skipped: 0\nshort overlay copy off by one killed tests: 18 skipped: 0\nextended overlay length off by one killed tests: 18 skipped: 0\nordinary overlay length off by one killed tests: 18 skipped: 0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tools/test_prank_callers.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\n"
+    },
+    {
+      "command": "python3 tools/test_stinkbomb_audit.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nOK\n"
+    },
+    {
+      "command": "python3 tools/audit_prank_reachability.py",
+      "exit_code": 0,
+      "stdout": "setter 0x800140ec: IDs [221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 239, 240, 241, 242, 243, 244, 245, 247, 248, 250, 257, 258, 267, 269, 270, 273, 276, 278, 279, 280, 282, 283, 284, 288]; prank hits []; skipped 0\nsetter 0x80017198: IDs [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 55, 56, 57, 58, 59, 60, 61, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 91, 92, 93, 95, 96, 97, 98, 99, 107, 109, 111, 113, 115, 116, 122, 123, 124, 125, 126, 127, 132, 133, 146, 147, 148, 149, 150, 151, 152, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 190]; prank hits []; skipped 0\nsetter 0x800677dc: IDs [175, 176, 177, 178, 179, 180, 181, 182, 188]; prank hits []; skipped 0\nsetter 0x80067f28: IDs [50, 51, 52, 53, 54]; prank hits []; skipped 0\nsetter 0x8006813c: IDs [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 53, 54]; prank hits []; skipped 0\nsetter 0x8006819c: IDs [45, 46, 47, 48, 49]; prank hits []; skipped 0\nsetter 0x8009c7d0: IDs [63, 64, 65]; prank hits []; skipped 0\nTutorial table entries: 14 skipped: 0; IDs: [221, 222, 223, 224, 225, 226, 227, 228, 290]\nVM programs: 125 code words: 1802 unreferenced: 0 skipped: 0\nMain words: 266327 skipped: 0; fixed sites: 45 skipped: 0\nOverlay entries: 12 words: 30634 skipped: 0; boot words: 11776 skipped: 0; boot header excluded: 2048 bytes\nPositive domain controls: 10 passed; skipped: 0\n117/118/119 are unreachable through all seven computed paths and the fixed submission paths in this unmodified build, with build-generated saves and intact memory.\n",
+      "stderr": ""
+    }
+  ],
+  "source_sha256": {
+    "tools/audit_prank_reachability.py": "b09077d3d3ffabd5fee2cdf5bbeae9858a640dd43be1b81ae6b871fab113c174",
+    "tools/test_prank_reachability.py": "561f5e5f2d1d6727f23ea7668c7644a7bca19d5c12689ddf4f321caede53ba97",
+    "tools/mutate_prank_reachability.py": "55567f3e554cf10a8e7f27d624f88fca1c08322fd403527e19a074ecfb9c86a3"
+  },
+  "dotnet": {
+    "command": "dotnet test tests/TPW.Sim.Tests/",
+    "exit_code": 0,
+    "passed": 1574,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1574,
+    "evidence": "Executed in this turn in exec session 68614; completion returned exit 0. No simulation sources changed before or after the run.",
+    "result_line": "Passed!  - Failed:     0, Passed:  1574, Skipped:     0, Total:  1574, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+    "existing_analyzer_warnings": [
+      "BootSequenceTests.cs(140,16): xUnit2000",
+      "VisitorConditionTests.cs(61,103): xUnit1026"
+    ]
+  },
+  "scope": "Search/domain audit only; no production code or game changes.",
+  "source_disagreements": {
+    "new": 0,
+    "inherited_behavior_retained": 5,
+    "inherited_boundary_confirmed": 1
+  }
+}
