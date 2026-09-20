@@ -959,6 +959,15 @@ namespace TPWGodot
         string RideReport()
         {
             var sb = new System.Text.StringBuilder();
+            if (_panelFor != null)
+            {
+                // Until the panel is drawn, the selection is at least VISIBLE: this is what it will show.
+                var r = TPW.Sim.RidePanel.Ranges(_panelFor);
+                sb.Append($"\nselected {_panelFor.Rec.Entry} ({_panelFor.Type}) level {_panelFor.Level}: "
+                        + $"speed {_panelFor.SpeedSlider} [{r.Speed.Min}..{r.Speed.Max}], "
+                        + $"duration {_panelFor.CyclesPerLoad} [{r.Duration.Min}..{r.Duration.Max}], "
+                        + $"seats {_panelFor.MaximumSeats}, reliability {_panelFor.Reliability}");
+            }
             foreach (var a in _attractionsPlaced)
             {
                 int len = PhaseTicks(a);
@@ -1996,6 +2005,24 @@ namespace TPWGodot
             return TargetAt(t);
         }
 
+        /// <summary>The placed attraction under a tile, which is what a click on one selects. Same search as
+        /// <see cref="TargetAt"/>, which returns only its hover box.</summary>
+        PlacedAttraction AttractionAt((int X, int Z) t)
+        {
+            foreach (var a in _attractionsPlaced)
+            {
+                var (w, d) = a.Rec.Footprint(a.Rot);
+                if (t.X >= a.Ox && t.X < a.Ox + w && t.Z >= a.Oz && t.Z < a.Oz + d) return a;
+            }
+            return null;
+        }
+
+        /// <summary>The attraction whose panel is open, or null. ⚠ SELECTION ONLY SO FAR: the panel itself is
+        /// not drawn yet, and what it shows per attraction type is being read off the disc rather than
+        /// invented. This is the hook it will hang from, and it is deliberately separate from the hover box —
+        /// hovering is where the cursor is, selecting is what you chose.</summary>
+        PlacedAttraction _panelFor;
+
         BoxSite TargetAt((int X, int Z) t)
         {
             BoxSite hit = null;
@@ -2593,8 +2620,14 @@ void fragment() {
                 {
                     // The click that opens the tool only opens it -- and it does not open at all while the cursor is
                     // on something the hover box is round (master): a click there belongs to that attraction or to
-                    // the gate, not to the path tool.
-                    if (HoverTarget() != null) return;
+                    // the gate, not to the path tool. That click now SELECTS the attraction, which is what opens
+                    // its panel; clicking bare ground with nothing selected closes it again.
+                    if (HoverTarget() != null)
+                    {
+                        if (tile is { } sel) { _panelFor = AttractionAt(sel); RefreshInfo(); }
+                        return;
+                    }
+                    if (_panelFor != null) { _panelFor = null; RefreshInfo(); }
                     if (tile is not { } t0 || !PathTool.CanStartOn(_map, t0.X, t0.Z)) return;
                     _cursorTile = tile; _pathMode = true; _cursorPinned = false; RefreshInfo();
                     return;
