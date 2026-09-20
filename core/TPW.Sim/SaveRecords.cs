@@ -104,8 +104,8 @@ public sealed class StaffSave : SaveRecord
 
 /// <summary>READ: 0x328 bytes, 0x80087DEC / 0x80088A0C. Eight compressed history records
 /// (+0..27F, 0x50 each), four loan records (+280..2EF, 0x1C each), then current totals.
-/// History interpolation remains a host operation over the preserved encoded records; no exact
-/// 144-month snapshot is claimed. Loan +25..27 are UNKNOWN padding.</summary>
+/// ParkScore can capture/restore the lossy histories and totals; the host still supplies balance
+/// and loan slots. No exact 144-month snapshot is claimed. Loan +25..27 are UNKNOWN padding.</summary>
 public sealed class BankSave : SaveRecord
 {
     public BankSave(byte[] bytes = null) : base(0x328, bytes) { }

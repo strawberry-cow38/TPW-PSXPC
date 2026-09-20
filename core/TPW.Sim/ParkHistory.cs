@@ -144,5 +144,29 @@ namespace TPW.Sim
                 _ => throw new ArgumentOutOfRangeException(nameof(row)),
             };
         }
+
+        /// <summary>READ: 0x8006892C fills the five compressed rows and annual byte.
+        /// The host supplies the calendar, admissions and strike fields in this same record.
+        /// Unwritten padding stays intact; old months are grouped means, not exact snapshots.</summary>
+        public void Capture(CalendarSave save, int months)
+        {
+            save.RatingAtNewYear = (byte)RatingAtNewYear;
+            var rows = new[] { _people, _arrivalRate, _happiness, _timeInPark, _overall };
+            for (int row = 0; row < rows.Length; row++)
+                ScoreHistoryCodec.PackBytes(rows[row], months,
+                    save.Bytes.AsSpan(0x2B + row * ScoreHistoryCodec.ByteRecordSize));
+        }
+
+        /// <summary>READ: 0x80069034 restores all five rings via 0x80068A54 and the
+        /// annual byte. ⚠ DO NOT FIX: oldest interpolation consumes the next row's first
+        /// byte (last row consumes save+0xDA padding). See findings/rating.md §4.</summary>
+        public void Restore(CalendarSave save)
+        {
+            RatingAtNewYear = save.RatingAtNewYear;
+            var rows = new[] { _people, _arrivalRate, _happiness, _timeInPark, _overall };
+            for (int row = 0; row < rows.Length; row++)
+                ScoreHistoryCodec.UnpackBytes(save.Bytes.AsSpan(0x2B + row * ScoreHistoryCodec.ByteRecordSize),
+                    save.TotalMonths, rows[row]);
+        }
     }
 }
