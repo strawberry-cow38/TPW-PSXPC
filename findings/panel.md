@@ -229,12 +229,24 @@ pixel of six scanlines and one column:
 | vertical | black 0..30, panel **31..221**, black 222..239 |
 
 ⭐ **35 from the left and 37 from the right, exactly as §4c read them — and NOTHING IS DRAWN OUTSIDE
-THE BACKDROP.** Not one pixel left of x=35 on any row. So the rendered answer to the question is: the
-left frame does not poke out, and the border can be drawn.
+THE BACKDROP.** Not one pixel left of x=35 on any row, on a panel of this family. So no element of a
+panel hangs off its own backdrop, and a border can be drawn.
 
-⚠ **AND IT SAYS THE FRAME RECTS ARE PANEL-RELATIVE.** The left frame's content begins at x=**51**,
-and 35 + 16 = 51. The three "proofs of absolute" in §1 — the name at 156, the slider labels at 370,
-the tab rows centred on 254 — are coincidences of a 512-wide layout, not evidence of the origin.
+⚠⚠ **I ALSO CLAIMED THIS PROVED THE RECTS ARE PANEL-RELATIVE. RETRACTED — it does not.** The
+argument was that the left frame's content begins at x=**51** and 35 + 16 = 51. That only works if
+the PURCHASE panel uses the DETAILS page's frame rects, which I assumed without saying so, and the
+measurement says it does not: the purchase panel's left orange region runs ~35..300 (265 wide) where
+the Details info frame is 280 wide, and there is no 180-wide control frame at 280..460 in it at all.
+So 51 is a coincidence of a different layout.
+
+The y axis says the same thing from the other side, which is how it was caught: absolute y puts the
+info frame at 64..216, exactly inside the measured 31..221, while RELATIVE y would put it at
+95..247 — hanging out of the bottom of its own backdrop. One axis fitting relative and the other
+absolute is not a coordinate convention, it is a sign that the two panels do not share a rect set.
+
+**What survives, and it is the part the question needed:** the backdrop is 35..474 x 31..221 on the
+real screen, and NOTHING IS DRAWN OUTSIDE IT. Which origin the Details page's frames use is still
+open, and the measurement that would settle it is a shot of the DETAILS page.
 
 ⚠ **Honest limit:** this is the purchase panel, not the ride Details page, and the two may not share
 a rect set. What they do share is the backdrop, and the backdrop is what the question was about. A
