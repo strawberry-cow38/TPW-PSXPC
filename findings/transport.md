@@ -231,3 +231,30 @@ at 980, 20 per bus). Position search = every 2-byte-aligned `(s16 x, s16 y)` pai
 tile centres; the count of exact-centre hits (12) is guests not yet moved 22 frames after spawning.
 Static: `fable/xref.py`, `fable/callers.py`, `fable/ann.py`; overlay scan and map-record parse are
 one-off scripts, reproduced in transport.json `method`.
+
+## 6. THE BUS MAKES NO SOUND (2026-09-20)
+
+Asked to wire the bus's sounds; there are none to wire. Checked exhaustively rather than by grep:
+
+1. **Every sound call site in the executable was enumerated.** The audio module's entry points are
+   0x800B8E08 (89 sites), 0x800B8E4C (13) and 0x800B8E90 (16, positional), all reaching 0x800B84AC.
+   Argument convention `(a0 = group, a1 = sound)`, checked against the known placed sound = group 8
+   sound 3 at 0x8001C614 (rides.md §placement). **Not one site lies in the bus machine (0x8005262C),
+   the bus half of its tick, or `Arrivals` (0x80067274).**
+2. **Call-graph reachability, 6 levels deep, from the bus machine and each of its 16 callees**
+   (0x8001397C, 0x80019FE8, 0x8001A054, 0x8001B064, 0x800396FC, 0x80052148, 0x80053D78, 0x8005400C,
+   0x800541AC, 0x80059080, 0x8005CFF0, 0x8005D010, 0x80061748, 0x800617D4, 0x800BDD0C, 0x80067274):
+   **none reaches any audio entry point.**
+3. ⚠ The hosting tick 0x80052324 *does* reach one, which is the trap: `jal 0x8006E22C` at **0x800527F8**,
+   past the bus machine, plays group 8 sound 10 at 0x8006E308. That routine is **the cheat-code checker**
+   — six 12-byte entries at 0x800F320C, each matching a sequence of pad masks from 0x8008974C(0), playing
+   one confirmation sound and toggling a flag. It is hosted in the same per-frame tick as the bus and has
+   nothing to do with it. Reading the tick's first 200 instructions misses the call entirely.
+
+**A park loads 8 groups**, listed as u16 at **0x800F23CC**: `1, 10, 11, 7, 2, 6, 5, 8` (loader 0x80058694,
+eight iterations through 0x800B8B80). Group table 0x800F91D0, `u32 samples, u32 table` per group.
+
+⭐ **Group 2 is loaded by every park and no resolved call site plays any of its 4 sounds.** They are all
+~0.3-0.43s at 11,025 Hz (pitch 0x0400), archive entries 283/284. ⚠ Eleven `play` sites compute their group
+at runtime, so one of those may own it — "no resolved site" is not yet "nothing". Sent to master to
+identify by ear.
