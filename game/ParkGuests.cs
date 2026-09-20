@@ -977,6 +977,32 @@ namespace TPWGodot
             if (g.V.Purpose == Purpose.QueueWalk || g.V.Purpose == Purpose.QueueShuffle)
             {
                 _rides?.SetGuest(g);
+                // ⚠ IS IT ACTUALLY AT THE QUEUE? This promotes the guest to the state a ride boards from,
+                // so an arrival that happened somewhere else entirely is a guest boarding a ride it never
+                // reached. Report the distance rather than trusting the purpose.
+                if (_rides != null && _promoLog < 20)   // an invariant, not a trace: see below
+                {
+                    var slot = _rides.QueuePath(g.V);
+                    if (slot is { Count: > 0 })
+                    {
+                        int tx = slot[0].X, tz = slot[0].Y;
+                        int gx = g.X / ParkTerrain.TileUnits, gz = g.Z / ParkTerrain.TileUnits;
+                        int d = System.Math.Abs(gx - tx) + System.Math.Abs(gz - tz);
+                        // ⚠⚠ A GUEST PROMOTED TO BOARDABLE AWAY FROM THE QUEUE HAS NOT QUEUED. State 18
+                        // is the only state a ride boards from, so this is the last place to notice a
+                        // guest that got here without walking the queue. MEASURED: on map 203 with an
+                        // unreachable queue this fires at distance 0 -- the guest really is on the tile --
+                        // which is how the straight-line shuffle was found. Keep it: it is cheap and it is
+                        // the difference between "a ride took somebody" and "a ride took somebody who
+                        // could not have got there".
+                        if (d > 1)
+                        {
+                            _promoLog++;
+                            GD.PushWarning($"[tpw] guest promoted to WaitingInQueue at ({gx},{gz}), {d} tiles "
+                                         + $"from the queue head ({tx},{tz}), purpose {g.V.Purpose}");
+                        }
+                    }
+                }
                 g.V.SetState(VisitorState.WaitingInQueue);
                 return;
             }
@@ -1170,6 +1196,7 @@ namespace TPWGodot
             foreach (var g in _guests) Place(g);
             foreach (var st in _staff) Place(st);
         }
+        int _promoLog;
         GuestSprites _sprites;
 
         /// <summary>A step of the walk: the facing the camera sees and how far through the stride, from
