@@ -762,6 +762,26 @@ reading tile 2 of that list. The toilet was real; it was the pad, not the table.
 4x4 with a 0xE8 body, so its tail runs to +0x108 and `+0xDC + class*4` for classes 0..10 lands inside it
 exactly — which is why a fixed offset works at all.
 
+#### Where the COASTER's own mapping stops (READ as far as it goes)
+Its draw calls `0x800300B8(handle, visual)` from 0x800B2AC8 with
+`handle = 0x800B1928([obj+0x28])` — three instructions, `return x + 0x20` — and
+`visual = 0x800B30D4([obj+0x24], i)`, which is:
+
+```
+kind  = [[obj+0x10] + 8 + 0x6B]        ; 0x80063328, a byte
+A     = [gp+0x124C]                    ; 0x80054000, the same word the descriptor window uses
+B     = [gp+0x1250]                    ; 0x80053FF4, likewise
+ptr   = [0x801090E0 + kind*4 + B*8 + A*16]
+return  [ptr + i*8]
+```
+
+So the coaster indexes a 4 x 2 x 2 table of POINTERS at **0x801090E0**, each pointing at an array of
+8-byte records whose first word is the model. ⚠ That table is in .bss — all zeros in the image — and its
+writer has NOT been found: the three sites that name it (0x800B2F70, 0x800B310C, 0x800B31A0) all READ it,
+and no `addiu` anywhere else in the image forms the address, so whatever fills it holds the base in a
+register. **That is the next thing to read**, and it is the whole of what stands between the port and
+drawing a coaster's track from the game's own data.
+
 ### What the descriptor's two bytes actually do (READ)
 ⚠ **+6 IS NOT A MODEL INDEX — IT IS THE PIECE'S TURN.** 0x800A4F34 hands the byte to slot 18 of the piece's
 class record (0x800E5C90, a proper 8-byte-per-slot vtable whose slot 1 is the constructor that writes it),
