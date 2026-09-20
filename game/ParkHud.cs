@@ -384,12 +384,23 @@ namespace TPWGodot
         /// ⚠ THE FRAME IS THE FILL ONLY SO FAR. The game's frame is a gouraud quad UNDER sprite corners
         /// (0x169 + 0x148) and stretched edges (0x173, 0x161) — the gradient and the geometry here are the
         /// game's, the ornamental border is not drawn yet. It is the next thing, not a design choice.</summary>
-        /// <summary>The advisor's caption: his words across the bottom of the screen, wrapped.
+        /// <summary>The advisor's caption across the bottom of the screen, wrapped.
         ///
-        /// ⚠ THE BOX IS A STAND-IN AND THE WORDS ARE NOT. The string, when it appears, how long it stays and
-        /// when it is suppressed are all read (0x80013EFC, 0x80038C8C); the game's own text box is drawn by
-        /// 0x800385AC, which has not been disassembled, so its art is this file's invention. Wrapping is
-        /// this port's too — nothing says the original wraps rather than pre-splitting its strings.</summary>
+        /// ⚠⚠ THIS IS NOT WHAT THE GAME DOES, AND IT IS NOW KNOWN WHAT THE GAME DOES. There is NO speech
+        /// bubble and no caption on screen while he talks. `0x800385AC` pushes a 0x120-byte record into the
+        /// HUD's MESSAGE LIST (`0x801069E8`, 32 records, oldest dropped); with the list closed all you get
+        /// is the badge at (50,190) carrying the count -- which is what <see cref="Messages"/> already is.
+        /// L2 opens the list: 80x34 tabs at x=50, y = 158 - 32i, plate sprite 0x131 with the orange-to-yellow
+        /// gradient and a kind icon, and the SELECTED card's words in a 260-wide box at (126,100) that grows
+        /// to fit. Cards never expire on their own; the poster retracts them (`0x800139EC`).
+        /// findings/advisor-presentation.md §3 has the full recipe.
+        ///
+        /// ⭐ One thing here IS right: `0x80029D28` wraps at DRAW time, breaking at the last space, and the
+        /// 270 advisor strings contain no newlines -- so greedy wrapping is the game's own behaviour. The
+        /// width should be 260, not this file's 404.
+        ///
+        /// Kept until the list is built, because a park where the advisor speaks and nothing can be read is
+        /// worse than a placeholder that says so. It is a placeholder that says so.</summary>
         void PaintAdvisor(CanvasItem on)
         {
             if (string.IsNullOrEmpty(AdvisorCaption) || _font == null) return;
