@@ -14,10 +14,17 @@ import re
 import sys
 from datetime import date
 
+# ⚠ TWO VOCABULARIES, BECAUSE THE FILE'S CHANGED HANDS. It was written by hand with emoji and is
+# now EXPORTED from the live board with words. Matching on both means the page keeps rendering
+# through the switch instead of going silently blank, which is the failure a parser like this has.
 STATE = {
-    "✅": ("verified", "var(--grass)"),
-    "🔶": ("not proved", "var(--amber)"),
+    "PROVED": ("proved", "var(--grass)"),
+    "✅": ("proved", "var(--grass)"),
+    "built": ("built, unchecked", "var(--amber)"),
+    "🔶": ("built, unchecked", "var(--amber)"),
+    "in progress": ("in progress", "var(--sky)"),
     "🚧": ("in progress", "var(--sky)"),
+    "not started": ("not started", "var(--dim)"),
     "⬜": ("not started", "var(--dim)"),
 }
 
@@ -107,11 +114,14 @@ def parse(md):
                     return cells[header.index(n)]
             return default
         state = col("state") if "state" in header else None
-        glyph = next((g for g in STATE if state and g in state), None)
-        note = col("evidence / note", "why it is stuck", "why", default="")
+        # Longest key first, so "not started" is not eaten by a substring of another word.
+        glyph = next((g for g in sorted(STATE, key=len, reverse=True) if state and g in state), None)
+        note = col("evidence / note", "note", "why it is stuck", "why", default="")
         if note == "" and "state" in header and glyph is None:
             note = state or ""
-        rows.append((cells[0], glyph, col("owner", "who found", default=""), note))
+        # The exported layout leads with the state column; the hand-written one led with the name.
+        name = col("system", "what", "question", default=cells[0])
+        rows.append((name, glyph, col("owner", "who found", default=""), note))
     if title:
         sections.append((title, rows))
     return sections
@@ -124,7 +134,7 @@ def render(md, updated):
 
     counts = {}
     for title, rows in sections:
-        if title.lower().startswith("the game"):
+        if not title.lower().startswith(("known bug", "needs a human", "open question", "deliberate")):
             for _, g, _, _ in rows:
                 if g:
                     counts[g] = counts.get(g, 0) + 1
@@ -170,7 +180,8 @@ def render(md, updated):
         parts.append("</div>")
 
     parts.append(
-        "<footer><span>generated from STATUS.md — the repo is the source, this is only the view</span>"
+        "<footer><span>a read-only view of STATUS.md, which is itself exported from the live board — "
+        "edit the board, not this</span>"
         f"<span>{updated}</span></footer></main></body></html>"
     )
     return "".join(parts)
