@@ -1500,6 +1500,15 @@ namespace TPWGodot
 
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
+
+        /// <summary>Select the attraction on a tile, as a click on it does. For captures, so the panel can be
+        /// driven headlessly the way every other tool in this port is.</summary>
+        public bool SelectAttraction(int x, int z)
+        {
+            _panelFor = AttractionAt((x, z));
+            RefreshInfo();
+            return _panelFor != null;
+        }
         (int X, int Z)? _hoverPin;
         /// <summary>Extra tiles held as hovered besides <see cref="PinHover"/>'s, so a capture can put two boxes up
         /// at once (the game keeps three: SelectionFades).</summary>
