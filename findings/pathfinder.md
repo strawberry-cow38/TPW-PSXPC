@@ -444,3 +444,63 @@ the pathfinder dereferences it without a null check (0x800EC4D8).
 - The absolute frame budget in wall time: 100 hblanks is exact, "≈ 6.4 ms" assumes 312 lines at 50 Hz.
 - The ordering of the six person lists in the pause/unpause walks (0x800536B4, 0x80053720, 0x800536D8,
   0x80053768, 0x800536FC, 0x80053744) — irrelevant to the pathfinder, listed only for completeness.
+
+## ⚠ THE OLDEST SEARCHES NEVER RUN — measured 2026-09-20
+
+Measured on the standard test park (`--park=203 --park-open --park-guests=25`, two attractions, a
+queue, four path runs), reported at frame 3000 by the new `states:` line:
+
+```
+                        no bin placed        bin placed        bin + 3 cleaners
+guests                  29                   31                31
+decisions made          7600                 4610              4837
+routes FAILED           7545 (99.3%)         4574 (99.2%)      4796 (99.2%)
+searches outstanding    4 / 10               7 / 10            7 / 10
+stuck in state 11       4, oldest 7389 tk    7, oldest 4458    7, oldest 4642
+nodes held              4 of 2000            7 of 2000         7 of 2000
+```
+
+⭐ **One node held per stuck request is the tell.** A seeded search holds exactly one node — the
+seed — so "7 outstanding, 7 nodes used" says those seven were accepted and **never stepped once**.
+They are not searching slowly; they are not searching at all.
+
+### The mechanism, and it is FAITHFUL
+
+`Request` inserts at the **head** of the active list, and `RunFrame` services the head and then only
+requests whose `flagB == 1`. So a steady arrival of new requests keeps jumping the queue in front of
+the old ones, which never get a slice, never answer, and never release their slot. With ten slots
+total, the park then refuses **99% of all route requests** — which makes guests re-decide, which
+produces more new requests, which starves the old ones harder.
+
+⚠ **THIS IS NOT A PORT BUG, AND DO NOT "FIX" IT BY MAKING THE LIST FIFO.** Verified by hand:
+
+| address | what it does |
+|---|---|
+| `0x800ECB90` | takes the free-list head at pool+4, bumps the count at +12, then calls the insert below with `a1 = pool+8`, the ACTIVE list |
+| `0x800ED28C` | `lw a1,0(s1)` old head → `new->next = old head` → `new->prev = 0` → `old head->prev = new` → `sw s0,0(s1)`: **head = new**. Unambiguous insert-at-head. |
+| `0x800EC8C4` | the scheduler: reads the pause flag at `0x801036C8`, takes a time budget of `now + 0x64`, walks from the head, and after the first `Work` requires `0x800ED378` (the flagB test) before running any other |
+
+So newest-first scheduling and one-non-flagB-per-frame are both the original's.
+
+⭐ **The port's frame budget is the one real difference, and it is the wrong SHAPE.** The original
+spends a **wall-clock budget** (`0x800D40F0` twice, `sltu` against `now + 100`) and keeps walking the
+list until the time is gone. The port counts EXPANSIONS (`_expansionsThisFrame >= ExpansionsPerSlice`)
+and returns. On hardware a cheap frame therefore services more of the list than an expensive one; in
+the port every frame services the same fixed amount regardless. That does not by itself change who
+starves, but it is a divergence worth recording before anyone tunes this.
+
+### What actually triggers it
+
+A request for an **unreachable** target burns its whole 200-slice budget before failing, so it holds
+the head for many frames while everything behind it waits. The two known sources of unreachable
+targets in this park are a queue tile sealed inside a ride's footprint (cow tools, same day) and a
+litter bin placed off the path. Remove the bin and the stuck count falls from 7 to 4 — it adds to the
+problem without being the cause.
+
+### Not established
+
+Whether the console reaches this state at all. Everything above says the scheduling is identical, so
+the honest reading is that the original is equally vulnerable and simply never accumulates enough
+unreachable targets to show it. **Do not conclude the port is uniquely broken here** — and do not
+conclude it is fine, either. The next step is a console trace of the outstanding-request count on a
+park with a sealed tile, which the emulator rig in `tools/oracle/` can take.
