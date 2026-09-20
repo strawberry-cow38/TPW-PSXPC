@@ -806,6 +806,15 @@ namespace TPW.Sim.Tests
             public bool TryJoinQueue(Visitor g) => true;
             public bool TryQueueSlot(Visitor g, out bool atSlot) { atSlot = AtSlot; return SlotFound; }
             public void RemoveFromPark(Visitor g) { }
+            // the turnstile view, unused by the queue chain
+            public int Counter80103950 { get; set; }
+            public int Counter80103954 { get; set; }
+            public (int X, int Y) Position(Visitor g) => (0, 0);
+            public MapTile EntranceTile(int lane) => new MapTile(0, 0);
+            public IReadOnlyList<Visitor> Lane(int lane) => new List<Visitor>();
+            public void AppendToLane(int lane, Visitor g) { }
+            public int LaneCount(int lane) => 0;
+            public void SetLaneCount(int lane, int value) { }
         }
 
         // ⭐ ARRIVING AT THE QUEUE SETS THE IN-QUEUE BIT (whether or not 41 did), and reaching the slot

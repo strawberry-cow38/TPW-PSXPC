@@ -7,8 +7,8 @@ namespace TPW.Sim
     /// ⚠ THE NUMBERS ARE THE INTERFACE. The original dispatches on a raw state byte (P+0x2D) and the
     /// findings name states by number throughout, so these carry their real values rather than being a
     /// tidy 0..n sequence. Renumbering them would silently break every cross-reference to behaviour.md.
-    /// Only the states reachable from Idle are here; the rest of the machine (§2.2-2.8) is not written
-    /// yet and must be added with its documented number, not appended.</summary>
+    /// States are added with their documented number, not appended; the enum is not in numeric order
+    /// because each section of the findings was ported in turn.</summary>
     public enum VisitorState
     {
         Idle = 0,
@@ -49,6 +49,27 @@ namespace TPW.Sim
         Vomiting = 29,
         /// <summary>Pathing to the park exit -- the leaving state (§2.6).</summary>
         LeavingPark = 38,
+        // ── the park entrance and exit, behaviour.md §2.6 ──
+        /// <summary>Just spawned: path to the spawn side of the gate, purpose 15 (§2.6).</summary>
+        SpawnToGate = 36,
+        /// <summary>At the turnstile: pay, or turn round (§2.6).</summary>
+        PayEntryFee = 37,
+        /// <summary>Path to my slot in a turnstile lane, purpose 11 (§2.6).</summary>
+        WalkToLaneSlot = 42,
+        /// <summary>One waypoint to my recomputed lane slot, purpose 12 (§2.6).</summary>
+        ShuffleInLane = 43,
+        /// <summary>Head of a turnstile lane, waiting for the turnstile's tick (§2.6). No per-tick
+        /// handler; message 6 from the turnstile is the only thing that moves the others behind it.</summary>
+        LaneFront = 44,
+        /// <summary>Through the turnstile: find the first path tile in +y and walk to it, purpose 13 (§2.6).</summary>
+        WalkIn = 45,
+        /// <summary>Outside the gate, waiting to be admitted (§2.6). No per-tick handler; message 9
+        /// moves it on. Shared with the guard, which sits in the same 46 (§3.4).</summary>
+        AtGate = 46,
+        /// <summary>One waypoint across the gate line, purpose 16; arrival picks a lane or leaves (§2.6).</summary>
+        PickLane = 47,
+        /// <summary>Path to a random exit point, purpose 9; arrival despawns (§2.6).</summary>
+        WalkOut = 48,
     }
 
     /// <summary>Everything Idle can decide to do on one tick, so a caller can act on the decision
@@ -245,6 +266,19 @@ namespace TPW.Sim
 
         /// <summary>V+0x28: whether the guest currently has something it is heading for.</summary>
         public bool HasTarget { get; set; }
+
+        /// <summary>V+0x28 read as a NUMBER, which is what the turnstile states do with it (§1: "also
+        /// used as a 16-bit scratch by purposes 11-16"). 0 after arriving at the spawn side (arrival 15),
+        /// 1 after arriving at the exit side (arrival 14), and then, for a guest going in, the lane it
+        /// rolled at arrival 16. The same word as <see cref="HasTarget"/>: state 37 and the leaving arm of
+        /// arrival 16 store a whole zero to it (0x80090F0C, 0x8008E17C), so both views are cleared there.
+        /// The guard's <c>GateDirection</c> is the same use of the same offset.</summary>
+        public int GateScratch { get; set; }
+
+        /// <summary>P+0x2B bit 0x20 (0x80094050 sets, 0x8009403C reads): the one retry a guest whose
+        /// path to the exit failed is allowed. Message 2 with purpose 14 sets it after re-requesting with
+        /// grass flags; message 1 clears it (0x8008F97C); a second failure with it set goes to Idle (§2.10).</summary>
+        public bool ExitPathRetried { get; set; }
 
         readonly System.Collections.Generic.Stack<VisitorState> _stack = new();
 

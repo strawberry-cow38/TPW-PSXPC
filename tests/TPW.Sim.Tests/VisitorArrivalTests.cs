@@ -35,6 +35,19 @@ namespace TPW.Sim.Tests
             public bool TryJoinQueue(Visitor g) => QueueJoins;
             public bool TryQueueSlot(Visitor g, out bool atSlot) { atSlot = AtSlot; return SlotFound; }
             public void RemoveFromPark(Visitor g) => Removed = true;
+
+            // the turnstile view: one lane, empty, entrance at (20, 5)
+            public (int X, int Y) Pos { get; set; }
+            public List<Visitor> LaneList { get; } = new();
+            public int Count0 { get; set; }
+            public int Counter80103950 { get; set; }
+            public int Counter80103954 { get; set; }
+            public (int X, int Y) Position(Visitor g) => Pos;
+            public MapTile EntranceTile(int lane) => new MapTile(20, 5);
+            public IReadOnlyList<Visitor> Lane(int lane) => LaneList;
+            public void AppendToLane(int lane, Visitor g) => LaneList.Add(g);
+            public int LaneCount(int lane) => Count0;
+            public void SetLaneCount(int lane, int value) => Count0 = value;
         }
 
         static Visitor Guest(Purpose p)
@@ -212,15 +225,6 @@ namespace TPW.Sim.Tests
             Assert.Equal(50, g.Rubbish);
         }
 
-        // The turnstile purposes are refused rather than half-built, because §2.6 is not written.
-        [Theory]
-        [InlineData(Purpose.Turnstile11)]
-        [InlineData(Purpose.Turnstile12)]
-        [InlineData(Purpose.Turnstile16)]
-        public void TheTurnstilePurposesAreRefusedUntilTheEntranceIsBuilt(Purpose p)
-        {
-            var g = Guest(p);
-            Assert.Equal(Arrival.TurnstileNotBuilt, VisitorArrival.Tick(g, new World(), new Dice()));
-        }
+        // The six turnstile arms are tested with the rest of the entrance, in VisitorEntranceTests.
     }
 }

@@ -235,9 +235,9 @@ namespace TPW.Sim
         public const int FeatureLowStockPenalty = 10;
         /// <summary>Message 6: V+0x2C := now + 3 x param1 (0x8008FBDC..0x8008FBE4).</summary>
         public const int ShuffleTicksPerStagger = 3;
-        /// <summary>State 44, "front of turnstile lane" -- the other state that honours message 6 (§2.6 is
-        /// not built, so this is the only mention of it here).</summary>
-        public const VisitorState TurnstileFront = (VisitorState)44;
+        /// <summary>State 44, "front of turnstile lane" -- the other state that honours message 6. The
+        /// turnstile sends it with stagger 0 and target 43 (<see cref="Turnstile.LaneTick"/>).</summary>
+        public const VisitorState TurnstileFront = VisitorState.LaneFront;
 
         /// <summary>Types 1, 3, 6 and 7 have an entrance and a queue; 2, 4 and 5 are walk-ins (§2.4).</summary>
         public static bool HasQueue(int type)
