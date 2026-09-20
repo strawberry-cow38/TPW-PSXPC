@@ -1739,6 +1739,36 @@ static class Program
     /// attraction record carries MaxSeats as a bare count, so the positions have to be in the model, and a
     /// set of seats is a RING: N bones sharing one parent at equal radius and even angular spacing. That
     /// pattern is visible in the numbers without having to look at the mesh.</summary>
+    /// <summary>Every ride, its seats per level from the RECORD against its skinless non-root bones from
+    /// the MODEL. Built to test "max seats = skinless bones", which tinyclaw falsified on entry 220 (the
+    /// record says [8, 11, 14] and the model has 11): the 11 matched the MIDDLE rung of a three-level
+    /// ladder, not the top. This prints both columns for every ride at once so the relationship -- if there
+    /// is one at all -- has to hold across the set rather than on the one model it was derived from.</summary>
+    static int SeatBones(GazArchive g)
+    {
+        Console.WriteLine("entry  seats-by-level     skinless(no root)  name");
+        foreach (var e in g.Entries)
+        {
+            var bytes = g.Read(e);
+            if (bytes == null || bytes.Length < 0x40) continue;
+            AttractionDefinition rec;
+            try { rec = AttractionDefinition.Read(e.Index, bytes); } catch { continue; }
+            if (rec == null || !rec.IsRide || rec.Levels.Length == 0) continue;
+            int skinless = -1;
+            if (MeshContainer.IsContainer(bytes) && MeshContainer.TryParse(bytes, out var c, out _)
+                && c.Subs.Count > 0 && c.TryParseMesh(bytes, 0, out var m, out _))
+            {
+                var sk = m.Skeleton;
+                skinless = 0;
+                for (int b = 0; b < sk.Count; b++)
+                    if (sk.Bones[b].SkinCount == 0 && sk.Bones[b].Parent >= 0) skinless++;
+            }
+            var seats = string.Join(",", Array.ConvertAll(rec.Levels, l => l.MaxSeats.ToString()));
+            Console.WriteLine($"{e.Index,5}  [{seats,-16}] {skinless,8}           entry {e.Index}");
+        }
+        return 0;
+    }
+
     static int Bones(GazArchive g, int entry)
     {
         foreach (var e in g.Entries)
@@ -2114,6 +2144,7 @@ static class Program
             if (subAt >= 0 && subAt + 1 < args.Length) return Subs(g, int.Parse(args[subAt + 1]));
             int bnAt = Array.IndexOf(args, "--bones");
             if (bnAt >= 0 && bnAt + 1 < args.Length) return Bones(g, int.Parse(args[bnAt + 1]));
+            if (Array.IndexOf(args, "--seatbones") >= 0) return SeatBones(g);
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),

@@ -962,12 +962,35 @@ nothing. They are attachment points, and they sit in two rows:
 A constant x per row and a spread of z is a **bench**: two rows of seats facing each other across the
 car, which is what a Crazy Ape looks like.
 
-⭐ **AND THE COUNT CONFIRMS IT FROM THE OTHER END.** There are exactly **11** skinless bones, and
-tinyclaw measured a level 0 → 1 upgrade on this same ride taking it from **8 seats to 11**. So the model
-ships every seat the ride will ever have, and `MaxSeats` says how many of them the current level uses.
-Two independent facts — a bone count read out of the archive and a seat count measured in the running
-port — landing on the same 11.
+⚠⚠ **"MAX SEATS = SKINLESS BONES" IS FALSE. RETRACTED THE SAME DAY IT WAS WRITTEN.**
 
-⚠ Not established: which 8 of the 11 a level-0 ride fills, whether the order is bone order, and whether
-other ride classes follow the same layout. The rule "seats are the skinless bones" is read from one
-model; a second ride should be dumped before it is treated as general.
+It was published on a match that was a coincidence: entry 220 has 11 skinless non-root bones, and
+tinyclaw had quoted a level 0 → 1 upgrade going "8 seats to 11". **11 is the MIDDLE rung of that ride's
+ladder, not the top** — the record says `[8, 11, 14]`. Matching one rung of three is not two instruments
+agreeing, and calling it that was the strongest claim of the day resting on the weakest footing.
+
+Dumping the record's seats-per-level against the model's skinless bones for **every ride** kills it
+outright:
+
+| entry | seats by level | skinless bones |
+| --- | --- | --- |
+| 227 | 8, 11, 14 | 13 |
+| 228 | 8, 8, 8 | 16 |
+| 361 | 4, 6, 8 | 1 |
+| **367** | **12, 16, 20** | **0** |
+| **373** | **18, 24, 30** | **0** |
+| 369 | 10, 16, 22 | 35 |
+
+**Rides with NO skinless bones at all still seat twenty and thirty.** So the positions are not one per
+skinless bone, and 227 — which shares 220's exact `[8, 11, 14]` ladder — has 13 of them, so the
+coincidence does not even repeat on the ride most like it.
+
+⭐ What survives, because it was read off geometry rather than inferred from a count: **the skinless
+bones are real attachment points.** They carry no vertices, and on Caterpillar Capers (42) each skinned
+body segment has one sitting ~66 units directly above it. They hang *something* off the model. They are
+just not one-per-seat.
+
+⚠ And tinyclaw's observation cuts the other way too: `[8, 11, 14]` appears on both 220 and 227, so the
+ladders look like a shared template rather than a per-model count — which would mean seat counts are not
+derived from geometry at all. **Where a rider is actually positioned is UNKNOWN.** Nothing should be
+parented to bone order on the strength of this.
