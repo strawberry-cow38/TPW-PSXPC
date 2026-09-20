@@ -638,11 +638,12 @@ namespace TPWGodot
             var kinds = new HashSet<int>();
             foreach (var a in _attractionsPlaced)
             {
-                // ⚠ `builtToday: false` IS A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score adds +20
-                // while an attraction's age is 0 or 1 whole days, and the port does not record the day a ride
-                // was built — so a brand-new park scores 20..24 here where the game scores 30..34, which is
+                // ⚠ `builtToday: false` IS STILL A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score
+                // adds +20 while an attraction's age is 0 or 1 whole days, and the port does not record the
+                // day a ride was built — so a brand-new park scores 20..24 here where the game scores 30..34,
                 // one guest a bus instead of one-or-two. Wants the build day on PlacedAttraction.
-                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, 0, a.Rec.BaseIntensity, false));
+                // (The LEVEL beside it is no longer a stand-in: the ride tracks its own now.)
+                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, a.Level, a.Rec.BaseIntensity, false));
                 kinds.Add(a.Rec.Entry);
             }
             int catalogue = Math.Max(1, _attractions.Count);
@@ -1546,7 +1547,7 @@ namespace TPWGodot
         /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
         /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
         /// list walks them to find the one under the cursor.</summary>
-        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob
+        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob, IRidePanelWorld
         {
             // --- IRideJob: the same object as a mechanic acts on it ---------------------------------
             int IRideJob.Id => Rec.Entry;
@@ -1597,9 +1598,44 @@ namespace TPWGodot
             /// <summary>Reliability, lifetime and the condemned mechanic (rides.md §6).</summary>
             public readonly RideWear Wear = new();
 
-            /// <summary>The speed slider, A+0xB8. ⚠ 50 is the DEFAULT rides.md §8 records on a placed
-            /// Crazy Ape; the range comes from the record. Nothing moves it yet - there is no panel.</summary>
+            /// <summary>The speed slider, A+0xB8. 50 is the DEFAULT rides.md §8 records on a placed
+            /// Crazy Ape; the range comes from the record's CURRENT level.</summary>
             public int SpeedSlider { get; set; } = 50;
+
+            /// <summary>The upgrade level, 0 to 2, and it is REAL now rather than assumed. ⭐ Placement sets
+            /// ZERO (0x8009C344) and the upgrade path is `if level >= 3 return; level++` (0x8009C56C), so a
+            /// freshly built ride is level 0 and everything the record says about it comes from the level-0
+            /// block. This class used to read Level0 unconditionally, which was right only until the first
+            /// upgrade; the panel is what moves it.</summary>
+            public int Level { get; set; }
+
+            /// <summary>The record's block for a level, as the panel wants it. Clamped, because the game's
+            /// own upgrade path allows a fourth level the data does not have (rides.md §1.3).</summary>
+            public TPW.Sim.RidePanelLevel ReadLevel(int level)
+            {
+                if (Rec.Levels.Length == 0) return default;
+                var l = Rec.Levels[Math.Clamp(level, 0, Rec.Levels.Length - 1)];
+                return new TPW.Sim.RidePanelLevel(l.WearMultiplier, l.MaxSeats, l.Lifetime,
+                                                  l.SpeedMin, l.SpeedMax, l.CyclesMin, l.CyclesMax, l.Price);
+            }
+
+            /// <summary>The record's block for the level this ride is actually at.</summary>
+            RideLevel Now => Rec.Levels.Length > 0 ? Rec.Levels[Math.Clamp(Level, 0, Rec.Levels.Length - 1)] : default;
+
+            // --- IRidePanelWorld ------------------------------------------------------------------------
+            public AttractionType Type => (AttractionType)Rec.Type;
+            /// <summary>⚠ Slot 99, and NOT the same as Capacity: a coaster overrides it with its model's
+            /// attachment count (0x800AD728). Until coaster trains exist, the level's seats.</summary>
+            public int MaximumSeats => MaxSeats;
+            public int BaseIntensity => Rec.BaseIntensity;
+            public int Capacity { get; set; }
+            public int ReliabilityFixed { get => Wear.Reliability; set => Wear.Reliability = value; }
+            public int Lifetime { get => Wear.Lifetime; set => Wear.Lifetime = value; }
+            public int ClosingProgress { get; set; }
+            /// <summary>⚠ NOT WIRED: the port has no smoke or sparkle handles to release yet, so this is
+            /// deliberately empty rather than pretending. When ride effects exist, both handles are freed
+            /// and zeroed here (0x8009C428 / 0x8009C434).</summary>
+            public void ClearRideEffects() { }
 
             public bool IsRide => Rec.IsRide;
             public bool BuildAnimationComplete { get; set; }
@@ -1614,9 +1650,17 @@ namespace TPWGodot
             }
 
             public int CyclesRun { get => Cycle.CyclesRun; set => Cycle.CyclesRun = value; }
-            /// <summary>The duration slider: half the level's maximum, so 5 for most rides and 25 for a
-            /// bouncer (rides.md §4.3). ⚠ Its own slider does not exist yet either.</summary>
-            public int CyclesPerLoad => Rec.Levels.Length > 0 ? Rec.Level0.DefaultCycles : 1;
+            /// <summary>The duration slider. Until the panel moves it, the game's own default: half the
+            /// CURRENT level's maximum, so 5 for most rides and 25 for a bouncer (rides.md §4.3). Setting it
+            /// is what the panel does; −1 means "still the default", so an upgrade that widens the range
+            /// carries the ride with it rather than pinning it to the old level's half.</summary>
+            int _cyclesPerLoad = -1;
+            public int CyclesPerLoad
+            {
+                get => _cyclesPerLoad >= 0 ? _cyclesPerLoad
+                     : Rec.Levels.Length > 0 ? Now.DefaultCycles : 1;
+                set => _cyclesPerLoad = value;
+            }
             /// <summary>Riders on board, from the ride's own runtime (ParkRideWorld). ⚠ THIS WAS THE
             /// STUB THAT ATE THE RIDERS: while it answered a constant "empty", status 11 left for 10
             /// on its FIRST tick, so at most one guest ever stepped off per unload and the rest stayed
@@ -1635,8 +1679,8 @@ namespace TPWGodot
 
             // IRideWearWorld
             public int Riders => RiderCount?.Invoke() ?? 0;
-            public int MaxSeats => Rec.Levels.Length > 0 ? Math.Max(1, Rec.Level0.MaxSeats) : 1;
-            public int WearMultiplier => Rec.Levels.Length > 0 ? Rec.Level0.WearMultiplier : 5;
+            public int MaxSeats => Rec.Levels.Length > 0 ? Math.Max(1, Now.MaxSeats) : 1;
+            public int WearMultiplier => Rec.Levels.Length > 0 ? Now.WearMultiplier : 5;
             public bool NoWear => false;
         }
         readonly List<PlacedAttraction> _attractionsPlaced = new();
