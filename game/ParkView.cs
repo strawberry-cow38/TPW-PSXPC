@@ -287,6 +287,9 @@ namespace TPWGodot
             _common = common;
             _guests?.Clear();
             _guests = new ParkGuests(map, this);
+            _guestSprites ??= GuestSprites.From(_modelSheets);
+            GuestSprites.Debug = System.Environment.GetCommandLineArgs() is { } cl && Array.IndexOf(cl, "--guest-debug") >= 0;
+            _guests.SetSprites(_guestSprites);
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _gateAnglePrev = _gateAngleCur = _gateRecentAt = 0;
             Array.Clear(_gateRecent);
@@ -1231,6 +1234,8 @@ namespace TPWGodot
 
         /// <summary>The park's guests. Null until a map is loaded.</summary>
         ParkGuests _guests;
+        /// <summary>The people sheet the guests are drawn from, baked once (GuestSprites).</summary>
+        GuestSprites _guestSprites;
         /// <summary>How many guests to put in the park when one loads. ⚠ A STAND-IN for the bus
         /// arrivals (TPW.Sim.BusArrivals), which compute a real arrival rate from what is built and are
         /// not wired to this yet.</summary>
@@ -1745,6 +1750,7 @@ void fragment() {
                 // SIM tick; this loop is the sim tick, so the search currently gets half the slices it
                 // would on hardware. It does not matter while ExpansionsPerSlice is unbounded and every
                 // search finishes the frame it starts, and it will matter the moment that is set.
+                if (_guests != null) _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
                 _guests?.Populate(DebugGuestCount);
                 _guests?.RunPathfinder();
                 _guests?.Tick();

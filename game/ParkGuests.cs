@@ -36,6 +36,10 @@ namespace TPWGodot
         public int X, Z;
         public MeshInstance3D Inst;
 
+        /// <summary>How this one is drawn (GuestSprites): which person's sprites, which way it is walking
+        /// as the camera sees it, and how far through the five-frame stride it is.</summary>
+        public int Block, Facing, Frame, Walked;
+
         /// <summary>Where the walk is up to: the waypoint pool index of the next corner, or
         /// <see cref="WaypointPool.NoChain"/>.</summary>
         public int WaypointHead { get; set; } = WaypointPool.NoChain;
@@ -125,7 +129,11 @@ namespace TPWGodot
                 V = Visitor.Spawn(_dice, 0),
                 X = Centre(tx),
                 Z = Centre(tz),
-                Inst = new MeshInstance3D
+                // ⭐ DRAWN AS THE GAME'S OWN SPRITE when the people sheet is there, and as the box this
+                // started as when it is not, so the pathfinder can still be watched without the archive.
+                // ⚠ WHICH person a guest is drawn as is the port's choice: the game's own rule for that is
+                // not traced (PeopleSheet).
+                Inst = _sprites?.NewGuest() ?? new MeshInstance3D
                 {
                     Mesh = new BoxMesh { Size = new Vector3(0.18f, 0.42f, 0.18f) },
                     MaterialOverride = new StandardMaterial3D
@@ -135,6 +143,7 @@ namespace TPWGodot
                     },
                 },
             };
+            g.Block = _sprites != null ? _rng.Next(_sprites.Blocks) : 0;
             _parent.AddChild(g.Inst);
             _guests.Add(g);
             Place(g);
@@ -188,6 +197,7 @@ namespace TPWGodot
         {
             int speed = Math.Max(1, g.V.WalkSpeed);
             int budget = speed;
+            int fromX = g.X, fromZ = g.Z;
 
             while (budget > 0 && g.WaypointHead != WaypointPool.NoChain)
             {
@@ -211,6 +221,7 @@ namespace TPWGodot
                 else g.Z += Math.Sign(dz) * budget;
                 budget = 0;
             }
+            Stride(g, fromX, fromZ);
             Place(g);
         }
 
@@ -218,7 +229,27 @@ namespace TPWGodot
         {
             float u = ParkTerrain.TileUnits;
             int gh = ParkCamera.GroundHeight(_map, g.X, g.Z);
-            g.Inst.Position = new Vector3(g.X / u, gh / u + 0.21f, -g.Z / u);
+            var feet = new Vector3(g.X / u, gh / u, -g.Z / u);
+            if (_sprites == null) { g.Inst.Position = feet + new Vector3(0, 0.21f, 0); return; }
+            _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+        }
+
+        /// <summary>The people sheet to draw guests from, and where the camera is looking, which is what
+        /// decides which of the eight drawn facings each guest shows (GuestSprites).</summary>
+        public void SetSprites(GuestSprites sprites) => _sprites = sprites;
+        public Vector3 CameraForward { get; set; } = new Vector3(0, 0, -1);
+        GuestSprites _sprites;
+
+        /// <summary>A step of the walk: the facing the camera sees and how far through the stride, from
+        /// how far the guest has actually moved. ⚠ The port's own timing — the game advances its frames
+        /// on the animation clock, which this has not traced.</summary>
+        void Stride(Guest g, int fromX, int fromZ)
+        {
+            int dx = g.X - fromX, dz = g.Z - fromZ;
+            if (dx == 0 && dz == 0) return;
+            g.Facing = GuestSprites.FacingFor(dx, -dz, CameraForward);
+            g.Walked += Math.Abs(dx) + Math.Abs(dz);
+            g.Frame = g.Walked / 48 % TPW.Data.PeopleSheet.WalkFrames;
         }
 
         /// <summary>Take every guest out of the park, and their routes with them. Called when the map

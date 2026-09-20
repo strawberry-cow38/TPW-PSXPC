@@ -2341,6 +2341,76 @@ static class Program
                     : null;
                 return Movies(disc, outDir, Array.IndexOf(args, "--frames") >= 0, only);
             }
+            // --spritegrid E FIRST N COLS OUT.rgba: sprites FIRST..FIRST+N-1 of entry E laid out in a grid, each
+            // placed by its own offsets inside its cell so the figures line up as the game draws them. For reading
+            // an animation's order off the picture instead of guessing it.
+            int sgAt = Array.IndexOf(args, "--spritegrid");
+            if (sgAt >= 0 && sgAt + 5 < args.Length)
+            {
+                var af3 = disc.Find(AssetSelfTest.AssetArchive);
+                if (af3 == null) { Console.WriteLine("no asset archive on this disc"); return 1; }
+                if (!GazArchive.TryParse(disc.ReadFile(af3), out var gz3, out string gerr3))
+                { Console.WriteLine("archive: " + gerr3); return 1; }
+                int ge = int.Parse(args[sgAt + 1]), first = int.Parse(args[sgAt + 2]);
+                int count = int.Parse(args[sgAt + 3]), cols = Math.Max(1, int.Parse(args[sgAt + 4]));
+                if (!TextureSheet.TryParse(gz3.Read(gz3.Entries[ge]), out var gsh, out string gherr))
+                { Console.WriteLine($"entry {ge}: {gherr}"); return 1; }
+                int cw = 0, ch = 0;
+                for (int i = first; i < first + count && i < gsh.Sprites.Count; i++)
+                { cw = Math.Max(cw, gsh.Sprites[i].W + 8); ch = Math.Max(ch, gsh.Sprites[i].H + 8); }
+                int rows = (count + cols - 1) / cols, gw = cw * cols, gh = ch * rows;
+                var grid = new byte[gw * gh * 4];
+                for (int i = 0; i < gw * gh; i++) { grid[i * 4] = 24; grid[i * 4 + 1] = 16; grid[i * 4 + 2] = 28; grid[i * 4 + 3] = 255; }
+                for (int k = 0; k < count && first + k < gsh.Sprites.Count; k++)
+                {
+                    var img = gsh.RenderSprite(first + k);
+                    if (img == null) continue;
+                    var sp = gsh.Sprites[first + k];
+                    int cx = (k % cols) * cw + cw / 2, cy = (k / cols) * ch + ch - 4;   // feet on the cell's floor
+                    for (int y = 0; y < img.Height; y++)
+                        for (int x = 0; x < img.Width; x++)
+                        {
+                            int si = (y * img.Width + x) * 4;
+                            if (img.Rgba[si + 3] == 0) continue;
+                            int X = cx + sp.OffsetX + x, Y = cy + sp.OffsetY + y;
+                            if (X < 0 || Y < 0 || X >= gw || Y >= gh) continue;
+                            int di = (Y * gw + X) * 4;
+                            grid[di] = img.Rgba[si]; grid[di + 1] = img.Rgba[si + 1];
+                            grid[di + 2] = img.Rgba[si + 2]; grid[di + 3] = 255;
+                        }
+                }
+                System.IO.File.WriteAllBytes(args[sgAt + 5], grid);
+                Console.WriteLine($"entry {ge}: sprites {first}..{first + count - 1} -> {gw}x{gh} RGBA ({cols} x {rows} cells of {cw}x{ch}) at {args[sgAt + 5]}");
+                return 0;
+            }
+            // --spritesheet E OUT.rgba: entry E's texture sheet with every sprite painted in its own palette,
+            // in the VRAM layout the game uploads — the quickest way to SEE what a sheet holds.
+            int ssAt = Array.IndexOf(args, "--spritesheet");
+            if (ssAt >= 0 && ssAt + 2 < args.Length)
+            {
+                var af2 = disc.Find(AssetSelfTest.AssetArchive);
+                if (af2 == null) { Console.WriteLine("no asset archive on this disc"); return 1; }
+                if (!GazArchive.TryParse(disc.ReadFile(af2), out var gz2, out string gerr2))
+                { Console.WriteLine("archive: " + gerr2); return 1; }
+                int se = int.Parse(args[ssAt + 1]);
+                if (se < 0 || se >= gz2.Entries.Count) { Console.WriteLine("no such entry"); return 1; }
+                if (!TextureSheet.TryParse(gz2.Read(gz2.Entries[se]), out var ssh, out string sherr))
+                { Console.WriteLine($"entry {se}: {sherr}"); return 1; }
+                var img = ssh.RenderSprites($"sheet #{se}");
+                System.IO.File.WriteAllBytes(args[ssAt + 2], img.Rgba);
+                Console.WriteLine($"entry {se}: {ssh.Sprites.Count} sprites, texpage {ssh.TPage:x2}, " +
+                                  $"{ssh.Columns}x{ssh.Rows} pages -> {img.Width}x{img.Height} RGBA at {args[ssAt + 2]}");
+                var sizes = new SortedDictionary<(int, int), int>();
+                foreach (var sp in ssh.Sprites) { var k = (sp.W, sp.H); sizes[k] = sizes.TryGetValue(k, out int c2) ? c2 + 1 : 1; }
+                foreach (var kv in sizes) if (kv.Value >= 8) Console.WriteLine($"  {kv.Key.Item1}x{kv.Key.Item2}: {kv.Value} sprites");
+                if (Array.IndexOf(args, "--table") >= 0)
+                    for (int i = 0; i < ssh.Sprites.Count; i++)
+                    {
+                        var sp = ssh.Sprites[i];
+                        Console.WriteLine($"  [{i,3}] page {sp.TPage:x2} clut {sp.Clut:x4} u {sp.U,3} v {sp.V,3} {sp.W,3}x{sp.H,-3} off {sp.OffsetX,3},{sp.OffsetY,-3} flags {sp.Flags}");
+                    }
+                return 0;
+            }
             if (rawOut != null && texIndex >= 0)
             {
                 var af = disc.Find(AssetSelfTest.AssetArchive);
