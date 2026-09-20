@@ -568,6 +568,58 @@ turnstile and takes up a post by the entrance before patrolling again.
 > 590064/786612/917624 — obvious nonsense, caught immediately. As flat **s16** it is 240, 9, 180, 12 —
 > the first value correct and the second plausible, which is the reading that survives review. Ported
 > in `TPW.Sim.Mechanic.RepairTicks` and `UnknownSecondColumn`.
+>
+> ⚠ **CORRECTION (tinyclaw, 2026-09-20): three claims in the entry below are wrong and most of the
+> machine was unread. Everything here is READ from TPW.BIN unless marked; ported in
+> `TPW.Sim.Mechanic`, `TPW.Sim.RideClosing` and `StaffBase.IsCommittedToStrikeOrRest`, sweep in
+> `findings/mechanic-mutations.json`.**
+>
+> 1. **"Service-due" is the UPGRADE queue.** 0x8005BE44 is `0x8005BAF8(0x801099EC, [0x80102D48], me)`:
+>    the nearest UNCLAIMED entry of the 15-pointer queue the ride panel's request 0x8005BE14 appends to
+>    (ride-panel.md §2). State 54 ends (0x80096AA4) with the PAID 0x8009C56C(ride, 0) and 0x8005BE70
+>    pulls the ride off that queue. There is no maintenance job anywhere in 0x8009710C.
+> 2. **0x8009C1E8 does not count riders.** It is `A+0xEC >= (5*(w+h))<<13` (0x8009C260..288), w/h being
+>    0x8006A798/0x8006A7A4 on the object slot 7 returns; 0x8009EEE4 adds 0x800BDD0C (the per-tick step
+>    0x80103A90, capped at 0x4000 by 0x800BDE6C) clamped at that threshold, 0x8009EFA8 subtracts it
+>    clamped at 0. State 17 uses a DIFFERENT predicate, 0x8009C294 = `A+0xEC == 0`. Nothing unloads
+>    anyone; A+0xEC is a closing timer that scales with the footprint.
+> 3. **The coin flip is not "or the reverse".** rand==0: 0x8005BCB0 → 0x80096C58(flag 1), then
+>    0x8005BE44 → 0x80096C58(flag 0). rand!=0: 0x8005BE44 → flag 0, then 0x8005BE44 AGAIN → flag 1
+>    (0x80096E4C..E64). 0x8005BCB0 is never called in the second order, so half of all idle ticks never
+>    look at broken rides. The second 0x8005BE44 runs only after the first found nothing (a found entry
+>    is unclaimed, so its flag-0 claim cannot fail) and therefore finds nothing too: dead, ported anyway.
+>
+> Unread before, READ now:
+> - **Claim 0x80096C58(me, ride, flag):** refuses if A+0x54 names someone else; flag 1 additionally
+>   requires slot 20 (A+0x6E ∈ {4,5}) and slot 84 (A+0x68 lifetime) **≠ 0** (not > 0); then A+0x54 := me,
+>   M+0x28 := ride, Set 56 (flag 1) / 57. 0x8005BCB0 admits rides already claimed by me; 0x8005BAF8
+>   admits only unclaimed ones. Only the NEAREST candidate is ever tried: a nearest broken ride that is
+>   condemned makes the repair branch report nothing.
+> - **56/57/58:** 0x800EC9F4 returning 0 leaves the state untouched (retried next tick, claim held). On
+>   success M+0x2C := now, purpose 6/20/22, **Push 11**. 56/57 first call 0x80093C68 (P+0x28 := −1); 58
+>   does not.
+> - **Arrival (slot 35 = 0x80096AE0):** Set 0 FIRST; purpose 6/20 with M+0x28 == 0 → stays 0 (no ride to
+>   close); else M+0x2C := 0, Set 16/52, flag bit 1 := 0. Purpose 22 → M+0x28 := 0. Else base 0x80094590.
+>   Still walking with purpose 6: morale −2, tiredness −2 (0x800975E4), then base.
+> - **14/54:** `if (M+0x2C != 0 && M+0x2C < now)` — 0x800968B4/0x80096A90: a zero deadline never fires.
+> - **17 order:** slot 57(7), A+0x54 := 0, Set 58, flag bit 1 := 1, morale +10.
+> - **Messages type 2, purpose 6/20 (0x80096554..5BC):** A+0x54 := 0; then walk the mechanic list from
+>   0x80097640(me) = me→next (the +0 link, forward only) and for the FIRST one where 0x80097694 == 0
+>   (M+0x28 == 0 and 0x800955B4 == 0) call 0x80096C58(candidate, my ride, purpose==6) — one offer,
+>   refused or not — then M+0x28 := 0, Set 0. 0x800955B4: state 26 or 15 → 1; state 2/3 with purpose 5
+>   or 17 → 1; otherwise purpose == 0x32 → 1 (no store of 0x32 exists in 0x80090000..0x8009B000).
+>   Purpose 22 → M+0x28 := 0, Set 0. Type 3 → nothing (the base ignores it too).
+> - **0x8009731C is NOT "job cancelled (ride removed)".** Its only caller is the catalogue pick-up sweep
+>   0x800EBA2C (from 0x80058F90; parkopen.md §2 and pathfinder.md name the trigger), run on every person
+>   when the player lifts a build object. After 0x80093C68, by table 0x800E467C: states 2/3/11 → purpose
+>   20: 0x80096C58(me, my ride, 0); 6: 0x80096C58(me, my ride, 1); 22: Set 58; else release +
+>   0x80095358. States 14/16/17/52/54 → nothing. Everything else — including 56/57/58, which fall off the
+>   table's end — → release A+0x54 if M+0x28, then 0x80095358 (M+0x28 := 0, 0x80093C68, Set 0, flag
+>   0x40 := 1). It re-claims the SAME ride: a re-plan, not a cancel.
+> - **Condemned rides (A+0x68 == 0):** never claimed for repair (the slot-84 test); claimed for an
+>   upgrade with no check. 0x8009CCD4 raises A+0xEC every tick while A+0x68 == 0 and it is short of the
+>   threshold. GUESS-high: a mechanic in 17 on such a ride lowers by the same step the ride raises, never
+>   sees 0, and never leaves.
 - **Idle** (0x80096D60): not on strike → **tiredness +6, morale +1** (once per idle tick), then 50/50:
   broken ride first (0x8005BCB0) then service-due ride (0x8005BE44), or the reverse. A ride is taken via
   0x80096C58 only if unclaimed (ride+0x54 == 0 or me), and for repairs its slots 20 and 84 are set;

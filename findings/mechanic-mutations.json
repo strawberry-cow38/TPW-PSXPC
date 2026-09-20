@@ -1,0 +1,1208 @@
+{
+  "sources": {
+    "mechanic": "core/TPW.Sim/Mechanic.cs",
+    "closing": "core/TPW.Sim/RideClosing.cs",
+    "staff": "core/TPW.Sim/StaffBase.cs"
+  },
+  "original_sha256": {
+    "mechanic": "a0141b36009a66d88587a01c17aafc2fe52e59e823090a5c2e7b8591ff97074a",
+    "closing": "a337f97905caac24ea886ec18fb4938a04f80298edbf73a8a14f90079901bb87",
+    "staff": "d0c51470afdf6261c778caf35d2a553c4df7ae5d05a15ce0cc281bd296da1eac"
+  },
+  "filter": "FullyQualifiedName~MechanicTests|FullyQualifiedName~RidePanelTests",
+  "mutations": [
+    {
+      "exit_code": 1,
+      "seconds": 11.86,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 303 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AMechanicIsWornDownByStandingAboutAndRestedByWalkingToAJob [12 ms]"
+      ],
+      "compile_error": false,
+      "name": "idle tiredness sign flipped",
+      "file": "mechanic",
+      "old": "IdleTiredness = 6;",
+      "new": "IdleTiredness = -6;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 13.19,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 271 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AMechanicIsWornDownByStandingAboutAndRestedByWalkingToAJob [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "idle morale dropped",
+      "file": "mechanic",
+      "old": "IdleMorale = 1;",
+      "new": "IdleMorale = 0;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.69,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 389 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AStillWalkingTickPaysTheMechanicsCostAndThenTheBases [31 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AMechanicIsWornDownByStandingAboutAndRestedByWalkingToAJob [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "repair walk tiredness sign flipped",
+      "file": "mechanic",
+      "old": "RepairWalkTiredness = -2;",
+      "new": "RepairWalkTiredness = 2;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.51,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 266 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AStillWalkingTickPaysTheMechanicsCostAndThenTheBases [13 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AMechanicIsWornDownByStandingAboutAndRestedByWalkingToAJob [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "repair walk morale sign flipped",
+      "file": "mechanic",
+      "old": "RepairWalkMorale = -2;",
+      "new": "RepairWalkMorale = 2;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.5,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 265 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheMoraleRewardIsPaidForReopeningNotForRepairing [14 ms]"
+      ],
+      "compile_error": false,
+      "name": "reopen morale dropped",
+      "file": "mechanic",
+      "old": "ReopenMorale = 10;",
+      "new": "ReopenMorale = 0;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 12.57,
+      "summary": "Failed!  - Failed:     4, Passed:   106, Skipped:     0, Total:   110, Duration: 238 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [13 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairTableIsTwoColumnsAndBothAreRecorded [75 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [4 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 4, ticks: 60) [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "repair table read as flat s16",
+      "file": "mechanic",
+      "old": "RepairTicks = { 240, 180, 120, 60, 60 };",
+      "new": "RepairTicks = { 240, 9, 180, 12, 120 };",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 12.22,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 309 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.OnlyTheRepairWalkHasThatCost [31 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AStillWalkingTickPaysTheMechanicsCostAndThenTheBases [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "walk cost charged on upgrade walks too",
+      "file": "mechanic",
+      "old": "if (staff.Purpose != MechanicStates.ToRepair) return;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.26,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 249 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WithNothingToDoHePatrolsAndOnStrikeHeDoesNothing [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "idle ignores the strike",
+      "file": "mechanic",
+      "old": "            if (world.IsTypeOnStrike(staff.Kind)) return;\n\n            staff.Tiredness",
+      "new": "            staff.Tiredness",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.61,
+      "summary": "Failed!  - Failed:     4, Passed:   106, Skipped:     0, Total:   110, Duration: 239 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.RepairFirstFallsBackToTheUpgradeQueue [10 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheCoinFlipDecidesWhichJobWinsWhenBothAreWaiting [2 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstAsksTheQueueTwiceTheSecondTimeAsARepair [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstNeverLooksAtBrokenRides [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "coin flip inverted",
+      "file": "mechanic",
+      "old": "if (rng.Next(2) == 0)",
+      "new": "if (rng.Next(2) != 0)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.26,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 274 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstAsksTheQueueTwiceTheSecondTimeAsARepair [13 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstNeverLooksAtBrokenRides [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "upgrade-first falls back to broken rides (the report's symmetry)",
+      "file": "mechanic",
+      "old": "if (Take(staff, world.TryClaimQueuedUpgradeAsRepair(staff), MechanicStates.GoToBrokenRide)) return;",
+      "new": "if (Take(staff, world.TryClaimBrokenRide(staff), MechanicStates.GoToBrokenRide)) return;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.03,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 356 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstAsksTheQueueTwiceTheSecondTimeAsARepair [24 ms]"
+      ],
+      "compile_error": false,
+      "name": "dead second queue call dropped",
+      "file": "mechanic",
+      "old": "if (Take(staff, world.TryClaimQueuedUpgradeAsRepair(staff), MechanicStates.GoToBrokenRide)) return;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.6,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 283 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstAsksTheQueueTwiceTheSecondTimeAsARepair [20 ms]"
+      ],
+      "compile_error": false,
+      "name": "second queue call lands in 57",
+      "file": "mechanic",
+      "old": "if (Take(staff, world.TryClaimQueuedUpgradeAsRepair(staff), MechanicStates.GoToBrokenRide)) return;",
+      "new": "if (Take(staff, world.TryClaimQueuedUpgradeAsRepair(staff), MechanicStates.GoToUpgradeRide)) return;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.54,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 208 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [14 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.RepairFirstFallsBackToTheUpgradeQueue [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "repair-first does not fall back to the queue",
+      "file": "mechanic",
+      "old": "                if (Take(staff, world.TryClaimQueuedUpgrade(staff), MechanicStates.GoToUpgradeRide)) return;\n            }\n            else\n",
+      "new": "            }\n            else\n",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.84,
+      "summary": "Failed!  - Failed:     5, Passed:   105, Skipped:     0, Total:   110, Duration: 222 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 20, repair: False, state: 57) [21 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 6, repair: True, state: 56) [< 1 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [16 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.RepairFirstFallsBackToTheUpgradeQueue [2 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.UpgradeFirstAsksTheQueueTwiceTheSecondTimeAsARepair [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "claim does not set the target",
+      "file": "mechanic",
+      "old": "            staff.HasTarget = true;\n            staff.SetState(go);",
+      "new": "            staff.SetState(go);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.5,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 205 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 20, repair: False, state: 57) [22 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 6, repair: True, state: 56) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.RepairFirstFallsBackToTheUpgradeQueue [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "claim pushes instead of setting",
+      "file": "mechanic",
+      "old": "            staff.HasTarget = true;\n            staff.SetState(go);",
+      "new": "            staff.HasTarget = true;\n            staff.PushState(go);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.21,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 236 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ARefusedPathRequestKeepsHimInPlaceToRetry [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "refused path request still sets off",
+      "file": "mechanic",
+      "old": "if (!world.TryPathToClaimedRide(staff)) return false;",
+      "new": "world.TryPathToClaimedRide(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.88,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 263 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.SettingOffPushesTheWalkAndStampsTheClock(repair: False, purpose: 20, under: 57) [10 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.SettingOffPushesTheWalkAndStampsTheClock(repair: True, purpose: 6, under: 56) [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "set-off does not stamp the clock",
+      "file": "mechanic",
+      "old": "            staff.BusyUntil = world.NowTick;\n            staff.Purpose = forRepair",
+      "new": "            staff.Purpose = forRepair",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.09,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 287 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [13 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.SettingOffPushesTheWalkAndStampsTheClock(repair: False, purpose: 20, under: 57) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.SettingOffPushesTheWalkAndStampsTheClock(repair: True, purpose: 6, under: 56) [7 ms]"
+      ],
+      "compile_error": false,
+      "name": "set-off purposes swapped",
+      "file": "mechanic",
+      "old": "staff.Purpose = forRepair ? MechanicStates.ToRepair : MechanicStates.ToUpgrade;",
+      "new": "staff.Purpose = forRepair ? MechanicStates.ToUpgrade : MechanicStates.ToRepair;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.98,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 196 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.SettingOffPushesTheWalkAndStampsTheClock(repair: False, purpose: 20, under: 57) [12 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.SettingOffPushesTheWalkAndStampsTheClock(repair: True, purpose: 6, under: 56) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "set-off sets instead of pushing",
+      "file": "mechanic",
+      "old": "            staff.PushState(StaffState.Walking);\n            return true;\n        }\n\n        /// <summary>The mechanic's share",
+      "new": "            staff.SetState(StaffState.Walking);\n            return true;\n        }\n\n        /// <summary>The mechanic's share",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.72,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 196 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AStillWalkingTickPaysTheMechanicsCostAndThenTheBases [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "still-walking skips the base cost",
+      "file": "mechanic",
+      "old": "                WalkTick(staff);\n                StaffBase.Arrive(staff, world, stillWalking: true);",
+      "new": "                WalkTick(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.85,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 268 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalOffTheRideClearsTheTargetAndOtherPurposesGoToTheBase [8 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivingWithTheClaimGoneStaysIdle(purpose: 6) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivingWithTheClaimGoneStaysIdle(purpose: 20) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "arrival does not Set 0 first",
+      "file": "mechanic",
+      "old": "            staff.SetState(StaffState.Idle);\n            switch (staff.Purpose)",
+      "new": "            switch (staff.Purpose)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.64,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 259 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivingWithTheClaimGoneStaysIdle(purpose: 6) [6 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivingWithTheClaimGoneStaysIdle(purpose: 20) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "arrival closes a ride he no longer holds",
+      "file": "mechanic",
+      "old": "                    if (!staff.HasTarget) return;\n                    staff.BusyUntil = 0;",
+      "new": "                    staff.BusyUntil = 0;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.15,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 247 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalZeroesTheDeadlineAndStartsClosingTheRide(purpose: 20, closing: 52) [18 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalZeroesTheDeadlineAndStartsClosingTheRide(purpose: 6, closing: 16) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "arrival keeps the set-off stamp",
+      "file": "mechanic",
+      "old": "                    staff.BusyUntil = 0;\n                    staff.SetState(staff.Purpose == MechanicStates.ToRepair",
+      "new": "                    staff.SetState(staff.Purpose == MechanicStates.ToRepair",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.4,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 180 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [6 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalZeroesTheDeadlineAndStartsClosingTheRide(purpose: 20, closing: 52) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalZeroesTheDeadlineAndStartsClosingTheRide(purpose: 6, closing: 16) [7 ms]"
+      ],
+      "compile_error": false,
+      "name": "arrival closing states swapped",
+      "file": "mechanic",
+      "old": "? MechanicStates.ClosingRide\n                        : MechanicStates.ClosingForUpgrade",
+      "new": "? MechanicStates.ClosingForUpgrade\n                        : MechanicStates.ClosingRide",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.38,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 191 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalOffTheRideClearsTheTargetAndOtherPurposesGoToTheBase [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "arrival 22 keeps the target",
+      "file": "mechanic",
+      "old": "                case MechanicStates.LeaveRide:\n                    staff.HasTarget = false;\n                    return;\n                default:\n                    StaffBase.Arrive",
+      "new": "                case MechanicStates.LeaveRide:\n                    return;\n                default:\n                    StaffBase.Arrive",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.65,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 188 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ArrivalOffTheRideClearsTheTargetAndOtherPurposesGoToTheBase [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "arrival swallows base purposes",
+      "file": "mechanic",
+      "old": "                    StaffBase.Arrive(staff, world, stillWalking: false);",
+      "new": "                    ;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.9,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 209 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ABiggerRideTakesLongerToClose [4 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [11 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "closing threshold ignores the footprint",
+      "file": "mechanic",
+      "old": "RideClosing.Threshold(world.FootprintSpan(staff))",
+      "new": "RideClosing.Threshold(1)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.42,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 295 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ABiggerRideTakesLongerToClose [23 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [28 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [17 ms]"
+      ],
+      "compile_error": false,
+      "name": "closing does not raise the progress",
+      "file": "mechanic",
+      "old": "world.SetClosingProgress(staff, RideClosing.Raise(progress, world.ClosingStep, threshold));",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.61,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 349 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [16 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "closing states swapped",
+      "file": "mechanic",
+      "old": "staff.SetState(forUpgrade ? MechanicStates.Upgrading : MechanicStates.Repairing);",
+      "new": "staff.SetState(forUpgrade ? MechanicStates.Repairing : MechanicStates.Upgrading);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.72,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 368 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [26 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "closing does not mark the ride under repair",
+      "file": "mechanic",
+      "old": "            world.MarkRideUnderRepair(staff);\n",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.42,
+      "summary": "Failed!  - Failed:     5, Passed:   105, Skipped:     0, Total:   110, Duration: 238 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [21 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [3 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [4 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 4, ticks: 60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 0, ticks: 240) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "timer from the second column",
+      "file": "mechanic",
+      "old": "Handyman.BySkill(RepairTicks, staff.Skill)",
+      "new": "Handyman.BySkill(UnknownSecondColumn, staff.Skill)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.02,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 345 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [18 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [13 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 4, ticks: 60) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "timer ignores skill",
+      "file": "mechanic",
+      "old": "Handyman.BySkill(RepairTicks, staff.Skill)",
+      "new": "RepairTicks[0]",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.49,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 251 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AZeroDeadlineNeverFires(upgrade: True) [10 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AZeroDeadlineNeverFires(upgrade: False) [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "zero deadline fires",
+      "file": "mechanic",
+      "old": "            if (staff.BusyUntil == 0) return false;\n",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.34,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 303 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [19 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheWorkTakesItsFullTime [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "work finishes at equality",
+      "file": "mechanic",
+      "old": "if (!(staff.BusyUntil < world.NowTick)) return false;",
+      "new": "if (!(staff.BusyUntil <= world.NowTick)) return false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.07,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 322 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.OnlyAnUpgradeIsBought [22 ms]"
+      ],
+      "compile_error": false,
+      "name": "repair also buys the upgrade",
+      "file": "mechanic",
+      "old": "if (forUpgrade) world.CompleteUpgrade(staff);",
+      "new": "world.CompleteUpgrade(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.67,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 277 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [30 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.OnlyAnUpgradeIsBought [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "upgrade is never bought",
+      "file": "mechanic",
+      "old": "if (forUpgrade) world.CompleteUpgrade(staff);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.75,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 285 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheMoraleRewardIsPaidForReopeningNotForRepairing [9 ms]"
+      ],
+      "compile_error": false,
+      "name": "work pays the morale",
+      "file": "mechanic",
+      "old": "            staff.SetState(MechanicStates.OpeningRide);\n            return true;",
+      "new": "            staff.Morale = Stat.Add(staff.Morale, ReopenMorale);\n            staff.SetState(MechanicStates.OpeningRide);\n            return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.4,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 237 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheWorkTakesItsFullTime [3 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.OnlyAnUpgradeIsBought [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "work skips reopening",
+      "file": "mechanic",
+      "old": "            staff.SetState(MechanicStates.OpeningRide);\n            return true;",
+      "new": "            staff.SetState(MechanicStates.LeavingRide);\n            return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.39,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 289 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ReopeningWaitsForProgressToFallToExactlyZero [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "reopening uses the closing predicate",
+      "file": "mechanic",
+      "old": "if (progress != 0)",
+      "new": "if (progress >= RideClosing.Threshold(world.FootprintSpan(staff)))",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.05,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 275 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ReopeningWaitsForProgressToFallToExactlyZero [6 ms]"
+      ],
+      "compile_error": false,
+      "name": "reopening does not lower the progress",
+      "file": "mechanic",
+      "old": "world.SetClosingProgress(staff, RideClosing.Lower(progress, world.ClosingStep));",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.18,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 309 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheMoraleRewardIsPaidForReopeningNotForRepairing [10 ms]"
+      ],
+      "compile_error": false,
+      "name": "reopening pays no morale",
+      "file": "mechanic",
+      "old": "            staff.Morale = Stat.Add(staff.Morale, ReopenMorale);\n            return true;",
+      "new": "            return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.11,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 269 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ReopeningKeepsTheTargetForTheWalkOff [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "reopening drops the target",
+      "file": "mechanic",
+      "old": "            world.MarkRideOpenAndRelease(staff);\n            staff.SetState(MechanicStates.LeavingRide);",
+      "new": "            world.MarkRideOpenAndRelease(staff);\n            staff.HasTarget = false;\n            staff.SetState(MechanicStates.LeavingRide);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.92,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 298 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheMoraleRewardIsPaidForReopeningNotForRepairing [18 ms]"
+      ],
+      "compile_error": false,
+      "name": "reopening goes idle",
+      "file": "mechanic",
+      "old": "            staff.SetState(MechanicStates.LeavingRide);\n            staff.Morale",
+      "new": "            staff.SetState(StaffState.Idle);\n            staff.Morale",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.72,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 241 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ARefusedLeavePathKeepsHimAtTheRideToRetry [45 ms]"
+      ],
+      "compile_error": false,
+      "name": "refused leave path goes idle",
+      "file": "mechanic",
+      "old": "if (!world.TryPathToLeavePoint(staff)) return false;",
+      "new": "if (!world.TryPathToLeavePoint(staff)) { staff.HasTarget = false; staff.SetState(StaffState.Idle); return false; }",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.82,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 226 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.LeavingPushesTheWalkOffTheRide [3 ms]"
+      ],
+      "compile_error": false,
+      "name": "leaving sets instead of pushing",
+      "file": "mechanic",
+      "old": "            staff.Purpose = MechanicStates.LeaveRide;\n            staff.PushState(StaffState.Walking);",
+      "new": "            staff.Purpose = MechanicStates.LeaveRide;\n            staff.SetState(StaffState.Walking);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.43,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 340 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkToAJobReleasesTheRide(purpose: 6) [11 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkToAJobReleasesTheRide(purpose: 20) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "failed walk keeps the claim",
+      "file": "mechanic",
+      "old": "                world.ReleaseClaim(staff);\n                HandJobOn",
+      "new": "                HandJobOn",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.36,
+      "summary": "Failed!  - Failed:     4, Passed:   106, Skipped:     0, Total:   110, Duration: 261 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 20, repair: False, state: 57) [16 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 6, repair: True, state: 56) [1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ARefusedHandOffEndsTheSearch [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "failed walk does not offer the job on",
+      "file": "mechanic",
+      "old": "                HandJobOn(staff, world, forRepair: staff.Purpose == MechanicStates.ToRepair);\n",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.93,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 362 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 6, repair: True, state: 56) [12 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "job is always offered as an upgrade",
+      "file": "mechanic",
+      "old": "forRepair: staff.Purpose == MechanicStates.ToRepair",
+      "new": "forRepair: false",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.76,
+      "summary": "Failed!  - Failed:     4, Passed:   106, Skipped:     0, Total:   110, Duration: 246 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 20, repair: False, state: 57) [11 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 6, repair: True, state: 56) [2 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkToAJobReleasesTheRide(purpose: 6) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkToAJobReleasesTheRide(purpose: 20) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "failed job walk keeps the target",
+      "file": "mechanic",
+      "old": "                staff.HasTarget = false;\n                staff.SetState(StaffState.Idle);\n                return;\n            }\n            if (staff.Purpose == MechanicStates.LeaveRide)",
+      "new": "                staff.SetState(StaffState.Idle);\n                return;\n            }\n            if (staff.Purpose == MechanicStates.LeaveRide)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.09,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 356 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkAwayFromAFinishedJobReleasesNothingButDropsTheTarget [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "failed leave walk keeps the target",
+      "file": "mechanic",
+      "old": "            if (staff.Purpose == MechanicStates.LeaveRide)\n            {\n                staff.HasTarget = false;",
+      "new": "            if (staff.Purpose == MechanicStates.LeaveRide)\n            {",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.75,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 313 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ARefusedHandOffEndsTheSearch [43 ms]"
+      ],
+      "compile_error": false,
+      "name": "refused hand-off moves to the next candidate",
+      "file": "mechanic",
+      "old": "                    forRepair ? MechanicStates.GoToBrokenRide : MechanicStates.GoToUpgradeRide);\n                return;",
+      "new": "                    forRepair ? MechanicStates.GoToBrokenRide : MechanicStates.GoToUpgradeRide);\n                if (candidate.HasTarget) return;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.62,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 326 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [37 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ARefusedHandOffEndsTheSearch [1 ms]"
+      ],
+      "compile_error": false,
+      "name": "hand-off offers to everyone",
+      "file": "mechanic",
+      "old": "                    forRepair ? MechanicStates.GoToBrokenRide : MechanicStates.GoToUpgradeRide);\n                return;",
+      "new": "                    forRepair ? MechanicStates.GoToBrokenRide : MechanicStates.GoToUpgradeRide);\n                continue;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.01,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 292 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [20 ms]"
+      ],
+      "compile_error": false,
+      "name": "hand-off does not skip unsuitable candidates",
+      "file": "mechanic",
+      "old": "if (!CanTakeHandedJob(candidate)) continue;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.17,
+      "summary": "Failed!  - Failed:     3, Passed:   107, Skipped:     0, Total:   110, Duration: 370 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 20, repair: False, state: 57) [16 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.AFailedWalkHandsTheJobToTheNextFreeMechanic(purpose: 6, repair: True, state: 56) [1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "hand-off states swapped",
+      "file": "mechanic",
+      "old": "                    forRepair ? MechanicStates.GoToBrokenRide : MechanicStates.GoToUpgradeRide);\n                return;",
+      "new": "                    forRepair ? MechanicStates.GoToUpgradeRide : MechanicStates.GoToBrokenRide);\n                return;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.71,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 304 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 0, purpose: 0, target: True, expected: False) [7 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [22 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate filter ignores the target",
+      "file": "mechanic",
+      "old": "return !candidate.HasTarget && !StaffBase.IsCommittedToStrikeOrRest(candidate);",
+      "new": "return !StaffBase.IsCommittedToStrikeOrRest(candidate);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.71,
+      "summary": "Failed!  - Failed:     6, Passed:   104, Skipped:     0, Total:   110, Duration: 342 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 26, purpose: 0, target: False, expected: False) [13 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 2, purpose: 5, target: False, expected: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 15, purpose: 0, target: False, expected: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 3, purpose: 17, target: False, expected: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 0, purpose: 50, target: False, expected: False) [2 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [38 ms]"
+      ],
+      "compile_error": false,
+      "name": "candidate filter ignores strike and rest",
+      "file": "mechanic",
+      "old": "return !candidate.HasTarget && !StaffBase.IsCommittedToStrikeOrRest(candidate);",
+      "new": "return !candidate.HasTarget;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.63,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 217 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepReissuesAWalkingMechanicsJob(state: 11, purpose: 6, repair: True, go: 56) [5 ms]"
+      ],
+      "compile_error": false,
+      "name": "sweep aborts a mechanic in state 11",
+      "file": "mechanic",
+      "old": "                case StaffState.Walking:\n                    switch (staff.Purpose)",
+      "new": "                    switch (staff.Purpose)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.74,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 237 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepReissuesAWalkingMechanicsJob(state: 2, purpose: 20, repair: False, go: 57) [15 ms]"
+      ],
+      "compile_error": false,
+      "name": "sweep re-claims an upgrade with the repair checks",
+      "file": "mechanic",
+      "old": "Take(staff, world.TryClaimRideFor(staff, staff, forRepair: false), MechanicStates.GoToUpgradeRide);",
+      "new": "Take(staff, world.TryClaimRideFor(staff, staff, forRepair: true), MechanicStates.GoToUpgradeRide);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.2,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 122 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepReissuesAWalkingMechanicsJob(state: 3, purpose: 6, repair: True, go: 56) [3 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepReissuesAWalkingMechanicsJob(state: 11, purpose: 6, repair: True, go: 56) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "sweep re-claims a repair without the checks",
+      "file": "mechanic",
+      "old": "Take(staff, world.TryClaimRideFor(staff, staff, forRepair: true), MechanicStates.GoToBrokenRide);",
+      "new": "Take(staff, world.TryClaimRideFor(staff, staff, forRepair: false), MechanicStates.GoToBrokenRide);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.01,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 193 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepSendsALeavingMechanicBackTo58AndAbortsTheRest [15 ms]"
+      ],
+      "compile_error": false,
+      "name": "sweep aborts a leaving mechanic",
+      "file": "mechanic",
+      "old": "                        case MechanicStates.LeaveRide:\n                            staff.SetState(MechanicStates.LeavingRide);\n                            return;",
+      "new": "                        case MechanicStates.LeaveRide:\n                            Abort(staff, world);\n                            return;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.77,
+      "summary": "Failed!  - Failed:     5, Passed:   105, Skipped:     0, Total:   110, Duration: 129 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepLeavesAMechanicAtTheRideAlone(state: 54) [8 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepLeavesAMechanicAtTheRideAlone(state: 17) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepLeavesAMechanicAtTheRideAlone(state: 52) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepLeavesAMechanicAtTheRideAlone(state: 16) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepLeavesAMechanicAtTheRideAlone(state: 14) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "sweep aborts a mechanic at the ride",
+      "file": "mechanic",
+      "old": "                case MechanicStates.Upgrading:\n                    return;\n                default:",
+      "new": "                case MechanicStates.Upgrading:\n                default:",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.29,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 126 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 56, target: True) [4 ms]"
+      ],
+      "compile_error": false,
+      "name": "sweep treats 56 as a walking state",
+      "file": "mechanic",
+      "old": "                case StaffState.Walking:\n                    switch (staff.Purpose)",
+      "new": "                case StaffState.Walking:\n                case MechanicStates.GoToBrokenRide:\n                    switch (staff.Purpose)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.58,
+      "summary": "Failed!  - Failed:     5, Passed:   105, Skipped:     0, Total:   110, Duration: 158 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 57, target: True) [3 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 49, target: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 56, target: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 58, target: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepSendsALeavingMechanicBackTo58AndAbortsTheRest [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "abort keeps the claim",
+      "file": "mechanic",
+      "old": "            if (staff.HasTarget) world.ReleaseClaim(staff);\n            staff.HasTarget = false;",
+      "new": "            staff.HasTarget = false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.58,
+      "summary": "Failed!  - Failed:     5, Passed:   105, Skipped:     0, Total:   110, Duration: 145 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 57, target: True) [1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 49, target: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 56, target: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(state: 58, target: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ThePickUpSweepSendsALeavingMechanicBackTo58AndAbortsTheRest [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "abort keeps the target",
+      "file": "mechanic",
+      "old": "            staff.HasTarget = false;\n            staff.SetState(StaffState.Idle);\n        }\n    }\n}",
+      "new": "            staff.SetState(StaffState.Idle);\n        }\n    }\n}",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.6,
+      "summary": "Failed!  - Failed:     6, Passed:   104, Skipped:     0, Total:   110, Duration: 225 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ABiggerRideTakesLongerToClose [6 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [15 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 2, threshold: 81920) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 4, threshold: 163840) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 8, threshold: 327680) [8 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "threshold five per tile",
+      "file": "closing",
+      "old": "UnitsPerSpanTile = 10;",
+      "new": "UnitsPerSpanTile = 5;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.0,
+      "summary": "Failed!  - Failed:     9, Passed:   101, Skipped:     0, Total:   110, Duration: 376 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ABiggerRideTakesLongerToClose [14 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [7 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 2, threshold: 81920) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 4, threshold: 163840) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 8, threshold: 327680) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 4, ticks: 60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 0, ticks: 240) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "threshold twenty per tile",
+      "file": "closing",
+      "old": "UnitsPerSpanTile = 10;",
+      "new": "UnitsPerSpanTile = 20;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.74,
+      "summary": "Failed!  - Failed:     9, Passed:   101, Skipped:     0, Total:   110, Duration: 267 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ABiggerRideTakesLongerToClose [16 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [9 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 2, threshold: 81920) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 4, threshold: 163840) [2 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 8, threshold: 327680) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 4, ticks: 60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 0, ticks: 240) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "threshold shifted one too many",
+      "file": "closing",
+      "old": "(UnitsPerSpanTile * footprintSpan) << Fixed.FracBits",
+      "new": "(UnitsPerSpanTile * footprintSpan) << (Fixed.FracBits + 1)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.49,
+      "summary": "Failed!  - Failed:     9, Passed:   101, Skipped:     0, Total:   110, Duration: 281 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ABiggerRideTakesLongerToClose [12 ms]",
+        "Failed TPW.Sim.Tests.RidePanelTests.MechanicWorkflowCompletesTheQueuedUpgradeThenReopens [4 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 2, threshold: 81920) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 4, threshold: 163840) [23 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheClosingThresholdIsTenUnitsPerTileOfSpan(span: 8, threshold: 327680) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ClosingForAnUpgradeIsTheSameWaitIntoADifferentState [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 4, ticks: 60) [< 1 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheJobLengthComesFromTheSkillTable(skill: 0, ticks: 240) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "complete needs strictly above",
+      "file": "closing",
+      "old": "progress >= threshold;",
+      "new": "progress > threshold;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.27,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 315 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ProgressIsClampedAtBothEnds [11 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheRepairClockDoesNotStartUntilClosingProgressReachesTheThreshold [2 ms]"
+      ],
+      "compile_error": false,
+      "name": "raise does not clamp",
+      "file": "closing",
+      "old": "return threshold < next ? threshold : next;",
+      "new": "return next;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.2,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 267 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.ProgressIsClampedAtBothEnds [28 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.ReopeningWaitsForProgressToFallToExactlyZero [< 1 ms]"
+      ],
+      "compile_error": false,
+      "name": "lower does not clamp",
+      "file": "closing",
+      "old": "return next < 0 ? 0 : next;",
+      "new": "return next;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.28,
+      "summary": "Failed!  - Failed:     2, Passed:   108, Skipped:     0, Total:   110, Duration: 230 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 15, purpose: 0, target: False, expected: False) [20 ms]",
+        "Failed TPW.Sim.Tests.MechanicTests.TheOfferGoesToTheFirstFreeMechanicAfterMeOnly [14 ms]"
+      ],
+      "compile_error": false,
+      "name": "striking is not a commitment",
+      "file": "staff",
+      "old": "if (staff.State == StaffState.WalkToStrike || staff.State == StaffState.Striking) return true;",
+      "new": "if (staff.State == StaffState.WalkToStrike) return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.9,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 277 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 11, purpose: 5, target: False, expected: True) [14 ms]"
+      ],
+      "compile_error": false,
+      "name": "purpose test in every state",
+      "file": "staff",
+      "old": "            if ((staff.State == StaffState.WalkToDestination || staff.State == StaffState.PathReady)\n                && (staff.Purpose == StaffPurpose.Strike || staff.Purpose == StaffPurpose.Rest)) return true;",
+      "new": "            if (staff.Purpose == StaffPurpose.Strike || staff.Purpose == StaffPurpose.Rest) return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.67,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 278 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 3, purpose: 17, target: False, expected: False) [18 ms]"
+      ],
+      "compile_error": false,
+      "name": "rest walk is not a commitment",
+      "file": "staff",
+      "old": "(staff.Purpose == StaffPurpose.Strike || staff.Purpose == StaffPurpose.Rest)) return true;",
+      "new": "(staff.Purpose == StaffPurpose.Strike)) return true;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.9,
+      "summary": "Failed!  - Failed:     1, Passed:   109, Skipped:     0, Total:   110, Duration: 317 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.MechanicTests.WhoCanBeHandedAJob(state: 0, purpose: 50, target: False, expected: False) [11 ms]"
+      ],
+      "compile_error": false,
+      "name": "purpose 50 dropped",
+      "file": "staff",
+      "old": "return staff.Purpose == StaffPurpose.Unidentified50;",
+      "new": "return false;",
+      "status": "killed"
+    }
+  ],
+  "status": "passed",
+  "restoration": "top-level try/finally, signal handlers, durable backups and recovery journal",
+  "previous_runs": [
+    {
+      "status": "error",
+      "baseline": {
+        "exit_code": 0,
+        "seconds": 12.28,
+        "summary": "Passed!  - Failed:     0, Passed:  1170, Skipped:     0, Total:  1170, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+        "failed_tests": [],
+        "compile_error": false
+      },
+      "restored": true,
+      "error": "Command '['dotnet', 'test', '/home/ec2-user/tpwport-mech/tests/TPW.Sim.Tests', '--no-restore', '--nologo', '--filter', 'FullyQualifiedName~MechanicTests|FullyQualifiedName~RidePanelTests']' timed out after 180 seconds"
+    },
+    {
+      "status": "partial",
+      "baseline": {
+        "exit_code": 0,
+        "seconds": 12.7,
+        "summary": "Passed!  - Failed:     0, Passed:  1170, Skipped:     0, Total:  1170, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+        "failed_tests": [],
+        "compile_error": false
+      },
+      "restored": true,
+      "error": null
+    }
+  ],
+  "baseline": {
+    "exit_code": 0,
+    "seconds": 4.83,
+    "summary": "Passed!  - Failed:     0, Passed:  1170, Skipped:     0, Total:  1170, Duration: 633 ms - TPW.Sim.Tests.dll (net8.0)",
+    "failed_tests": [],
+    "compile_error": false
+  },
+  "killed": 74,
+  "survived": [],
+  "invalid": [],
+  "mutation_count": 74,
+  "final_verification": {
+    "exit_code": 0,
+    "seconds": 7.83,
+    "summary": "Passed!  - Failed:     0, Passed:  1170, Skipped:     0, Total:  1170, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+    "failed_tests": [],
+    "compile_error": false
+  },
+  "restored_sha256": {
+    "mechanic": "a0141b36009a66d88587a01c17aafc2fe52e59e823090a5c2e7b8591ff97074a",
+    "closing": "a337f97905caac24ea886ec18fb4938a04f80298edbf73a8a14f90079901bb87",
+    "staff": "d0c51470afdf6261c778caf35d2a553c4df7ae5d05a15ce0cc281bd296da1eac"
+  },
+  "restored": true
+}

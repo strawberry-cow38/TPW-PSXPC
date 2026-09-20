@@ -477,41 +477,53 @@ namespace TPW.Sim.Tests
             public bool TryPathToStrikeMuster(StaffMember s) => true;
             public bool TryPathToRest(StaffMember s) => true;
             public bool TryClaimBrokenRide(StaffMember s) => false;
-            public bool TryClaimServiceRide(StaffMember s) => ride.Requests != 0;
-            // Retain Mechanic's existing findings-based contract. The binary actually uses closing
-            // progress here, as ride-panel.md's SOURCE DISAGREEMENTS explicitly records.
-            public bool RideIsClear(StaffMember s) => ride.Riders == 0;
-            public void UnloadRide(StaffMember s) => ride.Riders--;
-            public void ReloadRide(StaffMember s) { }
+            public bool TryClaimQueuedUpgrade(StaffMember s) => ride.Requests != 0;
+            public bool TryClaimQueuedUpgradeAsRepair(StaffMember s) => false;
+            public void ReleaseClaim(StaffMember s) { }
+            public StaffMember NextMechanic(StaffMember s) => null;
+            public bool TryClaimRideFor(StaffMember from, StaffMember to, bool repair) => false;
+            public bool TryPathToClaimedRide(StaffMember s) => true;
+            public bool TryPathToLeavePoint(StaffMember s) => true;
+            // The binary's predicate: the ride's closing-progress word A+0xEC, the same field the
+            // upgrade purchase zeroes. Riders on board are NOT consulted (ride-panel.md SOURCE DISAGREEMENTS).
+            public int ClosingProgress(StaffMember s) => ride.ClosingProgress;
+            public void SetClosingProgress(StaffMember s, int v) => ride.ClosingProgress = v;
+            public int FootprintSpan(StaffMember s) => 2;                 // a 1x1 ride: 20.0 units
+            public int ClosingStep => 10 << Fixed.FracBits;               // 10.0 a tick: two ticks to close
             public void MarkRideUnderRepair(StaffMember s) => ride.Status = AttractionStatus.UnderRepair;
             public void MarkRideOpenAndRelease(StaffMember s)
                 => ride.Status = AttractionLifecycle.Enter(AttractionStatus.Reopen, ride);
-            public void CompleteService(StaffMember s) => RidePanel.CompleteUpgrade(ride);
-            public void ReleaseClaim(StaffMember s) { }
-            public bool TryPathToLeavePoint(StaffMember s) => true;
+            public void CompleteUpgrade(StaffMember s) => RidePanel.CompleteUpgrade(ride);
         }
 
         // REJECTS an upgrade charged at enqueue or at the start/equality edge of the mechanic's
-        // work timer. This exercises the existing retained service workflow through the new purchase.
+        // work timer, and REJECTS a closing wait keyed to riders: the rider stays on board throughout
+        // and the ride still closes once its progress word reaches 20.0.
         [Fact]
-        public void ExistingMechanicWorkflowCompletesTheQueuedUpgradeThenReopens()
+        public void MechanicWorkflowCompletesTheQueuedUpgradeThenReopens()
         {
             var w = Placed(); w.Riders = 1; w.Cycle.Accumulator = 321;
             var park = new MechanicWorld(w); var m = new StaffMember(StaffKind.Mechanic) { Skill = 3 };
             Assert.True(RidePanel.RequestUpgrade(w));
             Mechanic.Idle(m, park, new Dice());
-            Assert.Equal(MechanicStates.GoToServiceRide, m.State);
-            Mechanic.SetOff(m, forRepair: false); Mechanic.Arrive(m);
-            Assert.False(Mechanic.CloseRide(m, park, forService: true));
+            Assert.Equal(MechanicStates.GoToUpgradeRide, m.State);
+            Assert.True(Mechanic.SetOff(m, park, forRepair: false));
+            Mechanic.Arrive(m, park, stillWalking: false);
+            Assert.Equal(MechanicStates.ClosingForUpgrade, m.State);
+            Assert.False(Mechanic.CloseRide(m, park, forUpgrade: true));
+            Assert.Equal(10 << Fixed.FracBits, w.ClosingProgress);
             Assert.Empty(w.Charges);
-            Assert.True(Mechanic.CloseRide(m, park, forService: true));
+            Assert.False(Mechanic.CloseRide(m, park, forUpgrade: true));   // reaches 20.0, clamped
+            Assert.True(Mechanic.CloseRide(m, park, forUpgrade: true));
+            Assert.Equal(1, w.Riders);
             Assert.Equal(AttractionStatus.UnderRepair, w.Status);
             park.NowTick = 160;
-            Assert.False(Mechanic.Work(m, park, forService: true)); Assert.Empty(w.Charges);
+            Assert.False(Mechanic.Work(m, park, forUpgrade: true)); Assert.Empty(w.Charges);
             park.NowTick = 161;
-            Assert.True(Mechanic.Work(m, park, forService: true));
+            Assert.True(Mechanic.Work(m, park, forUpgrade: true));
             Assert.Equal(1, w.Level); Assert.Equal(Money.FromPounds(200), Assert.Single(w.Charges));
             Assert.Equal(321, w.Cycle.Accumulator);
+            Assert.Equal(0, w.ClosingProgress);                           // the purchase zeroed it
             Assert.True(Mechanic.OpenRide(m, park));
             Assert.Equal(AttractionStatus.Loading, w.Status);
         }
