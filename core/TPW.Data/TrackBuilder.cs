@@ -115,6 +115,20 @@ namespace TPW.Data
             while (z != to.Z) { z += Math.Sign(to.Z - z); if ((x, z) != to) yield return (x, z); }
         }
 
+        /// <summary>What the next press would cost, for the cost preview: one pylon when a press would be
+        /// accepted, and nothing when it would be refused — the same shape as the path and queue tools'.
+        ///
+        /// ⚠ THIS IS THE PORT'S BILL, NOT SETTLED AS THE GAME'S. The port charges per pylon through the usual
+        /// helper, which is what the per-press handler does (0x800225C0 → 0x8001C2E0); the game ALSO has a
+        /// confirm that works out `unit × (pieces − 4)` in one go (0x800229E4), and which of the two is the
+        /// real bill is still open (rides.md §7b).</summary>
+        public int GhostCost(ParkMap map, int cx, int cz)
+        {
+            var at = Project(End, (cx, cz));
+            bool ok = !Circuit && _pylons.Count < MaxPylons && PieceCount(End, (cx, cz)) >= 1 && Takes(map, at.X, at.Z);
+            return ok ? PiecePrice[World] : 0;
+        }
+
         /// <summary>A press at (cx, cz): the run is projected onto the dominant axis, one pylon goes down at
         /// its end, and the track is what runs between.</summary>
         public Step Lay(ParkMap map, int cx, int cz)

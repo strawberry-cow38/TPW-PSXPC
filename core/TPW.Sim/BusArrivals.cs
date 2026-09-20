@@ -53,14 +53,17 @@ namespace TPW.Sim
         }
     }
 
-    /// <summary>One attraction's contribution to the park's draw.</summary>
+    /// <summary>One attraction's contribution to the park's draw. <paramref name="Type"/> is the record's own
+    /// type byte — 1 coaster, 2 feature, 3 ride, 4 shop, 5 sideshow, 6 track ride, 7 tour ride — because the
+    /// score branches on it through a seven-entry jump table and the kinds are not scored alike.</summary>
     public readonly struct AttractionDraw
     {
+        public readonly int Type;
         public readonly int Level;
         public readonly int Intensity;
         public readonly bool BuiltToday;   // age <= 1 game day
-        public AttractionDraw(int level, int intensity, bool builtToday)
-        { Level = level; Intensity = intensity; BuiltToday = builtToday; }
+        public AttractionDraw(int type, int level, int intensity, bool builtToday)
+        { Type = type; Level = level; Intensity = intensity; BuiltToday = builtToday; }
     }
 
     /// <summary>How many guests step off a bus.
@@ -96,22 +99,60 @@ namespace TPW.Sim
         public const int DerivedDivisorLowerExclusive = 76_182;
         public const int DerivedDivisorUpperInclusive = 84_257;
 
-        /// <summary>Park draw score. Returns 0 for an empty park — not <see cref="BaseScore"/>. The base is
-        /// added only once something exists, which is why "empty park" and "park with one bad ride" are
-        /// genuinely different states rather than differing by a little.</summary>
-        public static int ParkScore(IReadOnlyList<AttractionDraw> attractions)
+        /// <summary>Park draw score, 0x80067400. Returns 0 for an empty park — not <see cref="BaseScore"/>.
+        /// The base is added only once something exists, which is why "empty park" and "park with one bad
+        /// ride" are genuinely different states rather than differing by a little.
+        ///
+        /// ⭐⭐ EVERY ATTRACTION IS SCORED THROUGH A DIE ROLL, AND THAT IS WHERE MOST OF THE SCORE LIVES.
+        /// <code>
+        ///   S = 0                                                  if there are no attractions
+        ///   S = 10 + Σ (rand(10) + 20 + term + young) / divisor     one term per attraction
+        ///       roll    = rand(10), RE-ROLLED PER ATTRACTION        0x80067448
+        ///       term    = Level × Intensity  for a ride, coaster, track ride or tour ride   0x800674C8
+        ///               = Intensity          for a sideshow (no level)                      0x800674A4
+        ///               = 0                  for a shop, and for anything unrecognised      0x80067538
+        ///       young   = 20 when (age &lt;&lt; 12) / 2024 &lt; 4, i.e. built today               0x80067520
+        ///       divisor = 10 for a FEATURE, otherwise 2             0x80067454 / 0x80067534
+        /// </code>
+        /// The three ride getters: age from 0x8009EDBC (now − attraction+0xF4), level from 0x8009F5E0
+        /// (attraction+0xF6, a byte, whose setter is the next routine along), intensity from the class
+        /// record's slot at +0x1A8.
+        ///
+        /// ⚠ THE PREVIOUS PORT OF THIS WAS `s += Level × Intensity` AND IT MADE EVERY NEW PARK DEAD. The term
+        /// was right; everything around it was missing. A freshly built ride is level 0 (placement sets it, and
+        /// the upgrade path is `if level &gt;= 3 return; level++`), so `Level × Intensity` is exactly zero, the
+        /// score stayed at the bare base of 10, the head-count floored, and the bus arrived on time with nobody
+        /// on it forever. What actually carries a new park is the **roll**: 20..29 halved is 10..14, which is
+        /// precisely the contribution the live measurement recorded for a 16-day-old level-0 ride.
+        ///
+        /// ⭐ AND IT EXPLAINS THE UNEXPLAINED. An earlier report withdrew its story for why batch sizes varied
+        /// (5, 5, 4, 6, 3, 6 guests with the park unchanged) and left the pattern open. The score is re-rolled
+        /// per attraction on every call, so the load genuinely varies bus to bus with nothing else changing.
+        ///
+        /// <paramref name="rng"/> is the game's `rand(10)`; passing null takes the LOW end of every roll, which
+        /// is a floor rather than a sample and is only there so an empty-park check needs no dice.</summary>
+        public static int ParkScore(IReadOnlyList<AttractionDraw> attractions, IRandomSource rng = null)
         {
             if (attractions == null || attractions.Count == 0) return 0;
             int s = BaseScore;
             foreach (var a in attractions)
             {
-                // ⚠ THE BONUS IS ALWAYS ADDED; IT IS THE +20 THAT IS YOUNG-ONLY. An earlier reading had the
-                // level*intensity term itself gated on age, which is wrong: the instruction adding it sits in
-                // a branch delay slot and therefore executes on BOTH paths. A delay slot is not inside the
-                // branch it follows, and reading it as though it were is an easy way to invent a condition
-                // the machine does not have.
-                s += a.Level * a.Intensity;
-                if (a.BuiltToday) s += 20;
+                int roll = (rng?.Next(10) ?? 0) + 20;
+                int divisor = 2, young = 0, term = 0;
+                switch (a.Type)
+                {
+                    case 1: case 3: case 6: case 7:                 // the four ride kinds share one branch
+                        // ⚠ THE BONUS IS ALWAYS ADDED; IT IS THE +20 THAT IS YOUNG-ONLY. The instruction adding
+                        // level×intensity sits in a branch delay slot and therefore executes on BOTH paths. A
+                        // delay slot is not inside the branch it follows, and reading it as though it were is an
+                        // easy way to invent a condition the machine does not have.
+                        term = a.Level * a.Intensity;
+                        if (a.BuiltToday) young = 20;
+                        break;
+                    case 5: term = a.Intensity; break;              // a sideshow has no level to multiply by
+                    case 2: divisor = 10; break;                    // a feature is worth a fifth of a ride
+                }
+                s += (roll + term + young) / divisor;
             }
             return s;
         }
