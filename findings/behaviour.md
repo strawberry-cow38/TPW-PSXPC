@@ -40,6 +40,30 @@ Legend used throughout:
    one-instruction trampoline to state 5 (0x800934CC: `SetState(5)`), and 5 ("Walking") is the random
    wander in 0x80092844.
 
+7. **§3.4 (guard) corrected in five places (2026-09-20), all re-read from TPW.BIN.** Found by astra
+   while porting the class, which kept the text below and flagged the conflict rather than substituting;
+   each was then verified independently before the text was changed.
+   - **State 33 charges −5 for a culprit that no longer exists**, not −2. The gone test at 0x80097D9C
+     branches to the *same* abort block (0x80097DC8) as the queue test and the deadline, and that block
+     subtracts 5 via 0x80098808. The −2 belongs only to the state-3 override.
+   - **The state-3 override aborts for a queued culprit too** (0x80097A84), sharing its −2 block with
+     the gone case (0x80097A94..0x80097ABC). §3.4 listed only "culprit gone" there.
+   - **A catch made during a walking step pays nothing.** 0x80097B44..0x80097B84 sends message 4 and
+     sets 39 with no stat call between; only state 33's catch pays +10 morale and +3 tiredness.
+   - **Arrival 15 increments 0x80103950** (0x80097C7C calls 0x8005996C, which is exactly
+     `[gp+0x12FC] += 1`). §3.4 gave the increment to arrival 14 only. Both arrivals AT the gate add one
+     and both crossings (0x80059984) take one away, so an ejection round trip balances; the old reading
+     lost one per ejection permanently, which is the strongest argument that this correction is right.
+   - **Message 2 with purpose 8 ends in 13, not 0.** 0x800979B8 clears the culprit and sets 0, then
+     falls into the person base at 0x800942D8, which re-reads the purpose and sets 13 for anything that
+     is not 1 or 5. The 0 is real and is overwritten before anything can observe it.
+
+   **Not corrected, because the window does not settle it:** 0x80097F4C..0x80097F54 writes
+   `now` into the chase clock (+0x2C) after the pathfinder ACCEPTS a request, which taken alone would
+   end the chase a tick or two later regardless of the 3600 set at dispatch. Either +0x2C is refreshed
+   deliberately every tick the guard re-paths, or the field is doing double duty. READ that the store
+   happens; the consequence is NOT ESTABLISHED and nothing was changed on it.
+
 ## 1. Object model needed to read the rest
 
 READ from the setters/getters at 0x80093F80..0x80094160 and the constructor 0x8008C534:

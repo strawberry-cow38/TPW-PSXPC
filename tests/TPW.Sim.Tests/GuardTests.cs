@@ -184,22 +184,30 @@ namespace TPW.Sim.Tests
             g.Staff.Purpose = (StaffPurpose)purpose; w.Calls.Clear();
             Assert.Equal(caught, g.WalkStep(w));
             State(g, caught ? 39 : 3, caught ? 0 : 1);
-            Assert.Equal(caught ? 60 : 50, g.Staff.Morale);
-            Assert.Equal(caught ? 23 : 20, g.Staff.Tiredness);
+            // ⭐⭐ NOTHING IS PAID FOR A CATCH MADE MID-STEP. 0x80097B44..0x80097B84 sends message 4 and
+            // sets 39 with no stat call between; state 33's catch pays +10 and +3. Same act, same
+            // result for the guest, and the guard is rewarded only if he was standing still.
+            // REJECTS sharing one Catch() between the two handlers, which is the natural way to write
+            // it and quietly pays the reward twice as often as the game does.
+            Assert.Equal(50, g.Staff.Morale);
+            Assert.Equal(20, g.Staff.Tiredness);
             if (caught) { Assert.Same(v, w.LastGuest); Assert.Equal(4, w.LastMessage); }
             if (purpose == 9) Assert.Empty(w.Calls);
         }
 
-        // REJECTS -5 for disappearance, chasing a removed object, and failure to clear the target.
+        // REJECTS one price for both handlers, chasing a removed object, and not clearing the target.
         [Theory]
         [InlineData(false)] [InlineData(true)]
-        public void GoneCulpritCostsTwoOnChaseOrWalk(bool step)
+        public void GoneCulpritCostsTwoMidStepAndFiveWhileChasing(bool step)
         {
             var g = NewGuard(); var w = new GuardWorld { Exists = false, SameTile = true };
             g.Dispatch(Guest(), w); g.Staff.Purpose = (StaffPurpose)8;
             g.Staff.PushState(step ? StaffState.PathReady : GuardStates.Chase); w.Calls.Clear();
             if (step) Assert.True(g.WalkStep(w)); else g.Tick(w);
-            State(g, 0); Assert.Equal(48, g.Staff.Morale); Assert.Equal(20, g.Staff.Tiredness);
+            // ⚠ THE SAME EVENT COSTS DIFFERENT AMOUNTS depending on which handler notices it: state 33
+            // puts a vanished culprit through the same -5 block as a timeout (0x80097D9C -> 0x80097DC8),
+            // while the state-3 override charges -2 (0x80097A94). REJECTS one shared abort price.
+            State(g, 0); Assert.Equal(step ? 48 : 45, g.Staff.Morale); Assert.Equal(20, g.Staff.Tiredness);
             Assert.Null(g.Culprit); Assert.False(g.Staff.HasTarget);
             Assert.Equal(new[] { "exists" }, w.Calls);
         }
@@ -212,7 +220,8 @@ namespace TPW.Sim.Tests
             var g = NewGuard(); var w = new GuardWorld { SameTile = true };
             g.Staff.SetState(GuardStates.Chase); g.Staff.Purpose = (StaffPurpose)8;
             if (step) Assert.True(g.WalkStep(w)); else g.Tick(w);
-            State(g, 0); Assert.Equal(48, g.Staff.Morale); Assert.Empty(w.Calls);
+            // -2 mid-step, -5 standing: the two aborts are not the same price. See the Chase note.
+            State(g, 0); Assert.Equal(step ? 48 : 45, g.Staff.Morale); Assert.Empty(w.Calls);
         }
 
         // ⭐ REJECTS ending the ejection when the guest disappears, collapsing the two gate visits,
@@ -239,12 +248,17 @@ namespace TPW.Sim.Tests
             w.Calls.Clear(); g.Staff.PushState(GuardStates.ToSpawnPoint); g.Tick(w);
             HasPath(g, w, "point-0", 15, 1);
             g.Arrive(w); State(g, 46); Assert.Equal(0, g.GateDirection);
-            Assert.Equal(10, w.Counter80103950); Assert.Equal(21, w.Counter80103954);
+            // ⭐ THE COUNTER BALANCES, AND THAT IS THE EVIDENCE. Both arrivals AT the gate add one and
+            // both crossings take one away, so a guard that ejects someone and comes back leaves the
+            // count exactly where it found it - 10 in, 10 out. behaviour.md §3.4 omits the increment on
+            // arrival 15, and with that reading every ejection would quietly lose one, for ever.
+            Assert.Equal(11, w.Counter80103950); Assert.Equal(21, w.Counter80103954);
             g.OnMessage(w, 9); State(g, 47); g.Tick(w); State(g, 3);
-            g.Arrive(w); State(g, 55); Assert.Equal(9, w.Counter80103950); Assert.Equal(22, w.Counter80103954);
+            g.Arrive(w); State(g, 55); Assert.Equal(10, w.Counter80103950); Assert.Equal(22, w.Counter80103954);
             w.Calls.Clear(); g.Tick(w); HasPath(g, w, "post", 21, 0x21, 1);
             Assert.Equal((5, 3, 1, 5), w.PostSearch);
             g.Arrive(w); State(g, 0); g.Tick(w); State(g, 13);
+            // The +10/+3 IS paid here: this catch came from state 33, not from a walking step.
             Assert.Equal(60, g.Staff.Morale); Assert.Equal(23, g.Staff.Tiredness);
         }
 
@@ -271,7 +285,9 @@ namespace TPW.Sim.Tests
             g.Staff.PushState(GuardStates.WalkToDestination); g.Arrive(w);
             State(g, state); Assert.Null(g.Culprit); Assert.False(g.Staff.HasTarget);
             Assert.Equal(0, g.GateDirection);
-            Assert.Equal(0, w.Counter80103950); Assert.Equal(0, w.Counter80103954);
+            // Arrival 15 increments the first counter (0x80097C7C -> 0x8005996C); arrival 9 does not.
+            Assert.Equal(purpose == 15 ? 1 : 0, w.Counter80103950);
+            Assert.Equal(0, w.Counter80103954);
         }
 
         // REJECTS despawning a guard or requesting a nonexistent exit when state 39 has nowhere to go.
@@ -311,8 +327,12 @@ namespace TPW.Sim.Tests
 
         // REJECTS blanket failure handling: post retries state 55, chase gives up without the timeout
         // charge, and shared purposes retain the staff base's distinct answers.
+        //
+        // ⚠ PURPOSE 8 ENDS IN 13, NOT 0. §3.4 says "8 -> 0" and stops one call short: 0x800979B8 clears
+        // the culprit and sets 0, then falls into the person base at 0x800942D8, which reads the purpose
+        // again and sets 13 for anything that is not 1 or 5. The 0 is real and is immediately overwritten.
         [Theory]
-        [InlineData(21, 55)] [InlineData(8, 0)] [InlineData(5, 0)]
+        [InlineData(21, 55)] [InlineData(8, 13)] [InlineData(5, 0)]
         [InlineData(1, 5)] [InlineData(17, 13)] [InlineData(0, 13)]
         public void PathFailureRoutesByPurpose(int purpose, int state)
         {

@@ -164,7 +164,12 @@ namespace TPW.Sim
         /// <summary>READ: state 33, 0x80097D5C. Queue states are exactly 18/19/20 (0x800923A8).</summary>
         public void Chase(IGuardWorld world)
         {
-            if (Culprit == null || !world.GuestExists(Culprit)) { Abandon(GoneMorale); return; }
+            // ⚠ ALL THREE ABORTS COST THE SAME -5 HERE, INCLUDING A CULPRIT THAT NO LONGER EXISTS.
+            // behaviour.md §3.4 lists only the queue and the deadline; the gone test at 0x80097D9C
+            // branches to the very same block (0x80097DC8) as the other two, and that block charges 5
+            // through 0x80098808. The -2 in the report belongs to the state-3 override below, and
+            // importing it here is the easy mistake - verified 2026-09-20.
+            if (Culprit == null || !world.GuestExists(Culprit)) { Abandon(GiveUpMorale); return; }
             if ((int)Culprit.State == 18 || (int)Culprit.State == 19 || (int)Culprit.State == 20
                 || world.NowTick > Staff.BusyUntil)
             {
@@ -182,8 +187,25 @@ namespace TPW.Sim
         public bool WalkStep(IGuardWorld world)
         {
             if (Staff.Purpose != GuardStates.ToCulprit) return false;
-            if (Culprit == null || !world.GuestExists(Culprit)) { Abandon(GoneMorale); return true; }
-            return Catch(world);
+
+            // ⚠ THE QUEUE ABORT IS HERE TOO, not only in state 33 - 0x80097A84 tests it and shares the
+            // -2 block with the gone case (0x80097A94..0x80097ABC). §3.4 mentions only "culprit gone".
+            if (Culprit == null || !world.GuestExists(Culprit)
+                || (int)Culprit.State == 18 || (int)Culprit.State == 19 || (int)Culprit.State == 20)
+            {
+                Abandon(GoneMorale);
+                return true;
+            }
+
+            // ⭐⭐ CATCHING SOMEONE MID-STEP PAYS NOTHING. The state-3 catch (0x80097B44..0x80097B84)
+            // sends the guest message 4 and sets 39 with NO stat call between them, while state 33's
+            // catch pays +10 morale and +3 tiredness. Same act, same outcome for the guest, and the
+            // guard is only rewarded if he happened to be standing still when he caught them. Sharing
+            // one Catch() between the two is what hides it, so they are separate on purpose.
+            if (!world.OnGuestTile(Staff, Culprit)) return false;
+            world.SendGuestMessage(Culprit, CatchMessage);
+            Staff.SetState(GuardStates.ToExitPoint);
+            return true;
         }
 
         /// <summary>READ: state 39, 0x80097F8C.</summary>
@@ -258,8 +280,12 @@ namespace TPW.Sim
                     Culprit = null;
                     Staff.HasTarget = false;
                     Staff.SetState(GuardStates.AtGate);
-                    // ⚠ DO NOT FIX: §3.4 gives NO counter increment on arrival 15. Only arrival 14
-                    // increments it, although BOTH passes through arrival 16 decrement it.
+                    // ⚠ §3.4 SAYS THERE IS NO INCREMENT HERE AND THE REPORT IS WRONG. 0x80097C7C calls
+                    // 0x8005996C right after setting 46, and that routine is exactly `[0x80103950] += 1`
+                    // (0x8005996C..0x80059978, gp+0x12FC). Both arrivals at the gate increment it and
+                    // both crossings decrement it, which is what makes the counter balance - the
+                    // report's version leaks one per ejection. Verified 2026-09-20.
+                    world.Counter80103950++;
                     break;
                 case GuardStates.Post: Staff.SetState(StaffState.Idle); break;
                 default: StaffBase.Arrive(Staff, world, false); break;
@@ -287,7 +313,14 @@ namespace TPW.Sim
                     Staff.SetState(StaffState.Walking);
                     break;
                 case GuardStates.Post: Staff.SetState(GuardStates.TakePost); break;
-                case GuardStates.ToCulprit: Staff.SetState(StaffState.Idle); break;
+                case GuardStates.ToCulprit:
+                    // ⚠ AND THEN IT FALLS INTO THE BASE HANDLER as well (0x800979B8: clear +0x28,
+                    // SetState(0), then jal 0x800942D8). §3.4's "8 -> 0" stops one call short.
+                    Culprit = null;
+                    Staff.HasTarget = false;
+                    Staff.SetState(StaffState.Idle);
+                    StaffBase.OnPathMessage(Staff, false);
+                    break;
                 default: StaffBase.OnPathMessage(Staff, false); break;
             }
         }
