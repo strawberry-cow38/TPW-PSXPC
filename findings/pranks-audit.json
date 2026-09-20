@@ -1,0 +1,2548 @@
+{
+  "conclusion": "Producer NOT ESTABLISHED. Stop condition: no simulation component added.",
+  "image_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "main": {
+    "bytes": 1065308,
+    "aligned_words": 266327,
+    "skipped_aligned_words": 0,
+    "trailing_bytes_not_decoded": 0,
+    "calls": [
+      {
+        "site": 2147562048,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147562084,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147562092,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147564628,
+        "target": 2147564848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147565792,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147565804,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147565812,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147565908,
+        "target": 2147564572,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147578252,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147578264,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147578272,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580000,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580012,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580020,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580076,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580216,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580224,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580320,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580332,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580340,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580416,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580428,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580436,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580512,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580524,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580532,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580608,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580620,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580628,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580704,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580716,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580724,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580800,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580812,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580820,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580896,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580908,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580916,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147580992,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581004,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581012,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581088,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581100,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581108,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581184,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581196,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581204,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581280,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581292,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581300,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581376,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581388,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581396,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581472,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581484,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581492,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581568,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581580,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581588,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581664,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581676,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581684,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581760,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581772,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581780,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581856,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581868,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581876,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581952,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581964,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147581972,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582048,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582060,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582068,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582144,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582156,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582164,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582240,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582252,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582260,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582336,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582348,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582356,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582432,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582444,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582452,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582528,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582540,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147582548,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147600812,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147600840,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147600856,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147600864,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601272,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601284,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601292,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601632,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601660,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601676,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147601684,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602000,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602028,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602044,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602052,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602432,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602444,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602452,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602476,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602488,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147602496,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147608420,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147608612,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147608620,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147610748,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147610760,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147610768,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147622524,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147622536,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147622544,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147727696,
+        "target": 2147565708,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147885736,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147885748,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147885756,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147889584,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147889596,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147889616,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147904748,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147904916,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147904924,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147907536,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147907548,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147907556,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908000,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908092,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908232,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908376,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908440,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908520,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908612,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908676,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147908768,
+        "target": 2147907512,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909380,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909416,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909424,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909620,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909680,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909740,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909800,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909860,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909912,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909948,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147909956,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147910008,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147910044,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147910052,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147965692,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147965704,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147965712,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147982060,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147982148,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147982164,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2147982172,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148122576,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148122744,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148122752,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124484,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124496,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124516,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124604,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124612,
+        "target": 2147566216,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124624,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148124644,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244172,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244204,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244220,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244228,
+        "target": 2147565892,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244348,
+        "target": 2147565848,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244360,
+        "target": 2147565868,
+        "kind": "JAL"
+      },
+      {
+        "site": 2148244368,
+        "target": 2147565892,
+        "kind": "JAL"
+      }
+    ],
+    "pointers": []
+  },
+  "setter_classification": {
+    "rows": [
+      {
+        "site": 2147562084,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147562076,
+            "id": 189
+          },
+          {
+            "address": 2147562080,
+            "id": 206
+          }
+        ]
+      },
+      {
+        "site": 2147565804,
+        "kind": "computed",
+        "reading": "0x8001408C searches captions starting at id 221; NO upper bound. Normal tutorial rows 221..288, arbitrary input unresolved."
+      },
+      {
+        "site": 2147578264,
+        "kind": "computed",
+        "reading": "0x80017184 loads the VM operand; 125 scheduled programs audited separately, unscheduled inputs unresolved."
+      },
+      {
+        "site": 2147580012,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580016,
+            "id": 288
+          }
+        ]
+      },
+      {
+        "site": 2147580216,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580132,
+            "id": 221
+          },
+          {
+            "address": 2147580144,
+            "id": 222
+          },
+          {
+            "address": 2147580156,
+            "id": 223
+          },
+          {
+            "address": 2147580168,
+            "id": 224
+          },
+          {
+            "address": 2147580180,
+            "id": 225
+          },
+          {
+            "address": 2147580192,
+            "id": 226
+          },
+          {
+            "address": 2147580204,
+            "id": 227
+          },
+          {
+            "address": 2147580212,
+            "id": 228
+          }
+        ]
+      },
+      {
+        "site": 2147580332,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580336,
+            "id": 230
+          }
+        ]
+      },
+      {
+        "site": 2147580428,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580432,
+            "id": 237
+          }
+        ]
+      },
+      {
+        "site": 2147580524,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580528,
+            "id": 238
+          }
+        ]
+      },
+      {
+        "site": 2147580620,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580624,
+            "id": 239
+          }
+        ]
+      },
+      {
+        "site": 2147580716,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580720,
+            "id": 241
+          }
+        ]
+      },
+      {
+        "site": 2147580812,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580816,
+            "id": 244
+          }
+        ]
+      },
+      {
+        "site": 2147580908,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147580912,
+            "id": 247
+          }
+        ]
+      },
+      {
+        "site": 2147581004,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581008,
+            "id": 250
+          }
+        ]
+      },
+      {
+        "site": 2147581100,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581104,
+            "id": 253
+          }
+        ]
+      },
+      {
+        "site": 2147581196,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581200,
+            "id": 257
+          }
+        ]
+      },
+      {
+        "site": 2147581292,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581296,
+            "id": 261
+          }
+        ]
+      },
+      {
+        "site": 2147581388,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581392,
+            "id": 267
+          }
+        ]
+      },
+      {
+        "site": 2147581484,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581488,
+            "id": 270
+          }
+        ]
+      },
+      {
+        "site": 2147581580,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581584,
+            "id": 274
+          }
+        ]
+      },
+      {
+        "site": 2147581676,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581680,
+            "id": 275
+          }
+        ]
+      },
+      {
+        "site": 2147581772,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581776,
+            "id": 276
+          }
+        ]
+      },
+      {
+        "site": 2147581868,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581872,
+            "id": 278
+          }
+        ]
+      },
+      {
+        "site": 2147581964,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147581968,
+            "id": 279
+          }
+        ]
+      },
+      {
+        "site": 2147582060,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147582064,
+            "id": 280
+          }
+        ]
+      },
+      {
+        "site": 2147582156,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147582160,
+            "id": 281
+          }
+        ]
+      },
+      {
+        "site": 2147582252,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147582256,
+            "id": 283
+          }
+        ]
+      },
+      {
+        "site": 2147582348,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147582352,
+            "id": 284
+          }
+        ]
+      },
+      {
+        "site": 2147582444,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147582448,
+            "id": 269
+          }
+        ]
+      },
+      {
+        "site": 2147582540,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147582544,
+            "id": 241
+          }
+        ]
+      },
+      {
+        "site": 2147600856,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147600828,
+            "id": 208
+          },
+          {
+            "address": 2147600852,
+            "id": 207
+          }
+        ]
+      },
+      {
+        "site": 2147601284,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147601288,
+            "id": 218
+          }
+        ]
+      },
+      {
+        "site": 2147601676,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147601648,
+            "id": 210
+          },
+          {
+            "address": 2147601672,
+            "id": 209
+          }
+        ]
+      },
+      {
+        "site": 2147602044,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147602016,
+            "id": 212
+          },
+          {
+            "address": 2147602040,
+            "id": 211
+          }
+        ]
+      },
+      {
+        "site": 2147602444,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147602448,
+            "id": 214
+          }
+        ]
+      },
+      {
+        "site": 2147602488,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147602492,
+            "id": 213
+          }
+        ]
+      },
+      {
+        "site": 2147608612,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147608500,
+            "id": 110
+          },
+          {
+            "address": 2147608528,
+            "id": 114
+          },
+          {
+            "address": 2147608556,
+            "id": 112
+          },
+          {
+            "address": 2147608584,
+            "id": 106
+          },
+          {
+            "address": 2147608608,
+            "id": 108
+          }
+        ]
+      },
+      {
+        "site": 2147610760,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147610764,
+            "id": 219
+          }
+        ]
+      },
+      {
+        "site": 2147622536,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147622540,
+            "id": 217
+          }
+        ]
+      },
+      {
+        "site": 2147885748,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147885752,
+            "id": 120
+          }
+        ]
+      },
+      {
+        "site": 2147889596,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147889600,
+            "id": 153
+          }
+        ]
+      },
+      {
+        "site": 2147904916,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147904872,
+            "id": 137
+          },
+          {
+            "address": 2147904884,
+            "id": 138
+          },
+          {
+            "address": 2147904896,
+            "id": 139
+          },
+          {
+            "address": 2147904908,
+            "id": 140
+          },
+          {
+            "address": 2147904912,
+            "id": 141
+          }
+        ]
+      },
+      {
+        "site": 2147907548,
+        "kind": "computed",
+        "reading": "a1 forwarded from nine callers of 0x800677B8 in 0x80067928: ids 175..182 and 188."
+      },
+      {
+        "site": 2147909416,
+        "kind": "computed",
+        "reading": "0x80102E68[staffKind-1] + 50; loop 0x80067E28..0x80067F5C bounds staffKind to 1..5."
+      },
+      {
+        "site": 2147909948,
+        "kind": "computed",
+        "reading": "Same staff permutation + 30/35/40/50; branches 0x80067FE8..0x80068140."
+      },
+      {
+        "site": 2147910044,
+        "kind": "computed",
+        "reading": "Same staff permutation + 45 at 0x80068180..0x800681A0."
+      },
+      {
+        "site": 2147965704,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147965708,
+            "id": 120
+          }
+        ]
+      },
+      {
+        "site": 2147982164,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147982076,
+            "id": 143
+          },
+          {
+            "address": 2147982160,
+            "id": 142
+          }
+        ]
+      },
+      {
+        "site": 2148122744,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2148122688,
+            "id": 144
+          },
+          {
+            "address": 2148122696,
+            "id": 86
+          },
+          {
+            "address": 2148122708,
+            "id": 88
+          },
+          {
+            "address": 2148122720,
+            "id": 89
+          },
+          {
+            "address": 2148122732,
+            "id": 90
+          },
+          {
+            "address": 2148122740,
+            "id": 87
+          }
+        ]
+      },
+      {
+        "site": 2148124496,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2148124500,
+            "id": 62
+          }
+        ]
+      },
+      {
+        "site": 2148124624,
+        "kind": "computed",
+        "reading": "Return of 0x80014288: 63/64/65 loaded at 0x8001429C/B0/C0/D4."
+      },
+      {
+        "site": 2148244220,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2148244188,
+            "id": 197
+          },
+          {
+            "address": 2148244216,
+            "id": 195
+          }
+        ]
+      },
+      {
+        "site": 2148244360,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2148244364,
+            "id": 196
+          }
+        ]
+      }
+    ],
+    "unreviewed": 0,
+    "stale_manifest_sites": []
+  },
+  "missing_direct_jump_sources": [],
+  "award_wrapper": {
+    "rows": [
+      {
+        "site": 2147908000,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908004,
+            "id": 175
+          }
+        ]
+      },
+      {
+        "site": 2147908092,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908096,
+            "id": 176
+          }
+        ]
+      },
+      {
+        "site": 2147908232,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908236,
+            "id": 177
+          }
+        ]
+      },
+      {
+        "site": 2147908376,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908380,
+            "id": 188
+          }
+        ]
+      },
+      {
+        "site": 2147908440,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908444,
+            "id": 178
+          }
+        ]
+      },
+      {
+        "site": 2147908520,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908524,
+            "id": 179
+          }
+        ]
+      },
+      {
+        "site": 2147908612,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908616,
+            "id": 180
+          }
+        ]
+      },
+      {
+        "site": 2147908676,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908680,
+            "id": 181
+          }
+        ]
+      },
+      {
+        "site": 2147908768,
+        "kind": "fixed",
+        "sources": [
+          {
+            "address": 2147908772,
+            "id": 182
+          }
+        ]
+      }
+    ],
+    "unreviewed": 0,
+    "stale_manifest_sites": []
+  },
+  "staff_permutation_address": 2148544104,
+  "staff_permutation": [
+    3,
+    0,
+    2,
+    4,
+    1
+  ],
+  "overlays": [
+    {
+      "index": 0,
+      "packed_offset": 104,
+      "directory_word": 0,
+      "sha256": "a652951bb481df4a93fbbd908be28d77ad51bc6e469d096d2be0840f133c0f9f",
+      "string_lookup_control": [],
+      "bytes": 4532,
+      "aligned_words": 1133,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 1,
+      "packed_offset": 3078,
+      "directory_word": 2974,
+      "sha256": "4cd11600d401b317375e6be6a8df1a683780fe6a48bce196eb47c93628ef8f70",
+      "string_lookup_control": [
+        {
+          "site": 2148616100,
+          "target": 2147938316,
+          "kind": "JAL"
+        }
+      ],
+      "bytes": 2120,
+      "aligned_words": 530,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 2,
+      "packed_offset": 4532,
+      "directory_word": 1454,
+      "sha256": "488b8375c5e0b8658a33477ca3dcdde2194ada42825018c8c93dc71c48f45fd0",
+      "string_lookup_control": [
+        {
+          "site": 2148630408,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148630524,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148634524,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148637660,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148638532,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148638576,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148638624,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148639104,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148639504,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148639588,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148639876,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148639896,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148640412,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148640544,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148640564,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148642244,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148643104,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148643264,
+          "target": 2147938316,
+          "kind": "JAL"
+        }
+      ],
+      "bytes": 35000,
+      "aligned_words": 8750,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 3,
+      "packed_offset": 21025,
+      "directory_word": 16493,
+      "sha256": "5a1b6fa5fcc01f269d9a8f2da3446ad1994cdf6cf322589c0c1b858d9a0401c5",
+      "string_lookup_control": [],
+      "bytes": 45788,
+      "aligned_words": 11447,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 4,
+      "packed_offset": 21642,
+      "directory_word": 617,
+      "sha256": "897a04a3980824e9fb28c2692c84390dbb306d07c132bfcde5b4fafa82f39517",
+      "string_lookup_control": [],
+      "bytes": 1672,
+      "aligned_words": 418,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 5,
+      "packed_offset": 22750,
+      "directory_word": 1108,
+      "sha256": "23dc92d96c58d0fb768b5d48819b312d7382cb542a6af15fbb7d189ca175dc84",
+      "string_lookup_control": [],
+      "bytes": 3204,
+      "aligned_words": 801,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 6,
+      "packed_offset": 24981,
+      "directory_word": 2231,
+      "sha256": "8ddf291c7b668aea1a82d0d52043b84f79d9c341e35f5173e770a16e1bbc6931",
+      "string_lookup_control": [
+        {
+          "site": 2148615956,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148616560,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148616644,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148616924,
+          "target": 2147938316,
+          "kind": "JAL"
+        }
+      ],
+      "bytes": 2716,
+      "aligned_words": 679,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 7,
+      "packed_offset": 26777,
+      "directory_word": 1796,
+      "sha256": "dc9ac609bf00cc82a49e1266e190c29c8d6fbcb6ab9684d7cf2887b16067386d",
+      "string_lookup_control": [],
+      "bytes": 4384,
+      "aligned_words": 1096,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 8,
+      "packed_offset": 29583,
+      "directory_word": 2806,
+      "sha256": "7e2ee7b832e9ad96cb26023fbf65c36f7b12259b74ae0af2bdebd1ddd0a8e852",
+      "string_lookup_control": [],
+      "bytes": 3420,
+      "aligned_words": 855,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 9,
+      "packed_offset": 31619,
+      "directory_word": 2036,
+      "sha256": "162bb4979952d9231e3d0b894cd8471f53dea08d5f4f5cb599102994e2e6bafc",
+      "string_lookup_control": [],
+      "bytes": 3768,
+      "aligned_words": 942,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 10,
+      "packed_offset": 34049,
+      "directory_word": 2430,
+      "sha256": "95e1acd37cddee680fd0fe4b94fb0beffb6db54312d493cdead2968d128bb896",
+      "string_lookup_control": [
+        {
+          "site": 2148616932,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148617048,
+          "target": 2147938316,
+          "kind": "JAL"
+        }
+      ],
+      "bytes": 2672,
+      "aligned_words": 668,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    },
+    {
+      "index": 11,
+      "packed_offset": 35966,
+      "directory_word": 1917,
+      "sha256": "3cf9bdb4d06952963d99be4bcd3402a47ae57f8c9d7858753c84a61c34b5d67b",
+      "string_lookup_control": [
+        {
+          "site": 2148626508,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148626536,
+          "target": 2147938316,
+          "kind": "JAL"
+        },
+        {
+          "site": 2148626640,
+          "target": 2147938316,
+          "kind": "JAL"
+        }
+      ],
+      "bytes": 13260,
+      "aligned_words": 3315,
+      "skipped_aligned_words": 0,
+      "trailing_bytes_not_decoded": 0,
+      "calls": [],
+      "pointers": []
+    }
+  ],
+  "overlays_skipped": 0,
+  "overlay_archive_sha256": "4db2f12d84b0b27cbf6386d764fac4d613c3f551546a6b28715b4bf9a79d2f8a",
+  "overlay_decoder_sha256": "236ccf2ecd5c9ccf8d1cce71562ea6b4dfb95519c054ad809089e942f38a9a09",
+  "scheduled_rules": {
+    "programs": 125,
+    "instructions": 662,
+    "posts": [
+      {
+        "rule": 0,
+        "word_offset": 11,
+        "message": 0
+      },
+      {
+        "rule": 1,
+        "word_offset": 25,
+        "message": 20
+      },
+      {
+        "rule": 2,
+        "word_offset": 44,
+        "message": 116
+      },
+      {
+        "rule": 3,
+        "word_offset": 57,
+        "message": 1
+      },
+      {
+        "rule": 4,
+        "word_offset": 70,
+        "message": 2
+      },
+      {
+        "rule": 6,
+        "word_offset": 87,
+        "message": 55
+      },
+      {
+        "rule": 8,
+        "word_offset": 102,
+        "message": 132
+      },
+      {
+        "rule": 10,
+        "word_offset": 117,
+        "message": 150
+      },
+      {
+        "rule": 12,
+        "word_offset": 132,
+        "message": 133
+      },
+      {
+        "rule": 13,
+        "word_offset": 145,
+        "message": 122
+      },
+      {
+        "rule": 15,
+        "word_offset": 157,
+        "message": 85
+      },
+      {
+        "rule": 16,
+        "word_offset": 168,
+        "message": 84
+      },
+      {
+        "rule": 18,
+        "word_offset": 186,
+        "message": 154
+      },
+      {
+        "rule": 19,
+        "word_offset": 200,
+        "message": 164
+      },
+      {
+        "rule": 21,
+        "word_offset": 218,
+        "message": 155
+      },
+      {
+        "rule": 22,
+        "word_offset": 232,
+        "message": 165
+      },
+      {
+        "rule": 24,
+        "word_offset": 250,
+        "message": 156
+      },
+      {
+        "rule": 25,
+        "word_offset": 264,
+        "message": 166
+      },
+      {
+        "rule": 27,
+        "word_offset": 282,
+        "message": 157
+      },
+      {
+        "rule": 28,
+        "word_offset": 296,
+        "message": 167
+      },
+      {
+        "rule": 30,
+        "word_offset": 314,
+        "message": 158
+      },
+      {
+        "rule": 31,
+        "word_offset": 328,
+        "message": 168
+      },
+      {
+        "rule": 33,
+        "word_offset": 346,
+        "message": 159
+      },
+      {
+        "rule": 34,
+        "word_offset": 360,
+        "message": 169
+      },
+      {
+        "rule": 36,
+        "word_offset": 378,
+        "message": 160
+      },
+      {
+        "rule": 37,
+        "word_offset": 392,
+        "message": 170
+      },
+      {
+        "rule": 39,
+        "word_offset": 410,
+        "message": 161
+      },
+      {
+        "rule": 40,
+        "word_offset": 424,
+        "message": 171
+      },
+      {
+        "rule": 42,
+        "word_offset": 442,
+        "message": 162
+      },
+      {
+        "rule": 43,
+        "word_offset": 456,
+        "message": 172
+      },
+      {
+        "rule": 45,
+        "word_offset": 474,
+        "message": 163
+      },
+      {
+        "rule": 46,
+        "word_offset": 488,
+        "message": 173
+      },
+      {
+        "rule": 47,
+        "word_offset": 516,
+        "message": 146
+      },
+      {
+        "rule": 48,
+        "word_offset": 541,
+        "message": 147
+      },
+      {
+        "rule": 49,
+        "word_offset": 572,
+        "message": 148
+      },
+      {
+        "rule": 50,
+        "word_offset": 609,
+        "message": 149
+      },
+      {
+        "rule": 51,
+        "word_offset": 628,
+        "message": 123
+      },
+      {
+        "rule": 52,
+        "word_offset": 641,
+        "message": 124
+      },
+      {
+        "rule": 53,
+        "word_offset": 660,
+        "message": 125
+      },
+      {
+        "rule": 54,
+        "word_offset": 679,
+        "message": 126
+      },
+      {
+        "rule": 55,
+        "word_offset": 701,
+        "message": 127
+      },
+      {
+        "rule": 58,
+        "word_offset": 726,
+        "message": 3
+      },
+      {
+        "rule": 59,
+        "word_offset": 741,
+        "message": 4
+      },
+      {
+        "rule": 60,
+        "word_offset": 764,
+        "message": 5
+      },
+      {
+        "rule": 61,
+        "word_offset": 777,
+        "message": 111
+      },
+      {
+        "rule": 62,
+        "word_offset": 793,
+        "message": 25
+      },
+      {
+        "rule": 63,
+        "word_offset": 809,
+        "message": 16
+      },
+      {
+        "rule": 64,
+        "word_offset": 825,
+        "message": 17
+      },
+      {
+        "rule": 65,
+        "word_offset": 838,
+        "message": 97
+      },
+      {
+        "rule": 66,
+        "word_offset": 854,
+        "message": 6
+      },
+      {
+        "rule": 67,
+        "word_offset": 872,
+        "message": 7
+      },
+      {
+        "rule": 68,
+        "word_offset": 895,
+        "message": 8
+      },
+      {
+        "rule": 69,
+        "word_offset": 908,
+        "message": 107
+      },
+      {
+        "rule": 70,
+        "word_offset": 924,
+        "message": 26
+      },
+      {
+        "rule": 71,
+        "word_offset": 940,
+        "message": 18
+      },
+      {
+        "rule": 72,
+        "word_offset": 956,
+        "message": 19
+      },
+      {
+        "rule": 73,
+        "word_offset": 969,
+        "message": 95
+      },
+      {
+        "rule": 75,
+        "word_offset": 995,
+        "message": 9
+      },
+      {
+        "rule": 76,
+        "word_offset": 1019,
+        "message": 10
+      },
+      {
+        "rule": 77,
+        "word_offset": 1045,
+        "message": 11
+      },
+      {
+        "rule": 78,
+        "word_offset": 1058,
+        "message": 113
+      },
+      {
+        "rule": 79,
+        "word_offset": 1072,
+        "message": 27
+      },
+      {
+        "rule": 80,
+        "word_offset": 1088,
+        "message": 21
+      },
+      {
+        "rule": 81,
+        "word_offset": 1104,
+        "message": 22
+      },
+      {
+        "rule": 82,
+        "word_offset": 1126,
+        "message": 91
+      },
+      {
+        "rule": 83,
+        "word_offset": 1137,
+        "message": 98
+      },
+      {
+        "rule": 84,
+        "word_offset": 1153,
+        "message": 12
+      },
+      {
+        "rule": 85,
+        "word_offset": 1169,
+        "message": 109
+      },
+      {
+        "rule": 86,
+        "word_offset": 1183,
+        "message": 28
+      },
+      {
+        "rule": 87,
+        "word_offset": 1199,
+        "message": 23
+      },
+      {
+        "rule": 88,
+        "word_offset": 1215,
+        "message": 24
+      },
+      {
+        "rule": 89,
+        "word_offset": 1226,
+        "message": 96
+      },
+      {
+        "rule": 90,
+        "word_offset": 1245,
+        "message": 13
+      },
+      {
+        "rule": 91,
+        "word_offset": 1263,
+        "message": 14
+      },
+      {
+        "rule": 92,
+        "word_offset": 1289,
+        "message": 15
+      },
+      {
+        "rule": 93,
+        "word_offset": 1320,
+        "message": 29
+      },
+      {
+        "rule": 94,
+        "word_offset": 1333,
+        "message": 115
+      },
+      {
+        "rule": 95,
+        "word_offset": 1344,
+        "message": 99
+      },
+      {
+        "rule": 96,
+        "word_offset": 1360,
+        "message": 56
+      },
+      {
+        "rule": 97,
+        "word_offset": 1373,
+        "message": 57
+      },
+      {
+        "rule": 98,
+        "word_offset": 1386,
+        "message": 58
+      },
+      {
+        "rule": 99,
+        "word_offset": 1402,
+        "message": 59
+      },
+      {
+        "rule": 100,
+        "word_offset": 1420,
+        "message": 60
+      },
+      {
+        "rule": 101,
+        "word_offset": 1433,
+        "message": 61
+      },
+      {
+        "rule": 102,
+        "word_offset": 1449,
+        "message": 66
+      },
+      {
+        "rule": 103,
+        "word_offset": 1462,
+        "message": 67
+      },
+      {
+        "rule": 104,
+        "word_offset": 1481,
+        "message": 68
+      },
+      {
+        "rule": 105,
+        "word_offset": 1500,
+        "message": 69
+      },
+      {
+        "rule": 106,
+        "word_offset": 1516,
+        "message": 70
+      },
+      {
+        "rule": 107,
+        "word_offset": 1529,
+        "message": 71
+      },
+      {
+        "rule": 108,
+        "word_offset": 1546,
+        "message": 72
+      },
+      {
+        "rule": 109,
+        "word_offset": 1563,
+        "message": 73
+      },
+      {
+        "rule": 110,
+        "word_offset": 1579,
+        "message": 74
+      },
+      {
+        "rule": 111,
+        "word_offset": 1592,
+        "message": 75
+      },
+      {
+        "rule": 112,
+        "word_offset": 1606,
+        "message": 76
+      },
+      {
+        "rule": 113,
+        "word_offset": 1620,
+        "message": 77
+      },
+      {
+        "rule": 114,
+        "word_offset": 1636,
+        "message": 78
+      },
+      {
+        "rule": 115,
+        "word_offset": 1652,
+        "message": 79
+      },
+      {
+        "rule": 116,
+        "word_offset": 1674,
+        "message": 80
+      },
+      {
+        "rule": 117,
+        "word_offset": 1693,
+        "message": 82
+      },
+      {
+        "rule": 118,
+        "word_offset": 1715,
+        "message": 81
+      },
+      {
+        "rule": 119,
+        "word_offset": 1734,
+        "message": 83
+      },
+      {
+        "rule": 120,
+        "word_offset": 1747,
+        "message": 92
+      },
+      {
+        "rule": 121,
+        "word_offset": 1757,
+        "message": 93
+      },
+      {
+        "rule": 122,
+        "word_offset": 1772,
+        "message": 151
+      },
+      {
+        "rule": 123,
+        "word_offset": 1787,
+        "message": 152
+      },
+      {
+        "rule": 124,
+        "word_offset": 1796,
+        "message": 190
+      }
+    ],
+    "code_words": 1802,
+    "unreferenced_code_words": 0,
+    "skipped_programs": 0
+  },
+  "messages": [
+    {
+      "id": 117,
+      "address": 2148462112,
+      "text_id": 864,
+      "english": {
+        "id": 864,
+        "offset": 30370,
+        "text": "Some prankster has left a stink bomb in your park. Get it cleaned up before too many people get ill."
+      },
+      "symbol": {
+        "id": 864,
+        "offset": 32075,
+        "text": "STR_ADVMES_ADD_PRANK_SBOMB "
+      }
+    },
+    {
+      "id": 118,
+      "address": 2148462132,
+      "text_id": 484,
+      "english": {
+        "id": 484,
+        "offset": 19195,
+        "text": "A prankster is littering your park. Get your cleaners to the scene to clear up the mess."
+      },
+      "symbol": {
+        "id": 484,
+        "offset": 19706,
+        "text": "STR_ADVMES_ADD_PRANK_LITTER "
+      }
+    },
+    {
+      "id": 119,
+      "address": 2148462152,
+      "text_id": 68,
+      "english": {
+        "id": 68,
+        "offset": 6263,
+        "text": "A prankster is popping other kids balloons. A guard would stop him."
+      },
+      "symbol": {
+        "id": 68,
+        "offset": 6246,
+        "text": "STR_ADVMES_ADD_PRANK_BALLOON "
+      }
+    }
+  ],
+  "controls": {
+    "known_queue_edge": true,
+    "original_fixed_prank_hits": [],
+    "injected_117_hits": [
+      {
+        "site": 2147885748,
+        "address": 2147885752,
+        "id": 117
+      }
+    ],
+    "real_overlay_string_calls": 28,
+    "callback_pointer": [
+      {
+        "site": 2148497888,
+        "target": 2148057780
+      }
+    ],
+    "rule_zero_posts": [
+      {
+        "rule": 0,
+        "word_offset": 11,
+        "message": 0
+      }
+    ]
+  },
+  "text_tables_parsed": 2,
+  "parsed_entries_skipped": 0,
+  "advisor_rows_selected": 3,
+  "other_advisor_rows_not_reanalysed": 286,
+  "excluded_files": [
+    {
+      "file": "SLES_026.88",
+      "bytes": 49152,
+      "reason": "boot executable not analysed"
+    }
+  ],
+  "limitations": [
+    "No proof against computed/aliased queue entry or a direct write to queue memory.",
+    "Manifest coverage is checked; its control-flow interpretation was read by hand, not formally proved.",
+    "Unbounded caption lookup and unscheduled VM inputs are not proved safe or unreachable.",
+    "Overlay decoder is an existing dependency, not independently validated in this run.",
+    "No retail/emulator run, actor identity, allocation, cleaning route, or balloon mechanic established."
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "scope": "SEARCH TOOL ONLY; no prank simulation established or ported.",
+  "prior_rejected_runs": [
+    {
+      "source_sha256": "50db0bbe2cf9380706d103e22d6fe33dac8240c47f22909754528785636931ab",
+      "tests_sha256": "77129998836065369d55a8086b93514cb4cfa6d4b51b3db61aabad0af25aabef",
+      "killed": 14,
+      "survivors": 0,
+      "invalid": 1,
+      "rejected": [
+        {
+          "name": "omit ORI literal",
+          "old": "word >> 26 in (9, 13)",
+          "new": "word >> 26 == 9",
+          "status": "invalid",
+          "executed": 9,
+          "failed": 1,
+          "errors": 1,
+          "skipped": 0,
+          "failing_tests": [
+            "test_prank_callers.CallerAuditTests.test_literal_argument_has_negative_controls"
+          ],
+          "output": "...E.F...\n======================================================================\nERROR: test_fixed_branch_sources_and_prank_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 59, in test_fixed_branch_sources_and_prank_control\n    result = audit.classify(data, base, [base], {base: (base, base+4, base+8, base+12)}, {})\n  File \"/home/ec2-user/tpwport-pranks/tools/audit_prank_callers.py\", line 129, in classify\n    raise ValueError('manifest source is no longer a literal a1 assignment')\nValueError: manifest source is no longer a literal a1 assignment\n\n======================================================================\nFAIL: test_literal_argument_has_negative_controls (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 49, in test_literal_argument_has_negative_controls\n    self.assertEqual(118, audit.literal_a1(0x34050076))\nAssertionError: 118 != None\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=1, errors=1)\n"
+        }
+      ]
+    }
+  ],
+  "source_sha256": "9f294508800b25d7933bdb288eecfd43e168fc66627cbcefe1f45e6ee672959e",
+  "tests_sha256": "6e21e937eddda58dd3785fe62149e9c50a00aff435d526ab93cb77d3d50c6625",
+  "unchanged_control": {
+    "status": "passed",
+    "executed": 10,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\n"
+  },
+  "mutations": [
+    {
+      "name": "omit final aligned word",
+      "old": "len(data) - 3, 4",
+      "new": "len(data) - 4, 4",
+      "status": "killed",
+      "executed": 10,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_base_and_jump_region",
+        "test_prank_callers.CallerAuditTests.test_calls_and_tail_jumps_with_nonmatching_control",
+        "test_prank_callers.CallerAuditTests.test_pointer_control"
+      ],
+      "output": "FF.......F\n======================================================================\nFAIL: test_base_and_jump_region (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 26, in test_base_and_jump_region\n    self.assertEqual([dict(site=0x8FFFFFFC, target=0x90000000, kind='J')],\nAssertionError: Lists differ: [{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}\n\n- [{'kind': 'J', 'site': 2415919100, 'target': 2415919104}]\n+ []\n\n======================================================================\nFAIL: test_calls_and_tail_jumps_with_nonmatching_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 20, in test_calls_and_tail_jumps_with_nonmatching_control\n    self.assertEqual([(0x80010000, 'JAL'), (0x80010008, 'J')],\nAssertionError: Lists differ: [(2147549184, 'JAL'), (2147549192, 'J')] != [(2147549184, 'JAL')]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n(2147549192, 'J')\n\n- [(2147549184, 'JAL'), (2147549192, 'J')]\n+ [(2147549184, 'JAL')]\n\n======================================================================\nFAIL: test_pointer_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 37, in test_pointer_control\n    self.assertEqual([dict(site=0x80010004, target=0x8008C2B4)], result['pointers'])\nAssertionError: Lists differ: [{'site': 2147549188, 'target': 2148057780}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2147549188, 'target': 2148057780}\n\n- [{'site': 2147549188, 'target': 2148057780}]\n+ []\n\n----------------------------------------------------------------------\nRan 10 tests in 0.010s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "omit tail jumps",
+      "old": "word >> 26 in (2, 3)",
+      "new": "word >> 26 == 3",
+      "status": "killed",
+      "executed": 10,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_base_and_jump_region",
+        "test_prank_callers.CallerAuditTests.test_calls_and_tail_jumps_with_nonmatching_control",
+        "test_prank_callers.CallerAuditTests.test_independent_jump_source_guard"
+      ],
+      "output": "FF..F.....\n======================================================================\nFAIL: test_base_and_jump_region (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 26, in test_base_and_jump_region\n    self.assertEqual([dict(site=0x8FFFFFFC, target=0x90000000, kind='J')],\nAssertionError: Lists differ: [{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}\n\n- [{'kind': 'J', 'site': 2415919100, 'target': 2415919104}]\n+ []\n\n======================================================================\nFAIL: test_calls_and_tail_jumps_with_nonmatching_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 20, in test_calls_and_tail_jumps_with_nonmatching_control\n    self.assertEqual([(0x80010000, 'JAL'), (0x80010008, 'J')],\nAssertionError: Lists differ: [(2147549184, 'JAL'), (2147549192, 'J')] != [(2147549184, 'JAL')]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n(2147549192, 'J')\n\n- [(2147549184, 'JAL'), (2147549192, 'J')]\n+ [(2147549184, 'JAL')]\n\n======================================================================\nFAIL: test_independent_jump_source_guard (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 100, in test_independent_jump_source_guard\n    self.assertEqual([dict(jump=base, setter=target, source=base+4, id=117)],\nAssertionError: Lists differ: [{'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188, 'id': 117}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188, 'id': 117}\n\n- [{'id': 117, 'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188}]\n+ []\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "omit calls",
+      "old": "word >> 26 in (2, 3)",
+      "new": "word >> 26 == 2",
+      "status": "killed",
+      "executed": 10,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_base_and_jump_region",
+        "test_prank_callers.CallerAuditTests.test_calls_and_tail_jumps_with_nonmatching_control"
+      ],
+      "output": "FF........\n======================================================================\nFAIL: test_base_and_jump_region (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 30, in test_base_and_jump_region\n    self.assertEqual([dict(site=0x80114158, target=target, kind='JAL')],\nAssertionError: Lists differ: [{'site': 2148614488, 'target': 2147565892, 'kind': 'JAL'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2148614488, 'target': 2147565892, 'kind': 'JAL'}\n\n- [{'kind': 'JAL', 'site': 2148614488, 'target': 2147565892}]\n+ []\n\n======================================================================\nFAIL: test_calls_and_tail_jumps_with_nonmatching_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 20, in test_calls_and_tail_jumps_with_nonmatching_control\n    self.assertEqual([(0x80010000, 'JAL'), (0x80010008, 'J')],\nAssertionError: Lists differ: [(2147549184, 'JAL'), (2147549192, 'J')] != [(2147549192, 'J')]\n\nFirst differing element 0:\n(2147549184, 'JAL')\n(2147549192, 'J')\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n(2147549192, 'J')\n\n- [(2147549184, 'JAL'), (2147549192, 'J')]\n+ [(2147549192, 'J')]\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "wrong jump region at boundary",
+      "old": "(pc + 4) & 0xF0000000",
+      "new": "pc & 0xF0000000",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_base_and_jump_region"
+      ],
+      "output": "F.........\n======================================================================\nFAIL: test_base_and_jump_region (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 26, in test_base_and_jump_region\n    self.assertEqual([dict(site=0x8FFFFFFC, target=0x90000000, kind='J')],\nAssertionError: Lists differ: [{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}\n\n- [{'kind': 'J', 'site': 2415919100, 'target': 2415919104}]\n+ []\n\n----------------------------------------------------------------------\nRan 10 tests in 0.015s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "accept other call targets",
+      "old": "if target in targets:",
+      "new": "if True:",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_calls_and_tail_jumps_with_nonmatching_control"
+      ],
+      "output": ".F........\n======================================================================\nFAIL: test_calls_and_tail_jumps_with_nonmatching_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 20, in test_calls_and_tail_jumps_with_nonmatching_control\n    self.assertEqual([(0x80010000, 'JAL'), (0x80010008, 'J')],\nAssertionError: Lists differ: [(2147549184, 'JAL'), (2147549192, 'J')] != [(2147549184, 'JAL'), (2147549188, 'JAL'), (2147549192, 'J')]\n\nFirst differing element 1:\n(2147549192, 'J')\n(2147549188, 'JAL')\n\nSecond list contains 1 additional elements.\nFirst extra element 2:\n(2147549192, 'J')\n\n- [(2147549184, 'JAL'), (2147549192, 'J')]\n+ [(2147549184, 'JAL'), (2147549188, 'JAL'), (2147549192, 'J')]\n?                      +++++++++++++++++++++\n\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit callback pointers",
+      "old": "if word in targets:",
+      "new": "if False:",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_pointer_control"
+      ],
+      "output": ".........F\n======================================================================\nFAIL: test_pointer_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 37, in test_pointer_control\n    self.assertEqual([dict(site=0x80010004, target=0x8008C2B4)], result['pointers'])\nAssertionError: Lists differ: [{'site': 2147549188, 'target': 2148057780}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2147549188, 'target': 2148057780}\n\n- [{'site': 2147549188, 'target': 2148057780}]\n+ []\n\n----------------------------------------------------------------------\nRan 10 tests in 0.024s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "hide trailing bytes",
+      "old": "trailing_bytes_not_decoded=len(data) % 4",
+      "new": "trailing_bytes_not_decoded=0",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_partial_word_accounting"
+      ],
+      "output": "........F.\n======================================================================\nFAIL: test_partial_word_accounting (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 42, in test_partial_word_accounting\n    self.assertEqual((7, 1, 0, 3), (result['bytes'], result['aligned_words'],\nAssertionError: Tuples differ: (7, 1, 0, 3) != (7, 1, 0, 0)\n\nFirst differing element 3:\n3\n0\n\n- (7, 1, 0, 3)\n?           ^\n\n+ (7, 1, 0, 0)\n?           ^\n\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit ORI literal",
+      "old": "word >> 26 in (9, 13)",
+      "new": "word >> 26 == 9",
+      "status": "killed",
+      "executed": 10,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_fixed_branch_sources_and_prank_control",
+        "test_prank_callers.CallerAuditTests.test_literal_argument_has_negative_controls"
+      ],
+      "output": "...F..F...\n======================================================================\nFAIL: test_fixed_branch_sources_and_prank_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 60, in test_fixed_branch_sources_and_prank_control\n    result = audit.classify(data, base, [base], {base: (base, base+4, base+8, base+12)}, {})\n  File \"/home/ec2-user/tpwport-pranks/tools/audit_prank_callers.py\", line 129, in classify\n    raise ValueError('manifest source is no longer a literal a1 assignment')\nValueError: manifest source is no longer a literal a1 assignment\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 62, in test_fixed_branch_sources_and_prank_control\n    self.fail('Valid literal sources were rejected: ' + str(exc))\nAssertionError: Valid literal sources were rejected: manifest source is no longer a literal a1 assignment\n\n======================================================================\nFAIL: test_literal_argument_has_negative_controls (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 49, in test_literal_argument_has_negative_controls\n    self.assertEqual(118, audit.literal_a1(0x34050076))\nAssertionError: 118 != None\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "accept arithmetic as literal",
+      "old": "(word >> 21) & 31 == 0",
+      "new": "True",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_literal_argument_has_negative_controls"
+      ],
+      "output": "......F...\n======================================================================\nFAIL: test_literal_argument_has_negative_controls (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 52, in test_literal_argument_has_negative_controls\n    self.assertIsNone(audit.literal_a1(0x24A50075))\nAssertionError: 117 is not None\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "accept wrong argument",
+      "old": "(word >> 16) & 31 == 5",
+      "new": "True",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_literal_argument_has_negative_controls"
+      ],
+      "output": "......F...\n======================================================================\nFAIL: test_literal_argument_has_negative_controls (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 51, in test_literal_argument_has_negative_controls\n    self.assertIsNone(audit.literal_a1(0x24070075))\nAssertionError: 117 is not None\n\n----------------------------------------------------------------------\nRan 10 tests in 0.008s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit branch alternatives",
+      "old": "for address in fixed[site]:",
+      "new": "for address in fixed[site][:1]:",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_fixed_branch_sources_and_prank_control"
+      ],
+      "output": "...F......\n======================================================================\nFAIL: test_fixed_branch_sources_and_prank_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 63, in test_fixed_branch_sources_and_prank_control\n    self.assertEqual([120, 117, 118, 119], [s['id'] for s in result['rows'][0]['sources']])\nAssertionError: Lists differ: [120, 117, 118, 119] != [120]\n\nFirst list contains 3 additional elements.\nFirst extra element 1:\n117\n\n- [120, 117, 118, 119]\n+ [120]\n\n----------------------------------------------------------------------\nRan 10 tests in 0.003s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "hide unreviewed callers",
+      "old": "unreviewed=sum(r['kind'] == 'UNREVIEWED' for r in rows)",
+      "new": "unreviewed=0",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_computed_and_missing_sites_stay_explicit"
+      ],
+      "output": "..F.......\n======================================================================\nFAIL: test_computed_and_missing_sites_stay_explicit (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 72, in test_computed_and_missing_sites_stay_explicit\n    self.assertEqual(1, result['unreviewed'])\nAssertionError: 1 != 0\n\n----------------------------------------------------------------------\nRan 10 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "hide stale manifest entries",
+      "old": "sorted((set(fixed) | set(dynamic)) - set(sites))",
+      "new": "[]",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_computed_and_missing_sites_stay_explicit"
+      ],
+      "output": "..F.......\n======================================================================\nFAIL: test_computed_and_missing_sites_stay_explicit (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 73, in test_computed_and_missing_sites_stay_explicit\n    self.assertEqual([30], result['stale_manifest_sites'])\nAssertionError: Lists differ: [30] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n30\n\n- [30]\n+ []\n\n----------------------------------------------------------------------\nRan 10 tests in 0.002s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "invent zero for unknown id",
+      "old": "return None\n",
+      "new": "return 0\n",
+      "status": "killed",
+      "executed": 10,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_independent_jump_source_guard",
+        "test_prank_callers.CallerAuditTests.test_invalid_literal_source_fails_closed",
+        "test_prank_callers.CallerAuditTests.test_literal_argument_has_negative_controls"
+      ],
+      "output": "....FFF...\n======================================================================\nFAIL: test_independent_jump_source_guard (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 103, in test_independent_jump_source_guard\n    self.assertEqual([], audit.missing_jump_sources(packed(jump, 0), base, {target: ()}))\nAssertionError: Lists differ: [] != [{'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188, 'id': 0}]\n\nSecond list contains 1 additional elements.\nFirst extra element 0:\n{'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188, 'id': 0}\n\n- []\n+ [{'id': 0, 'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188}]\n\n======================================================================\nFAIL: test_invalid_literal_source_fails_closed (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 80, in test_invalid_literal_source_fails_closed\n    audit.classify(packed(0x8C050075), base, [base], {base: (base,)}, {})\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_literal_argument_has_negative_controls (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 51, in test_literal_argument_has_negative_controls\n    self.assertIsNone(audit.literal_a1(0x24070075))\nAssertionError: 0 is not None\n\n----------------------------------------------------------------------\nRan 10 tests in 0.002s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "omit balloon id",
+      "old": "PRANK_IDS = (117, 118, 119)",
+      "new": "PRANK_IDS = (117, 118)",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_fixed_branch_sources_and_prank_control"
+      ],
+      "output": "...F......\n======================================================================\nFAIL: test_fixed_branch_sources_and_prank_control (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 64, in test_fixed_branch_sources_and_prank_control\n    self.assertEqual([117, 118, 119], [s['id'] for s in audit.fixed_prank_hits(result)])\nAssertionError: Lists differ: [117, 118, 119] != [117, 118]\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n119\n\n- [117, 118, 119]\n?          -----\n\n+ [117, 118]\n\n----------------------------------------------------------------------\nRan 10 tests in 0.004s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "hide omitted jump alternatives",
+      "old": "value is not None and source not in fixed[edge['target']]",
+      "new": "False",
+      "status": "killed",
+      "executed": 10,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_prank_callers.CallerAuditTests.test_independent_jump_source_guard"
+      ],
+      "output": "....F.....\n======================================================================\nFAIL: test_independent_jump_source_guard (test_prank_callers.CallerAuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-pranks/tools/test_prank_callers.py\", line 100, in test_independent_jump_source_guard\n    self.assertEqual([dict(jump=base, setter=target, source=base+4, id=117)],\nAssertionError: Lists differ: [{'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188, 'id': 117}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188, 'id': 117}\n\n- [{'id': 117, 'jump': 2147549184, 'setter': 2147549200, 'source': 2147549188}]\n+ []\n\n----------------------------------------------------------------------\nRan 10 tests in 0.003s\n\nFAILED (failures=1)\n"
+    }
+  ],
+  "final_unchanged_control": {
+    "status": "passed",
+    "executed": 10,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.002s\n\nOK\n"
+  },
+  "source_unchanged": true,
+  "killed": 16,
+  "survivors": 0,
+  "invalid": 0
+}
