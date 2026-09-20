@@ -334,6 +334,11 @@ namespace TPWGodot
             // entrance wired once at boot would be silently dropped the first time a park is opened and
             // every guest would go back to appearing inside the fence.
             if (_finances != null && !NoGate) _guests.SetEntrance(_finances, () => _bus);
+            // ⭐ THE IDLE PASS NEEDS THE PARK'S OWN DAY AND ITS BINS. Without the day, "been here long
+            // enough to go home" compares against zero for ever; without the bins, every guest with
+            // rubbish litters instead of walking to one.
+            _guests.SlowClockDay = () => _finances?.Calendar.TotalDays ?? 0;
+            _guests.NearestBin = NearestBinTile;
             _guests.LogStaff = _logRides;
             _guests.MapChanged();
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
@@ -728,6 +733,25 @@ namespace TPWGodot
             foreach (var t in GuestTargets())
                 if (t.Id == entry) { _guests.MapChanged(); return _guests.AttractionJoined(t); }
             return (true, true);
+        }
+
+        /// <summary>The nearest placed litter bin within six tiles of (x, z), or null. ⭐ A BIN IS A
+        /// FEATURE WITH RECORD BYTE +0x2E BIT 2 SET (behaviour.md §0 item 8) — the same byte family
+        /// that says whether staff may rest there. Six tiles is the idle pass's own radius.</summary>
+        (int X, int Z)? NearestBinTile(int x, int z)
+        {
+            (int X, int Z)? best = null;
+            int bestD = 7;
+            foreach (var a in _attractionsPlaced)
+            {
+                if (a.Rec.Type != 2 || (a.Rec.FeatureFlags & 4) == 0) continue;
+                var (w, d) = a.Rec.Footprint(a.Rot);
+                int cx = a.Ox + w / 2, cz = a.Oz + d / 2;
+                int dist = System.Math.Abs(cx - x) + System.Math.Abs(cz - z);
+                if (dist >= bestD) continue;
+                bestD = dist; best = (cx, cz);
+            }
+            return best;
         }
 
         /// <summary>--park-nogate: guests appear inside the fence and pay nothing, the way they did

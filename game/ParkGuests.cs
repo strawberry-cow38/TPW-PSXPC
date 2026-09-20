@@ -529,6 +529,21 @@ namespace TPWGodot
         /// the honest answer then and a bug the moment one is.</summary>
         public int LanesWaiting => _entrance == null ? 0 : _entrance.LaneCount(0) + _entrance.LaneCount(1);
 
+        ParkIdleWorld IdleWorld() => _idle ??= new ParkIdleWorld(
+            () => _now,
+            () => SlowClockDay?.Invoke() ?? 0,
+            () => System.Linq.Enumerable.Select(_staff, s => s.S),
+            v => _byVisitor.TryGetValue(v, out var gg) ? (gg.X >> 8, gg.Z >> 8) : (0, 0),
+            st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); },
+            v =>
+            {
+                if (NearestBin == null || !_byVisitor.TryGetValue(v, out var gg)) return null;
+                return NearestBin(gg.X >> 8, gg.Z >> 8);
+            },
+            (v, tx, tz) => _byVisitor.TryGetValue(v, out var gg)
+                        && _finder.Request(gg, gg.X, gg.Z, Centre(tx), Centre(tz), WalkFlags, 0)
+                        && (gg.Waiting = true));
+
         ParkStaffWorld StaffWorld() => _staffWorld ??= new ParkStaffWorld(
             () => _now,
             () => _rideTargets?.Invoke() ?? (IReadOnlyList<GuestTarget>)System.Array.Empty<GuestTarget>(),
@@ -732,6 +747,15 @@ namespace TPWGodot
                 // hidden skip, because a guest on a ride still gets hungry.
                 VisitorNeeds.Tick(g.V, _needs, _dice);
 
+                // ⭐⭐ AND THE IDLE PASS, WHICH ALSO HAD NO CALLER. Its first act every tick is the
+                // LEAVE check — too tired, too unhappy, out of money, or here long enough — so with it
+                // unwired nobody ever decided to go home. Measured on a soak: 29 guests, average
+                // happiness 0, needs pinned at 100, and not one of them left.
+                // ⚠ STATE 0 ONLY. The pass IS state 0's handler; running it on a guest that is queueing,
+                // riding or walking would re-decide something another state owns.
+                if (g.V.State == VisitorState.Idle && !g.Hidden)
+                    VisitorIdle.Tick(g.V, IdleWorld(), _dice);
+
                 // ⚠ COUNTED BEFORE THE HIDDEN SKIP, so a guest that boards stops counting rather than
                 // freezing its total at whatever it had. The bit is the queue's own (V+0x5C bit), so
                 // this measures exactly what the queue thinks, not what the port thinks.
@@ -854,6 +878,16 @@ namespace TPWGodot
         }
 
         ParkNeedsWorld _needs;
+        ParkIdleWorld _idle;
+
+        /// <summary>The park's own slow day counter, which the leave check measures a visit against.
+        /// Set by the view, which owns the calendar. ⚠ WITHOUT IT the "been here long enough" arm of
+        /// the leave check compares against zero for ever.</summary>
+        public System.Func<int> SlowClockDay;
+
+        /// <summary>The nearest litter bin to a guest within six tiles: a placed FEATURE whose record
+        /// byte +0x2E has bit 2 set. Set by the view, which owns the placed attractions.</summary>
+        public System.Func<int, int, (int X, int Z)?> NearestBin;
 
         long _now;
 
