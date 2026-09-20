@@ -21,6 +21,27 @@ and should not be listed as a deviation.
 placed shop's context list (verified in the same session: a shop with no queue offers exactly
 "Delete"). Nothing here says what ○ does.
 
+### The panel's frame rects, read out of live RAM
+
+Same rig, RAM dumped at frame 150 from `practice.state`. The globals panel.md reads statically are
+there at runtime and say exactly what it says:
+
+| address | words | reading |
+|---|---|---|
+| 0x80102B0C..0x80102B18 | 0x503C05, 0x78642D, 0xA08C55, 0xC8B47D | a four-stop brown/tan ramp |
+| 0x80102B1C..0x80102B2C | 0x808080, 0x202020, 0x404040, 0x606060, 0x808080 | the four-stop grey ramp — 0x20 at one end, 0x80 at the other, which is the backdrop gradient panel.md guessed |
+| 0x80102B30 | 16, 64, 280, 152 | **info frame: x 16..296, y 64..216** |
+| 0x80102B40 | 280, 80, 180, 110 | **control frame: x 280..460, y 80..190** |
+
+⭐ SO THE TWO FRAME RECTS ARE CONFIRMED FROM THE RUNNING GAME, not just from the image, and the
+gradients really do sit immediately beside them rather than being a coincidence of nearby data.
+
+⚠ **THE PANEL'S OWN RECT IS NOT HERE.** panel.md's "the panel starts at x=35 and ends 37 from the
+right" cannot be confirmed this way: there is **no word equal to 35 anywhere in 0x80100000..0x80110000**
+of live RAM. That fits panel.md's own reading that a widget's rect lives at +8/+10/+20/+22 on the
+OBJECT — halfwords on the heap, not statics — so the 35 comes from somewhere else and the 19px
+overhang stays open until the panel exists to be read or photographed.
+
 ### The whole pad, from one state, with a control
 
 Same save, one button pulsed at frame 60 (8 frames down), final frame at 751 compared against a
