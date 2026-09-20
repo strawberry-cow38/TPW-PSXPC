@@ -289,9 +289,43 @@ namespace TPWGodot
             Quad(on, x + 1, y + 1, fill, 4, red, red);
         }
 
-        /// <summary>A frame's fill: the gouraud quad the game puts under its border, orange to yellow.</summary>
+        /// <summary>A frame: the game's orange-to-yellow gouraud fill, with ROUNDED CORNERS.
+        ///
+        /// ⭐ THE CORNERS ARE ROUNDED AND THE PORT WAS DRAWING SQUARE ONES (master, off the real game). Every
+        /// orange panel in the game carries the same rounded corner — it is visible on the catalogue screen,
+        /// the purchase panel and the ride panel alike, so it belongs on the shared frame rather than on one
+        /// page. The game builds it from sprites (corner 0x169 + inner 0x148, edge 0x173/0x161, via
+        /// 0x8003EDCC); this draws the SHAPE, which is what is actually observable, and the sprite arrangement
+        /// can replace it once 0x8003DEA8 / 0x8003E0DC are read. Rounding a corner is reproducing something
+        /// measured off the screen, not inventing a decoration.</summary>
         void Frame(CanvasItem on, int x, int y, int w, int h)
-            => Quad(on, x, y, w, h, Rgb((0xE7, 0x80, 0x1A)), Rgb((0xE8, 0xCA, 0x2D)));
+        {
+            var top = Rgb((0xE7, 0x80, 0x1A));
+            var bottom = Rgb((0xE8, 0xCA, 0x2D));
+            int r = Math.Min(FrameCorner, Math.Min(w, h) / 2);
+            var pts = new System.Collections.Generic.List<Vector2>();
+            var cols = new System.Collections.Generic.List<Color>();
+            // Four quarter arcs, clockwise from the top-left, in PSX units; mapped through PX/PY so the
+            // corner stays a corner whatever the panel's scale is.
+            void Arc(float cx, float cy, float from)
+            {
+                for (int i = 0; i <= FrameCornerSteps; i++)
+                {
+                    float a = from + (Mathf.Pi / 2f) * i / FrameCornerSteps;
+                    float px = cx + Mathf.Cos(a) * r, py = cy + Mathf.Sin(a) * r;
+                    pts.Add(new Vector2(PX(px), PY(py)));
+                    cols.Add(top.Lerp(bottom, h <= 0 ? 0f : Mathf.Clamp((py - y) / h, 0f, 1f)));
+                }
+            }
+            Arc(x + r,     y + r,     Mathf.Pi);            // top-left
+            Arc(x + w - r, y + r,     -Mathf.Pi / 2f);      // top-right
+            Arc(x + w - r, y + h - r, 0f);                  // bottom-right
+            Arc(x + r,     y + h - r, Mathf.Pi / 2f);       // bottom-left
+            on.DrawPolygon(pts.ToArray(), cols.ToArray());
+        }
+
+        /// <summary>The corner radius, in PSX units, and how many segments draw each quarter.</summary>
+        const int FrameCorner = 9, FrameCornerSteps = 5;
 
         /// <summary>A rectangle in PSX coordinates, shaded top colour to bottom colour.</summary>
         void Quad(CanvasItem on, int px, int py, int pw, int ph, Color top, Color bottom)
