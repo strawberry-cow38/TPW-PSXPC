@@ -189,6 +189,33 @@ namespace TPW.Sim.Tests
             Assert.Equal(30, g.NeedB);
         }
 
+        // ⭐ EATING MAKES YOU THIRSTY BY THE RECORD'S +0x33. The disc's Ice Cream is (kind 4, a=10, b=25,
+        // c=15, d=5; visitor-rest.md §1): need A down 25, toilet need up 25, nausea up 15, need B UP 10.
+        // Fries and burgers carry a=0, so every other food fixture here is blind to this line. REJECTS
+        // dropping the need-B add from the burger arm.
+        [Fact]
+        public void IceCreamRelievesNeedAAndFeedsNeedBByTheRecord()
+        {
+            var g = Guest(); var w = new World { ProductValue = new ShopProduct(40, 4, 25, 10, 5, 15), Second = 60, Price = 50 };
+            Assert.True(VisitorPurchase.BuyAtShop(g, w, new Dice(0)));
+            Assert.Equal(80 - 25, g.NeedA);
+            Assert.Equal(10 + 25, g.RideDesire);
+            Assert.Equal(10 + 15, g.Nausea);
+            Assert.Equal(30 + 10, g.NeedB);
+        }
+
+        // ⚠ THE FRIES TERM IS second / 15 EXACTLY (0x8008E8E4). A slider of 60 reads 4 for 14, 15 and 16
+        // alike, which is why the fries test above cannot see the divisor; 28 and 30 can. REJECTS 14
+        // (28 / 14 = 2) and REJECTS 16 (30 / 16 = 1).
+        [Theory]
+        [InlineData(28, 1)] [InlineData(30, 2)]
+        public void TheFriesThirstTermDividesTheSecondSliderByFifteen(int second, int gain)
+        {
+            var g = Guest(); var w = new World { Second = second, Price = 50 };
+            Assert.True(VisitorPurchase.BuyAtShop(g, w, new Dice(0)));
+            Assert.Equal(30 + gain, g.NeedB);
+        }
+
         // ⭐ A COSTUME REWRITES THE GUEST: type 8, flag 0x80, the model handle released, event (6, 1), and
         // happiness by quality alone (15 × 50 / 100 = 7). The Costume record is (60, kind 2, 0, 0, 15, 0)
         // at £90. REJECTS the food happiness formula, REJECTS leaving the type alone.

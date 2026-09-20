@@ -155,6 +155,8 @@ namespace TPW.Sim.Tests
         [InlineData(100, 3, true)]   // nauseous: the rand(4) is not even reached
         [InlineData(10, 0, true)]    // calm, but the 1-in-4 landed
         [InlineData(10, 1, false)]
+        [InlineData(92, 1, false)]   // ⚠ STRICT: 92 is not over 92, so it is down to the die, which missed
+        [InlineData(93, 1, true)]    // REJECTS 91 and REJECTS >=
         public void SicknessNeedsEitherNauseaOrTheOneInFour(int nausea, int roll, bool vomits)
         {
             var v = Healthy(); v.Nausea = nausea;

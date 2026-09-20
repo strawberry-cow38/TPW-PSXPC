@@ -78,6 +78,26 @@ namespace TPW.Sim.Tests
             Assert.Equal(Purpose.AtAttraction, g.Purpose);
         }
 
+        sealed class RecordingDice : IRandomSource
+        {
+            public readonly List<int> Asked = new();
+            public int Next(int n) { Asked.Add(n); return 1; }
+        }
+
+        // The tiredness die is rand(10) (0x8008E1F8..0x8008E200), drawn on EVERY walking tick whether or
+        // not it lands. REJECTS rand(9) or rand(11) -- a fixture that ignores the die's size cannot tell --
+        // and REJECTS rolling only on arrival.
+        [Fact]
+        public void TheWalkingTirednessDieIsRandTenEveryTick()
+        {
+            var g = Guest(Purpose.AtAttraction);
+            var dice = new RecordingDice();
+            VisitorArrival.Tick(g, new World { Waypoint = true }, dice);
+            VisitorArrival.Tick(g, new World { Waypoint = true }, dice);
+            Assert.Equal(new[] { VisitorArrival.TirednessChanceIn, VisitorArrival.TirednessChanceIn }, dice.Asked);
+            Assert.Equal(10, VisitorArrival.TirednessChanceIn);
+        }
+
         // ⭐ ARRIVAL SPENDS THE PURPOSE. A second arrival tick must do nothing, and that is what stops a
         // guest emptying its hands twice or joining a queue twice. REJECTS leaving the purpose set.
         [Fact]

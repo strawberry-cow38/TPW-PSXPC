@@ -1,0 +1,621 @@
+{
+  "date": "2026-09-20",
+  "runner": "tools/mutate_needs.py",
+  "distinct_mutations": 87,
+  "executions": 119,
+  "killed": 87,
+  "survived": 0,
+  "invalid": 0,
+  "not_run": 0,
+  "mutations": [
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "needA threshold 80",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheTwoNeedsUseDifferentThresholdsAloneAndTogether(needA: 81, needB: 81, expected: BothNeedsHigh)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "needB alone threshold 75",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheTwoNeedsUseDifferentThresholdsAloneAndTogether(needA: 0, needB: 76, expected: NeedBHigh)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "others threshold 75",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 0, nausea: 76, tired: 0, happiness: 50, unused: 0, expected: NauseaHigh)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "miserable threshold 25",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 0, nausea: 0, tired: 0, happiness: 25, unused: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "pair uses needB alone threshold",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheTwoNeedsUseDifferentThresholdsAloneAndTogether(needA: 81, needB: 80, expected: NeedAHigh)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "pair is either need",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ACodeIsListedAtMostOnce",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "pair dropped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ThePercentageStatisticsMatchExactlyAndTruncate",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "needA non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheTwoNeedsUseDifferentThresholdsAloneAndTogether(needA: 80, needB: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "needB non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheTwoNeedsUseDifferentThresholdsAloneAndTogether(needA: 0, needB: 75, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "toilet non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 75, nausea: 0, tired: 0, happiness: 50, unused: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "nausea non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 0, nausea: 75, tired: 0, happiness: 50, unused: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "happy non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 0, nausea: 0, tired: 0, happiness: 75, unused: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "tired non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 0, nausea: 0, tired: 75, happiness: 50, unused: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "miserable non-strict",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheOtherThresholdsAreStrict(toilet: 0, nausea: 0, tired: 0, happiness: 25, unused: 0, expected: None)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "order needB before needA",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheTwoNeedsUseDifferentThresholdsAloneAndTogether(needA: 81, needB: 80, expected: NeedAHigh)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "order nausea before toilet",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EarlierTestsWinOverLaterOnes",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "order happy before nausea",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EarlierTestsWinOverLaterOnes",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "order tired before happy",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EarlierTestsWinOverLaterOnes",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "order miserable before tired",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EarlierTestsWinOverLaterOnes",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "boredom code invented",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.BoredomAndRubbishNeverProduceACode",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "icon needB/needA swapped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EachCodeHasItsIcon(code: NeedAHigh, icon: 52)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "icon toilet/nausea swapped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EachCodeHasItsIcon(code: NauseaHigh, icon: 61)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "icon happy/tired swapped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EachCodeHasItsIcon(code: HappinessHigh, icon: 62)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "icon both/miserable swapped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EachCodeHasItsIcon(code: BothNeedsHigh, icon: 51)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "icon none nonzero",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.EachCodeHasItsIcon(code: None, icon: 0)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "percent rounds",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ThePercentageStatisticsMatchExactlyAndTruncate",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "percent divides by zero guests",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ThePercentageStatisticsMatchExactlyAndTruncate",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "percent counts the pair as both",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ThePercentageStatisticsMatchExactlyAndTruncate",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "top three ties to higher code",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheWindowShowsTheThreeCommonestConditionsWithTiesToTheLowerCode",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "top three includes none",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheWindowShowsTheThreeCommonestConditionsWithTiesToTheLowerCode",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "top three never clears winner",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ACodeIsListedAtMostOnce",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "top three pads with empty",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.ACodeIsListedAtMostOnce",
+      "executions": 1
+    },
+    {
+      "file": "VisitorCondition.cs",
+      "rule": "window slots 3",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorConditionTests.TheWindowShowsTheThreeCommonestConditionsWithTiesToTheLowerCode",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth die rand(2)",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.GrowthAddsTheDieAndTheDieIsRandTwo",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth A is die plus one",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheNeedsUpdateAppliesInEveryState(state: WalkToBin)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth B is a flat point",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.GrowthAddsTheDieAndTheDieIsRandTwo",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "needA period 50",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheTwoNeedsGrowOnTheirOwnSchedules",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "needB period 40",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheTwoNeedsGrowOnTheirOwnSchedules",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth A lands on boredom",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheNeedsUpdateAppliesInEveryState(state: WalkToBin)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth B lands on toilet",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.GrowthAddsTheDieAndTheDieIsRandTwo",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth A skips the die at the cap",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheGrowthDieIsDrawnEvenAtTheCap",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "growth only while idle",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheNeedsUpdateAppliesInEveryState(state: WalkToBin)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "tiredness drift invented",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.OnlyNeedAAndNeedBGrowWithTime",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "nausea drift invented",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.StandingInSomethingUnpleasantIsCheaperThanWalkingThroughIt",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "vomit nausea 3",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.LitterDepressesAndOnlyVomitSickens",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "litter happiness 3",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.LitterDepressesAndOnlyVomitSickens",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "boredom penalty 95",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheBoredomThresholdIsNinetyFive(boredom: 95, lost: 1)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "nausea penalty 85",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.EachUnmetNeedDocksHappinessSeparately",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "toilet penalty 90",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.EachPenaltyThresholdIsExact(field: \"toilet\", value: 90, lost: 1)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "needA penalty 95",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.EachPenaltyThresholdIsExact(field: \"needA\", value: 94, lost: 0)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "needB penalty 85",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheNeedBThresholdIsEightyFive(needB: 85, lost: 1)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "unpleasant standing nausea 2",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.InfluenceUsesTheRawMovingStateNumbersBeforeInterrupting(state: 1, happy: 55, nausea: 32)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "unpleasant standing happiness 1",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.StandingInSomethingUnpleasantIsCheaperThanWalkingThroughIt",
+      "executions": 1
+    },
+    {
+      "file": "VisitorNeeds.cs",
+      "rule": "pleasant happiness 6",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorNeedsTests.TheInfluencePassIsStaggeredPerGuest",
+      "executions": 1
+    },
+    {
+      "file": "VisitorArrival.cs",
+      "rule": "walk tiredness chance 1 in 10",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorArrivalTests.TheWalkingTirednessDieIsRandTenEveryTick",
+      "executions": 2
+    },
+    {
+      "file": "VisitorArrival.cs",
+      "rule": "walk tiredness +1",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorArrivalTests.WalkingStepsAndOccasionallyTires",
+      "executions": 1
+    },
+    {
+      "file": "VisitorArrival.cs",
+      "rule": "walk tiredness every tick",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorArrivalTests.WalkingStepsAndOccasionallyTires",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "queue boredom roll below 2",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.TheBoredomAndTirednessRollsAreStrictlyBelow(boredRoll: 2, restRoll: 10, boredom: 20, tiredness: 40)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "queue tiredness roll below 10",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.TheBoredomAndTirednessRollsAreStrictlyBelow(boredRoll: 2, restRoll: 10, boredom: 20, tiredness: 40)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "unload tiredness rand(20)",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.ShopsAndSideShowsHandOffToTheirOwnPurchaseRoutines",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "ride nausea from 56",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.IntenseRidesAddNauseaInTwentyTwelveFixedPoint(intensity: 55, gain: 0)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "ride nausea scale 1212",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.TheNauseaScaleIsTheDebugMenusWord",
+      "executions": 2
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "ride nausea scale off by a tenth",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.IntenseRidesAddNauseaInTwentyTwelveFixedPoint(intensity: 56, gain: 7)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "ride nausea base 30",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.IntenseRidesAddNauseaInTwentyTwelveFixedPoint(intensity: 100, gain: 20)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "ride boredom drop scale 4096",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.RidePanelTests.LiveIntensityReachesGuestRewardWithoutATicket",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "feature nausea relief 40",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.UsingAFeatureSpendsTheNeedAndMayUpsetTheGuest(need: 90, stock: 49, consumed: 20, nausea0: 50, dHappy: -10, dNausea: 10)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "feature low stock penalty 10",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.UsingAFeatureSpendsTheNeedAndMayUpsetTheGuest(need: 90, stock: 49, consumed: 20, nausea0: 50, dHappy: -10, dNausea: 10)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "feature use above 60",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.UsingAFeatureSpendsTheNeedAndMayUpsetTheGuest(need: 90, stock: 50, consumed: 20, nausea0: 30, dHappy: 0, dNausea: 0)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "feature keeps toilet need",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.UsingAFeatureSpendsTheNeedAndMayUpsetTheGuest(need: 90, stock: 50, consumed: 20, nausea0: 30, dHappy: 0, dNausea: 0)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "queue boredom leave 80",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.BoredomOverEightyLeavesTheQueueThroughMessageSeven",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "queue broken boredom +1 dropped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.ABrokenRideBoresItsQueueEveryFourStaggeredTicks(s: BrokenDown, now: 4, boredom: 21)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "queue tiredness adds instead of subtracts",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.TheBoredomAndTirednessRollsAreStrictlyBelow(boredRoll: 1, restRoll: 9, boredom: 21, tiredness: 39)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "ride nausea shift 12",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.IntenseRidesAddNauseaInTwentyTwelveFixedPoint(intensity: 56, gain: 7)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "unload tiredness dropped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.ShopsAndSideShowsHandOffToTheirOwnPurchaseRoutines",
+      "executions": 1
+    },
+    {
+      "file": "VisitorQueue.cs",
+      "rule": "feature nausea relief dropped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorQueueTests.UsingAFeatureSpendsTheNeedAndMayUpsetTheGuest(need: 90, stock: 50, consumed: 20, nausea0: 30, dHappy: 0, dNausea: 0)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorDecision.cs",
+      "rule": "no ride boredom +5",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.RideScoreTests.AnEmptyParkDisappointsTheGuestAndBacksOff",
+      "executions": 1
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "path failure boredom rand(2)",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.EveryOtherFailurePurposeTakesTheWanderPenalty(purpose: 6)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorEntrance.cs",
+      "rule": "path failure boredom dropped",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorMessagesTests.EveryOtherFailurePurposeTakesTheWanderPenalty(purpose: 6)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorActivity.cs",
+      "rule": "vomit keeps nausea",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorActivityTests.VomitingPlacesTheAllocatedObjectAndResetsOnlyItsOwnStats",
+      "executions": 1
+    },
+    {
+      "file": "VisitorIdle.cs",
+      "rule": "vomit threshold 92",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorIdleTests.SicknessNeedsEitherNauseaOrTheOneInFour(nausea: 92, roll: 1, vomits: False)",
+      "executions": 2
+    },
+    {
+      "file": "VisitorPurchase.cs",
+      "rule": "food adds needA",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.TheOtherFoodKindsUseTheBurgerArmWithoutTheThirstTerm(kind: 5)",
+      "executions": 1
+    },
+    {
+      "file": "VisitorPurchase.cs",
+      "rule": "food skips toilet need",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.FriesRelieveNeedAFeedTheToiletNeedAndMakeTheGuestThirstier",
+      "executions": 1
+    },
+    {
+      "file": "VisitorPurchase.cs",
+      "rule": "drink adds needB",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.TheWantUsesTheStatsAsTheyWereOnEntry",
+      "executions": 1
+    },
+    {
+      "file": "VisitorPurchase.cs",
+      "rule": "drink skips toilet need",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.DrinksRelieveNeedBAndSwapTheTwoNeeds",
+      "executions": 1
+    },
+    {
+      "file": "VisitorPurchase.cs",
+      "rule": "food skips nausea",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.FriesRelieveNeedAFeedTheToiletNeedAndMakeTheGuestThirstier",
+      "executions": 1
+    },
+    {
+      "file": "VisitorPurchase.cs",
+      "rule": "food skips needB",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.IceCreamRelievesNeedAAndFeedsNeedBByTheRecord",
+      "executions": 2
+    },
+    {
+      "file": "GuestSpending.cs",
+      "rule": "fries second slider /15",
+      "status": "KILLED",
+      "example_failing_test": "TPW.Sim.Tests.VisitorPurchaseTests.TheFriesThirstTermDividesTheSecondSliderByFifteen(second: 28, gain: 1)",
+      "executions": 2
+    }
+  ]
+}

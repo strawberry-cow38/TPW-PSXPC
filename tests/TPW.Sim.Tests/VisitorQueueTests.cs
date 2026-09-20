@@ -621,6 +621,19 @@ namespace TPW.Sim.Tests
             Assert.Equal(10 + gain, g.Nausea);
         }
 
+        // ⚠ THE SCALE IS PINNED BY VALUE, NOT BY EFFECT. Over the reachable intensities 56..100 no
+        // shifted product distinguishes 1212 from 1211 or 1213 (checked exhaustively), so the theory above
+        // cannot see a nudge to it -- but 0x801031FC is a lever the debug menu moved (debug.md §3, verified
+        // live), and the WORD is what a debug port would read. REJECTS any other value of the word; the
+        // theory above REJECTS a scale that is wrong by enough to move a byte (1100 gives 18 at 100).
+        [Fact]
+        public void TheNauseaScaleIsTheDebugMenusWord()
+        {
+            Assert.Equal(1212, VisitorQueue.NauseaScale);
+            Assert.Equal(30, VisitorQueue.NauseaBase);
+            Assert.Equal(56, VisitorQueue.NauseaFromIntensity);
+        }
+
         // Boredom drops by the intensity (4096/4096 of it), the ride counts a guest, the target is KEPT
         // and the guest is in 23. REJECTS clearing the target for rides, REJECTS Idle.
         [Fact]

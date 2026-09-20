@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TPW.Sim;
 using Xunit;
 
@@ -57,6 +58,64 @@ namespace TPW.Sim.Tests
             var world = new World { NowTick = VisitorNeeds.NeedAPeriod };
             VisitorNeeds.Tick(g, world, new Dice(1));
             Assert.Equal(1, g.NeedA);
+        }
+
+        sealed class RecordingDice : IRandomSource
+        {
+            public readonly List<int> Asked = new();
+            readonly int _value;
+            public RecordingDice(int value) => _value = value;
+            public int Next(int n) { Asked.Add(n); return _value; }
+        }
+
+        // ⭐ THE GROWTH IS THE DIE ITSELF: rand(2), so a pass adds 0 or 1 and never more. REJECTS an
+        // unconditional +1 (a die of 0 must add nothing), REJECTS rand(2)+1, REJECTS rand(3).
+        [Fact]
+        public void GrowthAddsTheDieAndTheDieIsRandTwo()
+        {
+            var world = new World { NowTick = VisitorNeeds.NeedAPeriod * VisitorNeeds.NeedBPeriod };  // 2000: both fire
+            var zero = Guest(); var zeroDice = new RecordingDice(0);
+            VisitorNeeds.Tick(zero, world, zeroDice);
+            Assert.Equal(0, zero.NeedA);
+            Assert.Equal(0, zero.NeedB);
+            Assert.Equal(new[] { 2, 2 }, zeroDice.Asked.Take(2));
+
+            var one = Guest();
+            VisitorNeeds.Tick(one, world, new RecordingDice(1));
+            Assert.Equal(1, one.NeedA);
+            Assert.Equal(1, one.NeedB);
+        }
+
+        // ⭐ ONLY TWO STATS MOVE ON A CLOCK. Two thousand ticks of standing on a clean tile with nothing
+        // near: need A and need B climb and NOTHING else changes. REJECTS any passive drift added to
+        // boredom, V+0x5D, nausea or tiredness -- the obvious "make the needs feel alive" invention.
+        [Fact]
+        public void OnlyNeedAAndNeedBGrowWithTime()
+        {
+            var g = Guest();
+            var world = new World();
+            var dice = new RecordingDice(1);                    // every growth die lands; the bubble's rand(10)==0 never does
+            for (long t = 1; t <= 2000; t++) { world.NowTick = t; VisitorNeeds.Tick(g, world, dice); }
+            Assert.Equal(40, g.NeedA);                          // 2000 / 50
+            Assert.Equal(50, g.NeedB);                          // 2000 / 40
+            Assert.Equal(0, g.Boredom);
+            Assert.Equal(0, g.RideDesire);
+            Assert.Equal(0, g.Nausea);
+            Assert.Equal(0, g.Tiredness);
+            Assert.Equal(50, g.Happiness);
+        }
+
+        // The die is drawn on the gated tick even when the stat is already full, and the clamp holds.
+        // REJECTS an early-out that skips the roll at 100 (it would shift the RNG stream for every guest
+        // behind a full one) and REJECTS a wrap past 100.
+        [Fact]
+        public void TheGrowthDieIsDrawnEvenAtTheCap()
+        {
+            var g = Guest(); g.NeedA = 100;
+            var dice = new RecordingDice(1);
+            VisitorNeeds.Tick(g, new World { NowTick = VisitorNeeds.NeedAPeriod }, dice);
+            Assert.Equal(100, g.NeedA);
+            Assert.Contains(2, dice.Asked);
         }
 
         // The needs climb on their own periods and only on those ticks.
@@ -161,6 +220,23 @@ namespace TPW.Sim.Tests
         public void TheNeedBThresholdIsEightyFive(int needB, int lost)
         {
             var g = Guest(); g.NeedB = needB;
+            VisitorNeeds.Tick(g, new World { NowTick = VisitorNeeds.LitterPeriod }, new Dice());
+            Assert.Equal(50 - lost, g.Happiness);
+        }
+
+        // ⚠ THE OTHER THREE THRESHOLDS, PINNED ON BOTH SIDES: V+0x5D at 90 ([0x80103220]), need A at 95
+        // ([0x80103224]), nausea at 85 ([0x8010321C]). REJECTS an off-by-one in EITHER direction -- the
+        // one-sided tests above let "89 or more" for the toilet need and "94 or more" for need A survive.
+        [Theory]
+        [InlineData("toilet", 89, 0)] [InlineData("toilet", 90, 1)]
+        [InlineData("needA", 94, 0)] [InlineData("needA", 95, 1)]
+        [InlineData("nausea", 84, 0)] [InlineData("nausea", 85, 1)]
+        public void EachPenaltyThresholdIsExact(string field, int value, int lost)
+        {
+            var g = Guest();
+            if (field == "toilet") g.RideDesire = value;
+            else if (field == "needA") g.NeedA = value;
+            else g.Nausea = value;
             VisitorNeeds.Tick(g, new World { NowTick = VisitorNeeds.LitterPeriod }, new Dice());
             Assert.Equal(50 - lost, g.Happiness);
         }
