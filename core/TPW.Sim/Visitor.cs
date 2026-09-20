@@ -30,6 +30,22 @@ namespace TPW.Sim
         ShuffleForward = 19,
         /// <summary>Standing in a queue waiting (§2.4).</summary>
         WaitingInQueue = 18,
+        /// <summary>Walking a single waypoint (state 3, 0x800932C8). Shuffle forward sets it directly with
+        /// one waypoint at the new slot; the path-ready message sets it after a pathfind (§0 item 5).</summary>
+        WalkToWaypoint = 3,
+        /// <summary>⚠ NEVER ENTERED IN THIS BUILD. behaviour.md §2.4: no SetState or PushState with 4 and
+        /// no raw write of the state byte anywhere in TPW.BIN, checked across the whole image. The name
+        /// table has it, nothing sets it, and nothing in this port does either. Kept at its number so the
+        /// enum still matches the table.</summary>
+        OnRide = 4,
+        /// <summary>Aboard and hidden; the ride owns the guest until it unloads (§2.4).</summary>
+        Loading = 21,
+        /// <summary>Applying the ride's or building's effect on the way off (§2.4).</summary>
+        Unloading = 22,
+        /// <summary>Walking back to the ride's entrance point after riding (§2.4).</summary>
+        GotoEntrance = 23,
+        /// <summary>Taken out of a queue: walking to the ride's leave point (§2.4).</summary>
+        RemovedFromQueue = 58,
         Vomiting = 29,
         /// <summary>Pathing to the park exit -- the leaving state (§2.6).</summary>
         LeavingPark = 38,
@@ -97,7 +113,7 @@ namespace TPW.Sim
         public static Visitor Spawn(IRandomSource rng, long nowTick)
         {
             if (rng == null) throw new ArgumentNullException(nameof(rng));
-            return new Visitor
+            var v = new Visitor
             {
                 Money = GuestSpending.StartingMoney(rng.Next(300)),
                 Rubbish = rng.Next(40),
@@ -118,6 +134,10 @@ namespace TPW.Sim
                 // so it cannot disturb the fields whose order IS known.
                 EntertainerNotBefore = nowTick + rng.Next(300),
             };
+            // ONE roll for both speeds: the constructor writes rand(15)+15 to V+0x62 and then copies it
+            // to V+0x60 (READ 0x8008C6CC..0x8008C704). Copied after the initializer so no die is added.
+            v.NormalWalkSpeed = v.WalkSpeed;
+            return v;
         }
 
         Visitor() { }
@@ -158,11 +178,34 @@ namespace TPW.Sim
         /// <summary>V+0x60: rand(15)+15 at spawn, 15 in a queue, 30 while RideDesire > 97.</summary>
         public int WalkSpeed { get; set; }
 
+        /// <summary>V+0x62: the speed the guest was born with. Unloading restores <see cref="WalkSpeed"/>
+        /// from it after the queue lowered it to 15 (§2.4).</summary>
+        public int NormalWalkSpeed { get; set; }
+
         /// <summary>V+0x54: the slow-clock reading at spawn. Time in park is `McAi+0x10 - this`.</summary>
         public long ArrivedOnDay { get; set; }
 
         /// <summary>P+0x2A, the thought bubble currently shown, or 0 for none.</summary>
         public int Bubble { get; set; }
+
+        /// <summary>P+0x2B bit 0x04 (0x80093ECC sets it, 0x80093EB8 reads it): the guest is in a ride's
+        /// queue member list. The can-join test lets a queued guest through the cap; messages 7 and 10
+        /// and Unloading clear it (§2.4, §2.10).</summary>
+        public bool InQueue { get; set; }
+
+        /// <summary>P+0x2B bit 0x01 (0x80093EFC). Set on coming off a ride and on leaving a queue,
+        /// cleared on boarding (state 21) and on reaching a type-2 building (§2.3, §2.4).
+        /// ⚠ WHAT READS IT IS NOT ESTABLISHED. It is carried because the handlers write it, and it is
+        /// named by its bit so nobody mistakes the name for a meaning.</summary>
+        public bool Flag1 { get; set; }
+
+        /// <summary>P+0x2E bits 3-7: 11 idle/walk, 12 vomit, 13 wander (§1). That it is an animation id
+        /// is GUESS-medium; the values the handlers write are READ.</summary>
+        public int Animation { get; set; }
+
+        /// <summary>P+0x2E bits 0-2: facing. 0/2/4/6 by direction of travel while walking (§2.7), and
+        /// rand(4)*2 when a queued guest fidgets (§2.4).</summary>
+        public int Facing { get; set; }
 
         /// <summary>P+0x2C: the "wait until" deadline in ticks, and the decision cooldown.</summary>
         public long WaitUntil { get; set; }

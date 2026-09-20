@@ -39,6 +39,28 @@ Legend used throughout:
    0x8009322C which Sets 3 again : arrived → purpose switch`. State 1 ("Set random dest") is a
    one-instruction trampoline to state 5 (0x800934CC: `SetState(5)`), and 5 ("Walking") is the random
    wander in 0x80092844.
+6. **§2.4 re-read for the port (2026-09-20), all READ.** State 18's `d` is `max(|pref − intensity|, 50)
+   >> 1` **with an absolute value**: 0x8009073C..0x8009079C computes `pref − intensity`, branches on the
+   sign and recomputes the other way round, then 0x80092118 (= max) and `sra 1`. The floor stands. The
+   every-4 and every-8 tick passes in 18 are **staggered by V+0x10** (`now & 3` / `now & 7` against it,
+   0x800907CC / 0x800907F0) like the decision; the 2/(100−d) roll is `rand(100−d) < 2`, the 10% is
+   `rand(100) < 10`, and the fidget is `rand(300)` then facing `:= rand(4) << 1` then `rand(10) == 0` for
+   the sound. **0x8009E118 delivers message 7 to the leaver synchronously** through its vtable slot 40
+   (0x8009E180) and then sets flag bit 0x01 (0x8009E194), so the "can't join while in-queue" path of 41
+   and 19 does **not** SetState(0) itself — the guest ends in **58**, not 0 (0x8008F778 / 0x8008F64C jump
+   straight to the epilogue). Message 2's purpose-3 arm is the same shape (0x8008FAEC). **41 and 23
+   SetState(11)** (0x80093F80); only 58 pushes. A refused pathfind in 41, 23 or 58 returns with the state
+   unchanged and retries next tick (41 has already listed the guest and set its in-queue bit by then).
+   Arrival purposes 3 and 10 also set the in-queue bit (0x8008DDAC / 0x8008DE1C) and test "at the slot"
+   by **exact equality** of both 8.8 coordinates (0x8008DDB4..0x8008DDD4). 0x8009D57C's origin is ride
+   slot 42 (arg 0) as a tile centre; each member ahead is one 0x40 step, first toward path tile 0 and
+   turning toward the next tile whenever the slot sits exactly on a tile's centre; it **fails (returns 0,
+   no append)** when it would advance past the last tile or when a step lands on the last tile's tile
+   (0x8009D838..0x8009D864) — so +x/+y paths get one step past the penultimate centre and −x/−y paths get
+   two. The unload ride arm (0x8008F3E4) has no slot-25 call; its mismatch is `|pref − intensity|` too.
+   The constructor rolls the walk speed **once** (0x8008C6CC) into V+0x62 and copies it to V+0x60.
+   Arrival purpose 0 clears flag bit 0x01 for type 2 (0x8008DC04, listed above) **and for types 4 and 5**
+   (0x8008DCC8, not listed above); the ride arm does not touch it.
 
 7. **§3.4 (guard) corrected in five places (2026-09-20), all re-read from TPW.BIN.** Found by astra
    while porting the class, which kept the text below and flagged the conflict rather than substituting;

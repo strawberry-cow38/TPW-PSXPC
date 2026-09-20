@@ -125,10 +125,10 @@ namespace TPW.Sim
         static Arrival Act(Visitor guest, IArrivalWorld world, IRandomSource rng) => guest.Purpose switch
         {
             Purpose.AtAttraction => AtAttraction(guest, world, rng),
-            Purpose.Finished => Idle(guest),
+            Purpose.Finished => AnimateAndIdle(guest),
             Purpose.QueueWalk => Queue(guest, world, joinIfNotAtSlot: false),
             Purpose.QueueShuffle => Queue(guest, world, joinIfNotAtSlot: true),
-            Purpose.Abandon => ClearAndIdle(guest),
+            Purpose.Abandon => AbandonTarget(guest),
             Purpose.ClearTarget => ClearAndIdle(guest),
             Purpose.AtBin => AtBin(guest),
             Purpose.Pleased => Pleased(guest, rng),
@@ -151,12 +151,14 @@ namespace TPW.Sim
             // variable time. Everything else is a ride and goes to the queue instead.
             if (type == 2)
             {
+                guest.Flag1 = false;   // READ 0x8008DC04: bit 0x01 cleared on reaching a type-2 building
                 guest.WaitUntil = world.NowTick + ShopDwellTicks;
                 guest.SetState(VisitorState.UsingAttraction);
                 return Arrival.UsingAttraction;
             }
             if (type == 4 || type == 5)
             {
+                guest.Flag1 = false;   // READ 0x8008DCC8: cleared here too, before the dwell roll
                 guest.WaitUntil = world.NowTick + ShopDwellTicks + rng.Next(StallExtraDwellMax);
                 guest.SetState(VisitorState.UsingAttraction);
                 return Arrival.UsingAttraction;
@@ -181,8 +183,12 @@ namespace TPW.Sim
                 guest.HasTarget = false;
                 return Idle(guest);
             }
+            // The in-queue bit is set here as well as in state 41 (READ 0x8008DDAC / 0x8008DE1C), so a
+            // guest that reached its slot counts as queued for the can-join test even if 41 was skipped.
+            guest.InQueue = true;
             if (atSlot)
             {
+                guest.Animation = VisitorQueue.AnimationIdle;
                 guest.SetState(VisitorState.WaitingInQueue);
                 return Arrival.WaitingInQueue;
             }
@@ -217,6 +223,21 @@ namespace TPW.Sim
         static Arrival ClearAndIdle(Visitor guest)
         {
             guest.HasTarget = false;
+            return Idle(guest);
+        }
+
+        // Purpose 4 (back from a ride's entrance) resets the animation as well as the target; purpose
+        // 22 (back from a leave point) does not touch the animation. Two arms, not one.
+        static Arrival AbandonTarget(Visitor guest)
+        {
+            guest.HasTarget = false;
+            guest.Animation = VisitorQueue.AnimationIdle;
+            return Idle(guest);
+        }
+
+        static Arrival AnimateAndIdle(Visitor guest)
+        {
+            guest.Animation = VisitorQueue.AnimationIdle;
             return Idle(guest);
         }
 
