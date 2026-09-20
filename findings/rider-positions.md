@@ -139,7 +139,8 @@ type = lbu outer+0x61 of the rider     # 0x800926A0 — visitor type byte (behav
 `facing = ((yaw+256) >> 9) & 7` (negatives rounded via +767), `band = max(2, (pitch+256) >> 9)` (band
 forced to 2 also zeroes facing), sprite id = `s16 0x800E0140[17*type + facing + 8*band]` (or, when
 `[gp+0x3A0] != 0`, `0x800F1EEC[type % [gp+0x39C]]`), sprite = `0x800BDCD4(id)`,
-`SetRotMatrix/SetTransMatrix({R,T})`, `0x800348F4(zero8, sprite, band < 5 ? 0 : 1, roll)`. That is a
+`SetRotMatrix/SetTransMatrix({R,T})`, `0x800348F4(zero8, sprite, facing > 4, roll)` (the third argument
+is the X-mirror flag — `slti` on the unmasked facing, corrected in §8 — not a band test). That is a
 **billboard picked by the composed orientation**; no Person field is read or written.
 
 ### 2.5 Arm B — `record+0xBC != 0` — write x/z, draw with a y override
@@ -322,5 +323,85 @@ land on it first.
   `(A+0x58<<8, A+0x5A, A+0x5C<<8)` (GUESS-high, §2.6); neither writer was read.
 - Whether the bone matrices in `W + D[0x24]` are parent-composed (GUESS-high, §2.3).
 - The meaning of `record+0xBC` values 2–4 on coasters and 1 on tours/track rides.
-- The sprite-frame table `0x800E0140` layout beyond the index formula; `0x800348F4`'s arguments.
+- ~~The sprite-frame table `0x800E0140` layout beyond the index formula; `0x800348F4`'s arguments.~~
+  Answered in §8: the sheet, the layout, what the sprites are, and the draw's arguments.
 - Anything about live behaviour: no emulator run was made for this report.
+
+## 8. Which sheet the rider sprites come from — and what they are (READ; pictures MEASURED)
+
+**Correction to §2.4 above**: `0x800348F4`'s third argument is `4 < facing` (the *unmasked* quantised
+yaw), which the draw uses to **mirror the quad** (`local_2c = −local_2c`); it is not a band test.
+
+### 8.1 The sheet is FOLIO entry 416, and the indices are absolute (READ)
+`0x80035050` turns the table entry into a sprite with `0x800BDCD4(id) = [0x80103A88] + 12·id`.
+`[0x80103A88]` is written once, in `0x800BDC60`: `0x800BE268(&0x80103A80, 0x1A0)` then
+`[0x80103A88] = 0x80028DD4(&0x80103A80)` (= slot+0x1C, the sprite record table). `0x800BE268` →
+`0x800BE288(slot, 0x1A0)` → `0x800BE2B4`: find or take a slot in the ten-entry sheet table at
+`0x800F07C8` (32 bytes each, ctor `0x8002809C`, vtable `0x800DD024`), then `0x800BE308(slot, id)`
+stores the id and calls vtable entry 2 = **`0x800282D0(slot, entry)`**, folio.md §4.1's generic FOLIO
+entry loader. So the id is the archive entry: **sheet 416**, the "common" sheet the port already draws
+the HUD frames, font, particles and entrance flags from (`ParkHud.cs`, `Particles.cs`,
+`EntranceFlags.cs`). There is **no per-type, per-world or per-block base**: `0x800E0140[17·type +
+facing + 8·band]` is the sprite number in sheet 416 as it stands. The walking people come from a
+different sheet (269, resolved through the person's model object and the `0x800DFFFC` block table —
+`PeopleSheet.cs`), which is why 269's sprites 110..120 are a guest body from block 273 and not riders.
+The draw then reads the record's own tpage/clut/u/v/w/h (`0x800344F0`, byte +10 = pre-mirrored UVs).
+
+Every site passes `type = 0x800926A0(rider) = V+0x61` (the spawner's `rand(8)`): NonPathedRide
+`0x8009FC48`, tour `0x800A2D4C`, track `0x800AC4C8`, `0x800AB1C8`, coaster `0x800B2964`. One call in
+`0x800AB1C8` (its second, at the decompile's line 253) passes `byte [obj+0xD]` of another object instead
+— not traced.
+
+### 8.2 The table, decoded (MEASURED against the image)
+Eight rows of 17 `s16`, `type = 0..7` → rows in the order **110, 121, 132, 143, 66, 77, 88, 99** (first
+sprite of each row's 11): types 0..3 use 110..153, types 4..7 use 66..109. In each row:
+
+```
+index 0..7   band 0 (level):     s+6, s+7, s+8, s+9, s+10, s+9, s+8, s+7    — 5 sprites, facings 5..7 reuse 3..1
+index 8..15  band 1 (elevated):  s+1, s+2, s+3, s+4, s+5,  s+4, s+3, s+2
+index 16     band 2 (overhead):  s                                          — one sprite, facing forced to 0
+```
+where `s` is the row's first sprite. Mirroring for facings 5..7 is done by the draw (§8.1's flag), so
+five drawn views cover eight facings: front, front-quarter, profile, back-quarter, back.
+
+### 8.3 They are HEADS, not seated bodies (MEASURED: sheet 416 rendered with the port's own layout)
+Rendering sprites 66..153 of sheet 416 (block 0 raw, the rest UNPAK, palettes inside the sheet —
+`TextureSheet.cs`) shows **eight hairstyles, 11..20 × 10..18 texels, one palette per row**: black
+short hair, blonde short, brown short, dark grey (types 0..3, palettes 3066/3067/3128/3129 — the rows at
+110..153); blonde pigtails, black pigtails, red pigtails, dark-blonde bob (types 4..7, palettes
+3002/3003/3064/3065 — the rows at 66..109). That pairs with `PeopleSheet.GuestBlocks` (bodies 272, 272,
+273, 273, 270, 270, 271, 271): two hair colours per walking body, 270/271 being the pigtailed girls.
+Per row, sprite `s` is the crown of the head seen from straight above; `s+1..s+5` the head seen from
+above at an angle, front to back; `s+6..s+10` the head seen level, front to back. **A rider on the 54
+in-place flat rides is drawn as a floating head at the seat bone — the body is whatever the car mesh
+shows.** The five bounce rides (arm B) draw the whole walking sprite instead (§2.5).
+
+### 8.4 The bands are the camera's elevation over the head (READ; naming GUESS-high)
+`0x800BFBDC(M)` on the composed `R = Mcam.R × B.R`: the first output is `0x400 − acos(−R32)` with the
+acos taken from the table at `0x800DDEF0` (`(x>>1)+0x800` → 2047, 1023, 0 at x = −4096, 0, +4096), i.e.
+**`asin(−R32)` in 4096ths of a turn** — the angle between the seat's up axis and the view plane. Then
+`band = clamp((a + 256) >> 9, 0, 2)` with negative `a` giving 0:
+* band 0: |a| < 22.5°, or any tilt away from the camera — the level views;
+* band 1: 22.5°..67.5° toward the camera — the from-above views;
+* band 2: > 67.5° — the crown, facing ignored.
+So it is not "level versus inclined seating" alone: the park camera's own pitch is in `Mcam.R`, so an
+upright seat under the usual elevated view already lands in band 1, and a seat that tips the rider
+back or forward moves the head across bands and around the facings as the ride runs. The second output
+(`ratan2(R31, R33) + 0x800`) is the facing; the third (`ratan2(R12, R22)`) is the roll, which
+`0x800348F4` applies as a rotation of the quad in the screen plane (`rsin`/`rcos` of −roll).
+
+### 8.5 The quad (READ)
+`0x800348F4(pos, record, mirror, roll)` runs RTPS on the bone position twice with **H set to the
+sprite's w/2 and then h/2** (`ctc2 $26`), so IR0 comes back as each half-extent scaled by 1/SZ; the
+half-width is further `<< 9 / 0x140` (×1.6, the 320→512 stretch) and both are shifted by
+`[0x801029E4] + 12` (= 14). The four corners are `centre ± (cos·hw ∓ sin·hh)`; the quad is dropped only when
+it lies entirely outside x ∈ [0, 512] or y ∈ [0, 256], and is linked into the ordering table at
+`(SZ >> 2) + [0x801029E8]` (= SZ/4 − 10, slots 1..0x7CF). Head size on screen therefore follows the sprite's texel size and the seat's
+depth, with no per-ride scale.
+
+### 8.6 The override (READ; identification GUESS-high)
+When `[0x801029F4]` (gp+0x3A0, 0 in the image, no writer found by gp or absolute store) is non-zero,
+the table is bypassed and `sprite = 0x800F1EEC[type % [0x801029F0]]` = sprites **564..569** of the same
+sheet, modulo 6. Rendered, those are six 26..32 × 38..46 photographic faces — a developer easter egg or
+debug switch that puts real faces on every rider. Nothing on this disc sets it.
+
