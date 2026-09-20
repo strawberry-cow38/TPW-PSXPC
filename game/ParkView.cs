@@ -1226,6 +1226,7 @@ namespace TPWGodot
         }
 
         string _infoLive = "";
+        (int X, int Z)? _lastHoverTile;
 
         void RefreshInfo()
         {
@@ -3524,6 +3525,18 @@ void fragment() {
                 _cursorMesh.Mesh = TrackMesh();
             }
             if (_placing >= 0) UpdatePlacementGhost();
+
+            // ⚠ THE HOVER READOUT NEEDS ITS OWN REFRESH. RefreshInfo runs on discrete events -- a tool
+            // opened, a tile laid, an attraction placed -- and MOVING THE MOUSE IS NOT ONE OF THEM, so the
+            // "under the mouse" section was only ever rebuilt when something else happened and read as
+            // simply absent. Rebuild it when the hovered tile changes, and only while the F3 overlay is
+            // actually on screen, so a normal game pays nothing for it.
+            if (_info != null && _info.IsVisibleInTree())
+            {
+                var hoverTile = TileUnderMouse();
+                if (hoverTile != _lastHoverTile) { _lastHoverTile = hoverTile; RefreshInfo(); }
+            }
+
             float dt = (float)delta;
             // ⚠ THE KEYBOARD IS POLLED, SO THE MODAL GATE IN _UnhandledInput CANNOT SEE IT. The mouse is
             // event-driven and stops at that gate; these keys are read straight from the device every frame,
