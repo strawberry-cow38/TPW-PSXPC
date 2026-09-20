@@ -1634,24 +1634,39 @@ namespace TPWGodot
         /// height in world units, its height in tiles, its footprint's centre.</summary>
         sealed class BoxSite { public int X0, Z0, W, D, Y0, Height, Cx, Cz, Type; }
 
-        /// <summary>⭐ THE ONLY HONEST INVERSE OF A PLACEMENT IS A SNAPSHOT. AttractionPlacement.Place
-        /// OVERWRITES each footprint tile — type becomes 5, the ground becomes the record's pad, the flags
-        /// go — and the doors become 7 and 8; PathTool.LayDoors then rewrites tiles OUTSIDE the footprint
-        /// too. None of that is reversible from the result, because what was underneath is gone. So the
-        /// tiles are copied before anything writes to them, and Delete puts them back exactly.
+        /// <summary>What a placement OWNS, as it was before the placement wrote over it — and nothing else.
         ///
-        /// The rect is the footprint grown by one tile on every side, which is what covers the doors and the
-        /// queue/path pieces LayDoors puts beside them.</summary>
-        List<(int X, int Z, TPW.Data.MapTile T)> SnapshotSite(AttractionDefinition rec, int ox, int oz, int rot)
+        /// ⭐ THE ONLY HONEST INVERSE OF A PLACEMENT IS A SNAPSHOT: `Place` overwrites each footprint tile's
+        /// type, ground and flags outright, so what was underneath cannot be recovered from the result.
+        ///
+        /// ⚠⚠ BUT A SNAPSHOT OF THE WHOLE AREA TAKES THE PLAYER'S WORK WITH IT. The first version saved the
+        /// footprint grown by one and restored all of it, which threw away any path laid from the ride's exit
+        /// afterwards — master's park lost a whole run to one delete. So this saves exactly what the ride
+        /// made: its footprint tiles (doors included, they sit on the footprint's edge) and the two tiles
+        /// LayDoors writes OUTSIDE it, the queue piece at the entrance and the path piece at the exit.
+        /// Everything else in the neighbourhood belongs to whoever laid it.</summary>
+        sealed class SiteSnapshot
         {
-            var saved = new List<(int, int, TPW.Data.MapTile)>();
-            if (_map == null) return saved;
-            var (w, d) = rec.Footprint(rot);
-            for (int z = oz - 1; z <= oz + d; z++)
-                for (int x = ox - 1; x <= ox + w; x++)
-                    if (x >= 0 && z >= 0 && x < _map.Width && z < _map.Height)
-                        saved.Add((x, z, _map[x, z]));
-            return saved;
+            public readonly List<(int X, int Z, TPW.Data.MapTile T)> Footprint = new();
+            public (int X, int Z, TPW.Data.MapTile T)? Entrance, Exit;
+        }
+
+        SiteSnapshot SnapshotSite(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var snap = new SiteSnapshot();
+            if (_map == null) return snap;
+            bool In(int x, int z) => x >= 0 && z >= 0 && x < _map.Width && z < _map.Height;
+            // The same walk Place makes, so the saved set is exactly the set it overwrites.
+            for (int j = 0; j < rec.Depth; j++)
+                for (int i = 0; i < rec.Width; i++)
+                {
+                    var (rx, rz) = rec.Rotate(i, j, rot);
+                    int tx = ox + rx, tz = oz + rz;
+                    if (In(tx, tz)) snap.Footprint.Add((tx, tz, _map[tx, tz]));
+                }
+            if (rec.EntranceTile(ox, oz, rot) is { } e && In(e.X, e.Z)) snap.Entrance = (e.X, e.Z, _map[e.X, e.Z]);
+            if (rec.ExitTile(ox, oz, rot) is { } x2 && In(x2.X, x2.Z)) snap.Exit = (x2.X, x2.Z, _map[x2.X, x2.Z]);
+            return snap;
         }
         const uint GateHoverRects = 0x800F2398;
         /// <summary>The park gate's type (its slot 0x84, 0x8006238C).</summary>
@@ -1741,7 +1756,7 @@ namespace TPWGodot
         }
 
         void RegisterPlaced(AttractionDefinition rec, int ox, int oz, int rot, MeshInstance3D inst,
-                            List<(int X, int Z, TPW.Data.MapTile T)> saved = null)
+                            SiteSnapshot saved = null)
         {
             var (w, d) = rec.Footprint(rot);
             int u = ParkTerrain.TileUnits;
@@ -1829,7 +1844,7 @@ namespace TPWGodot
             public int SoundTick;
 
             /// <summary>The tiles as they were before this was placed, so Delete can put them back.</summary>
-            public List<(int X, int Z, TPW.Data.MapTile T)> Saved;
+            public SiteSnapshot Saved;
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
@@ -3152,10 +3167,33 @@ void fragment() {
             if (_panelFor == a) _panelFor = null;
             if (_contextFor == a) { _contextFor = null; _contextAt = null; }
 
+            // ⭐ THE RIDE'S QUEUE GOES WITH THE RIDE, door tile and all — there is no ride left for it to
+            // serve. (Edit Queue keeps that tile; Delete cannot, because the door it belongs to is going.)
+            if (_paths != null && _map != null && a.IsRide)
+            {
+                _paths.RemoveQueue(_map, a.Rec, a.Ox, a.Oz, a.Rot);
+                if (a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot) is { } q && a.Saved?.Entrance is { } qs)
+                    _map.Tiles[q.Z * _map.Width + q.X] = qs.T;      // the door piece back to what it was
+            }
+
             if (a.Saved != null && _map != null)
-                foreach (var (x, z, t) in a.Saved)
-                    if (x >= 0 && z >= 0 && x < _map.Width && z < _map.Height)
-                        _map.Tiles[z * _map.Width + x] = t;
+            {
+                // The footprint is the ride's own ground and always goes back.
+                foreach (var (x, z, t) in a.Saved.Footprint) _map.Tiles[z * _map.Width + x] = t;
+                // ⚠ THE DOOR PIECES ONLY GO BACK IF THE RIDE MADE THEM. master's rule: take the one tile that
+                // was touching the exit door, UNLESS it was already there before the ride was placed. A tile
+                // that was path beforehand is the park's, not the ride's, and stays.
+                Restore(a.Saved.Exit);
+                Restore(a.Saved.Entrance);
+            }
+
+            void Restore((int X, int Z, TPW.Data.MapTile T)? door)
+            {
+                if (door is not { } d || _map == null) return;
+                var was = d.T.Type;
+                if (was == TileType.Path || was == TileType.QueuePath || was == TileType.PathQueueOverlap) return;
+                _map.Tiles[d.Z * _map.Width + d.X] = d.T;
+            }
 
             // ⭐ AND THE NEIGHBOURS HAVE TO BE TOLD. Restoring the snapshot puts the ride's own tiles back,
             // but the tiles AROUND it were linked TO the ride's door paths when it was placed, and those tiles
@@ -3193,6 +3231,12 @@ void fragment() {
                 ? $", door tile ({e.X},{e.Z}) is {_map[e.X, e.Z].Type}" : "";
             return $"removed {gone} queue tiles{door}";
         }
+
+        /// <summary>What a tile is, by name. A test hook: "the queue went and the path stayed" is two tile
+        /// types, and a screenshot cannot tell a grass tile from a path one reliably enough to assert on.</summary>
+        public string TileAt(int x, int z)
+            => _map == null || x < 0 || z < 0 || x >= _map.Width || z >= _map.Height
+                ? "off map" : $"{_map[x, z].Type}";
 
         /// <summary>Delete whatever is on a tile, as the context list's Delete does. A test hook: a right
         /// click and a menu pick cannot be driven headlessly, and a deletion that leaves the map wrong is

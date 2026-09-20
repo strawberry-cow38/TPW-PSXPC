@@ -79,7 +79,7 @@ namespace TPWGodot
         string _autoLay, _autoPathCursor;
         /// <summary>From <c>--park-place=entry,x,z,rot;...</c>: attractions placed at load (footprint corner, quarter
         /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
-        string _autoPlace, _autoGhost, _autoDelete, _autoReplace, _autoEditQueue;
+        string _autoPlace, _autoGhost, _autoDelete, _autoReplace, _autoEditQueue, _autoTile;
         bool _logRides;
         int _forcedGuests = -1;
         string _autoHire;
@@ -554,6 +554,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-delete=")) _autoDelete = arg.Substring("--park-delete=".Length);
                 else if (arg.StartsWith("--park-replace=")) _autoReplace = arg.Substring("--park-replace=".Length);
                 else if (arg.StartsWith("--park-editqueue=")) _autoEditQueue = arg.Substring("--park-editqueue=".Length);
+                else if (arg.StartsWith("--park-tile=")) _autoTile = arg.Substring("--park-tile=".Length);
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
@@ -926,6 +927,15 @@ namespace TPWGodot
                         {
                             var v = System.Array.ConvertAll(eq.Split(','), int.Parse);
                             if (v.Length == 2) GD.Print($"[tpw] --park-editqueue {eq}: {_park.EditQueueAt(v[0], v[1])}");
+                        }
+                    }
+                    // LAST, so it reports the state everything else left behind.
+                    if (_autoTile != null)
+                    {
+                        foreach (var tl in _autoTile.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(tl.Split(','), int.Parse);
+                            if (v.Length == 2) GD.Print($"[tpw] --park-tile {tl}: {_park.TileAt(v[0], v[1])}");
                         }
                     }
                     // Last, because the ride it names may have been placed by --park-queue.
