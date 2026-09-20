@@ -94,7 +94,14 @@ namespace TPWGodot
                         // A flat face's builder writes 0x808080, the neutral colour: the texel unshaded.
                         b.C.Add(face.Flat ? new Color(128 / 255f, 128 / 255f, 128 / 255f) : col);
                         int ox = (tile % tex.TilesX) * ModelTexturing.Tile, oy = (tile / tex.TilesX) * ModelTexturing.Tile;
-                        b.UV.Add(new Vector2((ox + u) / (float)tex.Atlas.Width, (oy + v) / (float)tex.Atlas.Height));
+                        // ⭐ SAMPLE THE TEXEL'S CENTRE, NOT ITS CORNER. A UV of exactly u/width lands on the
+                        // boundary between two texels, and with nearest filtering the winner is decided by
+                        // however the interpolation rounds — so across a face it flips between texel u-1 and u,
+                        // and at the edge of a texture region it SMEARS THAT EDGE ACROSS THE FACE. Master:
+                        // "the texture's edge is being stretched over a face it shouldn't". The half-texel puts
+                        // the sample in the middle of the intended texel, where rounding cannot reach a
+                        // neighbour. The flag mesh already did this (ParkView.FlagMesh); the models did not.
+                        b.UV.Add(new Vector2((ox + u + 0.5f) / tex.Atlas.Width, (oy + v + 0.5f) / tex.Atlas.Height));
                     }
                     else { pv.Add(pos); pc.Add(col); }
                 }
