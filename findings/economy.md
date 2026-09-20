@@ -199,6 +199,25 @@ Frequencies: "event" means it fires when the game event happens, not on the cloc
 admits at most one guest per 32 ticks per lane (behaviour.md §2.6), so **entry fees arrive at most
 2 per 1.28 s ≈ 6 per game day**.
 
+### 4.0b ⚠⚠ THE VERDICT GATE IS 40 AT RUNTIME, NOT THE 0 IN THE IMAGE (2026-09-20)
+
+`0x80103248`, the gate the fee verdict compares both `q` and the fee against, reads **0 in TPW.BIN and
+40 in live console RAM** — tinyclaw read it out of three separate save states. It is written at runtime,
+so **the image is not an authority for it**. Measured either way on the same bus-fed park:
+`gate 0 → 5 paid, 22 turned back` against `gate 40 → 16 paid, 0 turned back`.
+
+⭐ **What made the 0 convincing is worth remembering.** Its NEIGHBOUR at `0x80103244`, the divisor base,
+is a genuine image constant and does read 10000 — so one of the pair checked out, and the other was
+taken on the same trust. An adjacent value being right is not evidence that this one is.
+
+⭐ **And not every attraction feeds that sum.** The verdict asks each object's class for a value through
+a virtual getter at `record+0x1A8/0x1AC`. **Shop (type 4) and Feature (type 2) both point at
+0x80066110 — `jr ra; move v0, zero`** — so a park of shops and benches is worth nothing at the gate.
+Rides (1, 3, 6, 7) and SideShow (5) each run a real computation (0x800A0594, 0x800B08C8, 0x800A8A0C,
+0x800A202C, 0x800B7788). ⚠ Those computations are still unread: the port now excludes the two zero
+classes, which is measured, but hands the rest their record's base intensity, which is not what the
+game sums.
+
 ### 4.1 Entry fee — IN (READ)
 - Where: guest state 37 handler 0x80090EDC; fee read 0x80087248; verdict 0x80090D5C; booking
   **0x80087258**: `balance += fee; +0x12C8 += fee; feeHist[i] += fee` (and Income's totals via

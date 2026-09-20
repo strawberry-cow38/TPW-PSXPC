@@ -184,8 +184,17 @@ namespace TPWGodot
         public int Counter_McAi1C { get; private set; }
         public void CountAdmission() => Counter_McAi1C++;
 
-        /// <summary>Slot 53 of every placed attraction — the base intensity the fee verdict sums.</summary>
-        public IEnumerable<int> AttractionIntensities => _targets().Select(t => t.Intensity);
+        /// <summary>What the fee verdict sums. ⭐ NOT EVERY ATTRACTION COUNTS. The game asks each object's
+        /// class for a value through a virtual getter at record+0x1A8/0x1AC, and two classes answer with a
+        /// literal zero: **Shop (type 4) and Feature (type 2) both point at 0x80066110**, which is
+        /// `jr ra; move v0, zero`. Rides (1, 3, 6, 7) and SideShow (5) each run a real computation. So a park
+        /// full of shops and benches is worth nothing at the gate, and the port was counting all of them.
+        ///
+        /// ⚠ STILL WRONG, JUST LESS SO: a ride's real contribution is computed (0x800A0594 → 0x800A0B1C for a
+        /// flat ride, and a different routine per class), not the record's base intensity this hands over.
+        /// Excluding the two zero classes is measured; the value for the rest is not.</summary>
+        public IEnumerable<int> AttractionIntensities
+            => _targets().Where(t => t.TypeIndex != 4 && t.TypeIndex != 2).Select(t => t.Intensity);
 
         // ── the park's lists ──────────────────────────────────────────────────────────────────────
 
