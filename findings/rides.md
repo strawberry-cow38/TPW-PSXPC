@@ -44,7 +44,40 @@ therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below
    level 0 / 1 / 2**.
 5. **`ai_out.txt`/`behaviour.md` "slot 86 = status ∈ {2,10,11} open"** stands, but note the Coaster
    overrides it (0x800AD78C, not read).
-6. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
+7. **§4.3's own account of the run timer is corrected here (2026-09-20), all re-read.** The mechanism
+   is right in outline and wrong in three details that matter to a port.
+   - **The phase records are 88 bytes (0x58), not 40.** The stride is computed twice in the image as
+     `(((n*3) << 2) - n) << 3` = 88n — at 0x8003010C and again at 0x8002FE58. 40 is the size of a BONE
+     record in the same file (folio.md §3.2), which is the easy conflation. Reading the table at 40
+     lands in the middle of the wrong record and still produces a plausible u16.
+   - **The length is read from the handle at A+0x18, EVERY TICK** — not cached, and not from A+0x20.
+     `0x800658D8` → `0x80065DA8(A)` → `0x80030364(A+0x18)` for the current phase → `0x800300B8` →
+     `lhu +0x38`. So a model that changes phase changes the ride's cycle length with it.
+   - **A+0x20 feeds a dead field.** `0x800A0DF8` fetches phase **1**'s length from the OTHER handle
+     (A+0x20) and stores it as a byte at **A+0x100**, and A+0x100 is never read: no `lbu` of it
+     anywhere in TPW.BIN outside the accessor at 0x800A2894, which has no JAL caller and appears in no
+     vtable in TPW.BIN or TPW.OVL. Whatever it was for, this build does not use it.
+
+   The clock itself, exactly (0x800658D8):
+   ```
+   len    = status==1 ? BuildAnimLength(A)            # 0x80065994, keyed on A+0x6D
+                      : PhaseLength(A) - 1            # the -1 is in a delay slot: RUNNING path only
+   target = len << 12
+   d = 0x800BC290(A+0x10)                             # wall-clock delta off root counter 2, << 7
+   if [0x80103840] == 3: d >>= 1                      # half speed
+   if d > 0x4000: d = 0x4000                          # SIGNED test: never catches a negative d
+   A+0x60 += d
+   if (unsigned) A+0x60 >= target: A+0x60 = 0; phase complete
+   ```
+   Two consequences worth keeping: the clamp is signed and the completion test is unsigned, so a
+   negative delta (a counter wrap) is not caught AND then completes the phase instantly; and the same
+   accumulator, against a different length, is what ends CONSTRUCTION — which is the code behind
+   AttractionLifecycle's "the build ends with the animation, not on a timer".
+
+   **Still not established:** the per-ride phase length as a NUMBER, because that needs the 88-byte
+   table decoded out of FOLIO.GAZ. The structure is now known; the values are not.
+
+8. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
    (41→18→21→22→23) and the mechanic states 56/16/14/17/58 and 57/52/54 all matched what the ride
    side does.
 
