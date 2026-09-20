@@ -109,6 +109,42 @@ turnstile cadence, so the latency creeps +10/cycle then drops. Admission gaps th
 for several cycles and then a short one. Sampling at 10-tick resolution over three arrivals lands on
 705. **The underlying period is 694.**
 
+## 2.6 The bus you can see: its model, and where it is drawn (SOURCED, 2026-09-20)
+
+⭐ **THE BUS IS FOLIO ENTRY 90.** Its model object at gp+0x131C is built by
+`0x800351BC(gp+0x131C, 90)` at 0x800508AC, in the same game-start routine that seeds the machine.
+The id that call takes is the **folio archive entry**, and the proof is the company it keeps: the
+four GATE packs go through the same `0x800351BC` with 87, 86, 85 and 88 (0x8006E504, 0x8006E808,
+0x8006EA60, 0x8006EC10), and those are the gate entries the port already loads per world. Inside,
+0x800351BC resolves the id through 0x800BBE78 → the loader whose name table at 0x800E7174 is the
+string `"folio.gaz"`, then 0x800C0DB8 for the loaded base.
+
+Entry 90 is a **scenery-style pack of one model** (the same format as the gate and world scenery
+packs): 156 vertices, 146 faces, scale 102, measuring **3.12 x 1.09 x 0.82 tiles**. Its faces name
+texture page 0x000E, which is VRAM (896, 0) — the **COMMON sheet #416**, not any world's ground
+sheet. That is why one bus serves all four worlds.
+
+⭐ **WHERE IT IS DRAWN** (0x80057C98..0x80057D04, inside the park draw):
+
+```
+if ([0x80103960] > 0) skip          ; while countdown A runs the bus is NOT DRAWN AT ALL
+v = { x = [0x80103968] >> 8, y = 256, z = 1900 }    ; pos is 16.16 in TILES; >> 8 makes world units
+0x80035358(&gp[0x131C], matrix, 0)  ; the ordinary scenery-model draw
+```
+
+So the bus runs along **X** at a fixed z of 1900 units (7.42 tiles) and a fixed y of 256 (one tile),
+from −15 tiles to the stop at 16 and on to 60. It is hidden, not parked, between visits.
+
+⚠ **A TRAP FOR A PORT, and it bit this one.** The machine does `tgt = table[phase] << 16` BEFORE the
+wrap check, so on the last phase it reads `table[4]` — one word past a four-word table — and the
+wrap two instructions later overwrites whatever it got. Harmless on a PSX. In C# it is an
+IndexOutOfRangeException on the first bus, 27 seconds into the game.
+
+✅ **The transcription checks out against the measurement.** Run with the emulator's own time step
+(δ = 9947) the ported machine arrives every **694 ticks exactly** — the measured series is
+694 694 694 695 697 694 694, whose ±1..3 is the root counter — and at the nominal hardware step
+(10082) it gives 687, matching this report's closed form of ≈688.
+
 ## 3. Head-count per bus: `Arrivals` 0x80067274 (SOURCED)
 
 ```
