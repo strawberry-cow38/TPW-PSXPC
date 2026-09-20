@@ -79,6 +79,9 @@ namespace TPWGodot
         /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
         /// queue building.</summary>
         string _autoQueue;
+        /// <summary>From <c>--park-track=entry,x,z,rot:cx,cz:...</c>: a coaster or track ride placed at load and its
+        /// track laid by a press at each cursor tile ("u" for the undo). For captures of the track builder.</summary>
+        string _autoTrack;
         /// <summary>From <c>--park-hover=x,z[,x,z...]</c>: the cursor held on that tile, and any further pairs held
         /// as hovered too, for captures of one hover box or of several overlapping.</summary>
         string _autoHover;
@@ -497,6 +500,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
+                else if (arg.StartsWith("--park-track=")) _autoTrack = arg.Substring("--park-track=".Length);
                 else if (arg.StartsWith("--park-hover=")) _autoHover = arg.Substring("--park-hover=".Length);
                 else if (arg == "--park-picker") _autoPicker = 0;
                 else if (arg.StartsWith("--park-picker=")) _autoPicker = int.Parse(arg.Substring("--park-picker=".Length));
@@ -758,6 +762,23 @@ namespace TPWGodot
                         if (v.Length >= 2) _park.PinHover(v[0], v[1]);
                         for (int hv = 2; hv + 1 < v.Length; hv += 2) _park.PinHoverAlso(v[hv], v[hv + 1]);
                     }
+                    if (_autoTrack != null)
+                    {
+                        var parts = _autoTrack.Split(':');
+                        var v = System.Array.ConvertAll(parts[0].Split(','), int.Parse);
+                        var clicks = new System.Collections.Generic.List<(int X, int Z)>();
+                        (int X, int Z)? hover = null;
+                        for (int k = 1; k < parts.Length; k++)
+                        {
+                            if (parts[k] == "u") { clicks.Add((-1, -1)); continue; }
+                            var c = System.Array.ConvertAll(parts[k].TrimStart('~').Split(','), int.Parse);
+                            if (c.Length != 2) continue;
+                            if (parts[k].StartsWith("~")) hover = (c[0], c[1]); else clicks.Add((c[0], c[1]));
+                        }
+                        if (v.Length == 4)
+                            GD.Print($"[tpw] --park-track {_autoTrack}: {_park.TrackAt(v[0], v[1], v[2], v[3], clicks, hover)?.ToString() ?? "refused"}");
+                    }
+
                     if (_autoQueue != null)
                     {
                         var parts = _autoQueue.Split(':');

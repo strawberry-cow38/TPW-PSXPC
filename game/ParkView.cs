@@ -285,6 +285,7 @@ namespace TPWGodot
         {
             // The park as the game has it once loaded: road typed, the square inside the gate laid as path (ParkPaths).
             if (exe != null && world != null) map = ParkPaths.LayStartingPaths(map, exe, AssetSelfTest.GameExecutableBase, world.Index);
+            _worldIndex = world?.Index ?? -1;
             _map = map;
             _common = common;
 
@@ -307,6 +308,7 @@ namespace TPWGodot
             foreach (var m in _placed) m.QueueFree();
             _placed.Clear();
             _attractionsPlaced.Clear();
+            _track = null;
             _selection.Clear();
             _selectionMesh.Mesh = null;
             _gateBox = null; _gateRect = null;
@@ -923,6 +925,26 @@ namespace TPWGodot
             return last;
         }
 
+        /// <summary>Place a coaster or track ride and lay its track by pressing at each cursor tile in turn, as the
+        /// mouse would; (-1, -1) is the undo. For captures.</summary>
+        public TrackRun.Step? TrackAt(int entry, int x, int z, int rot, IReadOnlyList<(int X, int Z)> clicks, (int X, int Z)? hover = null)
+        {
+            if (!PlaceAt(entry, x, z, rot)) return null;
+            var rec = _attractions.Find(a => a.Rec.Entry == entry).Rec;
+            StartTrack(rec, x, z, rot & 3);
+            TrackRun.Step? last = null;
+            foreach (var c in clicks)
+            {
+                if (_track == null) break;
+                if (c.X < 0) { if (_track.Undo(_map)) RebuildGround(); continue; }
+                _cursorTile = c;
+                last = PressTrack(c);
+            }
+            if (hover is { } h) _cursorTile = h;
+            if (_track != null) _cursorPinned = true;
+            return last;
+        }
+
         /// <summary>Show attraction <paramref name="entry"/> as the placement ghost with its footprint's corner at
         /// (x, z), turned, instead of following the mouse. For captures.</summary>
         public void PinGhost(int entry, int x, int z, int rot)
@@ -1031,7 +1053,10 @@ namespace TPWGodot
             Charge(rec);
             int rot = _placeRot;
             StopPlacing();
-            if (rec.IsRide) StartQueue(rec, o.X, o.Z, rot);
+            // A coaster (type 1) or a track ride (6) hands over to a track builder; everything else with a queue
+            // hands over to the queue tool (findings/rides.md §7b).
+            if (rec.Type is 1 or 6) StartTrack(rec, o.X, o.Z, rot);
+            else if (rec.IsRide) StartQueue(rec, o.X, o.Z, rot);
             RefreshInfo();
         }
 
@@ -1052,6 +1077,67 @@ namespace TPWGodot
             SwingGameCamera(_queue.End, rec.EntranceTurn(rot));
             PlaySfx(ToolSound.Start);
             RefreshInfo();
+        }
+
+        /// <summary>The track builder, open after a coaster or a track ride is placed (the game's tools 12 and 8,
+        /// findings/rides.md §7b). Its shape is the queue tool's: press to lay a segment, right button to take the
+        /// last one back, and it ends itself when the track closes on the station.</summary>
+        void StartTrack(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            if (_map == null || _worldIndex < 0) return;
+            _track = new TrackRun(rec, ox, oz, rot, _worldIndex);
+            _queue = null; _pathMode = false; _runStart = null; _cursorPinned = false;
+            _cursorTile = _track.Start;
+            SwingGameCamera(_track.Start, rot);
+            PlaySfx(ToolSound.Start);
+            RefreshInfo();
+        }
+
+        TrackRun.Step PressTrack((int X, int Z) c)
+        {
+            if (_bank != null && _bank.Balance.Pounds < TrackRun.PiecePrice[_track.World])
+            { PlaySfx(ToolSound.Refused); return TrackRun.Step.Refused; }
+            int before = _track.Pieces.Count;
+            var step = _track.Lay(_map, _paths, c.X, c.Z);
+            switch (step)
+            {
+                case TrackRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
+                case TrackRun.Step.Laid:
+                    Charge((_track.Pieces.Count - before) * TrackRun.PiecePrice[_track.World]);
+                    RebuildGround(); PlaySfx(ToolSound.Lay); RefreshInfo();
+                    break;
+                case TrackRun.Step.Closed:
+                    Charge((_track.Pieces.Count - before) * TrackRun.PiecePrice[_track.World]);
+                    RebuildGround(); PlaySfx(ToolSound.Lay); PlaySfx(ToolSound.Connected);
+                    CloseTrack(false);
+                    break;
+            }
+            return step;
+        }
+
+        /// <summary>Put the builder away. The track stays as it is: an unclosed one is a ride nobody can queue for,
+        /// which is the game's own rule rather than a reason to refuse the tool.</summary>
+        void CloseTrack(bool sound)
+        {
+            if (_track == null) return;
+            if (sound) PlaySfx(ToolSound.Closed);
+            _track = null; _cursorPinned = false; _cursorMesh.Mesh = null;
+            RefreshInfo();
+        }
+
+        TrackRun _track;
+        /// <summary>Which world's park is loaded, for the track price (TrackRun.PiecePrice).</summary>
+        int _worldIndex = -1;
+
+        /// <summary>The builder's ghost: the segment from the track's end to the cursor, in ground markers.</summary>
+        ArrayMesh TrackMesh()
+        {
+            if (_track == null || _common == null || _paths == null) return new ArrayMesh();
+            var c = _cursorTile ?? _track.End;
+            var marks = new List<AttractionPlacement.Marker>();
+            foreach (var (x, z, sprite, _) in _track.Ghost(_paths, _map, c.X, c.Z, out _))
+                marks.Add(new AttractionPlacement.Marker(x, z, sprite, 0));
+            return MarkerMesh(marks);
         }
 
         /// <summary>A press of the queue tool at tile c (0x8001DF08): lays the ghost when it may be laid, else refuses.
@@ -1384,7 +1470,7 @@ namespace TPWGodot
         /// closed, the park gate when the cursor is in its rectangle (you open the park there).</summary>
         BoxSite HoverTarget()
         {
-            if (_map == null || _pathMode || _placing >= 0 || _queue != null || (_picker != null && _picker.Visible)) return null;
+            if (_map == null || _pathMode || _placing >= 0 || _queue != null || _track != null || (_picker != null && _picker.Visible)) return null;
             if ((_hoverPin ?? TileUnderMouse()) is not { } t) return null;
             return TargetAt(t);
         }
@@ -1833,6 +1919,11 @@ void fragment() {
                 if (!_cursorPinned) _cursorTile = TileUnderMouse() ?? _cursorTile;
                 _cursorMesh.Mesh = QueueMesh();
             }
+            else if (_track != null)
+            {
+                if (!_cursorPinned) _cursorTile = TileUnderMouse() ?? _cursorTile;
+                _cursorMesh.Mesh = TrackMesh();
+            }
             if (_placing >= 0) UpdatePlacementGhost();
             float dt = (float)delta;
             var move = Vector2.Zero;
@@ -1910,6 +2001,27 @@ void fragment() {
             // queue's end toward the pointer when no tile of it refuses (0x8001DF08); the right button takes the last
             // segment back (the game's undo, 0x8001E114) or, with nothing to take back, closes the tool; Esc closes it
             // (the game's close, 0x8001E178). Closing keeps the queue laid so far.
+            // ⭐ THE TRACK BUILDER. Left lays the segment, right takes the last press back and closes the tool when
+            // there is nothing left to take back, Esc closes it (the game's Cancel / Undo / Place, and builder 8's
+            // Undo All on Shift+right).
+            if (_track != null)
+            {
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
+                {
+                    if ((_cursorPinned ? _cursorTile : TileUnderMouse() ?? _cursorTile) is { } tc) { _cursorTile = tc; PressTrack(tc); }
+                    else PlaySfx(ToolSound.Refused);
+                    return;
+                }
+                if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
+                {
+                    bool all = Input.IsKeyPressed(Key.Shift);
+                    if (all) { _track.UndoAll(_map); RebuildGround(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
+                    else if (_track.Undo(_map)) { RebuildGround(); PlaySfx(ToolSound.Undo); RefreshInfo(); }
+                    else CloseTrack(true);
+                    return;
+                }
+                if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape }) { CloseTrack(true); return; }
+            }
             if (_queue != null)
             {
                 if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
