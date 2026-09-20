@@ -2098,7 +2098,7 @@ static class Program
                 var gate = ParkGate.ForWorld(w);
                 if (gate == null) { Console.WriteLine($"no gate for world {w}"); return 1; }
                 var st = new ParkGate.State(gate);
-                int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParkGate.State.StepsPerSecond);
+                int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParticleSystem.FramesPerSecond);
                 Console.WriteLine($"world {w}: frame time {frameTime}, speed {st.Speed}");
                 for (int f = 0; f < n; f++)
                 {

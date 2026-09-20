@@ -79,8 +79,14 @@ namespace TPWGodot
         TextureSheet _common;
         double _frameClock;
         int _gateAngleDrawn = int.MinValue;
-        /// <summary>The gate's swing at the last two park frames, to draw the angle between them.</summary>
-        int _gateAnglePrev, _gateAngleCur;
+        /// <summary>The gate's swing at the last two park frames, to draw the angle between them, and its last
+        /// few park frames, to tell a swing from the twitch it ends on.</summary>
+        int _gateAnglePrev, _gateAngleCur, _gateRecentAt;
+        readonly int[] _gateRecent = new int[8];
+        /// <summary>How wide the swing's own resting cycle is (ParkGate.State: 1021 to 1024, forever). A gate whose
+        /// last few frames all sit inside this is at rest as far as the console could ever show, so it is DRAWN at
+        /// rest — the simulation keeps twitching, faithfully, and nobody has to watch it.</summary>
+        const int GateAtRest = 4;
         /// <summary>Whether the park is open: the gates only open then (0x800541AC).</summary>
         public bool ParkOpen { get; set; }
         /// <summary>The material ground and scenery share; its scroll_rows advances one row per park frame.</summary>
@@ -280,7 +286,8 @@ namespace TPWGodot
             _map = map;
             _common = common;
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
-            _gateAnglePrev = _gateAngleCur = 0;
+            _gateAnglePrev = _gateAngleCur = _gateRecentAt = 0;
+            Array.Clear(_gateRecent);
             _fx = new ParticleSystem();
             _openingFx.Clear();
             _pathMode = false; _runStart = null; _cursorTile = null; _cursorMesh.Mesh = null; _paths = null; _cursorPinned = false;
@@ -1649,13 +1656,10 @@ void fragment() {
                 }
                 if (_gate != null)
                 {
-                    // Twice a park frame, half the time each: the gate's swing is stepped per video frame on the
-                    // console (ParkGate.State.StepsPerSecond), which is what makes it open in three quarters of a
-                    // second rather than a whole one.
                     _gateAnglePrev = _gateAngleCur;
-                    int steps = (int)(ParkGate.State.StepsPerSecond / ParticleSystem.FramesPerSecond);
-                    for (int g = 0; g < Math.Max(steps, 1); g++) _gate.Update(frameTime / Math.Max(steps, 1), ParkOpen);
+                    _gate.Update(frameTime, ParkOpen);
                     _gateAngleCur = (short)_gate.Angle;
+                    _gateRecent[_gateRecentAt++ % _gateRecent.Length] = _gateAngleCur;
                 }
                 if (_gate != null)
                     foreach (int i in _gate.TakeDueEffects())
@@ -1675,6 +1679,9 @@ void fragment() {
             {
                 float f = Mathf.Clamp((float)(_frameClock * ParticleSystem.FramesPerSecond), 0f, 1f);
                 int angle = Mathf.RoundToInt(Mathf.Lerp(_gateAnglePrev, _gateAngleCur, f));
+                int lo = int.MaxValue, hi = int.MinValue;
+                foreach (int a in _gateRecent) { lo = Math.Min(lo, a); hi = Math.Max(hi, a); }
+                if (_gateRecentAt >= _gateRecent.Length && hi - lo <= GateAtRest) angle = hi;
                 if (angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(angle); _gateAngleDrawn = angle; }
             }
             _selectionMesh.Mesh = SelectionMesh();
