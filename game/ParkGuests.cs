@@ -1133,6 +1133,26 @@ namespace TPWGodot
             _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
         }
 
+        /// <summary>Draw a rider in its seat, wherever the ride is holding it this frame.
+        ///
+        /// ⭐ IT DRAWS WITHOUT MOVING ANYTHING. On 54 of the 59 flat rides the original writes NOTHING to a
+        /// rider: the sprite is composed from camera x ride x bone at draw time and the guest's own position
+        /// is left where it was when it boarded (findings/rider-positions.md §2.4). So this is a draw, not a
+        /// placement -- `g.X`/`g.Z` stay put, and unloading puts the guest out at the exit from where the sim
+        /// always thought it was. Ride the sprite, not the guest.</summary>
+        public void DrawRider(Guest g, Vector3 feet, Vector3 outward)
+        {
+            if (g?.Inst == null) return;
+            g.Inst.Visible = true;
+            if (_sprites == null) { g.Inst.Position = feet + new Vector3(0, 0.21f, 0); return; }
+            g.Facing = GuestSprites.FacingFor(outward.X, outward.Z, CameraForward);
+            _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+        }
+
+        /// <summary>The riders of one ride, in boarding order -- which is the order the seats are handed
+        /// out, so rider i belongs in seat i.</summary>
+        public IReadOnlyList<Guest> RidersOf(int entry) => Rides?.RuntimeFor(entry)?.Riders;
+
         /// <summary>The people sheet to draw guests from, and where the camera is looking, which is what
         /// decides which of the eight drawn facings each guest shows (GuestSprites).</summary>
         public void SetSprites(GuestSprites sprites) => _sprites = sprites;

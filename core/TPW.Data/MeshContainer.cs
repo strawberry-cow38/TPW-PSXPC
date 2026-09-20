@@ -54,6 +54,27 @@ namespace TPW.Data
     {
         public int VertexCount;
         public int BoneCount;
+
+        /// <summary>Header +0x28: how many entries the trailing u32 list has (`0x8002C608` copies it to the
+        /// loaded record's +0x3A).</summary>
+        public int SeatCount;
+
+        /// <summary>⭐ THE SEAT LIST, AND IT IS THE MODEL THAT NAMES THE SEATS. The u32 list that ends every
+        /// mesh sub-entry is a list of BONE INDICES, one per place a rider can sit, and a ride's draw pairs
+        /// rider i with entry i of it (findings/rider-positions.md §2.2, §3.1).
+        ///
+        /// ⚠⚠ ITS LENGTH IS THE DRAW LOOP'S BOUND, NOT THE SEAT COUNT, AND THE TWO DISAGREE ON 37 OF THE 59
+        /// FLAT RIDES. Eight rides have an EMPTY list, so their riders are invisible aboard; Caterpillar
+        /// Capers seats eight at its top level and has three entries here, and the other five riders are
+        /// simply never drawn. That is the retail game's behaviour, not a gap to fill in — a port that seats
+        /// everybody is wrong in a way that looks right.
+        ///
+        /// ⚠ "Skinless bones are the seats" was a guess of mine and it is dead: Crazy Ape names ten of its
+        /// eleven skinless bones and leaves bone 10 out. Read the list; do not infer it.</summary>
+        public int[] Seats = System.Array.Empty<int>();
+
+        /// <summary>Why the seat list could not be read, or null. Non-fatal, like the animation.</summary>
+        public string SeatError;
         public int BlockCount;
         public int TrackCount;
 
@@ -302,6 +323,25 @@ namespace TPW.Data
                 m.TrackBytesEnd = trackEnd;
             }
             else m.AnimationError = animErr;
+
+            // The seat list is the last thing in the sub-entry, after the tracks.
+            // ⚠ IT HANGS OFF THE ANIMATION PARSE. Without TrackBytesEnd there is no way to find the list
+            // from the front, and guessing at the sub-entry's end from the outside would put a plausible
+            // wrong offset in a field callers trust. So it stays empty and says why.
+            m.SeatCount = BitConverter.ToInt32(d, b + 0x28);
+            if (m.SeatCount < 0 || m.SeatCount > 4096)
+                m.SeatError = $"implausible seat count {m.SeatCount}";
+            else if (m.SeatCount == 0) { }
+            else if (m.TrackBytesEnd <= 0)
+                m.SeatError = "the animation did not parse, so the list's start is unknown";
+            else if (m.TrackBytesEnd + m.SeatCount * 4 > d.Length)
+                m.SeatError = $"{m.SeatCount} seats at {m.TrackBytesEnd:X} run past the end";
+            else
+            {
+                m.Seats = new int[m.SeatCount];
+                for (int i = 0; i < m.SeatCount; i++)
+                    m.Seats[i] = BitConverter.ToInt32(d, m.TrackBytesEnd + i * 4);
+            }
 
             mesh = m;
             return true;

@@ -1408,6 +1408,71 @@ namespace TPWGodot
         }
         readonly Dictionary<(int Entry, int Tick), ArrayMesh> _attractionPoses = new();
 
+        /// <summary>Put every rider in its seat for this frame.
+        ///
+        /// ⭐⭐ A SEAT IS A BONE, AND THE MODEL SAYS WHICH. The u32 list that ends a mesh names bone indices,
+        /// one per place, and rider i (boarding order) goes in seat i -- so a rider's position is the posed
+        /// bone's, which means riders swing with the ride for free rather than needing their own motion.
+        /// findings/rider-positions.md has the trace.
+        ///
+        /// ⚠⚠ THE LOOP STOPS AT THE SEAT LIST, NOT AT THE RIDER COUNT, AND THAT IS THE GAME. Eight flat
+        /// rides have an EMPTY list and their riders really are invisible aboard; thirty-seven seat more
+        /// guests at some upgrade level than they have slots, and the surplus is never drawn -- Caterpillar
+        /// Capers seats eight and has three. Master confirmed both from playing it. A port that seats
+        /// everybody looks more finished and is wrong.</summary>
+        void DrawRiders(PlacedAttraction a, int tick)
+        {
+            var riders = _guests?.RidersOf(a.Rec.Entry);
+            var mesh = _attractionMesh?.Invoke(a.Rec.Entry);
+            var pose = mesh == null ? null : PoseFor(mesh, tick);
+            if (_logRides && a.IsRide && Engine.GetFramesDrawn() % 600 == 0)
+                GD.Print($"[tpw] riders {a.Rec.Entry}: {riders?.Count.ToString() ?? "no runtime"} aboard, "
+                       + $"mesh {(mesh == null ? "none" : mesh.Seats.Length + " seats")}, "
+                       + $"pose {(pose == null ? "none" : pose.Bones.Length + " bones")}"
+                       + (mesh?.SeatError is { } se ? $", seat error: {se}" : ""));
+            if (riders == null || riders.Count == 0) return;
+            if (mesh == null || mesh.Seats.Length == 0) return;
+            if (pose == null || pose.Bones.Length == 0) return;
+
+            // The same mapping ModelMesh.Build gives the vertices, so a seat lands where the model does.
+            var centre = new Vector3(a.Rec.Width * ParkTerrain.TileUnits / 2f, 0,
+                                     -a.Rec.Depth * ParkTerrain.TileUnits / 2f);
+            const float scale = 1f / ParkTerrain.TileUnits;
+            var xform = a.Inst.GlobalTransform;
+            var hub = xform * ((new Vector3(0, 0, 0) - centre) * scale);
+
+            int n = Math.Min(riders.Count, mesh.Seats.Length);
+            for (int i = 0; i < n; i++)
+            {
+                int bone = mesh.Seats[i];
+                if (bone < 0 || bone >= pose.Bones.Length) continue;
+                var b = pose.Bones[bone];
+                var seat = xform * ((new Vector3(b.X, b.Y, -b.Z) - centre) * scale);
+                // ⚠ FACING IS THE ONE PART NOT TAKEN FROM THE GAME YET. The original picks the sprite from
+                // the octant of the COMPOSED camera x ride x bone rotation; this faces each rider away from
+                // the ride's middle, which agrees for anything that spins and is a stand-in for anything
+                // that does not. The bone's own 3x3 is right there in `b.R` when someone reads which of its
+                // axes the game calls forward.
+                var outward = seat - hub;
+                if (outward.LengthSquared() < 1e-6f) outward = xform.Basis.Z;
+                _guests.DrawRider(riders[i], seat, outward.Normalized());
+                if (_logRides && i == 0 && Engine.GetFramesDrawn() % 300 == 0)
+                    GD.Print($"[tpw] rider 0 of {a.Rec.Entry} -> seat bone {bone} at {seat} (hub {hub}, tick {tick})");
+            }
+        }
+
+        /// <summary>A model's pose at one whole tick, kept per model so a ride full of guests poses once.</summary>
+        MeshPose PoseFor(TPW.Data.Mesh mesh, int tick)
+        {
+            if (mesh?.Tracks == null || mesh.Tracks.Count == 0) tick = 0;
+            if (_seatPoses.TryGetValue((mesh, tick), out var p)) return p;
+            try { p = MeshPose.Evaluate(mesh, tick); } catch { p = null; }
+            if (_seatPoses.Count > 2048) _seatPoses.Clear();
+            _seatPoses[(mesh, tick)] = p;
+            return p;
+        }
+        readonly Dictionary<(TPW.Data.Mesh Mesh, int Tick), MeshPose> _seatPoses = new();
+
         /// <summary>The footprint's corner for the attraction under the mouse. 0x8001C454, run every frame with the
         /// cursor's tile, puts the corner at the cursor less half the turned footprint, rounded down (w >> 1, d >> 1):
         /// an even side has the cursor just past its middle.</summary>
@@ -2063,6 +2128,9 @@ namespace TPWGodot
             public bool TryEnqueueUpgrade() => throw UpgradeNotWired();
 
             public AttractionDefinition Rec;
+            /// <summary>The animation tick its riders should be posed at this frame, set by StepAttractions
+            /// and consumed after the guests redraw. See the note at that call.</summary>
+            public int DrawTick;
             public MeshInstance3D Inst;
             public Transform3D Rest;
             public BoxSite Box;
@@ -2596,9 +2664,12 @@ namespace TPWGodot
                     {
                         int t = a.Cycle.Accumulator
                               + (int)(Math.Min(frameTime, RideCycle.MaxDelta) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
-                        var posed = AttractionMeshAt(a.Rec.Entry, Math.Clamp(t >> RideCycle.FixedShift, 0, len - 1));
+                        int frame = Math.Clamp(t >> RideCycle.FixedShift, 0, len - 1);
+                        var posed = AttractionMeshAt(a.Rec.Entry, frame);
                         if (posed != null && a.Inst.Mesh != posed) a.Inst.Mesh = posed;
+                        a.DrawTick = frame;
                     }
+                    else a.DrawTick = 0;
                     continue;
                 }
                 int clock = a.Cycle.Accumulator + (int)(Math.Min(frameTime, 0x4000) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
@@ -3308,6 +3379,12 @@ void fragment() {
                 {
                     _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
                     _guests.Redraw();
+                    // ⚠⚠ AFTER Redraw, AND THAT ORDERING IS THE WHOLE FEATURE. Redraw calls Place on every
+                    // guest, and Place hides anyone flagged Hidden -- which every rider is. Drawing the
+                    // riders inside StepAttractions put them in their seats correctly and then Redraw
+                    // un-drew them a few lines later: the seat positions printed perfectly while the screen
+                    // stayed empty. The ride draws its own riders, and it draws them LAST.
+                    foreach (var a in _attractionsPlaced) DrawRiders(a, a.DrawTick);
                 }
                 _clockTicks++;
                 // The stand-in only runs where there is no bus: once the bus is on the road it is the arrivals.

@@ -1744,6 +1744,51 @@ static class Program
     /// record says [8, 11, 14] and the model has 11): the 11 matched the MIDDLE rung of a three-level
     /// ladder, not the top. This prints both columns for every ride at once so the relationship -- if there
     /// is one at all -- has to hold across the set rather than on the one model it was derived from.</summary>
+    /// <summary>The seat list of every ride container, checked the way fable checked it.
+    ///
+    /// ⭐ THE FALSIFIER IS "EVERY INDEX IS A REAL BONE". The list is found by position -- the last 4n bytes
+    /// of a sub-entry -- so a wrong offset does not fail loudly, it yields plausible integers. Requiring all
+    /// of them to be below that mesh's own bone count, across every ride container, is a test a wrong offset
+    /// fails: arbitrary bytes read as u32 are astronomically unlikely to all land under a small bound.
+    /// findings/rider-positions.md §3.1 ran it off a separate script; this runs it through the PORT's parser,
+    /// which is the thing the game will actually use.
+    ///
+    /// Exit code is the number of containers with an out-of-range index.</summary>
+    static int Seats(GazArchive g)
+    {
+        int containers = 0, lists = 0, empty = 0, seats = 0, bad = 0, unreadable = 0;
+        Console.WriteLine("entry  sub  slots  seats-by-level   bones  list");
+        foreach (var e in g.Entries)
+        {
+            var bytes = g.Read(e);
+            if (bytes == null || bytes.Length < 0x40) continue;
+            AttractionDefinition rec;
+            try { rec = AttractionDefinition.Read(e.Index, bytes); } catch { continue; }
+            if (rec == null || !rec.IsRide || rec.Levels.Length == 0) continue;
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _)) continue;
+            containers++;
+            for (int sub = 0; sub < c.Subs.Count; sub++)
+            {
+                if (!c.TryParseMesh(bytes, sub, out var m, out _)) continue;
+                if (m.SeatCount == 0) { if (sub == 0) empty++; continue; }
+                if (m.SeatError != null) { unreadable++; Console.WriteLine($"{e.Index,5}  {sub,3}  -- {m.SeatError}"); continue; }
+                lists++; seats += m.Seats.Length;
+                var over = Array.FindAll(m.Seats, i => i < 0 || i >= m.Skeleton.Count);
+                if (over.Length > 0) bad++;
+                if (sub != 0 && over.Length == 0) continue;
+                var levels = string.Join("/", Array.ConvertAll(rec.Levels, l => l.MaxSeats.ToString()));
+                Console.WriteLine($"{e.Index,5}  {sub,3}  {m.Seats.Length,5}  {levels,-15}  {m.Skeleton.Count,5}  "
+                                  + string.Join(",", m.Seats) + (over.Length > 0 ? "   <- OUT OF RANGE" : ""));
+            }
+        }
+        Console.WriteLine($"-- {containers} ride containers, {lists} seat lists, {seats} seats, "
+                          + $"{empty} with an empty list on sub 0, {unreadable} unreadable, {bad} out of range");
+        Console.WriteLine(bad == 0 && unreadable == 0
+            ? "PASS: every seat names a bone that exists"
+            : "FAIL: the list is not where the parser looked");
+        return bad + unreadable;
+    }
+
     static int SeatBones(GazArchive g)
     {
         Console.WriteLine("entry  seats-by-level     skinless(no root)  name");
@@ -2275,6 +2320,7 @@ static class Program
             int bnAt = Array.IndexOf(args, "--bones");
             if (bnAt >= 0 && bnAt + 1 < args.Length) return Bones(g, int.Parse(args[bnAt + 1]));
             if (Array.IndexOf(args, "--seatbones") >= 0) return SeatBones(g);
+            if (Array.IndexOf(args, "--seats") >= 0) return Seats(g);
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
