@@ -912,3 +912,27 @@ where the track pieces themselves live.
   Slot 86, loading/dispatch control and completion/unloading conditions are now READ in
   [ride-classes.md](ride-classes.md); the disagreements in §0 remain pending review.
 - The shop product parameters at record +0x30..+0x36 and the feature flag byte +0x2E bits 1–3.
+
+## A running ride's noise (READ 2026-09-20)
+
+Status 2's tick (0x8009CA60) makes the noise this table already mentioned as "every 16 ticks a positional
+sound". What it plays:
+
+- **Two gates, and BOTH must be zero.** 0x8009CA94 takes the ride's own counter (0x800660C8) `& 15`, so
+  each ride counts for itself; 0x8009CAA8 then takes a GLOBAL (0x800BDD18) `& 3`, shared by every ride.
+- 0x8009CAF0 calls **0x800B8FCC**, which rolls `rand(11)` into the u16 table at **0x800E7028** — whose
+  eleven entries are just **4, 5, ... 14**, with zeros after, so it is a list and not a mapping — asks
+  0x800B8438 whether that sound is already playing, and **rerolls up to eleven times** before giving up
+  and playing it anyway. Two rides side by side therefore rarely shout in unison.
+- It ends at 0x800B8E90, the POSITIONAL player, with the position 0x8009CAB0..CC built from the ride
+  through its class record's +72/+76. So it is **group 1, one of sounds 4..14, at the ride**.
+
+⚠ **A PORT MUST NOT ADVANCE THOSE TWO COUNTERS TOGETHER.** Ticking the global beside the ride's own in
+the same loop fixes the offset between them, and `(tick & 15) == 0 && (clock & 3) == 0` is then decided
+once for all time — for three offsets out of four the sound NEVER plays. Found exactly that way: the port
+incremented both in the attraction step and made no sound at all until the global was moved onto the
+frame clock.
+
+⚠ **0x8009C730's "sound (8,0)" above is unconfirmed.** An enumeration of every sound call site in the
+executable finds no (8,0) anywhere, and no site at all inside that function; group 8 sound 0 is never
+played by any resolved caller. Status 5's **(8,1)** at 0x8009C7A8 IS confirmed by that enumeration.

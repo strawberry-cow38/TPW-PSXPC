@@ -59,6 +59,8 @@ namespace TPWGodot
         /// <summary>Group 5, the UI's own sounds — the panel and its widgets. A park loads eight groups, listed
         /// as u16 at 0x800F23CC: 1, 10, 11, 7, 2, 6, 5, 8.</summary>
         SoundGroup _uiSounds;
+        /// <summary>Group 1, the positional voices — a running ride's noise comes out of here.</summary>
+        SoundGroup _guestSounds;
         /// <summary>A few voices, so two sounds the game starts together (lay, then connected) both play, as the
         /// game's voice allocator (0x800B8300) gives each its own SPU voice.</summary>
         readonly AudioStreamPlayer[] _sfx = new AudioStreamPlayer[4];
@@ -141,6 +143,13 @@ namespace TPWGodot
             _cursorMesh = new MeshInstance3D();
             AddChild(_cursorMesh);
             for (int i = 0; i < _sfx.Length; i++) { _sfx[i] = new AudioStreamPlayer(); AddChild(_sfx[i]); }
+            // The ride's noise is placed in the world, so it needs 3D voices; the UI's does not.
+            for (int i = 0; i < _sfx3d.Length; i++)
+            {
+                _sfx3d[i] = new AudioStreamPlayer3D { UnitSize = ParkTerrain.TileUnits * 6, MaxDistance = ParkTerrain.TileUnits * 40 };
+                _sfx3dSound[i] = -1;
+                AddChild(_sfx3d[i]);
+            }
             _ghostModel = new MeshInstance3D();
             AddChild(_ghostModel);
             _ghostMarks = new MeshInstance3D();
@@ -1741,6 +1750,9 @@ namespace TPWGodot
             /// then divides by 365 for the years it shows (0x80079520's magic-number divide), and the park
             /// draw score asks the same getter for its young-ride bonus. One field, both readers.</summary>
             public int BuiltOnDay;
+
+            /// <summary>This ride's own tick count, for the every-sixteenth noise (0x8009CA94).</summary>
+            public int SoundTick;
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
@@ -2025,7 +2037,16 @@ namespace TPWGodot
                 if (a.Status == AttractionStatus.UnderConstruction)
                     a.BuildAnimationComplete = a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
                 else if (a.Status == AttractionStatus.Running && a.IsRide)
+                {
                     a.Cycle.RunTick(a, a.CyclesPerLoad, frameTime, halfSpeed: false);
+                    // ⭐ A RUNNING RIDE MAKES NOISE, ON ITS OWN SIXTEENS AND A SHARED QUARTER. 0x8009CA94
+                    // takes the ride's tick count & 15, so each ride counts for itself; 0x8009CAA8 then takes
+                    // a GLOBAL & 3, so all of them share one gate and a park full of rides does not turn into
+                    // a wall of sound. Both have to be zero. Missing the second one makes it four times as
+                    // loud and it took reading past the first branch to notice there were two.
+                    if ((++a.SoundTick & 15) == 0 && (_ambienceClock & 3) == 0)
+                        PlayRideAmbience(a.Inst?.GlobalPosition ?? Vector3.Zero);
+                }
                 // ⭐ A SHOP ANIMATES TOO, AND THE FINDINGS SAID IT DID NOT. Every class's status-2 tick
                 // sits at its vtable's +0x23C: for the rides that is the phase-counting tick, but Shop
                 // (0x800E6A8C), Feature (0x800DCA5C) and SideShow (0x800E6D64) all carry 0x80065B78 —
@@ -2613,8 +2634,8 @@ void fragment() {
 
         /// <summary>Give the park view the build tools' sound group (SoundGroup.Load(…, 7)) and the group with the
         /// placement tools' sounds (SoundGroup.Load(…, 8)).</summary>
-        public void SetToolSounds(SoundGroup tools, SoundGroup park = null, SoundGroup ui = null)
-        { _toolSounds = tools; _parkSounds = park; _uiSounds = ui; _sfxStreams.Clear(); }
+        public void SetToolSounds(SoundGroup tools, SoundGroup park = null, SoundGroup ui = null, SoundGroup guests = null)
+        { _toolSounds = tools; _parkSounds = park; _uiSounds = ui; _guestSounds = guests; _sfxStreams.Clear(); }
 
         void PlaySfx(ToolSound which) => PlaySfx(_toolSounds, 7, (int)which);
         void PlaySfx(PlaceSound which) => PlaySfx(_parkSounds, 8, (int)which);
@@ -2623,22 +2644,71 @@ void fragment() {
         /// <summary>Play sound n of a group, at the rate its record's pitch gives, full volume, centred (0x800B84AC).</summary>
         void PlaySfx(SoundGroup group, int g, int n)
         {
-            if (group == null) return;
-            if (!_sfxStreams.TryGetValue((g, n), out var stream))
-            {
-                var pcm = group.Decode(n);
-                if (pcm == null || pcm.SampleCount == 0) { _sfxStreams[(g, n)] = null; return; }
-                var bytes = new byte[pcm.SampleCount * 2];
-                Buffer.BlockCopy(pcm.Samples, 0, bytes, 0, bytes.Length);
-                stream = new AudioStreamWav { Format = AudioStreamWav.FormatEnum.Format16Bits, MixRate = group.Sounds[n].SampleRate, Stereo = false, Data = bytes };
-                _sfxStreams[(g, n)] = stream;
-            }
+            var stream = Stream(group, g, n);
             if (stream == null) return;
             var voice = _sfx[_sfxNext];
             _sfxNext = (_sfxNext + 1) % _sfx.Length;
             voice.Stream = stream;
             voice.Play();
         }
+
+        /// <summary>Sound n of a group as a stream, decoded once and kept.</summary>
+        AudioStreamWav Stream(SoundGroup group, int g, int n)
+        {
+            if (group == null) return null;
+            if (!_sfxStreams.TryGetValue((g, n), out var stream))
+            {
+                var pcm = group.Decode(n);
+                if (pcm == null || pcm.SampleCount == 0) { _sfxStreams[(g, n)] = null; return null; }
+                var bytes = new byte[pcm.SampleCount * 2];
+                Buffer.BlockCopy(pcm.Samples, 0, bytes, 0, bytes.Length);
+                stream = new AudioStreamWav { Format = AudioStreamWav.FormatEnum.Format16Bits, MixRate = group.Sounds[n].SampleRate, Stereo = false, Data = bytes };
+                _sfxStreams[(g, n)] = stream;
+            }
+            return stream;
+        }
+
+        /// <summary>⭐ A RIDE'S OWN NOISE: a random one of group 1's sounds 4..14, AT the ride (0x8009CAF0 →
+        /// 0x800B8FCC → 0x800B8E90, the positional player). The eleven ids are a table at 0x800E7028, and they
+        /// really are just 4..14 with zeros after it, so the table is a list and not a mapping.
+        ///
+        /// ⭐ AND IT WILL NOT DOUBLE UP: the game rolls rand(11), asks 0x800B8438 whether that sound is
+        /// already going, and REROLLS up to eleven times before giving up and playing it anyway. Two rides
+        /// side by side therefore rarely scream in unison, which is the whole point of the retry.</summary>
+        void PlayRideAmbience(Vector3 at)
+        {
+            if (_guestSounds == null) return;
+            int n = 0;
+            for (int tries = 0; tries < RideAmbienceRolls; tries++)
+            {
+                n = RideAmbienceFirst + _rideDice.Next(RideAmbienceCount);
+                if (!Playing3D(n)) break;
+            }
+            var stream = Stream(_guestSounds, 1, n);
+            if (stream == null) return;
+            var voice = _sfx3d[_sfx3dNext];
+            _sfx3dNext = (_sfx3dNext + 1) % _sfx3d.Length;
+            voice.Stream = stream;
+            voice.Position = at;
+            voice.Play();
+            _sfx3dSound[System.Array.IndexOf(_sfx3d, voice)] = n;
+        }
+
+        bool Playing3D(int n)
+        {
+            for (int i = 0; i < _sfx3d.Length; i++)
+                if (_sfx3dSound[i] == n && _sfx3d[i].Playing) return true;
+            return false;
+        }
+
+        /// <summary>Group 1's ride ambience: ids 4..14, rolled with up to eleven retries (0x800B8FCC).</summary>
+        const int RideAmbienceFirst = 4, RideAmbienceCount = 11, RideAmbienceRolls = 11;
+        readonly AudioStreamPlayer3D[] _sfx3d = new AudioStreamPlayer3D[6];
+        readonly int[] _sfx3dSound = new int[6];
+        int _sfx3dNext;
+        readonly Random _rideDice = new();
+        /// <summary>The global the ride noise shares (0x800BDD18 &amp; 3), so rides do not all fire at once.</summary>
+        int _ambienceClock;
 
         /// <summary>Lay a run of path as the tool would, from tile (x0, z0) toward (x1, z1). For captures: the mouse
         /// does the same interactively. Returns how many tiles took path.</summary>
@@ -2710,6 +2780,12 @@ void fragment() {
             float rows = (float)Math.Floor(_scrollClock / TPW.Sim.ParkClock.TickSeconds);
             _mat?.SetShaderParameter("scroll_rows", rows);
             _matCull?.SetShaderParameter("scroll_rows", rows);
+            // ⚠⚠ THIS COUNTS RENDER FRAMES, NOT SIM TICKS, AND THAT IS THE WHOLE POINT. The ride noise
+            // needs BOTH its own tick & 15 and this & 3 to be zero (0x8009CA94 and 0x8009CAA8). Advance this
+            // one inside the sim loop beside the ride's own counter and the two never drift: the offset
+            // between them is fixed, so the conjunction is decided once and for all — for most offsets the
+            // sound NEVER plays. The game reads a global here (0x800BDD18) that moves on its own clock.
+            _ambienceClock++;
             _parkTime += delta * EntranceFlags.TimeUnitsPerSecond;
             if (_flagMat != null) _flags.Mesh = FlagMesh((long)_parkTime);
             // Park frames: 25 a second (a frame per clock tick at PAL's 50 Hz), each worth 1/25 s of the game's time.
