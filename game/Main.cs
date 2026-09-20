@@ -824,20 +824,6 @@ namespace TPWGodot
                             var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
                             if (v.Length == 4) GD.Print($"[tpw] --park-place {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
                         }
-                    // After the placements, so a park can place, delete and place again in one run — which is
-                    // the only way to see whether the tiles really came back.
-                    if (_autoDelete != null)
-                        foreach (var del in _autoDelete.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            var v = System.Array.ConvertAll(del.Split(','), int.Parse);
-                            if (v.Length == 2) GD.Print($"[tpw] --park-delete {del}: {(_park.DeleteAt(v[0], v[1]) ? "deleted" : "nothing there")}");
-                        }
-                    if (_autoReplace != null)
-                        foreach (var pl in _autoReplace.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
-                            if (v.Length == 4) GD.Print($"[tpw] --park-replace {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
-                        }
                     if (_autoHire != null)
                         foreach (var hire in _autoHire.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
                         {
@@ -916,9 +902,22 @@ namespace TPWGodot
                         }
                         if (v.Length == 4) GD.Print($"[tpw] --park-queue {_autoQueue}: {_park.QueueAt(v[0], v[1], v[2], v[3], clicks, hover)?.ToString() ?? "not placed"}");
                     }
-                    // ⚠ AFTER --park-queue, because it edits what that built. It sat before it at first and
-                    // reported -1 -- "no attraction there" -- which reads like a broken command rather than a
-                    // command run too early.
+                    // ⚠⚠ ALL THREE OF THESE RUN AFTER --park-place, --park-lay AND --park-queue, because every
+                    // one of them EDITS what those built. Ordered before the queue, --park-delete reported
+                    // "nothing there" and --park-editqueue reported -1 — both of which read like a broken
+                    // command rather than a command run too early. Twice, on two different hooks.
+                    if (_autoDelete != null)
+                        foreach (var del in _autoDelete.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(del.Split(','), int.Parse);
+                            if (v.Length == 2) GD.Print($"[tpw] --park-delete {del}: {_park.DeleteAt(v[0], v[1])}");
+                        }
+                    if (_autoReplace != null)
+                        foreach (var pl in _autoReplace.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
+                            if (v.Length == 4) GD.Print($"[tpw] --park-replace {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
+                        }
                     if (_autoEditQueue != null)
                     {
                         foreach (var eq in _autoEditQueue.Split(';', System.StringSplitOptions.RemoveEmptyEntries))

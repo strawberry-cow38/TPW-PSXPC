@@ -3150,6 +3150,18 @@ void fragment() {
                     if (x >= 0 && z >= 0 && x < _map.Width && z < _map.Height)
                         _map.Tiles[z * _map.Width + x] = t;
 
+            // ⭐ AND THE NEIGHBOURS HAVE TO BE TOLD. Restoring the snapshot puts the ride's own tiles back,
+            // but the tiles AROUND it were linked TO the ride's door paths when it was placed, and those tiles
+            // are outside the snapshot. A link is half of a pair: the other half outlives the tile, so a path
+            // beside a deleted ride goes on drawing the stub of a junction to grass. Two tiles wider than the
+            // snapshot, because the snapshot's own edge has neighbours too.
+            if (_map != null && _paths != null)
+            {
+                var (fw, fd) = a.Rec.Footprint(a.Rot);
+                _lastRefreshed = _paths.RefreshLinks(_map, a.Ox - 2, a.Oz - 2, a.Ox + fw + 1, a.Oz + fd + 1);
+                _lastDangling = _paths.DanglingLinks(_map, a.Ox - 2, a.Oz - 2, a.Ox + fw + 1, a.Oz + fd + 1);
+            }
+
             if (a.Inst != null) { _placed.Remove(a.Inst); a.Inst.QueueFree(); }
             // The same two the placement calls: the pathfinder's pools are wiped and every search dropped,
             // because the map it searched no longer exists (0x800EBBE4).
@@ -3178,12 +3190,17 @@ void fragment() {
         /// <summary>Delete whatever is on a tile, as the context list's Delete does. A test hook: a right
         /// click and a menu pick cannot be driven headlessly, and a deletion that leaves the map wrong is
         /// invisible until someone tries to build there again.</summary>
-        public bool DeleteAt(int x, int z)
+        public string DeleteAt(int x, int z)
         {
-            if (AttractionAt((x, z)) is not { } a) return false;
+            if (AttractionAt((x, z)) is not { } a) return "nothing there";
+            _lastRefreshed = _lastDangling = 0;
             DeleteAttraction(a);
-            return true;
+            return $"deleted, {_lastRefreshed} neighbour tiles relinked, {_lastDangling} dangling left";
         }
+
+        /// <summary>What the last delete had to put right, and what it failed to: for the test hook, because
+        /// a stub sprite beside a deleted ride is invisible to anything but a screenshot otherwise.</summary>
+        int _lastRefreshed, _lastDangling;
 
         void CloseModal()
         {

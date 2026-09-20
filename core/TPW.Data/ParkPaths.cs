@@ -422,6 +422,48 @@ namespace TPW.Data
                 return ended;
             }
 
+            /// <summary>Drop every link on this tile that points at a tile nothing can link to any more, and
+            /// re-pick its sprite if anything went. Returns true when it changed.
+            ///
+            /// ⚠ A LINK IS HALF OF A PAIR AND THE OTHER HALF OUTLIVES THE TILE. Taking a tile off the map
+            /// leaves its neighbours still carrying the bit that pointed AT it, and the sprite is chosen from
+            /// that mask (0x8004D9DC) — so the neighbour keeps drawing the stub of a junction to a tile that
+            /// is now grass. Nothing notices, because the mask is still a perfectly valid mask.</summary>
+            public bool DropDeadLinks(int x, int z)
+            {
+                int t = At(x, z);
+                if (t < 0) return false;
+                byte before = _links[t];
+                bool linkable = _type[t] == 2 || _type[t] == 4 || _type[t] == 13;
+                if (!linkable) _links[t] = 0;
+                else
+                    foreach (var (bit, dx, dz) in new[] { (North, 0, -1), (East, 1, 0), (South, 0, 1), (West, -1, 0) })
+                    {
+                        if ((_links[t] & bit) == 0) continue;
+                        int n = At(x + dx, z + dz);
+                        if (n < 0 || !(_type[n] == 2 || _type[n] == 4 || _type[n] == 13)) _links[t] &= (byte)~bit;
+                    }
+                if (_links[t] == before) return false;
+                Wear(t);
+                return true;
+            }
+
+            /// <summary>Whether this tile carries a link to something unlinkable — the defect DropDeadLinks
+            /// fixes, counted rather than fixed, so a test can assert there are none left.</summary>
+            public bool HasDeadLink(int x, int z)
+            {
+                int t = At(x, z);
+                if (t < 0) return false;
+                if (!(_type[t] == 2 || _type[t] == 4 || _type[t] == 13)) return _links[t] != 0;
+                foreach (var (bit, dx, dz) in new[] { (North, 0, -1), (East, 1, 0), (South, 0, 1), (West, -1, 0) })
+                {
+                    if ((_links[t] & bit) == 0) continue;
+                    int n = At(x + dx, z + dz);
+                    if (n < 0 || !(_type[n] == 2 || _type[n] == 4 || _type[n] == 13)) return true;
+                }
+                return false;
+            }
+
             /// <summary>0x8004FBEC for a queue tile, the queue's undo: each of its four links is dropped, from the
             /// neighbour too, which picks its piece again; then the tile is grass again (0x8004E034 with kind 0),
             /// wearing a random grass sprite.</summary>
@@ -648,6 +690,32 @@ namespace TPW.Data
             }
             if (a.ExitTile(ox, oz, rot) is { } x2) layer.LaySegment(x2.X, x2.Z, x2.X, x2.Z, 2, null);
             layer.WriteInto(map);
+        }
+
+        /// <summary>Put the path sprites right around something that has just been taken off the map: any tile
+        /// in the rect still linking to a tile nothing can link to loses that link and picks its sprite again.
+        /// Returns how many tiles changed. See <see cref="Layer.DropDeadLinks"/> for why they are left behind.</summary>
+        public int RefreshLinks(ParkMap map, int x0, int z0, int x1, int z1)
+        {
+            var layer = NewLayer(map);
+            int fixedUp = 0;
+            for (int z = z0; z <= z1; z++)
+                for (int x = x0; x <= x1; x++)
+                    if (layer.DropDeadLinks(x, z)) fixedUp++;
+            layer.WriteInto(map);
+            return fixedUp;
+        }
+
+        /// <summary>How many tiles in the rect still link to something unlinkable. For tests: the count that
+        /// has to be zero once <see cref="RefreshLinks"/> has run.</summary>
+        public int DanglingLinks(ParkMap map, int x0, int z0, int x1, int z1)
+        {
+            var layer = NewLayer(map);
+            int n = 0;
+            for (int z = z0; z <= z1; z++)
+                for (int x = x0; x <= x1; x++)
+                    if (layer.HasDeadLink(x, z)) n++;
+            return n;
         }
 
         /// <summary>Take away the queue a ride already has: from the tile outside its entrance, every QUEUE tile
