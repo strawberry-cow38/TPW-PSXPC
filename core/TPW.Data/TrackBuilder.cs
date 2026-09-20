@@ -175,10 +175,17 @@ namespace TPW.Data
         /// measuring those meshes independently gives a corner where class 1 wants one and straights where
         /// classes 0 and 2 do. See rides.md.
         ///
-        /// ⚠ So this measuring tape is still what the port uses, and it is only defensible until a coaster's
-        /// own mapping is read: a car is small and long (under two thirds of a tile wide) and always in a
-        /// matching set, the station is the biggest thing there, and the track is the one-tile piece that is
-        /// flat and not merely a box.</summary>
+        /// ⭐ AND THE COASTER'S OWN MAPPING IS NOW READ TOO, and it is static data as well: a list of
+        /// sub-model indices at `[0x800F90E0 + kind*4 + B*8 + A*16]`, terminated by −1, whose slot 0 is the
+        /// station, slots 1..4 the four cars and the rest the piece classes. For Chac Atak that list is
+        /// `0, 6 7 8 9, 1 4 2 3` — cars at 6..9, pieces at 1, 4, 2, 3. ✅ Which is the pool this measuring
+        /// tape was already picking from: it chose sub 4 (the trough) as the straight and sub 2 (the pylon)
+        /// as the support, two of those four, without being told.
+        ///
+        /// ⚠ What remains is only WHICH CLASS each of those four slots is — the pool is exact, the
+        /// assignment inside it is not. Until that is read the port still measures: a car is small and long
+        /// (under two thirds of a tile wide) and always in a matching set, the station is the biggest thing
+        /// there, and the track is the one-tile piece that is flat and not merely a box.</summary>
         public readonly struct Pieces
         {
             public readonly int Straight, Support, Column;

@@ -762,31 +762,50 @@ reading tile 2 of that list. The toilet was real; it was the pad, not the table.
 4x4 with a 0xE8 body, so its tail runs to +0x108 and `+0xDC + class*4` for classes 0..10 lands inside it
 exactly — which is why a fixed offset works at all.
 
-#### Where the COASTER's own mapping stops (READ as far as it goes)
-Its draw calls `0x800300B8(handle, visual)` from 0x800B2AC8 with
-`handle = 0x800B1928([obj+0x28])` — three instructions, `return x + 0x20` — and
-`visual = 0x800B30D4([obj+0x24], i)`, which is:
+#### The COASTER's own kind → model, and it is static data too (READ)
+Its draw calls `0x800300B8(handle, visual)` from 0x800B2AC8 with `handle = 0x800B1928([obj+0x28])` —
+three instructions, `return x + 0x20` — and `visual = 0x800B30D4([obj+0x24], i)`:
 
 ```
 kind  = [[obj+0x10] + 8 + 0x6B]        ; 0x80063328, a byte
-A     = [gp+0x124C]                    ; 0x80054000, the same word the descriptor window uses
-B     = [gp+0x1250]                    ; 0x80053FF4, likewise
-ptr   = [0x801090E0 + kind*4 + B*8 + A*16]
-return  [ptr + i*8]
+B     = [gp+0x1250]                    ; 0x80053FF4 — the same pair the descriptor window uses
+A     = [gp+0x124C]                    ; 0x80054000
+list  = [0x800F90E0 + kind*4 + B*8 + A*16]
+return  [list + i*8]
 ```
 
-So the coaster indexes a 4 x 2 x 2 table of POINTERS at **0x801090E0**, each pointing at an array of
-8-byte records whose first word is the model. ⚠ That table is in .bss — all zeros in the image — and its
-writer has NOT been found: the three sites that name it (0x800B2F70, 0x800B310C, 0x800B31A0) all READ it,
-and no `addiu` anywhere else in the image forms the address, so whatever fills it holds the base in a
-register. **That is the next thing to read**, and it is the whole of what stands between the port and
-drawing a coaster's track from the game's own data.
+⭐ **0x800F90E0 IS PLAIN STATIC DATA**, sixteen pointers, one per (world, B, kind), with a second table of
+the same shape at **0x800F9120** read identically at 0x800B4D88. Each pointer is a list of **sub-model
+indices, one word per entry with a spare word beside it, terminated by −1**:
 
-There is a SECOND table of the same shape immediately after it at **0x80109120** (0x801090E0 + 0x40, i.e.
-exactly one table's length on), read the same way at 0x800B4D88 — so whatever fills one fills both, and a
-writer found for either closes the pair. Neither address is formed by `lui`+`addiu` anywhere outside those
-four read sites, and the value 0x801090E0 appears nowhere in the image as data, so the base arrives in a
-register: look at a generic loader or an overlay rather than at more scanning.
+| world | B | kind | list | contents |
+| --- | --- | --- | --- | --- |
+| 0 | 0 | 0 | 0x800F8D20 | 0, **6 7 8 9**, 1 4 2 3, −1 |
+| 0 | 1 | 0 | 0x800F8D70 | 0, **5 5 5 5**, 1 4 2 3, −1 |
+| 0 | 1 | 1 | 0x800F8DC0 | 0, **5 5 5 5**, 1 3, −1, 2 4 |
+
+⭐ **THE SAME SHAPE AS THE TRACK RIDE'S:** slot 0 the station, **slots 1..4 the four cars**, the rest the
+piece classes. Chac Atak (entry 212) has ten sub-models — station, slab, pylon, cube, trough, cap, then
+**cars at 6..9** — and the world-0 B-0 list is exactly `0, 6 7 8 9, 1 4 2 3`. The B-1 lists read
+`0, 5 5 5 5, …`, which is Temple of Gloom (entry 219, six sub-models and ONE car mesh used four times).
+So **B selects which coaster of the theme's set**, and the cars fall out of the table verbatim.
+
+✅ **The port's measuring tape was picking from the right pool.** Chac Atak's four piece slots are subs
+1, 4, 2, 3 — slab, trough, pylon, cube — and the heuristic independently chose the trough as its straight
+and the pylon as its support, two of those four.
+
+⚠ **What is still open is small, and worth naming precisely:** which piece CLASS each of slots 5..8 is.
+The pool is exact; the assignment inside it is not read.
+
+⚠⚠ **AND HOW THIS WAS NEARLY MISSED, TWICE IN ONE DAY.** I first read this table's base as 0x801090E0,
+because `lui v1, 0x8010` loads 0x8010_0000 and I carried an 0x8011. That address is .bss, so it read as
+all zeros, so I went looking for the code that fills it — proved exhaustively that the immediate appears
+nowhere in TPW.BIN or in any of the twelve overlays, and concluded the writer must be somewhere exotic.
+Every step of that was sound and every step was about an address that does not exist. It is the SAME
+error as the descriptor table's (0x80108A30 for 0x800F8A30) earlier the same day, with the same tell: a
+table that must be written and nothing writes it. **When a lookup lands on zeros, re-do the lui + addiu
+arithmetic before believing anything about who fills it.**
+
 
 ### What the descriptor's two bytes actually do (READ)
 ⚠ **+6 IS NOT A MODEL INDEX — IT IS THE PIECE'S TURN.** 0x800A4F34 hands the byte to slot 18 of the piece's
