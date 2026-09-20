@@ -17,6 +17,8 @@ namespace TPWGodot
         ParkClock _clock;
         ParkFinances _finances;
         bool _noGate;
+        int _autoBreakAt = -1;
+        bool _autoBreakHard;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -559,7 +561,19 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
-                else if (arg.StartsWith("--park-break=")) _autoBreak = int.Parse(arg.Substring("--park-break=".Length));
+                else if (arg.StartsWith("--park-break="))
+                {
+                    // --park-break=ENTRY or ENTRY@FRAME. ⚠ BREAKING AT LOAD TESTS NOTHING ABOUT A LOADED
+                    // RIDE: the ride is empty then, so the eject path runs over nobody and the invariant
+                    // it is meant to check passes vacuously. @FRAME lets it break with guests aboard.
+                    // ENTRY[!][@FRAME]; the ! takes reliability to zero and through BrokenDown, which
+                    // is the only setting that makes the ride eject its riders and its queue.
+                    var bspec = arg.Substring("--park-break=".Length);
+                    _autoBreakHard = bspec.Contains('!');
+                    var bp = bspec.Replace("!", "").Split('@');
+                    _autoBreak = int.Parse(bp[0]);
+                    if (bp.Length > 1) _autoBreakAt = int.Parse(bp[1]);
+                }
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-track=")) _autoTrack = arg.Substring("--park-track=".Length);
@@ -941,7 +955,8 @@ namespace TPWGodot
                     // Last, because the ride it names may have been placed by --park-queue.
                     if (_autoBreak >= 0)
                     {
-                        GD.Print($"[tpw] --park-break {_autoBreak}: {(_park.Break(_autoBreak) ? "broken" : "refused")}");
+                        if (_autoBreakAt < 0)
+                            GD.Print($"[tpw] --park-break {_autoBreak}: {(_park.Break(_autoBreak, _autoBreakHard) ? "broken" : "refused")}");
                     }
                     if (_autoPathCursor != null)
                     {
@@ -1408,6 +1423,14 @@ namespace TPWGodot
             // the box feels like; counting through it shot the menu twice and looked like the park had failed
             // to draw. With --park, the clock starts when the park is actually on screen.
             bool parkUp = _autoPark < 0 || (_park?.Visible ?? false);
+            // ⭐ BREAK IT WITH PEOPLE ON IT. The shot clock is the only frame counter that waits for the
+            // park to be up, so the delayed break rides on it rather than on a second one that would
+            // count through the asset self-test.
+            if (_autoBreakAt >= 0 && parkUp && _park != null && _shotClock >= _autoBreakAt)
+            {
+                GD.Print($"[tpw] --park-break {_autoBreak}@{_autoBreakAt}: {(_park.Break(_autoBreak, _autoBreakHard) ? "broken" : "refused")}");
+                _autoBreakAt = -1;
+            }
             if (_shotPath != null && parkUp && (++_shotClock >= _shotFrame
                                                 || (_shotWhenRunning && _park != null && _park.AnyRideRunning
                                                     && _shotHold-- <= 0)))

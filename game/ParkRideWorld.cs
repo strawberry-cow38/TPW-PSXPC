@@ -1,4 +1,5 @@
 using System;
+using Godot;
 using System.Collections.Generic;
 using TPW.Data;
 using TPW.Sim;
@@ -235,6 +236,49 @@ namespace TPWGodot
                                                              ?? Array.Empty<QueueTile>();
 
         public int QueueIndexOf(Visitor g) => _runtime?.Queue.IndexOf(_guest) ?? -1;
+        /// <summary>Throw everyone off a ride and out of its queue — the game's message 10 (0x8009D8C4)
+        /// to every rider and every queuer, sent when the ride breaks down or is demolished.
+        ///
+        /// ⚠⚠ THIS USED TO BE AN EMPTY METHOD. AttractionLifecycle calls EjectEveryone on entering
+        /// BrokenDown, and on AboutToBreakDown when there is no life left — and the port did nothing at
+        /// all. The riders stayed in the Riders list, HIDDEN, which is how a guest stops being drawn for
+        /// good; the queue stayed in the list with its states intact; and the ride's status is then
+        /// neither Loading nor Unloading, so RideLoading never runs and none of it can resolve itself.
+        /// A broken ride quietly swallowed everybody standing at it.
+        ///
+        /// ⚠ THE CURSOR IS SHARED. AppendToQueue and LeaveQueueList act on `_guest`, not on the Visitor
+        /// they are handed, so every message here has to move the cursor first and put it back after.</summary>
+        /// <summary>--park-log-rides: say what the ride machinery does rather than only its result.</summary>
+        public bool Log;
+
+        public void EjectAll(int entry, Action<Guest> placeAtExit)
+        {
+            if (!_rides.TryGetValue(entry, out var r)) return;
+            var savedGuest = _guest; var savedTarget = _target; var savedRuntime = _runtime;
+            int riders = r.R.Riders.Count, queued = r.R.Queue.Count;
+            _target = r.T; _runtime = r.R;
+            foreach (var g in r.R.Riders.ToArray())
+            {
+                g.Hidden = false;
+                if (g.Inst != null) g.Inst.Visible = true;
+                placeAtExit?.Invoke(g);
+                _guest = g;
+                VisitorQueue.OnMessage(g.V, this, QueueMessage.Ejected);
+            }
+            r.R.Riders.Clear();
+            foreach (var g in r.R.Queue.ToArray())
+            {
+                _guest = g;
+                VisitorQueue.OnMessage(g.V, this, QueueMessage.Ejected);
+            }
+            r.R.Queue.Clear();
+            _guest = savedGuest; _target = savedTarget; _runtime = savedRuntime;
+            // ⭐ SAY WHAT IT ACTUALLY DID. "Queue empty and nobody hidden" after a breakdown is equally
+            // true of an eject that ran and of an eject that never needed to, so the counts are the only
+            // thing that separates a working path from the empty method this replaced.
+            if (Log) GD.Print($"[tpw] eject {entry}: {riders} thrown off, {queued} sent out of the queue");
+        }
+
         public void AppendToQueue(Visitor g) { if (_runtime != null && !_runtime.Queue.Contains(_guest)) _runtime.Queue.Add(_guest); }
         public void LeaveQueueList(Visitor g) => _runtime?.Queue.Remove(_guest);
 

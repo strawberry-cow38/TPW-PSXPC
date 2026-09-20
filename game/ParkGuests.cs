@@ -808,6 +808,12 @@ namespace TPWGodot
 
         /// <summary>The spread of time-in-queue right now, worst first: one outlier against a pack is
         /// the signature of a stuck guest; an evenly long list is just a popular ride.</summary>
+        /// <summary>Guests that are hidden. ⚠ AN INVARIANT, NOT A STATISTIC: the only reason to hide a
+        /// guest is that a ride has it, so this must equal the riders aboard. Anything more is a guest
+        /// that has been swallowed — still in the list, never drawn, never ticked, gone for good — which
+        /// is what an unimplemented EjectEveryone did to everyone aboard a ride that broke down.</summary>
+        public int HiddenGuests { get { int n = 0; foreach (var g in _guests) if (g.Hidden) n++; return n; } }
+
         public string QueueWaitReport()
         {
             var waits = new List<(long T, VisitorState S)>();

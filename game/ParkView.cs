@@ -1024,6 +1024,8 @@ namespace TPWGodot
             + $"\n{_guests.Reachability()}"
             + $"\n{_guests.StrandedReport()}"
             + $"\n{_guests.QueueWaitReport()}"
+            + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"
+            + (_guests.HiddenGuests != (_guests.Rides?.Totals().Riding ?? 0) ? " ⚠ SWALLOWED GUESTS" : "")
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
@@ -1774,6 +1776,7 @@ namespace TPWGodot
                 RunLength = () => _attractionMesh?.Invoke(rec.Entry)?.HeaderWord0 ?? 0,
                 RiderCount = () => _guests?.Rides?.RuntimeFor(rec.Entry)?.Riders.Count ?? 0,
             };
+            a.Eject = () => _guests?.Rides?.EjectAll(rec.Entry, g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
             a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
             // ⭐ RUN THE GAME'S OWN PLACEMENT INITIALISER. It sets level 0, full reliability, the lifetime from
             // the record, and the three sliders to the record's defaults — capacity to half the seats, speed to
@@ -1934,7 +1937,10 @@ namespace TPWGodot
             public bool IsEmpty => (RiderCount?.Invoke() ?? 0) <= 0;
             public bool MechanicAssigned => false;
             public void PostMessage(int id) { }
-            public void EjectEveryone() { }
+            /// <summary>Message 10 to everyone aboard and everyone queueing. Wired by the view; see
+            /// ParkRideWorld.EjectAll for why doing nothing here swallowed guests permanently.</summary>
+            public Action Eject;
+            public void EjectEveryone() => Eject?.Invoke();
             public void ClearSmoke() { }
 
             // IRideAnimation: a flat ride has one mesh and therefore one phase (astra's phase table).
@@ -2074,11 +2080,22 @@ namespace TPWGodot
         /// HOOK. Wear takes several minutes of running to cross the threshold on its own, which is too
         /// long to watch a mechanic with; nothing here changes the wear rule, it only moves the number
         /// the rule already reads.</summary>
-        public bool Break(int entry)
+        public bool Break(int entry, bool hard = false)
         {
             foreach (var a in _attractionsPlaced)
                 if (a.Rec.Entry == entry && a.IsRide)
                 {
+                    // ⚠ RELIABILITY 1 NEVER EJECTS ANYONE. AttractionLifecycle's warning arm ejects only
+                    // at EXACTLY zero, so the ordinary hook cannot exercise the eject path at all — it
+                    // leaves the ride at 4 with its riders still aboard, which is correct and is also
+                    // why "0 hidden vs 0 aboard" passed vacuously. `hard` takes it to 0 and through
+                    // BrokenDown, which is the only way to watch a ride throw people off.
+                    if (hard)
+                    {
+                        a.Reliability = 0;
+                        a.Status = AttractionLifecycle.Enter(AttractionStatus.BrokenDown, a);
+                        return true;
+                    }
                     // Reliability AND the status, because wear only acts on a ride in status 2 — and a
                     // ride that nobody is queueing for never leaves 10, so lowering the number alone
                     // would leave the hook waiting on the same guests the hook exists to do without.
@@ -2157,6 +2174,10 @@ namespace TPWGodot
 
                 // ⭐ THE RIDE PULLS GUESTS OFF THE QUEUE. Statuses 10 and 11 are where a guest gets on
                 // and off; nothing in the guest's own machine does it (TPW.Sim.RideLoading).
+                // ⚠ SET WHERE THE WORLD EXISTS. Doing this next to LogStaff at load time did nothing
+                // at all: ParkGuests builds its ride world lazily, so Rides was still null there and the
+                // eject's own report never printed — which read exactly like an eject that never ran.
+                if (_guests?.Rides is { } lw) lw.Log = _logRides;
                 if (a.IsRide && _guests?.Rides is { } rw
                     && rw.RuntimeFor(a.Rec.Entry) is { } run
                     && (a.Status == AttractionStatus.Loading || a.Status == AttractionStatus.Unloading))
