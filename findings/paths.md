@@ -33,6 +33,28 @@ reachability test), `ovl_lz.py` (decoder for `TPW.OVL`, port of 0x800BFD9C).
 6. parkopen.md's spawn conditions get a sibling: **while a build item is held, the pathfinder is
    paused** as well as arrivals (§4 item 5). Not a correction, but it is the same trap.
 
+7. **A QUEUE THAT STOPS ONE TILE SHORT OF YOUR PATH IS NOT CONNECTED, and it looks connected
+   (2026-09-20, measured).** A path tile (2) and a queue tile (4) are never linked to each other. The
+   game dispatches the linker on kind at 0x8004E20C — 2 and 13 go to the path linker, 0 and 4 go
+   elsewhere — and inside it the neighbour test is `type == my kind` plus the single extra case
+   `type == 13 && kind == 2`. **Never 4.** So the ONLY bridge between a path network and a queue is the
+   OVERLAP tile: a queue run that ENDS ON an existing path tile turns it into type 13, which is both a
+   path and a queue, keeps its path links and gains the queue's backward link.
+
+   Measured on map 203 with the Crazy Ape at (20,36) rot 0, entrance (21,35):
+
+   | queue run | path | result |
+   |---|---|---|
+   | ends at (21,34) | one tile at (21,33) | every route from (21,33) REFUSED — adjacent and unreachable |
+   | ends at (21,33) | (21,30)..(21,33) | a mechanic walks (21,30) → the ride and completes a repair |
+
+   The pathfinder asks the tile being LEFT (`MaskOf(from) & bit`), so this is not a near miss that
+   sometimes works: with no overlap tile there is no bit to test and the two networks are disjoint.
+
+   ⚠ THIS IS THE GAME'S RULE, NOT A PORT ARTEFACT — the dispatch above is READ — so it must be
+   reproduced. It is recorded here because from outside it is invisible: the queue and the path are
+   drawn touching, and the only symptom is that nobody ever arrives.
+
 ## 1. How the game represents paths and connectivity
 
 ### 1.1 The tile map (READ, loader 0x800544E0)
