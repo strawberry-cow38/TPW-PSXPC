@@ -1167,19 +1167,43 @@ namespace TPWGodot
                 if (sub > 40) break;
             }
             var pieces = TrackRun.PickPieces(bounds);
-            GD.Print($"[track] entry {_track.Ride.Entry} subs {bounds.Count} straight {pieces.Straight} support {pieces.Support} pylons {_track.Pylons.Count}");
+            GD.Print($"[track] entry {_track.Ride.Entry} subs {bounds.Count} straight {pieces.Straight} support {pieces.Support} column {pieces.Column} pylons {_track.Pylons.Count}");
             if (!pieces.Any) return;
+            int u = ParkTerrain.TileUnits;
+            float colH = pieces.Column >= 0 ? bounds[pieces.Column].H / (float)u : 1f;
+
+            // ⭐ THE TRACK IS LEVEL AND THE PYLONS MAKE UP THE DIFFERENCE. Master, on the real game: "since the
+            // pylons can vary in height, rotation, etc i think the pylons are a combination of multiple parts."
+            // So the deck sits one tile above the HIGHEST ground the run crosses and every tile stacks the ride's
+            // own block up to it — which is what its one-tile cube is for. ⚠ The port chooses the deck height;
+            // the game's own rule for it is in the piece table it has not finished reading (TrackRun.Pieces).
+            var tiles = new List<(int X, int Z, bool Pylon)>();
             var last = _track.Start;
             foreach (var p in _track.Pylons)
             {
-                foreach (var (x, z) in TrackRun.Span(last, p)) AddTrackPiece(pieces.Straight, x, z);
-                AddTrackPiece(pieces.Support, p.X, p.Z);
+                foreach (var (x, z) in TrackRun.Span(last, p)) tiles.Add((x, z, false));
+                tiles.Add((p.X, p.Z, true));
                 last = p;
             }
-            GD.Print($"[track] drew {_trackPieces.GetChildCount()} pieces");
+            int high = 0;
+            foreach (var (x, z, _) in tiles) high = Math.Max(high, ParkCamera.GroundHeight(_map, x * u + u / 2, z * u + u / 2));
+            float deck = high / (float)u + 1f;
+            foreach (var (x, z, pylon) in tiles)
+            {
+                // Only a PYLON stands on the ground. The track between two of them is held up by them, which is
+                // the whole shape of the tool: a column under every tile would be a wall, not a coaster.
+                if (pylon)
+                {
+                    float ground = ParkCamera.GroundHeight(_map, x * u + u / 2, z * u + u / 2) / (float)u;
+                    for (float y = ground; y < deck - 0.01f; y += colH)
+                        AddTrackPiece(y + colH >= deck - 0.01f ? pieces.Support : pieces.Column, x, z, Math.Min(y, deck - colH));
+                }
+                AddTrackPiece(pieces.Straight, x, z, deck);
+            }
+            GD.Print($"[track] drew {_trackPieces.GetChildCount()} pieces on a deck at {deck:0.00}");
         }
 
-        void AddTrackPiece(int sub, int x, int z)
+        void AddTrackPiece(int sub, int x, int z, float y)
         {
             if (sub < 0) return;
             int key = _track.Ride.Entry * 64 + sub;
@@ -1199,12 +1223,10 @@ namespace TPWGodot
                 _trackMeshes[key] = mesh;
             }
             if (mesh == null) return;
-            int u = ParkTerrain.TileUnits;
-            int gh = ParkCamera.GroundHeight(_map, x * u + u / 2, z * u + u / 2);
             _trackPieces.AddChild(new MeshInstance3D
             {
                 Mesh = mesh,
-                Position = new Vector3(x + 0.5f, gh / (float)u, -(z + 0.5f)),
+                Position = new Vector3(x + 0.5f, y, -(z + 0.5f)),
             });
         }
 

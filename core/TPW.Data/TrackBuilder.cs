@@ -160,8 +160,8 @@ namespace TPW.Data
         /// the biggest thing there, and the track is the one-tile piece that is flat and not merely a box.</summary>
         public readonly struct Pieces
         {
-            public readonly int Straight, Support;
-            public Pieces(int straight, int support) { Straight = straight; Support = support; }
+            public readonly int Straight, Support, Column;
+            public Pieces(int straight, int support, int column) { Straight = straight; Support = support; Column = column; }
             public bool Any => Straight >= 0;
         }
 
@@ -172,11 +172,12 @@ namespace TPW.Data
         /// 0.34, while no track piece is under three quarters), anything over two and a half tiles is a station
         /// or a set piece, and of what is left the track is the FLATTEST piece that is more than a box: a trough
         /// has ten vertices and twelve faces where a plain support block has eight and a decorative cap has
-        /// five. The support is simply the tallest of them.</summary>
+        /// five. The support is simply the tallest of them, and the column — what a pylon is stacked out of — is the
+        /// plain box nearest a one-tile cube.</summary>
         public static Pieces PickPieces(IReadOnlyList<(int W, int H, int D, int Verts)> subs)
         {
-            int straight = -1, support = -1;
-            double straightH = double.MaxValue, supportH = -1;
+            int straight = -1, support = -1, column = -1;
+            double straightH = double.MaxValue, supportH = -1, columnSquare = double.MaxValue;
             for (int i = 1; i < subs.Count; i++)      // sub 0 is the station: the attraction itself draws that
             {
                 var (w, h, d, verts) = subs[i];
@@ -184,8 +185,11 @@ namespace TPW.Data
                 if (Math.Min(tw, td) < 0.7 || Math.Max(tw, td) > 2.6) continue;
                 if (th > supportH) { supportH = th; support = i; }
                 if (verts > 8 && th < straightH) { straightH = th; straight = i; }
+                // The column is the plain BOX nearest a one-tile cube: what a pylon is stacked out of.
+                double square = Math.Abs(tw - 1) + Math.Abs(td - 1) + Math.Abs(th - 1);
+                if (verts <= 8 && square < columnSquare) { columnSquare = square; column = i; }
             }
-            return new Pieces(straight, support);
+            return new Pieces(straight, support, column);
         }
 
         static void Mark(ParkMap map, int x, int z, byte type)
