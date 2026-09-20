@@ -352,8 +352,8 @@ namespace TPW.Sim.Tests
             {
                 var w = new World { Span = span, ClosingStep = Fixed.One };
                 var s = Mech(); int ticks = 0;
-                while (!Mechanic.CloseRide(s, w, forUpgrade: false)) ticks++;
-                return ticks;
+                while (!Mechanic.CloseRide(s, w, forUpgrade: false) && ticks < 1000) ticks++;
+                return ticks;                                  // 1000 = never closed
             }
             Assert.Equal(40, TicksToClose(4));
             Assert.Equal(80, TicksToClose(8));
