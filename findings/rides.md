@@ -715,6 +715,79 @@ kinds **40 to 51** are the big family, and for those it nudges the point by the 
 low two bits — dir 0 → x−1, dir 1 → x−1 z−2, dir 2 → z−1, dir 3 → x−2 z−1 — which is a 2-tile piece
 being placed by its corner. Everything else goes in unmoved.
 
+### ⚠⚠ WHOSE MACHINERY THIS IS: THE TRACK RIDE'S, NOT THE COASTER'S (READ, 2026-09-20)
+**Correction to everything above about "a coaster's pieces".** The piece class at 0x800E5C90, the setup at
+0x800A4F34 and the descriptor table at 0x800F8A30 belong to the **type-6 TRACK RIDE**. A coaster (type 1)
+is a different class entirely — vtable 0x800E65A0, constructor 0x800B1A68, carrying thirty-two 0x40-byte
+objects at +0x18C..+0x98C (class 0x800E6938) — and its own kind → model path goes through 0x800B2AC8 →
+0x800300B8(0x800B1928([obj+0x28]), 0x800B30D4([obj+0x24], i)), which is NOT READ. So Chac Atak's track is
+still open; what follows is settled for Dino Karts and its kin.
+
+⭐ **THE OWNER IS THE THEME'S TRACK-RIDE ENTRY.** The piece's +0x18 is bound by the piece vtable's slot 37
+(0x800A4504): `mgr = 0x80069610(); id = 0x8006A614(mgr, 0)`, then 0x800A6234 binds the handle. 0x8006A614
+walks `T = [0x800DDDC4 + theme*4]`, `L = [T + set*4 + 0x28]`, and returns `L[idx]` — the same word
+`defPrice(8, kind)` reads. For the jungle those lists hold **215 (Dino Karts)** for set A and **228 (Splish
+Splash)** for set B. The handle pool is at 0x800F112C (80 slots x 36 bytes: +0 id, +4 refcount, +0x14
+cached record, +0x18 the loaded-entry word 0x800307DC hands on).
+
+⭐ **AND `owner + 0xDC` IS ELEVEN SUB-MODEL INDICES INTO THAT ENTRY'S OWN CONTAINER.** The consumer
+(0x800300B8) takes the container's sub count at base+4 and uses `visual % nsub`, so each word is simply a
+sub index, 0 meaning "no model". Slots 0..3 and 8..9 are the piece classes, **slots 4..7 are the four
+cars**, slot 10 is always 0.
+
+| entry | ride | subs | classes 0-3 | cars 4-7 | classes 8-9 |
+| --- | --- | --- | --- | --- | --- |
+| 215 | Dino Karts | 13 | 1 2 3 4 | 5 6 7 8 | 9 10 |
+| 228 | Splish Splash | 7 | 1 2 3 4 | 5 5 5 5 | 0 0 |
+| 41 | Bumble Buggies | 10 | 7 2 3 6 | 1 1 1 1 | 4 5 |
+| 57 | Taptastic Rapids | 9 | 7 2 3 6 | 1 1 1 1 | 4 5 |
+| 130 | Crypt Karts | 13 | 1 2 3 4 | 5 6 7 8 | 9 10 |
+| 143 | Ooze Crooz | 10 | 1 2 3 6 | 7 7 7 7 | 4 5 |
+| 363 | Space Racers | 11 | 10 1 2 5 | 6 7 8 9 | 4 3 |
+| 378 | The Blobulator | 9 | 6 2 3 7 | 1 1 1 1 | 5 4 |
+
+✅ **AND THE MEASURING TAPE AGREES WITH THE TABLE**, which is the check that makes this believable rather
+than merely detailed. Dino Karts' kinds resolve to: 4-7 (class 0) → sub 1, 12-19 (class 1) → sub 2, 24-27
+(class 2) → sub 3, 20-21 (class 3) → sub 4, 28-31 and 36-39 (class 8) → sub 9, 32-35 (class 9) → sub 10;
+classes 11 and 99 draw nothing. Measured independently off the meshes, entry 215's sub 2 is a 1.70 x 0.59
+x 1.70 CORNER and subs 1 and 3 are 1.40 x 1.05 x 2.00 STRAIGHTS — exactly the shapes those classes want.
+
+⚠ **KINDS >= 40 SKIP THE TABLE** (0x800A4FFC..0x800A5018): the raw class byte is stored as the visual and
+goes through the same `% nsub`, so the two-tile specials draw sub-models 11, 12 and 6 of the owner.
+
+⚠⚠ **AND THE RECORD TAIL I READ EARLIER WAS THE GROUND PAD.** For all 83 type-1/3/6/7 records the bytes
+after the body are exactly `width x depth` u32 words, each a **(u16 entry, u16 sub) model reference per
+tile** — Chac Atak 6 of them, Gorilla Thrilla 16. My "class table at record +0xDC names a toilet" was
+reading tile 2 of that list. The toilet was real; it was the pad, not the table. Every type-6 record is
+4x4 with a 0xE8 body, so its tail runs to +0x108 and `+0xDC + class*4` for classes 0..10 lands inside it
+exactly — which is why a fixed offset works at all.
+
+#### Where the COASTER's own mapping stops (READ as far as it goes)
+Its draw calls `0x800300B8(handle, visual)` from 0x800B2AC8 with
+`handle = 0x800B1928([obj+0x28])` — three instructions, `return x + 0x20` — and
+`visual = 0x800B30D4([obj+0x24], i)`, which is:
+
+```
+kind  = [[obj+0x10] + 8 + 0x6B]        ; 0x80063328, a byte
+A     = [gp+0x124C]                    ; 0x80054000, the same word the descriptor window uses
+B     = [gp+0x1250]                    ; 0x80053FF4, likewise
+ptr   = [0x801090E0 + kind*4 + B*8 + A*16]
+return  [ptr + i*8]
+```
+
+So the coaster indexes a 4 x 2 x 2 table of POINTERS at **0x801090E0**, each pointing at an array of
+8-byte records whose first word is the model. ⚠ That table is in .bss — all zeros in the image — and its
+writer has NOT been found: the three sites that name it (0x800B2F70, 0x800B310C, 0x800B31A0) all READ it,
+and no `addiu` anywhere else in the image forms the address, so whatever fills it holds the base in a
+register. **That is the next thing to read**, and it is the whole of what stands between the port and
+drawing a coaster's track from the game's own data.
+
+There is a SECOND table of the same shape immediately after it at **0x80109120** (0x801090E0 + 0x40, i.e.
+exactly one table's length on), read the same way at 0x800B4D88 — so whatever fills one fills both, and a
+writer found for either closes the pair. Neither address is formed by `lui`+`addiu` anywhere outside those
+four read sites, and the value 0x801090E0 appears nowhere in the image as data, so the base arrives in a
+register: look at a generic loader or an overlay rather than at more scanning.
+
 ### What the descriptor's two bytes actually do (READ)
 ⚠ **+6 IS NOT A MODEL INDEX — IT IS THE PIECE'S TURN.** 0x800A4F34 hands the byte to slot 18 of the piece's
 class record (0x800E5C90, a proper 8-byte-per-slot vtable whose slot 1 is the constructor that writes it),

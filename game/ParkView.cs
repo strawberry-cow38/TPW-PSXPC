@@ -621,10 +621,14 @@ namespace TPWGodot
         /// TPW.Sim.BusLoad works it out from what is built, and an empty park gets a bus with nobody on it,
         /// which is the point of the whole design.
         ///
-        /// ⚠ TWO INPUTS ARE STAND-INS: an attraction's UPGRADE LEVEL (the port does not track upgrades yet, so
-        /// every ride counts as level 0 — which is what a freshly built one IS, so this is only wrong once
-        /// upgrades exist) and the gate's LANE COUNT (0, so the `20 − lanes` cap never bites). Neither is
-        /// guessed here; both are named in BusLoad.</summary>
+        /// ⚠ ONE INPUT IS A STAND-IN AND ONE ONLY LOOKS LIKE ONE. The UPGRADE LEVEL is a stand-in: the port
+        /// does not track upgrades, so every ride counts as level 0 — which is what a freshly built one IS
+        /// (placement sets 0 and the upgrade path is `if level >= 3 return; level++`), so it is only wrong
+        /// once upgrades exist. The LANE COUNT is 0 and that is CORRECT: `0x80059150(i)` reads
+        /// `[gp+0x12F4 + i*4]`, a pair of counters zeroed at game start and incremented as a guest enters a
+        /// turnstile lane (0x8005929C), so `20 − lanes` caps the bus by how many are already IN the gate.
+        /// With no turnstile queue in the port there is nobody in one, and zero is the honest answer rather
+        /// than a placeholder.</summary>
         void BusArrived()
         {
             if (_guests == null) return;
@@ -632,6 +636,10 @@ namespace TPWGodot
             var kinds = new HashSet<int>();
             foreach (var a in _attractionsPlaced)
             {
+                // ⚠ `builtToday: false` IS A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score adds +20
+                // while an attraction's age is 0 or 1 whole days, and the port does not record the day a ride
+                // was built — so a brand-new park scores 20..24 here where the game scores 30..34, which is
+                // one guest a bus instead of one-or-two. Wants the build day on PlacedAttraction.
                 draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, 0, a.Rec.BaseIntensity, false));
                 kinds.Add(a.Rec.Entry);
             }
@@ -2266,10 +2274,12 @@ void fragment() {
                 if (_bus != null)
                 {
                     _busXPrev = _busXCur;
-                    // ⚠ THE HOLD IS NOT WIRED: the game stops the bus dead while a gate batch is mid-admission
-                    // (batch == 1), and the port has no turnstile batch to ask, so it passes false. That makes
-                    // the loop run at its clean 694 ticks instead of the 705 a real park measures.
-                    if (_bus.Step(frameTime, ParkOpen, false)) BusArrived();
+                    // ⭐ CARRYING SOMETHING FROM THE CATALOGUE COSTS YOU THE BUS. The game's `held`
+                    // ([0x80103940]) is set while an object is on the cursor, and the arrival condition tests
+                    // it: the bus still turns up on time, it just turns up EMPTY. _placing is this port's
+                    // cursor-carry. ⚠ The gate BATCH hold is a different mechanism and is still not wired —
+                    // see BusRoute.Batch.
+                    if (_bus.Step(frameTime, ParkOpen, _placing >= 0)) BusArrived();
                     _busXCur = _bus.WorldX;
                 }
                 if (_gate != null)

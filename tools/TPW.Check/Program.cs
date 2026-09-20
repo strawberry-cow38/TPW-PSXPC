@@ -2129,6 +2129,7 @@ static class Program
                 int from = rdAt + 2 < args.Length ? Convert.ToInt32(args[rdAt + 2], 16) : 0;
                 int len = rdAt + 3 < args.Length ? Convert.ToInt32(args[rdAt + 3], 16) : 0x180;
                 Console.WriteLine($"entry {re}: {rb.Length} bytes, record at +0x{rec:X} (header +0x14)");
+                Console.WriteLine("  header " + string.Join(" ", System.Linq.Enumerable.Range(0, Math.Min(32, rb.Length)).Select(k => rb[k].ToString("X2"))));
                 for (int o = from; o < len && rec + o < rb.Length; o += 16)
                 {
                     int n = Math.Min(16, Math.Min(len - o, rb.Length - rec - o));
