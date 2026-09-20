@@ -170,6 +170,12 @@ namespace TPWGodot
             else if (inst.Mesh is QuadMesh q2 && q2.Size.Y != h) q2.Size = new Vector2(w, h);
             if (inst.MaterialOverride is StandardMaterial3D m)
             {
+                // ⚠⚠ PUT THE PEOPLE ATLAS BACK. A guest that has been a rider is still pointing at the
+                // COMMON sheet, and drawing people-sheet UVs against it lands somewhere in the HUD font --
+                // master's screenshot was a guest walking around as the letters "dF". Setting it here, in
+                // the draw, is the only place that cannot be skipped; doing it on the way out of the seat
+                // is not, because the way out is whatever the guest does next.
+                if (m.AlbedoTexture != _atlas) m.AlbedoTexture = _atlas;
                 // The sprite's rectangle in the baked sheet: its page's corner plus its own texels.
                 int px = (sp.PageX - sheet.VramX) / 64 * TextureSheet.PageTexels + sp.U;
                 int py = (sp.PageY - sheet.VramY) / TextureSheet.PageTexels * TextureSheet.PageTexels + sp.V;

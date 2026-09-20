@@ -1510,7 +1510,12 @@ namespace TPWGodot
                 //     the two negations cancel the half turn: atan2(Dot(sx, camZ), Dot(sz, camZ));
                 //   * band's -R32 is psx_z of the seat's UP negated, i.e. +Dot(sy, camZ) -- how far the
                 //     seat's up axis leans toward the viewer, which is the elevation the bands mean;
-                //   * roll's R22 is the psx_y of the seat's up, and psx y is DOWN, hence the minus.
+                //   * roll is ZERO when the seat's up projects onto the camera's up, so R22 is +Dot(sy,
+                //     camY). ⚠ I had a minus here from "psx y is down" and it put roll at pi for an
+                //     ordinary upright seat under an ordinary camera -- every head drawn UPSIDE DOWN,
+                //     which master read as "looking directly upwards". The sign rule was right in the
+                //     abstract and wrong here; the check that settles it is that an upright seat under an
+                //     upright camera must roll by nothing.
                 // ⚠ The handedness conversion is the part that can be plausibly wrong, so this is checked
                 // by looking at the picture, not by re-reading the algebra.
                 var cam = _camera.GlobalTransform.Basis;
@@ -1523,7 +1528,7 @@ namespace TPWGodot
                 int band = Math.Clamp((a4096 + 256) >> 9, 0, 2);
                 int yaw = (int)Math.Round(Mathf.Atan2(seatBasis.X.Dot(cam.Z), seatBasis.Z.Dot(cam.Z)) / Mathf.Tau * 4096f);
                 int facing = ((yaw + 256) >> 9) & 7;
-                float roll = Mathf.Atan2(seatBasis.Y.Dot(cam.X), -seatBasis.Y.Dot(cam.Y));
+                float roll = Mathf.Atan2(seatBasis.Y.Dot(cam.X), seatBasis.Y.Dot(cam.Y));
                 // ⚠ FACING IS THE ONE PART NOT TAKEN FROM THE GAME YET. The original picks the sprite from
                 // the octant of the COMPOSED camera x ride x bone rotation; this faces each rider away from
                 // the ride's middle, which agrees for anything that spins and is a stand-in for anything
@@ -1532,6 +1537,9 @@ namespace TPWGodot
                 var outward = seat - hub;
                 if (outward.LengthSquared() < 1e-6f) outward = xform.Basis.Z;
                 _guests.DrawRiderHead(riders[i], seat, facing, band, roll, outward.Normalized());
+                if (_logRides && i == 0 && _riderLogTick % 25 == 0)
+                    GD.Print($"[tpw] rider0 {a.Rec.Entry}: seatUp {seatBasis.Y.Normalized()} camZ {cam.Z} "
+                           + $"lean {lean:0.000} a4096 {a4096} band {band} yaw {yaw} facing {facing} roll {roll:0.00}");
                 if (_logRides && _riderLogTick % 25 == 0)
                     GD.Print($"[tpw] rider {i} of {a.Rec.Entry} -> seat bone {bone} at {seat} (tick {tick})");
             }
