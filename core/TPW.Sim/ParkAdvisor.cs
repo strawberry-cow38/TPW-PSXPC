@@ -9,11 +9,11 @@ namespace TPW.Sim
         Starting = 0,
         /// <summary>READ 0x80013298. ⭐ THE ONLY STATE THAT REFRESHES STATISTICS AND RUNS RULES.</summary>
         Idle = 1,
-        /// <summary>READ 0x800133C4. Rising and turning to face you; the message is shown at the end.</summary>
+        /// <summary>READ 0x800133C4. Growing from nothing and spinning; the message is shown at the end.</summary>
         Arriving = 2,
         /// <summary>READ 0x8001345C. Talking, for exactly as long as the recording lasts.</summary>
         Speaking = 3,
-        /// <summary>READ 0x80013518. Turning back and sinking.</summary>
+        /// <summary>READ 0x80013518. Unwinding the spin and shrinking away.</summary>
         Leaving = 4,
         /// <summary>READ 0x800135AC. Away, and not listening: the park runs no statistics at all.</summary>
         Gone = 5,
@@ -97,14 +97,18 @@ namespace TPW.Sim
         public const int TravelTicks = 50;
         /// <summary>READ 0x8001359C. And then he is away for 100.</summary>
         public const int GoneTicks = 100;
-        /// <summary>READ 0x800133C4. Height gained per tick while arriving; 24 x 50 is the 1200 he is
-        /// then snapped to.</summary>
-        public const int RisePerTick = 24, RiseTop = 1200;
-        /// <summary>READ 0x800133D0..F0. Turn per tick; 655 x 50 lands one tick short of the half turn he
-        /// is then snapped to, which is why the snap exists.</summary>
-        public const int TurnPerTick = 655, TurnFacing = 0x8000;
-        /// <summary>READ 0x80013500. While talking he drifts towards a heading re-rolled in this band
-        /// every time he reaches it, so he never stands quite still.</summary>
+        /// <summary>READ 0x800133C4 + 0x800136F4. ⭐ THIS IS A SCALE, NOT A HEIGHT. The draw builds a
+        /// matrix whose three diagonal entries are all `Scale >> 2`, so 1200 becomes 300/4096 = 0.073 --
+        /// he GROWS FROM NOTHING over his 50 frames rather than rising into view. Named wrong here until
+        /// fable traced the renderer; findings/advisor-presentation.md §1.2.</summary>
+        public const int ScalePerFrame = 24, ScaleFull = 1200;
+        /// <summary>READ 0x800133D0..F0 + 0x800C05B0. ⭐ AND THIS IS A SPIN IN THE SCREEN PLANE. The draw
+        /// takes `Spin >> 1` as an angle in 4096ths of a turn about Z, so arriving runs it 0 -> 0x8000,
+        /// i.e. 0 -> 0x4000 = FOUR FULL TURNS while he grows. Leaving unwinds them.</summary>
+        public const int SpinPerFrame = 655, SpinArrived = 0x8000;
+        /// <summary>READ 0x80013500. While talking the spin drifts towards a value re-rolled in this band
+        /// each time it arrives. Through the >> 1 and the 0xFFF mask that is only ±100 of 4096, a lean of
+        /// about ±8.8 degrees taking 200 frames to cross -- he sways, he does not turn.</summary>
         public const int SwayBase = 32568, SwaySpread = 400, SwaySlack = 5;
         /// <summary>READ 0x80014064. Five, and never the same one twice running.</summary>
         public const int GestureCount = 5;
@@ -115,16 +119,16 @@ namespace TPW.Sim
 
         public AdvisorFlags Flags { get; set; } = AdvisorFlags.Park;
         public AdvisorState State { get; private set; } = AdvisorState.Starting;
-        /// <summary>READ +0x184. Latched from the take he is about to deliver. Its meaning is not
-        /// established: it takes seven values across the table, is the same for every take of one message,
-        /// and the two values 10 and 12 appear ONLY on takes that were cut. Carried so the character can
-        /// use it once someone reads what consumes it.</summary>
+        /// <summary>READ +0x184. ⭐ IT IS HIS FACE. The draw uses it to pick a sub-mesh of FOLIO entry 0
+        /// and attaches it to the body clip's first listed bone; 16 means draw no face at all. Latched
+        /// from the take he is about to deliver, which is why every take of one message shares it.</summary>
         public byte Mood { get; private set; }
-        /// <summary>READ +0x1B1. The talk gesture, re-rolled until it differs from the last.</summary>
+        /// <summary>READ +0x1B1. Which BODY clip he performs, re-rolled until it differs from the last.</summary>
         public byte Gesture { get; private set; }
-        /// <summary>READ +0xE8 / +0xEC. How far he has risen, and which way he faces.</summary>
-        public int Rise { get; private set; }
-        public int Turn { get; private set; }
+        /// <summary>READ +0xE8 / +0xEC. His uniform scale and his spin about the screen's Z, in the
+        /// original's raw units. See the constants: growing from nothing, spinning four times.</summary>
+        public int Scale { get; private set; }
+        public int Spin { get; private set; }
         /// <summary>READ +0xB6. The message he is delivering, or -1.</summary>
         public int Saying { get; private set; } = -1;
         /// <summary>Messages delivered since the park opened, for the readout.</summary>
@@ -200,12 +204,12 @@ namespace TPW.Sim
                     break;
 
                 case AdvisorState.Arriving:
-                    Rise += RisePerTick * step;
-                    Turn += TurnPerTick * step;
+                    Scale += ScalePerFrame * step;
+                    Spin += SpinPerFrame * step;
                     _timer -= (short)step;
                     if (_timer > 0) break;
-                    Rise = RiseTop;
-                    Turn = TurnFacing;
+                    Scale = ScaleFull;
+                    Spin = SpinArrived;
                     Deliver(host);
                     _sway = SwayBase + host.Random(SwaySpread);
                     State = AdvisorState.Speaking;
@@ -218,16 +222,16 @@ namespace TPW.Sim
                         State = AdvisorState.Leaving;
                         break;
                     }
-                    if (Turn < _sway - SwaySlack) Turn += step;
-                    else if (Turn > _sway + SwaySlack) Turn -= step;
+                    if (Spin < _sway - SwaySlack) Spin += step;
+                    else if (Spin > _sway + SwaySlack) Spin -= step;
                     else _sway = SwayBase + host.Random(SwaySpread);
                     break;
 
                 case AdvisorState.Leaving:
-                    Rise -= RisePerTick * step;
-                    Turn -= TurnPerTick * step;
+                    Scale -= ScalePerFrame * step;
+                    Spin -= SpinPerFrame * step;
                     _timer -= (short)step;
-                    if (_timer > 0 || Rise >= 0) break;
+                    if (_timer > 0 || Scale >= 0) break;
                     host.HideCaption();
                     Saying = -1;
                     _timer = GoneTicks;
@@ -238,8 +242,8 @@ namespace TPW.Sim
                     _timer -= (short)step;
                     if (_timer <= 0 || (Flags & AdvisorFlags.Linger) == 0 || _urgent != null)
                     {
-                        Rise = 0;
-                        Turn = 0;
+                        Scale = 0;
+                        Spin = 0;
                         State = AdvisorState.Idle;
                     }
                     break;
@@ -257,8 +261,8 @@ namespace TPW.Sim
                 byte roll = (byte)host.Random(GestureCount);
                 if (roll != Gesture) { Gesture = roll; break; }
             }
-            Rise = 0;
-            Turn = 0;
+            Scale = 0;
+            Spin = 0;
             _timer = TravelTicks;
             State = AdvisorState.Arriving;
         }
