@@ -1,6 +1,13 @@
 # Where the port is
 
-**One page, kept current. If this disagrees with the code, the code is right and this is a bug.**
+⭐ **THE LIVE BOARD IS THE ONE TO READ AND TICK:** https://claude.ai/artifact/RoeedNAubVjynBFaM2wacn
+It saves itself — no pull, no commit — and every row shows how long since it last moved, so a row
+nobody has touched says so in red instead of quietly going stale. This file is the git-side copy for
+anyone who cannot open that link.
+
+⚠ **Two copies is how a tracker starts lying.** If you change one, change the other, or say so.
+
+**If this disagrees with the code, the code is right and this is a bug.**
 
 How to use it: whoever changes an area updates its row in the same commit. State means:
 **✅ built + verified** (there is evidence: a measurement, a control, a picture);
