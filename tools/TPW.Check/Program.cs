@@ -1757,6 +1757,7 @@ static class Program
     static int Seats(GazArchive g)
     {
         int containers = 0, lists = 0, empty = 0, seats = 0, bad = 0, unreadable = 0;
+        int stacked = 0, origins = 0, poseFailed = 0;
         Console.WriteLine("entry  sub  slots  seats-by-level   bones  list");
         foreach (var e in g.Entries)
         {
@@ -1776,17 +1777,48 @@ static class Program
                 var over = Array.FindAll(m.Seats, i => i < 0 || i >= m.Skeleton.Count);
                 if (over.Length > 0) bad++;
                 if (sub != 0 && over.Length == 0) continue;
+                // ⭐ AND WHERE THEY ARE, NOT JUST THAT THEY EXIST. An index that names a real bone still
+                // gives every rider the same place if the list is not the seats -- they would all stack on
+                // the model's origin and the feature would look "wired" from the code and be silently dead.
+                // So measure the spread of the seat bones and count how many sit on the origin.
+                int atOrigin = 0; float spread = 0;
+                try
+                {
+                    var pose = MeshPose.Evaluate(m, 0);
+                    var pts = new List<(float X, float Y, float Z)>();
+                    foreach (int bi in m.Seats)
+                        if (bi >= 0 && bi < pose.Bones.Length)
+                        {
+                            var b2 = pose.Bones[bi];
+                            pts.Add((b2.X, b2.Y, b2.Z));
+                            if (b2.X == 0 && b2.Y == 0 && b2.Z == 0) atOrigin++;
+                        }
+                    for (int x = 0; x < pts.Count; x++)
+                        for (int y = x + 1; y < pts.Count; y++)
+                        {
+                            float d = Math.Abs(pts[x].X - pts[y].X) + Math.Abs(pts[x].Y - pts[y].Y) + Math.Abs(pts[x].Z - pts[y].Z);
+                            if (d > spread) spread = d;
+                        }
+                    if (pts.Count > 1 && spread == 0) stacked++;
+                    if (atOrigin > 0) origins++;
+                }
+                catch { poseFailed++; }
                 var levels = string.Join("/", Array.ConvertAll(rec.Levels, l => l.MaxSeats.ToString()));
                 Console.WriteLine($"{e.Index,5}  {sub,3}  {m.Seats.Length,5}  {levels,-15}  {m.Skeleton.Count,5}  "
+                                  + $"spread {spread,7:0}  origin {atOrigin,2}  "
                                   + string.Join(",", m.Seats) + (over.Length > 0 ? "   <- OUT OF RANGE" : ""));
             }
         }
         Console.WriteLine($"-- {containers} ride containers, {lists} seat lists, {seats} seats, "
                           + $"{empty} with an empty list on sub 0, {unreadable} unreadable, {bad} out of range");
-        Console.WriteLine(bad == 0 && unreadable == 0
-            ? "PASS: every seat names a bone that exists"
-            : "FAIL: the list is not where the parser looked");
-        return bad + unreadable;
+        Console.WriteLine($"-- {stacked} lists whose seats all share one point, {origins} with a seat on the "
+                          + $"model origin, {poseFailed} that would not pose");
+        bool ok = bad == 0 && unreadable == 0 && stacked == 0;
+        Console.WriteLine(ok
+            ? "PASS: every seat names a bone that exists, and the seats of a ride are in different places"
+            : bad + unreadable > 0 ? "FAIL: the list is not where the parser looked"
+                                   : "FAIL: some ride's seats all sit on one point -- the list is not seats");
+        return bad + unreadable + stacked;
     }
 
     static int SeatBones(GazArchive g)

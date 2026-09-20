@@ -1456,8 +1456,8 @@ namespace TPWGodot
                 var outward = seat - hub;
                 if (outward.LengthSquared() < 1e-6f) outward = xform.Basis.Z;
                 _guests.DrawRider(riders[i], seat, outward.Normalized());
-                if (_logRides && i == 0 && Engine.GetFramesDrawn() % 300 == 0)
-                    GD.Print($"[tpw] rider 0 of {a.Rec.Entry} -> seat bone {bone} at {seat} (hub {hub}, tick {tick})");
+                if (_logRides && Engine.GetFramesDrawn() % 600 == 0)
+                    GD.Print($"[tpw] rider {i} of {a.Rec.Entry} -> seat bone {bone} at {seat} (tick {tick})");
             }
         }
 
