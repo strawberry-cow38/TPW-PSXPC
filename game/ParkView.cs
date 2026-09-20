@@ -577,7 +577,12 @@ namespace TPWGodot
             var atlas = PageAtlas.Build(common, uses);
             if (atlas?.Image == null) return;
             var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
-            var matCull = new ShaderMaterial { Shader = PsxShading.Shader(true) };
+            // ⚠ FRONT, NOT BACK. The port negates z, which reverses winding, so a polygon the game draws
+            // from one side is cull_FRONT here (SingleSidedCull). This said Shader(true) = cull_back and the
+            // bus rendered INSIDE OUT — master spotted it; the near panels were culled and you saw the far
+            // wheels through the body. Every other single-sided surface in the park already used the
+            // constant; the bus was the one place that hardcoded the wrong sense.
+            var matCull = new ShaderMaterial { Shader = PsxShading.Shader(SingleSidedCull) };
             var tex = ImageTexture.CreateFromImage(Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false,
                                                                        Image.Format.Rgba8, atlas.Image.Rgba));
             mat.SetShaderParameter("atlas", tex);
@@ -1502,6 +1507,31 @@ namespace TPWGodot
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
 
+        /// <summary>Move a slider on the selected attraction, as the panel's widget will. Returns what the
+        /// value actually became, which is NOT always what was asked: RidePanel.Apply clamps to the range of
+        /// the ride's current level, and a coaster's duration range is 1..1 on the disc, so its slider exists
+        /// and cannot move.
+        ///
+        /// ⚠ THIS IS THE WRITING HALF AND IT REACHES LIVE STATE. Speed and duration are read every tick by the
+        /// wear and cycle code, so moving a slider changes how fast a ride wears and how long a cycle takes —
+        /// this is the first thing in the port that can make a park worse. Proven headlessly before any pixels
+        /// exist, on purpose.</summary>
+        public (int Speed, int Duration)? MoveSlider(string which, int value)
+        {
+            if (_panelFor == null) return null;
+            int speed = _panelFor.SpeedSlider, duration = _panelFor.CyclesPerLoad, capacity = _panelFor.Capacity;
+            switch (which)
+            {
+                case "speed": speed = value; break;
+                case "duration": duration = value; break;
+                case "capacity": capacity = value; break;
+                default: return null;
+            }
+            TPW.Sim.RidePanel.Apply(_panelFor, speed, capacity, duration);
+            RefreshInfo();
+            return (_panelFor.SpeedSlider, _panelFor.CyclesPerLoad);
+        }
+
         /// <summary>Select the attraction on a tile, as a click on it does. For captures, so the panel can be
         /// driven headlessly the way every other tool in this port is.</summary>
         public bool SelectAttraction(int x, int z)
@@ -1554,6 +1584,12 @@ namespace TPWGodot
                 RiderCount = () => _guests?.Rides?.RuntimeFor(rec.Entry)?.Riders.Count ?? 0,
             };
             a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
+            // ⭐ RUN THE GAME'S OWN PLACEMENT INITIALISER. It sets level 0, full reliability, the lifetime from
+            // the record, and the three sliders to the record's defaults — capacity to half the seats, speed to
+            // the MIDDLE of the level's range, duration to half its maximum. The port had never called it, so a
+            // placed ride started on hardcoded values: capacity 0, below its own minimum of 1, and a speed of 50
+            // that happened to match only because most ranges are 1..100.
+            if (a.IsRide) TPW.Sim.RidePanel.Place(a);
             // Read once, at placement (0x8009F524) - and never again, which is the point of it.
             a.Wear.Lifetime = rec.Levels.Length > 0 ? rec.Level0.Lifetime : 0;
             a.Status = AttractionLifecycle.Enter(AttractionStatus.JustPlaced, a);
@@ -2034,52 +2070,94 @@ namespace TPWGodot
         /// would be wrong for three of them (rides.md, the panel's own words).</summary>
         readonly record struct PanelRow(int Label, string Value, bool Slider, int Min, int Max, int Now);
 
-        /// <summary>What the selected attraction's panel shows, per type.
+        /// <summary>What the selected attraction's panel shows, per type — READ off the game's own draw
+        /// routines (0x800794C4 ride, 0x8007A9E4 shop, 0x8007B2F4 sideshow), not inferred from label words.
         ///
-        /// ⚠ NO TICKET PRICE ON A RIDE. The string table has "Ticket Price" and it is not a ride's: this game
-        /// does not charge per ride at all (economy.md §4.7, "no ride class calls GetBank"). A ride does not
-        /// earn — it ATTRACTS, and the money comes from the gate and the shops. I had it in the row list for
-        /// an hour on the strength of the word alone.
+        /// ⭐ THE RIDE'S DETAILS PAGE IS SIX READINGS AND UP TO THREE SLIDERS, and four of the readings are
+        /// BARS rather than numbers: Age and Users are text, then Excitement, Reliability, Repair and Life are
+        /// 0..100 bars. "Reliability" and "Repair" are NOT the same number — Reliability is the PROJECTED
+        /// value (slot 88, what the current slider settings will wear it down to) and Repair is the live one
+        /// (A+0xB4 >> 12). The panel shows both, side by side, which is the whole point of it.
         ///
-        /// ⚠ A SHOP'S AND A SIDESHOW'S NUMBERS ARE NOT WIRED HERE YET: stock, cost of goods and the game and
-        /// prize prices live in the spending work rather than on this class, so those rows carry their real
-        /// label and no value rather than a made-up one.</summary>
+        /// ⚠ DURATION IS HIDDEN ON A COASTER (0x800798D8) — not shown pinned at 1..1, which is what I had.
+        /// And Capacity appears only when max seats > 1. So a coaster shows ONE slider, and a single-seat ride
+        /// shows two.
+        ///
+        /// ⚠ UPGRADES IS A TAB, NOT A ROW. The panel is four pages behind a tab menu (Details, Options,
+        /// Upgrades, Addons) and Upgrades only exists while the next level is researched and the ride is not
+        /// condemned. Addons is track-rides-only.
+        ///
+        /// ⚠ A PLAIN FEATURE HAS NO PANEL AT ALL (0x80038900): a bench or a bin opens the root menu instead.
+        /// Only toilets and staff rooms get one, and theirs are different panels again.
+        ///
+        /// ⚠ Values the port does not keep yet say "(not wired)" rather than showing a plausible invention:
+        /// the placement day Age counts from, the served-guest count, and every shop and sideshow figure
+        /// (those live in the spending work).</summary>
         List<PanelRow> PanelRows(PlacedAttraction a)
         {
             var rows = new List<PanelRow>();
             if (a == null) return rows;
             var r = TPW.Sim.RidePanel.Ranges(a);
+            bool coaster = a.Type == AttractionType.RollerCoaster;
             switch (a.Type)
             {
                 case AttractionType.Ride:
                 case AttractionType.RollerCoaster:
                 case AttractionType.TrackRide:
                 case AttractionType.TourRide:
+                    rows.Add(new PanelRow(PanelLabel.Age, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.Users, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.Excitement, $"{a.BaseIntensity}", false, 0, 100, a.BaseIntensity));
+                    rows.Add(new PanelRow(PanelLabel.Reliability, "(not wired)", false, 0, 100, 0));
+                    rows.Add(new PanelRow(PanelLabel.Repair, $"{a.Reliability}", false, 0, 100, a.Reliability));
+                    rows.Add(new PanelRow(PanelLabel.Life, $"{a.Lifetime}", false, 0, 100, a.Lifetime));
                     rows.Add(new PanelRow(PanelLabel.Speed, null, true, r.Speed.Min, r.Speed.Max, a.SpeedSlider));
-                    rows.Add(new PanelRow(PanelLabel.Duration, null, true, r.Duration.Min, r.Duration.Max, a.CyclesPerLoad));
-                    rows.Add(new PanelRow(PanelLabel.StateOfRepair, $"{a.Reliability}%", false, 0, 100, a.Reliability));
-                    rows.Add(new PanelRow(PanelLabel.Upgrades, $"{a.Level + 1}/3", false, 0, 0, a.Level));
+                    if (a.MaximumSeats > 1)
+                        rows.Add(new PanelRow(PanelLabel.Capacity, null, true, r.Capacity.Min, r.Capacity.Max, a.Capacity));
+                    if (!coaster)
+                        rows.Add(new PanelRow(PanelLabel.Duration, null, true, r.Duration.Min, r.Duration.Max, a.CyclesPerLoad));
                     break;
                 case AttractionType.Shop:
-                    rows.Add(new PanelRow(PanelLabel.SalePrice, null, false, 0, 0, 0));
-                    rows.Add(new PanelRow(PanelLabel.CostOfGoods, null, false, 0, 0, 0));
-                    rows.Add(new PanelRow(PanelLabel.Stock, null, false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.ShopCustomers, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.CostOfGoods, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.Takings, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.Profit, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.CustomerSatisfaction, "(not wired)", false, 0, 100, 0));
+                    rows.Add(new PanelRow(PanelLabel.QualityOfGoods, "(not wired)", true, 50, 100, 0));
+                    rows.Add(new PanelRow(PanelLabel.SalePrice, "(not wired)", false, 1, 500, 0));
                     break;
                 case AttractionType.SideShow:
-                    rows.Add(new PanelRow(PanelLabel.GamePrice, null, false, 0, 0, 0));
-                    rows.Add(new PanelRow(PanelLabel.PrizeCost, null, false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.ShowCustomers, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.Winners, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.ShowTakings, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.ShowProfit, "(not wired)", false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.ShowExcitement, "(not wired)", false, 0, 100, 0));
+                    rows.Add(new PanelRow(PanelLabel.Satisfaction, "(not wired)", false, 0, 100, 0));
+                    rows.Add(new PanelRow(PanelLabel.ChanceOfWinning, "(not wired)", true, 0, 100, 0));
+                    rows.Add(new PanelRow(PanelLabel.PrizeCost, "(not wired)", false, 1, 1000, 0));
+                    rows.Add(new PanelRow(PanelLabel.GamePrice, "(not wired)", false, 1, 1000, 0));
                     break;
             }
             return rows;
         }
 
-        /// <summary>The panel's labels, by string id in the game's own table (FOLIO entry 407 in English).</summary>
+        /// <summary>The panel's labels, by string id in the game's own table (FOLIO entry 407 in English),
+        /// READ off the draw routines rather than matched by word.</summary>
         static class PanelLabel
         {
-            public const int Speed = 417, Duration = 725, Reliability = 1005, StateOfRepair = 122;
-            public const int Upgrade = 657, Upgrades = 112, UpgradeCost = 281, Repair = 604;
-            public const int SalePrice = 560, CostOfGoods = 17, PurchaseCost = 735, Stock = 867;
-            public const int GamePrice = 182, PrizeCost = 787;
+            // Ride Details (0x800794C4)
+            public const int Age = 0x1DC, Users = 0x18C, Excitement = 0x37;
+            public const int Reliability = 0x3ED, Repair = 0x25C, Life = 0x3FA;
+            public const int Speed = 0x1A1, Capacity = 0x364, Duration = 0x2D5;
+            // Upgrades page (0x80079E38)
+            public const int UpgradeCost = 0x119, Stock = 0x363;
+            // Shop Details (0x8007A9E4)
+            public const int ShopCustomers = 0x4C, CostOfGoods = 0x11, Takings = 0x63, Profit = 0x3A4;
+            public const int CustomerSatisfaction = 0x3FB, QualityOfGoods = 0x127, SalePrice = 0x230;
+            // Sideshow Details (0x8007B2F4)
+            public const int ShowCustomers = 0x293, Winners = 0x257, ShowTakings = 0x383, ShowProfit = 0xE2;
+            public const int ShowExcitement = 0x350, Satisfaction = 0x2B9;
+            public const int ChanceOfWinning = 0x116, PrizeCost = 0x313, GamePrice = 0xB6;
         }
 
         /// <summary>The attraction whose panel is open, or null. ⚠ SELECTION ONLY SO FAR: the panel itself is
