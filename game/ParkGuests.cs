@@ -340,10 +340,30 @@ namespace TPWGodot
         /// ⚠ NO STAFF LIST IS TOLD, because no staff list holds guests yet.</summary>
         void RemoveGuest(Guest g)
         {
+            // ⚠ DEFERRED, BECAUSE THE CALLER IS INSIDE THE FOREACH. A guest leaves from its OWN arrival,
+            // which runs while Tick is enumerating _guests, and removing there throws. It never fired
+            // before only because nothing reached the leaving arrival at all.
+            if (_ticking) { _leaving.Add(g); return; }
+            Left++;
             FreeChain(g);
             _byVisitor.Remove(g.V);
             _guests.Remove(g);
             g.Inst?.QueueFree();
+        }
+
+        /// <summary>How many guests have actually left the park. ⚠ THE NUMBER THAT SHOWS THE LEAVE PATH
+        /// IS REAL — a refused guest that walks back in instead of leaving keeps the headcount looking
+        /// healthy and never appears here.</summary>
+        public int Left { get; private set; }
+
+        readonly List<Guest> _leaving = new();
+        bool _ticking;
+
+        void DrainLeavers()
+        {
+            if (_leaving.Count == 0) return;
+            foreach (var g in _leaving) RemoveGuest(g);
+            _leaving.Clear();
         }
 
         /// <summary>The park as an arriving or leaving guest reads it. Built lazily because it needs the
@@ -366,12 +386,26 @@ namespace TPWGodot
             _entrance.SetQueueWorld(() => _rides);
         }
 
-        /// <summary>Whether this guest is in the turnstile machine rather than loose in the park. The
-        /// entrance states are not contiguous, so they are listed rather than ranged.</summary>
-        static bool AtTheGate(Guest g) => g.V.State is VisitorState.SpawnToGate or VisitorState.WalkToLaneSlot
+        /// <summary>Whether this guest is in the turnstile machine rather than loose in the park.
+        ///
+        /// ⚠⚠ THE STATE IS NOT ENOUGH, AND THAT COST A REAL BUG. Both Leave (38) and WalkOut (48) set
+        /// state 11 WHILE WALKING (0x80091094, 0x800915D8) — the same state the litter-bin walk uses —
+        /// so a guest on its way out stopped looking like a gate guest the moment it started moving. It
+        /// then fell through to the ordinary logic, and a failed route dropped its target and WANDERED
+        /// it: observed as "they turn round at the bus stop and walk back in without paying".
+        /// The PURPOSE is what survives the walk, so it is half of the test.
+        ///
+        /// ⚠ AND IT MUST BE THE PURPOSE, NOT "state 11", or a guest walking to a bin is caught too.</summary>
+        static bool AtTheGate(Guest g) => AtTheGateByPurpose(g) || g.V.State is VisitorState.SpawnToGate or VisitorState.WalkToLaneSlot
             or VisitorState.ShuffleInLane or VisitorState.LaneFront or VisitorState.PayEntryFee
             or VisitorState.WalkIn or VisitorState.AtGate or VisitorState.LeavingPark
             or VisitorState.PickLane or VisitorState.WalkOut;
+
+        /// <summary>The purposes the entrance owns: 9 (gone), 11/12 (a lane slot), 14/15/16 (the gate
+        /// line, the exit point, the spawn point). A guest carrying one of these is walking the gate's
+        /// errand whatever state it is sitting in.</summary>
+        static bool AtTheGateByPurpose(Guest g) => g.V.Purpose is Purpose.LeavePark or Purpose.Turnstile11
+            or Purpose.Turnstile12 or Purpose.Turnstile14 or Purpose.Turnstile15 or Purpose.Turnstile16;
 
         /// <summary>One tick of a guest that is arriving or leaving (TPW.Sim.VisitorEntrance, §2.6).
         ///
@@ -391,6 +425,14 @@ namespace TPWGodot
                     // afford £40, the other one who looked at what is built and decided it was not
                     // worth it. A park that charges too much and a park with nothing in it look the
                     // same from the headcount and nothing else here separates them.
+                    // ⚠ THE SUM AT THE MOMENT OF THE ROLL, not at the end of the run. The verdict
+                    // weighs the fee against what is built RIGHT THEN, so a guest that rolled before a
+                    // ride was placed answered a different question from the one the final report shows.
+                    // That is the first thing to rule out when the measured refusal rate misses the
+                    // closed form, and it cannot be ruled out by reading the total afterwards.
+                    int sumNow = System.Linq.Enumerable.Sum(_entrance.AttractionIntensities);
+                    if (_verdicts++ == 0) _sumMin = _sumMax = sumNow;
+                    else { if (sumNow < _sumMin) _sumMin = sumNow; if (sumNow > _sumMax) _sumMax = sumNow; }
                     switch (VisitorEntrance.PayEntryFee(g.V, _entrance, _dice))
                     {
                         case PayOutcome.CannotAfford: _refusedEntry++; _brokeAtGate++; break;
@@ -416,7 +458,7 @@ namespace TPWGodot
             return g;
         }
 
-        int _refusedEntry, _brokeAtGate;
+        int _refusedEntry, _brokeAtGate, _verdicts, _sumMin, _sumMax;
 
         /// <summary>What the gate is doing: how many guests are in each entrance state, plus the two
         /// lane counters and the fees taken. For a caption on a capture — the turnstile's whole job is
@@ -436,7 +478,10 @@ namespace TPWGodot
                 }
             return $"gate: {outside} outside, {lanes} in a lane, {paying} paying, {inside} walking in, "
                  + $"{leaving} leaving; lanes {_entrance.LaneCount(0)}/{_entrance.LaneCount(1)}, "
-                 + $"{_entrance.Counter_McAi1C} paid, {_refusedEntry} turned back ({_brokeAtGate} broke)";
+                 + $"{_entrance.Counter_McAi1C} paid, {_refusedEntry} turned back ({_brokeAtGate} broke), {Left} actually left; "
+                 + $"intensity sum {System.Linq.Enumerable.Sum(_entrance.AttractionIntensities)} "
+                 + $"over {System.Linq.Enumerable.Count(_entrance.AttractionIntensities)} attractions, fee {_entrance.EntryFee}"
+                 + $" (at roll time the sum ran {_sumMin}..{_sumMax} over {_verdicts} rolls)";
         }
 
         /// <summary>How many guests are standing in the two turnstile lanes right now — the number the
@@ -635,6 +680,7 @@ namespace TPWGodot
                 Turnstile.LaneTick(_entrance, 0);
                 Turnstile.LaneTick(_entrance, 1);
             }
+            _ticking = true;
             foreach (var g in _guests)
             {
                 // On a ride: the ride owns it entirely (state 21).
@@ -679,6 +725,8 @@ namespace TPWGodot
                 if (RunQueueState(g)) continue;
                 AskForARoute(g);
             }
+            _ticking = false;
+            DrainLeavers();
             TickStaff();
         }
 
@@ -734,6 +782,11 @@ namespace TPWGodot
                 case Purpose.Turnstile14: VisitorEntrance.ArriveAtExitPoint(g.V, _entrance); return;
                 case Purpose.Turnstile15: VisitorEntrance.ArriveAtSpawnPoint(g.V, _entrance); return;
                 case Purpose.Turnstile16: VisitorEntrance.ArriveAtGate(g.V, _entrance, _dice); break;
+                // Arm 9 (0x8008DF3C), the one that jumps past the shared `purpose := 2`: the guest is
+                // gone. ⚠ WITHOUT THIS A REFUSED GUEST NEVER LEAVES — it walks out to the gate line and
+                // then stands on it for ever, still counted, still eating a search slot. 22 of 27 in the
+                // first measured run were doing exactly that.
+                case Purpose.LeavePark: g.V.Bubble = 0; RemoveGuest(g); return;
                 default: goto notTheGate;
             }
             // ⭐ ARRIVAL IS SELF-CANCELLING and 14 and 15 are the exceptions (VisitorArrival.Tick). A
@@ -1007,6 +1060,71 @@ namespace TPWGodot
                 if (_map[nx, nz].IsWalkable) return _area[nx, nz];
             }
             return _area[x, z];
+        }
+
+        /// <summary>The piece of the map a guest is standing in once it has walked through the gate:
+        /// the first path tile the entrance's own walk-in scan would find, or the biggest piece there is
+        /// when no entrance is wired. This is the "here" that everything else is measured against.</summary>
+        /// <summary>The tile the reachability check measures from: where a guest stands after walking in.</summary>
+        public (int X, int Z) GateTile { get; private set; } = (-1, -1);
+
+        int GateArea()
+        {
+            if (_entrance != null)
+            {
+                var e = _entrance.EntranceTile(0);
+                // ⚠ THE FIRST *PATH* TILE, NOT THE FIRST WALKABLE ONE. Grass outside the fence has a
+                // piece of its own, so taking the first non-zero answer put the reference OUTSIDE the
+                // park and reported every ride in the place as unreachable. WalkIn's own rule is the
+                // first type-2/13 tile scanning +y, and that is the tile a guest actually stands on.
+                //
+                // ⭐ AND THE GATE LINE IS NOT A LINK. A guest crosses it through the turnstile, not
+                // through the pathfinder, so the tiles outside and inside are legitimately different
+                // pieces. Anything measuring "reachable" from outside is measuring the wrong park.
+                for (int dz = 0; dz <= 15; dz++)
+                {
+                    var t = _map[e.X, e.Y + dz].Type;
+                    if (t == TileType.Path || t == TileType.PathQueueOverlap)
+                    {
+                        GateTile = (e.X, e.Y + dz);
+                        return AreaAt(e.X, e.Y + dz);
+                    }
+                }
+            }
+            var size = new Dictionary<int, int>();
+            for (int z = 0; z < _map.Height; z++)
+                for (int x = 0; x < _map.Width; x++)
+                    if (_area[x, z] != 0) size[_area[x, z]] = size.GetValueOrDefault(_area[x, z]) + 1;
+            int best = 0, bestN = 0;
+            foreach (var kv in size) if (kv.Value > bestN) { best = kv.Key; bestN = kv.Value; }
+            return best;
+        }
+
+        /// <summary>Which attractions a guest standing inside the gate cannot walk to.
+        ///
+        /// ⭐ THE GAME HAS NO SUCH CHECK and this is deliberately not one. Nothing in the original ever
+        /// validates that a queue reached a path: the only feedback is the queue tool's join marker at
+        /// BUILD time, and after that a queue one tile short is silently never routed into, for ever,
+        /// while the ride sits there open, staffed and empty. This is a DIAGNOSTIC over the port, not a
+        /// rule ported from the disc — it must never refuse a build the game would allow.
+        ///
+        /// It is the same flood fill the route-failure split already runs, asked a different question.</summary>
+        public string Reachability()
+        {
+            var targets = _rideTargets?.Invoke();
+            if (targets == null || targets.Count == 0) return "nothing built";
+            if (_area == null) RebuildAreas();
+            int gate = GateArea();
+            var bad = new List<string>();
+            foreach (var t in targets)
+                if (AreaAt(t.DoorX, t.DoorZ) != gate) bad.Add($"#{t.Id} at ({t.DoorX},{t.DoorZ}) in piece {AreaAt(t.DoorX, t.DoorZ)}");
+            // ⭐ THE PIECE NUMBERS ARE THE DIAGNOSIS, not decoration. All the strays sharing ONE piece
+            // means the paths are fine and it is the GATE that is not joined to them; each in its own
+            // means the runs never met. Without them "unreachable" says only that something is wrong.
+            return bad.Count == 0
+                ? $"all {targets.Count} attractions reachable from the gate at {GateTile} (piece {gate})"
+                : $"⚠ {bad.Count}/{targets.Count} UNREACHABLE from the gate at {GateTile} (piece {gate}): {string.Join(", ", bad)}"
+                  + " — a queue that stops one tile short of a path looks connected and never is";
         }
 
         bool SameArea(Walker wk)

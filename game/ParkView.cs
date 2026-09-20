@@ -979,6 +979,7 @@ namespace TPWGodot
             + $"{_guests.FreeNodes}/{Pathfinder.NodePoolSize} nodes and "
             + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free"
             + $"\n{_guests.GateReport()}"
+            + $"\n{_guests.Reachability()}"
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
