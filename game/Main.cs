@@ -89,6 +89,9 @@ namespace TPWGodot
         /// <summary>From <c>--park-hover=x,z[,x,z...]</c>: the cursor held on that tile, and any further pairs held
         /// as hovered too, for captures of one hover box or of several overlapping.</summary>
         string _autoHover;
+        /// <summary>From <c>--park-select=x,z</c>: the attraction on that tile selected at load, as a click on
+        /// it does, so the panel can be captured.</summary>
+        string _autoSelect;
         /// <summary>From <c>--park-picker[=tab]</c>: the purchase catalogue open on that category, for captures.</summary>
         int _autoPicker = -1;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
@@ -528,6 +531,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-track=")) _autoTrack = arg.Substring("--park-track=".Length);
                 else if (arg.StartsWith("--park-hover=")) _autoHover = arg.Substring("--park-hover=".Length);
+                else if (arg.StartsWith("--park-select=")) _autoSelect = arg.Substring("--park-select=".Length);
                 else if (arg == "--park-picker") _autoPicker = 0;
                 else if (arg.StartsWith("--park-picker=")) _autoPicker = int.Parse(arg.Substring("--park-picker=".Length));
                 else if (arg.StartsWith("--park-pathcursor=")) _autoPathCursor = arg.Substring("--park-pathcursor=".Length);
@@ -813,6 +817,14 @@ namespace TPWGodot
                         }
                         if (v.Length == 4)
                             GD.Print($"[tpw] --park-track {_autoTrack}: {_park.TrackAt(v[0], v[1], v[2], v[3], clicks, hover)?.ToString() ?? "refused"}");
+                    }
+
+                    // ⚠ AFTER the placement flags, not before: selecting a tile is only meaningful once
+                    // whatever --park-track put there exists. Sitting above them selected empty ground.
+                    if (_autoSelect != null)
+                    {
+                        var v = System.Array.ConvertAll(_autoSelect.Split(','), int.Parse);
+                        if (v.Length >= 2) GD.Print($"[panel] select {v[0]},{v[1]}: {(_park.SelectAttraction(v[0], v[1]) ? "selected" : "nothing there")}");
                     }
 
                     if (_autoQueue != null)

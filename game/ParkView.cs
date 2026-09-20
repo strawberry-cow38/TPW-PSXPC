@@ -638,11 +638,12 @@ namespace TPWGodot
             var kinds = new HashSet<int>();
             foreach (var a in _attractionsPlaced)
             {
-                // ⚠ `builtToday: false` IS A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score adds +20
-                // while an attraction's age is 0 or 1 whole days, and the port does not record the day a ride
-                // was built — so a brand-new park scores 20..24 here where the game scores 30..34, which is
+                // ⚠ `builtToday: false` IS STILL A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score
+                // adds +20 while an attraction's age is 0 or 1 whole days, and the port does not record the
+                // day a ride was built — so a brand-new park scores 20..24 here where the game scores 30..34,
                 // one guest a bus instead of one-or-two. Wants the build day on PlacedAttraction.
-                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, 0, a.Rec.BaseIntensity, false));
+                // (The LEVEL beside it is no longer a stand-in: the ride tracks its own now.)
+                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, a.Level, a.Rec.BaseIntensity, false));
                 kinds.Add(a.Rec.Entry);
             }
             int catalogue = Math.Max(1, _attractions.Count);
@@ -958,6 +959,14 @@ namespace TPWGodot
         string RideReport()
         {
             var sb = new System.Text.StringBuilder();
+            if (_panelFor != null)
+            {
+                // Until the panel is drawn, its ROWS are at least visible: the same list the drawing will lay out.
+                sb.Append($"\nselected {_panelFor.Rec.Entry} ({_panelFor.Type}) level {_panelFor.Level}, seats {_panelFor.MaximumSeats}");
+                foreach (var row in PanelRows(_panelFor))
+                    sb.Append($"\n  [{row.Label}] {_catalogueNames?[row.Label] ?? "?"}: "
+                            + (row.Slider ? $"{row.Now} [{row.Min}..{row.Max}]" : row.Value ?? "(not wired)"));
+            }
             foreach (var a in _attractionsPlaced)
             {
                 int len = PhaseTicks(a);
@@ -1490,6 +1499,15 @@ namespace TPWGodot
 
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
+
+        /// <summary>Select the attraction on a tile, as a click on it does. For captures, so the panel can be
+        /// driven headlessly the way every other tool in this port is.</summary>
+        public bool SelectAttraction(int x, int z)
+        {
+            _panelFor = AttractionAt((x, z));
+            RefreshInfo();
+            return _panelFor != null;
+        }
         (int X, int Z)? _hoverPin;
         /// <summary>Extra tiles held as hovered besides <see cref="PinHover"/>'s, so a capture can put two boxes up
         /// at once (the game keeps three: SelectionFades).</summary>
@@ -1546,7 +1564,7 @@ namespace TPWGodot
         /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
         /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
         /// list walks them to find the one under the cursor.</summary>
-        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob
+        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob, IRidePanelWorld
         {
             // --- IRideJob: the same object as a mechanic acts on it ---------------------------------
             int IRideJob.Id => Rec.Entry;
@@ -1597,9 +1615,44 @@ namespace TPWGodot
             /// <summary>Reliability, lifetime and the condemned mechanic (rides.md §6).</summary>
             public readonly RideWear Wear = new();
 
-            /// <summary>The speed slider, A+0xB8. ⚠ 50 is the DEFAULT rides.md §8 records on a placed
-            /// Crazy Ape; the range comes from the record. Nothing moves it yet - there is no panel.</summary>
+            /// <summary>The speed slider, A+0xB8. 50 is the DEFAULT rides.md §8 records on a placed
+            /// Crazy Ape; the range comes from the record's CURRENT level.</summary>
             public int SpeedSlider { get; set; } = 50;
+
+            /// <summary>The upgrade level, 0 to 2, and it is REAL now rather than assumed. ⭐ Placement sets
+            /// ZERO (0x8009C344) and the upgrade path is `if level >= 3 return; level++` (0x8009C56C), so a
+            /// freshly built ride is level 0 and everything the record says about it comes from the level-0
+            /// block. This class used to read Level0 unconditionally, which was right only until the first
+            /// upgrade; the panel is what moves it.</summary>
+            public int Level { get; set; }
+
+            /// <summary>The record's block for a level, as the panel wants it. Clamped, because the game's
+            /// own upgrade path allows a fourth level the data does not have (rides.md §1.3).</summary>
+            public TPW.Sim.RidePanelLevel ReadLevel(int level)
+            {
+                if (Rec.Levels.Length == 0) return default;
+                var l = Rec.Levels[Math.Clamp(level, 0, Rec.Levels.Length - 1)];
+                return new TPW.Sim.RidePanelLevel(l.WearMultiplier, l.MaxSeats, l.Lifetime,
+                                                  l.SpeedMin, l.SpeedMax, l.CyclesMin, l.CyclesMax, l.Price);
+            }
+
+            /// <summary>The record's block for the level this ride is actually at.</summary>
+            RideLevel Now => Rec.Levels.Length > 0 ? Rec.Levels[Math.Clamp(Level, 0, Rec.Levels.Length - 1)] : default;
+
+            // --- IRidePanelWorld ------------------------------------------------------------------------
+            public AttractionType Type => (AttractionType)Rec.Type;
+            /// <summary>⚠ Slot 99, and NOT the same as Capacity: a coaster overrides it with its model's
+            /// attachment count (0x800AD728). Until coaster trains exist, the level's seats.</summary>
+            public int MaximumSeats => MaxSeats;
+            public int BaseIntensity => Rec.BaseIntensity;
+            public int Capacity { get; set; }
+            public int ReliabilityFixed { get => Wear.Reliability; set => Wear.Reliability = value; }
+            public int Lifetime { get => Wear.Lifetime; set => Wear.Lifetime = value; }
+            public int ClosingProgress { get; set; }
+            /// <summary>⚠ NOT WIRED: the port has no smoke or sparkle handles to release yet, so this is
+            /// deliberately empty rather than pretending. When ride effects exist, both handles are freed
+            /// and zeroed here (0x8009C428 / 0x8009C434).</summary>
+            public void ClearRideEffects() { }
 
             public bool IsRide => Rec.IsRide;
             public bool BuildAnimationComplete { get; set; }
@@ -1614,9 +1667,17 @@ namespace TPWGodot
             }
 
             public int CyclesRun { get => Cycle.CyclesRun; set => Cycle.CyclesRun = value; }
-            /// <summary>The duration slider: half the level's maximum, so 5 for most rides and 25 for a
-            /// bouncer (rides.md §4.3). ⚠ Its own slider does not exist yet either.</summary>
-            public int CyclesPerLoad => Rec.Levels.Length > 0 ? Rec.Level0.DefaultCycles : 1;
+            /// <summary>The duration slider. Until the panel moves it, the game's own default: half the
+            /// CURRENT level's maximum, so 5 for most rides and 25 for a bouncer (rides.md §4.3). Setting it
+            /// is what the panel does; −1 means "still the default", so an upgrade that widens the range
+            /// carries the ride with it rather than pinning it to the old level's half.</summary>
+            int _cyclesPerLoad = -1;
+            public int CyclesPerLoad
+            {
+                get => _cyclesPerLoad >= 0 ? _cyclesPerLoad
+                     : Rec.Levels.Length > 0 ? Now.DefaultCycles : 1;
+                set => _cyclesPerLoad = value;
+            }
             /// <summary>Riders on board, from the ride's own runtime (ParkRideWorld). ⚠ THIS WAS THE
             /// STUB THAT ATE THE RIDERS: while it answered a constant "empty", status 11 left for 10
             /// on its FIRST tick, so at most one guest ever stepped off per unload and the rest stayed
@@ -1635,8 +1696,8 @@ namespace TPWGodot
 
             // IRideWearWorld
             public int Riders => RiderCount?.Invoke() ?? 0;
-            public int MaxSeats => Rec.Levels.Length > 0 ? Math.Max(1, Rec.Level0.MaxSeats) : 1;
-            public int WearMultiplier => Rec.Levels.Length > 0 ? Rec.Level0.WearMultiplier : 5;
+            public int MaxSeats => Rec.Levels.Length > 0 ? Math.Max(1, Now.MaxSeats) : 1;
+            public int WearMultiplier => Rec.Levels.Length > 0 ? Now.WearMultiplier : 5;
             public bool NoWear => false;
         }
         readonly List<PlacedAttraction> _attractionsPlaced = new();
@@ -1951,6 +2012,79 @@ namespace TPWGodot
             if ((_hoverPin ?? TileUnderMouse()) is not { } t) return null;
             return TargetAt(t);
         }
+
+        /// <summary>The placed attraction under a tile, which is what a click on one selects. Same search as
+        /// <see cref="TargetAt"/>, which returns only its hover box.</summary>
+        PlacedAttraction AttractionAt((int X, int Z) t)
+        {
+            foreach (var a in _attractionsPlaced)
+            {
+                var (w, d) = a.Rec.Footprint(a.Rot);
+                if (t.X >= a.Ox && t.X < a.Ox + w && t.Z >= a.Oz && t.Z < a.Oz + d) return a;
+            }
+            return null;
+        }
+
+        /// <summary>One row of an attraction's panel: a label from the game's own string table, and either a
+        /// slider with its range or a plain value. ⭐ THE ROWS DIFFER BY TYPE and that is the whole point — a
+        /// shop has NO sliders, it has a margin (what the stock costs against what it sells for), and a
+        /// sideshow prices its game and its prize separately. A panel that drew sliders for all four types
+        /// would be wrong for three of them (rides.md, the panel's own words).</summary>
+        readonly record struct PanelRow(int Label, string Value, bool Slider, int Min, int Max, int Now);
+
+        /// <summary>What the selected attraction's panel shows, per type.
+        ///
+        /// ⚠ NO TICKET PRICE ON A RIDE. The string table has "Ticket Price" and it is not a ride's: this game
+        /// does not charge per ride at all (economy.md §4.7, "no ride class calls GetBank"). A ride does not
+        /// earn — it ATTRACTS, and the money comes from the gate and the shops. I had it in the row list for
+        /// an hour on the strength of the word alone.
+        ///
+        /// ⚠ A SHOP'S AND A SIDESHOW'S NUMBERS ARE NOT WIRED HERE YET: stock, cost of goods and the game and
+        /// prize prices live in the spending work rather than on this class, so those rows carry their real
+        /// label and no value rather than a made-up one.</summary>
+        List<PanelRow> PanelRows(PlacedAttraction a)
+        {
+            var rows = new List<PanelRow>();
+            if (a == null) return rows;
+            var r = TPW.Sim.RidePanel.Ranges(a);
+            switch (a.Type)
+            {
+                case AttractionType.Ride:
+                case AttractionType.RollerCoaster:
+                case AttractionType.TrackRide:
+                case AttractionType.TourRide:
+                    rows.Add(new PanelRow(PanelLabel.Speed, null, true, r.Speed.Min, r.Speed.Max, a.SpeedSlider));
+                    rows.Add(new PanelRow(PanelLabel.Duration, null, true, r.Duration.Min, r.Duration.Max, a.CyclesPerLoad));
+                    rows.Add(new PanelRow(PanelLabel.StateOfRepair, $"{a.Reliability}%", false, 0, 100, a.Reliability));
+                    rows.Add(new PanelRow(PanelLabel.Upgrades, $"{a.Level + 1}/3", false, 0, 0, a.Level));
+                    break;
+                case AttractionType.Shop:
+                    rows.Add(new PanelRow(PanelLabel.SalePrice, null, false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.CostOfGoods, null, false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.Stock, null, false, 0, 0, 0));
+                    break;
+                case AttractionType.SideShow:
+                    rows.Add(new PanelRow(PanelLabel.GamePrice, null, false, 0, 0, 0));
+                    rows.Add(new PanelRow(PanelLabel.PrizeCost, null, false, 0, 0, 0));
+                    break;
+            }
+            return rows;
+        }
+
+        /// <summary>The panel's labels, by string id in the game's own table (FOLIO entry 407 in English).</summary>
+        static class PanelLabel
+        {
+            public const int Speed = 417, Duration = 725, Reliability = 1005, StateOfRepair = 122;
+            public const int Upgrade = 657, Upgrades = 112, UpgradeCost = 281, Repair = 604;
+            public const int SalePrice = 560, CostOfGoods = 17, PurchaseCost = 735, Stock = 867;
+            public const int GamePrice = 182, PrizeCost = 787;
+        }
+
+        /// <summary>The attraction whose panel is open, or null. ⚠ SELECTION ONLY SO FAR: the panel itself is
+        /// not drawn yet, and what it shows per attraction type is being read off the disc rather than
+        /// invented. This is the hook it will hang from, and it is deliberately separate from the hover box —
+        /// hovering is where the cursor is, selecting is what you chose.</summary>
+        PlacedAttraction _panelFor;
 
         BoxSite TargetAt((int X, int Z) t)
         {
@@ -2549,8 +2683,14 @@ void fragment() {
                 {
                     // The click that opens the tool only opens it -- and it does not open at all while the cursor is
                     // on something the hover box is round (master): a click there belongs to that attraction or to
-                    // the gate, not to the path tool.
-                    if (HoverTarget() != null) return;
+                    // the gate, not to the path tool. That click now SELECTS the attraction, which is what opens
+                    // its panel; clicking bare ground with nothing selected closes it again.
+                    if (HoverTarget() != null)
+                    {
+                        if (tile is { } sel) { _panelFor = AttractionAt(sel); RefreshInfo(); }
+                        return;
+                    }
+                    if (_panelFor != null) { _panelFor = null; RefreshInfo(); }
                     if (tile is not { } t0 || !PathTool.CanStartOn(_map, t0.X, t0.Z)) return;
                     _cursorTile = tile; _pathMode = true; _cursorPinned = false; RefreshInfo();
                     return;

@@ -563,6 +563,11 @@ namespace TPW.Sim
                     cost = 1;
                     return Has(req, PathFlags.Path) && (mask & bit) != 0;
                 case 4:                                        // queue path
+                    // ⚠⚠ IF A GUEST WILL NOT ENTER A QUEUE, SUSPECT THE LINKER, NOT THIS. A path tile's bits
+                    // never point at a queue tile — the game refuses that join outright (0x8004E20C) — so the
+                    // only way in is over the type-13 tile a queue run makes when it ENDS ON a path. A queue
+                    // that stops one tile short looks connected on screen and can never be routed into, from
+                    // any adjacent tile. Measured both ways; see ParkPaths.QueueRun.
                     cost = 1;
                     return Has(req, PathFlags.Queue) && (mask & bit) != 0;
                 case 5:                                        // a building's footprint

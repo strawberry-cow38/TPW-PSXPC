@@ -678,6 +678,43 @@ So a press lands the pylon on a two-tile lattice along ONE axis from the last on
 cursor tile, and the track it assembles is a straight run. The two-tile step is also why the kinds the
 generator emits for a run are the 4x3x4 family.
 
+### The attraction panel's own words (READ, 2026-09-20)
+What a panel shows per type falls out of the string table without reading a single draw routine. FOLIO
+entry 407 (English) is `u32 count = 1031`, then 1031 `u32` offsets, then NUL-terminated CP850 strings:
+
+| id | string | belongs to |
+| --- | --- | --- |
+| 46 | Ticket Price | ⚠ NOT a ride — see below |
+| 417 / 725 | Speed / Duration | a ride's sliders |
+| 1005 / 122 | Reliability / State of Repair | a ride |
+| 657, 112, 619, 789 | Upgrade, Upgrades | a ride |
+| 281, 561, 562, 563 | Upgrade Cost, Upgrade 1/2/3 | a ride |
+| 604 | Repair | a ride |
+| 258, 635 / 918, 1025 | Open / Close | |
+| 560, 17, 735, 867 | Sale Price, Cost of Goods, Purchase Cost, Stock | a SHOP |
+| 182, 787 | Game Price, Prize Cost | a SIDESHOW |
+| 212, 316 | Pylon Stock, Track Stock | the coaster/track BUILDER |
+| 884, 895 | Build Queue, Edit Queue | |
+
+⚠ **"TICKET PRICE" IS NOT A RIDE'S, AND THAT IS A CORRECTION TO THIS TABLE'S FIRST DRAFT.** I filed it
+under a ride from the word alone. economy.md §4.7 has it already settled the other way: **"Ride tickets:
+none. No ride class calls GetBank"** — this game does not charge per ride at all. The likeliest owner is
+the PARK's admission (the entry fee guests pay at the turnstile, VisitorEntrance's `EntryFee`), which is
+a different panel. Left in the table with the correction attached rather than deleted, because the next
+person will grep the same word and reach the same wrong conclusion.
+
+⭐ **A SHOP IS NOT A RIDE WITH DIFFERENT NUMBERS.** It has no sliders at all: it is a MARGIN — what the
+stock costs against what it sells for — and a sideshow is the same shape with the game and the prize
+priced separately. Any panel that draws sliders for all four types is wrong for three of them.
+
+⚠ **AND THE TRACK BUILDER APPEARS TO HAVE A STOCK.** `Pylon Stock` and `Track Stock` are not panel words:
+0x800224B0 loads id 316 and calls 0x8006F00C, which picks one of two objects (gp+0x134C or gp+0x1354, by
+gp+0x1358) and posts the id through 0x8006F0AC — and it sits immediately after the builder's walk loop
+(`bgez s4, 0x80022354`), where the run's end point is stored to +0x30/+0x34. So the builder says something
+about track stock every time it walks a run. ⚠ NOT ESTABLISHED whether that is a readout or a refusal, or
+whether a stock LIMITS laying; what is established is that the concept exists and this port does not model
+it. It is also the first plausible reading of the confirm's `unit x (pieces - 4)` that is not about money.
+
 ### The pieces the track is made of (READ)
 ⭐ **THERE IS A PIECE TABLE, AND IT IS PLAIN DATA IN THE EXE: 80 descriptors of 8 bytes at 0x800F8A30.**
 (⚠ my earlier note said 0x80108A30 and "RAM-resident, loader not found" — that was an address typo: the
