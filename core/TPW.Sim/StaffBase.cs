@@ -6,6 +6,10 @@ namespace TPW.Sim
     public enum StaffState
     {
         Idle = 0,
+        /// <summary>READ: state 2, the per-tick walking state whose handler IS slot 35 (behaviour.md §3.1
+        /// row "2 (arrival)", and §0 item 2 for the guest). Walking = 11 is the request; once the path is
+        /// ready the member lives here until it arrives.</summary>
+        WalkToDestination = 2,
         /// <summary>Walking to a destination; arrival is handled by slot 35.</summary>
         Walking = 11,
         /// <summary>Random wander, shared with the visitor machine.</summary>
@@ -34,6 +38,11 @@ namespace TPW.Sim
         Strike = 5,
         /// <summary>Walking to a bench. On arrival: rest.</summary>
         Rest = 17,
+        /// <summary>⚠ NOT IDENTIFIED. 0x800955B4 (<see cref="StaffBase.IsCommittedToStrikeOrRest"/>) tests
+        /// the purpose byte against 0x32 in every state it does not otherwise decide, but no write of 50
+        /// exists in the staff code: a scan of every `sb ..,44()` store in 0x80090000..0x8009B000 finds
+        /// only 1, 2, 5 and 17 stored. Carried so the test is ported as READ, not laundered into "false".</summary>
+        Unidentified50 = 50,
     }
 
     /// <summary>What the staff machine needs of the park.</summary>
@@ -215,6 +224,23 @@ namespace TPW.Sim
                 case StaffPurpose.Patrol: staff.SetState(StaffState.Idle); break;
                 case StaffPurpose.Rest: staff.SetState(StaffState.Resting); break;
             }
+        }
+
+        /// <summary>0x800955B4 -- is this member spoken for by a strike or a rest? READ: true when striking
+        /// (15) or walking to the strike (26); true when in the walking states 2/3 for a strike (5) or a
+        /// rest (17); otherwise true only for the unidentified purpose 50.
+        ///
+        /// ⚠ THE PURPOSE TEST ONLY COUNTS IN STATES 2 AND 3. A member in state 11 (walk requested, path not
+        /// yet ready) with a strike purpose is NOT committed by this test, so a mechanic's hand-off
+        /// (<see cref="Mechanic.CanTakeHandedJob"/>) can pull a colleague off a strike walk in the one tick
+        /// between the request and the path arriving. Port of the instructions, not of the intent.</summary>
+        public static bool IsCommittedToStrikeOrRest(StaffMember staff)
+        {
+            if (staff == null) throw new ArgumentNullException(nameof(staff));
+            if (staff.State == StaffState.WalkToStrike || staff.State == StaffState.Striking) return true;
+            if ((staff.State == StaffState.WalkToDestination || staff.State == StaffState.PathReady)
+                && (staff.Purpose == StaffPurpose.Strike || staff.Purpose == StaffPurpose.Rest)) return true;
+            return staff.Purpose == StaffPurpose.Unidentified50;
         }
 
         /// <summary>Slot 40 -- the pathfinder's answer (0x800942D8).
