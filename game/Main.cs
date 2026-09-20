@@ -90,6 +90,8 @@ namespace TPWGodot
         int _autoPicker = -1;
         /// <summary>Each world's gate pack by archive entry (ParkGate).</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _gatePacks = new();
+        /// <summary>The bus's model pack (archive entry 90), shared by every world.</summary>
+        SceneryPack _busPack;
         /// <summary>Each world's scenery pack by archive entry.</summary>
         System.Collections.Generic.Dictionary<int, SceneryPack> _sceneryPacks = new();
         /// <summary>From <c>--park=203</c>: open the park view on that map once the disc is checked, UI hidden.</summary>
@@ -610,6 +612,10 @@ namespace TPWGodot
                         if (MenuLayout.Sheet < gz.Entries.Count &&
                             TextureSheet.TryParse(gz.Read(gz.Entries[MenuLayout.Sheet]), out var ms, out _))
                             _menuSheet = ms;
+                        // The bus: one model for all four worlds, on the common sheet (TPW.Sim.BusRoute).
+                        if (TPW.Sim.BusRoute.ModelEntry < gz.Entries.Count &&
+                            SceneryPack.TryParse(gz.Read(gz.Entries[TPW.Sim.BusRoute.ModelEntry]), out var busPack, out _))
+                            _busPack = busPack;
                         foreach (var (entry, map) in ParkMap.FindAll(gz))
                         {
                             _maps.Add((entry.Index, map));
@@ -916,7 +922,7 @@ namespace TPWGodot
                 _park.SetAttractions(world != null && _attractionsByWorld.TryGetValue(world.Index, out var al) ? al : null,
                                      ae => _models != null && _models.TryGet(ae, 0, out var am) ? am : null, _models?.Sheets,
                                      (ae, sub) => _models != null && _models.TryGet(ae, sub, out var sm) ? sm : null);
-                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe);
+                _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe, _busPack);
                 _park.SetToolSounds(_toolSounds, _parkSounds);
                 _park.SetHud(_commonSheet, _exe, _strings);
                 _park.SetBuildRig(v => _models != null && _models.TryGet(3, v, out var rig) ? rig : null);

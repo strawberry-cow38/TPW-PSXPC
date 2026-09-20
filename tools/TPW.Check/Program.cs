@@ -2087,6 +2087,36 @@ static class Program
         {
             // --model-bounds E: sub-model 0 of entry E, its vertices' extent at rest and posed at time 0, and its
             // definition record -- where a model's origin sits relative to its footprint.
+            // --pack E: a scenery-style model pack (the gate packs, the bus at entry 90), with each model's
+            // size and the texture pages its faces name — which is what says whose sheet it is drawn from.
+            int pkAt = Array.IndexOf(args, "--pack");
+            if (pkAt >= 0 && pkAt + 1 < args.Length)
+            {
+                var agp = Archive(disc);
+                int pe = int.Parse(args[pkAt + 1]);
+                var pb = agp.Read(agp.Entries[pe]);
+                if (!SceneryPack.TryParse(pb, out var pack, out string pErr)) { Console.WriteLine($"entry {pe}: {pErr}"); return 1; }
+                Console.WriteLine($"entry {pe}: {pb.Length} bytes, {pack.Models.Count} models");
+                for (int m = 0; m < pack.Models.Count; m++)
+                {
+                    var md = pack.Models[m];
+                    int x0 = int.MaxValue, x1 = int.MinValue, y0 = int.MaxValue, y1 = int.MinValue, z0 = int.MaxValue, z1 = int.MinValue;
+                    for (int v = 0; v < md.Vertices.Count; v++)
+                    {
+                        var (vx, vy, vz) = md.Position(v);
+                        x0 = Math.Min(x0, (int)vx); x1 = Math.Max(x1, (int)vx);
+                        y0 = Math.Min(y0, (int)vy); y1 = Math.Max(y1, (int)vy);
+                        z0 = Math.Min(z0, (int)vz); z1 = Math.Max(z1, (int)vz);
+                    }
+                    var pages = new System.Collections.Generic.SortedSet<string>();
+                    foreach (var t in md.Textures) pages.Add($"{t.TPage:X4}/{t.Clut:X4}");
+                    Console.WriteLine($"  model {m}: scale {md.Scale}, {md.Vertices.Count} verts, {md.Polygons.Count} faces, " +
+                                      $"{(x1 - x0) / 256.0:0.00} x {(y1 - y0) / 256.0:0.00} x {(z1 - z0) / 256.0:0.00} tiles, " +
+                                      $"pages {string.Join(" ", pages)}");
+                }
+                return 0;
+            }
+
             // --recdump E [FROM LEN]: an attraction record's raw words, for reading tables the port has not
             // named yet (the piece class table the coaster code indexes at record +0xDC, say).
             int rdAt = Array.IndexOf(args, "--recdump");
