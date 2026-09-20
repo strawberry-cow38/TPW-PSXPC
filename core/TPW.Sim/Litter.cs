@@ -65,9 +65,19 @@ namespace TPW.Sim
         /// <summary>READ: statistic switch entry 12 at 0x800DBA28 → 0x80016CFC stores the live count.
         /// This is separate from FeatureStock.ParkDirtiness, statistic 30.</summary>
         public const int CountStatistic = 12;
-        /// <summary>behaviour.md §2.9: "within 2 tiles". GUESS-medium: inclusive interpretation of
-        /// that prose. ⚠ DISPUTED BOUNDARY: the binary tests
-        /// distance &lt; 2 (0x800901F4). The port retains the report's inclusive reading; see litter.md.</summary>
+        /// <summary>The immediate in the binary's own test: `slti v0, v0, 0x2` at 0x800901F4, applied
+        /// STRICTLY — `|dx| + |dy| &lt; 2`, which is the guest's own tile and its four edge neighbours.
+        /// FIVE tiles, not a 5x5 block and not a nine-tile square.
+        ///
+        /// ⭐ THREE INDEPENDENT READS, AGAINST THE PROSE. behaviour.md §2.9 says "within 2 tiles" and
+        /// this constant used to be inclusive on that basis. Two agents traced 0x800901B8..0x800901F4
+        /// separately on 2026-09-20 without sight of each other and both read it strictly; I then read
+        /// the same window myself — the two `bgez`/`subu` absolute values, the `addu`, and the `slti`
+        /// against 2. The prose is a summary; the instruction is the rule.
+        ///
+        /// ⚠ THE CONSTANT STAYS 2 AND THE COMPARISON IS `&lt;`, deliberately, so the number here is the
+        /// one you can find in the disassembly. Writing it as `&lt;= 1` would be the same behaviour and
+        /// would hide where it came from.</summary>
         public const int NearbyRadius = 2;
 
         // READ: 0x800E14B8, in stored order. In particular A0 precedes 9F.
@@ -140,12 +150,12 @@ namespace TPW.Sim
         }
 
         /// <summary>Wire INeedsWorld.LitterNearby to this. READ: all pieces count, including claimed
-        /// ones, and vomit also counts as litter (0x80090198..244). The report's radius is retained.</summary>
+        /// ones, and vomit also counts as litter (0x80090198..244), within the strict radius above.</summary>
         public (int Litter, int Vomit) Nearby(int x, int y)
         {
             int litter = 0, vomit = 0;
             foreach (var piece in live)
-                if (TileDistance(piece, x, y) <= NearbyRadius)
+                if (TileDistance(piece, x, y) < NearbyRadius)
                 {
                     litter++;
                     if (piece.IsVomit) vomit++;

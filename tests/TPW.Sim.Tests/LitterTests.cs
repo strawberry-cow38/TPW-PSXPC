@@ -181,15 +181,19 @@ namespace TPW.Sim.Tests
         }
 
         // REJECTS Chebyshev distance, subtract-before-shift, truncating negative tiles toward zero,
-        // and changing the report's inclusive two-tile boundary to the binary's strict one without review.
+        // and an INCLUSIVE two-tile boundary. The binary's test is `slti v0, v0, 2` (0x800901F4), so a
+        // piece exactly two tiles away does NOT count: the pairs at distance 2 below are all false and
+        // the distance-1 pair is true, which is what separates `< 2` from `<= 2`.
         [Theory]
-        [InlineData(255, 255, 256, 256, true)]
-        [InlineData(0, 0, -1, -1, true)]
+        [InlineData(255, 255, 256, 256, false)]   // tiles (0,0) and (1,1): distance 2
+        [InlineData(0, 0, -1, -1, false)]         // tiles (0,0) and (-1,-1): distance 2
+        [InlineData(0, 0, 256, 0, true)]          // distance 1: the neighbour that DOES count
+        [InlineData(0, 0, 0, -1, true)]           // distance 1 the other way, and across zero
         [InlineData(0, 0, -257, -1, false)]
-        [InlineData(0, 0, 512, 0, true)]
+        [InlineData(0, 0, 512, 0, false)]         // distance 2 in a straight line
         [InlineData(0, 0, 512, 256, false)]
         [InlineData(0, 0, 0, 768, false)]
-        [InlineData(65535, 65535, -1, -1, true)]
+        [InlineData(65535, 65535, -1, -1, true)]  // both are tile (-1,-1): distance 0
         public void NearbyUsesWholeTilesAndTheRetainedBoundary(int x, int y, int px, int py, bool near)
         {
             var w = new World(); w.Piece(px, py, true);
