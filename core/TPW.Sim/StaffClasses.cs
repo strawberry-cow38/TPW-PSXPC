@@ -5,6 +5,11 @@ namespace TPW.Sim
     /// <summary>Per-class staff states and purposes that the base machine does not own.</summary>
     public static class StaffClassStates
     {
+        /// <summary>READ: name-table state 25, "I will clear litter" (0x800E2360). No Set/Push
+        /// writer in this build; the staff dispatch entry 0x800E416C takes the no-work default.
+        /// The live litter job uses purpose 7, states 11/3/2, then 27. There is no mowing handler
+        /// in the handyman's dispatch (0x80099490..510). See findings/litter.md §6.</summary>
+        public const StaffState DeadClearLitter = (StaffState)25;
         /// <summary>Handyman: cleaning up a piece of litter.</summary>
         public const StaffState CleaningLitter = (StaffState)27;
         /// <summary>Handyman: emptying a bin.</summary>
@@ -69,8 +74,9 @@ namespace TPW.Sim
 
         /// <summary>The table's third column, 10/15/20/20/18.
         ///
-        /// ⚠ NOTHING READS IT. behaviour.md says so and a scan of the handler agrees; it is exposed only
-        /// so the next person does not rediscover the column and assume it must be wired somewhere.</summary>
+        /// READ refinement: slot-44 speed getter 0x80098A68..88 reads this column. StaffMotion uses
+        /// it. behaviour.md only said the job handlers did not read it; the old claim that NOTHING
+        /// reads it was too broad. The historical name is retained. This is not mowing data.</summary>
         public static readonly int[] UnusedThirdColumn = { 10, 15, 20, 20, 18 };
 
         /// <summary>Morale for clearing ordinary litter.</summary>

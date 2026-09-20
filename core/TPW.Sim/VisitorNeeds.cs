@@ -29,7 +29,9 @@ namespace TPW.Sim
         bool IdleNeedsSuppressed { get; }
         /// <summary>The OR of the influence bits covering this guest.</summary>
         TileInfluence InfluenceAt(Visitor guest);
-        /// <summary>Litter objects within 2 tiles, and how many of those are vomit (obj+0x1C == 0x9E).</summary>
+        /// <summary>Litter objects within 2 tiles, and how many of those are vomit (obj+0x1C == 0x9E).
+        /// LitterPool.Nearby supplies this count. ⚠ DISPUTED: the report's inclusive reading is
+        /// retained; 0x800901F4 instead tests Manhattan distance &lt; 2 (findings/litter.md §0).</summary>
         (int Litter, int Vomit) LitterNearby(Visitor guest);
         /// <summary>True while the guest is queueing, which blocks the entertainer push.</summary>
         bool InQueue(Visitor guest);
