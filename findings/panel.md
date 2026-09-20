@@ -13,7 +13,16 @@ The panel is ONE class family with **four pages behind a tab menu** — Details,
 — run as a **blocking modal task**, not a HUD overlay. The same loop serves both the in-park route and
 the "Ride Information" list route.
 
-⭐ **CIRCLE opens it** over a highlighted attraction (0x80038D80 → 0x80038900), not CROSS. Buttons
+⭐ **CIRCLE opens it** over a highlighted attraction (0x80038D80 → 0x80038900), not CROSS.
+
+⭐ **AND CROSS OPENS THE CONTEXT LIST — THE SAME COMMANDS, BUILT BY THE SAME ROUTINE.** In the park, CROSS
+goes to 0x800387AC, which reads the highlighted object's TYPE (class record slot 16) and jumps through a
+19-entry table at 0x800E0358. Every attraction type lands on one handler, which fires a tutorial hint
+(id 51, or 57 for a coaster, via 0x8001397C) and then calls 0x800385D0: clear the list at 0x80108F88,
+fill it with **0x8004A0B4** — *the Options page's own builder* — and show it at the cursor. So CROSS is
+the shortcut to Options and CIRCLE is the whole panel, which is why the two share a builder.
+⚠ CROSS on a STAFF member (type 10) instead GRABS them to carry, 0x80093DDC(staff, 1) — the "Grab"
+command. In the park TRIANGLE opens Build (loop 0xE) and SQUARE opens Hire (0xF). Buttons
 (0x80089010, logical table 0x800E35C0): **CROSS** activate/OK, **TRIANGLE** back (page → tab menu; tab
 menu → close), **CIRCLE** close the chain, **SQUARE** close-all then root menu. Panel flags +0x4C
 activate, +0x48 cancel, +0x50 done, +0x54 close-all (base input 0x80044D38).
