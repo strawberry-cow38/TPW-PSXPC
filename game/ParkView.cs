@@ -1167,6 +1167,7 @@ namespace TPWGodot
             var rec = _attractions[k].Rec;
             AttractionPlacement.Ghost(_map, rec, x, z, rot & 3, out bool ok);
             if (!ok) return false;
+            var saved = SnapshotSite(rec, x, z, rot & 3);
             AttractionPlacement.Place(_map, rec, x, z, rot & 3);
             _paths?.LayDoors(_map, rec, x, z, rot & 3);
             _guests?.OnBuildItemPlaced();
@@ -1175,7 +1176,7 @@ namespace TPWGodot
             var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
             AddChild(inst);
             _placed.Add(inst);
-            RegisterPlaced(rec, x, z, rot & 3, inst);
+            RegisterPlaced(rec, x, z, rot & 3, inst, saved);
             RebuildGround();
             return true;
         }
@@ -1343,6 +1344,7 @@ namespace TPWGodot
             var rec = _attractions[_placing].Rec;
             AttractionPlacement.Ghost(_map, rec, o.X, o.Z, _placeRot, out bool ok);
             if (!ok || !CanAfford(rec)) { PlaySfx(ToolSound.Refused); return; }
+            var saved = SnapshotSite(rec, o.X, o.Z, _placeRot);
             AttractionPlacement.Place(_map, rec, o.X, o.Z, _placeRot);
             _paths?.LayDoors(_map, rec, o.X, o.Z, _placeRot);
             // 0x800EBBE4: putting a build item down wipes both pathfinder pools and drops every search.
@@ -1351,7 +1353,7 @@ namespace TPWGodot
             var inst = new MeshInstance3D { Mesh = AttractionMesh(rec.Entry), Transform = AttractionTransform(rec, o.X, o.Z, _placeRot) };
             AddChild(inst);
             _placed.Add(inst);
-            RegisterPlaced(rec, o.X, o.Z, _placeRot, inst);
+            RegisterPlaced(rec, o.X, o.Z, _placeRot, inst, saved);
             RebuildGround();
             // The placed sound. A shop or sideshow's tool then closes (0x8001C5C8 switches to tool 0; only the
             // features' tool, 15, reopens itself). A flat or tour ride's hands over to the queue tool (0x8001C92C /
@@ -1615,6 +1617,26 @@ namespace TPWGodot
         /// <summary>What the hover box needs to know of one object (SelectionBox): footprint corner and size and base
         /// height in world units, its height in tiles, its footprint's centre.</summary>
         sealed class BoxSite { public int X0, Z0, W, D, Y0, Height, Cx, Cz, Type; }
+
+        /// <summary>⭐ THE ONLY HONEST INVERSE OF A PLACEMENT IS A SNAPSHOT. AttractionPlacement.Place
+        /// OVERWRITES each footprint tile — type becomes 5, the ground becomes the record's pad, the flags
+        /// go — and the doors become 7 and 8; PathTool.LayDoors then rewrites tiles OUTSIDE the footprint
+        /// too. None of that is reversible from the result, because what was underneath is gone. So the
+        /// tiles are copied before anything writes to them, and Delete puts them back exactly.
+        ///
+        /// The rect is the footprint grown by one tile on every side, which is what covers the doors and the
+        /// queue/path pieces LayDoors puts beside them.</summary>
+        List<(int X, int Z, TPW.Data.MapTile T)> SnapshotSite(AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var saved = new List<(int, int, TPW.Data.MapTile)>();
+            if (_map == null) return saved;
+            var (w, d) = rec.Footprint(rot);
+            for (int z = oz - 1; z <= oz + d; z++)
+                for (int x = ox - 1; x <= ox + w; x++)
+                    if (x >= 0 && z >= 0 && x < _map.Width && z < _map.Height)
+                        saved.Add((x, z, _map[x, z]));
+            return saved;
+        }
         const uint GateHoverRects = 0x800F2398;
         /// <summary>The park gate's type (its slot 0x84, 0x8006238C).</summary>
         const int GateType = 0x12;
@@ -1702,7 +1724,8 @@ namespace TPWGodot
             return ParkCamera.GroundHeight(_map, (ox + (w >> 1)) * u + u / 2, (oz + (d >> 1)) * u + u / 2);
         }
 
-        void RegisterPlaced(AttractionDefinition rec, int ox, int oz, int rot, MeshInstance3D inst)
+        void RegisterPlaced(AttractionDefinition rec, int ox, int oz, int rot, MeshInstance3D inst,
+                            List<(int X, int Z, TPW.Data.MapTile T)> saved = null)
         {
             var (w, d) = rec.Footprint(rot);
             int u = ParkTerrain.TileUnits;
@@ -1732,6 +1755,7 @@ namespace TPWGodot
             a.Status = AttractionLifecycle.Enter(AttractionStatus.JustPlaced, a);
             a.Status = AttractionLifecycle.Enter(AttractionStatus.UnderConstruction, a);
             a.BuiltOnDay = ParkDay;
+            a.Saved = saved;
             a.Variant = _buildVariant;
             _buildVariant = (_buildVariant + 1) & 7;
             _attractionsPlaced.Add(a);
@@ -1787,6 +1811,9 @@ namespace TPWGodot
 
             /// <summary>This ride's own tick count, for the every-sixteenth noise (0x8009CA94).</summary>
             public int SoundTick;
+
+            /// <summary>The tiles as they were before this was placed, so Delete can put them back.</summary>
+            public List<(int X, int Z, TPW.Data.MapTile T)> Saved;
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
@@ -2651,7 +2678,7 @@ void fragment() {
 
         /// <summary>The placement tools' sounds in group 8, shared by every placement tool (rides, shops, sideshows,
         /// features): placed by 0x8001C5C8, cancelled by 0x8001C7E4, turned by 0x8001C6BC / 0x8001C750.</summary>
-        public enum PlaceSound { Placed = 3, Cancelled = 6, Turned = 9 }
+        public enum PlaceSound { Placed = 3, Cancelled = 6, Turned = 9, Demolished = 5 }
 
         /// <summary>The UI's sounds in group 5. Each was taken from a routine this port had ALREADY identified
         /// for another reason, so the sound and the thing it belongs to were established separately:
@@ -3050,8 +3077,13 @@ void fragment() {
                 if (row >= 0)
                 {
                     var cmds = ContextCommands(_contextFor);
-                    if (row < cmds.Count) _contextChose = cmds[row];
+                    var target = _contextFor;
+                    int label = row < cmds.Count ? cmds[row] : -1;
+                    _contextChose = label;
+                    // Close FIRST: the command may open a tool, and a tool cannot take the mouse while the
+                    // modal gate above is still swallowing it.
                     CloseModal();
+                    if (label >= 0) RunContextCommand(label, target);
                 }
                 else if (!_hud.ContextHit(mb.Position)) CloseModal();   // clicking away dismisses it
                 return true;
@@ -3063,6 +3095,65 @@ void fragment() {
         /// commands themselves are not wired yet — see findings/panel.md §3 for what each one does.</summary>
         public int ContextChose => _contextChose;
         int _contextChose = -1;
+
+        /// <summary>Run a context-list command. The game keeps these as (label id, handler) pairs at
+        /// 0x80102C20 — see findings/panel.md §3a — and Build Queue and Edit Queue really do share one
+        /// handler (0x8003BC5C), which is why they share one branch here: only the label differs.</summary>
+        void RunContextCommand(int label, PlacedAttraction a)
+        {
+            if (a == null) return;
+            switch (label)
+            {
+                case PanelLabel.BuildQueue:
+                case PanelLabel.EditQueue:
+                    StartQueue(a.Rec, a.Ox, a.Oz, a.Rot);
+                    break;
+                case PanelLabel.Delete:
+                    DeleteAttraction(a);
+                    break;
+            }
+        }
+
+        /// <summary>⭐ DELETE, 0x24D → 0x8003BBE4 → 0x800510C0(attraction, 1). The 1 is what separates it
+        /// from the placement tool's cancel, which passes 0: it runs the teardown and plays the demolish
+        /// sound, group 8 sound 5. ⚠ NO REFUND — nothing in either half of that routine touches money, so a
+        /// deleted ride returns nothing, and this does not credit the bank either.
+        ///
+        /// The map is put back from the snapshot taken before the placement wrote over it. Restoring is the
+        /// only honest inverse: Place overwrites the tile's type, ground and flags outright, so what was
+        /// underneath cannot be recovered from the result.</summary>
+        void DeleteAttraction(PlacedAttraction a)
+        {
+            if (a == null || !_attractionsPlaced.Remove(a)) return;
+            // A tool pointed at this ride has nothing left to point at.
+            if (_queueRide != null && _queue != null && _queueOx == a.Ox && _queueOz == a.Oz) { _queue = null; _queueRide = null; }
+            if (_panelFor == a) _panelFor = null;
+            if (_contextFor == a) { _contextFor = null; _contextAt = null; }
+
+            if (a.Saved != null && _map != null)
+                foreach (var (x, z, t) in a.Saved)
+                    if (x >= 0 && z >= 0 && x < _map.Width && z < _map.Height)
+                        _map.Tiles[z * _map.Width + x] = t;
+
+            if (a.Inst != null) { _placed.Remove(a.Inst); a.Inst.QueueFree(); }
+            // The same two the placement calls: the pathfinder's pools are wiped and every search dropped,
+            // because the map it searched no longer exists (0x800EBBE4).
+            _guests?.OnBuildItemPlaced();
+            _guests?.MapChanged();
+            RebuildGround();
+            PlaySfx(PlaceSound.Demolished);
+            RefreshInfo();
+        }
+
+        /// <summary>Delete whatever is on a tile, as the context list's Delete does. A test hook: a right
+        /// click and a menu pick cannot be driven headlessly, and a deletion that leaves the map wrong is
+        /// invisible until someone tries to build there again.</summary>
+        public bool DeleteAt(int x, int z)
+        {
+            if (AttractionAt((x, z)) is not { } a) return false;
+            DeleteAttraction(a);
+            return true;
+        }
 
         void CloseModal()
         {

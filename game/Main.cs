@@ -79,7 +79,7 @@ namespace TPWGodot
         string _autoLay, _autoPathCursor;
         /// <summary>From <c>--park-place=entry,x,z,rot;...</c>: attractions placed at load (footprint corner, quarter
         /// turns); from <c>--park-ghost=entry,x,z,rot</c>: one shown as the placement ghost there. For captures.</summary>
-        string _autoPlace, _autoGhost;
+        string _autoPlace, _autoGhost, _autoDelete, _autoReplace;
         bool _logRides;
         int _forcedGuests = -1;
         string _autoHire;
@@ -549,6 +549,8 @@ namespace TPWGodot
                 else if (arg == "--park-gamecam") _autoGameCam = true;
                 else if (arg.StartsWith("--park-lay=")) _autoLay = arg.Substring("--park-lay=".Length);
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
+                else if (arg.StartsWith("--park-delete=")) _autoDelete = arg.Substring("--park-delete=".Length);
+                else if (arg.StartsWith("--park-replace=")) _autoReplace = arg.Substring("--park-replace=".Length);
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
@@ -820,6 +822,20 @@ namespace TPWGodot
                         {
                             var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
                             if (v.Length == 4) GD.Print($"[tpw] --park-place {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
+                        }
+                    // After the placements, so a park can place, delete and place again in one run — which is
+                    // the only way to see whether the tiles really came back.
+                    if (_autoDelete != null)
+                        foreach (var del in _autoDelete.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(del.Split(','), int.Parse);
+                            if (v.Length == 2) GD.Print($"[tpw] --park-delete {del}: {(_park.DeleteAt(v[0], v[1]) ? "deleted" : "nothing there")}");
+                        }
+                    if (_autoReplace != null)
+                        foreach (var pl in _autoReplace.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
+                            if (v.Length == 4) GD.Print($"[tpw] --park-replace {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
                         }
                     if (_autoHire != null)
                         foreach (var hire in _autoHire.Split(';', System.StringSplitOptions.RemoveEmptyEntries))

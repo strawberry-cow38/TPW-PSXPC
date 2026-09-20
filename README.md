@@ -119,6 +119,8 @@ state you care about and check the two runs agree on it.
 | `--park-place=entry,x,z,rot;...` | place attractions at a footprint corner |
 | `--park-lay=x0,z0,x1,z1;...` | lay path runs as the path tool would |
 | `--park-queue=entry,x,z,rot:cx,cz:...` | place a ride, then click its queue tool at each tile |
+| `--park-delete=x,z;...` | delete what is on a tile, as the context list's Delete does |
+| `--park-replace=entry,x,z,rot;...` | place again AFTER the deletes, so one run can prove the tiles came back |
 | `--park-track=...` / `--park-select=x,z` / `--park-slider=...` | the track builder and the attraction panel |
 | `--park-view=x,z,yaw,pitch,distance` | put the camera somewhere specific |
 | `--park-hire=kind,x,z;...` | hire staff (0 mechanic, 1 entertainer, 2 cleaner, 3 guard, 4 researcher) |

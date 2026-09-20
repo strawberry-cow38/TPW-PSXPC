@@ -153,9 +153,12 @@ its `a1` is what separates them: **1** runs the record's teardown vtable (+0xE8/
 0x80051D74 and plays **(8, 5)**, the demolish sound; **0** skips straight past all of it. ⚠ **No refund**
 — nothing in either half touches money, so deleting a ride returns nothing.
 
-⚠ Not wired in the port: it has no removal path at all (nothing removes from `_attractionsPlaced`), so
-Delete needs one written that undoes `RegisterPlaced`'s bookkeeping — the tiles and the mesh — not just a
-list remove. Recorded here so that is a known job rather than a surprise.
+✅ **Wired 2026-09-20.** Delete and Build/Edit Queue both run from the context list. Delete restores the
+map from a snapshot taken before the placement overwrote it, which is the only honest inverse: `Place`
+overwrites each tile's type, ground and flags outright, so what was underneath cannot be recovered from
+the result. Proved with a control — place, delete, place again on the same tiles all succeed, and the
+same run WITHOUT the delete is refused the second time, so the test rejects the bug instead of passing
+because placement is lenient.
 
 **Upgrades** (0x80079E38), only while `level+1 < researched` and the ride is not condemned: Upgrade Cost
 0x119 = `record+0x50 + 0x34*(level+1)`; for a track ride **Stock** 0x363 = `35 − u8(outer+0x1BD8)` ⭐
