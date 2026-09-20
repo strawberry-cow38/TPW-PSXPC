@@ -623,3 +623,36 @@ tinyclaw can dump console VRAM while the game runs and has established that resi
 does mean any decoder proposed here has a known-correct answer to be checked against — which is the
 check that catches a decoder producing a plausible image that is not the right image, the failure
 mode that survives review longest because wrong-but-pretty looks fine.
+
+## Texture mapping is AFFINE, and a port that interpolates properly is wrong (READ + FIXED, 2026-09-20)
+
+⭐ **THE GPU HAS NO PERSPECTIVE-CORRECT MODE.** It interpolates texture coordinates linearly in SCREEN
+space and ignores z — nocash's spec, "the GPU supports only linear interpolations... texture coordinates
+are NOT linear to the screen coordinates" — which is the PlayStation's characteristic texture wobble. A
+modern engine interpolates perspective-correctly by default, so the port was **strictly better than the
+console and therefore wrong**, most visibly at glancing angles.
+
+The port now does it the hardware's way (`game/PsxShading.cs`). A varying arrives perspective-correct as
+`(Σλ·A/w) / (Σλ/w)`, so passing `UV*w` and `w` separately and dividing cancels the w and leaves `Σλ·UV`
+— the screen-linear value the GPU produces.
+
+⚠ **WHY IT SURFACED, AND THE TRAP IN IT.** Master reported the hands of Crazy Ape (entry 220) as "the
+texture's edge being stretched over a face". Measuring the disc found the shape of the problem:
+
+| | faces | |
+| --- | --- | --- |
+| all three UVs identical | 663 (1.2%) | one texel, flat fill — these already rendered correctly |
+| three UVs COLLINEAR, not identical | 2,057 (3.8%), in 184 of 556 models | a real triangle textured by a degenerate one — the streak |
+
+Crazy Ape has four of the second kind and two of them are its two hands. **Those UVs are on the disc
+unmodified**, so the degeneracy is the game's own data, not a port artefact.
+
+⚠ **The hardware docs do not describe the degenerate case at all**, so any statement about what the PS1
+does with a zero-area UV triangle is reasoning rather than reading. What IS documented is the affine
+interpolation, and fixing that fixed the reported symptom (confirmed by master) — which is the right
+order: fix the divergence you can cite, then re-measure the thing you could not.
+
+⚠ Two hypotheses died on the way and are worth not re-testing: **untextured faces** getting a tile
+anyway (only 5 faces on the disc are untextured and none got one) and **z-fighting on doubled geometry**
+(Crazy Ape has no faces sharing three vertex indices or three positions). A third — sampling texels at
+their corners rather than centres — turned out to be a real but SEPARATE defect, fixed on its own.
