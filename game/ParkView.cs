@@ -1066,7 +1066,8 @@ namespace TPWGodot
                 sb.Append($"\n  {a.Rec.Entry}: status {(int)a.Status} {a.Status}, "
                         + $"tick {(len > 0 ? a.Cycle.Accumulator >> RideCycle.FixedShift : 0)}/{len}, "
                         + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, "
-                        + $"reliability {a.Reliability}"
+                        + $"reliability {a.Reliability}, type {a.Rec.Type}"
+                        + $", intensity base {a.Rec.BaseIntensity} live {RidePanel.Intensity(a)}"
                         // ⭐ THE QUEUE HEAD'S STATE IS THE WHOLE LOADING STORY. RideLoading.Load boards
                         // only a head in 18, and a head in any other state blocks the ride entirely —
                         // there is no "skip him". So "people in the queue, they just don't get on after

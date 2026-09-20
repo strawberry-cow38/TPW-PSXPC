@@ -249,9 +249,25 @@ namespace TPW.Sim
         public const int ArrivingFacing = 0;
         /// <summary>The verdict's divisor base, 0x80103244 = 10000; the roll is rand(base / 2 + 1) on top.</summary>
         public const int VerdictDivisorBase = 10000;
-        /// <summary>0x80103248 = 0: unless q or the fee in pounds exceeds this, the verdict is 0 without a
-        /// sound (0x80090E30..0x80090E4C). With the shipped value that is "no rides and no fee".</summary>
-        public const int VerdictGate = 0;
+        /// <summary>0x80103248: unless q or the fee in pounds exceeds this, the verdict is 0 without a
+        /// sound (0x80090E30..0x80090E4C).
+        ///
+        /// ⭐⭐ MEASURED 40 IN THE RUNNING GAME, AND THE IMAGE SAYS 0. Read out of console RAM from
+        /// three different save states (practice park, a park with a shop, a plain park): every one
+        /// has 40. The static image at 0x80103248 holds 0 — the word is WRITTEN AT RUNTIME, so the
+        /// image is the wrong authority for it. Its neighbour 0x80103244 (10000) IS in the image and
+        /// matches, which is exactly what made the 0 look trustworthy.
+        ///
+        /// ⚠ THIS ONE VALUE IS THE WHOLE "GUESTS REFUSE FAR MORE THAN THE REAL GAME" REPORT. With 0,
+        /// the short-circuit can never fire and every small park refuses almost everyone: at the
+        /// default £40 fee you need an intensity sum around 81 — roughly four rides — before anybody
+        /// is admitted at all. With 40, a park whose q is under 40 and whose fee is not over 40
+        /// returns a neutral verdict and everyone walks in, which is what the game does.
+        ///
+        /// ⚠ AND IT IS NOT THE ENTRY FEE. The obvious rival explanation was that the scenario lowers
+        /// the fee; BANK+0 reads 400 tenths = £40 in all three states, so the fee is the default and
+        /// the gate is the difference.</summary>
+        public const int VerdictGate = 40;
         /// <summary>0x8010324C = 0x1400, 1.25 in 20.12: a fee strictly below 1.25q is at worst neutral.</summary>
         public const int VerdictNeutralBelow = 0x1400;
         /// <summary>0x80103250 = 0x1800, 1.5 in 20.12: a fee at or above 1.5q is refused.</summary>

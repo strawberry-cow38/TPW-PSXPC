@@ -24,8 +24,16 @@ namespace TPW.Sim.Tests
             for (int i = 0; i < n; i++)
                 if (VisitorEntrance.FeeVerdict(80, Money.FromPounds(40), rng) <= -2) refused++;
             _out.WriteLine($"sum 80 fee 40: refused {refused}/{n} = {100.0 * refused / n:F2}%");
-            // Exhaustive over the divisor range this is 65.9%.
-            Assert.InRange(100.0 * refused / n, 65.0, 67.0);
+            // ⭐⭐ ZERO, AND IT USED TO BE 65.9%. The early-exit gate (0x80103248) is 40 in the running
+            // game, not the 0 the static image holds, so a park this small with the default £40 fee
+            // never reaches the bands at all: q tops out at 32, which is under 40, and 40 is not OVER
+            // 40. Every guest is admitted. That single constant is the whole "guests refuse far more
+            // than the real game" report.
+            //
+            // ⚠ THE OLD 65.9% WAS ARITHMETICALLY CORRECT AND ANSWERED THE WRONG QUESTION — it was the
+            // exhaustive rate over the divisor range FOR A GATE OF ZERO. A right number from a wrong
+            // constant is the hardest kind to doubt.
+            Assert.Equal(0, refused);
         }
     }
 }

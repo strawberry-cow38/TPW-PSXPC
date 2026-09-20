@@ -372,18 +372,23 @@ namespace TPW.Sim.Tests
 
         // ───────────────────────── the verdict ─────────────────────────
 
-        // With sum 100 and a roll of 0, q = 409600 / 10000 = 40, so the bands sit at 30, 50 and 60.
-        // REJECTS an off-by-one at every edge: 30 is still a bargain, 50 is already -1, 60 is refused.
+        // With sum 200 and a roll of 0, q = 819200 / 10000 = 81, so the bands sit at 60, 101 and 121.
+        // REJECTS an off-by-one at every edge: 60 is still a bargain, 101 is already -1, 121 is refused.
+        //
+        // ⚠ THE SUM USED TO BE 100, WHICH PUT q AT EXACTLY 40 — the value of the early-exit gate
+        // (0x80103248, measured at 40 in the running game). Every fee at or under 40 then took the
+        // gate instead of the bands, so the low edges were testing the gate while claiming to test
+        // the bands. 200 puts q clear of it at any roll.
         [Theory]
-        [InlineData(30, 1)]
-        [InlineData(31, 0)]
-        [InlineData(49, 0)]
-        [InlineData(50, -1)]
-        [InlineData(59, -1)]
-        [InlineData(60, -2)]
+        [InlineData(60, 1)]
+        [InlineData(61, 0)]
+        [InlineData(100, 0)]
+        [InlineData(101, -1)]
+        [InlineData(120, -1)]
+        [InlineData(121, -2)]
         public void TheVerdictBandsAreThreeQuartersFiveQuartersAndThreeHalvesOfQ(int feePounds, int verdict)
         {
-            Assert.Equal(verdict, VisitorEntrance.FeeVerdict(100, Money.FromPounds(feePounds), new Dice(0)));
+            Assert.Equal(verdict, VisitorEntrance.FeeVerdict(200, Money.FromPounds(feePounds), new Dice(0)));
         }
 
         // ⚠ THE DIVISOR IS 10000 + rand(5001), not §2.6's `5001 + rand(5001)`. A roll of 5000 makes it
@@ -393,22 +398,33 @@ namespace TPW.Sim.Tests
         public void TheVerdictDivisorIsTenThousandPlusTheRoll()
         {
             var dice = new Dice(5000);
-            Assert.Equal(1, VisitorEntrance.FeeVerdict(100, Money.FromPounds(20), dice));
+            // Sum 400, roll 5000: the divisor is 15000 and q = 109, so £82 is neutral (bargain edge 81).
+            // Under §2.6's reading the divisor would be 10001 and q = 163, whose bargain edge is 122 —
+            // so the same £82 would come back a BARGAIN. ⚠ The fee has to clear the 40 gate for either
+            // reading to be reached at all, which is why this is not the £20 it used to be.
+            Assert.Equal(0, VisitorEntrance.FeeVerdict(400, Money.FromPounds(82), dice));
             Assert.Equal(new[] { 5001 }, dice.Bounds);
-            Assert.Equal(0, VisitorEntrance.FeeVerdict(100, Money.FromPounds(21), new Dice(5000)));
+            Assert.Equal(1, VisitorEntrance.FeeVerdict(400, Money.FromPounds(60), new Dice(5000)));
         }
 
-        // ⚠ NO RIDES IS NOT FREE ENTRY. q = 0 makes every band 0, so any fee at all is refused, and only
-        // "no rides AND no fee" takes the early 0. Either way the die is spent first. REJECTS treating
-        // q == 0 as "pays nothing", and REJECTS skipping the roll on the early exit.
+        // ⚠ NO RIDES IS NOT FREE ENTRY, BUT THE GATE COVERS A LOT OF IT. q = 0 makes every band 0, so
+        // a fee that clears the gate is refused; a fee of 40 or less takes the early 0 whatever q is.
+        // Either way the die is spent first.
+        //
+        // ⚠⚠ THIS TEST USED TO SAY "no rides AND ANY fee refuses" and that was the old gate value of 0
+        // talking. 0x80103248 is 40 in the running game (measured from three save states; the static
+        // image holds 0 because the word is written at runtime), so £1 at an empty park is admitted and
+        // £41 is not. REJECTS treating q == 0 as "pays nothing", REJECTS skipping the roll on the early
+        // exit, and REJECTS a gate of 0.
         [Fact]
-        public void NoRidesAndNoFeeIsZeroButNoRidesAndAnyFeeRefuses()
+        public void NoRidesRefusesOnlyAboveTheGate()
         {
             var free = new Dice(0);
             Assert.Equal(0, VisitorEntrance.FeeVerdict(0, Money.Zero, free));
             Assert.Single(free.Bounds);
-            Assert.Equal(-2, VisitorEntrance.FeeVerdict(0, Money.FromPounds(1), new Dice(0)));
-            Assert.Equal(1, VisitorEntrance.FeeVerdict(100, Money.Zero, new Dice(0)));   // rides, no fee: a bargain
+            Assert.Equal(0, VisitorEntrance.FeeVerdict(0, Money.FromPounds(40), new Dice(0)));   // at the gate
+            Assert.Equal(-2, VisitorEntrance.FeeVerdict(0, Money.FromPounds(41), new Dice(0)));  // over it
+            Assert.Equal(1, VisitorEntrance.FeeVerdict(200, Money.Zero, new Dice(0)));   // rides, no fee: a bargain
         }
 
         // ───────────────────────── 37: pay ─────────────────────────
