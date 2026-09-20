@@ -61,6 +61,11 @@ namespace TPWGodot
         /// <summary>True between asking for a route and hearing about it.</summary>
         public bool Waiting;
 
+        /// <summary>The tile the outstanding request was for, so a FAILURE can be classified. A bare
+        /// count of failures cannot tell "the player built an island" from "the search is broken", and
+        /// those two want opposite responses.</summary>
+        public int TargetTileX = -1, TargetTileZ = -1;
+
         /// <summary>Tiles per park frame in 8.8 units; the walk loop's budget.</summary>
         public abstract int WalkSpeed { get; }
 
@@ -144,9 +149,16 @@ namespace TPWGodot
         public ParkRideWorld Rides => _rides;
 
         public void SetBrain(Func<IReadOnlyList<GuestTarget>> targets)
-            => _brain = new GuestBrain(_map, targets,
-                   (g, tx, tz) => _finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
-                   () => _now);
+            => _brain = new GuestBrain(_map, targets, (g, tx, tz) => Ask(g, tx, tz, WalkFlags), () => _now);
+
+        /// <summary>Every path request in the park goes through here, so the tile asked for is always
+        /// recorded against the walker and a failure can say which KIND of failure it was.</summary>
+        bool Ask(Walker w, int tx, int tz, PathFlags flags)
+        {
+            if (!_finder.Request(w, w.X, w.Z, Centre(tx), Centre(tz), flags, 0)) return false;
+            w.TargetTileX = tx; w.TargetTileZ = tz;
+            return true;
+        }
 
         /// <summary>Build the queue world. Separate from the brain because the rides need it too.</summary>
         public void SetRideWorld(Func<IReadOnlyList<GuestTarget>> targets)
@@ -188,6 +200,20 @@ namespace TPWGodot
         /// <summary>Searches that came back with no route. A park whose attractions cannot be reached
         /// shows it here rather than by quietly doing nothing.</summary>
         public int RouteFailed { get; private set; }
+
+        /// <summary>Failures where the walker and its destination were in DIFFERENT connected pieces of
+        /// the map. Expected and self-inflicted: the player built somewhere nothing joins to. The useful
+        /// reading of this one is not "small", it is FLAT — a climbing number means guests keep choosing
+        /// things they can never reach, which is the park's shape, not a fault.</summary>
+        public int RouteFailedStranded { get; private set; }
+
+        /// <summary>Failures where the two WERE in the same piece and the search still found nothing.
+        ///
+        /// ⭐ THIS IS THE NUMBER WORTH GATING ON. The other bucket can never be zero in a park with an
+        /// island in it, so a single total can only ever climb and says nothing. ⚠ It is a triage
+        /// signal, not a proof: the fill is WEAKLY connected (an edge either way joins two tiles) while
+        /// the search is directed, so a genuinely one-way link lands here legitimately.</summary>
+        public int RouteFailedSameArea { get; private set; }
 
         /// <summary>How many guests currently have something they are heading for.</summary>
         public int WithTarget { get { int n = 0; foreach (var g in _guests) if (g.V.HasTarget) n++; return n; } }
@@ -482,6 +508,8 @@ namespace TPWGodot
                     g.V.Happiness = Stat.Sub(g.V.Happiness, _rng.Next(15));
                     g.V.Boredom = Stat.Add(g.V.Boredom, _rng.Next(2));
                     RouteFailed++;
+                    if (SameArea(g)) RouteFailedSameArea++; else RouteFailedStranded++;
+                    g.TargetTileX = g.TargetTileZ = -1;
                     Wander(g);
                     continue;
                 }
@@ -725,6 +753,79 @@ namespace TPWGodot
             for (int x = 0; x < _map.Width; x++)
                 for (int z = 0; z < _map.Height; z++)
                     if (_map[x, z].IsWalkable) _walkable.Add((x, z));
+            RebuildAreas();
         }
+
+        /// <summary>Stamp every tile with which connected piece of the map it belongs to, using the
+        /// SEARCH'S OWN step test (Pathfinder.CanStepThrough) rather than a second opinion about
+        /// walkability. A separate reachability rule beside the pathfinder agrees with it until one of
+        /// them changes, and then answers confidently for the other.
+        ///
+        /// ⚠ WEAKLY CONNECTED: an edge in EITHER direction joins two tiles, where the search is
+        /// directed. That makes "different piece" a solid NO and "same piece" only a strong maybe,
+        /// which is the right way round for triage.
+        ///
+        /// ⚠ A FOOTPRINT OR ENTRANCE TILE HAS NO THROUGH-EDGES and so belongs to no piece of its own —
+        /// they are enterable only as a destination. <see cref="AreaAt"/> answers for those with the
+        /// best piece among their neighbours, which is what "can somebody standing nearby get here"
+        /// actually means.</summary>
+        void RebuildAreas()
+        {
+            int w = _map.Width, h = _map.Height;
+            _area = new int[w, h];
+            var parent = new int[w * h];
+            for (int i = 0; i < parent.Length; i++) parent[i] = i;
+            int Find(int a) { while (parent[a] != a) { parent[a] = parent[parent[a]]; a = parent[a]; } return a; }
+            void Union(int a, int b) { a = Find(a); b = Find(b); if (a != b) parent[a] = b; }
+
+            for (int x = 0; x < w; x++)
+                for (int z = 0; z < h; z++)
+                    for (int dir = 0; dir < 2; dir++)          // +x and +z only; the reverse is the same pair
+                    {
+                        int nx = x + (dir == 0 ? 1 : 0), nz = z + (dir == 0 ? 0 : 1);
+                        if (nx >= w || nz >= h) continue;
+                        if (_finder.CanStepThrough(x, z, dir, WalkFlags)
+                         || _finder.CanStepThrough(nx, nz, dir + 2, WalkFlags))
+                            Union(x * h + z, nx * h + nz);
+                    }
+
+            var id = new Dictionary<int, int>();
+            var hasWalkable = new HashSet<int>();
+            for (int x = 0; x < w; x++)
+                for (int z = 0; z < h; z++)
+                {
+                    int root = Find(x * h + z);
+                    if (!id.TryGetValue(root, out int n)) id[root] = n = id.Count + 1;
+                    _area[x, z] = n;
+                    if (_map[x, z].IsWalkable) hasWalkable.Add(n);
+                }
+            // Only pieces somebody can actually stand in. Every lone grass tile is its own piece and
+            // counting those makes the number a map statistic instead of a park one.
+            Areas = hasWalkable.Count;
+        }
+        int[,] _area;
+
+        /// <summary>How many connected pieces the walkable map is in. One is a healthy park.</summary>
+        public int Areas { get; private set; }
+
+        /// <summary>The piece a tile belongs to, answering for a footprint or entrance tile with the
+        /// piece of whichever neighbour has one.</summary>
+        int AreaAt(int x, int z)
+        {
+            if (_area == null || x < 0 || z < 0 || x >= _map.Width || z >= _map.Height) return 0;
+            var t = _map[x, z].Type;
+            if (t != TileType.BuildingFootprint && t != TileType.AttractionEntrance) return _area[x, z];
+            int[] dx = { 1, 0, -1, 0 }, dz = { 0, 1, 0, -1 };
+            for (int i = 0; i < 4; i++)
+            {
+                int nx = x + dx[i], nz = z + dz[i];
+                if (nx < 0 || nz < 0 || nx >= _map.Width || nz >= _map.Height) continue;
+                if (_map[nx, nz].IsWalkable) return _area[nx, nz];
+            }
+            return _area[x, z];
+        }
+
+        bool SameArea(Walker wk)
+            => wk.TargetTileX >= 0 && AreaAt(wk.X >> 8, wk.Z >> 8) == AreaAt(wk.TargetTileX, wk.TargetTileZ);
     }
 }

@@ -528,10 +528,26 @@ namespace TPW.Sim
                 int t = _map.TypeAt(nx, ny);
                 if (t >= 15) continue;
 
-                if (!Admits(req, t, nx, ny, mask, LinkBit[dir], out int cost)) continue;
+                if (!Admits(req.FlagA, nx == req.ToTileX && ny == req.ToTileY, t, nx, ny, mask, LinkBit[dir], out int cost)) continue;
                 if (!Admit(req, node, nx, ny, cost)) return false;
             }
             return true;
+        }
+
+        /// <summary>Whether a walker carrying <paramref name="flags"/> could step from (x, y) to the
+        /// neighbour in <paramref name="dir"/> as a THROUGH-ROUTE, for a connectivity fill.
+        ///
+        /// ⭐ IT IS THE SEARCH'S OWN TEST, not a copy of it. A separate reachability rule beside the
+        /// pathfinder is a thing that agrees with it until somebody changes one of them, and then
+        /// reports the other's answer with total confidence. `destination` is false here on purpose:
+        /// footprint and entrance tiles are enterable only AS a destination, so they belong to no
+        /// through-component and a caller asking about one must ask about its neighbours.</summary>
+        public bool CanStepThrough(int x, int y, int dir, PathFlags flags)
+        {
+            if (dir < 0 || dir >= 4) throw new ArgumentOutOfRangeException(nameof(dir));
+            int nx = x + Dx[dir], ny = y + Dy[dir];
+            if (nx < 0 || ny < 0 || nx >= _map.Width || ny >= _map.Height) return false;
+            return Admits(flags, false, _map.TypeAt(nx, ny), nx, ny, MaskOf(x, y), LinkBit[dir], out _);
         }
 
         /// <summary>The mask the link test is applied to (0x800EC028).
@@ -550,18 +566,17 @@ namespace TPW.Sim
 
         /// <summary>Whether a neighbour of this type may be stepped onto, and what the step costs
         /// (pathfinder.md §5.2). Types 1, 3, 6, 9, 10 and 11 are never walkable.</summary>
-        bool Admits(PathRequest req, int type, int nx, int ny, int mask, int bit, out int cost)
+        bool Admits(PathFlags flags, bool destination, int type, int nx, int ny, int mask, int bit, out int cost)
         {
-            bool destination = nx == req.ToTileX && ny == req.ToTileY;
             switch (type)
             {
                 case 0:                                        // grass
                     cost = 2;
-                    return Has(req, PathFlags.Grass) && GrassGate(nx, ny);
+                    return Has(flags, PathFlags.Grass) && GrassGate(nx, ny);
                 case 2:
                 case 13:                                       // path, path over queue
                     cost = 1;
-                    return Has(req, PathFlags.Path) && (mask & bit) != 0;
+                    return Has(flags, PathFlags.Path) && (mask & bit) != 0;
                 case 4:                                        // queue path
                     // ⚠⚠ IF A GUEST WILL NOT ENTER A QUEUE, SUSPECT THE LINKER, NOT THIS. A path tile's bits
                     // never point at a queue tile — the game refuses that join outright (0x8004E20C) — so the
@@ -569,12 +584,12 @@ namespace TPW.Sim
                     // that stops one tile short looks connected on screen and can never be routed into, from
                     // any adjacent tile. Measured both ways; see ParkPaths.QueueRun.
                     cost = 1;
-                    return Has(req, PathFlags.Queue) && (mask & bit) != 0;
+                    return Has(flags, PathFlags.Queue) && (mask & bit) != 0;
                 case 5:                                        // a building's footprint
                     // ⭐ THE DESTINATION IS ALWAYS ENTERABLE even without the flag. That is how a guest
                     // reaches a shop counter standing on the building's own tiles.
                     cost = 2;
-                    return Has(req, PathFlags.Footprint) || destination;
+                    return Has(flags, PathFlags.Footprint) || destination;
                 case 7:                                        // an attraction's entrance
                     // ⚠ ONLY AS A DESTINATION. An entrance tile is never a through-route, whatever the
                     // flags say, so a queue cannot be short-cut across someone else's entrance.
@@ -587,17 +602,17 @@ namespace TPW.Sim
                 case 12:                                       // the park gate
                     // ⚠ NO LINK TEST, unlike ordinary path on the same flag.
                     cost = 1;
-                    return Has(req, PathFlags.Path);
+                    return Has(flags, PathFlags.Path);
                 case 14:                                       // the tiles beside the gate
                     cost = 1;
-                    return Has(req, PathFlags.GateSide);
+                    return Has(flags, PathFlags.GateSide);
                 default:
                     cost = 0;
                     return false;
             }
         }
 
-        static bool Has(PathRequest req, PathFlags f) => (req.FlagA & f) != 0;
+        static bool Has(PathFlags flags, PathFlags f) => (flags & f) != 0;
 
         /// <summary>0x8004D388, as the search reaches it - which is only ever with a type 0 tile, so
         /// the routine's first condition collapses to "flag 0x02 is clear".
