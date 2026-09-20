@@ -82,6 +82,7 @@ namespace TPWGodot
         readonly Random _rng;
         readonly SimRandom _dice;
         readonly List<(int X, int Z)> _walkable = new();
+        GuestBrain _brain;
 
         /// <summary>The flags a guest walks with: paths, queues, the gate and the tiles beside it.
         ///
@@ -110,6 +111,27 @@ namespace TPWGodot
                 for (int z = 0; z < map.Height; z++)
                     if (map[x, z].IsWalkable) _walkable.Add((x, z));
         }
+
+        /// <summary>Give the guests something to want. Until this is set they walk to random tiles;
+        /// with it they run the real decision (TPW.Sim.VisitorDecision) against the placed
+        /// attractions.</summary>
+        public void SetBrain(Func<IReadOnlyList<GuestTarget>> targets)
+            => _brain = new GuestBrain(_map, targets,
+                   (g, tx, tz) => _finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
+                   () => _now);
+
+        /// <summary>Running totals since the park loaded. ⚠ THE INSTANTANEOUS COUNT IS A BAD
+        /// INSTRUMENT: with an 8-tick decision stagger and a 360-tick cooldown after a failure, how
+        /// many guests happen to hold a target at the moment of a screenshot swings between none and
+        /// most of them for reasons that have nothing to do with whether the decision works. These
+        /// only go up.</summary>
+        public int ChoseTarget { get; private set; }
+        /// <summary>Searches that came back with no route. A park whose attractions cannot be reached
+        /// shows it here rather than by quietly doing nothing.</summary>
+        public int RouteFailed { get; private set; }
+
+        /// <summary>How many guests currently have something they are heading for.</summary>
+        public int WithTarget { get { int n = 0; foreach (var g in _guests) if (g.V.HasTarget) n++; return n; } }
 
         public int Count => _guests.Count;
         public int FreeNodes => _finder.FreeNodes;
@@ -172,15 +194,63 @@ namespace TPWGodot
         /// <summary>One sim tick of every guest.</summary>
         public void Tick()
         {
+            _now++;
             foreach (var g in _guests)
             {
+                // ⚠ A FAILED SEARCH MUST BE ANSWERED OR THE PARK LOCKS UP. The guest asked, the search
+                // was accepted, and it came back with "no route" - message 2. If the guest simply keeps
+                // its target and asks again, it does so every tick, holds one of the TEN request slots
+                // for ever, and starves every other guest in the park. That is not a hypothetical: it
+                // is what this code did until the readout showed 10/10 searches out and not one
+                // waypoint ever allocated. behaviour.md §2.10's own answer is the fix - drop the
+                // target, take the happiness hit, wander.
+                if (g.Answer == PathMessage.Failed)
+                {
+                    g.Answer = null;
+                    g.V.HasTarget = false;
+                    g.V.Happiness = Stat.Sub(g.V.Happiness, _rng.Next(15));
+                    g.V.Boredom = Stat.Add(g.V.Boredom, _rng.Next(2));
+                    RouteFailed++;
+                    Wander(g);
+                    continue;
+                }
                 if (g.WaypointHead != WaypointPool.NoChain) { Walk(g); continue; }
                 if (g.Waiting) continue;                       // the answer has not come back yet
                 AskForARoute(g);
             }
         }
 
+        long _now;
+
         void AskForARoute(Guest g)
+        {
+            // ⭐ THE DECISION FIRST. It scores every open attraction for THIS guest - its taste against
+            // the ride's intensity, how far it is, and what it has been on lately - and only falls back
+            // to wandering when the park has nothing it wants.
+            // ⭐ THROUGH THE WHOLE DECISION, not just its scoring half. VisitorDecision.Tick carries the
+            // 8-tick stagger - so a park's guests do not all think on the same frame - and the 360-tick
+            // cooldown after a failure, which is the thing that stops a guest with an unreachable
+            // target asking for ever. Calling ChooseTarget directly skips both, and skipping the second
+            // one is what jammed the pathfinder.
+            if (_brain != null)
+            {
+                _brain.SetGuest(g);
+                if (g.V.WaitUntil > _now) return;              // still cooling off from a failure
+                switch (VisitorDecision.Tick(g.V, _brain, _dice))
+                {
+                    case DecisionOutcome.HeadingThere:
+                        g.Waiting = true; g.Answer = null; ChoseTarget++; return;
+                    case DecisionOutcome.NotMyTick: return;
+                    default: break;                            // nothing worth doing, or refused
+                }
+            }
+
+            Wander(g);
+        }
+
+        /// <summary>No target, or the decision gave up: walk somewhere on the paths so the guest is not
+        /// simply stood still. ⚠ A STAND-IN for TPW.Sim's real wander (§2.7), which is not wired.</summary>
+        void Wander(Guest g)
         {
             if (_walkable.Count == 0) return;
             var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
@@ -215,6 +285,9 @@ namespace TPWGodot
                     int next = _waypoints.Next(g.WaypointHead);
                     _waypoints.Free(g.WaypointHead);
                     g.WaypointHead = next < 0 ? WaypointPool.NoChain : next;
+                    // Arrived: the guest wants something else now. The real machine does this through
+                    // the arrival purposes (TPW.Sim.VisitorArrival), which are not wired here yet.
+                    if (g.WaypointHead == WaypointPool.NoChain) g.V.HasTarget = false;
                     continue;
                 }
 

@@ -290,6 +290,7 @@ namespace TPWGodot
             _guestSprites ??= GuestSprites.From(_modelSheets);
             GuestSprites.Debug = System.Environment.GetCommandLineArgs() is { } cl && Array.IndexOf(cl, "--guest-debug") >= 0;
             _guests.SetSprites(_guestSprites);
+            _guests.SetBrain(GuestTargets);
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _gateAnglePrev = _gateAngleCur = _gateRecentAt = 0;
             Array.Clear(_gateRecent);
@@ -810,6 +811,14 @@ namespace TPWGodot
             _camera.LookAt(_gLookPrev.Lerp(_gLookCur, t), Vector3.Up);
         }
 
+        /// <summary>What the guests are doing, for a caption on a capture.</summary>
+        public string GuestReport() => _guests == null ? "no guests"
+            : $"guests {_guests.Count}, {_guests.WithTarget} heading somewhere now "
+            + $"({_guests.ChoseTarget} decisions made, {_guests.RouteFailed} routes failed), "
+            + $"{_guests.Outstanding}/{Pathfinder.MaxRequests} searches out, "
+            + $"{_guests.FreeNodes}/{Pathfinder.NodePoolSize} nodes and "
+            + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free";
+
         void RefreshInfo()
         {
             if (_info != null && _map != null)
@@ -818,7 +827,10 @@ namespace TPWGodot
                            + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "")
                            + (_queue != null ? $"\nQUEUE TOOL ({_queue.Points.Count}/{QueueRun.MaxPoints - 1} corners): click to lay the queue toward the pointer; it goes on from its end, "
                                               + "and is done when it reaches a path or you click its end again; right button takes the last piece back, then closes; Esc closes" : "")
-                           + (_placing >= 0 ? $"\nPLACING {_attractions[_placing].Name}: , . or R to turn, left button to place, right button to stop" : "");
+                           + (_placing >= 0 ? $"\nPLACING {_attractions[_placing].Name}: , . or R to turn, left button to place, right button to stop" : "")
+                           + (_guests != null ? $"\nguests {_guests.Count}, {_guests.WithTarget} heading somewhere; "
+                                              + $"pathfinder {_guests.Outstanding}/{Pathfinder.MaxRequests} searching, "
+                                              + $"{_guests.FreeNodes} nodes and {_guests.FreeWaypoints} waypoints free" : "");
         }
 
         /// <summary>The tile under the mouse: march the ray from the camera through the pointer until it drops below
@@ -1236,6 +1248,35 @@ namespace TPWGodot
         ParkGuests _guests;
         /// <summary>The people sheet the guests are drawn from, baked once (GuestSprites).</summary>
         GuestSprites _guestSprites;
+        readonly List<GuestTarget> _guestTargets = new();
+
+        /// <summary>The placed attractions as the guests' decision reads them (see GuestBrain).
+        ///
+        /// ⚠ SLOT 54 IS ZERO FOR EVERY RIDE and that is READ, not a placeholder (rides.md §0 item 1):
+        /// only a FEATURE marked usable in its record ever contributes the desire terms. Getting this
+        /// backwards would make every ride score as though guests had a need for it.</summary>
+        IReadOnlyList<GuestTarget> GuestTargets()
+        {
+            _guestTargets.Clear();
+            foreach (var a in _attractionsPlaced)
+            {
+                var (w, d) = a.Rec.Footprint(a.Rot);
+                int cx = a.Ox + w / 2, cz = a.Oz + d / 2;
+                var door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot) ?? (cx, cz);
+                _guestTargets.Add(new GuestTarget
+                {
+                    Id = a.Rec.Entry,
+                    TypeIndex = a.Rec.Type,
+                    Intensity = a.Rec.BaseIntensity,
+                    Usable = a.Rec.Type == 2 && a.Rec.UsableByGuests ? 1 : 0,
+                    Open = AttractionLifecycle.OpenToGuests(a.Status),
+                    DoorX = door.X, DoorZ = door.Z,
+                    CentreX = cx, CentreZ = cz,
+                });
+            }
+            return _guestTargets;
+        }
+
         /// <summary>How many guests to put in the park when one loads. ⚠ A STAND-IN for the bus
         /// arrivals (TPW.Sim.BusArrivals), which compute a real arrival rate from what is built and are
         /// not wired to this yet.</summary>

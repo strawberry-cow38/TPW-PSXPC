@@ -731,17 +731,20 @@ namespace TPWGodot
                     _parkChoice.Selected = i; _debugLayer.Visible = false; ShowPark(true);
                     if (_parkView != null && _parkView.Length == 5) _park.SetView(_parkView[0], _parkView[1], _parkView[2], _parkView[3], _parkView[4]);
                     if (_autoGameCam) _park.GameCamera = true;
-                    if (_autoLay != null)
-                        foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            var v = System.Array.ConvertAll(run.Split(','), int.Parse);
-                            if (v.Length == 4) GD.Print($"[tpw] --park-lay {run}: {_park.LayRun(v[0], v[1], v[2], v[3])} tiles took path");
-                        }
+// ⭐ PLACE BEFORE LAYING. A path run links to whatever is beside it AS IT IS LAID, so a
+                    // path laid before the ride cannot link to the ride's door - the guests then
+                    // choose the ride and can never reach it. Build, then connect, as a player does.
                     if (_autoPlace != null)
                         foreach (var pl in _autoPlace.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
                         {
                             var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
                             if (v.Length == 4) GD.Print($"[tpw] --park-place {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
+                        }
+                    if (_autoLay != null)
+                        foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(run.Split(','), int.Parse);
+                            if (v.Length == 4) GD.Print($"[tpw] --park-lay {run}: {_park.LayRun(v[0], v[1], v[2], v[3])} tiles took path");
                         }
                     if (_autoGhost != null)
                     {
@@ -1201,6 +1204,9 @@ namespace TPWGodot
             {
                 img.SavePng(path);
                 GD.Print($"[tpw] wrote {path} ({img.GetWidth()}x{img.GetHeight()})");
+                // Say what was in the picture. A shot of a park is evidence about the park, and the
+                // counts are the half of it a screenshot cannot show.
+                if (_park != null && _park.HasMap) GD.Print("[tpw] " + _park.GuestReport());
             }
             GetTree().Quit();
         }

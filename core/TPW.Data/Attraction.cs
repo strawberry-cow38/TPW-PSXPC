@@ -53,6 +53,23 @@ namespace TPW.Data
     public sealed class AttractionDefinition
     {
         public int Entry, Type, NameId, Width, Depth, EntranceFacing, ExitFacing, Price;
+
+        /// <summary>Record +0x18 (rides.md §1.3, READ 0x800A0B1C): rides 40..95, coasters 90/95, shops
+        /// 20, features 0.
+        ///
+        /// ⭐ THIS IS THE RIDE'S "SLOT 53", the number a guest matches its own taste against - both when
+        /// choosing what to go on (the ride score) and when working out how much it enjoyed it
+        /// (behaviour.md §2.4's `|pref − ride.intensity|`). Two reports name it independently, which is
+        /// why it can be wired without guessing: rides.md reads the field, behaviour.md names the slot.</summary>
+        public int BaseIntensity;
+
+        /// <summary>Record +0x2E bit 0 on a FEATURE (type 2): guests may use it. This is what the ride
+        /// score calls "slot 54", which gates both of its desire terms.
+        ///
+        /// ⚠ FOR A REAL RIDE SLOT 54 IS ALWAYS ZERO (rides.md §0 item 1: slot 54 = 0x8009C2A0 = returns
+        /// 0, READ), so the two desire terms are dead for rides and only features ever get them. That is
+        /// why the ride score can be wired at all without knowing what slots 55 and 56 hold.</summary>
+        public bool UsableByGuests;
         public (int X, int Z)? Entrance, Exit;
         public (short Sprite, ushort Flags)[] Pad = Array.Empty<(short, ushort)>();
 
@@ -79,6 +96,8 @@ namespace TPW.Data
                 Width = d[r + 8], Depth = d[r + 0x0A],
                 EntranceFacing = d[r + 0x14] & 3, ExitFacing = d[r + 0x15] & 3,
             };
+            if (r + 0x1C <= d.Length) a.BaseIntensity = BitConverter.ToInt32(d, r + 0x18);
+            if (type == 2 && r + 0x2F <= d.Length) a.UsableByGuests = (d[r + 0x2E] & 1) != 0;
             short ex = BitConverter.ToInt16(d, r + 0x0C), ez = BitConverter.ToInt16(d, r + 0x0E);
             short xx = BitConverter.ToInt16(d, r + 0x10), xz = BitConverter.ToInt16(d, r + 0x12);
             if (ex >= 0 && ez >= 0) a.Entrance = (ex, ez);
