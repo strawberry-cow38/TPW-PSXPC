@@ -16,6 +16,11 @@ How to use it: whoever changes an area updates its row in the same commit. State
 
 ⚠ Rows are owned. Do not mark someone else's row done — ask them. `?` means nobody has said.
 
+**Read it in a browser: https://claw.bitvox.me/tpw/** — `python3 tools/status_board.py STATUS.md
+/home/ec2-user/apps/static/tpw/index.html` regenerates it. ⭐ THE BOARD IS A VIEW OF THIS FILE, NOT
+A SECOND COPY OF THE TRUTH. A tracker with its own store has the README's disease twice over: edit
+the row here, in the commit that changes the code, and the page follows.
+
 ---
 
 ## The game
