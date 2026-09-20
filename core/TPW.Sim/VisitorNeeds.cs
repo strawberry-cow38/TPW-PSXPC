@@ -30,8 +30,19 @@ namespace TPW.Sim
         /// <summary>The OR of the influence bits covering this guest.</summary>
         TileInfluence InfluenceAt(Visitor guest);
         /// <summary>Litter objects the original counts, and how many of those are vomit (obj+0x1C == 0x9E).
-        /// READ: the test is `|dx| + |dy| &lt; 2` in WHOLE tiles (0x800901B8..0x800901F4) -- the guest's own
-        /// tile and its four edge-neighbours, not a two-tile radius (findings/needs.md §0 item 2).</summary>
+        ///
+        /// ⭐ TWO INDEPENDENT TRACES AGREE AGAINST THE REPORT. behaviour.md §2.9 says "within 2 tiles".
+        /// Both the needs pass and the litter pass were traced separately, by different agents, on the
+        /// same day and without sight of each other's work, and both read the test at
+        /// 0x800901B8..0x800901F4 (`slti v0, v0, 2`) as `|dx| + |dy| &lt; 2` in WHOLE tiles — the guest's
+        /// own tile and its four edge-neighbours, which is FIVE tiles, not a 5x5 block. Agreement
+        /// reached twice from the same instruction and against a shared prior is the strongest evidence
+        /// this project has produced for a correction.
+        ///
+        /// ⚠ AND THE IMPLEMENTATION HAS NOT MOVED YET. LitterPool.Nearby still counts the report's wider
+        /// radius and its tests pin that, which is the right state for a correction that arrived at
+        /// merge time: flipping a behaviour under tests written for the other one is how a merge ships a
+        /// silent change. findings/needs.md §0 item 2 and findings/litter.md §0 both carry it.</summary>
         (int Litter, int Vomit) LitterNearby(Visitor guest);
         /// <summary>True while the guest is queueing, which blocks the entertainer push.</summary>
         bool InQueue(Visitor guest);

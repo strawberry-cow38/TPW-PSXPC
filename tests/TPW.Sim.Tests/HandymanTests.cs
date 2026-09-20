@@ -49,14 +49,14 @@ namespace TPW.Sim.Tests
             => new(StaffKind.Cleaner) { Skill = skill, Morale = morale };
 
         // ⭐ READ OUT OF THE EXECUTABLE, not copied from prose. A top-skill handyman cleans twelve times
-        // faster than a new one and empties bins twelve times faster.
+        // faster than a new one and empties bins twelve times faster. REJECTS a flat table or invented durations.
         [Fact]
         public void TheSkillTablesAreTheExecutablesOwnNumbers()
         {
             Assert.Equal(new[] { 120, 60, 30, 20, 10 }, Handyman.CleanTicks);
             Assert.Equal(new[] { 180, 120, 60, 30, 15 }, Handyman.EmptyTicks);
             Assert.Equal(new[] { 20, 30, 35, 40, 43 }, Researcher.PointsBySkill);
-            // The third column exists and nothing reads it. Pinned so its absence is deliberate.
+            // READ refinement (staff.md/litter.md): slot 44 reads this as speed, not a third job duration.
             Assert.Equal(new[] { 10, 15, 20, 20, 18 }, Handyman.UnusedThirdColumn);
         }
 

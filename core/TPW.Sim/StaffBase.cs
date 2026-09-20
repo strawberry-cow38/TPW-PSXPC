@@ -89,6 +89,10 @@ namespace TPW.Sim
         /// <summary>Whether this member has somewhere to be.</summary>
         public bool HasTarget { get; set; }
 
+        /// <summary>READ: the handyman's H+0x28 points to the claimed litter's drawable base.
+        /// HandymanLitter keeps this and the piece's +0x20 claim in step (findings/litter.md).</summary>
+        public Litter TargetLitter { get; internal set; }
+
         readonly System.Collections.Generic.Stack<StaffState> _stack = new();
         public int StackDepth => _stack.Count;
         public void SetState(StaffState s) { _stack.Clear(); State = s; }

@@ -41,7 +41,10 @@ namespace TPW.Sim
         bool TryPeltEntertainer(Visitor guest);
 
         /// <summary>Drop a litter object at the guest's feet. Used by roll 3 (no bin, and rubbish is
-        /// then zeroed) and roll 5 (misery, and rubbish is NOT touched).</summary>
+        /// then zeroed) and roll 5 (misery, and rubbish is NOT touched). ⚠ DISPUTED: roll 5 is a
+        /// particle influence in the binary (0x8008D710..724), not a PoolOfLitter allocation.
+        /// The findings' version is retained; see findings/litter.md §0. Delegate to LitterPool.Drop
+        /// with the guest's position and the shared random source to supply real pieces.</summary>
         void DropLitter(Visitor guest);
     }
 
