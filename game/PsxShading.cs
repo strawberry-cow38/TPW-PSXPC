@@ -35,11 +35,27 @@ uniform sampler2D atlas : filter_nearest;
 // The trick: a varying is interpolated perspective-correctly, i.e. (sum l*A/w) / (sum l/w). Pass UV*w and w
 // separately and divide, and the w cancels to leave sum(l*UV) — the screen-linear value the GPU produces.
 varying vec3 uvw;
+// ⭐ VERTEX SNAPPING, THE OTHER HALF OF THE PSX LOOK. The GTE hands the rasteriser INTEGER screen
+// coordinates — there is no subpixel precision anywhere in the pipeline — so a vertex can only ever land
+// on a whole pixel. As a model moves, each vertex jumps a pixel at a time instead of sliding, and because
+// they cross their boundaries on different frames the polygon visibly shimmers. That is the wobble people
+// remember, and it is a DIFFERENT artefact from the affine texture warp above: one moves the corners, the
+// other slides the texture between them. A port with only the affine half still looks too clean.
+//
+// The grid is HALF the framebuffer because clip space spans -1..1 across the full width: 512x240 -> 256x120.
+// Set either component to 0 to turn it off.
+uniform vec2 psx_snap = vec2(256.0, 120.0);
 vec3 to_linear(vec3 c) {{
     return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
 }}
 void vertex() {{
     vec4 clip = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+    // ⚠ Behind the eye, w <= 0: dividing would mirror the vertex to the wrong side of the screen, so those
+    // are left alone and the clipper deals with them as usual.
+    if (psx_snap.x > 0.0 && psx_snap.y > 0.0 && clip.w > 0.0) {{
+        clip.xy = round(clip.xy / clip.w * psx_snap) / psx_snap * clip.w;
+    }}
+    POSITION = clip;
     uvw = vec3(UV * clip.w, clip.w);
 }}
 void fragment() {{

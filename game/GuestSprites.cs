@@ -114,12 +114,24 @@ namespace TPWGodot
                 m.Uv1Scale = new Vector3(sp.W / (float)_atlasW, sp.H / (float)_atlasH, 1);
                 m.Uv1Offset = new Vector3(px / (float)_atlasW, py / (float)_atlasH, 0);
             }
-            // Stand it up and turn it to the camera: the quad's +Z looks back along the view direction.
-            var towards = new Vector3(-cameraForward.X, 0, -cameraForward.Z);
+            // ⭐ FULL BILLBOARD, VERTICALLY TOO (master). This used to zero the Y of the view direction,
+            // which is a yaw-only billboard: upright and correct from the game's own low camera, but it
+            // leans away as soon as you look down at it, because the quad keeps standing on the world's up
+            // while the camera no longer does. The console never showed that — its camera pitch is fixed —
+            // so the port's free camera is what exposes it. The sprite is screen-aligned now: its +Z is the
+            // view direction and its up is the camera's.
+            //
+            // ⚠ ANCHORED AT THE FEET, NOT THE CENTRE. The offset is along the sprite's OWN up, so the base
+            // of the quad stays on the ground point as it tilts. Offsetting along world up instead sinks a
+            // guest into the path the moment the camera pitches down.
+            var towards = -cameraForward;
             if (towards.LengthSquared() < 1e-6f) towards = Vector3.Back;
             towards = towards.Normalized();
-            var right = Vector3.Up.Cross(towards).Normalized();
-            inst.Transform = new Transform3D(new Basis(right, Vector3.Up, towards), feet + new Vector3(0, h / 2, 0));
+            var right = Vector3.Up.Cross(towards);
+            // Looking straight down or up: world up and the view direction are parallel, so pick any right.
+            right = right.LengthSquared() < 1e-6f ? Vector3.Right : right.Normalized();
+            var up = towards.Cross(right).Normalized();
+            inst.Transform = new Transform3D(new Basis(right, up, towards), feet + up * (h / 2));
             if (Debug && (_shouted++ % 600) == 0)
                 GD.Print($"[guest] mesh {(inst.Mesh is QuadMesh qq ? qq.Orientation.ToString() + " " + qq.Size : inst.Mesh?.GetType().Name)} " +
                          $"basis x={inst.Transform.Basis.X} y={inst.Transform.Basis.Y} z={inst.Transform.Basis.Z} at {inst.Position} sprite {index} {sp.W}x{sp.H}");
