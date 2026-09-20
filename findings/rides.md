@@ -942,3 +942,32 @@ before the play. No deviation remains in the sound code.
 ⚠ **0x8009C730's "sound (8,0)" above is unconfirmed.** An enumeration of every sound call site in the
 executable finds no (8,0) anywhere, and no site at all inside that function; group 8 sound 0 is never
 played by any resolved caller. Status 5's **(8,1)** at 0x8009C7A8 IS confirmed by that enumeration.
+
+## Where a ride keeps its SEATS (READ 2026-09-20)
+
+The attraction record carries **`MaxSeats` as a bare count** (+0x0C of the level block) with no
+coordinates anywhere near it, and unload calls 0x80053C04 to put a guest **back** on the map — so a
+rider is taken off the world while aboard and must be re-attached to something. The something is the
+**model's skeleton**.
+
+Entry 220 (`tpwcheck --gaz FOLIO.GAZ --bones 220`): one sub-mesh, 189 verts, **19 bones**, 19 tracks.
+Eleven of those bones carry **`skin` = 0** — no vertices are weighted to them at all, so they draw
+nothing. They are attachment points, and they sit in two rows:
+
+| parent | children | local x | local z |
+| --- | --- | --- | --- |
+| bone 4 | 5, 6, 7, 8, 9, 10 | **+76** (all six) | 191, 171, 91, −10, −133, −229 |
+| bone 11 | 12, 13, 14, 15, 16 | **−76** (all five) | 191, 91, −10, −133, −229 |
+
+A constant x per row and a spread of z is a **bench**: two rows of seats facing each other across the
+car, which is what a Crazy Ape looks like.
+
+⭐ **AND THE COUNT CONFIRMS IT FROM THE OTHER END.** There are exactly **11** skinless bones, and
+tinyclaw measured a level 0 → 1 upgrade on this same ride taking it from **8 seats to 11**. So the model
+ships every seat the ride will ever have, and `MaxSeats` says how many of them the current level uses.
+Two independent facts — a bone count read out of the archive and a seat count measured in the running
+port — landing on the same 11.
+
+⚠ Not established: which 8 of the 11 a level-0 ride fills, whether the order is bone order, and whether
+other ride classes follow the same layout. The rule "seats are the skinless bones" is read from one
+model; a second ride should be dumped before it is treated as general.

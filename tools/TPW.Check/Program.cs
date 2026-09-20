@@ -1730,6 +1730,71 @@ static class Program
         return 1;
     }
 
+    /// <summary>Every sub-mesh of a model container, with what each one carries. For finding where a ride
+    /// keeps its SEATS: the attraction record holds MaxSeats as a bare count with no coordinates, so the
+    /// positions have to live in the model, and a seat that turns with a Crazy Ape has to be a bone or a
+    /// sub-object rather than a vertex.</summary>
+    /// <summary>A model's skeleton: every bone with its parent and its rest position in MODEL space, plus
+    /// the radius and angle of each around the model's vertical axis. For finding a ride's SEATS — the
+    /// attraction record carries MaxSeats as a bare count, so the positions have to be in the model, and a
+    /// set of seats is a RING: N bones sharing one parent at equal radius and even angular spacing. That
+    /// pattern is visible in the numbers without having to look at the mesh.</summary>
+    static int Bones(GazArchive g, int entry)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _))
+            { Console.WriteLine($"entry {entry} is not a model container"); return 1; }
+            if (!c.TryParseMesh(bytes, 0, out var m, out var why))
+            { Console.WriteLine($"sub 0 unparsed: {why}"); return 1; }
+            var skel = m.Skeleton;
+            Console.WriteLine($"entry {entry}: {skel.Count} bones (rest pose, file units)");
+            for (int b = 0; b < skel.Count; b++)
+            {
+                var bo = skel.Bones[b];
+                // World-space rest position: walk up the parents adding translations. Rotations are left
+                // out deliberately -- a ring shows up in the translations alone, and mixing in rotations
+                // here would hide a mistake rather than reveal one.
+                double x = 0, y = 0, z = 0;
+                for (int k = b; k >= 0; k = skel.Bones[k].Parent)
+                { x += skel.Bones[k].Tx; y += skel.Bones[k].Ty; z += skel.Bones[k].Tz; }
+                double r = Math.Sqrt(x * x + z * z);
+                double ang = Math.Atan2(z, x) * 180.0 / Math.PI;
+                Console.WriteLine($"  bone {b,2}  parent {bo.Parent,3}  local ({bo.Tx,6},{bo.Ty,6},{bo.Tz,6})  " +
+                                  $"world ({x,7:F0},{y,7:F0},{z,7:F0})  r {r,7:F0}  angle {ang,7:F1}  " +
+                                  $"skin {bo.SkinCount,4}");
+            }
+            return 0;
+        }
+        Console.WriteLine($"entry {entry} not in the archive");
+        return 1;
+    }
+
+    static int Subs(GazArchive g, int entry)
+    {
+        foreach (var e in g.Entries)
+        {
+            if (e.Index != entry) continue;
+            var bytes = g.Read(e);
+            if (!MeshContainer.IsContainer(bytes) || !MeshContainer.TryParse(bytes, out var c, out _))
+            { Console.WriteLine($"entry {entry} is not a model container"); return 1; }
+            Console.WriteLine($"entry {entry}: {c.Subs.Count} sub-mesh(es)");
+            for (int s = 0; s < c.Subs.Count; s++)
+            {
+                if (!c.TryParseMesh(bytes, s, out var m, out var why))
+                { Console.WriteLine($"  sub {s,2}: unparsed ({why})"); continue; }
+                Console.WriteLine($"  sub {s,2}: verts {m.VertexCount,5}  bones {m.BoneCount,4}  " +
+                                  $"faces {m.Faces.Count,5}  blocks {m.BlockCount,4}  tracks {m.TrackCount,4}  " +
+                                  $"hdr0 {m.HeaderWord0,6}");
+            }
+            return 0;
+        }
+        Console.WriteLine($"entry {entry} not in the archive");
+        return 1;
+    }
+
     static int AnimHeaders(GazArchive g, int entry)
     {
         foreach (var e in g.Entries)
@@ -2045,6 +2110,10 @@ static class Program
             if (sbAt >= 0 && sbAt + 1 < args.Length) return ScaleBlocks(g, int.Parse(args[sbAt + 1]));
             int ahAt = Array.IndexOf(args, "--animheaders");
             if (ahAt >= 0 && ahAt + 1 < args.Length) return AnimHeaders(g, int.Parse(args[ahAt + 1]));
+            int subAt = Array.IndexOf(args, "--subs");
+            if (subAt >= 0 && subAt + 1 < args.Length) return Subs(g, int.Parse(args[subAt + 1]));
+            int bnAt = Array.IndexOf(args, "--bones");
+            if (bnAt >= 0 && bnAt + 1 < args.Length) return Bones(g, int.Parse(args[bnAt + 1]));
             int fgAt = Array.IndexOf(args, "--facegroup");
             if (fgAt >= 0 && fgAt + 3 < args.Length)
                 return FaceGroup(g, int.Parse(args[fgAt + 1]), int.Parse(args[fgAt + 2]),
