@@ -58,7 +58,15 @@ namespace TPW.Sim
 
     /// <summary>One attraction's contribution to the park's draw. <paramref name="Type"/> is the record's own
     /// type byte — 1 coaster, 2 feature, 3 ride, 4 shop, 5 sideshow, 6 track ride, 7 tour ride — because the
-    /// score branches on it through a seven-entry jump table and the kinds are not scored alike.</summary>
+    /// score branches on it through a seven-entry jump table and the kinds are not scored alike. The dispatch
+    /// is `sltiu (type − 1), 7` (0x80067478), so type 0 and anything from 8 up fall through and score like a
+    /// SHOP rather than being skipped.
+    ///
+    /// ⚠ <see cref="Intensity"/> IS NOT ONE QUANTITY. The score reads it through a virtual (this-adjust at
+    /// class record +0x1A8, function at +0x1AC) and the classes bind it differently: a ride's is 0x800A0594
+    /// and is RECOMPUTED per call from the record and that ride's own sliders rather than stored, while a
+    /// sideshow's is 0x800B7788 and a different formula altogether. Passing a record's base intensity for
+    /// both is the port's approximation and will drift the moment sliders move.</summary>
     public readonly struct AttractionDraw
     {
         public readonly int Type;
@@ -114,7 +122,8 @@ namespace TPW.Sim
         ///       term    = Level × Intensity  for a ride, coaster, track ride or tour ride   0x800674C8
         ///               = Intensity          for a sideshow (no level)                      0x800674A4
         ///               = 0                  for a shop, and for anything unrecognised      0x80067538
-        ///       young   = 20 when (age &lt;&lt; 12) / 2024 &lt; 4, i.e. built today               0x80067520
+        ///       young   = 20 when (age &lt;&lt; 12) / 2024 &lt; 4, age in WHOLE DAYS, so exactly {0, 1}:
+        ///                 age 1 gives 4096/2024 = 2 and passes, age 2 gives 8192/2024 = 4 and fails  0x80067520
         ///       divisor = 10 for a FEATURE, otherwise 2             0x80067454 / 0x80067534
         /// </code>
         /// The three ride getters: age from 0x8009EDBC (now − attraction+0xF4), level from 0x8009F5E0
@@ -152,7 +161,9 @@ namespace TPW.Sim
                         term = a.Level * a.Intensity;
                         if (a.BuiltToday) young = 20;
                         break;
-                    case 5: term = a.Intensity; break;              // a sideshow has no level to multiply by
+                    // ⚠ A sideshow has no level to multiply by — and its "intensity" is a DIFFERENT virtual
+                    // from a ride's (0x800B7788 against 0x800A0594), not the same number left unmultiplied.
+                    case 5: term = a.Intensity; break;
                     case 2: divisor = 10; break;                    // a feature is worth a fifth of a ride
                 }
                 s += (roll + term + young) / divisor;

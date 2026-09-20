@@ -636,6 +636,10 @@ namespace TPWGodot
             var kinds = new HashSet<int>();
             foreach (var a in _attractionsPlaced)
             {
+                // ⚠ `builtToday: false` IS A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score adds +20
+                // while an attraction's age is 0 or 1 whole days, and the port does not record the day a ride
+                // was built — so a brand-new park scores 20..24 here where the game scores 30..34, which is
+                // one guest a bus instead of one-or-two. Wants the build day on PlacedAttraction.
                 draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, 0, a.Rec.BaseIntensity, false));
                 kinds.Add(a.Rec.Entry);
             }
