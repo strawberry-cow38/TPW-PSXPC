@@ -936,7 +936,8 @@ namespace TPWGodot
             + $"{_guests.Outstanding}/{Pathfinder.MaxRequests} searches out, "
             + $"{_guests.FreeNodes}/{Pathfinder.NodePoolSize} nodes and "
             + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free"
-            + RideReport();
+            + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
+            + RideReport() + _guests.StaffReport();
         }
 
         /// <summary>Each placed ride's status, its animation clock and what it is carrying - the half of the park
@@ -1648,6 +1649,18 @@ namespace TPWGodot
         /// bare base score of 10 and the head count floors to zero), and a park with no guests in it
         /// cannot be used to test queueing, riding, wear or staff.</summary>
         public int ForcedGuests { get; set; } = -1;
+
+        /// <summary>--park-hire=kind,x,z;... : put staff in the park at load. kind is TPW.Sim.StaffKind
+        /// (0 mechanic, 1 entertainer, 2 cleaner, 3 guard, 4 researcher). A test hook: the game hires
+        /// from a panel this port does not have, and what a hire COSTS and where it appears are not
+        /// read yet (findings/staff.md is being written).</summary>
+        public bool Hire(int kind, int x, int z)
+        {
+            if (_guests == null || _map == null) return false;
+            if (x < 0 || z < 0 || x >= _map.Width || z >= _map.Height) return false;
+            _guests.Hire((TPW.Sim.StaffKind)kind, x, z);
+            return true;
+        }
         int _buildVariant;
         Func<int, TPW.Data.Mesh> _buildRigSource;
         readonly TPW.Data.Mesh[] _buildRigs = new TPW.Data.Mesh[8];

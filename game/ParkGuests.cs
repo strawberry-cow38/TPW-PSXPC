@@ -99,6 +99,8 @@ namespace TPWGodot
         readonly WaypointPool _waypoints = new();
         readonly Pathfinder _finder;
         readonly List<Guest> _guests = new();
+        readonly List<Staffer> _staff = new();
+        ParkStaffWorld _staffWorld;
         readonly Node3D _parent;
         readonly Random _rng;
         readonly SimRandom _dice;
@@ -255,6 +257,111 @@ namespace TPWGodot
         /// are not the same rate.</summary>
         public void RunPathfinder() => _finder.RunFrame();
 
+        /// <summary>Put a member of staff in the park at a tile. Their sprite is one of the game's own
+        /// four staff blocks (PeopleSheet.StaffBlocks, entries 263/264/266/274).
+        ///
+        /// ⚠ WHICH BLOCK IS WHICH JOB IS NOT READ. There are four blocks and five classes, and nothing
+        /// maps one to the other yet, so the kind picks a block by its enum order. That is the port's
+        /// arrangement, not the game's: a mechanic may currently be drawn as a handyman.</summary>
+        public Staffer Hire(StaffKind kind, int tx, int tz)
+        {
+            var blocks = TPW.Data.PeopleSheet.StaffBlocks;
+            var st = new Staffer
+            {
+                S = new StaffMember(kind),
+                X = Centre(tx),
+                Z = Centre(tz),
+                Block = blocks[(int)kind % blocks.Length],
+                Inst = _sprites?.NewGuest() ?? new MeshInstance3D
+                {
+                    Mesh = new BoxMesh { Size = new Vector3(0.20f, 0.46f, 0.20f) },
+                    MaterialOverride = new StandardMaterial3D
+                    {
+                        AlbedoColor = new Color(0.95f, 0.85f, 0.15f),
+                        ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    },
+                },
+            };
+            st.OnArrive = w => StaffBase.Arrive(((Staffer)w).S, _staffWorld ??= new ParkStaffWorld(() => _now), false);
+            _parent.AddChild(st.Inst);
+            _staff.Add(st);
+            Place(st);
+            return st;
+        }
+
+        public int StaffCount => _staff.Count;
+
+        /// <summary>Each member of staff's state, tiredness and where it is standing — the half of the
+        /// park a headcount cannot see. A staff member that is "there" but never moves and a staff
+        /// member that is working look identical from a count.</summary>
+        public string StaffReport()
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var st in _staff)
+                sb.Append($"\n  {st.S.Kind}: {st.S.State}, purpose {st.S.Purpose}, "
+                        + $"tired {st.S.Tiredness} morale {st.S.Morale}, "
+                        + $"at ({st.X >> 8},{st.Z >> 8}){(st.WaypointHead != WaypointPool.NoChain ? ", walking" : "")}");
+            return sb.ToString();
+        }
+
+        /// <summary>One sim tick of every member of staff.
+        ///
+        /// ⚠ THE CLASS HOOK IS NOT CONNECTED. This runs the SHARED machine (TPW.Sim.StaffBase) only -
+        /// tiredness, patrolling, wandering, resting, strikes and the arrival table. Each class's own
+        /// switch runs BEFORE that fall-through in the original, so a mechanic here cannot yet claim a
+        /// broken ride; it walks about like any other staff member. Deliberately left as a gap rather
+        /// than approximated, because "a mechanic that looks like it is working" is worse than one that
+        /// visibly is not.</summary>
+        void TickStaff()
+        {
+            _staffWorld ??= new ParkStaffWorld(() => _now);
+            foreach (var st in _staff)
+            {
+                if (st.Answer is { } m)
+                {
+                    st.Answer = null;
+                    StaffBase.OnPathMessage(st.S, m == PathMessage.Found);
+                }
+                if (st.WaypointHead != WaypointPool.NoChain)
+                {
+                    StaffBase.Arrive(st.S, _staffWorld, true);   // tires them while they walk
+                    Walk(st);
+                    continue;
+                }
+                if (st.Waiting) continue;
+
+                StaffBase.IdleCheck(st.S, _staffWorld);
+                switch (st.S.State)
+                {
+                    case StaffState.Patrolling: StaffBase.Patrol(st.S, _staffWorld); break;
+                    case StaffState.WalkToStrike: StaffBase.WalkToStrike(st.S, _staffWorld); break;
+                    case StaffState.Striking: StaffBase.Strike(st.S, _staffWorld); break;
+                    case StaffState.GoAndRest: StaffBase.GoAndRest(st.S, _staffWorld); break;
+                    case StaffState.Resting: StaffBase.Rest(st.S, _staffWorld); break;
+                    case StaffState.PathReady: st.S.SetState(StaffState.Walking); break;
+                    // ⚠ Idle is where the class switch belongs. With none, fall to the base's own
+                    // answer for a member with nothing assigned: patrol, which with no rectangle
+                    // becomes a random wander.
+                    case StaffState.Idle: st.S.SetState(StaffState.Patrolling); break;
+                    default: WanderStaff(st); break;
+                }
+            }
+        }
+
+        /// <summary>State 5, random wander. ⚠ A STAND-IN, the same one the guests use: the real wander
+        /// (§2.7) picks its tile by a rule this does not implement.</summary>
+        void WanderStaff(Staffer st)
+        {
+            if (_walkable.Count == 0) return;
+            var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
+            if (_finder.Request(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0))
+            {
+                st.Waiting = true;
+                st.S.SetState(StaffState.Walking);
+                st.S.Purpose = StaffPurpose.Patrol;
+            }
+        }
+
         /// <summary>One sim tick of every guest.</summary>
         public void Tick()
         {
@@ -288,6 +395,7 @@ namespace TPWGodot
                 if (RunQueueState(g)) continue;
                 AskForARoute(g);
             }
+            TickStaff();
         }
 
         long _now;

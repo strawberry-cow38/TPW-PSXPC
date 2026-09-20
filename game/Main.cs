@@ -77,6 +77,7 @@ namespace TPWGodot
         string _autoPlace, _autoGhost;
         bool _logRides;
         int _forcedGuests = -1;
+        string _autoHire;
         /// <summary>From <c>--park-queue=entry,x,z,rot:cx,cz:cx,cz...[:~hx,hz]</c>: a ride placed at load, then its queue
         /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
         /// queue building.</summary>
@@ -520,6 +521,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-place=")) _autoPlace = arg.Substring("--park-place=".Length);
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
+                else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-track=")) _autoTrack = arg.Substring("--park-track=".Length);
@@ -769,6 +771,12 @@ namespace TPWGodot
                         {
                             var v = System.Array.ConvertAll(pl.Split(','), int.Parse);
                             if (v.Length == 4) GD.Print($"[tpw] --park-place {pl}: {(_park.PlaceAt(v[0], v[1], v[2], v[3]) ? "placed" : "refused")}");
+                        }
+                    if (_autoHire != null)
+                        foreach (var hire in _autoHire.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(hire.Split(','), int.Parse);
+                            if (v.Length == 3) GD.Print($"[tpw] --park-hire {hire}: {(_park.Hire(v[0], v[1], v[2]) ? "hired" : "refused")}");
                         }
                     if (_autoLay != null)
                         foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
