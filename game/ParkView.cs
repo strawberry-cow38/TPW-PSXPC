@@ -223,6 +223,26 @@ namespace TPWGodot
                                    List<(GazEntry Entry, TextureSheet Sheet)> sheets, Func<int, int, TPW.Data.Mesh> subFor = null)
         {
             _attractions = list ?? new();
+            // ⚠⚠ THE STATISTICS WANT A TYPE-LOCAL INDEX, NOT A FOLIO ENTRY. StatisticAttraction's
+            // DefinitionIndex is the attraction's position WITHIN ITS OWN TYPE in this world's catalogue
+            // ("type-local catalogue identity", its own XML doc), and BuiltVariety uses it to index a
+            // 50-slot presence array. I passed a.Rec.Entry -- a FOLIO entry number, 217 for the fire ride
+            // -- which walked off the end of that array and threw IndexOutOfRange from inside the advisor's
+            // tick, EVERY FRAME, aborting ParkView._Process partway through. Guests stopped moving and
+            // their billboards stopped turning to the camera, because the code that does both runs after
+            // the advisor. That is what master saw as "guests are frozen".
+            _definitionIndex.Clear();
+            var perType = new Dictionary<int, int>();
+            foreach (var (rec, _) in _attractions)
+            {
+                perType.TryGetValue(rec.Type, out int n);
+                _definitionIndex[rec.Entry] = n;
+                perType[rec.Type] = n + 1;
+                if (n >= TPW.Sim.ParkStatisticCalculator.DefinitionSlots)
+                    GD.PushWarning($"[tpw] catalogue type {rec.Type} has more than "
+                                 + $"{TPW.Sim.ParkStatisticCalculator.DefinitionSlots} definitions; "
+                                 + "entry {rec.Entry} cannot be counted in the variety statistics");
+            }
             _attractionMesh = meshFor;
             _attractionSub = subFor;
             _modelSheets = sheets;
@@ -472,12 +492,20 @@ namespace TPWGodot
                 () => (uint)ParkDay, () => ParkOpen,
                 () => _guests?.VisitorList ?? System.Linq.Enumerable.Empty<TPW.Sim.Visitor>(),
                 () => _attractionsPlaced.Select(a => new TPW.Sim.StatisticAttraction(
-                          a.Type, a.Rec.Entry, a.Status, (byte)a.Rec.FeatureFlags)),
+                          a.Type, DefinitionIndexOf(a.Rec.Entry), a.Status, (byte)a.Rec.FeatureFlags)),
                 StaffStats,
                 () => _attractions.Select(x => new TPW.Sim.StatisticDefinition(
-                          (TPW.Sim.AttractionType)x.Rec.Type, x.Rec.Entry)),
+                          (TPW.Sim.AttractionType)x.Rec.Type, DefinitionIndexOf(x.Rec.Entry))),
                 () => _advisor.Idle);
         }
+
+        /// <summary>An attraction's index within its own type in this world's catalogue, which is what the
+        /// statistics mean by a definition index. Out-of-range entries land on 0 rather than crashing the
+        /// park; the warning above says when that can happen.</summary>
+        int DefinitionIndexOf(int entry)
+            => _definitionIndex.TryGetValue(entry, out int i)
+               && i < TPW.Sim.ParkStatisticCalculator.DefinitionSlots ? i : 0;
+        readonly Dictionary<int, int> _definitionIndex = new();
 
         /// <summary>The park's staff as the statistics want them. ⚠ Patrol areas are not modelled, so
         /// HasPatrolArea is false for everyone — a stand-in, and named as one in ParkAdvisorWorld.Gaps.</summary>
