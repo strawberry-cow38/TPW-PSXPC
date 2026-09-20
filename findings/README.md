@@ -21,6 +21,7 @@ as a lead, not a fact.
 | `shop-stock.md` + `shop-stock-mutations.json` | a shop has NO stock; the feature's cleanliness byte (signed, clamped), its consumption, the handyman's free refill, the absent shop employee, every low-stock surface; binary disagreements with behaviour.md/rides.md retained in §0 |
 | `happiness.md` + `happiness-mutations.json` | every writer and reader of guest happiness V+0x59: the eleven writers with sign, size and address, no clock, what it multiplies (the wants, the type-4 score bonus), what it decides (departure, litter, bubbles, the condition code, statistic 46, the monthly ring, a stall's satisfaction bar) and what it does not (the park rating, arrivals); the four scans behind "every"; source disagreements in §0 |
 | `litter.md` + `litter-mutations.json` | forty persistent litter pieces, guest producers versus the misery particle, terrain drawing, concrete handyman claims/cleanup, nearby happiness/nausea costs, statistic 12, no direct arrival penalty, dead state 25 and no mowing; source disagreements retained in §0 |
+| `statistics.md` + `statistics-rules.json` + `statistics-mutations.json` | all 72 advisor-cache slots and their readers, 125 decoded disc rules with string IDs, separate refresh/rule clocks and event counters, retained source disagreements, restoring mutation sweep |
 | `parkopen.md` | what gates guest arrival |
 | `disc-check.md` | why Main Game and Load Game are greyed: a disc check at boot, not save data |
 | `psyq-named-functions.json` | 219 Sony PsyQ library functions located in the image by signature |
