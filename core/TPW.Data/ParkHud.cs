@@ -190,6 +190,11 @@ namespace TPW.Data
         public static readonly (byte R, byte G, byte B) MoneyColour = (0x80, 0x80, 0x80), DebtColour = (0xB0, 0, 0);
         /// <summary>The date (0x80039008): centred on (136, 222).</summary>
         public const int DateX = 136, DateY = 222;
+        /// <summary>The cost of what the open tool is about to do (0x8001B1DC, drawn from the park's own frame at
+        /// 0x80057E04): the tool's pending total, from the left at (48, 64) — just under the balance — in white,
+        /// as "%s $%ld" (the string at 0x801026BC) with string <see cref="CostLabel"/>, "Cost:". A plain %ld, so
+        /// unlike the balance it carries no thousands comma, and nothing is drawn while the total is zero.</summary>
+        public const int CostX = 48, CostY = 64, CostLabel = 35;
         /// <summary>The video camera (0x800391B4): sprite 406 at (50, 20) (0x80102A74).</summary>
         public const int CameraSprite = 406, CameraX = 50, CameraY = 20;
         /// <summary>The message bubble (0x8003A22C → 0x8003B06C) at (50, 190): the count centred 8 right and 26

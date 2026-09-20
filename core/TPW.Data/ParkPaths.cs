@@ -550,6 +550,41 @@ namespace TPW.Data
             return ghost;
         }
 
+        /// <summary>What laying <paramref name="run"/> would cost, in pounds, the way the validator adds it up
+        /// (0x8004F360 → the accumulator at 0x80102724): a tile the ghost refuses costs nothing and ends the run,
+        /// and a tile that is ALREADY the type being laid costs nothing either — 0x8004F494 compares the tile's own
+        /// type against the one being laid and skips the add when they match, so running path back over path is
+        /// free.</summary>
+        public int RunCost(ParkMap map, System.Collections.Generic.IReadOnlyList<(int X, int Z)> run)
+        {
+            int cost = 0;
+            foreach (var (x, z, _, takes) in Ghost(map, run))
+            {
+                if (!takes) break;
+                if (map[x, z].Raw0 != 2) cost += PathTileCost;
+            }
+            return cost;
+        }
+
+        /// <summary>The head of <paramref name="run"/> the bank can pay for, and what it costs: the game checks the
+        /// running total against the balance tile by tile and refuses the one the money does not reach, so a run
+        /// stops there rather than failing whole.</summary>
+        public System.Collections.Generic.List<(int X, int Z)> Afford(ParkMap map,
+            System.Collections.Generic.IReadOnlyList<(int X, int Z)> run, long pounds, out int cost)
+        {
+            var kept = new System.Collections.Generic.List<(int X, int Z)>();
+            cost = 0;
+            foreach (var (x, z, _, takes) in Ghost(map, run))
+            {
+                int tile = takes && map[x, z].Raw0 != 2 ? PathTileCost : 0;
+                if (cost + tile > pounds) break;
+                cost += tile;
+                kept.Add((x, z));
+                if (!takes) break;
+            }
+            return kept;
+        }
+
         /// <summary>Whether a click on tile (x, z) opens the path tool (the port's control, master's call): any tile on
         /// the map that nothing is built on -- grass, path, the entrance road, buildable or not. Attraction footprints,
         /// entrances and exits, queues and track do not.</summary>
@@ -718,6 +753,19 @@ namespace TPW.Data
             Finished = true;
             _link.PrevDx = _link.PrevDz = ParkPaths.QueueLink.NoWay;
             return Step.Finished;
+        }
+
+        /// <summary>What the segment to the cursor would cost, in pounds: its tiles that are not already queue
+        /// (PathTool.QueueTileCost each), up to the first the ghost refuses.</summary>
+        public int GhostCost(ParkMap map, int cx, int cz)
+        {
+            int cost = 0;
+            foreach (var (x, z, _, code) in Ghost(map, cx, cz, out _))
+            {
+                if (code == 1) break;
+                if (map[x, z].Raw0 != 4) cost += PathTool.QueueTileCost;
+            }
+            return cost;
         }
 
         /// <summary>Take the last segment back (0x8001BB08): its tiles, all but the corner it started from, are grass

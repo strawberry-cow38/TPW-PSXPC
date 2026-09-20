@@ -266,15 +266,6 @@ namespace TPWGodot
             RefreshPickerPrices();
         }
 
-        /// <summary>How many of <paramref name="wanted"/> pieces at <paramref name="each"/> pounds the bank can pay
-        /// for, or null when nothing is keeping the money (0x8004F360 makes the same test per tile).</summary>
-        int? Affordable(int wanted, int each)
-        {
-            if (_bank == null || each <= 0) return null;
-            long can = _bank.Balance.Pounds / each;
-            return (int)Math.Clamp(can, 0, wanted);
-        }
-
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
         /// <param name="scenery">The world's scenery pack, or null for bare ground.</param>
         /// <param name="common">The common sheet (#416), for the entrance flags; null leaves them out.</param>
@@ -1034,13 +1025,10 @@ namespace TPWGodot
         {
             // A queue tile costs more than a path one (PathTool.QueueTileCost). The segment about to be laid runs
             // from the queue's end to the snapped cursor, and its new tiles are the ones past that corner.
-            var from = _queue.End;
-            var to = _queue.Snap(c.X, c.Z);
-            int tiles = Math.Abs(to.X - from.X) + Math.Abs(to.Z - from.Z);
-            if (tiles > 0 && Affordable(tiles, PathTool.QueueTileCost) is { } budget && budget < tiles)
-            { PlaySfx(ToolSound.Refused); return QueueRun.Step.Refused; }
+            int cost = _queue.GhostCost(_map, c.X, c.Z);
+            if (_bank != null && cost > _bank.Balance.Pounds) { PlaySfx(ToolSound.Refused); return QueueRun.Step.Refused; }
             var step = _queue.Lay(_map, c.X, c.Z);
-            if (step != QueueRun.Step.Refused) Charge(tiles * PathTool.QueueTileCost);
+            if (step != QueueRun.Step.Refused) Charge(cost);
             switch (step)
             {
                 case QueueRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
@@ -1242,6 +1230,22 @@ namespace TPWGodot
                 var local = new Transform3D(flip * R * flip, new Vector3(gameShift.X, gameShift.Y, -gameShift.Z) / u);
                 a.Inst.Transform = a.Rest * local;
             }
+        }
+
+        /// <summary>What the open tool is about to charge, for the HUD's "Cost:" line (0x8001B1DC reads the tool's
+        /// own +8, which each tool fills as its ghost is worked out: the blueprint's price, or the run's total).</summary>
+        int PendingCost()
+        {
+            if (_map == null) return 0;
+            if (_placing >= 0 && _placing < _attractions.Count) return _attractions[_placing].Rec.Price;
+            if (_queue != null && _cursorTile is { } q) return _queue.GhostCost(_map, q.X, q.Z);
+            if (_pathMode && _paths != null && _cursorTile is { } cur)
+            {
+                var run = _runStart is { } st ? PathTool.Run(st.X, st.Z, cur.X, cur.Z)
+                                              : new List<(int X, int Z)> { cur };
+                return _paths.RunCost(_map, run);
+            }
+            return 0;
         }
 
         /// <summary>The object the hover box goes round this frame, or null. As 0x80052324 picks it: with no tool
@@ -1495,9 +1499,12 @@ void fragment() {
             var run = PathTool.Run(start.X, start.Z, end.X, end.Z);
             // Paid for by the tile (PathTool.PathTileCost): the game checks the running total against the balance as
             // it walks the run and refuses the tile the money does not reach, so the run stops there.
-            if (Affordable(run.Count, PathTool.PathTileCost) is { } budget && budget < run.Count)
-                run = run.GetRange(0, budget);
-            if (run.Count == 0) { PlaySfx(ToolSound.Refused); return; }
+            int cost = 0;
+            if (_bank != null)
+            {
+                run = _paths.Afford(_map, run, _bank.Balance.Pounds, out cost);
+                if (run.Count == 0) { PlaySfx(ToolSound.Refused); return; }
+            }
             // ⭐ CONNECTED: the run reached its last tile and that tile was already path (or queue or track). The place
             // step flags it (0x8004DE04 sets 0x801026D0 for the last tile of those types), the piece pass then
             // reports the run finished, the tool resets and 0x8001D5C0 plays sound 3 after sound 4. Master: "03 plays
@@ -1507,7 +1514,7 @@ void fragment() {
             int laid = _paths.Lay(_map, run);
             if (laid > 0)
             {
-                Charge(laid * PathTool.PathTileCost);
+                Charge(cost);
                 RebuildGround();
                 PlaySfx(ToolSound.Lay);
                 if (laid == run.Count && endsOnPath) PlaySfx(ToolSound.Connected);
@@ -1555,8 +1562,10 @@ void fragment() {
         public int LayRun(int x0, int z0, int x1, int z1)
         {
             if (_paths == null || _map == null) return 0;
-            int laid = _paths.Lay(_map, PathTool.Run(x0, z0, x1, z1));
-            if (laid > 0) { Charge(laid * PathTool.PathTileCost); RebuildGround(); }
+            var run = PathTool.Run(x0, z0, x1, z1);
+            int cost = _paths.RunCost(_map, run);
+            int laid = _paths.Lay(_map, run);
+            if (laid > 0) { Charge(cost); RebuildGround(); }
             return laid;
         }
 
@@ -1649,6 +1658,7 @@ void fragment() {
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
             _selectionMesh.Mesh = SelectionMesh();
             PoseAttractions(_frameClock);
+            _hud.Cost = PendingCost();
             _hudLayer.Visible = Visible && _hud.CanDraw;
             if (_hud.CanDraw) _hud.SetPrompts(CurrentTool() is int tool && tool != 0 ? _hud.ToolPrompts(tool) : IdlePrompts(hovered));
             _fxMesh.Mesh = FxMesh();

@@ -26,6 +26,8 @@ namespace TPWGodot
         public long Pounds;
         public int Day = 1, Month = 1, Year = 2000;
         public int Messages;
+        /// <summary>What the open tool is about to charge, in pounds; zero draws nothing.</summary>
+        public int Cost;
 
         static readonly double TicksPerSecond = EntranceFlags.TimeUnitsPerSecond / 4096.0;
 
@@ -152,6 +154,10 @@ namespace TPWGodot
             Sprite(this, ParkHudLayout.CameraSprite, ParkHudLayout.CameraX, ParkHudLayout.CameraY, false, white);
             Text(this, HudText.Money(Pounds), ParkHudLayout.MoneyX, ParkHudLayout.MoneyY, 0, false,
                  Psx(Pounds < 1 ? ParkHudLayout.DebtColour : ParkHudLayout.MoneyColour));
+            // What the open tool is about to cost, under the balance (0x8001B1DC).
+            if (Cost > 0)
+                Text(this, $"{Label(ParkHudLayout.CostLabel)} ${Cost.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
+                     ParkHudLayout.CostX, ParkHudLayout.CostY, 0, false, white);
             // The four prompts, each bubble and, when it is not flipping, its label.
             for (int b = 0; b < HudPrompts.Buttons; b++)
             {
