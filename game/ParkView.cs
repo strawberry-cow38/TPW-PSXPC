@@ -621,9 +621,10 @@ namespace TPWGodot
         /// TPW.Sim.BusLoad works it out from what is built, and an empty park gets a bus with nobody on it,
         /// which is the point of the whole design.
         ///
-        /// ⚠ TWO INPUTS ARE STAND-INS and the head-count moves with them: an attraction's UPGRADE LEVEL (the
-        /// port does not track it yet, so every ride counts as level 0) and the gate's LANE COUNT (0, so the
-        /// `20 − lanes` cap never bites). Both are named in BusLoad.HeadCount and neither is guessed here.</summary>
+        /// ⚠ TWO INPUTS ARE STAND-INS: an attraction's UPGRADE LEVEL (the port does not track upgrades yet, so
+        /// every ride counts as level 0 — which is what a freshly built one IS, so this is only wrong once
+        /// upgrades exist) and the gate's LANE COUNT (0, so the `20 − lanes` cap never bites). Neither is
+        /// guessed here; both are named in BusLoad.</summary>
         void BusArrived()
         {
             if (_guests == null) return;
@@ -631,16 +632,17 @@ namespace TPWGodot
             var kinds = new HashSet<int>();
             foreach (var a in _attractionsPlaced)
             {
-                draws.Add(new TPW.Sim.AttractionDraw(0, a.Rec.BaseIntensity, false));
+                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, 0, a.Rec.BaseIntensity, false));
                 kinds.Add(a.Rec.Entry);
             }
             int catalogue = Math.Max(1, _attractions.Count);
             int capacity = 25 + 75 * kinds.Count / catalogue;
-            int count = TPW.Sim.BusLoad.HeadCount(TPW.Sim.BusLoad.ParkScore(draws), capacity, _guests.Count, 0, BusDivisor);
+            int score = TPW.Sim.BusLoad.ParkScore(draws, _guests.Dice);
+            int count = TPW.Sim.BusLoad.HeadCount(score, capacity, _guests.Count, 0, BusDivisor);
             // Exit point 0's tile, the same one for the whole load (see ParkGuests.Spawn).
             (int X, int Z)? at = _map.SpawnTiles.Count > 0 ? _map.SpawnTiles[0] : null;
             for (int i = 0; i < count; i++) _guests.Spawn(at);
-            GD.Print($"[bus] arrived: score {TPW.Sim.BusLoad.ParkScore(draws)} capacity {capacity} -> {count} guests at {at}");
+            GD.Print($"[bus] arrived: score {score} capacity {capacity} -> {count} guests at {at}");
         }
 
         /// <summary>[0x80102E50], the divisor the draw is scaled by.</summary>

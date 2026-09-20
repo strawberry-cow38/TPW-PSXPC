@@ -57,12 +57,26 @@ namespace TPW.Sim.Tests
             Assert.Equal(0, BusLoad.ParkScore(null));
         }
 
-        [Fact]
-        public void OneAttractionAddsTheBase()
+        /// <summary>A die that always shows the same face, so the roll inside the score can be pinned.</summary>
+        sealed class Roll : IRandomSource
         {
-            // a level-0 ride contributes nothing itself, so the score is exactly the base
-            var one = new[] { new AttractionDraw(0, 0, builtToday: false) };
-            Assert.Equal(BusLoad.BaseScore, BusLoad.ParkScore(one));
+            readonly int _face;
+            public Roll(int face) => _face = face;
+            public int Next(int n) => _face;
+        }
+
+        // ⭐⭐ REJECTS THE FORMULA THAT MADE EVERY NEW PARK DEAD. A freshly built ride is level 0 (placement
+        // sets it; the upgrade path is `if level >= 3 return; level++`), so level*intensity is exactly zero.
+        // The old port scored `base + level*intensity` and therefore stayed at the bare 10, the head-count
+        // floored, and the bus turned up on time with nobody on it forever while every number looked healthy.
+        // What carries a new park is the ROLL: 20..29 halved is 10..14, which is precisely the contribution
+        // the live measurement recorded for a 16-day-old level-0 ride.
+        [Fact]
+        public void ALevelZeroRideContributesTheRollNotNothing()
+        {
+            var one = new[] { new AttractionDraw(3, 0, 90, builtToday: false) };
+            Assert.Equal(BusLoad.BaseScore + 10, BusLoad.ParkScore(one, new Roll(0)));   // (20 + 0) / 2
+            Assert.Equal(BusLoad.BaseScore + 14, BusLoad.ParkScore(one, new Roll(9)));   // (29 + 0) / 2
         }
 
         // ⭐ REJECTS THE DELAY-SLOT MISREADING. An earlier report had level*intensity gated on the ride being
@@ -71,10 +85,35 @@ namespace TPW.Sim.Tests
         [Fact]
         public void LevelTimesIntensityCountsWhateverTheAge()
         {
-            var old = new[] { new AttractionDraw(3, 4, builtToday: false) };
-            var young = new[] { new AttractionDraw(3, 4, builtToday: true) };
-            Assert.Equal(BusLoad.BaseScore + 12, BusLoad.ParkScore(old));
-            Assert.Equal(BusLoad.BaseScore + 12 + 20, BusLoad.ParkScore(young));
+            var old = new[] { new AttractionDraw(3, 3, 4, builtToday: false) };
+            var young = new[] { new AttractionDraw(3, 3, 4, builtToday: true) };
+            Assert.Equal(BusLoad.BaseScore + (20 + 12) / 2, BusLoad.ParkScore(old, new Roll(0)));
+            Assert.Equal(BusLoad.BaseScore + (20 + 12 + 20) / 2, BusLoad.ParkScore(young, new Roll(0)));
+        }
+
+        // ⭐ THE SEVEN KINDS ARE NOT SCORED ALIKE, which one formula for all of them could never express: the
+        // score branches through a jump table at 0x800E1564 where the four RIDE kinds share a handler and the
+        // other three have their own. A feature divides by ten instead of two, a shop adds nothing but the
+        // roll, and a sideshow adds its intensity outright since it has no level to multiply by.
+        [Fact]
+        public void TheKindsAreScoredDifferently()
+        {
+            Assert.Equal(BusLoad.BaseScore + 2,
+                         BusLoad.ParkScore(new[] { new AttractionDraw(2, 0, 90, false) }, new Roll(0)));   // feature: 20 / 10
+            Assert.Equal(BusLoad.BaseScore + 10,
+                         BusLoad.ParkScore(new[] { new AttractionDraw(4, 0, 90, false) }, new Roll(0)));   // shop: 20 / 2
+            Assert.Equal(BusLoad.BaseScore + 55,
+                         BusLoad.ParkScore(new[] { new AttractionDraw(5, 0, 90, false) }, new Roll(0)));   // sideshow: (20 + 90) / 2
+        }
+
+        // ⭐ THE SCORE IS RANDOM PER CALL, and that is the mechanism behind a pattern an earlier report
+        // recorded and could not explain: batch sizes of 5, 5, 4, 6, 3 and 6 guests with the park unchanged.
+        // A roll per attraction per call is enough on its own.
+        [Fact]
+        public void TheSameParkDoesNotScoreTheSameTwice()
+        {
+            var park = new[] { new AttractionDraw(3, 0, 90, false), new AttractionDraw(3, 0, 90, false) };
+            Assert.NotEqual(BusLoad.ParkScore(park, new Roll(0)), BusLoad.ParkScore(park, new Roll(9)));
         }
 
         // The headroom term is SOURCED and does cap the bus, so these cases stand. ⚠ But note what they do

@@ -193,6 +193,9 @@ namespace TPWGodot
         public int Count => _guests.Count;
         public int FreeNodes => _finder.FreeNodes;
         public int FreeWaypoints => _waypoints.FreeCount;
+        /// <summary>The sim's dice, so a caller that has to roll the game's own rolls (the bus's draw score is
+        /// a die roll per attraction) uses the same stream rather than starting a second one.</summary>
+        public IRandomSource Dice => _dice;
         public int Outstanding => _finder.ActiveRequests;
         public bool ParkIsOpen { get => _pathMap.ParkIsOpen; set => _pathMap.ParkIsOpen = value; }
 
