@@ -22,6 +22,10 @@ namespace TPWGodot
         int _autoUpgrade = -1;
         string _autoPrice;
         bool _autoSeats;
+        string _parkSavePath, _parkLoadPath;
+        string _parkSaveProof;
+        int _parkSaveAfter, _parkSaveFrames;
+        ParkSaveHost _saveHost;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -269,12 +273,7 @@ namespace TPWGodot
             // "the honest answer, because the port has no staff yet"; it has staff now, so the honest
             // answer changed. The month just ended is the one to bill for — its length is on the
             // calendar AFTER the rollover, and the day it ended on is the day before today.
-            _finances = new ParkFinances(ParkEconomy.OpeningBalance, () =>
-            {
-                var cal = _finances.Calendar;
-                int len = cal.LengthOfMonthJustEnded > 0 ? cal.LengthOfMonthJustEnded : cal.CurrentMonthLength;
-                return _park?.StaffWages(cal.TotalDays - 1, len) ?? Money.Zero;
-            });
+            ResetParkFinances();
 
             // ⚠ INSET FROM THE EDGES. Anchored full-rect with no offsets, the first label sits ON the top
             // edge and is clipped by it -- which looked like a missing widget rather than a margin bug.
@@ -584,6 +583,10 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
                 else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
                 else if (arg == "--park-seats") _autoSeats = true;
+                else if (arg.StartsWith("--park-save=")) _parkSavePath = arg.Substring("--park-save=".Length);
+                else if (arg.StartsWith("--park-load=")) _parkLoadPath = arg.Substring("--park-load=".Length);
+                else if (arg.StartsWith("--park-save-after=")) _parkSaveAfter = int.Parse(arg.Substring("--park-save-after=".Length));
+                else if (arg.StartsWith("--park-save-proof=")) _parkSaveProof = arg.Substring("--park-save-proof=".Length);
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-break="))
                 {
@@ -611,6 +614,12 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-view="))
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
+            }
+
+            if ((_parkSavePath != null || _parkLoadPath != null || _parkSaveProof != null) && _autoPark < 0)
+            {
+                FailParkSave(new System.ArgumentException("Park file hooks require --park=MAP so the matching map and catalogue are loaded."));
+                return;
             }
 
             // ⭐ A WINDOW BY DEFAULT, FULLSCREEN ON REQUEST. This went fullscreen-by-default earlier today and
@@ -858,12 +867,30 @@ namespace TPWGodot
             foreach (var (entry, _) in _maps)
                 _parkChoice.AddItem($"map #{entry}, {ParkWorlds.Describe(ParkWorlds.ForMap(entry))}" + (entry == 203 ? " (tinyclaw's park)" : ""));
             _parkChoice.Disabled = _parkButton.Disabled = _maps.Count == 0;
+            if ((_parkSavePath != null || _parkLoadPath != null || _parkSaveProof != null)
+                && _maps.FindIndex(m => m.Entry == _autoPark) < 0)
+            {
+                FailParkSave(new System.ArgumentException($"Map {_autoPark} is not available on this disc."));
+                return;
+            }
             if (_autoPark >= 0)
             {
                 int i = _maps.FindIndex(m => m.Entry == _autoPark);
                 if (i >= 0)
                 {
                     _parkChoice.Selected = i; _debugLayer.Visible = false; ShowPark(true);
+                    // AFTER map/assets/finances exist, BEFORE hooks that edit the restored park.
+                    try
+                    {
+                        _saveHost = CreateSaveHost();
+                        if (_parkSaveProof == "read") ParkSaveProof.AssertFresh(_park, _saveHost);
+                        if (_parkLoadPath != null)
+                        {
+                            ParkSaving.Load(System.IO.File.ReadAllBytes(_parkLoadPath), _saveHost.Layout, _saveHost);
+                            GD.Print($"[tpw] --park-load {_parkLoadPath}: loaded");
+                        }
+                    }
+                    catch (System.Exception e) { FailParkSave(e); return; }
                     if (_parkView != null && _parkView.Length == 5) _park.SetView(_parkView[0], _parkView[1], _parkView[2], _parkView[3], _parkView[4]);
                     if (_autoGameCam) _park.GameCamera = true;
 // ⭐ PLACE BEFORE LAYING. A path run links to whatever is beside it AS IT IS LAID, so a
@@ -1012,6 +1039,16 @@ namespace TPWGodot
                         var v = System.Array.ConvertAll(_autoPathCursor.Split(','), int.Parse);
                         if (v.Length >= 2) _park.PinPathCursor(v[0], v[1], v.Length >= 4 ? v[2] : -1, v.Length >= 4 ? v[3] : -1);
                     }
+                    // LAST: save sees placement, paths, queue, hires, prices, upgrades and breaks.
+                    try
+                    {
+                        if (_parkSaveProof == "write") ParkSaveProof.Seed(_park, _saveHost);
+                        else if (_parkSaveProof == "read") ParkSaveProof.Check(_park, _saveHost);
+                        else if (_parkSaveProof != null) throw new System.ArgumentException("--park-save-proof must be write or read.");
+                        if (_parkSavePath != null && _parkSaveAfter <= 0) SaveParkFile();
+                        if (_parkSaveProof != null) GetTree().Quit();
+                    }
+                    catch (System.Exception e) { FailParkSave(e); return; }
                 }
             }
 
@@ -1145,6 +1182,45 @@ namespace TPWGodot
                 // Leaving takes the park's music with it; music picked by hand is left alone.
                 if (_parkStartedMusic) { _music.Stop(); _musicButton.SetPressedNoSignal(false); _parkStartedMusic = false; }
             }
+        }
+
+        void ResetParkFinances()
+        {
+            _finances = new ParkFinances(ParkEconomy.OpeningBalance, () =>
+            {
+                var cal = _finances.Calendar;
+                int len = cal.LengthOfMonthJustEnded > 0 ? cal.LengthOfMonthJustEnded : cal.CurrentMonthLength;
+                return _park?.StaffWages(cal.TotalDays - 1, len) ?? Money.Zero;
+            });
+            _park?.SetBank(_finances.Bank);
+            _park?.SetFinances(_finances);
+            _clock = new ParkClock(); _accum = 0;
+        }
+
+        ParkSaveHost CreateSaveHost() => new(_park,
+            _park.SaveLayout(_maps[_parkChoice.Selected].Entry), ResetParkFinances,
+            tick => { _clock = ParkClock.At(tick); _accum = 0; });
+
+        void SaveParkFile()
+        {
+            byte[] bytes = ParkSaving.Save(_saveHost ??= CreateSaveHost());
+            // Serialize completely before replacing the file; a refused capture cannot truncate it.
+            string path = System.IO.Path.GetFullPath(_parkSavePath);
+            string temporary = path + "." + System.Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                System.IO.File.WriteAllBytes(temporary, bytes);
+                System.IO.File.Move(temporary, path, overwrite: true);
+            }
+            finally { if (System.IO.File.Exists(temporary)) System.IO.File.Delete(temporary); }
+            GD.Print($"[tpw] --park-save {path}: {bytes.Length} bytes");
+            _parkSavePath = null;
+        }
+
+        void FailParkSave(System.Exception error)
+        {
+            GD.PrintErr($"[park-save] FAILED: {error}");
+            GetTree().Quit(1);
         }
 
         void PlayAdvisorLine() => PlayAdvisorLine(-1, _advisorLanguage.Selected);
@@ -1479,6 +1555,14 @@ namespace TPWGodot
             {
                 GD.Print($"[tpw] --park-break {_autoBreak}@{_autoBreakAt}: {(_park.Break(_autoBreak, _autoBreakHard) ? "broken" : "refused")}");
                 _autoBreakAt = -1;
+            }
+            // AFTER delayed edits too. Optional delay gives guests time to enter, independently of
+            // the screenshot clock; saving and breaking on the same frame captures the broken ride.
+            if (_parkSavePath != null && _parkSaveAfter > 0 && _saveHost != null && _park.Visible
+                && ++_parkSaveFrames >= _parkSaveAfter)
+            {
+                try { SaveParkFile(); }
+                catch (System.Exception e) { FailParkSave(e); return; }
             }
             if (_shotPath != null && parkUp && (++_shotClock >= _shotFrame
                                                 || (_shotWhenRunning && _park != null && _park.AnyRideRunning

@@ -24,7 +24,7 @@ namespace TPWGodot
         /// <summary>A feature's capacity byte and last-cleaned stamp, placed full (TPW.Sim.FeatureStock).
         /// Only a type-2 feature reads it; it is allocated for every runtime because the runtime does
         /// not know its type, and an unused full byte costs nothing.</summary>
-        public readonly FeatureStock Stock = new();
+        public FeatureStock Stock = new();
     }
 
     /// <summary>The park as the queue-and-ride chain reads it (behaviour.md §2.4).

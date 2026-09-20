@@ -315,6 +315,9 @@ namespace TPWGodot
                          SceneryPack gatePack = null, byte[] exe = null, SceneryPack busPack = null)
         {
             // The park as the game has it once loaded: road typed, the square inside the gate laid as path (ParkPaths).
+            // Retain the original terrain/assets, never the edited live tiles, for save restoration.
+            var originalMap = map.Clone();
+            _reloadForSave = () => Load(originalMap.Clone(), name, ground, world, scenery, common, gatePack, exe, busPack);
             if (exe != null && world != null) map = ParkPaths.LayStartingPaths(map, exe, AssetSelfTest.GameExecutableBase, world.Index);
             _worldIndex = world?.Index ?? -1;
             _map = map;
@@ -353,6 +356,9 @@ namespace TPWGodot
             _placed.Clear();
             _attractionsPlaced.Clear();
             _track = null;
+            if (_trackPieces != null) foreach (var child in _trackPieces.GetChildren()) child.QueueFree();
+            _clockTicks = 0; _frameClock = 0; _parkTime = 0; _scrollClock = 0;
+            _panelFor = null; _contextFor = null;
             _selection.Clear();
             _selectionMesh.Mesh = null;
             _gateBox = null; _gateRect = null;
@@ -1461,6 +1467,7 @@ namespace TPWGodot
         {
             _queue = _paths?.StartQueue(rec, ox, oz, rot);
             if (_queue == null) return;
+            PlacedForSave(rec, ox, oz, rot).Queue = _queue;
             _queueRide = rec; _queueOx = ox; _queueOz = oz; _queueRot = rot;
             _pathMode = false; _runStart = null; _cursorPinned = false;
             _cursorTile = _queue.End;
@@ -1476,6 +1483,7 @@ namespace TPWGodot
         {
             if (_map == null || _worldIndex < 0) return;
             _track = new TrackRun(rec, ox, oz, rot, _worldIndex);
+            PlacedForSave(rec, ox, oz, rot).Track = _track;
             _queue = null; _pathMode = false; _runStart = null; _cursorPinned = false;
             _cursorTile = _track.Start;
             SwingGameCamera(_track.Start, rot);
@@ -2018,7 +2026,7 @@ namespace TPWGodot
             /// <summary>Sound (8, final ? 10 : 11) and a sparkle (0x8009C61C..670). ⚠ THE SOUND IS NOT
             /// PLAYED HERE — the park owns the mixer — so the host is told and decides. Silent by
             /// itself rather than wrong.</summary>
-            public Action<bool> UpgradeEffect;
+            public Action<bool> UpgradeEffect = null;
             public void ShowUpgradeEffect(bool finalLevel) => UpgradeEffect?.Invoke(finalLevel);
 
             static Exception UpgradeNotWired([System.Runtime.CompilerServices.CallerMemberName] string m = null)
@@ -2048,6 +2056,9 @@ namespace TPWGodot
 
             /// <summary>The tiles as they were before this was placed, so Delete can put them back.</summary>
             public SiteSnapshot Saved;
+            // Keep completed tool data after the tool closes; the save stream stores these routes.
+            public QueueRun Queue;
+            public TrackRun Track;
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
