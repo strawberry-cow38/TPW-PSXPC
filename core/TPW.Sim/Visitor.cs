@@ -184,7 +184,13 @@ namespace TPW.Sim
         /// <summary>V+0x58, 0..100. At 90 or more the guest looks for a bin.</summary>
         public int Rubbish { get => _rubbish; set => _rubbish = Stat.Clamp(value); }
         int _rubbish;
-        /// <summary>V+0x59, 0..100, starts at 50.</summary>
+        /// <summary>V+0x59, 0..100, starts at 50. READ that the game's own word for this byte's park-wide
+        /// mean is "Happiness" (text 0x36B, the Visitor Information row that reads the ring
+        /// <see cref="ParkHistory"/> fills from it). Every writer and every reader is in
+        /// findings/happiness.md; the short form: rides pay 15/10/5, an entertainer 5, a pleasant tile 6,
+        /// a purchase its product's coefficient; litter takes 3, a failed route up to 14, nothing to do 10,
+        /// a poor choice 5, an unmet need 1 each per pass. Below 5 the guest leaves; it scales what a
+        /// guest will pay and nothing about the park's rating or arrivals.</summary>
         public int Happiness { get => _happiness; set => _happiness = Stat.Clamp(value); }
         int _happiness;
         /// <summary>V+0x5A, 0..100. Above 92 the guest is sick. Raised by rides of intensity 56+, the

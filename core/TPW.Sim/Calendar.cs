@@ -42,11 +42,11 @@ namespace TPW.Sim
 
         /// <summary>Months since the park opened (McAi+0x18).
         ///
-        /// ⚠ READ WITH A CAVEAT. economy.md §2 places `McAi+0x18++` after the month-changed branch in
-        /// 0x80066C50, and the field is described as total months elapsed, so it is incremented here on
-        /// a month rollover. The report's wording does not make it unambiguous whether the original
-        /// increments it every tick instead; if a live reading ever shows this running at tick rate,
-        /// this is the line to change and the field is misnamed rather than miscounted.</summary>
+        /// READ (happiness.md §4.3): the `sw v0, 24(s2)` at 0x80066E04 sits INSIDE the month-changed
+        /// branch of 0x80066C50 (`beq v0, s0, 0x80066E10` at 0x80066C90 skips the whole block when McAi+4
+        /// is unchanged), so it is one increment per month rollover, as here. It runs AFTER the history
+        /// writer 0x800670D4 at 0x80066DEC, which is why <see cref="ParkHistory.RecordMonth"/> takes the
+        /// pre-increment count.</summary>
         public int TotalMonths { get; private set; }
 
         /// <summary>Length of the month now in progress.</summary>
