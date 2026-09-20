@@ -1031,6 +1031,7 @@ namespace TPWGodot
             + $"\n{_guests.GateReport()}"
             + $"\n{_guests.Reachability()}"
             + $"\n{_guests.StrandedReport()}"
+            + $"\n{_guests.NeedReport()}"
             + $"\n{_guests.QueueWaitReport()}"
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"
             + (_guests.HiddenGuests != (_guests.Rides?.Totals().Riding ?? 0) ? " ⚠ SWALLOWED GUESTS" : "")

@@ -721,8 +721,17 @@ namespace TPWGodot
                 Turnstile.LaneTick(_entrance, 1);
             }
             _ticking = true;
+            _needs ??= new ParkNeedsWorld(() => _now, () => System.Linq.Enumerable.Select(_staff, s => s.S),
+                                          v => _byVisitor.TryGetValue(v, out var gg) ? (gg.X >> 8, gg.Z >> 8) : (0, 0),
+                                          st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); });
             foreach (var g in _guests)
             {
+                // ⭐⭐ THE NEEDS CLOCK, WHICH HAD NO CALLER AT ALL. VisitorNeeds.Tick is "call before the
+                // state handler, every tick" and nothing in the game project called it, so every guest
+                // kept its spawn needs for its whole visit and no shop ever sold anything. Before the
+                // hidden skip, because a guest on a ride still gets hungry.
+                VisitorNeeds.Tick(g.V, _needs, _dice);
+
                 // ⚠ COUNTED BEFORE THE HIDDEN SKIP, so a guest that boards stops counting rather than
                 // freezing its total at whatever it had. The bit is the queue's own (V+0x5C bit), so
                 // this measures exactly what the queue thinks, not what the port thinks.
@@ -814,6 +823,24 @@ namespace TPWGodot
         /// is what an unimplemented EjectEveryone did to everyone aboard a ride that broke down.</summary>
         public int HiddenGuests { get { int n = 0; foreach (var g in _guests) if (g.Hidden) n++; return n; } }
 
+        /// <summary>What the guests actually WANT, averaged. ⭐ THE SHOPS' WHOLE INPUT: a purchase is
+        /// the base want times the need factor times (happiness + 100)/100, so a park of contented,
+        /// unhungry guests buys nothing at any sensible price — and that is indistinguishable from a
+        /// broken shop unless somebody prints the needs.</summary>
+        public string NeedReport()
+        {
+            if (_guests.Count == 0) return "no guests";
+            long a = 0, b = 0, bored = 0, happy = 0, tired = 0, nausea = 0;
+            foreach (var g in _guests)
+            {
+                a += g.V.NeedA; b += g.V.NeedB; bored += g.V.Boredom;
+                happy += g.V.Happiness; tired += g.V.Tiredness; nausea += g.V.Nausea;
+            }
+            int n = _guests.Count;
+            return $"average guest: need A {a / n}, need B {b / n}, bored {bored / n}, "
+                 + $"happy {happy / n}, tired {tired / n}, nausea {nausea / n} (of {n})";
+        }
+
         public string QueueWaitReport()
         {
             var waits = new List<(long T, VisitorState S)>();
@@ -825,6 +852,8 @@ namespace TPWGodot
             return $"queueing now ({waits.Count}): {string.Join(" ", parts)}"
                  + (waits.Count > 6 ? " ..." : "") + $"; worst ever {QueuedWorst} ticks in {QueuedWorstState}";
         }
+
+        ParkNeedsWorld _needs;
 
         long _now;
 
