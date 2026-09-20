@@ -81,8 +81,15 @@ namespace TPWGodot
                 int px = (sp.PageX - _headSheet.VramX) / 64 * TextureSheet.PageTexels + sp.U;
                 int py = (sp.PageY - _headSheet.VramY) / TextureSheet.PageTexels * TextureSheet.PageTexels + sp.V;
                 m.AlbedoTexture = _heads;
-                m.Uv1Scale = new Vector3((mirror ? -sp.W : sp.W) / (float)_headsW, sp.H / (float)_headsH, 1);
-                m.Uv1Offset = new Vector3((mirror ? px + sp.W : px) / (float)_headsW, py / (float)_headsH, 0);
+                // ⚠⚠ MIRROR THE QUAD, NOT THE UVs. Flipping by negating Uv1Scale.X puts the sprite's RIGHT
+                // edge at uv.x = 0, which samples at px + W -- one texel PAST the sprite, into whatever sits
+                // next to it in the atlas. In this sheet what sits next to a head is the HUD FONT: the
+                // heads and the glyphs are interleaved in the same block, with "dF" one row above them.
+                // A one-texel white sliver of a letter along the edge of a mirrored head is exactly what
+                // master photographed. Keeping the UVs forward and negating the quad's right vector gives
+                // the same mirrored picture and can never sample outside the rect.
+                m.Uv1Scale = new Vector3(sp.W / (float)_headsW, sp.H / (float)_headsH, 1);
+                m.Uv1Offset = new Vector3(px / (float)_headsW, py / (float)_headsH, 0);
             }
             var towards = -cameraForward;
             if (towards.LengthSquared() < 1e-6f) towards = Vector3.Back;
@@ -90,6 +97,7 @@ namespace TPWGodot
             var right = Vector3.Up.Cross(towards);
             right = right.LengthSquared() < 1e-6f ? Vector3.Right : right.Normalized();
             var up = towards.Cross(right).Normalized();
+            if (mirror) right = -right;
             if (roll != 0f)
             {
                 float c = Mathf.Cos(roll), sn = Mathf.Sin(roll);
