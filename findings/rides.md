@@ -994,3 +994,7 @@ just not one-per-seat.
 ladders look like a shared template rather than a per-model count — which would mean seat counts are not
 derived from geometry at all. **Where a rider is actually positioned is UNKNOWN.** Nothing should be
 parented to bone order on the strength of this.
+
+→ **Superseded 2026-09-20 by [rider-positions.md](rider-positions.md):** the seats are the model's trailing
+list of bone indices (Crazy Ape: 10 of its 11 skinless bones), read at draw time by NonPathedRide slot 4
+`0x8009FC48`; the rider count is capped by that list, not by MaxSeats.
