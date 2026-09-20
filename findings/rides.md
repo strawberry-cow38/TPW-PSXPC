@@ -782,6 +782,12 @@ and no `addiu` anywhere else in the image forms the address, so whatever fills i
 register. **That is the next thing to read**, and it is the whole of what stands between the port and
 drawing a coaster's track from the game's own data.
 
+There is a SECOND table of the same shape immediately after it at **0x80109120** (0x801090E0 + 0x40, i.e.
+exactly one table's length on), read the same way at 0x800B4D88 — so whatever fills one fills both, and a
+writer found for either closes the pair. Neither address is formed by `lui`+`addiu` anywhere outside those
+four read sites, and the value 0x801090E0 appears nowhere in the image as data, so the base arrives in a
+register: look at a generic loader or an overlay rather than at more scanning.
+
 ### What the descriptor's two bytes actually do (READ)
 ⚠ **+6 IS NOT A MODEL INDEX — IT IS THE PIECE'S TURN.** 0x800A4F34 hands the byte to slot 18 of the piece's
 class record (0x800E5C90, a proper 8-byte-per-slot vtable whose slot 1 is the constructor that writes it),
