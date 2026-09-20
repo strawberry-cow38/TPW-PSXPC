@@ -90,6 +90,44 @@ Legend used throughout:
    deliberately every tick the guard re-paths, or the field is doing double duty. READ that the store
    happens; the consequence is NOT ESTABLISHED and nothing was changed on it.
 
+8. **§3.1's rest target stops being a GUESS: it is the STAFF ROOM, and three of the feature record's
+   four flag bits now have names (2026-09-20).** §3.1 reads state 49 as "nearest object in list
+   0x80053248 whose 0x8002433C-flag and status byte +0x6E are set" and labels the object
+   *(GUESS: a bench/staff room)*. Both halves are now settled, one by reading and one by counting.
+
+   **The flags are a family of three-instruction leaves on the FEATURE record byte +0x2E**, each doing
+   `lbu v0,46(a0)` and one `andi` and nothing else (READ):
+
+   | address | bit | meaning |
+   |---|---|---|
+   | 0x80024348 | 0 (0x01) | guests may use it — the ride score's "slot 54" |
+   | 0x8002433C | 1 (0x02) | **the rest flag state 49 searches on** |
+   | 0x80024330 | 2 (0x04) | see below |
+   | 0x80024324 | 3 (0x08) | see below |
+
+   State 49 reaches bit 1 through the wrapper 0x80024110, which fetches the record through a vtable
+   slot and calls 0x8002433C; the second test is 0x800660DC, `lbu v0,110(a0); sltu v0,zero,v0` — the
+   status byte A+0x6E being NON-ZERO, i.e. past "just placed".
+
+   **What carries each bit, read out of all 197 attraction records on the disc** — and this is a count,
+   not an inference:
+
+   - **bit 1**: the **Staff Room** in every one of the four worlds (entries 32, 109, 197, 353), plus
+     four space-world features (Antenna, Small/Large Crystals, Laser Show). Nothing else in more than
+     one world. So there is **no bench**: the staff room is the thing, and a park without one has staff
+     who can never recover.
+   - **bit 2**: the **Litter Bin**, exactly — all four worlds (19, 98, 193, 351) and nothing else.
+   - **bit 3**: the **Security Camera**, exactly — all four worlds (30, 105, 185, 350) and nothing else.
+
+   Bits 2 and 3 are named here by their POPULATION and not by their reader, which has not been traced;
+   a bit carried by every litter bin and nothing else is not much of a mystery, but the callers are
+   what would make it READ. Bit 1's four space-world extras are why "staff may rest here" is stated as
+   the flag's use rather than as "this is a staff room".
+
+   Confirmed live: a hired mechanic on a park with a staff room walks to it and goes from tiredness 100
+   / morale 0 to tiredness 40 / morale 100. Without one it stays pinned at 100/0, which is StaffBase's
+   own documented answer to "nothing to sit on".
+
 ## 1. Object model needed to read the rest
 
 READ from the setters/getters at 0x80093F80..0x80094160 and the constructor 0x8008C534:

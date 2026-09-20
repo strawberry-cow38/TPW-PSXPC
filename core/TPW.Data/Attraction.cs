@@ -112,6 +112,31 @@ namespace TPW.Data
         /// why it can be wired without guessing: rides.md reads the field, behaviour.md names the slot.</summary>
         public int BaseIntensity;
 
+        /// <summary>Record +0x2E on a FEATURE (type 2): four one-bit properties, each with its own
+        /// accessor in the same run of three-instruction leaves — every one of them `lbu v0,46(a0)`
+        /// followed by an `andi`:
+        ///
+        /// <list type="bullet">
+        /// <item>bit 0 (0x80024348): guests may use it — <see cref="UsableByGuests"/>.</item>
+        /// <item>bit 1 (0x8002433C): <see cref="StaffMayRest"/>, the flag state 49 searches on.</item>
+        /// <item>bit 2 (0x80024330): not established.</item>
+        /// <item>bit 3 (0x80024324): not established.</item>
+        /// </list>
+        ///
+        /// ⚠ THE OTHER TWO BITS ARE DELIBERATELY NOT NAMED. Their accessors exist and are read
+        /// somewhere; what they mean is not established, and a plausible name on a bit is worse than a
+        /// number, because the next reader takes the name as the finding.</summary>
+        public int FeatureFlags;
+
+        /// <summary>Record +0x2E bit 1 on a FEATURE: staff may rest here (READ, 0x8002433C).
+        ///
+        /// ⭐ THIS IS THE THING STAFF STATE 49 LOOKS FOR. behaviour.md §3.1 has "nearest object in list
+        /// 0x80053248 whose 0x8002433C-flag and status byte are set", and marks the object a GUESS
+        /// ("a bench/staff room"). The flag itself is not a guess: it is this bit, read by a leaf that
+        /// does nothing else. Without somewhere carrying it, a tired staff member goes back to work
+        /// instead of recovering and its tiredness only ever climbs.</summary>
+        public bool StaffMayRest => (FeatureFlags & 2) != 0;
+
         /// <summary>Record +0x2E bit 0 on a FEATURE (type 2): guests may use it. This is what the ride
         /// score calls "slot 54", which gates both of its desire terms.
         ///
@@ -152,7 +177,11 @@ namespace TPW.Data
                 EntranceFacing = d[r + 0x14] & 3, ExitFacing = d[r + 0x15] & 3,
             };
             if (r + 0x1C <= d.Length) a.BaseIntensity = BitConverter.ToInt32(d, r + 0x18);
-            if (type == 2 && r + 0x2F <= d.Length) a.UsableByGuests = (d[r + 0x2E] & 1) != 0;
+            if (type == 2 && r + 0x2F <= d.Length)
+            {
+                a.FeatureFlags = d[r + 0x2E];
+                a.UsableByGuests = (a.FeatureFlags & 1) != 0;
+            }
             short ex = BitConverter.ToInt16(d, r + 0x0C), ez = BitConverter.ToInt16(d, r + 0x0E);
             short xx = BitConverter.ToInt16(d, r + 0x10), xz = BitConverter.ToInt16(d, r + 0x12);
             if (ex >= 0 && ez >= 0) a.Entrance = (ex, ez);

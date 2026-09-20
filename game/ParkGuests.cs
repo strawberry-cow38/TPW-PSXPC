@@ -285,12 +285,22 @@ namespace TPWGodot
                     },
                 },
             };
-            st.OnArrive = w => StaffBase.Arrive(((Staffer)w).S, _staffWorld ??= new ParkStaffWorld(() => _now), false);
+            st.OnArrive = w => StaffBase.Arrive(((Staffer)w).S, StaffWorld(), false);
             _parent.AddChild(st.Inst);
             _staff.Add(st);
             Place(st);
             return st;
         }
+
+        ParkStaffWorld StaffWorld() => _staffWorld ??= new ParkStaffWorld(
+            () => _now,
+            () => _rideTargets?.Invoke() ?? (IReadOnlyList<GuestTarget>)System.Array.Empty<GuestTarget>(),
+            (st, tx, tz) =>
+            {
+                if (!_finder.Request(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return false;
+                st.Waiting = true;
+                return true;
+            });
 
         public int StaffCount => _staff.Count;
 
@@ -317,9 +327,12 @@ namespace TPWGodot
         /// visibly is not.</summary>
         void TickStaff()
         {
-            _staffWorld ??= new ParkStaffWorld(() => _now);
+            var world = StaffWorld();
             foreach (var st in _staff)
             {
+                // "Nearest" is measured from where THIS member stands, so the world is pointed at it
+                // before every call, exactly as GuestBrain is set per guest.
+                world.Current = st;
                 if (st.Answer is { } m)
                 {
                     st.Answer = null;
@@ -327,20 +340,20 @@ namespace TPWGodot
                 }
                 if (st.WaypointHead != WaypointPool.NoChain)
                 {
-                    StaffBase.Arrive(st.S, _staffWorld, true);   // tires them while they walk
+                    StaffBase.Arrive(st.S, world, true);   // tires them while they walk
                     Walk(st);
                     continue;
                 }
                 if (st.Waiting) continue;
 
-                StaffBase.IdleCheck(st.S, _staffWorld);
+                StaffBase.IdleCheck(st.S, world);
                 switch (st.S.State)
                 {
-                    case StaffState.Patrolling: StaffBase.Patrol(st.S, _staffWorld); break;
-                    case StaffState.WalkToStrike: StaffBase.WalkToStrike(st.S, _staffWorld); break;
-                    case StaffState.Striking: StaffBase.Strike(st.S, _staffWorld); break;
-                    case StaffState.GoAndRest: StaffBase.GoAndRest(st.S, _staffWorld); break;
-                    case StaffState.Resting: StaffBase.Rest(st.S, _staffWorld); break;
+                    case StaffState.Patrolling: StaffBase.Patrol(st.S, world); break;
+                    case StaffState.WalkToStrike: StaffBase.WalkToStrike(st.S, world); break;
+                    case StaffState.Striking: StaffBase.Strike(st.S, world); break;
+                    case StaffState.GoAndRest: StaffBase.GoAndRest(st.S, world); break;
+                    case StaffState.Resting: StaffBase.Rest(st.S, world); break;
                     case StaffState.PathReady: st.S.SetState(StaffState.Walking); break;
                     // ⚠ Idle is where the class switch belongs. With none, fall to the base's own
                     // answer for a member with nothing assigned: patrol, which with no rectangle

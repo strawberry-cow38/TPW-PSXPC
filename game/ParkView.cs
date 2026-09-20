@@ -1618,6 +1618,35 @@ namespace TPWGodot
         /// ⚠ SLOT 54 IS ZERO FOR EVERY RIDE and that is READ, not a placeholder (rides.md §0 item 1):
         /// only a FEATURE marked usable in its record ever contributes the desire terms. Getting this
         /// backwards would make every ride score as though guests had a need for it.</summary>
+        /// <summary>A walkable tile touching a footprint, for the things that have no entrance tile -
+        /// shops, features and sideshows (rides.md §2: their entrance/exit offsets are (-1,-1)).
+        ///
+        /// ⚠ THE PORT'S CHOICE, NOT THE GAME'S. 0x8009F614 asks the attraction for its entrance point
+        /// and the object answers through a vtable slot this has not followed. What is READ is that the
+        /// search runs with flags 0x11 (path and queue, NOT footprint), so a target ON the footprint
+        /// cannot be reached at all — and that is what the port was asking for: a feature's "door" was
+        /// its own centre tile, which no walker can stand on. Guests and staff were both failing to
+        /// reach every shop and every feature in the park because of it.
+        ///
+        /// Walks the footprint's four sides and takes the first walkable tile, in a fixed order so two
+        /// runs agree. Nearest-by-distance would be a different arbitrary rule, not a better one.</summary>
+        (int X, int Z)? WalkableBeside(int ox, int oz, int w, int d)
+        {
+            if (_map == null) return null;
+            bool Ok(int x, int z) => x >= 0 && z >= 0 && x < _map.Width && z < _map.Height && _map[x, z].IsWalkable;
+            for (int x = ox; x < ox + w; x++)
+            {
+                if (Ok(x, oz - 1)) return (x, oz - 1);
+                if (Ok(x, oz + d)) return (x, oz + d);
+            }
+            for (int z = oz; z < oz + d; z++)
+            {
+                if (Ok(ox - 1, z)) return (ox - 1, z);
+                if (Ok(ox + w, z)) return (ox + w, z);
+            }
+            return null;
+        }
+
         IReadOnlyList<GuestTarget> GuestTargets()
         {
             _guestTargets.Clear();
@@ -1625,7 +1654,7 @@ namespace TPWGodot
             {
                 var (w, d) = a.Rec.Footprint(a.Rot);
                 int cx = a.Ox + w / 2, cz = a.Oz + d / 2;
-                var door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot) ?? (cx, cz);
+                var door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot) ?? WalkableBeside(a.Ox, a.Oz, w, d) ?? (cx, cz);
                 _guestTargets.Add(new GuestTarget
                 {
                     Id = a.Rec.Entry,
@@ -1633,6 +1662,8 @@ namespace TPWGodot
                     Intensity = a.Rec.BaseIntensity,
                     Usable = a.Rec.Type == 2 && a.Rec.UsableByGuests ? 1 : 0,
                     Open = AttractionLifecycle.OpenToGuests(a.Status),
+                    StaffMayRest = a.Rec.Type == 2 && a.Rec.StaffMayRest,
+                    Built = a.Status != AttractionStatus.JustPlaced,
                     DoorX = door.X, DoorZ = door.Z,
                     CentreX = cx, CentreZ = cz,
                 });

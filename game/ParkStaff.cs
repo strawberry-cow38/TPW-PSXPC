@@ -38,7 +38,17 @@ namespace TPWGodot
     sealed class ParkStaffWorld : IStaffWorld
     {
         readonly Func<long> _now;
-        public ParkStaffWorld(Func<long> now) => _now = now;
+        readonly Func<System.Collections.Generic.IReadOnlyList<GuestTarget>> _targets;
+        readonly Func<Staffer, int, int, bool> _pathTo;
+
+        public ParkStaffWorld(Func<long> now,
+                              Func<System.Collections.Generic.IReadOnlyList<GuestTarget>> targets,
+                              Func<Staffer, int, int, bool> pathToTile)
+        { _now = now; _targets = targets; _pathTo = pathToTile; }
+
+        /// <summary>The member the next world call is about. Set before each one, the same way
+        /// GuestBrain is set per guest, because "nearest" is measured from where THIS one stands.</summary>
+        public Staffer Current;
 
         public long NowTick => _now();
 
@@ -56,10 +66,32 @@ namespace TPWGodot
         public bool StrikeMusterExists => false;
         public bool TryPathToStrikeMuster(StaffMember staff) => false;
 
-        /// <summary>⚠ NO BENCHES tracked. A member over the rest threshold therefore goes back to
-        /// patrolling instead of recovering - so tiredness only ever climbs, and morale with it. That is
-        /// StaffBase's own answer to "nothing to sit on", not a shortcut here, but it does mean staff
-        /// fatigue is currently a ratchet.</summary>
-        public bool TryPathToRest(StaffMember staff) => false;
+        /// <summary>State 49's search (0x800947CC): the NEAREST placed feature whose record +0x2E bit 1
+        /// is set (0x80024110 -> 0x8002433C) and whose status byte A+0x6E is non-zero (0x800660DC), then
+        /// a path to it.
+        ///
+        /// ⭐ THE FLAG IS READ AND THE OBJECT NAMES ITSELF. behaviour.md §3.1 marks the target a GUESS
+        /// ("a bench/staff room") because it read the flag and not what carries it. Reading the bit out
+        /// of all 197 records settles it: bit 1 is on the STAFF ROOM in every one of the four worlds
+        /// (entries 32, 109, 197, 353) and on nothing else that appears in more than one. So there is no
+        /// bench - the staff room is the thing - and a park with none has staff who can never recover.
+        ///
+        /// ⚠ DISTANCE IS MEASURED IN TILES, NOT BY THE GAME'S METRIC. 0x800947CC compares a distance it
+        /// computes through a vtable call this does not follow; Manhattan on tile centres is the port's
+        /// choice, and it can pick a different staff room when two are close to equal.</summary>
+        public bool TryPathToRest(StaffMember staff)
+        {
+            if (Current == null || _targets == null) return false;
+            GuestTarget best = null;
+            int bestD = int.MaxValue;
+            foreach (var t in _targets())
+            {
+                if (!t.StaffMayRest || !t.Built) continue;
+                int d = Math.Abs(t.CentreX - (Current.X >> 8)) + Math.Abs(t.CentreZ - (Current.Z >> 8));
+                if (d >= bestD) continue;
+                bestD = d; best = t;
+            }
+            return best != null && _pathTo(Current, best.DoorX, best.DoorZ);
+        }
     }
 }

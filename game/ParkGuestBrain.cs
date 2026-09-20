@@ -24,6 +24,16 @@ namespace TPWGodot
         public int DoorX, DoorZ;
         /// <summary>The footprint's centre tile, which is what the score measures distance to.</summary>
         public int CentreX, CentreZ;
+
+        /// <summary>Record +0x2E bit 1 on a feature: staff may rest here (READ, 0x8002433C via the
+        /// wrapper 0x80024110). Staff state 49 searches the object list for the NEAREST one of these
+        /// whose status byte is also non-zero (0x800660DC).</summary>
+        public bool StaffMayRest;
+
+        /// <summary>Status byte A+0x6E is non-zero, i.e. past "just placed". The rest search tests it
+        /// alongside the flag above; it is NOT the same as <see cref="Open"/>, which is the three
+        /// statuses a guest may queue at.</summary>
+        public bool Built;
     }
 
     /// <summary>The park as TPW.Sim.VisitorDecision reads it (behaviour.md §2.2).
