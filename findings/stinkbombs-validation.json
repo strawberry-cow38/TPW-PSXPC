@@ -1,0 +1,71 @@
+{
+  "conclusion": "Runtime stinkbomb identity not established; simulation implementation stopped.",
+  "simulation_runs": [
+    {
+      "phase": "baseline",
+      "command": "dotnet test tests/TPW.Sim.Tests/",
+      "counters": {
+        "total": 1574,
+        "executed": 1574,
+        "passed": 1574,
+        "failed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "inconclusive": 0,
+        "passedButRunAborted": 0,
+        "notRunnable": 0,
+        "notExecuted": 0,
+        "disconnected": 0,
+        "warning": 0,
+        "completed": 0,
+        "inProgress": 0,
+        "pending": 0
+      },
+      "trx_sha256": "1d818f52820e1336f78b6c63f2c9c4a29dcd57a3f26f8b306ff625913822b0cc"
+    },
+    {
+      "phase": "final",
+      "command": "dotnet test tests/TPW.Sim.Tests/",
+      "counters": {
+        "total": 1574,
+        "executed": 1574,
+        "passed": 1574,
+        "failed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "inconclusive": 0,
+        "passedButRunAborted": 0,
+        "notRunnable": 0,
+        "notExecuted": 0,
+        "disconnected": 0,
+        "warning": 0,
+        "completed": 0,
+        "inProgress": 0,
+        "pending": 0
+      },
+      "trx_sha256": "189c9b835d1abe9e0096ed88a6b39546ec1026ee6e9513e06f7c42ca06c0c42c"
+    }
+  ],
+  "audit_tests": 8,
+  "audit_mutations_killed": 12,
+  "simulation_mutations": 0,
+  "simulation_mutation_reason": "No simulation code changed because identity was not established.",
+  "source_disagreements": {
+    "new": 0,
+    "inherited_documented": 5,
+    "existing_behavior_changed": false
+  },
+  "audited_files": 690,
+  "attraction_records_examined": 488,
+  "unreadable_or_truncated_skipped": 0,
+  "old_guard_exclusions_included": 94,
+  "artifact_sha256": {
+    "tools/audit_stinkbombs.py": "a601a7a52bc497d2e5dd76b9572b2be9a2428383e38911eeced2d9560f2d047e",
+    "tools/test_stinkbomb_audit.py": "267553a55dda1cbad8f41db2aa3076afeaa3632fef0acba634c7ff21684cdce0",
+    "tools/mutate_stinkbomb_audit.py": "35547505e00131a52aa665111547f982ad22a53d5995e638dec290373d6d1dcc",
+    "findings/stinkbombs-audit.json": "45a03cbc33557f76f4bd770f2d86746f85291ccdb68cc9b0cfc7e14a3444ca18",
+    "findings/stinkbombs-mutations.json": "8887c54db289d30943ebff5d56b356e2615d68731fecbeb704d3185bc8159c70"
+  }
+}

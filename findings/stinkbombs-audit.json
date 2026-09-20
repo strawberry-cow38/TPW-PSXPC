@@ -1,0 +1,4854 @@
+{
+  "conclusion": "Stinkbomb runtime identity NOT ESTABLISHED; no simulation mapping established.",
+  "image_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "record_manifest_sha256": "27e9ea09ab1d1762f811f004b09799400e44d51addb7c21808da5453381baae3",
+  "image_scan": {
+    "bytes": 1065308,
+    "aligned_words": 266327,
+    "known_code_words": 187686,
+    "other_words_also_scanned": 78641,
+    "trailing_bytes_not_decoded_as_words": 0,
+    "skipped_aligned_words": 0
+  },
+  "record_counts": {
+    "files_enumerated": 690,
+    "files_raw_searched": 690,
+    "other_type": 48,
+    "non_record": 154,
+    "attraction": 488,
+    "old_guard_would_skip_but_read": 94,
+    "numeric_names": 244,
+    "prefixed_names": 244,
+    "skipped_unreadable_or_truncated": 0
+  },
+  "failures": [],
+  "controls": {
+    "litter_three_known_callers": true,
+    "both_influence_producers": true,
+    "callback_pointer_found": true,
+    "named_caption_found": true,
+    "symbol_found": true,
+    "short_bin_read": true,
+    "ordinary_named_records_read": true,
+    "live_advisor_rule_found": true,
+    "prank_rules_absent": true
+  },
+  "raw_ascii_hits": {
+    "executable": [
+      {
+        "offset": 855184,
+        "text": "PoolOfLitter"
+      },
+      {
+        "offset": 861024,
+        "text": "I will clear litter"
+      },
+      {
+        "offset": 861060,
+        "text": "Cleaning up litter"
+      },
+      {
+        "offset": 861100,
+        "text": "Vomitting"
+      },
+      {
+        "offset": 864796,
+        "text": "Vomit/Ride Inc"
+      },
+      {
+        "offset": 864812,
+        "text": "Min Litter Increase"
+      },
+      {
+        "offset": 864880,
+        "text": "Vomit/Happiness"
+      },
+      {
+        "offset": 864936,
+        "text": "Prank Chance"
+      }
+    ],
+    "extracted_files": [
+      {
+        "file": "0406.bin",
+        "offset": 28372,
+        "text": "Stinkende Pompoenen"
+      },
+      {
+        "file": "0406.bin",
+        "offset": 33324,
+        "text": "Een of andere grapjas heeft een stinkbom in je park geplaatst. Zorg dat dat ding wordt opgeruimd voordat er te veel mensen ziek van worden."
+      },
+      {
+        "file": "0407.bin",
+        "offset": 6263,
+        "text": "A prankster is popping other kids balloons. A guard would stop him."
+      },
+      {
+        "file": "0407.bin",
+        "offset": 14686,
+        "text": "Litter Bin"
+      },
+      {
+        "file": "0407.bin",
+        "offset": 18303,
+        "text": "ve discovered a hidden award. For having seen to it that enough of your shops have litter bins to keep the park tidy, please accept the Green Award and a Gold Ticket as tokens of my esteem."
+      },
+      {
+        "file": "0407.bin",
+        "offset": 19195,
+        "text": "A prankster is littering your park. Get your cleaners to the scene to clear up the mess."
+      },
+      {
+        "file": "0407.bin",
+        "offset": 23997,
+        "text": "Litter Bin"
+      },
+      {
+        "file": "0407.bin",
+        "offset": 26001,
+        "text": "Litter Bin"
+      },
+      {
+        "file": "0407.bin",
+        "offset": 30370,
+        "text": "Some prankster has left a stink bomb in your park. Get it cleaned up before too many people get ill."
+      },
+      {
+        "file": "0407.bin",
+        "offset": 34605,
+        "text": "Litter Bin"
+      },
+      {
+        "file": "0409.bin",
+        "offset": 34805,
+        "text": "Irgend so ein Scherzkeks hat Dir eine Stinkbombe in Deinen Vergn"
+      },
+      {
+        "file": "0410.bin",
+        "offset": 6246,
+        "text": "STR_ADVMES_ADD_PRANK_BALLOON "
+      },
+      {
+        "file": "0410.bin",
+        "offset": 19706,
+        "text": "STR_ADVMES_ADD_PRANK_LITTER "
+      },
+      {
+        "file": "0410.bin",
+        "offset": 32075,
+        "text": "STR_ADVMES_ADD_PRANK_SBOMB "
+      },
+      {
+        "file": "0414.bin",
+        "offset": 32952,
+        "text": "n graciosillo se le ha ocurrido echar una bomba f"
+      },
+      {
+        "file": "0415.bin",
+        "offset": 14287,
+        "text": "Warp-fart"
+      },
+      {
+        "file": "0415.bin",
+        "offset": 26694,
+        "text": "ka farten genom att anst"
+      },
+      {
+        "file": "0415.bin",
+        "offset": 30496,
+        "text": "ngt en stinkbomb i parken. Skicka dit en st"
+      }
+    ],
+    "files_skipped": 0
+  },
+  "parsed_text_tables": {
+    "english_entries": 1031,
+    "symbol_entries": 1031,
+    "skipped_entries": 0,
+    "tables_selected": 2
+  },
+  "advisor_messages": [
+    {
+      "message": 117,
+      "address": "0x800EEE20",
+      "text_id": 864,
+      "english": {
+        "id": 864,
+        "offset": 30370,
+        "text": "Some prankster has left a stink bomb in your park. Get it cleaned up before too many people get ill."
+      },
+      "symbol": {
+        "id": 864,
+        "offset": 32075,
+        "text": "STR_ADVMES_ADD_PRANK_SBOMB "
+      }
+    },
+    {
+      "message": 118,
+      "address": "0x800EEE34",
+      "text_id": 484,
+      "english": {
+        "id": 484,
+        "offset": 19195,
+        "text": "A prankster is littering your park. Get your cleaners to the scene to clear up the mess."
+      },
+      "symbol": {
+        "id": 484,
+        "offset": 19706,
+        "text": "STR_ADVMES_ADD_PRANK_LITTER "
+      }
+    },
+    {
+      "message": 119,
+      "address": "0x800EEE48",
+      "text_id": 68,
+      "english": {
+        "id": 68,
+        "offset": 6263,
+        "text": "A prankster is popping other kids balloons. A guard would stop him."
+      },
+      "symbol": {
+        "id": 68,
+        "offset": 6246,
+        "text": "STR_ADVMES_ADD_PRANK_BALLOON "
+      }
+    }
+  ],
+  "advisor_table_rows_examined": 289,
+  "advisor_table_rows_skipped": 0,
+  "direct_jump_or_call_matches": {
+    "0x800514E0": [
+      {
+        "site": "0x80053AFC",
+        "known_code": true
+      },
+      {
+        "site": "0x8008D9B0",
+        "known_code": true
+      },
+      {
+        "site": "0x80090C2C",
+        "known_code": true
+      }
+    ],
+    "0x80051A94": [
+      {
+        "site": "0x80099230",
+        "known_code": true
+      }
+    ],
+    "0x8006694C": [
+      {
+        "site": "0x80053B8C",
+        "known_code": true
+      },
+      {
+        "site": "0x80090C60",
+        "known_code": true
+      }
+    ],
+    "0x80053554": [
+      {
+        "site": "0x8008C2C4",
+        "known_code": true
+      },
+      {
+        "site": "0x800959D4",
+        "known_code": true
+      }
+    ],
+    "0x800926AC": [
+      {
+        "site": "0x800673B8",
+        "known_code": true
+      },
+      {
+        "site": "0x8008EB48",
+        "known_code": true
+      },
+      {
+        "site": "0x80091BE4",
+        "known_code": true
+      }
+    ],
+    "0x80098494": [
+      {
+        "site": "0x80095FFC",
+        "known_code": true
+      }
+    ],
+    "0x8008C2B4": []
+  },
+  "literal_pointers": {
+    "0x800514E0": [],
+    "0x80051A94": [],
+    "0x8006694C": [],
+    "0x80053554": [],
+    "0x800926AC": [],
+    "0x80098494": [],
+    "0x8008C2B4": [
+      "0x800F79E0"
+    ]
+  },
+  "immediate_loads": {
+    "117": [
+      {
+        "site": "0x80083294",
+        "register": 7,
+        "known_code": true
+      },
+      {
+        "site": "0x80083310",
+        "register": 7,
+        "known_code": true
+      },
+      {
+        "site": "0x80083388",
+        "register": 7,
+        "known_code": true
+      }
+    ],
+    "118": [],
+    "119": [
+      {
+        "site": "0x8005073C",
+        "register": 5,
+        "known_code": true
+      },
+      {
+        "site": "0x800589DC",
+        "register": 16,
+        "known_code": true
+      },
+      {
+        "site": "0x800C5C30",
+        "register": 4,
+        "known_code": false
+      }
+    ]
+  },
+  "rules": {
+    "programs": 125,
+    "instructions": 662,
+    "posts": [
+      {
+        "rule": 0,
+        "word_offset": 11,
+        "message": 0
+      },
+      {
+        "rule": 1,
+        "word_offset": 25,
+        "message": 20
+      },
+      {
+        "rule": 2,
+        "word_offset": 44,
+        "message": 116
+      },
+      {
+        "rule": 3,
+        "word_offset": 57,
+        "message": 1
+      },
+      {
+        "rule": 4,
+        "word_offset": 70,
+        "message": 2
+      },
+      {
+        "rule": 6,
+        "word_offset": 87,
+        "message": 55
+      },
+      {
+        "rule": 8,
+        "word_offset": 102,
+        "message": 132
+      },
+      {
+        "rule": 10,
+        "word_offset": 117,
+        "message": 150
+      },
+      {
+        "rule": 12,
+        "word_offset": 132,
+        "message": 133
+      },
+      {
+        "rule": 13,
+        "word_offset": 145,
+        "message": 122
+      },
+      {
+        "rule": 15,
+        "word_offset": 157,
+        "message": 85
+      },
+      {
+        "rule": 16,
+        "word_offset": 168,
+        "message": 84
+      },
+      {
+        "rule": 18,
+        "word_offset": 186,
+        "message": 154
+      },
+      {
+        "rule": 19,
+        "word_offset": 200,
+        "message": 164
+      },
+      {
+        "rule": 21,
+        "word_offset": 218,
+        "message": 155
+      },
+      {
+        "rule": 22,
+        "word_offset": 232,
+        "message": 165
+      },
+      {
+        "rule": 24,
+        "word_offset": 250,
+        "message": 156
+      },
+      {
+        "rule": 25,
+        "word_offset": 264,
+        "message": 166
+      },
+      {
+        "rule": 27,
+        "word_offset": 282,
+        "message": 157
+      },
+      {
+        "rule": 28,
+        "word_offset": 296,
+        "message": 167
+      },
+      {
+        "rule": 30,
+        "word_offset": 314,
+        "message": 158
+      },
+      {
+        "rule": 31,
+        "word_offset": 328,
+        "message": 168
+      },
+      {
+        "rule": 33,
+        "word_offset": 346,
+        "message": 159
+      },
+      {
+        "rule": 34,
+        "word_offset": 360,
+        "message": 169
+      },
+      {
+        "rule": 36,
+        "word_offset": 378,
+        "message": 160
+      },
+      {
+        "rule": 37,
+        "word_offset": 392,
+        "message": 170
+      },
+      {
+        "rule": 39,
+        "word_offset": 410,
+        "message": 161
+      },
+      {
+        "rule": 40,
+        "word_offset": 424,
+        "message": 171
+      },
+      {
+        "rule": 42,
+        "word_offset": 442,
+        "message": 162
+      },
+      {
+        "rule": 43,
+        "word_offset": 456,
+        "message": 172
+      },
+      {
+        "rule": 45,
+        "word_offset": 474,
+        "message": 163
+      },
+      {
+        "rule": 46,
+        "word_offset": 488,
+        "message": 173
+      },
+      {
+        "rule": 47,
+        "word_offset": 516,
+        "message": 146
+      },
+      {
+        "rule": 48,
+        "word_offset": 541,
+        "message": 147
+      },
+      {
+        "rule": 49,
+        "word_offset": 572,
+        "message": 148
+      },
+      {
+        "rule": 50,
+        "word_offset": 609,
+        "message": 149
+      },
+      {
+        "rule": 51,
+        "word_offset": 628,
+        "message": 123
+      },
+      {
+        "rule": 52,
+        "word_offset": 641,
+        "message": 124
+      },
+      {
+        "rule": 53,
+        "word_offset": 660,
+        "message": 125
+      },
+      {
+        "rule": 54,
+        "word_offset": 679,
+        "message": 126
+      },
+      {
+        "rule": 55,
+        "word_offset": 701,
+        "message": 127
+      },
+      {
+        "rule": 58,
+        "word_offset": 726,
+        "message": 3
+      },
+      {
+        "rule": 59,
+        "word_offset": 741,
+        "message": 4
+      },
+      {
+        "rule": 60,
+        "word_offset": 764,
+        "message": 5
+      },
+      {
+        "rule": 61,
+        "word_offset": 777,
+        "message": 111
+      },
+      {
+        "rule": 62,
+        "word_offset": 793,
+        "message": 25
+      },
+      {
+        "rule": 63,
+        "word_offset": 809,
+        "message": 16
+      },
+      {
+        "rule": 64,
+        "word_offset": 825,
+        "message": 17
+      },
+      {
+        "rule": 65,
+        "word_offset": 838,
+        "message": 97
+      },
+      {
+        "rule": 66,
+        "word_offset": 854,
+        "message": 6
+      },
+      {
+        "rule": 67,
+        "word_offset": 872,
+        "message": 7
+      },
+      {
+        "rule": 68,
+        "word_offset": 895,
+        "message": 8
+      },
+      {
+        "rule": 69,
+        "word_offset": 908,
+        "message": 107
+      },
+      {
+        "rule": 70,
+        "word_offset": 924,
+        "message": 26
+      },
+      {
+        "rule": 71,
+        "word_offset": 940,
+        "message": 18
+      },
+      {
+        "rule": 72,
+        "word_offset": 956,
+        "message": 19
+      },
+      {
+        "rule": 73,
+        "word_offset": 969,
+        "message": 95
+      },
+      {
+        "rule": 75,
+        "word_offset": 995,
+        "message": 9
+      },
+      {
+        "rule": 76,
+        "word_offset": 1019,
+        "message": 10
+      },
+      {
+        "rule": 77,
+        "word_offset": 1045,
+        "message": 11
+      },
+      {
+        "rule": 78,
+        "word_offset": 1058,
+        "message": 113
+      },
+      {
+        "rule": 79,
+        "word_offset": 1072,
+        "message": 27
+      },
+      {
+        "rule": 80,
+        "word_offset": 1088,
+        "message": 21
+      },
+      {
+        "rule": 81,
+        "word_offset": 1104,
+        "message": 22
+      },
+      {
+        "rule": 82,
+        "word_offset": 1126,
+        "message": 91
+      },
+      {
+        "rule": 83,
+        "word_offset": 1137,
+        "message": 98
+      },
+      {
+        "rule": 84,
+        "word_offset": 1153,
+        "message": 12
+      },
+      {
+        "rule": 85,
+        "word_offset": 1169,
+        "message": 109
+      },
+      {
+        "rule": 86,
+        "word_offset": 1183,
+        "message": 28
+      },
+      {
+        "rule": 87,
+        "word_offset": 1199,
+        "message": 23
+      },
+      {
+        "rule": 88,
+        "word_offset": 1215,
+        "message": 24
+      },
+      {
+        "rule": 89,
+        "word_offset": 1226,
+        "message": 96
+      },
+      {
+        "rule": 90,
+        "word_offset": 1245,
+        "message": 13
+      },
+      {
+        "rule": 91,
+        "word_offset": 1263,
+        "message": 14
+      },
+      {
+        "rule": 92,
+        "word_offset": 1289,
+        "message": 15
+      },
+      {
+        "rule": 93,
+        "word_offset": 1320,
+        "message": 29
+      },
+      {
+        "rule": 94,
+        "word_offset": 1333,
+        "message": 115
+      },
+      {
+        "rule": 95,
+        "word_offset": 1344,
+        "message": 99
+      },
+      {
+        "rule": 96,
+        "word_offset": 1360,
+        "message": 56
+      },
+      {
+        "rule": 97,
+        "word_offset": 1373,
+        "message": 57
+      },
+      {
+        "rule": 98,
+        "word_offset": 1386,
+        "message": 58
+      },
+      {
+        "rule": 99,
+        "word_offset": 1402,
+        "message": 59
+      },
+      {
+        "rule": 100,
+        "word_offset": 1420,
+        "message": 60
+      },
+      {
+        "rule": 101,
+        "word_offset": 1433,
+        "message": 61
+      },
+      {
+        "rule": 102,
+        "word_offset": 1449,
+        "message": 66
+      },
+      {
+        "rule": 103,
+        "word_offset": 1462,
+        "message": 67
+      },
+      {
+        "rule": 104,
+        "word_offset": 1481,
+        "message": 68
+      },
+      {
+        "rule": 105,
+        "word_offset": 1500,
+        "message": 69
+      },
+      {
+        "rule": 106,
+        "word_offset": 1516,
+        "message": 70
+      },
+      {
+        "rule": 107,
+        "word_offset": 1529,
+        "message": 71
+      },
+      {
+        "rule": 108,
+        "word_offset": 1546,
+        "message": 72
+      },
+      {
+        "rule": 109,
+        "word_offset": 1563,
+        "message": 73
+      },
+      {
+        "rule": 110,
+        "word_offset": 1579,
+        "message": 74
+      },
+      {
+        "rule": 111,
+        "word_offset": 1592,
+        "message": 75
+      },
+      {
+        "rule": 112,
+        "word_offset": 1606,
+        "message": 76
+      },
+      {
+        "rule": 113,
+        "word_offset": 1620,
+        "message": 77
+      },
+      {
+        "rule": 114,
+        "word_offset": 1636,
+        "message": 78
+      },
+      {
+        "rule": 115,
+        "word_offset": 1652,
+        "message": 79
+      },
+      {
+        "rule": 116,
+        "word_offset": 1674,
+        "message": 80
+      },
+      {
+        "rule": 117,
+        "word_offset": 1693,
+        "message": 82
+      },
+      {
+        "rule": 118,
+        "word_offset": 1715,
+        "message": 81
+      },
+      {
+        "rule": 119,
+        "word_offset": 1734,
+        "message": 83
+      },
+      {
+        "rule": 120,
+        "word_offset": 1747,
+        "message": 92
+      },
+      {
+        "rule": 121,
+        "word_offset": 1757,
+        "message": 93
+      },
+      {
+        "rule": 122,
+        "word_offset": 1772,
+        "message": 151
+      },
+      {
+        "rule": 123,
+        "word_offset": 1787,
+        "message": 152
+      },
+      {
+        "rule": 124,
+        "word_offset": 1796,
+        "message": 190
+      }
+    ],
+    "code_words": 1802,
+    "unreferenced_code_words": 0,
+    "skipped_programs": 0
+  },
+  "attraction_names": [
+    {
+      "file": "0019.bin",
+      "type": 2,
+      "offset": 768,
+      "text_id": 337,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0020.bin",
+      "type": 2,
+      "offset": 3544,
+      "text_id": 669,
+      "old_guard_would_skip": false,
+      "name": "Bricks"
+    },
+    {
+      "file": "0021.bin",
+      "type": 2,
+      "offset": 4356,
+      "text_id": 543,
+      "old_guard_would_skip": false,
+      "name": "Card Statue"
+    },
+    {
+      "file": "0022.bin",
+      "type": 2,
+      "offset": 592,
+      "text_id": 836,
+      "old_guard_would_skip": true,
+      "name": "Candy Cane"
+    },
+    {
+      "file": "0023.bin",
+      "type": 2,
+      "offset": 780,
+      "text_id": 971,
+      "old_guard_would_skip": true,
+      "name": "Donut"
+    },
+    {
+      "file": "0024.bin",
+      "type": 2,
+      "offset": 932,
+      "text_id": 549,
+      "old_guard_would_skip": true,
+      "name": "Large Flower"
+    },
+    {
+      "file": "0025.bin",
+      "type": 2,
+      "offset": 652,
+      "text_id": 812,
+      "old_guard_would_skip": true,
+      "name": "Grass"
+    },
+    {
+      "file": "0026.bin",
+      "type": 2,
+      "offset": 1112,
+      "text_id": 115,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "0027.bin",
+      "type": 2,
+      "offset": 588,
+      "text_id": 320,
+      "old_guard_would_skip": true,
+      "name": "Match"
+    },
+    {
+      "file": "0028.bin",
+      "type": 2,
+      "offset": 3756,
+      "text_id": 1029,
+      "old_guard_would_skip": false,
+      "name": "Plant Pot"
+    },
+    {
+      "file": "0029.bin",
+      "type": 2,
+      "offset": 3556,
+      "text_id": 662,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "0030.bin",
+      "type": 2,
+      "offset": 916,
+      "text_id": 332,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "0031.bin",
+      "type": 2,
+      "offset": 880,
+      "text_id": 885,
+      "old_guard_would_skip": true,
+      "name": "speaker"
+    },
+    {
+      "file": "0032.bin",
+      "type": 2,
+      "offset": 2116,
+      "text_id": 745,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "0033.bin",
+      "type": 2,
+      "offset": 3724,
+      "text_id": 207,
+      "old_guard_would_skip": false,
+      "name": "Teapot"
+    },
+    {
+      "file": "0039.bin",
+      "type": 3,
+      "offset": 16480,
+      "text_id": 959,
+      "old_guard_would_skip": false,
+      "name": "The Dizzy Tree"
+    },
+    {
+      "file": "0040.bin",
+      "type": 3,
+      "offset": 14536,
+      "text_id": 15,
+      "old_guard_would_skip": false,
+      "name": "Bumper Bugs"
+    },
+    {
+      "file": "0041.bin",
+      "type": 6,
+      "offset": 37100,
+      "text_id": 474,
+      "old_guard_would_skip": false,
+      "name": "Bumble Buggies"
+    },
+    {
+      "file": "0042.bin",
+      "type": 3,
+      "offset": 20584,
+      "text_id": 997,
+      "old_guard_would_skip": false,
+      "name": "Caterpillar Capers"
+    },
+    {
+      "file": "0043.bin",
+      "type": 3,
+      "offset": 20976,
+      "text_id": 275,
+      "old_guard_would_skip": false,
+      "name": "Bugs TV "
+    },
+    {
+      "file": "0044.bin",
+      "type": 1,
+      "offset": 13156,
+      "text_id": 152,
+      "old_guard_would_skip": false,
+      "name": "Big Dripper"
+    },
+    {
+      "file": "0045.bin",
+      "type": 3,
+      "offset": 12552,
+      "text_id": 198,
+      "old_guard_would_skip": false,
+      "name": "Woodland Racers"
+    },
+    {
+      "file": "0046.bin",
+      "type": 1,
+      "offset": 9808,
+      "text_id": 727,
+      "old_guard_would_skip": false,
+      "name": "Caterpillar Coaster"
+    },
+    {
+      "file": "0047.bin",
+      "type": 1,
+      "offset": 9556,
+      "text_id": 887,
+      "old_guard_would_skip": false,
+      "name": "Candy Coaster"
+    },
+    {
+      "file": "0048.bin",
+      "type": 3,
+      "offset": 17820,
+      "text_id": 792,
+      "old_guard_would_skip": false,
+      "name": "Dragon Fliers"
+    },
+    {
+      "file": "0049.bin",
+      "type": 3,
+      "offset": 11868,
+      "text_id": 296,
+      "old_guard_would_skip": false,
+      "name": "Flamingo Fling"
+    },
+    {
+      "file": "0050.bin",
+      "type": 3,
+      "offset": 11856,
+      "text_id": 120,
+      "old_guard_would_skip": false,
+      "name": "Flower Power"
+    },
+    {
+      "file": "0051.bin",
+      "type": 3,
+      "offset": 10704,
+      "text_id": 53,
+      "old_guard_would_skip": false,
+      "name": "Flying Fishes"
+    },
+    {
+      "file": "0052.bin",
+      "type": 3,
+      "offset": 10864,
+      "text_id": 190,
+      "old_guard_would_skip": false,
+      "name": "Flying Fountain"
+    },
+    {
+      "file": "0053.bin",
+      "type": 3,
+      "offset": 16920,
+      "text_id": 377,
+      "old_guard_would_skip": false,
+      "name": "Spore Spinner"
+    },
+    {
+      "file": "0054.bin",
+      "type": 3,
+      "offset": 14924,
+      "text_id": 607,
+      "old_guard_would_skip": false,
+      "name": "Jelly Bounce"
+    },
+    {
+      "file": "0055.bin",
+      "type": 3,
+      "offset": 10484,
+      "text_id": 437,
+      "old_guard_would_skip": false,
+      "name": "Escargot A-Go Go"
+    },
+    {
+      "file": "0056.bin",
+      "type": 7,
+      "offset": 8800,
+      "text_id": 863,
+      "old_guard_would_skip": false,
+      "name": "Tweety Tours"
+    },
+    {
+      "file": "0057.bin",
+      "type": 6,
+      "offset": 35224,
+      "text_id": 510,
+      "old_guard_would_skip": false,
+      "name": "Taptastic Rapids"
+    },
+    {
+      "file": "0058.bin",
+      "type": 5,
+      "offset": 2600,
+      "text_id": 603,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "0059.bin",
+      "type": 5,
+      "offset": 3892,
+      "text_id": 826,
+      "old_guard_would_skip": false,
+      "name": "Should be removed"
+    },
+    {
+      "file": "0060.bin",
+      "type": 4,
+      "offset": 6064,
+      "text_id": 239,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "0061.bin",
+      "type": 4,
+      "offset": 5608,
+      "text_id": 235,
+      "old_guard_would_skip": false,
+      "name": "Should be removed"
+    },
+    {
+      "file": "0062.bin",
+      "type": 4,
+      "offset": 5456,
+      "text_id": 937,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "0063.bin",
+      "type": 4,
+      "offset": 3600,
+      "text_id": 938,
+      "old_guard_would_skip": false,
+      "name": "Cake Shop"
+    },
+    {
+      "file": "0064.bin",
+      "type": 4,
+      "offset": 6192,
+      "text_id": 623,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "0065.bin",
+      "type": 4,
+      "offset": 3152,
+      "text_id": 413,
+      "old_guard_would_skip": false,
+      "name": "Fries Shop"
+    },
+    {
+      "file": "0066.bin",
+      "type": 5,
+      "offset": 5320,
+      "text_id": 498,
+      "old_guard_would_skip": false,
+      "name": "Fruit Shy"
+    },
+    {
+      "file": "0067.bin",
+      "type": 4,
+      "offset": 12712,
+      "text_id": 798,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "0068.bin",
+      "type": 4,
+      "offset": 3248,
+      "text_id": 641,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "0069.bin",
+      "type": 4,
+      "offset": 7720,
+      "text_id": 56,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop "
+    },
+    {
+      "file": "0070.bin",
+      "type": 5,
+      "offset": 7840,
+      "text_id": 458,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "0071.bin",
+      "type": 4,
+      "offset": 10536,
+      "text_id": 642,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "0072.bin",
+      "type": 5,
+      "offset": 9656,
+      "text_id": 998,
+      "old_guard_would_skip": false,
+      "name": "Aqua Spray"
+    },
+    {
+      "file": "0073.bin",
+      "type": 5,
+      "offset": 8404,
+      "text_id": 270,
+      "old_guard_would_skip": false,
+      "name": "Strength Flower"
+    },
+    {
+      "file": "0074.bin",
+      "type": 5,
+      "offset": 9484,
+      "text_id": 516,
+      "old_guard_would_skip": false,
+      "name": "Worm Bash"
+    },
+    {
+      "file": "0093.bin",
+      "type": 2,
+      "offset": 528,
+      "text_id": 21,
+      "old_guard_would_skip": true,
+      "name": "Tiny Rock"
+    },
+    {
+      "file": "0094.bin",
+      "type": 2,
+      "offset": 664,
+      "text_id": 146,
+      "old_guard_would_skip": true,
+      "name": "Small Rock"
+    },
+    {
+      "file": "0095.bin",
+      "type": 2,
+      "offset": 3688,
+      "text_id": 665,
+      "old_guard_would_skip": false,
+      "name": "Large Rock Pillar"
+    },
+    {
+      "file": "0096.bin",
+      "type": 2,
+      "offset": 2768,
+      "text_id": 149,
+      "old_guard_would_skip": false,
+      "name": "Huge Rock"
+    },
+    {
+      "file": "0097.bin",
+      "type": 2,
+      "offset": 5208,
+      "text_id": 175,
+      "old_guard_would_skip": false,
+      "name": "bellt-unconfirmed"
+    },
+    {
+      "file": "0098.bin",
+      "type": 2,
+      "offset": 864,
+      "text_id": 643,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0099.bin",
+      "type": 2,
+      "offset": 492,
+      "text_id": 470,
+      "old_guard_would_skip": true,
+      "name": "Green Bush"
+    },
+    {
+      "file": "0100.bin",
+      "type": 2,
+      "offset": 492,
+      "text_id": 73,
+      "old_guard_would_skip": true,
+      "name": "Brown Bush"
+    },
+    {
+      "file": "0101.bin",
+      "type": 2,
+      "offset": 3460,
+      "text_id": 141,
+      "old_guard_would_skip": false,
+      "name": "Demon Statue"
+    },
+    {
+      "file": "0102.bin",
+      "type": 2,
+      "offset": 648,
+      "text_id": 214,
+      "old_guard_would_skip": true,
+      "name": "Should be removed"
+    },
+    {
+      "file": "0103.bin",
+      "type": 2,
+      "offset": 1676,
+      "text_id": 238,
+      "old_guard_would_skip": false,
+      "name": "Gargoyle"
+    },
+    {
+      "file": "0104.bin",
+      "type": 2,
+      "offset": 624,
+      "text_id": 849,
+      "old_guard_would_skip": true,
+      "name": "Gravestone"
+    },
+    {
+      "file": "0105.bin",
+      "type": 2,
+      "offset": 808,
+      "text_id": 341,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "0106.bin",
+      "type": 2,
+      "offset": 752,
+      "text_id": 606,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "0107.bin",
+      "type": 2,
+      "offset": 744,
+      "text_id": 81,
+      "old_guard_would_skip": true,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "0108.bin",
+      "type": 2,
+      "offset": 1900,
+      "text_id": 988,
+      "old_guard_would_skip": false,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "0109.bin",
+      "type": 2,
+      "offset": 1512,
+      "text_id": 834,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "0110.bin",
+      "type": 2,
+      "offset": 2048,
+      "text_id": 124,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "0111.bin",
+      "type": 2,
+      "offset": 652,
+      "text_id": 301,
+      "old_guard_would_skip": true,
+      "name": "Pumpkin"
+    },
+    {
+      "file": "0112.bin",
+      "type": 2,
+      "offset": 3592,
+      "text_id": 696,
+      "old_guard_would_skip": false,
+      "name": "skull - unconfirmed"
+    },
+    {
+      "file": "0113.bin",
+      "type": 2,
+      "offset": 700,
+      "text_id": 227,
+      "old_guard_would_skip": true,
+      "name": "Tree Stump"
+    },
+    {
+      "file": "0114.bin",
+      "type": 2,
+      "offset": 1832,
+      "text_id": 228,
+      "old_guard_would_skip": false,
+      "name": "Haunted Tower"
+    },
+    {
+      "file": "0115.bin",
+      "type": 2,
+      "offset": 1488,
+      "text_id": 531,
+      "old_guard_would_skip": false,
+      "name": "Medium Tree"
+    },
+    {
+      "file": "0121.bin",
+      "type": 3,
+      "offset": 16064,
+      "text_id": 336,
+      "old_guard_would_skip": false,
+      "name": "Brain Buster"
+    },
+    {
+      "file": "0122.bin",
+      "type": 3,
+      "offset": 21272,
+      "text_id": 756,
+      "old_guard_would_skip": false,
+      "name": "Insecticide "
+    },
+    {
+      "file": "0123.bin",
+      "type": 3,
+      "offset": 11400,
+      "text_id": 170,
+      "old_guard_would_skip": false,
+      "name": "Pumpkin Castle"
+    },
+    {
+      "file": "0124.bin",
+      "type": 3,
+      "offset": 12952,
+      "text_id": 934,
+      "old_guard_would_skip": false,
+      "name": "Hocus Pocus"
+    },
+    {
+      "file": "0125.bin",
+      "type": 1,
+      "offset": 7816,
+      "text_id": 27,
+      "old_guard_would_skip": false,
+      "name": "Hades"
+    },
+    {
+      "file": "0126.bin",
+      "type": 1,
+      "offset": 16016,
+      "text_id": 165,
+      "old_guard_would_skip": false,
+      "name": "Scatty Batty"
+    },
+    {
+      "file": "0127.bin",
+      "type": 1,
+      "offset": 8276,
+      "text_id": 280,
+      "old_guard_would_skip": false,
+      "name": "Ghosta Coasta"
+    },
+    {
+      "file": "0128.bin",
+      "type": 3,
+      "offset": 12908,
+      "text_id": 535,
+      "old_guard_would_skip": false,
+      "name": "Jaw Dropper"
+    },
+    {
+      "file": "0129.bin",
+      "type": 3,
+      "offset": 20564,
+      "text_id": 741,
+      "old_guard_would_skip": false,
+      "name": "Thrill Grill"
+    },
+    {
+      "file": "0130.bin",
+      "type": 6,
+      "offset": 44816,
+      "text_id": 88,
+      "old_guard_would_skip": false,
+      "name": "Crypt Karts"
+    },
+    {
+      "file": "0131.bin",
+      "type": 3,
+      "offset": 10568,
+      "text_id": 830,
+      "old_guard_would_skip": false,
+      "name": "Tentacle Terror"
+    },
+    {
+      "file": "0132.bin",
+      "type": 3,
+      "offset": 10116,
+      "text_id": 941,
+      "old_guard_would_skip": false,
+      "name": "Devils Disc"
+    },
+    {
+      "file": "0133.bin",
+      "type": 3,
+      "offset": 23820,
+      "text_id": 822,
+      "old_guard_would_skip": false,
+      "name": "Crazy Clown"
+    },
+    {
+      "file": "0134.bin",
+      "type": 3,
+      "offset": 13476,
+      "text_id": 277,
+      "old_guard_would_skip": false,
+      "name": "Jumping Skulls"
+    },
+    {
+      "file": "0135.bin",
+      "type": 3,
+      "offset": 4344,
+      "text_id": 354,
+      "old_guard_would_skip": false,
+      "name": "Tower-unconfirmed"
+    },
+    {
+      "file": "0136.bin",
+      "type": 3,
+      "offset": 7952,
+      "text_id": 118,
+      "old_guard_would_skip": false,
+      "name": "Phantom"
+    },
+    {
+      "file": "0137.bin",
+      "type": 3,
+      "offset": 12504,
+      "text_id": 717,
+      "old_guard_would_skip": false,
+      "name": "Putrid Pumpkins"
+    },
+    {
+      "file": "0138.bin",
+      "type": 3,
+      "offset": 13988,
+      "text_id": 955,
+      "old_guard_would_skip": false,
+      "name": "Rat Race"
+    },
+    {
+      "file": "0139.bin",
+      "type": 3,
+      "offset": 11948,
+      "text_id": 873,
+      "old_guard_would_skip": false,
+      "name": "Ghost Ship"
+    },
+    {
+      "file": "0140.bin",
+      "type": 3,
+      "offset": 8892,
+      "text_id": 222,
+      "old_guard_would_skip": false,
+      "name": "Eye Slide"
+    },
+    {
+      "file": "0141.bin",
+      "type": 3,
+      "offset": 29876,
+      "text_id": 134,
+      "old_guard_would_skip": false,
+      "name": "Spooky Spider"
+    },
+    {
+      "file": "0142.bin",
+      "type": 7,
+      "offset": 5604,
+      "text_id": 92,
+      "old_guard_would_skip": false,
+      "name": "Flightmare Tours"
+    },
+    {
+      "file": "0143.bin",
+      "type": 6,
+      "offset": 39132,
+      "text_id": 816,
+      "old_guard_would_skip": false,
+      "name": "Ooze Crooz"
+    },
+    {
+      "file": "0144.bin",
+      "type": 5,
+      "offset": 4356,
+      "text_id": 851,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "0145.bin",
+      "type": 5,
+      "offset": 3888,
+      "text_id": 994,
+      "old_guard_would_skip": false,
+      "name": "Fortune Teller"
+    },
+    {
+      "file": "0146.bin",
+      "type": 4,
+      "offset": 3352,
+      "text_id": 475,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "0147.bin",
+      "type": 4,
+      "offset": 5612,
+      "text_id": 200,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "0148.bin",
+      "type": 5,
+      "offset": 10388,
+      "text_id": 838,
+      "old_guard_would_skip": false,
+      "name": "Crusher-unconfirmed"
+    },
+    {
+      "file": "0149.bin",
+      "type": 4,
+      "offset": 3544,
+      "text_id": 61,
+      "old_guard_would_skip": false,
+      "name": "Fries Shop"
+    },
+    {
+      "file": "0150.bin",
+      "type": 4,
+      "offset": 7116,
+      "text_id": 870,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop"
+    },
+    {
+      "file": "0151.bin",
+      "type": 4,
+      "offset": 3412,
+      "text_id": 233,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "0152.bin",
+      "type": 4,
+      "offset": 4760,
+      "text_id": 772,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "0153.bin",
+      "type": 5,
+      "offset": 6368,
+      "text_id": 557,
+      "old_guard_would_skip": false,
+      "name": "Pumpkin Shy"
+    },
+    {
+      "file": "0154.bin",
+      "type": 5,
+      "offset": 9300,
+      "text_id": 679,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "0155.bin",
+      "type": 5,
+      "offset": 25380,
+      "text_id": 910,
+      "old_guard_would_skip": false,
+      "name": "Shooter"
+    },
+    {
+      "file": "0156.bin",
+      "type": 5,
+      "offset": 6156,
+      "text_id": 302,
+      "old_guard_would_skip": false,
+      "name": "Strength Skull"
+    },
+    {
+      "file": "0157.bin",
+      "type": 5,
+      "offset": 9796,
+      "text_id": 371,
+      "old_guard_would_skip": false,
+      "name": "Tombs-unconfirmed"
+    },
+    {
+      "file": "0158.bin",
+      "type": 4,
+      "offset": 6084,
+      "text_id": 924,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "0159.bin",
+      "type": 5,
+      "offset": 11064,
+      "text_id": 707,
+      "old_guard_would_skip": false,
+      "name": "Bone Crusher"
+    },
+    {
+      "file": "0160.bin",
+      "type": 4,
+      "offset": 7768,
+      "text_id": 103,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "0171.bin",
+      "type": 2,
+      "offset": 796,
+      "text_id": 976,
+      "old_guard_would_skip": true,
+      "name": "Stone Head"
+    },
+    {
+      "file": "0172.bin",
+      "type": 2,
+      "offset": 424,
+      "text_id": 525,
+      "old_guard_would_skip": true,
+      "name": "Tiny Rock"
+    },
+    {
+      "file": "0173.bin",
+      "type": 2,
+      "offset": 664,
+      "text_id": 645,
+      "old_guard_would_skip": true,
+      "name": "Small Rock"
+    },
+    {
+      "file": "0174.bin",
+      "type": 2,
+      "offset": 860,
+      "text_id": 306,
+      "old_guard_would_skip": true,
+      "name": "2x1 Log-unconfirmed"
+    },
+    {
+      "file": "0175.bin",
+      "type": 2,
+      "offset": 972,
+      "text_id": 290,
+      "old_guard_would_skip": false,
+      "name": "Small Rock Pillar"
+    },
+    {
+      "file": "0176.bin",
+      "type": 2,
+      "offset": 2328,
+      "text_id": 496,
+      "old_guard_would_skip": false,
+      "name": "Large Rock Pillar"
+    },
+    {
+      "file": "0177.bin",
+      "type": 2,
+      "offset": 4736,
+      "text_id": 933,
+      "old_guard_would_skip": false,
+      "name": "Huge Leafy Rock"
+    },
+    {
+      "file": "0178.bin",
+      "type": 2,
+      "offset": 3532,
+      "text_id": 720,
+      "old_guard_would_skip": false,
+      "name": "Huge Hollow Rock"
+    },
+    {
+      "file": "0179.bin",
+      "type": 2,
+      "offset": 1976,
+      "text_id": 304,
+      "old_guard_would_skip": false,
+      "name": "Toilet"
+    },
+    {
+      "file": "0180.bin",
+      "type": 2,
+      "offset": 1336,
+      "text_id": 699,
+      "old_guard_would_skip": false,
+      "name": "Big Palm"
+    },
+    {
+      "file": "0181.bin",
+      "type": 2,
+      "offset": 840,
+      "text_id": 22,
+      "old_guard_would_skip": false,
+      "name": "Large Tree"
+    },
+    {
+      "file": "0182.bin",
+      "type": 2,
+      "offset": 444,
+      "text_id": 117,
+      "old_guard_would_skip": true,
+      "name": "Small Bush"
+    },
+    {
+      "file": "0183.bin",
+      "type": 2,
+      "offset": 352,
+      "text_id": 703,
+      "old_guard_would_skip": true,
+      "name": "Medium Bush"
+    },
+    {
+      "file": "0184.bin",
+      "type": 2,
+      "offset": 352,
+      "text_id": 283,
+      "old_guard_would_skip": true,
+      "name": "Bush 3-unconfirmed"
+    },
+    {
+      "file": "0185.bin",
+      "type": 2,
+      "offset": 876,
+      "text_id": 712,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "0186.bin",
+      "type": 2,
+      "offset": 4180,
+      "text_id": 204,
+      "old_guard_would_skip": false,
+      "name": "Control-unconfirmed"
+    },
+    {
+      "file": "0187.bin",
+      "type": 2,
+      "offset": 972,
+      "text_id": 672,
+      "old_guard_would_skip": false,
+      "name": "Should be removed"
+    },
+    {
+      "file": "0188.bin",
+      "type": 2,
+      "offset": 2988,
+      "text_id": 763,
+      "old_guard_would_skip": false,
+      "name": "Fountain"
+    },
+    {
+      "file": "0189.bin",
+      "type": 2,
+      "offset": 2992,
+      "text_id": 495,
+      "old_guard_would_skip": false,
+      "name": "lfountain-unconfirmed"
+    },
+    {
+      "file": "0190.bin",
+      "type": 2,
+      "offset": 944,
+      "text_id": 210,
+      "old_guard_would_skip": true,
+      "name": "Butterfly Nest"
+    },
+    {
+      "file": "0191.bin",
+      "type": 2,
+      "offset": 3380,
+      "text_id": 345,
+      "old_guard_would_skip": false,
+      "name": "Mammoth Fountain"
+    },
+    {
+      "file": "0192.bin",
+      "type": 2,
+      "offset": 936,
+      "text_id": 702,
+      "old_guard_would_skip": true,
+      "name": "Medium Palm- unconfirmed"
+    },
+    {
+      "file": "0193.bin",
+      "type": 2,
+      "offset": 648,
+      "text_id": 983,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0194.bin",
+      "type": 2,
+      "offset": 708,
+      "text_id": 728,
+      "old_guard_would_skip": true,
+      "name": "Small Palm"
+    },
+    {
+      "file": "0195.bin",
+      "type": 2,
+      "offset": 680,
+      "text_id": 307,
+      "old_guard_would_skip": true,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "0196.bin",
+      "type": 2,
+      "offset": 2368,
+      "text_id": 953,
+      "old_guard_would_skip": false,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "0197.bin",
+      "type": 2,
+      "offset": 2052,
+      "text_id": 790,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "0198.bin",
+      "type": 2,
+      "offset": 548,
+      "text_id": 89,
+      "old_guard_would_skip": true,
+      "name": "Golden Statue"
+    },
+    {
+      "file": "0199.bin",
+      "type": 2,
+      "offset": 708,
+      "text_id": 456,
+      "old_guard_would_skip": true,
+      "name": "Stone Statue"
+    },
+    {
+      "file": "0200.bin",
+      "type": 2,
+      "offset": 2852,
+      "text_id": 285,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "0201.bin",
+      "type": 2,
+      "offset": 772,
+      "text_id": 130,
+      "old_guard_would_skip": true,
+      "name": "Small Tree"
+    },
+    {
+      "file": "0202.bin",
+      "type": 2,
+      "offset": 584,
+      "text_id": 184,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "0208.bin",
+      "type": 7,
+      "offset": 7708,
+      "text_id": 544,
+      "old_guard_would_skip": false,
+      "name": "Jurassic Tours"
+    },
+    {
+      "file": "0209.bin",
+      "type": 3,
+      "offset": 11344,
+      "text_id": 189,
+      "old_guard_would_skip": false,
+      "name": "Belly Bounce"
+    },
+    {
+      "file": "0210.bin",
+      "type": 3,
+      "offset": 21448,
+      "text_id": 322,
+      "old_guard_would_skip": false,
+      "name": "The Hot Pot"
+    },
+    {
+      "file": "0211.bin",
+      "type": 3,
+      "offset": 19644,
+      "text_id": 119,
+      "old_guard_would_skip": false,
+      "name": "Aztec Bounce"
+    },
+    {
+      "file": "0212.bin",
+      "type": 1,
+      "offset": 21280,
+      "text_id": 69,
+      "old_guard_would_skip": false,
+      "name": "Chac Atak"
+    },
+    {
+      "file": "0213.bin",
+      "type": 1,
+      "offset": 10636,
+      "text_id": 199,
+      "old_guard_would_skip": false,
+      "name": "Gorilla Thrilla"
+    },
+    {
+      "file": "0214.bin",
+      "type": 3,
+      "offset": 14252,
+      "text_id": 500,
+      "old_guard_would_skip": false,
+      "name": "Diplo-Dip"
+    },
+    {
+      "file": "0215.bin",
+      "type": 6,
+      "offset": 44108,
+      "text_id": 186,
+      "old_guard_would_skip": false,
+      "name": "Dino Karts"
+    },
+    {
+      "file": "0216.bin",
+      "type": 3,
+      "offset": 12828,
+      "text_id": 801,
+      "old_guard_would_skip": false,
+      "name": "Sun God"
+    },
+    {
+      "file": "0217.bin",
+      "type": 3,
+      "offset": 9736,
+      "text_id": 489,
+      "old_guard_would_skip": false,
+      "name": "Inca Pot"
+    },
+    {
+      "file": "0218.bin",
+      "type": 3,
+      "offset": 12696,
+      "text_id": 671,
+      "old_guard_would_skip": false,
+      "name": "Mayan Spinner"
+    },
+    {
+      "file": "0219.bin",
+      "type": 1,
+      "offset": 12652,
+      "text_id": 993,
+      "old_guard_would_skip": false,
+      "name": "Temple of Gloom"
+    },
+    {
+      "file": "0220.bin",
+      "type": 3,
+      "offset": 9672,
+      "text_id": 992,
+      "old_guard_would_skip": false,
+      "name": "Crazy Ape"
+    },
+    {
+      "file": "0221.bin",
+      "type": 3,
+      "offset": 17760,
+      "text_id": 660,
+      "old_guard_would_skip": false,
+      "name": "Mumbo"
+    },
+    {
+      "file": "0222.bin",
+      "type": 3,
+      "offset": 8356,
+      "text_id": 102,
+      "old_guard_would_skip": false,
+      "name": "Rocky Racers"
+    },
+    {
+      "file": "0223.bin",
+      "type": 3,
+      "offset": 24940,
+      "text_id": 990,
+      "old_guard_would_skip": false,
+      "name": "Slither"
+    },
+    {
+      "file": "0224.bin",
+      "type": 3,
+      "offset": 18228,
+      "text_id": 282,
+      "old_guard_would_skip": false,
+      "name": "Tom Tom Twister"
+    },
+    {
+      "file": "0225.bin",
+      "type": 3,
+      "offset": 10940,
+      "text_id": 886,
+      "old_guard_would_skip": false,
+      "name": "Inca Totem"
+    },
+    {
+      "file": "0226.bin",
+      "type": 3,
+      "offset": 11352,
+      "text_id": 530,
+      "old_guard_would_skip": false,
+      "name": "Aztec Mayhem"
+    },
+    {
+      "file": "0227.bin",
+      "type": 3,
+      "offset": 11992,
+      "text_id": 954,
+      "old_guard_would_skip": false,
+      "name": "Eruption"
+    },
+    {
+      "file": "0228.bin",
+      "type": 6,
+      "offset": 28928,
+      "text_id": 344,
+      "old_guard_would_skip": false,
+      "name": "Splish Splash"
+    },
+    {
+      "file": "0229.bin",
+      "type": 5,
+      "offset": 1936,
+      "text_id": 159,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "0230.bin",
+      "type": 5,
+      "offset": 2572,
+      "text_id": 769,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "0231.bin",
+      "type": 5,
+      "offset": 4020,
+      "text_id": 419,
+      "old_guard_would_skip": false,
+      "name": "Large Arcade"
+    },
+    {
+      "file": "0232.bin",
+      "type": 4,
+      "offset": 6740,
+      "text_id": 384,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "0233.bin",
+      "type": 4,
+      "offset": 4824,
+      "text_id": 90,
+      "old_guard_would_skip": false,
+      "name": "Beef & Chips"
+    },
+    {
+      "file": "0234.bin",
+      "type": 4,
+      "offset": 8024,
+      "text_id": 647,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "0235.bin",
+      "type": 4,
+      "offset": 4344,
+      "text_id": 77,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "0236.bin",
+      "type": 4,
+      "offset": 8636,
+      "text_id": 576,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "0237.bin",
+      "type": 4,
+      "offset": 2988,
+      "text_id": 879,
+      "old_guard_would_skip": false,
+      "name": "Fries"
+    },
+    {
+      "file": "0238.bin",
+      "type": 4,
+      "offset": 5188,
+      "text_id": 742,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop"
+    },
+    {
+      "file": "0239.bin",
+      "type": 4,
+      "offset": 3708,
+      "text_id": 1015,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "0240.bin",
+      "type": 5,
+      "offset": 11224,
+      "text_id": 100,
+      "old_guard_would_skip": false,
+      "name": "Jungle Spray"
+    },
+    {
+      "file": "0241.bin",
+      "type": 4,
+      "offset": 3724,
+      "text_id": 502,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shops"
+    },
+    {
+      "file": "0242.bin",
+      "type": 4,
+      "offset": 10100,
+      "text_id": 705,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shops"
+    },
+    {
+      "file": "0243.bin",
+      "type": 5,
+      "offset": 7984,
+      "text_id": 881,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "0244.bin",
+      "type": 5,
+      "offset": 13276,
+      "text_id": 1023,
+      "old_guard_would_skip": false,
+      "name": "Dino Racing"
+    },
+    {
+      "file": "0245.bin",
+      "type": 5,
+      "offset": 31532,
+      "text_id": 135,
+      "old_guard_would_skip": false,
+      "name": "Sun Shooter"
+    },
+    {
+      "file": "0246.bin",
+      "type": 5,
+      "offset": 8964,
+      "text_id": 374,
+      "old_guard_would_skip": false,
+      "name": "Strength Bird"
+    },
+    {
+      "file": "0247.bin",
+      "type": 4,
+      "offset": 4256,
+      "text_id": 775,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "0248.bin",
+      "type": 5,
+      "offset": 9440,
+      "text_id": 958,
+      "old_guard_would_skip": false,
+      "name": "Idol Smash"
+    },
+    {
+      "file": "0249.bin",
+      "type": 5,
+      "offset": 3392,
+      "text_id": 400,
+      "old_guard_would_skip": false,
+      "name": "DuckShoot"
+    },
+    {
+      "file": "0334.bin",
+      "type": 2,
+      "offset": 4332,
+      "text_id": 480,
+      "old_guard_would_skip": false,
+      "name": "Alien Bubbler"
+    },
+    {
+      "file": "0335.bin",
+      "type": 2,
+      "offset": 1916,
+      "text_id": 139,
+      "old_guard_would_skip": false,
+      "name": "Antenna"
+    },
+    {
+      "file": "0336.bin",
+      "type": 2,
+      "offset": 792,
+      "text_id": 38,
+      "old_guard_would_skip": true,
+      "name": "Medium Bush"
+    },
+    {
+      "file": "0337.bin",
+      "type": 2,
+      "offset": 764,
+      "text_id": 625,
+      "old_guard_would_skip": true,
+      "name": "Small Bush"
+    },
+    {
+      "file": "0338.bin",
+      "type": 2,
+      "offset": 728,
+      "text_id": 136,
+      "old_guard_would_skip": true,
+      "name": "Small Crystals"
+    },
+    {
+      "file": "0339.bin",
+      "type": 2,
+      "offset": 1900,
+      "text_id": 747,
+      "old_guard_would_skip": false,
+      "name": "Large Crystals"
+    },
+    {
+      "file": "0340.bin",
+      "type": 2,
+      "offset": 1968,
+      "text_id": 558,
+      "old_guard_would_skip": false,
+      "name": "Strange Growth"
+    },
+    {
+      "file": "0341.bin",
+      "type": 2,
+      "offset": 3040,
+      "text_id": 950,
+      "old_guard_would_skip": false,
+      "name": "Gyrotron"
+    },
+    {
+      "file": "0342.bin",
+      "type": 2,
+      "offset": 744,
+      "text_id": 969,
+      "old_guard_would_skip": false,
+      "name": "Large Crater-unconfirmed"
+    },
+    {
+      "file": "0343.bin",
+      "type": 2,
+      "offset": 828,
+      "text_id": 343,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "0344.bin",
+      "type": 2,
+      "offset": 2344,
+      "text_id": 43,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "0345.bin",
+      "type": 2,
+      "offset": 3348,
+      "text_id": 465,
+      "old_guard_would_skip": false,
+      "name": "Large Tree"
+    },
+    {
+      "file": "0346.bin",
+      "type": 2,
+      "offset": 1588,
+      "text_id": 743,
+      "old_guard_would_skip": false,
+      "name": "Plasmatrope"
+    },
+    {
+      "file": "0347.bin",
+      "type": 2,
+      "offset": 1656,
+      "text_id": 565,
+      "old_guard_would_skip": false,
+      "name": "Golden Rocks"
+    },
+    {
+      "file": "0348.bin",
+      "type": 2,
+      "offset": 744,
+      "text_id": 157,
+      "old_guard_would_skip": true,
+      "name": "Crater"
+    },
+    {
+      "file": "0349.bin",
+      "type": 2,
+      "offset": 1736,
+      "text_id": 793,
+      "old_guard_would_skip": true,
+      "name": "Laser Show"
+    },
+    {
+      "file": "0350.bin",
+      "type": 2,
+      "offset": 832,
+      "text_id": 323,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "0351.bin",
+      "type": 2,
+      "offset": 928,
+      "text_id": 724,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0352.bin",
+      "type": 2,
+      "offset": 536,
+      "text_id": 220,
+      "old_guard_would_skip": true,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "0353.bin",
+      "type": 2,
+      "offset": 1904,
+      "text_id": 547,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "0354.bin",
+      "type": 2,
+      "offset": 1960,
+      "text_id": 8,
+      "old_guard_would_skip": false,
+      "name": "Medium Tree"
+    },
+    {
+      "file": "0360.bin",
+      "type": 3,
+      "offset": 14496,
+      "text_id": 574,
+      "old_guard_would_skip": false,
+      "name": "Bounce on Iggy"
+    },
+    {
+      "file": "0361.bin",
+      "type": 3,
+      "offset": 22180,
+      "text_id": 713,
+      "old_guard_would_skip": false,
+      "name": "Uforia"
+    },
+    {
+      "file": "0362.bin",
+      "type": 3,
+      "offset": 12520,
+      "text_id": 338,
+      "old_guard_would_skip": false,
+      "name": "Crater Creature"
+    },
+    {
+      "file": "0363.bin",
+      "type": 6,
+      "offset": 27924,
+      "text_id": 267,
+      "old_guard_would_skip": false,
+      "name": "Space Racers"
+    },
+    {
+      "file": "0364.bin",
+      "type": 3,
+      "offset": 16276,
+      "text_id": 66,
+      "old_guard_would_skip": false,
+      "name": "Hover Bot Havoc"
+    },
+    {
+      "file": "0365.bin",
+      "type": 3,
+      "offset": 14512,
+      "text_id": 865,
+      "old_guard_would_skip": false,
+      "name": "Romper Stomper"
+    },
+    {
+      "file": "0366.bin",
+      "type": 3,
+      "offset": 11752,
+      "text_id": 827,
+      "old_guard_would_skip": false,
+      "name": "Moon Buggies"
+    },
+    {
+      "file": "0367.bin",
+      "type": 1,
+      "offset": 9152,
+      "text_id": 330,
+      "old_guard_would_skip": false,
+      "name": "Escape Velocity"
+    },
+    {
+      "file": "0368.bin",
+      "type": 1,
+      "offset": 13156,
+      "text_id": 138,
+      "old_guard_would_skip": false,
+      "name": "Moonshot"
+    },
+    {
+      "file": "0369.bin",
+      "type": 3,
+      "offset": 12848,
+      "text_id": 52,
+      "old_guard_would_skip": false,
+      "name": "The Orbiter"
+    },
+    {
+      "file": "0370.bin",
+      "type": 3,
+      "offset": 28384,
+      "text_id": 365,
+      "old_guard_would_skip": false,
+      "name": "Missile Madness"
+    },
+    {
+      "file": "0371.bin",
+      "type": 3,
+      "offset": 21432,
+      "text_id": 571,
+      "old_guard_would_skip": false,
+      "name": "The Gravatron"
+    },
+    {
+      "file": "0372.bin",
+      "type": 7,
+      "offset": 7160,
+      "text_id": 824,
+      "old_guard_would_skip": false,
+      "name": "Star Tours"
+    },
+    {
+      "file": "0373.bin",
+      "type": 1,
+      "offset": 11516,
+      "text_id": 715,
+      "old_guard_would_skip": false,
+      "name": "The Shocker"
+    },
+    {
+      "file": "0374.bin",
+      "type": 3,
+      "offset": 6572,
+      "text_id": 129,
+      "old_guard_would_skip": false,
+      "name": "Space Balls"
+    },
+    {
+      "file": "0375.bin",
+      "type": 3,
+      "offset": 13196,
+      "text_id": 264,
+      "old_guard_would_skip": false,
+      "name": "The Areotron"
+    },
+    {
+      "file": "0376.bin",
+      "type": 3,
+      "offset": 10068,
+      "text_id": 31,
+      "old_guard_would_skip": false,
+      "name": "Cyclone Station"
+    },
+    {
+      "file": "0377.bin",
+      "type": 3,
+      "offset": 17256,
+      "text_id": 125,
+      "old_guard_would_skip": false,
+      "name": "Rock 'n Roll"
+    },
+    {
+      "file": "0378.bin",
+      "type": 6,
+      "offset": 39068,
+      "text_id": 651,
+      "old_guard_would_skip": false,
+      "name": "The Blobulator"
+    },
+    {
+      "file": "0379.bin",
+      "type": 3,
+      "offset": 20296,
+      "text_id": 321,
+      "old_guard_would_skip": false,
+      "name": "Zero G"
+    },
+    {
+      "file": "0380.bin",
+      "type": 5,
+      "offset": 4000,
+      "text_id": 368,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "0381.bin",
+      "type": 4,
+      "offset": 4284,
+      "text_id": 47,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "0382.bin",
+      "type": 4,
+      "offset": 6088,
+      "text_id": 986,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "0383.bin",
+      "type": 4,
+      "offset": 3704,
+      "text_id": 686,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "0384.bin",
+      "type": 4,
+      "offset": 5872,
+      "text_id": 601,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "0385.bin",
+      "type": 4,
+      "offset": 3872,
+      "text_id": 521,
+      "old_guard_would_skip": false,
+      "name": "Fries Shop"
+    },
+    {
+      "file": "0386.bin",
+      "type": 4,
+      "offset": 4460,
+      "text_id": 572,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop"
+    },
+    {
+      "file": "0387.bin",
+      "type": 4,
+      "offset": 3700,
+      "text_id": 482,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "0388.bin",
+      "type": 5,
+      "offset": 9148,
+      "text_id": 94,
+      "old_guard_would_skip": false,
+      "name": "UFO Blaster"
+    },
+    {
+      "file": "0389.bin",
+      "type": 5,
+      "offset": 30352,
+      "text_id": 155,
+      "old_guard_would_skip": false,
+      "name": "Martian Mooners"
+    },
+    {
+      "file": "0390.bin",
+      "type": 4,
+      "offset": 5572,
+      "text_id": 888,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "0391.bin",
+      "type": 5,
+      "offset": 10796,
+      "text_id": 915,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "0392.bin",
+      "type": 5,
+      "offset": 36212,
+      "text_id": 810,
+      "old_guard_would_skip": false,
+      "name": "shoot- unconfirmed"
+    },
+    {
+      "file": "0393.bin",
+      "type": 5,
+      "offset": 6552,
+      "text_id": 436,
+      "old_guard_would_skip": false,
+      "name": "Strength Rocket"
+    },
+    {
+      "file": "0394.bin",
+      "type": 5,
+      "offset": 12956,
+      "text_id": 595,
+      "old_guard_would_skip": false,
+      "name": "Martian Mash"
+    },
+    {
+      "file": "e0019.bin",
+      "type": 2,
+      "offset": 768,
+      "text_id": 337,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0020.bin",
+      "type": 2,
+      "offset": 3544,
+      "text_id": 669,
+      "old_guard_would_skip": false,
+      "name": "Bricks"
+    },
+    {
+      "file": "e0021.bin",
+      "type": 2,
+      "offset": 4356,
+      "text_id": 543,
+      "old_guard_would_skip": false,
+      "name": "Card Statue"
+    },
+    {
+      "file": "e0022.bin",
+      "type": 2,
+      "offset": 592,
+      "text_id": 836,
+      "old_guard_would_skip": true,
+      "name": "Candy Cane"
+    },
+    {
+      "file": "e0023.bin",
+      "type": 2,
+      "offset": 780,
+      "text_id": 971,
+      "old_guard_would_skip": true,
+      "name": "Donut"
+    },
+    {
+      "file": "e0024.bin",
+      "type": 2,
+      "offset": 932,
+      "text_id": 549,
+      "old_guard_would_skip": true,
+      "name": "Large Flower"
+    },
+    {
+      "file": "e0025.bin",
+      "type": 2,
+      "offset": 652,
+      "text_id": 812,
+      "old_guard_would_skip": true,
+      "name": "Grass"
+    },
+    {
+      "file": "e0026.bin",
+      "type": 2,
+      "offset": 1112,
+      "text_id": 115,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "e0027.bin",
+      "type": 2,
+      "offset": 588,
+      "text_id": 320,
+      "old_guard_would_skip": true,
+      "name": "Match"
+    },
+    {
+      "file": "e0028.bin",
+      "type": 2,
+      "offset": 3756,
+      "text_id": 1029,
+      "old_guard_would_skip": false,
+      "name": "Plant Pot"
+    },
+    {
+      "file": "e0029.bin",
+      "type": 2,
+      "offset": 3556,
+      "text_id": 662,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "e0030.bin",
+      "type": 2,
+      "offset": 916,
+      "text_id": 332,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "e0031.bin",
+      "type": 2,
+      "offset": 880,
+      "text_id": 885,
+      "old_guard_would_skip": true,
+      "name": "speaker"
+    },
+    {
+      "file": "e0032.bin",
+      "type": 2,
+      "offset": 2116,
+      "text_id": 745,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "e0033.bin",
+      "type": 2,
+      "offset": 3724,
+      "text_id": 207,
+      "old_guard_would_skip": false,
+      "name": "Teapot"
+    },
+    {
+      "file": "e0039.bin",
+      "type": 3,
+      "offset": 16480,
+      "text_id": 959,
+      "old_guard_would_skip": false,
+      "name": "The Dizzy Tree"
+    },
+    {
+      "file": "e0040.bin",
+      "type": 3,
+      "offset": 14536,
+      "text_id": 15,
+      "old_guard_would_skip": false,
+      "name": "Bumper Bugs"
+    },
+    {
+      "file": "e0041.bin",
+      "type": 6,
+      "offset": 37100,
+      "text_id": 474,
+      "old_guard_would_skip": false,
+      "name": "Bumble Buggies"
+    },
+    {
+      "file": "e0042.bin",
+      "type": 3,
+      "offset": 20584,
+      "text_id": 997,
+      "old_guard_would_skip": false,
+      "name": "Caterpillar Capers"
+    },
+    {
+      "file": "e0043.bin",
+      "type": 3,
+      "offset": 20976,
+      "text_id": 275,
+      "old_guard_would_skip": false,
+      "name": "Bugs TV "
+    },
+    {
+      "file": "e0044.bin",
+      "type": 1,
+      "offset": 13156,
+      "text_id": 152,
+      "old_guard_would_skip": false,
+      "name": "Big Dripper"
+    },
+    {
+      "file": "e0045.bin",
+      "type": 3,
+      "offset": 12552,
+      "text_id": 198,
+      "old_guard_would_skip": false,
+      "name": "Woodland Racers"
+    },
+    {
+      "file": "e0046.bin",
+      "type": 1,
+      "offset": 9808,
+      "text_id": 727,
+      "old_guard_would_skip": false,
+      "name": "Caterpillar Coaster"
+    },
+    {
+      "file": "e0047.bin",
+      "type": 1,
+      "offset": 9556,
+      "text_id": 887,
+      "old_guard_would_skip": false,
+      "name": "Candy Coaster"
+    },
+    {
+      "file": "e0048.bin",
+      "type": 3,
+      "offset": 17820,
+      "text_id": 792,
+      "old_guard_would_skip": false,
+      "name": "Dragon Fliers"
+    },
+    {
+      "file": "e0049.bin",
+      "type": 3,
+      "offset": 11868,
+      "text_id": 296,
+      "old_guard_would_skip": false,
+      "name": "Flamingo Fling"
+    },
+    {
+      "file": "e0050.bin",
+      "type": 3,
+      "offset": 11856,
+      "text_id": 120,
+      "old_guard_would_skip": false,
+      "name": "Flower Power"
+    },
+    {
+      "file": "e0051.bin",
+      "type": 3,
+      "offset": 10704,
+      "text_id": 53,
+      "old_guard_would_skip": false,
+      "name": "Flying Fishes"
+    },
+    {
+      "file": "e0052.bin",
+      "type": 3,
+      "offset": 10864,
+      "text_id": 190,
+      "old_guard_would_skip": false,
+      "name": "Flying Fountain"
+    },
+    {
+      "file": "e0053.bin",
+      "type": 3,
+      "offset": 16920,
+      "text_id": 377,
+      "old_guard_would_skip": false,
+      "name": "Spore Spinner"
+    },
+    {
+      "file": "e0054.bin",
+      "type": 3,
+      "offset": 14924,
+      "text_id": 607,
+      "old_guard_would_skip": false,
+      "name": "Jelly Bounce"
+    },
+    {
+      "file": "e0055.bin",
+      "type": 3,
+      "offset": 10484,
+      "text_id": 437,
+      "old_guard_would_skip": false,
+      "name": "Escargot A-Go Go"
+    },
+    {
+      "file": "e0056.bin",
+      "type": 7,
+      "offset": 8800,
+      "text_id": 863,
+      "old_guard_would_skip": false,
+      "name": "Tweety Tours"
+    },
+    {
+      "file": "e0057.bin",
+      "type": 6,
+      "offset": 35224,
+      "text_id": 510,
+      "old_guard_would_skip": false,
+      "name": "Taptastic Rapids"
+    },
+    {
+      "file": "e0058.bin",
+      "type": 5,
+      "offset": 2600,
+      "text_id": 603,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "e0059.bin",
+      "type": 5,
+      "offset": 3892,
+      "text_id": 826,
+      "old_guard_would_skip": false,
+      "name": "Should be removed"
+    },
+    {
+      "file": "e0060.bin",
+      "type": 4,
+      "offset": 6064,
+      "text_id": 239,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "e0061.bin",
+      "type": 4,
+      "offset": 5608,
+      "text_id": 235,
+      "old_guard_would_skip": false,
+      "name": "Should be removed"
+    },
+    {
+      "file": "e0062.bin",
+      "type": 4,
+      "offset": 5456,
+      "text_id": 937,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "e0063.bin",
+      "type": 4,
+      "offset": 3600,
+      "text_id": 938,
+      "old_guard_would_skip": false,
+      "name": "Cake Shop"
+    },
+    {
+      "file": "e0064.bin",
+      "type": 4,
+      "offset": 6192,
+      "text_id": 623,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "e0065.bin",
+      "type": 4,
+      "offset": 3152,
+      "text_id": 413,
+      "old_guard_would_skip": false,
+      "name": "Fries Shop"
+    },
+    {
+      "file": "e0066.bin",
+      "type": 5,
+      "offset": 5320,
+      "text_id": 498,
+      "old_guard_would_skip": false,
+      "name": "Fruit Shy"
+    },
+    {
+      "file": "e0067.bin",
+      "type": 4,
+      "offset": 12712,
+      "text_id": 798,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "e0068.bin",
+      "type": 4,
+      "offset": 3248,
+      "text_id": 641,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "e0069.bin",
+      "type": 4,
+      "offset": 7720,
+      "text_id": 56,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop "
+    },
+    {
+      "file": "e0070.bin",
+      "type": 5,
+      "offset": 7840,
+      "text_id": 458,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "e0071.bin",
+      "type": 4,
+      "offset": 10536,
+      "text_id": 642,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "e0072.bin",
+      "type": 5,
+      "offset": 9656,
+      "text_id": 998,
+      "old_guard_would_skip": false,
+      "name": "Aqua Spray"
+    },
+    {
+      "file": "e0073.bin",
+      "type": 5,
+      "offset": 8404,
+      "text_id": 270,
+      "old_guard_would_skip": false,
+      "name": "Strength Flower"
+    },
+    {
+      "file": "e0074.bin",
+      "type": 5,
+      "offset": 9484,
+      "text_id": 516,
+      "old_guard_would_skip": false,
+      "name": "Worm Bash"
+    },
+    {
+      "file": "e0093.bin",
+      "type": 2,
+      "offset": 528,
+      "text_id": 21,
+      "old_guard_would_skip": true,
+      "name": "Tiny Rock"
+    },
+    {
+      "file": "e0094.bin",
+      "type": 2,
+      "offset": 664,
+      "text_id": 146,
+      "old_guard_would_skip": true,
+      "name": "Small Rock"
+    },
+    {
+      "file": "e0095.bin",
+      "type": 2,
+      "offset": 3688,
+      "text_id": 665,
+      "old_guard_would_skip": false,
+      "name": "Large Rock Pillar"
+    },
+    {
+      "file": "e0096.bin",
+      "type": 2,
+      "offset": 2768,
+      "text_id": 149,
+      "old_guard_would_skip": false,
+      "name": "Huge Rock"
+    },
+    {
+      "file": "e0097.bin",
+      "type": 2,
+      "offset": 5208,
+      "text_id": 175,
+      "old_guard_would_skip": false,
+      "name": "bellt-unconfirmed"
+    },
+    {
+      "file": "e0098.bin",
+      "type": 2,
+      "offset": 864,
+      "text_id": 643,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0099.bin",
+      "type": 2,
+      "offset": 492,
+      "text_id": 470,
+      "old_guard_would_skip": true,
+      "name": "Green Bush"
+    },
+    {
+      "file": "e0100.bin",
+      "type": 2,
+      "offset": 492,
+      "text_id": 73,
+      "old_guard_would_skip": true,
+      "name": "Brown Bush"
+    },
+    {
+      "file": "e0101.bin",
+      "type": 2,
+      "offset": 3460,
+      "text_id": 141,
+      "old_guard_would_skip": false,
+      "name": "Demon Statue"
+    },
+    {
+      "file": "e0102.bin",
+      "type": 2,
+      "offset": 648,
+      "text_id": 214,
+      "old_guard_would_skip": true,
+      "name": "Should be removed"
+    },
+    {
+      "file": "e0103.bin",
+      "type": 2,
+      "offset": 1676,
+      "text_id": 238,
+      "old_guard_would_skip": false,
+      "name": "Gargoyle"
+    },
+    {
+      "file": "e0104.bin",
+      "type": 2,
+      "offset": 624,
+      "text_id": 849,
+      "old_guard_would_skip": true,
+      "name": "Gravestone"
+    },
+    {
+      "file": "e0105.bin",
+      "type": 2,
+      "offset": 808,
+      "text_id": 341,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "e0106.bin",
+      "type": 2,
+      "offset": 752,
+      "text_id": 606,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "e0107.bin",
+      "type": 2,
+      "offset": 744,
+      "text_id": 81,
+      "old_guard_would_skip": true,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "e0108.bin",
+      "type": 2,
+      "offset": 1900,
+      "text_id": 988,
+      "old_guard_would_skip": false,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "e0109.bin",
+      "type": 2,
+      "offset": 1512,
+      "text_id": 834,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "e0110.bin",
+      "type": 2,
+      "offset": 2048,
+      "text_id": 124,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "e0111.bin",
+      "type": 2,
+      "offset": 652,
+      "text_id": 301,
+      "old_guard_would_skip": true,
+      "name": "Pumpkin"
+    },
+    {
+      "file": "e0112.bin",
+      "type": 2,
+      "offset": 3592,
+      "text_id": 696,
+      "old_guard_would_skip": false,
+      "name": "skull - unconfirmed"
+    },
+    {
+      "file": "e0113.bin",
+      "type": 2,
+      "offset": 700,
+      "text_id": 227,
+      "old_guard_would_skip": true,
+      "name": "Tree Stump"
+    },
+    {
+      "file": "e0114.bin",
+      "type": 2,
+      "offset": 1832,
+      "text_id": 228,
+      "old_guard_would_skip": false,
+      "name": "Haunted Tower"
+    },
+    {
+      "file": "e0115.bin",
+      "type": 2,
+      "offset": 1488,
+      "text_id": 531,
+      "old_guard_would_skip": false,
+      "name": "Medium Tree"
+    },
+    {
+      "file": "e0121.bin",
+      "type": 3,
+      "offset": 16064,
+      "text_id": 336,
+      "old_guard_would_skip": false,
+      "name": "Brain Buster"
+    },
+    {
+      "file": "e0122.bin",
+      "type": 3,
+      "offset": 21272,
+      "text_id": 756,
+      "old_guard_would_skip": false,
+      "name": "Insecticide "
+    },
+    {
+      "file": "e0123.bin",
+      "type": 3,
+      "offset": 11400,
+      "text_id": 170,
+      "old_guard_would_skip": false,
+      "name": "Pumpkin Castle"
+    },
+    {
+      "file": "e0124.bin",
+      "type": 3,
+      "offset": 12952,
+      "text_id": 934,
+      "old_guard_would_skip": false,
+      "name": "Hocus Pocus"
+    },
+    {
+      "file": "e0125.bin",
+      "type": 1,
+      "offset": 7816,
+      "text_id": 27,
+      "old_guard_would_skip": false,
+      "name": "Hades"
+    },
+    {
+      "file": "e0126.bin",
+      "type": 1,
+      "offset": 16016,
+      "text_id": 165,
+      "old_guard_would_skip": false,
+      "name": "Scatty Batty"
+    },
+    {
+      "file": "e0127.bin",
+      "type": 1,
+      "offset": 8276,
+      "text_id": 280,
+      "old_guard_would_skip": false,
+      "name": "Ghosta Coasta"
+    },
+    {
+      "file": "e0128.bin",
+      "type": 3,
+      "offset": 12908,
+      "text_id": 535,
+      "old_guard_would_skip": false,
+      "name": "Jaw Dropper"
+    },
+    {
+      "file": "e0129.bin",
+      "type": 3,
+      "offset": 20564,
+      "text_id": 741,
+      "old_guard_would_skip": false,
+      "name": "Thrill Grill"
+    },
+    {
+      "file": "e0130.bin",
+      "type": 6,
+      "offset": 44816,
+      "text_id": 88,
+      "old_guard_would_skip": false,
+      "name": "Crypt Karts"
+    },
+    {
+      "file": "e0131.bin",
+      "type": 3,
+      "offset": 10568,
+      "text_id": 830,
+      "old_guard_would_skip": false,
+      "name": "Tentacle Terror"
+    },
+    {
+      "file": "e0132.bin",
+      "type": 3,
+      "offset": 10116,
+      "text_id": 941,
+      "old_guard_would_skip": false,
+      "name": "Devils Disc"
+    },
+    {
+      "file": "e0133.bin",
+      "type": 3,
+      "offset": 23820,
+      "text_id": 822,
+      "old_guard_would_skip": false,
+      "name": "Crazy Clown"
+    },
+    {
+      "file": "e0134.bin",
+      "type": 3,
+      "offset": 13476,
+      "text_id": 277,
+      "old_guard_would_skip": false,
+      "name": "Jumping Skulls"
+    },
+    {
+      "file": "e0135.bin",
+      "type": 3,
+      "offset": 4344,
+      "text_id": 354,
+      "old_guard_would_skip": false,
+      "name": "Tower-unconfirmed"
+    },
+    {
+      "file": "e0136.bin",
+      "type": 3,
+      "offset": 7952,
+      "text_id": 118,
+      "old_guard_would_skip": false,
+      "name": "Phantom"
+    },
+    {
+      "file": "e0137.bin",
+      "type": 3,
+      "offset": 12504,
+      "text_id": 717,
+      "old_guard_would_skip": false,
+      "name": "Putrid Pumpkins"
+    },
+    {
+      "file": "e0138.bin",
+      "type": 3,
+      "offset": 13988,
+      "text_id": 955,
+      "old_guard_would_skip": false,
+      "name": "Rat Race"
+    },
+    {
+      "file": "e0139.bin",
+      "type": 3,
+      "offset": 11948,
+      "text_id": 873,
+      "old_guard_would_skip": false,
+      "name": "Ghost Ship"
+    },
+    {
+      "file": "e0140.bin",
+      "type": 3,
+      "offset": 8892,
+      "text_id": 222,
+      "old_guard_would_skip": false,
+      "name": "Eye Slide"
+    },
+    {
+      "file": "e0141.bin",
+      "type": 3,
+      "offset": 29876,
+      "text_id": 134,
+      "old_guard_would_skip": false,
+      "name": "Spooky Spider"
+    },
+    {
+      "file": "e0142.bin",
+      "type": 7,
+      "offset": 5604,
+      "text_id": 92,
+      "old_guard_would_skip": false,
+      "name": "Flightmare Tours"
+    },
+    {
+      "file": "e0143.bin",
+      "type": 6,
+      "offset": 39132,
+      "text_id": 816,
+      "old_guard_would_skip": false,
+      "name": "Ooze Crooz"
+    },
+    {
+      "file": "e0144.bin",
+      "type": 5,
+      "offset": 4356,
+      "text_id": 851,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "e0145.bin",
+      "type": 5,
+      "offset": 3888,
+      "text_id": 994,
+      "old_guard_would_skip": false,
+      "name": "Fortune Teller"
+    },
+    {
+      "file": "e0146.bin",
+      "type": 4,
+      "offset": 3352,
+      "text_id": 475,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "e0147.bin",
+      "type": 4,
+      "offset": 5612,
+      "text_id": 200,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "e0148.bin",
+      "type": 5,
+      "offset": 10388,
+      "text_id": 838,
+      "old_guard_would_skip": false,
+      "name": "Crusher-unconfirmed"
+    },
+    {
+      "file": "e0149.bin",
+      "type": 4,
+      "offset": 3544,
+      "text_id": 61,
+      "old_guard_would_skip": false,
+      "name": "Fries Shop"
+    },
+    {
+      "file": "e0150.bin",
+      "type": 4,
+      "offset": 7116,
+      "text_id": 870,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop"
+    },
+    {
+      "file": "e0151.bin",
+      "type": 4,
+      "offset": 3412,
+      "text_id": 233,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "e0152.bin",
+      "type": 4,
+      "offset": 4760,
+      "text_id": 772,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "e0153.bin",
+      "type": 5,
+      "offset": 6368,
+      "text_id": 557,
+      "old_guard_would_skip": false,
+      "name": "Pumpkin Shy"
+    },
+    {
+      "file": "e0154.bin",
+      "type": 5,
+      "offset": 9300,
+      "text_id": 679,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "e0155.bin",
+      "type": 5,
+      "offset": 25380,
+      "text_id": 910,
+      "old_guard_would_skip": false,
+      "name": "Shooter"
+    },
+    {
+      "file": "e0156.bin",
+      "type": 5,
+      "offset": 6156,
+      "text_id": 302,
+      "old_guard_would_skip": false,
+      "name": "Strength Skull"
+    },
+    {
+      "file": "e0157.bin",
+      "type": 5,
+      "offset": 9796,
+      "text_id": 371,
+      "old_guard_would_skip": false,
+      "name": "Tombs-unconfirmed"
+    },
+    {
+      "file": "e0158.bin",
+      "type": 4,
+      "offset": 6084,
+      "text_id": 924,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "e0159.bin",
+      "type": 5,
+      "offset": 11064,
+      "text_id": 707,
+      "old_guard_would_skip": false,
+      "name": "Bone Crusher"
+    },
+    {
+      "file": "e0160.bin",
+      "type": 4,
+      "offset": 7768,
+      "text_id": 103,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "e0171.bin",
+      "type": 2,
+      "offset": 796,
+      "text_id": 976,
+      "old_guard_would_skip": true,
+      "name": "Stone Head"
+    },
+    {
+      "file": "e0172.bin",
+      "type": 2,
+      "offset": 424,
+      "text_id": 525,
+      "old_guard_would_skip": true,
+      "name": "Tiny Rock"
+    },
+    {
+      "file": "e0173.bin",
+      "type": 2,
+      "offset": 664,
+      "text_id": 645,
+      "old_guard_would_skip": true,
+      "name": "Small Rock"
+    },
+    {
+      "file": "e0174.bin",
+      "type": 2,
+      "offset": 860,
+      "text_id": 306,
+      "old_guard_would_skip": true,
+      "name": "2x1 Log-unconfirmed"
+    },
+    {
+      "file": "e0175.bin",
+      "type": 2,
+      "offset": 972,
+      "text_id": 290,
+      "old_guard_would_skip": false,
+      "name": "Small Rock Pillar"
+    },
+    {
+      "file": "e0176.bin",
+      "type": 2,
+      "offset": 2328,
+      "text_id": 496,
+      "old_guard_would_skip": false,
+      "name": "Large Rock Pillar"
+    },
+    {
+      "file": "e0177.bin",
+      "type": 2,
+      "offset": 4736,
+      "text_id": 933,
+      "old_guard_would_skip": false,
+      "name": "Huge Leafy Rock"
+    },
+    {
+      "file": "e0178.bin",
+      "type": 2,
+      "offset": 3532,
+      "text_id": 720,
+      "old_guard_would_skip": false,
+      "name": "Huge Hollow Rock"
+    },
+    {
+      "file": "e0179.bin",
+      "type": 2,
+      "offset": 1976,
+      "text_id": 304,
+      "old_guard_would_skip": false,
+      "name": "Toilet"
+    },
+    {
+      "file": "e0180.bin",
+      "type": 2,
+      "offset": 1336,
+      "text_id": 699,
+      "old_guard_would_skip": false,
+      "name": "Big Palm"
+    },
+    {
+      "file": "e0181.bin",
+      "type": 2,
+      "offset": 840,
+      "text_id": 22,
+      "old_guard_would_skip": false,
+      "name": "Large Tree"
+    },
+    {
+      "file": "e0182.bin",
+      "type": 2,
+      "offset": 444,
+      "text_id": 117,
+      "old_guard_would_skip": true,
+      "name": "Small Bush"
+    },
+    {
+      "file": "e0183.bin",
+      "type": 2,
+      "offset": 352,
+      "text_id": 703,
+      "old_guard_would_skip": true,
+      "name": "Medium Bush"
+    },
+    {
+      "file": "e0184.bin",
+      "type": 2,
+      "offset": 352,
+      "text_id": 283,
+      "old_guard_would_skip": true,
+      "name": "Bush 3-unconfirmed"
+    },
+    {
+      "file": "e0185.bin",
+      "type": 2,
+      "offset": 876,
+      "text_id": 712,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "e0186.bin",
+      "type": 2,
+      "offset": 4180,
+      "text_id": 204,
+      "old_guard_would_skip": false,
+      "name": "Control-unconfirmed"
+    },
+    {
+      "file": "e0187.bin",
+      "type": 2,
+      "offset": 972,
+      "text_id": 672,
+      "old_guard_would_skip": false,
+      "name": "Should be removed"
+    },
+    {
+      "file": "e0188.bin",
+      "type": 2,
+      "offset": 2988,
+      "text_id": 763,
+      "old_guard_would_skip": false,
+      "name": "Fountain"
+    },
+    {
+      "file": "e0189.bin",
+      "type": 2,
+      "offset": 2992,
+      "text_id": 495,
+      "old_guard_would_skip": false,
+      "name": "lfountain-unconfirmed"
+    },
+    {
+      "file": "e0190.bin",
+      "type": 2,
+      "offset": 944,
+      "text_id": 210,
+      "old_guard_would_skip": true,
+      "name": "Butterfly Nest"
+    },
+    {
+      "file": "e0191.bin",
+      "type": 2,
+      "offset": 3380,
+      "text_id": 345,
+      "old_guard_would_skip": false,
+      "name": "Mammoth Fountain"
+    },
+    {
+      "file": "e0192.bin",
+      "type": 2,
+      "offset": 936,
+      "text_id": 702,
+      "old_guard_would_skip": true,
+      "name": "Medium Palm- unconfirmed"
+    },
+    {
+      "file": "e0193.bin",
+      "type": 2,
+      "offset": 648,
+      "text_id": 983,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0194.bin",
+      "type": 2,
+      "offset": 708,
+      "text_id": 728,
+      "old_guard_would_skip": true,
+      "name": "Small Palm"
+    },
+    {
+      "file": "e0195.bin",
+      "type": 2,
+      "offset": 680,
+      "text_id": 307,
+      "old_guard_would_skip": true,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "e0196.bin",
+      "type": 2,
+      "offset": 2368,
+      "text_id": 953,
+      "old_guard_would_skip": false,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "e0197.bin",
+      "type": 2,
+      "offset": 2052,
+      "text_id": 790,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "e0198.bin",
+      "type": 2,
+      "offset": 548,
+      "text_id": 89,
+      "old_guard_would_skip": true,
+      "name": "Golden Statue"
+    },
+    {
+      "file": "e0199.bin",
+      "type": 2,
+      "offset": 708,
+      "text_id": 456,
+      "old_guard_would_skip": true,
+      "name": "Stone Statue"
+    },
+    {
+      "file": "e0200.bin",
+      "type": 2,
+      "offset": 2852,
+      "text_id": 285,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "e0201.bin",
+      "type": 2,
+      "offset": 772,
+      "text_id": 130,
+      "old_guard_would_skip": true,
+      "name": "Small Tree"
+    },
+    {
+      "file": "e0202.bin",
+      "type": 2,
+      "offset": 584,
+      "text_id": 184,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "e0208.bin",
+      "type": 7,
+      "offset": 7708,
+      "text_id": 544,
+      "old_guard_would_skip": false,
+      "name": "Jurassic Tours"
+    },
+    {
+      "file": "e0209.bin",
+      "type": 3,
+      "offset": 11344,
+      "text_id": 189,
+      "old_guard_would_skip": false,
+      "name": "Belly Bounce"
+    },
+    {
+      "file": "e0210.bin",
+      "type": 3,
+      "offset": 21448,
+      "text_id": 322,
+      "old_guard_would_skip": false,
+      "name": "The Hot Pot"
+    },
+    {
+      "file": "e0211.bin",
+      "type": 3,
+      "offset": 19644,
+      "text_id": 119,
+      "old_guard_would_skip": false,
+      "name": "Aztec Bounce"
+    },
+    {
+      "file": "e0212.bin",
+      "type": 1,
+      "offset": 21280,
+      "text_id": 69,
+      "old_guard_would_skip": false,
+      "name": "Chac Atak"
+    },
+    {
+      "file": "e0213.bin",
+      "type": 1,
+      "offset": 10636,
+      "text_id": 199,
+      "old_guard_would_skip": false,
+      "name": "Gorilla Thrilla"
+    },
+    {
+      "file": "e0214.bin",
+      "type": 3,
+      "offset": 14252,
+      "text_id": 500,
+      "old_guard_would_skip": false,
+      "name": "Diplo-Dip"
+    },
+    {
+      "file": "e0215.bin",
+      "type": 6,
+      "offset": 44108,
+      "text_id": 186,
+      "old_guard_would_skip": false,
+      "name": "Dino Karts"
+    },
+    {
+      "file": "e0216.bin",
+      "type": 3,
+      "offset": 12828,
+      "text_id": 801,
+      "old_guard_would_skip": false,
+      "name": "Sun God"
+    },
+    {
+      "file": "e0217.bin",
+      "type": 3,
+      "offset": 9736,
+      "text_id": 489,
+      "old_guard_would_skip": false,
+      "name": "Inca Pot"
+    },
+    {
+      "file": "e0218.bin",
+      "type": 3,
+      "offset": 12696,
+      "text_id": 671,
+      "old_guard_would_skip": false,
+      "name": "Mayan Spinner"
+    },
+    {
+      "file": "e0219.bin",
+      "type": 1,
+      "offset": 12652,
+      "text_id": 993,
+      "old_guard_would_skip": false,
+      "name": "Temple of Gloom"
+    },
+    {
+      "file": "e0220.bin",
+      "type": 3,
+      "offset": 9672,
+      "text_id": 992,
+      "old_guard_would_skip": false,
+      "name": "Crazy Ape"
+    },
+    {
+      "file": "e0221.bin",
+      "type": 3,
+      "offset": 17760,
+      "text_id": 660,
+      "old_guard_would_skip": false,
+      "name": "Mumbo"
+    },
+    {
+      "file": "e0222.bin",
+      "type": 3,
+      "offset": 8356,
+      "text_id": 102,
+      "old_guard_would_skip": false,
+      "name": "Rocky Racers"
+    },
+    {
+      "file": "e0223.bin",
+      "type": 3,
+      "offset": 24940,
+      "text_id": 990,
+      "old_guard_would_skip": false,
+      "name": "Slither"
+    },
+    {
+      "file": "e0224.bin",
+      "type": 3,
+      "offset": 18228,
+      "text_id": 282,
+      "old_guard_would_skip": false,
+      "name": "Tom Tom Twister"
+    },
+    {
+      "file": "e0225.bin",
+      "type": 3,
+      "offset": 10940,
+      "text_id": 886,
+      "old_guard_would_skip": false,
+      "name": "Inca Totem"
+    },
+    {
+      "file": "e0226.bin",
+      "type": 3,
+      "offset": 11352,
+      "text_id": 530,
+      "old_guard_would_skip": false,
+      "name": "Aztec Mayhem"
+    },
+    {
+      "file": "e0227.bin",
+      "type": 3,
+      "offset": 11992,
+      "text_id": 954,
+      "old_guard_would_skip": false,
+      "name": "Eruption"
+    },
+    {
+      "file": "e0228.bin",
+      "type": 6,
+      "offset": 28928,
+      "text_id": 344,
+      "old_guard_would_skip": false,
+      "name": "Splish Splash"
+    },
+    {
+      "file": "e0229.bin",
+      "type": 5,
+      "offset": 1936,
+      "text_id": 159,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "e0230.bin",
+      "type": 5,
+      "offset": 2572,
+      "text_id": 769,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "e0231.bin",
+      "type": 5,
+      "offset": 4020,
+      "text_id": 419,
+      "old_guard_would_skip": false,
+      "name": "Large Arcade"
+    },
+    {
+      "file": "e0232.bin",
+      "type": 4,
+      "offset": 6740,
+      "text_id": 384,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "e0233.bin",
+      "type": 4,
+      "offset": 4824,
+      "text_id": 90,
+      "old_guard_would_skip": false,
+      "name": "Beef & Chips"
+    },
+    {
+      "file": "e0234.bin",
+      "type": 4,
+      "offset": 8024,
+      "text_id": 647,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "e0235.bin",
+      "type": 4,
+      "offset": 4344,
+      "text_id": 77,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "e0236.bin",
+      "type": 4,
+      "offset": 8636,
+      "text_id": 576,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "e0237.bin",
+      "type": 4,
+      "offset": 2988,
+      "text_id": 879,
+      "old_guard_would_skip": false,
+      "name": "Fries"
+    },
+    {
+      "file": "e0238.bin",
+      "type": 4,
+      "offset": 5188,
+      "text_id": 742,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop"
+    },
+    {
+      "file": "e0239.bin",
+      "type": 4,
+      "offset": 3708,
+      "text_id": 1015,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "e0240.bin",
+      "type": 5,
+      "offset": 11224,
+      "text_id": 100,
+      "old_guard_would_skip": false,
+      "name": "Jungle Spray"
+    },
+    {
+      "file": "e0241.bin",
+      "type": 4,
+      "offset": 3724,
+      "text_id": 502,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shops"
+    },
+    {
+      "file": "e0242.bin",
+      "type": 4,
+      "offset": 10100,
+      "text_id": 705,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shops"
+    },
+    {
+      "file": "e0243.bin",
+      "type": 5,
+      "offset": 7984,
+      "text_id": 881,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "e0244.bin",
+      "type": 5,
+      "offset": 13276,
+      "text_id": 1023,
+      "old_guard_would_skip": false,
+      "name": "Dino Racing"
+    },
+    {
+      "file": "e0245.bin",
+      "type": 5,
+      "offset": 31532,
+      "text_id": 135,
+      "old_guard_would_skip": false,
+      "name": "Sun Shooter"
+    },
+    {
+      "file": "e0246.bin",
+      "type": 5,
+      "offset": 8964,
+      "text_id": 374,
+      "old_guard_would_skip": false,
+      "name": "Strength Bird"
+    },
+    {
+      "file": "e0247.bin",
+      "type": 4,
+      "offset": 4256,
+      "text_id": 775,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "e0248.bin",
+      "type": 5,
+      "offset": 9440,
+      "text_id": 958,
+      "old_guard_would_skip": false,
+      "name": "Idol Smash"
+    },
+    {
+      "file": "e0249.bin",
+      "type": 5,
+      "offset": 3392,
+      "text_id": 400,
+      "old_guard_would_skip": false,
+      "name": "DuckShoot"
+    },
+    {
+      "file": "e0334.bin",
+      "type": 2,
+      "offset": 4332,
+      "text_id": 480,
+      "old_guard_would_skip": false,
+      "name": "Alien Bubbler"
+    },
+    {
+      "file": "e0335.bin",
+      "type": 2,
+      "offset": 1916,
+      "text_id": 139,
+      "old_guard_would_skip": false,
+      "name": "Antenna"
+    },
+    {
+      "file": "e0336.bin",
+      "type": 2,
+      "offset": 792,
+      "text_id": 38,
+      "old_guard_would_skip": true,
+      "name": "Medium Bush"
+    },
+    {
+      "file": "e0337.bin",
+      "type": 2,
+      "offset": 764,
+      "text_id": 625,
+      "old_guard_would_skip": true,
+      "name": "Small Bush"
+    },
+    {
+      "file": "e0338.bin",
+      "type": 2,
+      "offset": 728,
+      "text_id": 136,
+      "old_guard_would_skip": true,
+      "name": "Small Crystals"
+    },
+    {
+      "file": "e0339.bin",
+      "type": 2,
+      "offset": 1900,
+      "text_id": 747,
+      "old_guard_would_skip": false,
+      "name": "Large Crystals"
+    },
+    {
+      "file": "e0340.bin",
+      "type": 2,
+      "offset": 1968,
+      "text_id": 558,
+      "old_guard_would_skip": false,
+      "name": "Strange Growth"
+    },
+    {
+      "file": "e0341.bin",
+      "type": 2,
+      "offset": 3040,
+      "text_id": 950,
+      "old_guard_would_skip": false,
+      "name": "Gyrotron"
+    },
+    {
+      "file": "e0342.bin",
+      "type": 2,
+      "offset": 744,
+      "text_id": 969,
+      "old_guard_would_skip": false,
+      "name": "Large Crater-unconfirmed"
+    },
+    {
+      "file": "e0343.bin",
+      "type": 2,
+      "offset": 828,
+      "text_id": 343,
+      "old_guard_would_skip": true,
+      "name": "Small Toilet"
+    },
+    {
+      "file": "e0344.bin",
+      "type": 2,
+      "offset": 2344,
+      "text_id": 43,
+      "old_guard_would_skip": false,
+      "name": "Super Toilet"
+    },
+    {
+      "file": "e0345.bin",
+      "type": 2,
+      "offset": 3348,
+      "text_id": 465,
+      "old_guard_would_skip": false,
+      "name": "Large Tree"
+    },
+    {
+      "file": "e0346.bin",
+      "type": 2,
+      "offset": 1588,
+      "text_id": 743,
+      "old_guard_would_skip": false,
+      "name": "Plasmatrope"
+    },
+    {
+      "file": "e0347.bin",
+      "type": 2,
+      "offset": 1656,
+      "text_id": 565,
+      "old_guard_would_skip": false,
+      "name": "Golden Rocks"
+    },
+    {
+      "file": "e0348.bin",
+      "type": 2,
+      "offset": 744,
+      "text_id": 157,
+      "old_guard_would_skip": true,
+      "name": "Crater"
+    },
+    {
+      "file": "e0349.bin",
+      "type": 2,
+      "offset": 1736,
+      "text_id": 793,
+      "old_guard_would_skip": true,
+      "name": "Laser Show"
+    },
+    {
+      "file": "e0350.bin",
+      "type": 2,
+      "offset": 832,
+      "text_id": 323,
+      "old_guard_would_skip": true,
+      "name": "Security Camera"
+    },
+    {
+      "file": "e0351.bin",
+      "type": 2,
+      "offset": 928,
+      "text_id": 724,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0352.bin",
+      "type": 2,
+      "offset": 536,
+      "text_id": 220,
+      "old_guard_would_skip": true,
+      "name": "Loudspeaker"
+    },
+    {
+      "file": "e0353.bin",
+      "type": 2,
+      "offset": 1904,
+      "text_id": 547,
+      "old_guard_would_skip": false,
+      "name": "Staff Room"
+    },
+    {
+      "file": "e0354.bin",
+      "type": 2,
+      "offset": 1960,
+      "text_id": 8,
+      "old_guard_would_skip": false,
+      "name": "Medium Tree"
+    },
+    {
+      "file": "e0360.bin",
+      "type": 3,
+      "offset": 14496,
+      "text_id": 574,
+      "old_guard_would_skip": false,
+      "name": "Bounce on Iggy"
+    },
+    {
+      "file": "e0361.bin",
+      "type": 3,
+      "offset": 22180,
+      "text_id": 713,
+      "old_guard_would_skip": false,
+      "name": "Uforia"
+    },
+    {
+      "file": "e0362.bin",
+      "type": 3,
+      "offset": 12520,
+      "text_id": 338,
+      "old_guard_would_skip": false,
+      "name": "Crater Creature"
+    },
+    {
+      "file": "e0363.bin",
+      "type": 6,
+      "offset": 27924,
+      "text_id": 267,
+      "old_guard_would_skip": false,
+      "name": "Space Racers"
+    },
+    {
+      "file": "e0364.bin",
+      "type": 3,
+      "offset": 16276,
+      "text_id": 66,
+      "old_guard_would_skip": false,
+      "name": "Hover Bot Havoc"
+    },
+    {
+      "file": "e0365.bin",
+      "type": 3,
+      "offset": 14512,
+      "text_id": 865,
+      "old_guard_would_skip": false,
+      "name": "Romper Stomper"
+    },
+    {
+      "file": "e0366.bin",
+      "type": 3,
+      "offset": 11752,
+      "text_id": 827,
+      "old_guard_would_skip": false,
+      "name": "Moon Buggies"
+    },
+    {
+      "file": "e0367.bin",
+      "type": 1,
+      "offset": 9152,
+      "text_id": 330,
+      "old_guard_would_skip": false,
+      "name": "Escape Velocity"
+    },
+    {
+      "file": "e0368.bin",
+      "type": 1,
+      "offset": 13156,
+      "text_id": 138,
+      "old_guard_would_skip": false,
+      "name": "Moonshot"
+    },
+    {
+      "file": "e0369.bin",
+      "type": 3,
+      "offset": 12848,
+      "text_id": 52,
+      "old_guard_would_skip": false,
+      "name": "The Orbiter"
+    },
+    {
+      "file": "e0370.bin",
+      "type": 3,
+      "offset": 28384,
+      "text_id": 365,
+      "old_guard_would_skip": false,
+      "name": "Missile Madness"
+    },
+    {
+      "file": "e0371.bin",
+      "type": 3,
+      "offset": 21432,
+      "text_id": 571,
+      "old_guard_would_skip": false,
+      "name": "The Gravatron"
+    },
+    {
+      "file": "e0372.bin",
+      "type": 7,
+      "offset": 7160,
+      "text_id": 824,
+      "old_guard_would_skip": false,
+      "name": "Star Tours"
+    },
+    {
+      "file": "e0373.bin",
+      "type": 1,
+      "offset": 11516,
+      "text_id": 715,
+      "old_guard_would_skip": false,
+      "name": "The Shocker"
+    },
+    {
+      "file": "e0374.bin",
+      "type": 3,
+      "offset": 6572,
+      "text_id": 129,
+      "old_guard_would_skip": false,
+      "name": "Space Balls"
+    },
+    {
+      "file": "e0375.bin",
+      "type": 3,
+      "offset": 13196,
+      "text_id": 264,
+      "old_guard_would_skip": false,
+      "name": "The Areotron"
+    },
+    {
+      "file": "e0376.bin",
+      "type": 3,
+      "offset": 10068,
+      "text_id": 31,
+      "old_guard_would_skip": false,
+      "name": "Cyclone Station"
+    },
+    {
+      "file": "e0377.bin",
+      "type": 3,
+      "offset": 17256,
+      "text_id": 125,
+      "old_guard_would_skip": false,
+      "name": "Rock 'n Roll"
+    },
+    {
+      "file": "e0378.bin",
+      "type": 6,
+      "offset": 39068,
+      "text_id": 651,
+      "old_guard_would_skip": false,
+      "name": "The Blobulator"
+    },
+    {
+      "file": "e0379.bin",
+      "type": 3,
+      "offset": 20296,
+      "text_id": 321,
+      "old_guard_would_skip": false,
+      "name": "Zero G"
+    },
+    {
+      "file": "e0380.bin",
+      "type": 5,
+      "offset": 4000,
+      "text_id": 368,
+      "old_guard_would_skip": false,
+      "name": "Arcade"
+    },
+    {
+      "file": "e0381.bin",
+      "type": 4,
+      "offset": 4284,
+      "text_id": 47,
+      "old_guard_would_skip": false,
+      "name": "Burger Shop"
+    },
+    {
+      "file": "e0382.bin",
+      "type": 4,
+      "offset": 6088,
+      "text_id": 986,
+      "old_guard_would_skip": false,
+      "name": "Costume Shop"
+    },
+    {
+      "file": "e0383.bin",
+      "type": 4,
+      "offset": 3704,
+      "text_id": 686,
+      "old_guard_would_skip": false,
+      "name": "Drinks Shop"
+    },
+    {
+      "file": "e0384.bin",
+      "type": 4,
+      "offset": 5872,
+      "text_id": 601,
+      "old_guard_would_skip": false,
+      "name": "Balloon Shop"
+    },
+    {
+      "file": "e0385.bin",
+      "type": 4,
+      "offset": 3872,
+      "text_id": 521,
+      "old_guard_would_skip": false,
+      "name": "Fries Shop"
+    },
+    {
+      "file": "e0386.bin",
+      "type": 4,
+      "offset": 4460,
+      "text_id": 572,
+      "old_guard_would_skip": false,
+      "name": "Gift Shop"
+    },
+    {
+      "file": "e0387.bin",
+      "type": 4,
+      "offset": 3700,
+      "text_id": 482,
+      "old_guard_would_skip": false,
+      "name": "Ice Cream Shop"
+    },
+    {
+      "file": "e0388.bin",
+      "type": 5,
+      "offset": 9148,
+      "text_id": 94,
+      "old_guard_would_skip": false,
+      "name": "UFO Blaster"
+    },
+    {
+      "file": "e0389.bin",
+      "type": 5,
+      "offset": 30352,
+      "text_id": 155,
+      "old_guard_would_skip": false,
+      "name": "Martian Mooners"
+    },
+    {
+      "file": "e0390.bin",
+      "type": 4,
+      "offset": 5572,
+      "text_id": 888,
+      "old_guard_would_skip": false,
+      "name": "Restaurant"
+    },
+    {
+      "file": "e0391.bin",
+      "type": 5,
+      "offset": 10796,
+      "text_id": 915,
+      "old_guard_would_skip": false,
+      "name": "Giant Puzzle"
+    },
+    {
+      "file": "e0392.bin",
+      "type": 5,
+      "offset": 36212,
+      "text_id": 810,
+      "old_guard_would_skip": false,
+      "name": "shoot- unconfirmed"
+    },
+    {
+      "file": "e0393.bin",
+      "type": 5,
+      "offset": 6552,
+      "text_id": 436,
+      "old_guard_would_skip": false,
+      "name": "Strength Rocket"
+    },
+    {
+      "file": "e0394.bin",
+      "type": 5,
+      "offset": 12956,
+      "text_id": 595,
+      "old_guard_would_skip": false,
+      "name": "Martian Mash"
+    }
+  ],
+  "attraction_name_keyword_matches": [
+    {
+      "file": "0019.bin",
+      "type": 2,
+      "offset": 768,
+      "text_id": 337,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0098.bin",
+      "type": 2,
+      "offset": 864,
+      "text_id": 643,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0193.bin",
+      "type": 2,
+      "offset": 648,
+      "text_id": 983,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "0351.bin",
+      "type": 2,
+      "offset": 928,
+      "text_id": 724,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0019.bin",
+      "type": 2,
+      "offset": 768,
+      "text_id": 337,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0098.bin",
+      "type": 2,
+      "offset": 864,
+      "text_id": 643,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0193.bin",
+      "type": 2,
+      "offset": 648,
+      "text_id": 983,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    },
+    {
+      "file": "e0351.bin",
+      "type": 2,
+      "offset": 928,
+      "text_id": 724,
+      "old_guard_would_skip": true,
+      "name": "Litter Bin"
+    }
+  ],
+  "limitations": [
+    "ASCII search does not decode compressed data, audio, or graphics; all 690 raw files still searched.",
+    "J/JAL, literal and immediate searches do not resolve computed or aliased accesses; data can mimic opcodes.",
+    "Only English and symbol tables are parsed; the remaining files receive the raw ASCII search.",
+    "No dynamic watchpoints, overlay-code analysis, or executable-to-caption producer link.",
+    "Visitor type assignment does not exhaust every flag or prove absence of a prankster class."
+  ]
+}
