@@ -684,7 +684,7 @@ entry 407 (English) is `u32 count = 1031`, then 1031 `u32` offsets, then NUL-ter
 
 | id | string | belongs to |
 | --- | --- | --- |
-| 46 | Ticket Price | a ride |
+| 46 | Ticket Price | ⚠ NOT a ride — see below |
 | 417 / 725 | Speed / Duration | a ride's sliders |
 | 1005 / 122 | Reliability / State of Repair | a ride |
 | 657, 112, 619, 789 | Upgrade, Upgrades | a ride |
@@ -695,6 +695,13 @@ entry 407 (English) is `u32 count = 1031`, then 1031 `u32` offsets, then NUL-ter
 | 182, 787 | Game Price, Prize Cost | a SIDESHOW |
 | 212, 316 | Pylon Stock, Track Stock | the coaster/track BUILDER |
 | 884, 895 | Build Queue, Edit Queue | |
+
+⚠ **"TICKET PRICE" IS NOT A RIDE'S, AND THAT IS A CORRECTION TO THIS TABLE'S FIRST DRAFT.** I filed it
+under a ride from the word alone. economy.md §4.7 has it already settled the other way: **"Ride tickets:
+none. No ride class calls GetBank"** — this game does not charge per ride at all. The likeliest owner is
+the PARK's admission (the entry fee guests pay at the turnstile, VisitorEntrance's `EntryFee`), which is
+a different panel. Left in the table with the correction attached rather than deleted, because the next
+person will grep the same word and reach the same wrong conclusion.
 
 ⭐ **A SHOP IS NOT A RIDE WITH DIFFERENT NUMBERS.** It has no sliders at all: it is a MARGIN — what the
 stock costs against what it sells for — and a sideshow is the same shape with the game and the prize
