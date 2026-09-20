@@ -24,10 +24,13 @@ namespace TPW.Sim
         public const int DefaultIntervalTicks = 694;
 
         /// <summary>⚠ NOT THE SAME THING AS THE INTERVAL. The gaps between guests actually *admitted* were
-        /// measured at 705 704 704 703 705 671 704 641 — noisier and longer than the bus gap, because a guest
-        /// has to walk from the bus to the gate and that latency creeps then snaps back. Anything comparing
-        /// against admissions rather than arrivals must expect this; the two series are not interchangeable
-        /// and neither is wrong.</summary>
+        /// measured at 705 704 704 703 705 671 704 641. That is NOT the bus being held and not a walk latency
+        /// that "creeps then snaps back": it is the TURNSTILE'S OWN BEAT. 0x800592CC runs once a sim tick and
+        /// fires lane L only when `(clock &amp; 31) == L`, so a payment can land on one tick in 32 per lane,
+        /// with no phase relation to the bus at all. 694 ≡ 22 (mod 32), so each cycle's first payer waits ten
+        /// ticks longer than the last until it drops a whole slot: 704, 704, 704, 672, and round again. The
+        /// proof it is not a hold is in the same run — the SPAWN gaps were 694 694 694 695 697 694 694, and a
+        /// held bus would have stretched those too.</summary>
         public const int ObservedAdmissionGapNote = DefaultIntervalTicks;
 
         public int IntervalTicks { get; }
@@ -221,7 +224,21 @@ namespace TPW.Sim
         /// <summary>The bus has to be past 25.0 tiles before it lets the gate start another batch.</summary>
         public const int BatchClearPos = 0x190000;
 
-        public int A, B, Phase, Pos, Target, Batch;
+        public int A, B, Phase, Pos, Target;
+
+        /// <summary>The gate batch, [0x80103958]. The bus itself only cycles it 0 → 2 (on reaching the stop)
+        /// → 0 (once past 25.0 tiles); the value that HOLDS the bus is 1, and only `admit()` (0x80052148, run
+        /// once a tick before the machine) sets that — the first tick somebody is standing at the gate in
+        /// state 46 while the batch is 0. It clears when the last of them has crossed, or when eleven have
+        /// crossed and the bus is at the stop, which is what bounds a hold.
+        ///
+        /// ⚠ DEAD IN THIS PORT UNTIL THE TURNSTILE IS WIRED. Nothing here feeds the gate's waiting/admitted
+        /// counters, so this never reaches 1 and the hold branch never fires. The core already has the
+        /// routine (VisitorEntrance's Turnstile.Admit matches 0x80052148 line for line); what is missing is
+        /// calling it once a tick before <see cref="Step"/> against the same word, and feeding guest arrivals
+        /// 14, 15 and 16 into the counters. ⭐ A LEAVER HOLDS THE BUS EXACTLY LIKE AN ARRIVAL — the waiting
+        /// count is people AT the gate in either direction.</summary>
+        public int Batch;
 
         public BusRoute() => Reset();
 
@@ -246,8 +263,14 @@ namespace TPW.Sim
         /// bus is 687 ticks, 27.5 seconds.</summary>
         /// <summary>One sim tick. <paramref name="delta"/> is the game's own time step
         /// ([0x80103A90], ≈10081 a tick). Returns true on the tick the bus DROPS ITS LOAD — the phase 1→2 edge,
-        /// and only with the park open and no batch being held.</summary>
-        public bool Step(int delta, bool parkOpen, bool gateHolding)
+        /// and only with the park open and nothing carried on the cursor.
+        ///
+        /// ⚠ <paramref name="carryingFromCatalogue"/> IS NOT A GATE THING, despite sitting next to the batch.
+        /// It is `held` = [0x80103940] (0x80059080), set when a catalogue object is picked up with the cursor
+        /// (0x80058FE0) and cleared when it is placed or cancelled. While it is set the bus still runs and
+        /// still arrives on time — it just arrives EMPTY, because the arrival condition at 0x80052720 tests
+        /// it. Building something costs you the bus you were waiting for.</summary>
+        public bool Step(int delta, bool parkOpen, bool carryingFromCatalogue)
         {
             if (A > 0) { A -= delta; return false; }
             if (B > 0) { B -= delta; return false; }
@@ -260,7 +283,7 @@ namespace TPW.Sim
             Pos += (int)((long)speed * delta >> 12);
             if (Batch == 2 && Pos > BatchClearPos) Batch = 0;
             if (Pos < Target) return false;
-            bool arrived = Phase == 1 && parkOpen && !gateHolding;
+            bool arrived = Phase == 1 && parkOpen && !carryingFromCatalogue;
             if (Phase != 2) B = ShortWait;
             // ⚠ THE GAME READS PAST ITS OWN TABLE HERE AND GETS AWAY WITH IT. `tgt = table[phase] << 16` runs
             // before the wrap check, so on the last phase it reads table[4] — one word past a four-word table —

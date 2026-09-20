@@ -2239,10 +2239,12 @@ void fragment() {
                 if (_bus != null)
                 {
                     _busXPrev = _busXCur;
-                    // ⚠ THE HOLD IS NOT WIRED: the game stops the bus dead while a gate batch is mid-admission
-                    // (batch == 1), and the port has no turnstile batch to ask, so it passes false. That makes
-                    // the loop run at its clean 694 ticks instead of the 705 a real park measures.
-                    if (_bus.Step(frameTime, ParkOpen, false)) BusArrived();
+                    // ⭐ CARRYING SOMETHING FROM THE CATALOGUE COSTS YOU THE BUS. The game's `held`
+                    // ([0x80103940]) is set while an object is on the cursor, and the arrival condition tests
+                    // it: the bus still turns up on time, it just turns up EMPTY. _placing is this port's
+                    // cursor-carry. ⚠ The gate BATCH hold is a different mechanism and is still not wired —
+                    // see BusRoute.Batch.
+                    if (_bus.Step(frameTime, ParkOpen, _placing >= 0)) BusArrived();
                     _busXCur = _bus.WorldX;
                 }
                 if (_gate != null)
