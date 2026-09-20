@@ -2807,7 +2807,14 @@ void fragment() {
                     // port has no all-time served counter (slot 22 = A+0x14) to read.
                     Age = (AgeInDays(_panelFor) / 365).ToString(), Users = null,
                     Excitement = _panelFor.BaseIntensity,
-                    Reliability = -1,                       // ⚠ the PROJECTED value; not computed yet
+                    // ⭐ RELIABILITY IS THE FORECAST, REPAIR IS THE FACT — that split is the page's whole
+                    // point (panel.md §2). Slot 88: ask the wear rate what it WOULD be with the capacity
+                    // slider's seats filled rather than the riders actually aboard (slot 104, flag 1), then
+                    // 100 - (rate * 9 * duration >> 15). ⚠ A coaster shifts by 12, not 15 — not a typo.
+                    Reliability = TPW.Sim.RideSliderEffects.ProjectedReliability(
+                        TPW.Sim.RideWear.RateFor(_panelFor.SpeedSlider, _panelFor.Capacity,
+                                                 _panelFor.MaxSeats, _panelFor.WearMultiplier),
+                        _panelFor.CyclesPerLoad, coaster),
                     Repair = _panelFor.Reliability,
                     Life = _panelFor.Lifetime,
                     Speed = _panelFor.SpeedSlider, SpeedMin = r.Speed.Min, SpeedMax = r.Speed.Max,
