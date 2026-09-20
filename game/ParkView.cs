@@ -257,11 +257,22 @@ namespace TPWGodot
 
         bool CanAfford(AttractionDefinition rec) => _bank == null || _bank.Balance >= Money.FromPounds(rec.Price);
 
-        void Charge(AttractionDefinition rec)
+        void Charge(AttractionDefinition rec) => Charge(rec.Price);
+
+        void Charge(int pounds)
         {
-            if (_bank == null) return;
-            _bank.Spend(Money.FromPounds(rec.Price));
+            if (_bank == null || pounds <= 0) return;
+            _bank.Spend(Money.FromPounds(pounds));
             RefreshPickerPrices();
+        }
+
+        /// <summary>How many of <paramref name="wanted"/> pieces at <paramref name="each"/> pounds the bank can pay
+        /// for, or null when nothing is keeping the money (0x8004F360 makes the same test per tile).</summary>
+        int? Affordable(int wanted, int each)
+        {
+            if (_bank == null || each <= 0) return null;
+            long can = _bank.Balance.Pounds / each;
+            return (int)Math.Clamp(can, 0, wanted);
         }
 
         /// <param name="ground">The world's ground sheet, or null to draw the tile types alone.</param>
@@ -1021,7 +1032,15 @@ namespace TPWGodot
         /// A finished queue hands over to the path tool at the ride's exit.</summary>
         QueueRun.Step PressQueue((int X, int Z) c)
         {
+            // A queue tile costs more than a path one (PathTool.QueueTileCost). The segment about to be laid runs
+            // from the queue's end to the snapped cursor, and its new tiles are the ones past that corner.
+            var from = _queue.End;
+            var to = _queue.Snap(c.X, c.Z);
+            int tiles = Math.Abs(to.X - from.X) + Math.Abs(to.Z - from.Z);
+            if (tiles > 0 && Affordable(tiles, PathTool.QueueTileCost) is { } budget && budget < tiles)
+            { PlaySfx(ToolSound.Refused); return QueueRun.Step.Refused; }
             var step = _queue.Lay(_map, c.X, c.Z);
+            if (step != QueueRun.Step.Refused) Charge(tiles * PathTool.QueueTileCost);
             switch (step)
             {
                 case QueueRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
@@ -1474,6 +1493,11 @@ void fragment() {
         void LayPath((int X, int Z) start, (int X, int Z) end)
         {
             var run = PathTool.Run(start.X, start.Z, end.X, end.Z);
+            // Paid for by the tile (PathTool.PathTileCost): the game checks the running total against the balance as
+            // it walks the run and refuses the tile the money does not reach, so the run stops there.
+            if (Affordable(run.Count, PathTool.PathTileCost) is { } budget && budget < run.Count)
+                run = run.GetRange(0, budget);
+            if (run.Count == 0) { PlaySfx(ToolSound.Refused); return; }
             // ⭐ CONNECTED: the run reached its last tile and that tile was already path (or queue or track). The place
             // step flags it (0x8004DE04 sets 0x801026D0 for the last tile of those types), the piece pass then
             // reports the run finished, the tool resets and 0x8001D5C0 plays sound 3 after sound 4. Master: "03 plays
@@ -1483,6 +1507,7 @@ void fragment() {
             int laid = _paths.Lay(_map, run);
             if (laid > 0)
             {
+                Charge(laid * PathTool.PathTileCost);
                 RebuildGround();
                 PlaySfx(ToolSound.Lay);
                 if (laid == run.Count && endsOnPath) PlaySfx(ToolSound.Connected);
@@ -1531,7 +1556,7 @@ void fragment() {
         {
             if (_paths == null || _map == null) return 0;
             int laid = _paths.Lay(_map, PathTool.Run(x0, z0, x1, z1));
-            if (laid > 0) RebuildGround();
+            if (laid > 0) { Charge(laid * PathTool.PathTileCost); RebuildGround(); }
             return laid;
         }
 
@@ -1747,7 +1772,10 @@ void fragment() {
                 var tile = TileUnderMouse();            // the cursor is not tracked while the tool is closed
                 if (!_pathMode)
                 {
-                    // The click that opens the tool only opens it.
+                    // The click that opens the tool only opens it -- and it does not open at all while the cursor is
+                    // on something the hover box is round (master): a click there belongs to that attraction or to
+                    // the gate, not to the path tool.
+                    if (HoverTarget() != null) return;
                     if (tile is not { } t0 || !PathTool.CanStartOn(_map, t0.X, t0.Z)) return;
                     _cursorTile = tile; _pathMode = true; _cursorPinned = false; RefreshInfo();
                     return;

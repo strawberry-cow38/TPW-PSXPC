@@ -283,12 +283,20 @@ no separate interest flow exists.
   165/166/167 Chopper, Firepit, Ogre; 79/80/81 Bee Karts Jump, Piranha, Honey Pot; 399 The Meteor.
   £700-900 each at +0x20. They are 112-byte **bare records, not 0x96 containers**, which is why a
   container scan reports "no type 8 on the disc".
-- **Paths and queues cost NOTHING in this build** (READ, by exhaustion). The path tool's vtable is
-  0x800DC3A4 (it holds 0x8001D5C0, the path tool's own sounds), and not one of its 32 slots reaches
-  GetBank 0x80086814, TrySpend 0x800868B8, Income 0x800868A0 or defPrice 0x8006AD58 — nor does any
-  other build tool's vtable except the track builders above and the placement tools at 0x800DC224.
-  Laying path moves no money, so there is no price to find for it. Like rides being free to ride
-  (§4.7), this is the game, not a gap in the reading.
+- **Path £10 a tile, queue £25 a tile** (READ). 0x8001B580 sets the two per-tile values at boot —
+  `0x8001B600(10)` into gp 0x80102714 (path) and `0x8001B618(25)` into gp 0x80102718 (queue), read
+  back by 0x8001B60C / 0x8001B624. While a run is being built, 0x8004F360 takes the value for the
+  tile's own type (2 and 13 → path, 4 → queue), adds it to the run's running total (the accumulator
+  at 0x80102724: set 0x8001B630, add 0x8001B63C, read 0x8001B654) and **refuses the tile when the
+  balance minus that total would go below zero** — so a run stops where the money stops rather than
+  failing whole. The tool then puts the total in its +8 and charges it through **the same helper the
+  placement tools use** (0x8001C2E0 → TrySpend of total × 10): path at 0x8001D448 / 0x8001D6F0,
+  queue at 0x8001E0E0 / 0x8001E6EC, right after the lay sound. The queue's undo (0x8001E114) plays
+  sound 5 and gives nothing back.
+  ⚠ AND THIS PARAGRAPH SAID "paths are free" FOR ONE COMMIT, off a scan of the path tool's vtable
+  (0x800DC3A4) for direct GetBank / TrySpend / Income / defPrice calls, which finds none. The charge
+  is two calls deep through a shared helper, so "no bank call in the tool" was never the same claim as
+  "no charge" — master knew the price from playing it and was right.
 
 ### 4.7 Things that do NOT move money (READ, by exhaustion of the 41 GetBank call sites)
 - **Ride tickets: none.** No ride class calls GetBank, and only four visitor functions touch guest
@@ -296,7 +304,6 @@ no separate interest flow exists.
   0x8009CEFC) but never read by ride logic.
 - **Upkeep / running costs: none** (§3 step 6 records value only).
 - **Research: no money.** No GetBank caller in 0x8009B000..0x8009C000; the research "BANK" is points.
-- **Laying path or queue: none.** The path tool's vtable never reaches the bank (§4.6).
 - **Fines, interest, repairs, restocking: none.** Every TrySpend caller is listed in §4 (placement,
   track pieces, hiring, sacking, upgrade, the two shop sells, the rollover).
 

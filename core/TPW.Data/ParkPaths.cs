@@ -553,6 +553,20 @@ namespace TPW.Data
         /// <summary>Whether a click on tile (x, z) opens the path tool (the port's control, master's call): any tile on
         /// the map that nothing is built on -- grass, path, the entrance road, buildable or not. Attraction footprints,
         /// entrances and exits, queues and track do not.</summary>
+        /// <summary>What a tile of path and a tile of queue cost, in pounds.
+        ///
+        /// ⭐ FROM THE GAME'S CODE, and it took a correction to find: 0x8001B580 sets the path's per-tile value to
+        /// **10** and the queue's to **25** (the two gp words at 0x80102714 and 0x80102718, read back by 0x8001B60C
+        /// and 0x8001B624). While a run is being built, 0x8004F360 reads the value for the tile's own type, checks
+        /// the balance against the run's total so far (the accumulator at 0x80102724) and REFUSES the tile when the
+        /// money would run out -- so a run stops where the bank stops, it does not fail as a whole. The tool then
+        /// hands the total to the same charge the placement tools use (0x8001C2E0, total x 10, the money unit).
+        ///
+        /// ⚠ The path tool's own vtable never touches the bank, which is exactly how this was missed: the charge is
+        /// two calls deep, through a helper shared with the placement tools. "No bank call in the tool" is not the
+        /// same as "no charge", and master knew the price before the disassembly did.</summary>
+        public const int PathTileCost = 10, QueueTileCost = 25;
+
         public static bool CanStartOn(ParkMap map, int x, int z) =>
             x >= 0 && x < map.Width - 1 && z >= 0 && z < map.Height - 1 && map[x, z].Raw0 is not (4 or 5 or 7 or 8 or 10);
 
