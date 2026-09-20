@@ -56,6 +56,9 @@ namespace TPWGodot
         /// <summary>The build tools' sound group (SoundGroup 7): the path tool's own sounds, and the placement tools'
         /// refusal. Group 8 holds the placement tools' other sounds (placed, cancelled, turned).</summary>
         SoundGroup _toolSounds, _parkSounds;
+        /// <summary>Group 5, the UI's own sounds — the panel and its widgets. A park loads eight groups, listed
+        /// as u16 at 0x800F23CC: 1, 10, 11, 7, 2, 6, 5, 8.</summary>
+        SoundGroup _uiSounds;
         /// <summary>A few voices, so two sounds the game starts together (lay, then connected) both play, as the
         /// game's voice allocator (0x800B8300) gives each its own SPU voice.</summary>
         readonly AudioStreamPlayer[] _sfx = new AudioStreamPlayer[4];
@@ -1570,6 +1573,7 @@ namespace TPWGodot
                 default: return null;
             }
             TPW.Sim.RidePanel.Apply(_panelFor, speed, capacity, duration);
+            PlaySfx(UiSound.SliderMoved);
             RefreshInfo();
             return (_panelFor.SpeedSlider, _panelFor.CyclesPerLoad);
         }
@@ -1581,6 +1585,7 @@ namespace TPWGodot
         {
             _contextFor = AttractionAt((x, z));
             _contextAt = _contextFor != null ? at : null;
+            if (_contextFor != null) PlaySfx(UiSound.ContextOpened);
             RefreshInfo();
             return _contextFor != null;
         }
@@ -1590,6 +1595,7 @@ namespace TPWGodot
         public bool SelectAttraction(int x, int z)
         {
             _panelFor = AttractionAt((x, z));
+            if (_panelFor != null) PlaySfx(UiSound.PanelOpened);
             RefreshInfo();
             return _panelFor != null;
         }
@@ -2550,12 +2556,29 @@ void fragment() {
         /// features): placed by 0x8001C5C8, cancelled by 0x8001C7E4, turned by 0x8001C6BC / 0x8001C750.</summary>
         public enum PlaceSound { Placed = 3, Cancelled = 6, Turned = 9 }
 
+        /// <summary>The UI's sounds in group 5. Each was taken from a routine this port had ALREADY identified
+        /// for another reason, so the sound and the thing it belongs to were established separately:
+        ///
+        /// ⭐ <b>PanelOpened</b> — 0x80038900, the CIRCLE/open dispatcher in findings/panel.md §0, tail-calls
+        /// 0x80073EF4, which plays (5,2) at 0x800740D4.
+        /// ⭐ <b>ContextOpened</b> — 0x800385D0, the routine that fills the context list and shows it at the
+        /// cursor (panel.md §0), plays (5,3) at 0x8003877C.
+        /// ⭐ <b>SliderMoved</b> — 0x80079300, the ride panel's slider input (panel.md §2), plays (5,6) at BOTH
+        /// 0x80079354 and 0x80079378, the decrement and the increment, so either direction sounds the same.
+        ///
+        /// ⚠ The panel's base input 0x80044D38 is NOT here. It looks like (5,1), and it is not: `a1` is
+        /// `addu a1,s2,zero` in the call's delay slot, a per-widget value, and the `addiu a1,zero,1` above it
+        /// belongs to the PREVIOUS call. A scan that reads the nearest immediate gets that one wrong.</summary>
+        public enum UiSound { PanelOpened = 2, ContextOpened = 3, SliderMoved = 6 }
+
         /// <summary>Give the park view the build tools' sound group (SoundGroup.Load(…, 7)) and the group with the
         /// placement tools' sounds (SoundGroup.Load(…, 8)).</summary>
-        public void SetToolSounds(SoundGroup tools, SoundGroup park = null) { _toolSounds = tools; _parkSounds = park; _sfxStreams.Clear(); }
+        public void SetToolSounds(SoundGroup tools, SoundGroup park = null, SoundGroup ui = null)
+        { _toolSounds = tools; _parkSounds = park; _uiSounds = ui; _sfxStreams.Clear(); }
 
         void PlaySfx(ToolSound which) => PlaySfx(_toolSounds, 7, (int)which);
         void PlaySfx(PlaceSound which) => PlaySfx(_parkSounds, 8, (int)which);
+        void PlaySfx(UiSound which) => PlaySfx(_uiSounds, 5, (int)which);
 
         /// <summary>Play sound n of a group, at the rate its record's pitch gives, full volume, centred (0x800B84AC).</summary>
         void PlaySfx(SoundGroup group, int g, int n)

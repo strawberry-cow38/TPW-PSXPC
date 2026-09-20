@@ -57,6 +57,8 @@ namespace TPWGodot
         /// <summary>The build tools' sound-effect group (SoundGroup 7), for the park view's path tool, and group 8, with
         /// the placement tools' sounds.</summary>
         SoundGroup _toolSounds, _parkSounds;
+        /// <summary>Group 5, the UI's own sounds, for the attraction panel and its widgets.</summary>
+        SoundGroup _uiSounds;
         /// <summary>The language's strings (English), for the park HUD's labels.</summary>
         StringTable _strings;
         /// <summary>Each world's attractions (AttractionCatalog) with their English names, for the park view's picker.</summary>
@@ -640,6 +642,7 @@ namespace TPWGodot
                         // The build tools' sounds: group 7 of the game's effect groups (entries 320/321).
                         _toolSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 7);
                         _parkSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 8);
+                        _uiSounds = SoundGroup.Load(gz, _exe, AssetSelfTest.GameExecutableBase, 5);
                         // Each world's attractions for the park view's picker, named from the English table.
                         StringTable english = null;
                         int enEntry = StringTable.EntryByLanguage[0];
@@ -1006,7 +1009,7 @@ namespace TPWGodot
                 // a working control would have made impossible. The check is that it prints "no gate".
                 _park.NoGate = _noGate;
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe, _busPack);
-                _park.SetToolSounds(_toolSounds, _parkSounds);
+                _park.SetToolSounds(_toolSounds, _parkSounds, _uiSounds);
                 _park.SetHud(_commonSheet, _exe, _strings);
                 _park.SetBuildRig(v => _models != null && _models.TryGet(3, v, out var rig) ? rig : null);
                 _park.LogRides = _logRides;

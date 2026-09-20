@@ -105,6 +105,26 @@ y=168 (or 134 when Capacity is hidden) and ⚠ **HIDDEN ENTIRELY FOR A COASTER**
 the **union over all three level blocks**, not the current one. Slots 92/93/94 are written back **every
 frame** from the widgets.
 
+## 2b. The panel's SOUNDS (group 5), and one trap
+
+Sound calls are `0x800B8E08(a0 = group, a1 = sound)` / `0x800B8E4C` likewise; convention checked against
+the known placed sound, group 8 sound 3 at 0x8001C614. A park loads eight groups, listed as u16 at
+**0x800F23CC**: `1, 10, 11, 7, 2, 6, 5, 8` (loader 0x80058694 → 0x800B8B80). Group 5 is the UI's.
+
+| what | sound | where |
+| --- | --- | --- |
+| the panel opens | **(5, 2)** | 0x80038900 — the CIRCLE/open dispatcher of §0 — tail-calls 0x80073EF4, which plays it at 0x800740D4 |
+| the context list opens | **(5, 3)** | 0x800385D0, the §0 routine that fills it and shows it at the cursor, at 0x8003877C |
+| a slider moves | **(5, 6)** | 0x80079300, §2's slider input, at BOTH 0x80079354 (decrement) and 0x80079378 (increment) |
+
+Each was taken from a routine this report had already identified for a different reason, so the sound and
+the thing it belongs to were established separately rather than inferred from one address.
+
+⚠ **THE BASE INPUT 0x80044D38 IS NOT (5,1).** It reads that way to any scan that takes the nearest
+`addiu a1,zero,N`: the real `a1` is `addu a1,s2,zero` in the call's delay slot at 0x80044EA0 — a
+per-widget value, skipped entirely when negative (`bltz s2` at 0x80044E94) — and the `addiu a1,zero,1`
+above it is the PREVIOUS call's argument. Not wired, because the per-widget value is not yet read.
+
 ## 3. The other pages
 
 **Options** (list 0x8004A0B4, right at (280,80) 180x110): Build/Edit Queue 0x374/0x37F; type 6 Build/Edit
