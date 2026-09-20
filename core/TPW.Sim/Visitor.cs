@@ -159,10 +159,10 @@ namespace TPW.Sim
                 Tiredness = rng.Next(50),
                 WalkSpeed = rng.Next(15) + 15,
                 ArrivedOnDay = nowTick,
-                // ⚠ ROLL ORDER HERE IS A GUESS. The report gives V+0x50 as `now + rand(300)` at
-                // spawn but not WHERE in the constructor it is drawn, and the position matters to
-                // anything trying to reproduce the original's RNG stream tick for tick. Placed last
-                // so it cannot disturb the fields whose order IS known.
+                // READ (needs.md §0 item 5): V+0x50's rand(300) IS the constructor's last die, after
+                // the speed roll. ⚠ The money die is the constructor's FOURTH roll (after rubbish,
+                // nausea and need A), not its first as this initializer draws it; only the RNG stream
+                // order differs, and it is left as is because every dice-driven fixture depends on it.
                 EntertainerNotBefore = nowTick + rng.Next(300),
             };
             // ONE roll for both speeds: the constructor writes rand(15)+15 to V+0x62 and then copies it
@@ -187,26 +187,37 @@ namespace TPW.Sim
         /// <summary>V+0x59, 0..100, starts at 50.</summary>
         public int Happiness { get => _happiness; set => _happiness = Stat.Clamp(value); }
         int _happiness;
-        /// <summary>V+0x5A, 0..100. Above 92 the guest is sick.</summary>
+        /// <summary>V+0x5A, 0..100. Above 92 the guest is sick. Raised by rides of intensity 56+, the
+        /// unpleasant influence, vomit nearby, food and drink, a dirty feature; lowered ONLY by a feature
+        /// (-40) and by vomiting (:= 0). No drift with time (findings/needs.md §4).</summary>
         public int Nausea { get => _nausea; set => _nausea = Stat.Clamp(value); }
         int _nausea;
         /// <summary>V+0x5B -- GUESS-high "hunger" from the decoded food coefficients and bubble art
-        /// (findings/visitor-rest.md). The semantic name remains an inference.</summary>
+        /// (findings/visitor-rest.md); the Park Statistics window's icon for it is the burger sprite
+        /// (needs.md §6, READ). The semantic name remains an inference. Grows `rand(2)` per 50 ticks; only
+        /// a food purchase lowers it (needs.md §3.1).</summary>
         public int NeedA { get => _needa; set => _needa = Stat.Clamp(value); }
         int _needa;
-        /// <summary>V+0x5C -- GUESS-low "boredom". +5 when no ride can be found.</summary>
+        /// <summary>V+0x5C -- "boredom": the debug slider pool's label for the threshold that gates it
+        /// (debug.md §3, DERIVED). +5 when no ride can be found, +rand(2) on a failed path, +1s in a queue;
+        /// only a ride lowers it. No drift with time and no icon in the stats window (needs.md §3.4).</summary>
         public int Boredom { get => _boredom; set => _boredom = Stat.Clamp(value); }
         int _boredom;
         /// <summary>V+0x5D -- the earlier report calls this ride-related desire; GUESS-high "toilet need"
         /// in rides.md §0, supported by bubble 0x3B's artwork (findings/visitor-rest.md). The existing
-        /// field name is retained. READ: above 97 the guest speeds up to 30.</summary>
+        /// field name is retained; the stats window's icon for it is the toilet pictogram (needs.md §6,
+        /// READ). READ: above 97 the guest speeds up to 30. ⚠ FED ONLY BY PURCHASES and emptied only by a
+        /// feature: no clock (needs.md §3.3).</summary>
         public int RideDesire { get => _ridedesire; set => _ridedesire = Stat.Clamp(value); }
         int _ridedesire;
         /// <summary>V+0x5E -- GUESS-high "thirst" from the decoded drink coefficients and bubble art
-        /// (findings/visitor-rest.md). The semantic name remains an inference.</summary>
+        /// (findings/visitor-rest.md); the stats window's icon for it is the drink cup (needs.md §6, READ).
+        /// The semantic name remains an inference. Grows `rand(2)` per 40 ticks and with food; only a
+        /// drink purchase lowers it (needs.md §3.2).</summary>
         public int NeedB { get => _needb; set => _needb = Stat.Clamp(value); }
         int _needb;
-        /// <summary>V+0x5F, 0..100. At 99 the guest goes home.</summary>
+        /// <summary>V+0x5F, 0..100. At 99 the guest goes home. Rises ONLY while walking (10% per step
+        /// tick); queueing and unloading lower it. A guest that never walks never tires (needs.md §3.6).</summary>
         public int Tiredness { get => _tiredness; set => _tiredness = Stat.Clamp(value); }
         int _tiredness;
 

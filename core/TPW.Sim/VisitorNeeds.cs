@@ -29,7 +29,9 @@ namespace TPW.Sim
         bool IdleNeedsSuppressed { get; }
         /// <summary>The OR of the influence bits covering this guest.</summary>
         TileInfluence InfluenceAt(Visitor guest);
-        /// <summary>Litter objects within 2 tiles, and how many of those are vomit (obj+0x1C == 0x9E).</summary>
+        /// <summary>Litter objects the original counts, and how many of those are vomit (obj+0x1C == 0x9E).
+        /// READ: the test is `|dx| + |dy| &lt; 2` in WHOLE tiles (0x800901B8..0x800901F4) -- the guest's own
+        /// tile and its four edge-neighbours, not a two-tile radius (findings/needs.md §0 item 2).</summary>
         (int Litter, int Vomit) LitterNearby(Visitor guest);
         /// <summary>True while the guest is queueing, which blocks the entertainer push.</summary>
         bool InQueue(Visitor guest);
@@ -46,11 +48,21 @@ namespace TPW.Sim
     /// thought bubbles. Folding it into Idle -- the obvious shortcut, since Idle is where most guests
     /// are -- would freeze the needs of every guest actually doing something.
     ///
-    /// ⚠ FOUR DIFFERENT PERIODS, AND ONLY ONE OF THEM IS STAGGERED. The 8-tick influence pass is
+    /// ⚠ FOUR DIFFERENT PERIODS, AND ONLY ONE OF THEM IS STAGGERED HERE. The 8-tick influence pass is
     /// staggered per guest by the same field as the decision; the 64, 50, 40 and 128 tick passes are
-    /// written in the report without a stagger, so they are implemented on the bare tick and every guest
-    /// takes its litter damage on the same tick. That is what the report says rather than what is
-    /// tidy -- if a live reading shows otherwise, this is the place.</summary>
+    /// written in behaviour.md §2.9 without a stagger, so they are implemented on the bare tick and every
+    /// guest takes its litter damage on the same tick. findings/needs.md §0 item 1 records that the
+    /// binary staggers ALL FOUR by V+0x10 (0x80090128, 0x80090320, 0x80090384, 0x800903F8); the report's
+    /// version is kept deliberately until that disagreement is reviewed. Same long-run rate either way.
+    ///
+    /// ⭐ ONLY TWO STATS GROW ON A CLOCK. Need A and need B are the only bytes anything raises with time
+    /// (needs.md §2). Boredom, V+0x5D, nausea and tiredness move only when the guest does something or
+    /// something is done to it -- a guest stood still on a clean tile gets hungrier and thirstier and
+    /// nothing else. Adding a passive drift to any of the other four is inventing a mechanic.
+    ///
+    /// NOT PORTED: the bubble pass is also skipped when 25 bubbles are already showing park-wide and
+    /// this guest has none (0x80090414..0x80090440, counter at 0x80103264); the sim has no park-wide
+    /// bubble counter (needs.md §0 item 3).</summary>
     public static class VisitorNeeds
     {
         public const int InfluencePeriod = 8;
@@ -58,6 +70,10 @@ namespace TPW.Sim
         public const int NeedAPeriod = 50;
         public const int NeedBPeriod = 40;
         public const int BubblePeriod = 128;
+
+        /// <summary>The growth die: `rand(2)` at 0x8009036C and 0x800903D0, so each pass adds 0 or 1 --
+        /// half a point per period on average. The die is drawn on every gated tick, even at 100.</summary>
+        public const int GrowthRollMax = 2;
 
         /// <summary>Happiness lost per litter object within 2 tiles, per 64 ticks.</summary>
         public const int LitterHappiness = 3;
@@ -90,8 +106,8 @@ namespace TPW.Sim
                 Influence(guest, world);
 
             if (now % LitterPeriod == 0) LitterAndNeedPenalties(guest, world);
-            if (now % NeedAPeriod == 0) guest.NeedA = Stat.Add(guest.NeedA, rng.Next(2));
-            if (now % NeedBPeriod == 0) guest.NeedB = Stat.Add(guest.NeedB, rng.Next(2));
+            if (now % NeedAPeriod == 0) guest.NeedA = Stat.Add(guest.NeedA, rng.Next(GrowthRollMax));
+            if (now % NeedBPeriod == 0) guest.NeedB = Stat.Add(guest.NeedB, rng.Next(GrowthRollMax));
             if (now % BubblePeriod == 0 && !world.IdleNeedsSuppressed) ChooseBubble(guest, rng);
         }
 
