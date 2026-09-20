@@ -45,6 +45,14 @@ namespace TPWGodot
         /// as the camera sees it, and how far through the five-frame stride it is.</summary>
         public int Block, Facing, Frame, Walked;
 
+        /// <summary>The last step this walker took, in WORLD units — which way it is actually going.
+        ///
+        /// ⚠ THIS, NOT THE FACING INDEX, IS WHAT A WALKER OWNS. Which of the eight drawn facings it
+        /// shows depends on where the CAMERA is, so it is not a property of the walker at all and must
+        /// be worked out again every time the view moves. Storing the index instead froze every guest's
+        /// sprite at whatever the camera happened to be doing on its last step.</summary>
+        public int DirX, DirZ;
+
         /// <summary>Not drawn, and not walked - somebody else owns it. A guest on a ride (state 21).</summary>
         public bool Hidden;
 
@@ -966,6 +974,11 @@ namespace TPWGodot
             int gh = ParkCamera.GroundHeight(_map, g.X, g.Z);
             var feet = new Vector3(g.X / u, gh / u, -g.Z / u);
             if (_sprites == null) { g.Inst.Position = feet + new Vector3(0, 0.21f, 0); return; }
+            // ⭐ THE FACING IS RE-DERIVED HERE, EVERY DRAW. The quad is aimed at the camera in Draw, and
+            // which of the eight sprites it wears is the walk direction measured against that same
+            // camera — so both halves move together when the view turns. Deciding it on the STEP left
+            // a standing guest wearing a facing from a camera angle that no longer existed.
+            g.Facing = GuestSprites.FacingFor(g.DirX, -g.DirZ, CameraForward);
             _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
         }
 
@@ -973,6 +986,19 @@ namespace TPWGodot
         /// decides which of the eight drawn facings each guest shows (GuestSprites).</summary>
         public void SetSprites(GuestSprites sprites) => _sprites = sprites;
         public Vector3 CameraForward { get; set; } = new Vector3(0, 0, -1);
+
+        /// <summary>Re-aim and re-dress every guest and every member of staff for the camera where it is
+        /// NOW. Called once a drawn frame, not once a sim tick.
+        ///
+        /// ⚠ A STANDING GUEST IS NOT REDRAWN BY THE WALK. Place only ran after a step, so anyone idle,
+        /// queueing or waiting at a gate kept the quad angle it was given when it last moved: turn the
+        /// camera and they went edge-on and vanished. Everyone gets redrawn, movers included — it is one
+        /// transform and two UV numbers each.</summary>
+        public void Redraw()
+        {
+            foreach (var g in _guests) Place(g);
+            foreach (var st in _staff) Place(st);
+        }
         GuestSprites _sprites;
 
         /// <summary>A step of the walk: the facing the camera sees and how far through the stride, from
@@ -982,7 +1008,7 @@ namespace TPWGodot
         {
             int dx = g.X - fromX, dz = g.Z - fromZ;
             if (dx == 0 && dz == 0) return;
-            g.Facing = GuestSprites.FacingFor(dx, -dz, CameraForward);
+            g.DirX = dx; g.DirZ = dz;
             g.Walked += Math.Abs(dx) + Math.Abs(dz);
             g.Frame = g.Walked / 48 % TPW.Data.PeopleSheet.WalkFrames;
         }

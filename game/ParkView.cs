@@ -2699,7 +2699,11 @@ void fragment() {
                 // SIM tick; this loop is the sim tick, so the search currently gets half the slices it
                 // would on hardware. It does not matter while ExpansionsPerSlice is unbounded and every
                 // search finishes the frame it starts, and it will matter the moment that is set.
-                if (_guests != null) _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
+                if (_guests != null)
+                {
+                    _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
+                    _guests.Redraw();
+                }
                 _clockTicks++;
                 // The stand-in only runs where there is no bus: once the bus is on the road it is the arrivals.
                 if (ForcedGuests >= 0) _guests?.Populate(ForcedGuests);
