@@ -473,9 +473,29 @@ host now catches it at the harness door and reports it rather than swallowing it
 
 - **Established:** with the port's current catalogue — every definition the port loads, all worlds —
   the tier scan cannot terminate, so `CanSelect` throws and no topic can be selected.
-- **NOT established:** whether the retail game ever reaches it. The obvious candidate is that the
-  original's candidate set is ONE WORLD's definitions, not all four, and that a single world has a
-  populated tier 4. That is a checkable claim and it is not checked here.
+- ⚠ **THE ONE-WORLD HYPOTHESIS IS FALSIFIED.** The first version of this section guessed that the
+  original's candidate set is one world's definitions and that a single world has a populated tier 4.
+  Checked: it does not. Splitting the ride records by world at the boundaries the per-world markers
+  already establish (litter bins 19/98/193/351, staff rooms 32/109/197/353, cameras 30/105/185/350):
+
+  ```
+  W1  tier0×6  tier1×24  tier2×15  tier3×12
+  W2  tier0×8  tier1×32  tier2×16  tier3×13
+  W3  tier0×5  tier1×25  tier2×20  tier3×13
+  W4  tier0×7  tier1×29  tier2×12  tier3×12
+  ```
+
+  Four worlds, near-identical shapes, **not one tier 4 between them** — which the global histogram
+  already implied, since tier 4 is zero over all 498 blocks. Accounting: 249 of the 498 blocks carry
+  a numbered entry and are classified above; the other 83 records have no entry number in their
+  filename and are unclassified, but they cannot change the answer because the global count of tier 4
+  is zero.
+
+- **So the remaining reading is that the scan's last bin is simply never reached in play.** The walk
+  stops at the first bin that is populated AND under two-thirds unlocked, so reaching bin 4 requires
+  two-thirds of every tier 0..3 ride already unlocked — a park that has researched nearly the whole
+  game. NOT ESTABLISHED, but it is now the only candidate left standing, and it would mean the
+  original's unbounded read is reachable in principle and effectively never taken.
 - **NOT established:** the definition ORDER. `ResearchDefinition(type, index)` is taken by the host
   to mean "position among the definitions of that type in catalogue order"; the binary carries a
   per-object definition selector at `A+0x6B` (rating.md §0) that would settle it. ⚠ A wrong order
