@@ -459,7 +459,15 @@ namespace TPWGodot
         public Guest SpawnAtGate()
         {
             if (_entrance == null || _map.SpawnTiles.Count == 0) return Spawn();
-            var (sx, sz) = _map.SpawnTiles[_rng.Next(_map.SpawnTiles.Count)];
+            // ⭐⭐ ARRIVALS ALWAYS USE EXIT 0 — ROLLING FOR ONE PUTS THEM AT THE *EXIT* BUS STOP.
+            // The bus tick calls Arrivals (0x80067274) at 0x8005273C with `addu a1,zero,zero`, so the index
+            // is hard-wired to 0, and `Arrivals`' own rand(2) machinery is reached only by the −1 variant
+            // that the game never runs (findings/transport.md §5, which measured it both ways: with entry 0
+            // left alone 12 guests stand at (4736,1408) = tile 18, and only a PATCHED entry 0 puts them at
+            // (6016,1408) = tile 23). Map 203's two tiles are (18,5), the arrivals' side, and (23,5), the
+            // exit's. Rolling between them sent half of every bus to the wrong one.
+            // ⚠ LEAVERS ARE THE OPPOSITE and must keep rolling: state 48 picks rand(N) at 0x8009154C.
+            var (sx, sz) = _map.SpawnTiles[0];
             var g = Spawn((sx, sz));
             if (g == null) return null;
             g.V.SetState(VisitorState.SpawnToGate);
