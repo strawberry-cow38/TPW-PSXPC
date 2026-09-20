@@ -691,10 +691,23 @@ than four different numbers.
 result is stowed at **piece +0x4C** by 0x800A61C0. The owner comes from 0x80031114 (a dereference of the
 piece's +0x18 and 0x800307DC), so the mesh a piece draws is **the owner's class-indexed model slot**.
 
-⚠ What that owner's +0xDC table is filled from is NOT read yet, and it is the one thing still between the
-port and drawing the real pieces. It is a LIST rather than a flat array where other code touches it
-(0x8009FD48 passes `s5+0xDC` to 0x800A0ACC/0x800A0AC4), so "class indexes the ride's sub-models in order"
-is a GUESS and an untested one.
+**Where that owner comes from**: 0x80031114 reads the piece's +0x18 as an ID, hands it to 0x800C0DB8,
+which checks the entry is loaded and returns `table[id]` out of the 24-byte-per-entry loaded-archive table
+at **0x8010B0D4** [RAM], and 0x800307DC then adds that base's own `+0x14`. So the owner is a LOADED
+ARCHIVE ENTRY, resolved the same way everything else on this disc is.
+
+⚠ **IT IS NOT THE RIDE'S OWN RECORD, and which entry it is stays open.** I checked: an attraction record's
+tail is not at a fixed offset — the body ends at `+0x1C`'s length and the ground pad after it is
+`width x depth x 2` bytes, so Chac Atak's (2x3) extra data starts at +0xC0 while Gorilla Thrilla's (4x4)
+starts at +0xD4. A table read at a FIXED `+0xDC` cannot be in a structure that moves with the footprint.
+Reading Chac Atak's record there anyway gives `(219, 0) (219, 8) (205, 0) (206, 2) (202, 3) (202, 2)` —
+Temple of Gloom, the jungle scenery pack, and the Small Toilet — which is the sort of answer that tells you
+the offset is being read against the wrong object.
+
+The likely owner is the WORLD's own shared pack rather than the ride: the descriptor lookup already
+branches per world (the table above), a coaster's track is themed per world, and the ride's own entry
+carries only its station, four cars and a handful of one-tile parts. NOT ESTABLISHED — what to read next
+is what writes the piece's +0x18.
 
 ⚠ Two things that follow from the table and are NOT settled. With the window at entry 36 or 40, kinds
 40..51 index entries 76..91, and the table stops at 79 — so either those two branches never see a big

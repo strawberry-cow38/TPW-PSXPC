@@ -2087,6 +2087,29 @@ static class Program
         {
             // --model-bounds E: sub-model 0 of entry E, its vertices' extent at rest and posed at time 0, and its
             // definition record -- where a model's origin sits relative to its footprint.
+            // --recdump E [FROM LEN]: an attraction record's raw words, for reading tables the port has not
+            // named yet (the piece class table the coaster code indexes at record +0xDC, say).
+            int rdAt = Array.IndexOf(args, "--recdump");
+            if (rdAt >= 0 && rdAt + 1 < args.Length)
+            {
+                var agr = Archive(disc);
+                int re = int.Parse(args[rdAt + 1]);
+                var rb = agr.Read(agr.Entries[re]);
+                int rec = BitConverter.ToInt32(rb, 0x14);
+                int from = rdAt + 2 < args.Length ? Convert.ToInt32(args[rdAt + 2], 16) : 0;
+                int len = rdAt + 3 < args.Length ? Convert.ToInt32(args[rdAt + 3], 16) : 0x180;
+                Console.WriteLine($"entry {re}: {rb.Length} bytes, record at +0x{rec:X} (header +0x14)");
+                for (int o = from; o < len && rec + o < rb.Length; o += 16)
+                {
+                    int n = Math.Min(16, Math.Min(len - o, rb.Length - rec - o));
+                    var words = new System.Collections.Generic.List<string>();
+                    for (int k = 0; k + 4 <= n; k++) if (k % 4 == 0) words.Add(BitConverter.ToUInt32(rb, rec + o + k).ToString("X8"));
+                    var raw = string.Join(" ", System.Linq.Enumerable.Range(0, n).Select(k => rb[rec + o + k].ToString("X2")));
+                    Console.WriteLine($"  +0x{o:X3}  {string.Join(" ", words),-35}   {raw}");
+                }
+                return 0;
+            }
+
             // --subbounds E: every sub-model of entry E with its extent in tiles, which is how a station, a piece
             // of track and a car tell themselves apart without a table.
             int sbAt = Array.IndexOf(args, "--subbounds");
