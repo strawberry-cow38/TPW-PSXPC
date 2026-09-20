@@ -78,6 +78,7 @@ namespace TPWGodot
         bool _logRides;
         int _forcedGuests = -1;
         string _autoHire;
+        int _autoBreak = -1;
         /// <summary>From <c>--park-queue=entry,x,z,rot:cx,cz:cx,cz...[:~hx,hz]</c>: a ride placed at load, then its queue
         /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
         /// queue building.</summary>
@@ -522,6 +523,7 @@ namespace TPWGodot
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
+                else if (arg.StartsWith("--park-break=")) _autoBreak = int.Parse(arg.Substring("--park-break=".Length));
                 else if (arg.StartsWith("--park-ghost=")) _autoGhost = arg.Substring("--park-ghost=".Length);
                 else if (arg.StartsWith("--park-queue=")) _autoQueue = arg.Substring("--park-queue=".Length);
                 else if (arg.StartsWith("--park-track=")) _autoTrack = arg.Substring("--park-track=".Length);
@@ -829,6 +831,11 @@ namespace TPWGodot
                             if (held) hover = (c[0], c[1]); else clicks.Add((c[0], c[1]));
                         }
                         if (v.Length == 4) GD.Print($"[tpw] --park-queue {_autoQueue}: {_park.QueueAt(v[0], v[1], v[2], v[3], clicks, hover)?.ToString() ?? "not placed"}");
+                    }
+                    // Last, because the ride it names may have been placed by --park-queue.
+                    if (_autoBreak >= 0)
+                    {
+                        GD.Print($"[tpw] --park-break {_autoBreak}: {(_park.Break(_autoBreak) ? "broken" : "refused")}");
                     }
                     if (_autoPathCursor != null)
                     {

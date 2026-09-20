@@ -304,6 +304,8 @@ namespace TPWGodot
             _guests.SetSprites(_guestSprites);
             _guests.SetBrain(GuestTargets);
             _guests.SetRideWorld(GuestTargets);
+            _guests.SetRideJobs(RideJobs);
+            _guests.LogStaff = _logRides;
             _guests.MapChanged();
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _gateAnglePrev = _gateAngleCur = _gateRecentAt = 0;
@@ -1544,8 +1546,34 @@ namespace TPWGodot
         /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
         /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
         /// list walks them to find the one under the cursor.</summary>
-        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld
+        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob
         {
+            // --- IRideJob: the same object as a mechanic acts on it ---------------------------------
+            int IRideJob.Id => Rec.Entry;
+            AttractionStatus IRideJob.Status { get => Status; set => Status = AttractionLifecycle.Enter(value, this); }
+            int IRideJob.Lifetime => Wear.Lifetime;
+            int IRideJob.CentreX { get { var (w, _) = Rec.Footprint(Rot); return Ox + w / 2; } }
+            int IRideJob.CentreZ { get { var (_, d) = Rec.Footprint(Rot); return Oz + d / 2; } }
+            /// <summary>Where a mechanic walks. ⚠ NOT THE ENTRANCE TILE, and that is READ rather than a
+            /// preference: the mechanic's own request uses flags 0x11 — path and queue — while reaching
+            /// an ENTRANCE tile (type 7) needs 0x18 (behaviour.md's state 23 uses exactly that). So the
+            /// entrance is not reachable on the mechanic's own flags, and aiming at it made every claim
+            /// end in a failed path and a released ride. The port aims at a walkable tile touching the
+            /// footprint instead; what the game asks the object for is its slot 42, not followed.</summary>
+            public int JobDoorX, JobDoorZ;
+            int IRideJob.DoorX => JobDoorX;
+            int IRideJob.DoorZ => JobDoorZ;
+            int IRideJob.FootprintSpan { get { var (w, d) = Rec.Footprint(Rot); return w + d; } }
+            /// <summary>A+0xEC. Its own field because nothing else in the port has one; the ride's own
+            /// machine never touches it, only the mechanic closing the ride does.</summary>
+            public int Closing;
+            int IRideJob.Closing { get => Closing; set => Closing = value; }
+            public StaffMember MechanicClaim;
+            StaffMember IRideJob.Claim { get => MechanicClaim; set => MechanicClaim = value; }
+            /// <summary>⚠ NOT WIRED: the paid level-up (RidePanel.CompleteUpgrade) needs the panel and
+            /// the bank, and nothing in the port queues an upgrade, so nothing can reach this.</summary>
+            void IRideJob.CompleteUpgrade() { }
+
             public AttractionDefinition Rec;
             public MeshInstance3D Inst;
             public Transform3D Rest;
@@ -1638,10 +1666,17 @@ namespace TPWGodot
         ///
         /// Walks the footprint's four sides and takes the first walkable tile, in a fixed order so two
         /// runs agree. Nearest-by-distance would be a different arbitrary rule, not a better one.</summary>
-        (int X, int Z)? WalkableBeside(int ox, int oz, int w, int d)
+        (int X, int Z)? WalkableBeside(int ox, int oz, int w, int d, bool allowEntrance = true)
         {
             if (_map == null) return null;
-            bool Ok(int x, int z) => x >= 0 && z >= 0 && x < _map.Width && z < _map.Height && _map[x, z].IsWalkable;
+            // ⚠ AN ENTRANCE TILE IS "WALKABLE" AND STILL NOT REACHABLE. ParkMap.IsWalkable counts type 7
+            // because guests stand on one to queue — but they get there with flags 0x18, and anything
+            // walking on the plain 0x11 (path and queue) cannot enter it. Handing an entrance tile to a
+            // 0x11 search is a route that always fails, which is exactly what it did to every mechanic
+            // claim until this was separated.
+            bool Ok(int x, int z) => x >= 0 && z >= 0 && x < _map.Width && z < _map.Height
+                && _map[x, z].IsWalkable
+                && (allowEntrance || _map[x, z].Type != TileType.AttractionEntrance);
             for (int x = ox; x < ox + w; x++)
             {
                 if (Ok(x, oz - 1)) return (x, oz - 1);
@@ -1654,6 +1689,29 @@ namespace TPWGodot
             }
             return null;
         }
+
+        /// <summary>The placed rides as a mechanic acts on them. Live handles, not a snapshot: the
+        /// claim, the status and the closing progress are all written back through them.</summary>
+        IReadOnlyList<IRideJob> RideJobs()
+        {
+            _rideJobs.Clear();
+            foreach (var a in _attractionsPlaced)
+            {
+                if (!a.IsRide) continue;
+                var (w, d) = a.Rec.Footprint(a.Rot);
+                // ⭐ THE ENTRANCE TILE IS THE RIGHT TARGET AFTER ALL. Type 7 is enterable as a
+                // DESTINATION whatever the flags say (Pathfinder's own case 7) — only the link test
+                // applies — so 0x11 reaches it. A tile merely beside the footprint is usually not a
+                // path at all: a ride's only pedestrian access is its entrance and its exit.
+                var door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot)
+                        ?? WalkableBeside(a.Ox, a.Oz, w, d, allowEntrance: false)
+                        ?? (a.Ox + w / 2, a.Oz + d / 2);
+                a.JobDoorX = door.Item1; a.JobDoorZ = door.Item2;
+                _rideJobs.Add(a);
+            }
+            return _rideJobs;
+        }
+        readonly List<IRideJob> _rideJobs = new();
 
         IReadOnlyList<GuestTarget> GuestTargets()
         {
@@ -1695,6 +1753,25 @@ namespace TPWGodot
         /// (0 mechanic, 1 entertainer, 2 cleaner, 3 guard, 4 researcher). A test hook: the game hires
         /// from a panel this port does not have, and what a hire COSTS and where it appears are not
         /// read yet (findings/staff.md is being written).</summary>
+        /// <summary>--park-break=entry: drop a placed ride's reliability so it breaks down now. A TEST
+        /// HOOK. Wear takes several minutes of running to cross the threshold on its own, which is too
+        /// long to watch a mechanic with; nothing here changes the wear rule, it only moves the number
+        /// the rule already reads.</summary>
+        public bool Break(int entry)
+        {
+            foreach (var a in _attractionsPlaced)
+                if (a.Rec.Entry == entry && a.IsRide)
+                {
+                    // Reliability AND the status, because wear only acts on a ride in status 2 — and a
+                    // ride that nobody is queueing for never leaves 10, so lowering the number alone
+                    // would leave the hook waiting on the same guests the hook exists to do without.
+                    a.Reliability = 1;
+                    a.Status = AttractionLifecycle.Enter(AttractionStatus.AboutToBreakDown, a);
+                    return true;
+                }
+            return false;
+        }
+
         public bool Hire(int kind, int x, int z)
         {
             if (_guests == null || _map == null) return false;
@@ -1796,7 +1873,7 @@ namespace TPWGodot
         }
 
         /// <summary>Print each ride's status changes with the frame they happen on (<c>--park-log-rides</c>).</summary>
-        public bool LogRides { set => _logRides = value; }
+        public bool LogRides { set { _logRides = value; if (_guests != null) _guests.LogStaff = value; } }
         bool _logRides;
 
         /// <summary>Draw each attraction under construction moved by its build rig (0x800659C4): the rig's bone 1,

@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using TPW.Data;
 using TPW.Sim;
 
 namespace TPWGodot
@@ -92,5 +93,166 @@ namespace TPWGodot
             }
             return best != null && _pathTo(Current, best.DoorX, best.DoorZ);
         }
+    }
+
+    /// <summary>One placed ride as a mechanic acts on it: a live handle, not a snapshot, because the
+    /// claim, the status and the closing progress are all written back through it.</summary>
+    interface IRideJob
+    {
+        int Id { get; }
+        AttractionStatus Status { get; set; }
+        /// <summary>Remaining lifetime. ZERO MEANS CONDEMNED, and a condemned ride is never claimed for
+        /// repair — the test is `!= 0`, not `> 0` (Mechanic's own note).</summary>
+        int Lifetime { get; }
+        /// <summary>The footprint's centre tile, for "nearest".</summary>
+        int CentreX { get; }
+        int CentreZ { get; }
+        /// <summary>Where a mechanic walks. ⚠ THE PORT'S CHOICE: the binary asks the ride for its slot
+        /// 42 position and its slot 26 leave point; both are vtable slots not yet followed. A ride's
+        /// entrance tile is a real tile of the right building and is reachable with flags 0x11, which
+        /// the slot-42 position may not be.</summary>
+        int DoorX { get; }
+        int DoorZ { get; }
+        /// <summary>Footprint width + height in tiles, which is what the closing threshold scales.</summary>
+        int FootprintSpan { get; }
+        /// <summary>A+0xEC, the closing-progress word. NOT a rider count (RideClosing).</summary>
+        int Closing { get; set; }
+        /// <summary>A+0x54: the mechanic that holds this ride, or null.</summary>
+        StaffMember Claim { get; set; }
+        void CompleteUpgrade();
+    }
+
+    /// <summary>The park as the mechanic reads it (TPW.Sim.IMechanicWorld).
+    ///
+    /// ⭐ THIS IS WHAT UNSTICKS A WORN-OUT PARK. Wear sends a ride to status 4 and nothing in the ride's
+    /// own machine ever brings it back: 4 leaves only for 5 at reliability EXACTLY zero, which the wear
+    /// arithmetic cannot reach because a ride that is not running does not wear. Without a mechanic
+    /// every ride in the park freezes permanently the first time it crosses the threshold.</summary>
+    sealed class ParkMechanicWorld : IMechanicWorld
+    {
+        readonly ParkStaffWorld _base;
+        readonly Func<System.Collections.Generic.IReadOnlyList<IRideJob>> _rides;
+        readonly Func<Staffer, int, int, bool> _pathTo;
+        readonly System.Collections.Generic.Dictionary<StaffMember, IRideJob> _target = new();
+        readonly System.Collections.Generic.List<Staffer> _order;
+
+        public ParkMechanicWorld(ParkStaffWorld shared,
+                                 Func<System.Collections.Generic.IReadOnlyList<IRideJob>> rides,
+                                 Func<Staffer, int, int, bool> pathToTile,
+                                 System.Collections.Generic.List<Staffer> order)
+        { _base = shared; _rides = rides; _pathTo = pathToTile; _order = order; }
+
+        public Staffer Current { get => _base.Current; set => _base.Current = value; }
+        public bool Log;
+
+        public long NowTick => _base.NowTick;
+        public bool IsTypeOnStrike(StaffKind kind) => _base.IsTypeOnStrike(kind);
+        public bool HasPatrolRect(StaffMember s) => _base.HasPatrolRect(s);
+        public bool TryPathIntoPatrolArea(StaffMember s) => _base.TryPathIntoPatrolArea(s);
+        public bool StrikeMusterExists => _base.StrikeMusterExists;
+        public bool TryPathToStrikeMuster(StaffMember s) => _base.TryPathToStrikeMuster(s);
+        public bool TryPathToRest(StaffMember s) => _base.TryPathToRest(s);
+
+        /// <summary>The ride this mechanic is on, or null. The binary keeps it on the object; the port
+        /// keeps it beside the StaffMember rather than widening the sim's type for a host's bookkeeping.</summary>
+        public IRideJob TargetOf(StaffMember s) => s != null && _target.TryGetValue(s, out var r) ? r : null;
+
+        int DistanceTo(IRideJob r) => Math.Abs(r.CentreX - (Current.X >> 8)) + Math.Abs(r.CentreZ - (Current.Z >> 8));
+
+        IRideJob Nearest(Func<IRideJob, bool> ok)
+        {
+            IRideJob best = null;
+            int bestD = int.MaxValue;
+            foreach (var r in _rides())
+            {
+                if (!ok(r)) continue;
+                int d = DistanceTo(r);
+                if (d >= bestD) continue;
+                bestD = d; best = r;
+            }
+            return best;
+        }
+
+        public bool TryClaimBrokenRide(StaffMember staff)
+        {
+            // ⚠ ONLY THE NEAREST IS EVER TRIED, and a condemned one refuses without falling through to
+            // the next. That is the reason rides.md §6.3 says a condemned ride is never repaired, and
+            // reproducing it means selecting first and testing after.
+            var r = Nearest(x => (x.Status == AttractionStatus.AboutToBreakDown
+                               || x.Status == AttractionStatus.BrokenDown)
+                              && (x.Claim == null || ReferenceEquals(x.Claim, staff)));
+            if (r == null || r.Lifetime == 0) return false;
+            r.Claim = staff;
+            _target[staff] = r;
+            return true;
+        }
+
+        /// <summary>⚠ THERE IS NO UPGRADE QUEUE IN THE PORT. The panel that appends to 0x801099EC does
+        /// not exist, so this is empty rather than approximated — an upgrade a player never asked for
+        /// would spend their money.</summary>
+        public bool TryClaimQueuedUpgrade(StaffMember staff) => false;
+        public bool TryClaimQueuedUpgradeAsRepair(StaffMember staff) => false;
+
+        public void ReleaseClaim(StaffMember staff)
+        {
+            if (TargetOf(staff) is { } r && ReferenceEquals(r.Claim, staff)) r.Claim = null;
+        }
+
+        public StaffMember NextMechanic(StaffMember staff)
+        {
+            int i = _order.FindIndex(s => ReferenceEquals(s.S, staff));
+            for (int j = i + 1; i >= 0 && j < _order.Count; j++)
+                if (_order[j].S.Kind == StaffKind.Mechanic) return _order[j].S;
+            return null;
+        }
+
+        public bool TryClaimRideFor(StaffMember from, StaffMember candidate, bool forRepair)
+        {
+            if (TargetOf(from) is not { } r) return false;
+            if (r.Claim != null && !ReferenceEquals(r.Claim, candidate)) return false;
+            if (forRepair && (r.Lifetime == 0
+                || (r.Status != AttractionStatus.AboutToBreakDown && r.Status != AttractionStatus.BrokenDown)))
+                return false;
+            r.Claim = candidate;
+            _target[candidate] = r;
+            return true;
+        }
+
+        public bool TryPathToClaimedRide(StaffMember staff)
+        {
+            if (TargetOf(staff) is not { } r || Current == null) return false;
+            Current.WaypointHead = TPW.Sim.WaypointPool.NoChain;   // 0x80093C68 drops the waypoint first
+            bool ok = _pathTo(Current, r.DoorX, r.DoorZ);
+            if (Log) Godot.GD.Print($"[tpw] mechanic path from ({Current.X >> 8},{Current.Z >> 8}) "
+                                  + $"to ride {r.Id} at ({r.DoorX},{r.DoorZ}): {(ok ? "accepted" : "refused")}");
+            return ok;
+        }
+
+        public bool TryPathToLeavePoint(StaffMember staff)
+        {
+            if (TargetOf(staff) is not { } r || Current == null) return false;
+            return _pathTo(Current, r.DoorX, r.DoorZ);
+        }
+
+        public int ClosingProgress(StaffMember staff) => TargetOf(staff)?.Closing ?? 0;
+        public void SetClosingProgress(StaffMember staff, int value)
+        { if (TargetOf(staff) is { } r) r.Closing = value; }
+        public int FootprintSpan(StaffMember staff) => TargetOf(staff)?.FootprintSpan ?? 0;
+
+        /// <summary>The closing step, 20.12, capped at 0x4000. The park's own frame time, the same one
+        /// the ride cycle races.</summary>
+        public int ClosingStep => Math.Min(0x4000, (int)(TPW.Data.EntranceFlags.TimeUnitsPerSecond / ParticleSystem.FramesPerSecond));
+
+        public void MarkRideUnderRepair(StaffMember staff)
+        { if (TargetOf(staff) is { } r) r.Status = AttractionStatus.UnderRepair; }
+
+        public void MarkRideOpenAndRelease(StaffMember staff)
+        {
+            if (TargetOf(staff) is not { } r) return;
+            r.Status = AttractionStatus.Reopen;
+            r.Claim = null;
+        }
+
+        public void CompleteUpgrade(StaffMember staff) => TargetOf(staff)?.CompleteUpgrade();
     }
 }

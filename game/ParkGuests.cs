@@ -287,7 +287,17 @@ namespace TPWGodot
                     },
                 },
             };
-            st.OnArrive = w => StaffBase.Arrive(((Staffer)w).S, StaffWorld(), false);
+            // ⚠ ARRIVAL IS PER CLASS, and this cost me an afternoon. Slot 35 is OVERRIDDEN: a
+            // mechanic's arrival (0x80096AE0) checks its target and starts closing the ride, where the
+            // base's (0x80094590) only knows patrol, strike and rest. Sending a mechanic through the
+            // base one made it walk all the way to a broken ride and then stand there with nothing to
+            // do, go idle, and claim the same ride again — for ever.
+            st.OnArrive = w =>
+            {
+                var s2 = (Staffer)w;
+                if (s2.S.Kind == StaffKind.Mechanic) { var mw = MechanicWorld(); mw.Current = s2; Mechanic.Arrive(s2.S, mw, false); }
+                else StaffBase.Arrive(s2.S, StaffWorld(), false);
+            };
             _parent.AddChild(st.Inst);
             _staff.Add(st);
             Place(st);
@@ -335,20 +345,42 @@ namespace TPWGodot
                 // "Nearest" is measured from where THIS member stands, so the world is pointed at it
                 // before every call, exactly as GuestBrain is set per guest.
                 world.Current = st;
+                var wasState = st.S.State;
+                var mech = st.S.Kind == StaffKind.Mechanic ? MechanicWorld() : null;
+                if (mech != null) mech.Current = st;
+
                 if (st.Answer is { } m)
                 {
                     st.Answer = null;
-                    StaffBase.OnPathMessage(st.S, m == PathMessage.Found);
+                    bool found = m == PathMessage.Found;
+                    if (mech != null) Mechanic.OnPathMessage(st.S, mech, found);
+                    else StaffBase.OnPathMessage(st.S, found);
                 }
                 if (st.WaypointHead != WaypointPool.NoChain)
                 {
-                    StaffBase.Arrive(st.S, world, true);   // tires them while they walk
+                    // ⭐ THE MECHANIC'S WALK COSTS ARE ITS OWN, and they run BEFORE the base's. Walking
+                    // to a breakdown RESTS a mechanic and demoralises it, which is backwards from every
+                    // other class and is what the code says (Mechanic's class note).
+                    if (mech != null) Mechanic.Arrive(st.S, mech, true);
+                    else StaffBase.Arrive(st.S, world, true);
                     Walk(st);
                     continue;
                 }
                 if (st.Waiting) continue;
 
-                StaffBase.IdleCheck(st.S, world);
+                // ⚠ IdleCheck IS PART OF THE IDLE STATE, NOT A PER-TICK PRE-PASS. StaffBase's own note
+                // has it as "slot 51, called from every class's Idle" (0x80094698). Running it on every
+                // state meant a tired mechanic was sent to rest out of the middle of a repair, and —
+                // worse — could never reach the branch that looks for work at all, because resting
+                // returns to Patrolling rather than to Idle.
+                if (st.S.State == StaffState.Idle) StaffBase.IdleCheck(st.S, world);
+                if (mech != null && RunMechanic(st, mech))
+                {
+                    if (LogStaff && st.S.State != wasState)
+                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                                     + $"jobs {(_rideJobs?.Invoke().Count ?? -1)}, tired {st.S.Tiredness} [own]");
+                    continue;
+                }
                 switch (st.S.State)
                 {
                     case StaffState.Patrolling: StaffBase.Patrol(st.S, world); break;
@@ -363,8 +395,53 @@ namespace TPWGodot
                     case StaffState.Idle: st.S.SetState(StaffState.Patrolling); break;
                     default: WanderStaff(st); break;
                 }
+                if (LogStaff && st.S.State != wasState)
+                    Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                                 + $"jobs {(_rideJobs?.Invoke().Count ?? -1)}, tired {st.S.Tiredness}");
             }
         }
+
+        /// <summary>Print each staff member's state changes (--park-log-rides).</summary>
+        public bool LogStaff { get; set; }
+
+        /// <summary>The mechanic's own states (TPW.Sim.Mechanic). Returns true when it handled the
+        /// state, so the shared machine does not also run on it.
+        ///
+        /// ⭐ TWO JOBS, ONE MACHINE: a repair is 56 -> 16 -> 14 -> 17 -> 58 and an upgrade is
+        /// 57 -> 52 -> 54 -> 17 -> 58. Nothing in a repair restores reliability; reopening the ride is
+        /// the repair, and that is what unsticks a park whose rides have all worn into status 4.</summary>
+        bool RunMechanic(Staffer st, ParkMechanicWorld mech)
+        {
+            switch (st.S.State)
+            {
+                case StaffState.Idle: Mechanic.Idle(st.S, mech, _dice); return true;
+                case MechanicStates.GoToBrokenRide: Mechanic.SetOff(st.S, mech, true); return true;
+                case MechanicStates.GoToUpgradeRide: Mechanic.SetOff(st.S, mech, false); return true;
+                case MechanicStates.ClosingRide: Mechanic.CloseRide(st.S, mech, false); return true;
+                case MechanicStates.ClosingForUpgrade: Mechanic.CloseRide(st.S, mech, true); return true;
+                case MechanicStates.Repairing: Mechanic.Work(st.S, mech, false); return true;
+                case MechanicStates.Upgrading: Mechanic.Work(st.S, mech, true); return true;
+                case MechanicStates.OpeningRide: Mechanic.OpenRide(st.S, mech); return true;
+                case MechanicStates.LeavingRide: Mechanic.LeaveRide(st.S, mech); return true;
+                default: return false;          // the shared states are the base's
+            }
+        }
+
+        ParkMechanicWorld MechanicWorld() => _mechWorld ??= new ParkMechanicWorld(
+            StaffWorld(),
+            () => _rideJobs?.Invoke() ?? (IReadOnlyList<IRideJob>)System.Array.Empty<IRideJob>(),
+            (st, tx, tz) =>
+            {
+                if (!_finder.Request(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return false;
+                st.Waiting = true;
+                return true;
+            },
+            _staff) { Log = LogStaff };
+        ParkMechanicWorld _mechWorld;
+        Func<IReadOnlyList<IRideJob>> _rideJobs;
+
+        /// <summary>The placed rides a mechanic can be sent to. Set by the view, which owns them.</summary>
+        public void SetRideJobs(Func<IReadOnlyList<IRideJob>> jobs) => _rideJobs = jobs;
 
         /// <summary>State 5, random wander. ⚠ A STAND-IN, the same one the guests use: the real wander
         /// (§2.7) picks its tile by a rule this does not implement.</summary>
