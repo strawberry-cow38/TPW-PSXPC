@@ -260,21 +260,23 @@ namespace TPWGodot
         /// are not the same rate.</summary>
         public void RunPathfinder() => _finder.RunFrame();
 
-        /// <summary>Put a member of staff in the park at a tile. Their sprite is one of the game's own
-        /// four staff blocks (PeopleSheet.StaffBlocks, entries 263/264/266/274).
+        /// <summary>Put a member of staff in the park at a tile, drawn from the block its class actually
+        /// uses: mechanic 263, guard 264, cleaner 266, researcher 274 (READ, findings/staff.md §3, the
+        /// manager slots 0x800972E0/0x8009852C/0x80099590/0x80099C5C).
         ///
-        /// ⚠ WHICH BLOCK IS WHICH JOB IS NOT READ. There are four blocks and five classes, and nothing
-        /// maps one to the other yet, so the kind picks a block by its enum order. That is the port's
-        /// arrangement, not the game's: a mechanic may currently be drawn as a handyman.</summary>
+        /// ⚠ AN ENTERTAINER IS NOT UNIFORMED and has no block here — its resource is per THEME
+        /// (403/401/402/404), which is why there are four uniformed blocks for five classes. Until the
+        /// park knows its theme, hiring one falls back to the mechanic's block and says so.</summary>
         public Staffer Hire(StaffKind kind, int tx, int tz)
         {
-            var blocks = TPW.Data.PeopleSheet.StaffBlocks;
+            int block = StaffAppearance.Art(kind == StaffKind.Entertainer ? StaffKind.Mechanic : kind, 0)
+                                       .PeopleBlock ?? TPW.Data.PeopleSheet.StaffBlocks[0];
             var st = new Staffer
             {
                 S = new StaffMember(kind),
                 X = Centre(tx),
                 Z = Centre(tz),
-                Block = blocks[(int)kind % blocks.Length],
+                Block = block,
                 Inst = _sprites?.NewGuest() ?? new MeshInstance3D
                 {
                     Mesh = new BoxMesh { Size = new Vector3(0.20f, 0.46f, 0.20f) },

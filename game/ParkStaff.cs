@@ -16,16 +16,15 @@ namespace TPWGodot
     {
         public StaffMember S;
 
-        /// <summary>⚠ NOT ESTABLISHED, AND BORROWED RATHER THAN INVENTED. behaviour.md reads the shared
-        /// step as `speed x timescale >> 14` with speed = P+0x60 in 15..29, and reads the VISITOR's
-        /// constructor rolling rand(15)+15 into it (0x8008C6CC). Nothing reads what a STAFF object's
-        /// P+0x60 is set to. 15 is the bottom of the game's own range - the speed it pins guests to in a
-        /// queue - so a mechanic walks at a real number from the game rather than a made-up one, and it
-        /// is the slowest choice in range so nothing downstream is tuned against an optimistic value.
-        /// Replace it the moment the staff constructor is read.</summary>
-        public const int NotEstablishedWalkSpeed = 15;
-
-        public override int WalkSpeed => NotEstablishedWalkSpeed;
+        /// <summary>READ (findings/staff.md §2), and it is NOT a field. There is no staff P+0x60: a
+        /// uniformed staff node is 0x4C bytes and P+0x60/P+0x62 belong to the larger Visitor object.
+        /// The walker asks virtual slot 44 instead, and for a mechanic that is a per-SKILL row whose
+        /// other column is its repair time — (240,9), (180,12), (120,14), (60,16), (60,18).
+        ///
+        /// ⭐ SO SPEED IS A CONSEQUENCE OF TRAINING, READ FRESH EVERY CALL. A new mechanic walks at 9,
+        /// barely over half the 15 this port had borrowed from the visitor while it was unread, and it
+        /// gets faster the moment it is trained rather than at its next hire.</summary>
+        public override int WalkSpeed => StaffMotion.Speed(S);
     }
 
     /// <summary>The park as the shared staff machine reads it (TPW.Sim.StaffBase, behaviour.md §3.1).
