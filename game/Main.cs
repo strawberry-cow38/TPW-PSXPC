@@ -21,6 +21,7 @@ namespace TPWGodot
         bool _autoBreakHard;
         int _autoUpgrade = -1;
         string _autoPrice;
+        bool _autoSeats;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -582,6 +583,7 @@ namespace TPWGodot
                 else if (arg == "--park-nogate") _noGate = true;
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
                 else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
+                else if (arg == "--park-seats") _autoSeats = true;
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-break="))
                 {
@@ -985,6 +987,7 @@ namespace TPWGodot
                         }
                     }
                     // Last, because the ride it names may have been placed by --park-queue.
+                    if (_autoSeats) GD.Print("[tpw] seat table:" + _park.SeatTable());
                     if (_autoPrice != null)
                         foreach (var one in _autoPrice.Split(';'))
                         {

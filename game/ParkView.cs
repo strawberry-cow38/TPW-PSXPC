@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using Godot;
@@ -1069,6 +1070,12 @@ namespace TPWGodot
                         + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, "
                         + $"reliability {a.Reliability}, type {a.Rec.Type}"
                         + $", intensity base {a.Rec.BaseIntensity} live {RidePanel.Intensity(a)}"
+                        // ⭐ EVERY LEVEL'S SEAT COUNT, not just the live one. The model ships every seat
+                        // the ride will ever have (cow tools: eleven skin-0 bones on entry 220, against
+                        // a measured 8 -> 11 on a level 0 -> 1 upgrade), so the top of this list should
+                        // equal the bone count on any ride. That is the cross-check that turns one
+                        // agreement into a rule.
+                        + $", seats by level [{string.Join(",", a.Rec.Levels.Select(l => l.MaxSeats))}]"
                         // ⭐ THE QUEUE HEAD'S STATE IS THE WHOLE LOADING STORY. RideLoading.Load boards
                         // only a head in 18, and a head in any other state blocks the ride entirely —
                         // there is no "skip him". So "people in the queue, they just don't get on after
@@ -2261,6 +2268,21 @@ namespace TPWGodot
         /// or -1 if the ride was not found.</summary>
         /// <summary>--park-price=ENTRY,POUNDS: set a stall's sale price, the thing the panel would set.
         /// A TEST HOOK for the one input the want formula is most sensitive to.</summary>
+        /// <summary>--park-seats: every attraction in the catalogue with its seat count at each upgrade
+        /// level. ⭐ FOR THE SEAT/BONE CROSS-CHECK: the model ships every seat a ride will ever have, so
+        /// the LAST number here is the one a skinless-bone count should match. Reading it needs no
+        /// placement, which matters because most entries cannot be placed on a given map at all.</summary>
+        public string SeatTable()
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var (rec, name) in _attractions)
+            {
+                if (rec.Levels.Length == 0) continue;
+                sb.Append($"\n  seats {rec.Entry,4} type {rec.Type} [{string.Join(",", rec.Levels.Select(l => l.MaxSeats))}]  {name}");
+            }
+            return sb.Length == 0 ? "no catalogue" : sb.ToString();
+        }
+
         public bool SetStallPrice(int entry, int pounds)
         {
             foreach (var a in _attractionsPlaced)
