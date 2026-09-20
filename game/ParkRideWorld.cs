@@ -126,7 +126,11 @@ namespace TPWGodot
                 _r.Queue.RemoveAt(0);
                 _r.Riders.Add(g);
                 g.V.SetState((VisitorState)21);              // 21: loading, the ride owns it now
+                // ⚠ HIDE IT HERE, NOT ON THE NEXT MOVE. A boarded guest is skipped by the walk loop,
+                // so nothing would ever draw it again - it would simply stand frozen at the head of
+                // the queue for the whole ride, which is exactly what it looked like.
                 g.Hidden = true;
+                if (g.Inst != null) g.Inst.Visible = false;
             }
 
             /// <summary>Message 6 to everyone still queued. ⚠ The real one carries a per-guest
@@ -143,7 +147,7 @@ namespace TPWGodot
                 var g = _r.Riders[0];
                 _r.Riders.RemoveAt(0);
                 g.Hidden = false;
-                _place(g);
+                _place(g);                                    // puts it at the exit AND shows it again
                 g.V.SetState((VisitorState)22);              // 22: unloading, which applies the ride's effect
                 _r.Served++;
             }
