@@ -598,23 +598,22 @@ namespace TPWGodot
             return false;
         }
 
-        /// <summary>No target, or the decision gave up: walk somewhere on the paths so the guest is not
-        /// simply stood still. ⚠ A STAND-IN for TPW.Sim's real wander (§2.7), which is not wired.</summary>
+        /// <summary>No target, or the decision gave up: the game's own wander (TPW.Sim.VisitorWander).
+        ///
+        /// ⭐ IT DOES NOT ASK THE PATHFINDER when the guest is on a path — it walks rand(10) steps
+        /// neighbour to neighbour off the tile's link bits and chains the waypoints itself. That is the
+        /// whole point of wiring it: the stand-in this replaces asked for a route to a random walkable
+        /// tile anywhere on the map, most of which sit on path islands nothing connects to, and a park
+        /// of thirty guests produced four thousand failed searches and held all ten request slots.</summary>
         void Wander(Guest g)
         {
-            if (_walkable.Count == 0) return;
-            var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
-
-            // ⚠ A REFUSAL IS NOT A FAILURE AND GETS NO MESSAGE. Ten searches may be outstanding at
-            // once; the eleventh is simply declined, and so is any request made with the node pool
-            // empty. The guest must retry rather than wait, or a busy park quietly freezes everyone
-            // who happened to ask on a crowded frame - which is exactly what the original's own
-            // callers do (state 23 retries next tick).
-            if (!_finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return;
-
-            g.Waiting = true;
-            g.Answer = null;
+            _wander ??= new ParkWanderWorld(_map, _waypoints, () => _now,
+                (w, x, y, flags, _) => _finder.Request(w, w.X, w.Z, x, y, (PathFlags)flags, 0) && (w.Waiting = true));
+            _wander.Current = g;
+            if (VisitorWander.Tick(g.V, _wander, _dice) != WanderOutcome.PathRequested) return;
         }
+        ParkWanderWorld _wander;
+
 
         void Walk(Walker g)
         {
