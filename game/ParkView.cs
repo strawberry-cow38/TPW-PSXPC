@@ -2717,7 +2717,7 @@ void fragment() {
             int n = 0;
             for (int tries = 0; tries < RideAmbienceRolls; tries++)
             {
-                n = RideAmbienceFirst + _rideDice.Next(RideAmbienceCount);
+                n = RideAmbience[_rideDice.Next(RideAmbience.Length)];
                 if (!Playing3D(n)) break;
             }
             var stream = Stream(_guestSounds, 1, n);
@@ -2737,8 +2737,18 @@ void fragment() {
             return false;
         }
 
-        /// <summary>Group 1's ride ambience: ids 4..14, rolled with up to eleven retries (0x800B8FCC).</summary>
-        const int RideAmbienceFirst = 4, RideAmbienceCount = 11, RideAmbienceRolls = 11;
+        /// <summary>Group 1's ride ambience, rolled with up to eleven retries (0x800B8FCC).
+        ///
+        /// ⚠⚠ THIS IS A DELIBERATE DEVIATION AND THE ONLY ONE IN THE SOUND CODE. The game's own table at
+        /// 0x800E7028 is **4..14**, eleven contiguous ids, and it really does roll all of them at a running
+        /// ride: 0x800B8FCC has exactly one caller (the status-2 tick at 0x8009CAF0) and no data reference,
+        /// and the table is referenced from nowhere else, so there is no second list and no misread group —
+        /// `a0 = 1` is set two instructions before the play. Group 1 is ONE shared people-bank, and **9 and
+        /// 10 are the toilet's straining noises**, which master identified by ear coming out of a roller
+        /// coaster. They are dropped here at master's call. Restoring fidelity is putting 9 and 10 back in
+        /// this array; nothing else has to change.</summary>
+        static readonly int[] RideAmbience = { 4, 5, 6, 7, 8, 11, 12, 13, 14 };
+        const int RideAmbienceRolls = 11;
         readonly AudioStreamPlayer3D[] _sfx3d = new AudioStreamPlayer3D[6];
         readonly int[] _sfx3dSound = new int[6];
         int _sfx3dNext;
