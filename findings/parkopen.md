@@ -21,6 +21,26 @@ and should not be listed as a deviation.
 placed shop's context list (verified in the same session: a shop with no queue offers exactly
 "Delete"). Nothing here says what ○ does.
 
+### The whole pad, from one state, with a control
+
+Same save, one button pulsed at frame 60 (8 frames down), final frame at 751 compared against a
+run with no input at all. Park gate selected, root radial (Build / OK) already open:
+
+| button | changed | what |
+|---|---|---|
+| ✕ cross | 2694 | the context list at the cursor — one row, **Open** |
+| △ triangle | 3396 | back / closes |
+| L1 | 3035 | camera |
+| R1 | 3020 | camera |
+| Start | 3495 | **PAUSED** on screen |
+| ○ circle | **0** | nothing |
+| □ square | **0** | nothing |
+| Select | **0** | nothing |
+
+⭐ FIVE BUTTONS REGISTER, so the pad is reaching the console and a zero is a real zero rather than a
+dead instrument — that is the control this table needed, and without it "○ does nothing" would be
+indistinguishable from "○ never arrived".
+
 ⚠ ○ COULD NOT BE REPRODUCED DOING ANYTHING. Pressed from two different selected objects at four
 delays (100, 300, 500, 700 frames after the restore), every final frame came back BYTE-IDENTICAL to
 a do-nothing control. That is a negative result about these two states, not a refutation of
