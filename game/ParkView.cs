@@ -1751,9 +1751,15 @@ namespace TPWGodot
         /// position, plays effect 0x78, calls OpenPark (0x80054144) and then points the camera at that position.
         /// This runs the same sequence from a click on the gate.
         ///
-        /// ⚠ THE GAME'S TRIGGER IS THE PARK MENU, NOT THE GATE. findings/parkopen.md §2.1: "Open Park" is entry
-        /// 12 of the menu table at 0x800F4884, and the builder inserts it ONLY while IsOpen() == 0. The gate
-        /// click is master's, and it is the same action behind a different door. The port has no park menu yet.
+        /// ⚠ WHAT IS ESTABLISHED, AND WHAT IS NOT. The park-open flag 0x80102D30 has exactly THREE writers —
+        /// OpenPark, ClosePark, IsOpen (parkopen.md §1, re-checked against gp+0x06DC) — and none is a click
+        /// handler, so a gate click cannot set it directly. The live UI route is the park menu's "Open Park",
+        /// entry 12 of 0x800F4884, inserted only while IsOpen() == 0.
+        ///
+        /// ⚠ But master points out the gate IS selectable in the real game, which is a fair question: a click
+        /// that opens the ROOT MENU, which carries "Open Park", would make the gate the way in with the menu
+        /// in between. That pick handler is NOT traced, so this does not claim the gate is or is not the
+        /// game's route — only that nothing reaches the flag without going through one of those three.
         ///
         /// ⚠ Effect 0x78 is NOT played, because it is not a (group, sound) and nothing has identified it —
         /// parkopen.md marks it GUESS-high as the jingle. Better silent than the wrong noise.

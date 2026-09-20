@@ -48,6 +48,19 @@ Callers of OpenPark (all four, READ): 0x80075ABC (menu), 0x800622A0 (slot 36), 0
 (saved-park stream), 0x80059AA8 (memory-card mode byte). Callers of ClosePark: 0x80050600 (game
 start, at 0x8005081C) and slot 37.
 
+### 1a. ⚠ Is the GATE a route in? (open, 2026-09-20)
+
+Master: "the real game DOES let u open the park from the gate, because WHY would it be selectable?" — a
+fair question, and the answer here is partial. **Re-checked: the flag at gp+0x06DC = 0x80102D30 has
+exactly three references in the whole image** — the two writers in §1 and `IsOpen`. So **no click handler
+sets it**, and a gate click cannot open the park directly.
+
+What that does NOT settle: whether picking the gate opens the **root menu**, which carries "Open Park"
+(§2.1). That would make the gate the way in with the menu in between, and master's design argument is
+exactly that. The gate object is `gp+0x1320` = 0x80103974, referenced six times — created at 0x80058BB4,
+drawn at 0x80057C74/F68/F8C, and ticked from the bus tick at 0x800527D4 through its own vtable. **None of
+those six is a pick handler**, so if the route exists it is reached some other way and is not yet traced.
+
 ## 2. What normally sets it
 
 ### 2.1 The park menu — "Open Park"
