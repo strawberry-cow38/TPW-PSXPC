@@ -55,7 +55,7 @@ namespace TPWGodot
             _top = Make(CanvasItemMaterial.BlendModeEnum.Mix);
             _sub.Paint = PaintRing;
             _add.Paint = PaintFlips;
-            _top.Paint = on => { PaintCount(on); PaintContext(on); };
+            _top.Paint = on => { PaintCount(on); PaintPanel(on); PaintContext(on); };
         }
 
         public void Setup(TextureSheet common, byte[] exe, StringTable strings)
@@ -120,6 +120,12 @@ namespace TPWGodot
 
         static Color Psx((byte R, byte G, byte B) c) => new(c.R / 128f, c.G / 128f, c.B / 128f);
 
+        /// <summary>⚠ A FLAT COLOUR IS NOT A TEXEL TINT. <see cref="Psx"/> divides by 128 because 128 is the
+        /// GPU's "draw the texel as it is" — right for tinting a sprite, wrong for a quad with no texture,
+        /// where the value IS the colour and anything over 128 blows out. The panel's orange came out the
+        /// same yellow as its yellow until this existed.</summary>
+        static Color Rgb((byte R, byte G, byte B) c) => new(c.R / 255f, c.G / 255f, c.B / 255f);
+
         /// <summary>Sprite s with its pen at PSX (px, py), measured from the left or the right; mirrored left-right
         /// when asked, with a colour for each corner (top-left, top-right, bottom-left, bottom-right), the GPU's
         /// gouraud, 128 = the texel as it is.</summary>
@@ -145,6 +151,104 @@ namespace TPWGodot
         }
 
         string Label(int id) => _strings?[id] ?? "";
+
+        /// <summary>An attraction's panel as the HUD needs it: the numbers, already decided, with the LAYOUT
+        /// left to the HUD because that is where every other coordinate in this port lives. Null = closed.
+        ///
+        /// A value of −1 on a bar means the port cannot supply it yet; the bar is drawn empty with its label
+        /// dimmed rather than filled with an invention.</summary>
+        public sealed class AttractionPanelView
+        {
+            public string Name = "";
+            public string Age, Users;                      // null = not wired
+            public int Excitement = -1, Reliability = -1, Repair = -1, Life = -1;
+            public int Speed, SpeedMin, SpeedMax;
+            public int Capacity, CapacityMin, CapacityMax; public bool ShowCapacity;
+            public int Duration, DurationMin, DurationMax; public bool ShowDuration;
+        }
+        public AttractionPanelView Panel;
+
+        /// <summary>The attraction panel's Details page, at the game's own coordinates (findings/panel.md §2).
+        /// Six readings — Age and Users as text, then Excitement, Reliability, Repair and Life as 0..100 bars —
+        /// and up to three sliders on the right.
+        ///
+        /// ⚠ RELIABILITY AND REPAIR ARE DIFFERENT NUMBERS: the projected value against the live one. The panel
+        /// shows both, side by side, and that is the point of the page.
+        ///
+        /// ⚠ THE FRAMES AND BARS ARE FILLS ONLY. The game draws each frame's gradient UNDER sprite corners
+        /// (0x169 + 0x148) and stretched edges (0x173, 0x161), and a bar under caps and a knob (0x163..0x170).
+        /// Every rectangle, colour and coordinate here is the game's; the ornament is not drawn yet.</summary>
+        void PaintPanel(CanvasItem on)
+        {
+            if (Panel == null) return;
+            var dim = Psx((0x40, 0x40, 0x40));
+            var lit = Psx((0x80, 0x80, 0x80));
+            // GUESS: the panel's own rect is READ (0x800446C4 writes 35/31/440/191 to the same +8/+10/+20/+22
+            // the frames use), but nothing proves it is DRAWN, and its colour is unknown.  The four greys at
+            // 0x80102B20 sit immediately before the two frame rects in the same data block and read like a
+            // gouraud quad's corners, so they are the best candidate.  ⚠ The info frame starts 19px LEFT of
+            // this rect, which is either how the game looks or a sign this rect is not the backdrop at all.
+            Quad(on, 35, 31, 440, 191, Rgb((0x20, 0x20, 0x20)), Rgb((0x80, 0x80, 0x80)));   // backdrop
+            Frame(on, 16, 64, 280, 152);                                                     // info frame
+            Frame(on, 280, 80, 180, 110);                                                    // control frame
+            Text(on, Panel.Name, 156, 80, 1, false, lit);
+
+            Text(on, Label(0x1DC), 66, 114, 0, false, dim);
+            Text(on, Panel.Age ?? "-", 126, 114, 1, false, Panel.Age == null ? dim : lit);
+            Text(on, Label(0x18C), 206, 114, 0, false, dim);
+            Text(on, Panel.Users ?? "-", 256, 114, 1, false, Panel.Users == null ? dim : lit);
+
+            Reading(on, 0x37,  66, 144, 176, 134, Panel.Excitement);
+            Reading(on, 0x3ED, 66, 164, 176, 154, Panel.Reliability);
+            Reading(on, 0x25C, 66, 184, 176, 174, Panel.Repair);
+            Reading(on, 0x3FA, 66, 204, 176, 194, Panel.Life);
+
+            Slider(on, 0x1A1, 100, Panel.Speed, Panel.SpeedMin, Panel.SpeedMax);
+            int y = 134;
+            if (Panel.ShowCapacity) { Slider(on, 0x364, y, Panel.Capacity, Panel.CapacityMin, Panel.CapacityMax); y = 168; }
+            if (Panel.ShowDuration) Slider(on, 0x2D5, y, Panel.Duration, Panel.DurationMin, Panel.DurationMax);
+
+            // The page-name strip, bottom right, with its icon (a ride's is 0x141).
+            Text(on, Label(0x39A), 354, 216, 0, false, lit);
+        }
+
+        /// <summary>A labelled 0..100 bar: the label at the left, the bar at (bx, by) 80 wide.</summary>
+        void Reading(CanvasItem on, int label, int lx, int ly, int bx, int by, int value)
+        {
+            Text(on, Label(label), lx, ly, 0, false, Psx((0x40, 0x40, 0x40)));
+            Bar(on, bx, by, 80, value, 0, 100);
+        }
+
+        /// <summary>A slider: its label centred above the bar, both at the control frame's x (findings §2).</summary>
+        void Slider(CanvasItem on, int label, int y, int value, int min, int max)
+        {
+            Text(on, Label(label), 370, y - 4, 1, false, Psx((0x40, 0x40, 0x40)));
+            Bar(on, 320, y, 100, value, min, max);
+        }
+
+        /// <summary>The game's bar: a teal track with a red fill, 0..100 of its range. ⚠ Caps and knob absent.</summary>
+        void Bar(CanvasItem on, int x, int y, int w, int value, int min, int max)
+        {
+            var track = Rgb((0x00, 0x68, 0x72));
+            Quad(on, x, y, w, 6, track, track);
+            if (value < 0 || max <= min) return;
+            int fill = Math.Clamp((value - min) * w / (max - min), 0, w);
+            if (fill <= 0) return;
+            var red = Rgb((0xF0, 0x40, 0x40));
+            Quad(on, x + 1, y + 1, fill, 4, red, red);
+        }
+
+        /// <summary>A frame's fill: the gouraud quad the game puts under its border, orange to yellow.</summary>
+        void Frame(CanvasItem on, int x, int y, int w, int h)
+            => Quad(on, x, y, w, h, Rgb((0xE7, 0x80, 0x1A)), Rgb((0xE8, 0xCA, 0x2D)));
+
+        /// <summary>A rectangle in PSX coordinates, shaded top colour to bottom colour.</summary>
+        void Quad(CanvasItem on, int px, int py, int pw, int ph, Color top, Color bottom)
+        {
+            float x = Left(px), y = py * Sy, w = pw * Sx, h = ph * Sy;
+            on.DrawPrimitive(new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + h), new Vector2(x, y + h) },
+                             new[] { top, top, bottom, bottom }, new[] { Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero });
+        }
 
         /// <summary>The context list the right button opens on an attraction: the command labels, already
         /// resolved to words, and where the cursor was. Empty means nothing is open.
@@ -174,8 +278,8 @@ namespace TPWGodot
             int px = (int)(ContextAt.X / Sx), py = (int)(ContextAt.Y / Sy);
             float x = Left(px), y = py * Sy, w = width * Sx, hh = h * Sy;
             // The frame's own gradient: orange at the top, yellow at the bottom (DAT_80102AEC / DAT_80102AE4).
-            var top = Psx((0xE7, 0x80, 0x1A));
-            var bottom = Psx((0xE8, 0xCA, 0x2D));
+            var top = Rgb((0xE7, 0x80, 0x1A));
+            var bottom = Rgb((0xE8, 0xCA, 0x2D));
             on.DrawPrimitive(new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + hh), new Vector2(x, y + hh) },
                              new[] { top, top, bottom, bottom }, new[] { Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero });
             for (int i = 0; i < ContextRows.Count; i++)

@@ -45,6 +45,25 @@ or a bin opens the main menu instead.
 | 3D model view | (52,70) 224x140, zoom 1400, spins every frame | 0x8004A7EC / 0x8004B3B4 |
 | tab menu box | (154,90) 200x90, rows centred x=254 | 0x8004BBE4 |
 
+### 1a. The rects are the SAME four fields, and they are ABSOLUTE
+
+Re-read 2026-09-20 after the first draw looked wrong. `0x80045AE8(obj,x,y,w,h)` → `0x80040ED0`/`0x80045B34`
+→ four leaf setters that write **x→+8, y→+10, w→+20, h→+22**, and the panel's own init (0x800446C4) writes
+those same four fields directly. So panel and frames are one widget family with one kind of rect, and
+w/h are sizes, not a second corner. The frame rects are not literals: the routines pass four **globals**,
+`0x80102B30..3C` = 16/64/280/152 (info) and `0x80102B40..4C` = 280/80/180/110 (control).
+
+Three independent checks say the coordinates are **absolute screen**, not panel-relative:
+the name at x=156 is exactly the info frame's centre (16+140); the slider labels at x=370 are exactly the
+control frame's centre (280+90); and the tab menu's row centre x=254 lands on the **panel's** centre
+(35+220 = 255), which is only true in absolute space.
+
+⚠ **Which leaves the info frame starting 19px LEFT of the panel rect** (16 vs 35). Either the panel rect
+is not drawn as a backdrop, or it is not the backdrop. Unresolved — flagged to master against the real game.
+**GUESS**: the four greys at `0x80102B20` (0x202020, 0x404040, 0x606060, 0x808080) sit immediately before
+the two frame rects in the same data block and read like a gouraud quad's corners, so the port draws the
+backdrop with them. Nothing proves it.
+
 Frames are a gouraud quad, orange (0xE7,0x80,0x1A) top to yellow (0xE8,0xCA,0x2D) bottom, with corner
 sprite 0x169 + inner 0x148 and edge 0x173 (0x8003EDCC). Sprites come from FOLIO 0x1A0 (#416), 12-byte
 entries at table+id*12 (0x80029450). Title ids: ride 0x186, shop 0x129, sideshow 0x17, toilet 0x21D,

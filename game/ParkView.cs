@@ -2707,6 +2707,29 @@ void fragment() {
             _selectionMesh.Mesh = SelectionMesh();
             PoseAttractions(_frameClock);
             _hud.Cost = PendingCost();
+            // The panel, handed to the HUD as numbers; the HUD owns where they go.
+            if (_panelFor != null)
+            {
+                var r = TPW.Sim.RidePanel.Ranges(_panelFor);
+                bool coaster = _panelFor.Type == AttractionType.RollerCoaster;
+                _hud.Panel = new ParkHud.AttractionPanelView
+                {
+                    Name = _catalogueNames?[_panelFor.Rec.NameId] ?? $"#{_panelFor.Rec.Entry}",
+                    // ⚠ Age and Users stay null - the port records neither the day a ride was built nor how
+                    // many it has served - and the panel shows a dash rather than a plausible number.
+                    Age = null, Users = null,
+                    Excitement = _panelFor.BaseIntensity,
+                    Reliability = -1,                       // ⚠ the PROJECTED value; not computed yet
+                    Repair = _panelFor.Reliability,
+                    Life = _panelFor.Lifetime,
+                    Speed = _panelFor.SpeedSlider, SpeedMin = r.Speed.Min, SpeedMax = r.Speed.Max,
+                    Capacity = _panelFor.Capacity, CapacityMin = r.Capacity.Min, CapacityMax = r.Capacity.Max,
+                    ShowCapacity = _panelFor.MaximumSeats > 1,
+                    Duration = _panelFor.CyclesPerLoad, DurationMin = r.Duration.Min, DurationMax = r.Duration.Max,
+                    ShowDuration = !coaster,
+                };
+            }
+            else _hud.Panel = null;
             // The right button's context list, handed to the HUD as words at a place on screen.
             if (_hud.ContextRows.Count > 0 || _contextFor != null)
             {
