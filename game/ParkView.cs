@@ -1147,7 +1147,14 @@ namespace TPWGodot
             box.Cx = box.X0 + box.W / 2; box.Cz = box.Z0 + box.D / 2;
             // Placed (status 0), then built: 0x80062894 zeroes the build clock, sets status 1 and takes the next
             // build variant (0x8006268C: a counter that runs 0..7 and round again, one per placement, never reset).
-            var a = new PlacedAttraction { Rec = rec, Inst = inst, Rest = inst.Transform, Box = box, Ox = ox, Oz = oz, Rot = rot };
+            var a = new PlacedAttraction
+            {
+                Rec = rec, Inst = inst, Rest = inst.Transform, Box = box, Ox = ox, Oz = oz, Rot = rot,
+                RunLength = () => _attractionMesh?.Invoke(rec.Entry)?.HeaderWord0 ?? 0,
+            };
+            a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
+            // Read once, at placement (0x8009F524) - and never again, which is the point of it.
+            a.Wear.Lifetime = rec.Levels.Length > 0 ? rec.Level0.Lifetime : 0;
             a.Status = AttractionLifecycle.Enter(AttractionStatus.JustPlaced, a);
             a.Status = AttractionLifecycle.Enter(AttractionStatus.UnderConstruction, a);
             a.Variant = _buildVariant;
@@ -1158,7 +1165,7 @@ namespace TPWGodot
         /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
         /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
         /// list walks them to find the one under the cursor.</summary>
-        sealed class PlacedAttraction : IAttractionWorld
+        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld
         {
             public AttractionDefinition Rec;
             public MeshInstance3D Inst;
@@ -1166,18 +1173,59 @@ namespace TPWGodot
             public BoxSite Box;
             public int Ox, Oz, Rot;
             public AttractionStatus Status;
-            /// <summary>The build animation: which of the eight rigs (A+0x6D) and its clock, in 1/4096 ticks (A+0x60).</summary>
-            public int Variant, Clock;
+            /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
+            public int Variant;
+            /// <summary>The running model's own phase length, and the build rig's: both are the mesh's
+            /// first halfword, which is what the animation descriptor's +0x38 is copied from
+            /// (0x8002C5FC → 0x8002C604, rides.md §0 item 7). Supplied by the view, which owns the
+            /// model cache.</summary>
+            public Func<int> RunLength, BuildLength;
+
+            /// <summary>The animation clock that decides when a phase ends, and with it the end of both
+            /// construction and a run (0x800658D8).</summary>
+            public readonly RideCycle Cycle = new();
+            /// <summary>Reliability, lifetime and the condemned mechanic (rides.md §6).</summary>
+            public readonly RideWear Wear = new();
+
+            /// <summary>The speed slider, A+0xB8. ⚠ 50 is the DEFAULT rides.md §8 records on a placed
+            /// Crazy Ape; the range comes from the record. Nothing moves it yet - there is no panel.</summary>
+            public int SpeedSlider { get; set; } = 50;
+
             public bool IsRide => Rec.IsRide;
             public bool BuildAnimationComplete { get; set; }
-            public int Reliability { get; set; } = 100;
-            public int CyclesRun { get; set; }
-            public int CyclesPerLoad => 1;
+
+            // ⚠ IAttractionWorld WANTS POINTS, RideWear KEEPS 20.12. One of the two has to convert and
+            // it is cheaper to do it here than to widen the lifecycle's interface, which is about
+            // statuses and does not otherwise care about fixed point.
+            public int Reliability
+            {
+                get => Wear.ReliabilityPoints;
+                set => Wear.Reliability = value << 12;
+            }
+
+            public int CyclesRun { get => Cycle.CyclesRun; set => Cycle.CyclesRun = value; }
+            /// <summary>The duration slider: half the level's maximum, so 5 for most rides and 25 for a
+            /// bouncer (rides.md §4.3). ⚠ Its own slider does not exist yet either.</summary>
+            public int CyclesPerLoad => Rec.Levels.Length > 0 ? Rec.Level0.DefaultCycles : 1;
+            /// <summary>⚠ NO RIDERS YET. Guests do not board (TPW.Sim.VisitorQueue is not wired to the
+            /// park), so a ride always unloads instantly and always wears at the empty-load rate. Both
+            /// are placeholders that disappear when the queue is connected, not decisions.</summary>
             public bool IsEmpty => true;
             public bool MechanicAssigned => false;
             public void PostMessage(int id) { }
             public void EjectEveryone() { }
             public void ClearSmoke() { }
+
+            // IRideAnimation: a flat ride has one mesh and therefore one phase (astra's phase table).
+            public int CurrentPhase => 0;
+            public int PhaseLength(int phase) => RunLength?.Invoke() ?? 0;
+            public int BuildAnimationLength => BuildLength?.Invoke() ?? 0;
+
+            // IRideWearWorld
+            public int Riders => 0;
+            public int MaxSeats => Rec.Levels.Length > 0 ? Math.Max(1, Rec.Level0.MaxSeats) : 1;
+            public int WearMultiplier => Rec.Levels.Length > 0 ? Rec.Level0.WearMultiplier : 5;
+            public bool NoWear => false;
         }
         readonly List<PlacedAttraction> _attractionsPlaced = new();
 
@@ -1208,12 +1256,22 @@ namespace TPWGodot
         {
             foreach (var a in _attractionsPlaced)
             {
+                // ⭐ ONE CLOCK DRIVES BOTH. Construction and a run are the same accumulator against
+                // different animation lengths (0x800658D8), which is why the build finishes with the
+                // animation rather than on a timer.
                 if (a.Status == AttractionStatus.UnderConstruction)
+                    a.BuildAnimationComplete = a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
+                else if (a.Status == AttractionStatus.Running && a.IsRide)
+                    a.Cycle.RunTick(a, a.CyclesPerLoad, frameTime, halfSpeed: false);
+
+                // Wear runs on the ride's own tick and can send it to 4 or 5; the lifecycle's tick then
+                // sees the status it left behind.
+                if (a.IsRide)
                 {
-                    a.Clock += Math.Min(frameTime, 0x4000);
-                    a.BuildAnimationComplete = a.Clock >= (BuildRig(a.Variant)?.HeaderWord0 ?? 0) << 12;
-                    if (a.BuildAnimationComplete) a.Clock = 0;
+                    var worn = a.Wear.Tick(a.Status, a, isTrackOrCoaster: a.Rec.Type is 1 or 6);
+                    if (worn != a.Status) a.Status = AttractionLifecycle.Enter(worn, a);
                 }
+
                 var next = AttractionLifecycle.Tick(a.Status, a);
                 if (next != a.Status) a.Status = AttractionLifecycle.Enter(next, a);
             }
@@ -1236,7 +1294,7 @@ namespace TPWGodot
                     if (a.Inst.Transform != a.Rest) a.Inst.Transform = a.Rest;
                     continue;
                 }
-                int clock = a.Clock + (int)(Math.Min(frameTime, 0x4000) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
+                int clock = a.Cycle.Accumulator + (int)(Math.Min(frameTime, 0x4000) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
                 var pose = MeshPose.Evaluate(rig, clock >> 12);
                 if (pose.Bones.Length < 2) { a.Inst.Transform = a.Rest; continue; }
                 var (r, tx, ty, tz) = pose.Bones[1];

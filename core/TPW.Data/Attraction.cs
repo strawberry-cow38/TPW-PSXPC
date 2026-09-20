@@ -12,11 +12,55 @@ namespace TPW.Data
     /// right after the body the ground pad (0x8006A7C8): per footprint tile, row by row, s16 sprite in the world's
     /// ground sheet (negative: no ground drawn there) and u16 flags (turns in bits 0-1, mirror V bit 2, mirror U
     /// bit 3: 0x80066024 / 0x80066030 / 0x80066044).</summary>
+    /// <summary>One upgrade level of a ride: the 13-word block at record +0x24 + 0x34xL (rides.md §1.3,
+    /// slots 95..102 and 0x8009F470 / 0x8009F524).
+    ///
+    /// ⭐ AN UPGRADE IS MOSTLY A WEAR REDUCTION. The multiplier goes 5 at level 0 to 3 to 2, which more
+    /// than halves how fast the ride wears out, on top of more seats and a reliability reset. The seat
+    /// count is the more obvious sell and the smaller effect.</summary>
+    public readonly struct RideLevel
+    {
+        /// <summary>+0x08: 5 / 3 / 2 for most rides, 7 for tour rides and Rock 'n Roll. Multiplies the
+        /// wear rate directly (TPW.Sim.RideWear).</summary>
+        public readonly int WearMultiplier;
+        /// <summary>+0x0C: seats, and so the denominator of the load fraction the wear rate uses.</summary>
+        public readonly int MaxSeats;
+        /// <summary>+0x10: 45..100. One is spent per 15 points of reliability lost, and NOTHING restores
+        /// it - see TPW.Sim.RideWear. Read once, at placement (0x8009F524).</summary>
+        public readonly int Lifetime;
+        /// <summary>+0x14 / +0x18: the speed slider's range. 1..100, except tour rides which start at 80.</summary>
+        public readonly int SpeedMin, SpeedMax;
+        /// <summary>+0x1C / +0x20: the duration slider's range, in animation phases per run. 1 for a
+        /// coaster; up to 60 for the bouncers.</summary>
+        public readonly int CyclesMin, CyclesMax;
+        /// <summary>+0x2C: level 0 is the build price, 1 and 2 are the upgrade prices. In pounds; the
+        /// bank stores ten times this (economy.md §4.6).</summary>
+        public readonly int Price;
+
+        public RideLevel(int wearMultiplier, int maxSeats, int lifetime, int speedMin, int speedMax,
+                         int cyclesMin, int cyclesMax, int price)
+        {
+            WearMultiplier = wearMultiplier; MaxSeats = maxSeats; Lifetime = lifetime;
+            SpeedMin = speedMin; SpeedMax = speedMax; CyclesMin = cyclesMin; CyclesMax = cyclesMax;
+            Price = price;
+        }
+
+        /// <summary>Where the duration slider starts: half the maximum (rides.md §4.3), so 5 for most
+        /// rides. ⚠ DERIVED from the report's "default cycles max / 2", not read from a save.</summary>
+        public int DefaultCycles => Math.Max(CyclesMin, CyclesMax / 2);
+    }
+
     public sealed class AttractionDefinition
     {
         public int Entry, Type, NameId, Width, Depth, EntranceFacing, ExitFacing, Price;
         public (int X, int Z)? Entrance, Exit;
         public (short Sprite, ushort Flags)[] Pad = Array.Empty<(short, ushort)>();
+
+        /// <summary>The three upgrade levels of a ride, or empty for everything else (rides.md §1.3).</summary>
+        public RideLevel[] Levels = Array.Empty<RideLevel>();
+
+        /// <summary>The level a ride is placed at.</summary>
+        public RideLevel Level0 => Levels.Length > 0 ? Levels[0] : default;
 
         /// <summary>Types (findings/rides.md §1.1): 1 coaster, 2 feature, 3 flat ride, 4 shop, 5 sideshow, 6 track
         /// ride, 7 tour ride.</summary>
@@ -42,6 +86,34 @@ namespace TPW.Data
             // Build price: level 0's block for the rides (+0x24 + 0x2C), +0x20 for the rest (rides.md §1.3).
             int priceAt = a.IsRide ? r + 0x24 + 0x2C : r + 0x20;
             if (priceAt + 4 <= d.Length) a.Price = BitConverter.ToInt32(d, priceAt);
+            // ⭐ THE PER-LEVEL BLOCK, which is where a ride's real numbers live: how fast it wears, how
+            // many it seats, how long it lasts and what its sliders may be set to. Nothing could read
+            // them before, so wear, throughput and upgrades all had to be guessed at.
+            //
+            // ⚠ THE DATA HOLDS THREE AND THE CODE ALLOWS A FOURTH. 0x8009C56C increments the level
+            // while it is < 3, so a third upgrade reads 0x34 bytes past the record into the model - for
+            // a Crazy Ape, a £65,819 upgrade with 65,818 seats. Three are parsed here deliberately; a
+            // port that offers a fourth would be reproducing a buffer overrun, not a feature.
+            if (a.IsRide)
+            {
+                var levels = new List<RideLevel>();
+                for (int L = 0; L < 3; L++)
+                {
+                    int b = r + 0x24 + 0x34 * L;
+                    if (b + 0x30 > d.Length) break;
+                    levels.Add(new RideLevel(
+                        wearMultiplier: BitConverter.ToInt32(d, b + 0x08),
+                        maxSeats:       BitConverter.ToInt32(d, b + 0x0C),
+                        lifetime:       BitConverter.ToInt32(d, b + 0x10),
+                        speedMin:       BitConverter.ToInt32(d, b + 0x14),
+                        speedMax:       BitConverter.ToInt32(d, b + 0x18),
+                        cyclesMin:      BitConverter.ToInt32(d, b + 0x1C),
+                        cyclesMax:      BitConverter.ToInt32(d, b + 0x20),
+                        price:          BitConverter.ToInt32(d, b + 0x2C)));
+                }
+                a.Levels = levels.ToArray();
+            }
+
             int body = BitConverter.ToInt32(d, r + 0x1C);
             int pad = r + 0x20 + body, n = a.Width * a.Depth;
             if (body >= 0 && n > 0 && pad + n * 4 <= d.Length)
