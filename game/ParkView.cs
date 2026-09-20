@@ -3162,13 +3162,17 @@ void fragment() {
 
         /// <summary>Run the context list's Edit Queue on the attraction at a tile — the old queue goes and the
         /// tool opens on a clean run. Returns how many queue tiles were taken away. A test hook.</summary>
-        public int EditQueueAt(int x, int z)
+        public string EditQueueAt(int x, int z)
         {
-            if (AttractionAt((x, z)) is not { } a) return -1;
+            if (AttractionAt((x, z)) is not { } a) return "nothing there";
             int gone = _paths?.RemoveQueue(_map, a.Rec, a.Ox, a.Oz, a.Rot) ?? 0;
             if (gone > 0) { _guests?.MapChanged(); RebuildGround(); }
             StartQueue(a.Rec, a.Ox, a.Oz, a.Rot);
-            return gone;
+            // Say what the DOOR's tile is afterwards, not just the count: "kept it" is the requirement here,
+            // and a count cannot show whether the one tile that had to survive did.
+            string door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot) is { } e && _map != null
+                ? $", door tile ({e.X},{e.Z}) is {_map[e.X, e.Z].Type}" : "";
+            return $"removed {gone} queue tiles{door}";
         }
 
         /// <summary>Delete whatever is on a tile, as the context list's Delete does. A test hook: a right

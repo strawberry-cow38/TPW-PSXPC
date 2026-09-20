@@ -924,7 +924,7 @@ namespace TPWGodot
                         foreach (var eq in _autoEditQueue.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
                         {
                             var v = System.Array.ConvertAll(eq.Split(','), int.Parse);
-                            if (v.Length == 2) GD.Print($"[tpw] --park-editqueue {eq}: removed {_park.EditQueueAt(v[0], v[1])} queue tiles");
+                            if (v.Length == 2) GD.Print($"[tpw] --park-editqueue {eq}: {_park.EditQueueAt(v[0], v[1])}");
                         }
                     }
                     // Last, because the ride it names may have been placed by --park-queue.

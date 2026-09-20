@@ -653,7 +653,7 @@ namespace TPW.Data
         /// <summary>Take away the queue a ride already has: from the tile outside its entrance, every QUEUE tile
         /// (type 4) reachable across the four sides, each dropped the way the tool's own undo drops one
         /// (<see cref="Layer.RemoveQueueTile"/>, 0x8004FBEC — the links go from the neighbour too, and the tile is
-        /// grass again). Returns how many went.
+        /// grass again). Returns how many went. ⭐ The tile outside the entrance itself is KEPT — see below.
         ///
         /// ⚠ **THE JOIN TILE IS NOT A QUEUE TILE AND IS LEFT ALONE.** Where a run ended ON a path, that tile became
         /// **13** — path AND queue, the only thing that ever bridges the two (see <see cref="QueueRun"/>). It is a
@@ -668,7 +668,14 @@ namespace TPW.Data
             var layer = NewLayer(map);
             var seen = new System.Collections.Generic.HashSet<(int, int)>();
             var stack = new System.Collections.Generic.Stack<(int X, int Z)>();
-            stack.Push((e.X, e.Z));
+            // ⭐⭐ THE DOOR'S OWN QUEUE TILE STAYS. The tile outside the entrance is laid by LayDoors when the
+            // RIDE is placed, not by the player laying a queue, and StartQueue begins its run ON it
+            // (0x8001DDD8). Take it away and the ride has no queue piece at its door and the tool has nothing
+            // to start from. So it is marked seen without being removed, and the walk sets off from its
+            // neighbours — everything the player actually laid.
+            seen.Add((e.X, e.Z));
+            stack.Push((e.X + 1, e.Z)); stack.Push((e.X - 1, e.Z));
+            stack.Push((e.X, e.Z + 1)); stack.Push((e.X, e.Z - 1));
             int gone = 0;
             while (stack.Count > 0)
             {
