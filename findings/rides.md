@@ -585,6 +585,38 @@ Its key result: **track has a short tick gate followed by per-vehicle lap comple
 trains finish independently by route progress; tour vehicles count destination arrivals.**
 None uses the flat ride's phase-counted run formula. The common sliders do not imply common clocks.
 
+## 7b. Building one: which tool hands over to which (READ)
+The tool objects are constructed in one place, 0x80019E90, each into its own static: the table at
+0x800EFD5C then indexes them, so a constructor's argument names its tool.
+
+| tool | object | constructor | prompts (△ ○ ✕ □) |
+|---|---|---|---|
+| 2 path | 0x80104A08 | 0x8001E4C8 | Cancel · — · Place · Delete |
+| 3 queue | 0x801049C8 | 0x8001E490 | Cancel · Undo · Place · — |
+| 5 flat ride | 0x80104968 | 0x8001D178 | Cancel · Rotate · Place · — |
+| 6 tour ride | 0x80104948 | 0x8001D144 | Cancel · Rotate · Place · — |
+| 7 track ride | 0x80104408 | 0x80022F58 | Cancel · Rotate · Place · — |
+| **8 track builder** | 0x801043C8 | 0x80022F24 | Cancel · Undo · Place · **Undo All** |
+| 11 coaster | 0x801048C8 | 0x80021D28 | Cancel · Rotate · Place · — |
+| **12 track builder** | 0x80104678 | 0x80021CF0 | Cancel · Undo · Place · — |
+| 14 shop / 15 feature / 16 sideshow | 0x80104928 / 0x801048E8 / 0x80104908 | 0x8001D110 / 0x8001D0A4 / 0x8001D0DC | Cancel · Rotate · Place · — |
+
+⭐ **A COASTER IS PLACED LIKE ANY OTHER RIDE, THEN ITS TRACK IS LAID BY A SECOND TOOL.** The prompts say
+it before any disassembly does: 6, 7 and 11 carry the same Cancel/Rotate/Place a flat ride does, and it
+is 8 and 12 that carry Undo. The hand-over is in the place handlers, through the tool's slot 0x48:
+**tool 7 (track ride) → tool 8** (0x80021EDC), **tool 11 (coaster) → tool 12** (0x8001F0D0), each right
+after the placed sound (group 8, sound 3) and before the charge (0x8001C2E0). Tools 9, 10 and 13 are
+further builders of the same two shapes.
+
+So the port's flow is the one it already has for a ride and its queue: drop the station as a blueprint,
+then open the builder.
+
+⚠ What the builder DOES per click - which piece, how it snaps, what a slope costs - is not traced yet.
+What is known: the piece price is `defPrice(8, kind)` and the charge is `unit × (pieces − 4)`, or − 5
+in one branch (economy.md §4.6); the type-8 records that price it are the named specials (Water Jump,
+Mammoth Tunnel, Piranha, Firepit); and a ride's own archive entry carries 6 to 13 sub-models, which is
+where the track pieces themselves live.
+
 ## 8. Live checks (in the order I would run them)
 1. `A+0x6E` of a freshly placed ride goes 0 → 1 → 10 and then loops 10 → 2 → 11 → 10; a shop goes
    0 → 1 → 10 → 2 within one tick of 10.
