@@ -22,12 +22,15 @@ namespace TPWGodot
         readonly System.Func<Visitor, (int X, int Z)> _tileOf;
         readonly System.Func<StaffMember, (int X, int Z)> _staffTile;
         readonly System.Func<Visitor, (int Litter, int Vomit)> _litterNearby;
+        readonly System.Func<Visitor, TileInfluence> _influenceAt;
 
         public ParkNeedsWorld(System.Func<long> now, System.Func<IEnumerable<StaffMember>> staff,
                               System.Func<Visitor, (int X, int Z)> tileOf,
                               System.Func<StaffMember, (int X, int Z)> staffTile,
-                              System.Func<Visitor, (int Litter, int Vomit)> litterNearby)
-        { _now = now; _staff = staff; _tileOf = tileOf; _staffTile = staffTile; _litterNearby = litterNearby; }
+                              System.Func<Visitor, (int Litter, int Vomit)> litterNearby,
+                              System.Func<Visitor, TileInfluence> influenceAt)
+        { _now = now; _staff = staff; _tileOf = tileOf; _staffTile = staffTile; _litterNearby = litterNearby;
+          _influenceAt = influenceAt; }
 
         public long NowTick => _now();
 
@@ -36,12 +39,18 @@ namespace TPWGodot
         /// true would hide every bubble in the game on a guess.</summary>
         public bool IdleNeedsSuppressed => false;
 
-        /// <summary>⚠ NONE, AND THAT IS A GAP RATHER THAN AN ANSWER. The influence bits come from a
-        /// per-tile map the port does not build: bit 1 is +6 happiness for something nice to look at,
-        /// bit 2 is the entertainer's own mark, bit 4 costs happiness and adds nausea. With None, a
-        /// guest gets none of the three — so scenery does nothing for mood yet, and that is a missing
-        /// input, not a measured zero.</summary>
-        public TileInfluence InfluenceAt(Visitor guest) => TileInfluence.None;
+        /// <summary>The influence circles covering this guest, ORed together.
+        ///
+        /// ⚠ AN EARLIER VERSION OF THIS COMMENT CALLED IT "a per-tile map the port does not build".
+        /// It is not a tile map at all — it is a pool of TWENTY circles, centre and radius, and you
+        /// are influenced if you are inside one. Building the grid that comment implied would have
+        /// been a plausible, testable, entirely wrong system (findings/influence.md).
+        ///
+        /// ⚠ BIT 1 IS STILL NEVER SET. "Something nice to look at", +6 happiness, was always a GUESS
+        /// and its producer is NOT ESTABLISHED, so nothing in the port writes it and scenery still
+        /// does nothing for mood. Bit 2 (the entertainer's mark) is live as of today; bit 4 needs the
+        /// unpleasant particle, which has no producer here either.</summary>
+        public TileInfluence InfluenceAt(Visitor guest) => _influenceAt(guest);
 
         /// <summary>Rubbish within the strict radius of this guest: it costs happiness, and vomit also
         /// adds nausea. ⭐ THE POOL IS WIRED NOW — this returned (0, 0) while nothing in the park owned

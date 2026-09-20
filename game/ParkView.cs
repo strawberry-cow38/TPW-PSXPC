@@ -1116,6 +1116,7 @@ namespace TPWGodot
             + $"\n{_guests.StrandedReport()}"
             + $"\n{_guests.NeedReport()}"
             + $"\n{_guests.LitterLine()}"
+            + $"\n{_guests.InfluenceLine()}"
             + $"\n{_guests.StateReport()}"
             + $"\n{_guests.QueueWaitReport()}"
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"

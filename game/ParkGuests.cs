@@ -590,12 +590,28 @@ namespace TPWGodot
                         && (gg.Waiting = true),
             // ⚠ THE GUEST'S OWN 8.8 POSITION, which Drop then scatters by ±100 (about 0.4 of a tile).
             // Passing a tile centre would stack every piece on the middle of its tile.
-            v => { if (_byVisitor.TryGetValue(v, out var gg)) _litter.Pool.Drop(gg.X, gg.Z, _litter, _dice); });
+            v => { if (_byVisitor.TryGetValue(v, out var gg)) _litter.Pool.Drop(gg.X, gg.Z, _litter, _dice); },
+            (s2, v) =>
+            {
+                var w = EntertainerWorld();
+                foreach (var sf in _staff) if (sf.S == s2) w.Current = sf;
+                var e = _entertainers.TryGetValue(s2, out var have) ? have : (_entertainers[s2] = new Entertainer(s2));
+                e.Pelted(v, w, _dice);
+            });
 
         /// <summary>The park's forty pieces of litter. ⭐ OWNED HERE because the guests who drop it, the
         /// guests who are made miserable by it and the staff who clear it are all in this one list —
         /// the pool is the only thing all three touch.</summary>
         readonly ParkLitterWorld _litter = new();
+
+        /// <summary>The park's twenty influence circles. ⚠ TWENTY IN THE WHOLE PARK, not a tile map —
+        /// everything written about this before today, including my own comment in ParkNeeds, called it
+        /// a per-tile grid. The only producer wired is the entertainer's performance aura.</summary>
+        readonly InfluenceMap _influence = new();
+
+        /// <summary>One TPW.Sim.Entertainer per hired entertainer. The sim keeps the class's extra
+        /// fields on this object rather than on StaffMember, so the host has to own one each.</summary>
+        readonly Dictionary<StaffMember, Entertainer> _entertainers = new();
 
         /// <summary>Litter dropped / cleared, bins emptied, and how many of those were already past
         /// the neglect line. ⭐ CURRENTLY THE ONLY WAY TO SEE ANY OF IT, because nothing draws litter.</summary>
@@ -611,6 +627,14 @@ namespace TPWGodot
             v => _byVisitor.TryGetValue(v, out var gg) ? (gg.X, gg.Z) : (0, 0),
             st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X, sf.Z); return (0, 0); });
         ParkActivityWorld _activity;
+
+        /// <summary>⚠⚠ THE FIFTH NEVER-CALLED SYSTEM. Entertainer.Tick had no caller anywhere in the
+        /// game project and IEntertainerWorld had no implementation, so a hired entertainer wandered.
+        /// It is also the only producer the influence map has, and the other end of a guest's state 28.</summary>
+        ParkEntertainerWorld EntertainerWorld() => _entWorld ??= new ParkEntertainerWorld(
+            StaffWorld(), _influence, () => _guests,
+            st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); });
+        ParkEntertainerWorld _entWorld;
 
         ParkHandymanWorld HandymanWorld() => _handyWorld ??= new ParkHandymanWorld(
             StaffWorld(), _litter,
@@ -695,6 +719,8 @@ namespace TPWGodot
                 if (mech != null) mech.Current = st;
                 var handy = st.S.Kind == StaffKind.Cleaner ? HandymanWorld() : null;
                 if (handy != null) handy.Current = st;
+                var ent = st.S.Kind == StaffKind.Entertainer ? EntertainerWorld() : null;
+                if (ent != null) ent.Current = st;
 
                 if (st.Answer is { } m)
                 {
@@ -726,6 +752,23 @@ namespace TPWGodot
                 // worse — could never reach the branch that looks for work at all, because resting
                 // returns to Patrolling rather than to Idle.
                 if (st.S.State == StaffState.Idle) StaffBase.IdleCheck(st.S, world);
+                // ⭐ Entertainer.Tick OWNS ITS OWN DISPATCH, unlike the mechanic's and the handyman's.
+                // It returns false only when the member is HELD, in which case the shared machine must
+                // be skipped as well — so the return value decides whether anything runs at all, and
+                // treating it as "did you handle it" would run the base pass on a held entertainer.
+                if (ent != null)
+                {
+                    var e = _entertainers.TryGetValue(st.S, out var have) ? have : (_entertainers[st.S] = new Entertainer(st.S));
+                    if (!e.Tick(ent, _dice)) continue;
+                    if (st.S.State == StaffState.Idle || st.S.State == EntertainerStates.Entertaining
+                        || st.S.State == EntertainerStates.Shocked)
+                    {
+                        if (LogStaff && st.S.State != wasState)
+                            Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, "
+                                         + $"{_influence.Count} influence areas, morale {st.S.Morale} [own]");
+                        continue;
+                    }
+                }
                 if (handy != null && RunHandyman(st, handy))
                 {
                     if (LogStaff && st.S.State != wasState)
@@ -858,7 +901,14 @@ namespace TPWGodot
                                           // ⚠ RAW 8.8, NOT TILES. LitterPool.Nearby shifts its own arguments down
                                           // by 8; handing it tiles would put every piece beside the origin.
                                           v => _byVisitor.TryGetValue(v, out var gg)
-                                             ? _litter.Pool.Nearby(gg.X, gg.Z) : (0, 0));
+                                             ? _litter.Pool.Nearby(gg.X, gg.Z) : (0, 0),
+                                          // ⭐ THE ENTERTAINER'S MARK, AT LAST. This answered None for
+                                          // every guest on every tile because nothing in the park owned
+                                          // an InfluenceMap — and it would have gone on answering None
+                                          // even with one, because the only producer is the entertainer
+                                          // and the entertainer never ran.
+                                          v => _byVisitor.TryGetValue(v, out var gg)
+                                             ? _influence.AtPosition(gg.X, gg.Z) : TileInfluence.None);
             foreach (var g in _guests)
             {
                 if (g.V.State != g.LastState) { g.LastState = g.V.State; g.StateSince = _now; }
@@ -1066,6 +1116,19 @@ namespace TPWGodot
         /// <summary>The dirt loop in one line. ⭐ READ IT AS A RATE, NOT A LEVEL: "live" alone cannot
         /// tell a clean park from one whose forty slots are full and whose guests have given up
         /// littering — dropped-minus-cleared is the number that says which.</summary>
+        /// <summary>The influence circles, and who is standing in one. ⭐ THE COUNT ALONE IS NOT THE
+        /// TEST: twenty areas with nobody inside them changes nothing a guest feels, and "areas &gt; 0"
+        /// would pass on a park where the aura is placed somewhere no one goes.</summary>
+        public string InfluenceLine()
+        {
+            int watched = 0, ents = 0;
+            foreach (var st in _staff) if (st.S.Kind == StaffKind.Entertainer) ents++;
+            foreach (var g in _guests)
+                if (_influence.AtPosition(g.X, g.Z) != TileInfluence.None) watched++;
+            return $"influence: {_influence.Count} areas of {InfluenceMap.Capacity}, "
+                 + $"{watched} guests standing in one, {ents} entertainers";
+        }
+
         public string LitterLine()
         {
             var (live, dropped, cleaned, bins, neglected) = LitterReport();

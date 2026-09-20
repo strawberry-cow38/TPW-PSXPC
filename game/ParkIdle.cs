@@ -21,12 +21,14 @@ namespace TPWGodot
         readonly Func<Visitor, (int X, int Z)?> _nearestBin;
         readonly Func<Visitor, int, int, bool> _walkTo;
         readonly Action<Visitor> _dropLitter;
+        readonly Action<StaffMember, Visitor> _pelt;
 
         public ParkIdleWorld(Func<long> now, Func<int> day, Func<IEnumerable<StaffMember>> staff,
                              Func<Visitor, (int X, int Z)> tileOf, Func<StaffMember, (int X, int Z)> staffTile,
                              Func<Visitor, (int X, int Z)?> nearestBin, Func<Visitor, int, int, bool> walkTo,
-                             Action<Visitor> dropLitter)
+                             Action<Visitor> dropLitter, Action<StaffMember, Visitor> pelt)
         {
+            _pelt = pelt;
             _now = now; _day = day; _staff = staff; _tileOf = tileOf;
             _staffTile = staffTile; _nearestBin = nearestBin; _walkTo = walkTo;
             _dropLitter = dropLitter;
@@ -71,8 +73,14 @@ namespace TPWGodot
                 if (s.Kind != StaffKind.Entertainer) continue;
                 var (sx, sz) = _staffTile(s);
                 if (Math.Abs(sx - gx) + Math.Abs(sz - gz) > 5) continue;
-                s.Morale = Stat.Sub(s.Morale, 5);
-                s.SetState(EntertainerStates.Shocked);
+                // ⭐ THROUGH THE REAL HANDLER NOW. This used to dock 5 morale and set state 32 by
+                // hand, which is what Entertainer.Pelted does plus nothing else — it dropped the
+                // CULPRIT (the sim records which guest threw it, for the guard to be sent after), and
+                // it dropped the random shock duration, so a pelted entertainer recovered on the next
+                // tick instead of standing there losing 10 morale every tick for up to four seconds.
+                // An approximation that matches the visible half of a handler is the hardest kind of
+                // wrong to notice.
+                _pelt(s, guest);
                 return true;
             }
             return false;
