@@ -53,10 +53,8 @@ therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below
    - **The length is read from the handle at A+0x18, EVERY TICK** — not cached, and not from A+0x20.
      `0x800658D8` → `0x80065DA8(A)` → `0x80030364(A+0x18)` for the current phase → `0x800300B8` →
      `lhu +0x38`. So a model that changes phase changes the ride's cycle length with it.
-   - **A+0x20 feeds a dead field.** `0x800A0DF8` fetches phase **1**'s length from the OTHER handle
-     (A+0x20) and stores it as a byte at **A+0x100**, and A+0x100 is never read: no `lbu` of it
-     anywhere in TPW.BIN outside the accessor at 0x800A2894, which has no JAL caller and appears in no
-     vtable in TPW.BIN or TPW.OVL. Whatever it was for, this build does not use it.
+   - **The earlier “other handle / dead field” claim is withdrawn.** It mixed outer-relative and
+     A-relative offsets and missed two direct callers. The tour cache is live; see item 9 below.
 
    The clock itself, exactly (0x800658D8):
    ```
@@ -70,16 +68,48 @@ therefore read `outer+0xF8` for `A+0xF0` etc. — I converted every offset below
    if (unsigned) A+0x60 >= target: A+0x60 = 0; phase complete
    ```
    Two consequences worth keeping: the clamp is signed and the completion test is unsigned, so a
-   negative delta (a counter wrap) is not caught AND then completes the phase instantly; and the same
+   negative delta is not caught and completes the phase if it drives the accumulator negative; and the same
    accumulator, against a different length, is what ends CONSTRUCTION — which is the code behind
    AttractionLifecycle's "the build ends with the animation, not on a timer".
 
-   **Still not established:** the per-ride phase length as a NUMBER, because that needs the 88-byte
-   table decoded out of FOLIO.GAZ. The structure is now known; the values are not.
+   **Now established:** the per-ride lengths are decoded in [animation-phases.md](animation-phases.md)
+   and [ride-phase-lengths.md](ride-phase-lengths.md). Item 9 corrects the remaining pointer and clock
+   claims in this earlier audit.
 
 8. Nothing else I touched in the three reports turned out wrong. The queue/ride guest chain
    (41→18→21→22→23) and the mechanic states 56/16/14/17/58 and 57/52/54 all matched what the ride
    side does.
+
+9. **Disc phase-table decode (2026-09-20), READ unless qualified.** This supersedes item 7 where
+   noted; the complete trace and every descriptor field are in [animation-phases.md](animation-phases.md).
+   - **The 88-byte descriptor is built in RAM.** `0x80030A70` calls folio.md's builder
+     `0x8002C5CC`; `0x8002C5FC..604` copies **u16(mesh+0) → descriptor+0x38**. No need to find
+     an 88-byte array on disc. All **59 flat rides** have one mesh and map `[-1,0,-1,-1]`.
+   - **`0x8003084C` returns the container base B.** The computed
+     `B+0x20+4*[B+0x1C]` goes into R+0x10 through a1; v0 remains B. Thus the modulo count
+     read at `0x800300DC` is **B+4, the mesh count**, not a directory word. `0x80030364`
+     maps the supplied logical phase (A+0x64), not an internally stored “current phase”.
+   - **The tour cache is neither another handle nor dead.** `0x800A0DF4` passes
+     **outer+0x20 = A+0x18** and sub-entry 1; `0x800A0E0C` stores its length byte at
+     **outer+0x100 = A+0xF8**. Getter 0x800A2894 is called directly at **0x800A2EB4 and
+     0x800A2F04**, to form twice the length as a vehicle-animation modulus.
+   - **Phase-counted unloading applies to flat rides.** Status-2 slot 71 is 0x8009CA60
+     for type 3; tour/track/coaster overrides are 0x800A1334/0x800A6960/0x800B0D68.
+     Their mesh lengths alone do not determine their trip times.
+   - **P is now known in clock units:** `32*(L-1)` software IRQ counts per phase, before
+     sampling/capping. Crazy Ape **L=41**, The Dizzy Tree **239**, Zero G **801**. At the
+     constant reference delta 9984 from arrivals.md §2.1, P is **17/98/329 calls** and
+     their five-phase runs are **3.40/19.60/65.80 s** (**READ-derived, conditional**, not
+     live measurements). Exact runs depend on raw deltas; the first call after loading can
+     be capped because entering running clears the accumulator but not its timestamp.
+   - The counter sampled by 0x800BC290 is the **software IRQ count**, not the hardware's
+     wrapping 16-bit counter. Ordinary wrap does not itself establish a negative elapsed delta.
+   - Space Balls has cycles max **10/10/10**, Slither **1/10/1**, and Bounce on Iggy
+     defaults to **22/25/27 despite minima 30/30/30**. These are disc values and the literal
+     `max(1,maxCycles>>1)` initializer (0x8009C524..534), not corrections to game behaviour.
+   - “All 197 definitions” describes `recs.py`'s output, not all definitions on this disc.
+     Its `recOff+0x40 > size` guard excludes **47 short Feature records**; direct headers
+     give **244** type-1..8 definitions. All 83 ride definitions were already included.
 
 ## 1. The building-type table — settled
 
@@ -147,7 +177,8 @@ loader, so which of the 12 coasters / 8 track rides / 4 tour rides a park offers
 
 ### 1.3 FOLIO entry and the definition record (READ)
 
-`FOLIO.GAZ` is a pack: word 0 = 422 entries, then (offset, size) pairs; `ext/rip/NNNN.bin` is entry
+`FOLIO.GAZ` is a pack: word 0 = 422 entries, word 1 = 0x17, then (offset, size) pairs at +8
+(READ 0x800BBFA0); `ext/rip/NNNN.bin` is entry
 N. An attraction entry starts `0x96, 1, 0, 0, 0, recOff, size, 4`; the **definition record is at
 `recOff`** (0x800307DC: `data + data[0x14]`), and the same entry also carries the model. Guests reach
 the record through the handle object at A+0x18: `A+0x18[0]` = handle id, slot 7 (0x80062A20 →
@@ -224,7 +255,7 @@ Track rides (type 6, 8 records): £4,000–6,500, 8 seats at every level, intens
 | A+0x0C | vptr | ctors |
 | A+0x10 | matrix/anim-time object (0x800BC288); A+0x10[0] = last frame counter for the animation step | 0x800658D8 |
 | A+0x14 | **guests served, all time** (slot 22 get, 0x80063164 inc from guest state 22) | |
-| A+0x18 | FOLIO handle object (`[0]` handle id; +8 second handle → animation resource; +0x34/+0x38 current frame/mesh) | 0x800663FC, 0x80066380/88 |
+| A+0x18 | FOLIO handle object (H+0 resource pointer; H+8 = resource+0x18; H+0x34 sub-entry index, H+0x38 frame) | 0x800311F4, 0x80066380/88; animation-phases.md §1 |
 | A+0x54 | **mechanic claim** (pointer to the mechanic, 0 = free) | 0x800632A8/B8 |
 | A+0x58/5A/5C | position x, y, z in tiles (slot 19 set; slot 9 returns x<<8,y,z<<8) | 0x80063334/58 |
 | A+0x5E | u16, zeroed at placement, unknown | 0x80062678 |
@@ -345,25 +376,27 @@ Tour rides use the same 20-tick load cadence (0x800A11E8) but load into a vehicl
 (not traced beyond the SetState(21) sites).
 
 ### 4.3 Run time
-Status 2 counts **animation phases**: each time the phase timer completes, A+0xF2 += 1; the run ends
-when `A+0xF2 ≥ A+0xC0` (duration slider, 1..cycles max, default cycles max / 2 → **5** for most
-rides, 25–30 for the 10–60 bouncers, fixed 1 for coasters and Escargot/Slither/Space Balls).
-Per phase, the timer adds the frame delta `0x800BC290(A+0x10)` = (counter 0x80103480 − last) << 7
-per tick — **the same quantity the calendar uses as its timescale** (0x800BDE88 stores it to
-0x80103A90), i.e. ≈ 9930 per tick given your 99-tick day — halved when gp 0x80103840 == 3
-(0x80053D98; GUESS: a slow-motion/menu mode), capped at 0x4000. A phase completes when the sum
-reaches `duration << 12`, so **one phase ≈ duration × 4096 / 9930 ≈ duration × 0.41 ticks**, where
-`duration` is the u16 at +0x38 of the phase's 40-byte animation record (0x800300B8 → 0x800314D4)
-in the model's animation resource (second handle at A+0x20; the chain 0x800311F4 → 0x800C0DB8 is
-not traced, so **I cannot give the per-ride phase length from the disc**).
-**Live check that gives the number in one run**: watch `A+0xF2` (u16) on a running ride and the clock
-0x80103A94; the tick delta between increments is the phase length P. Then run time = A+0xC0 × P.
+**READ:** flat-ride status 2 counts completions of logical phase 1's selected mesh, repeatedly;
+it does not walk to the next mesh. A+0xF2 increments on completion and unloads at ≥ A+0xC0.
+Each target is `(L-1)<<12`, with **L = u16(mesh+0)** copied into an 88-byte runtime descriptor.
+The [full table](ride-phase-lengths.md) gives L for every ride and the flat-ride run calculation.
+
+**READ-derived:** with constant positive delta δ, one phase is
+`Pδ = max(1,ceil(((L-1)<<12)/min(δ,0x4000)))` calls and a run is `C*Pδ` calls.
+The table declares δ=9984, the common measured value from arrivals.md §2.1. With real variable
+deltas, half speed, stalls or a first call capped after loading, sum the actual phase intervals
+instead. [animation-phases.md §3](animation-phases.md#3-what-p-actually-means) gives the exact
+recurrence, nominal hardware conversion and remaining live-measurement requirements.
+The tour, track and coaster overrides do not use this flat-ride run formula.
 
 ### 4.4 Throughput
 Per cycle: `load = 20×capacity` ticks (plus waiting for guests), `run = A+0xC0 × P`, `unload =
-10×capacity`, so **guests per second = capacity / ((30×capacity + A+0xC0×P) / 25)**. Crazy Ape at
-defaults (capacity 4, duration 5): 120 ticks load + 40 unload + 5P. If P ≈ 60 ticks (2.4 s) that is
-460 ticks = 18.4 s per 4 guests ≈ 13 guests/min, 4.6 game days per cycle. Raising the capacity slider
+10×capacity`, so the cadence-only estimate is
+**guests per second = capacity / ((30×capacity + runTicks) / 25)**. Crazy Ape at
+defaults (capacity 4, duration 5): **80** ticks load + 40 unload, not the earlier 120+40 arithmetic.
+Using the declared δ=9984 reference, its run is 85 ticks (84 with a capped first call).
+These are **READ-derived estimates**, excluding cadence alignment and extra transition/wait calls;
+the former guessed P≈60 example is withdrawn. Raising the capacity slider
 to 8 (max at level 0) almost doubles it because the run time is per cycle, not per rider; raising
 duration lowers it linearly and raises intensity (§5).
 
@@ -488,8 +521,9 @@ lifetime are shared through the queued-ride base.
    record's text id names the ride you placed.
 
 ## 9. Not established (honest list)
-- The per-ride animation phase length (needs the animation resource chain 0x800311F4 → second handle
-  → 40-byte records, u16 at +0x38); hence run time is given as A+0xC0 × P with P measured live.
+- Exact live wall times under variable IRQ delivery, first-call timestamps, pauses and stalls;
+  complete tour/track/coaster trip timing. The disc phase lengths are now established for all
+  83 ride definitions, with 59 flat-ride run calculations in `ride-phase-lengths.md`.
 - What `mgr+4` (set A/B) is and who sets it; which coaster/track/tour records each scenario exposes.
 - Record header bytes +0x09, +0x14..+0x17, +0x20 and the per-level words +0x24/+0x28 (`f48`/`f4C`).
 - Whether the UI ever offers the (out-of-data) third upgrade to level 3.

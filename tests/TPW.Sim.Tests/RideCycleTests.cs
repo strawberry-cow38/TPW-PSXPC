@@ -151,7 +151,7 @@ namespace TPW.Sim.Tests
         // ⚠⚠ A NEGATIVE DELTA WINDS THE CLOCK BACKWARDS AND THEN COMPLETES THE PHASE INSTANTLY. The
         // clamp is signed so it never catches one, and the completion test is UNSIGNED so a negative
         // accumulator reads as enormous. Reproduced deliberately: it is what the hardware does when the
-        // root counter wraps, and a guard here would hide the wrap rather than fix it.
+        // raw delta is negative; ordinary hardware-counter wrap does not establish that it occurs.
         // REJECTS "tidying" either comparison to match the other.
         [Fact]
         public void ANegativeDeltaIsNotCaughtAndFinishesThePhaseAtOnce()

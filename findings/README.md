@@ -12,7 +12,8 @@ as a lead, not a fact.
 | `ai_out.txt` | person state MAP — classes, vtables, Update dispatch, per-state handlers |
 | `behaviour.md` + `states.json` | what each state DOES, exits, fields read/written |
 | `economy.md` + `economy.json` | the BANK object, every flow of money, wages, prices |
-| `rides.md` + `rides.json` + `records.json` | building-type table, all 197 definition records, queues, throughput, breakdowns |
+| `rides.md` + `rides.json` + locally generated `records.json` | building-type table, 197 definitions selected by the original parser, queues, throughput, breakdowns; phase report corrects the full count to 244 |
+| `animation-phases.md` + `ride-phase-lengths.md` | 88-byte runtime descriptor, disc lengths for 83 rides, conditional run times for 59 flat rides; reproducible extractor and mutation checks in `tools/` |
 | `parkopen.md` | what gates guest arrival |
 | `disc-check.md` | why Main Game and Load Game are greyed: a disc check at boot, not save data |
 | `psyq-named-functions.json` | 219 Sony PsyQ library functions located in the image by signature |
@@ -29,6 +30,11 @@ as a lead, not a fact.
 - The game is **analog-native** and enables DualShock analog mode itself.
 
 ## Provenance
+The phase-table investigation explicitly includes a narrow per-ride timing table, as requested.
+It contains lengths and timing calculations, not the excluded full `records.json` or raw assets.
+Its direct archive scan also found 47 short Feature definitions omitted by `recs.py`'s 64-byte guard:
+197 is that script's output count; the disc has 244 type-1..8 definition headers.
+
 Static analysis by Fable 5.1; live verification, measurement and the harness by tinyclaw. Where the
 two disagreed, the disagreement is recorded rather than resolved silently — e.g. the money address was
 reached independently from both sides and agreed, and a claim that the build menu "opens the park" was

@@ -2,7 +2,8 @@
   "binary": "/home/ec2-user/tpw/ext/TPW.BIN @ 0x80010000",
   "units": {"tick_s": 0.04, "day_ticks": 99, "fixed_point": "20.12 (x4096) where noted"},
   "companion_files": {
-    "records": "records.json (all 197 definition records, parsed by recs.py, with English names)",
+    "records": "records.json (197 definitions selected by recs.py; its 64-byte guard omits 47 short Feature records; READ archive census in animation-phases.md)",
+    "animation_phases": "animation-phases.md + ride-phase-lengths.md (READ disc lengths, conditional flat-ride timing; tools/ride_phases.py)",
     "records_text": "records_named.txt",
     "themes": "rides_themes.json (FOLIO ids per theme/set for rides, features, shops, sideshows)",
     "english_text_table": "ext/rip/0407.bin (FOLIO 0x197): u32 count=1031, then u32 offsets"
@@ -62,7 +63,7 @@
     "capacity_by_level": [7, 11, 15],
     "load": {"fn": "0x8009C884", "cadence_ticks": 20, "condition": "riders < A+0xBC and head.state == 18", "full": "A+0xF2 := 0; SetStatus(2)"},
     "partial_start": {"fn": "0x800A0178", "rule": "queue empty for >= 5 game days (495 ticks) and riders > 0 -> SetStatus(2)"},
-    "run": {"fn": "0x8009CA60", "rule": "each animation phase completed: A+0xF2 += 1; A+0xF2 >= A+0xC0 -> SetStatus(11)", "phase_ticks": "duration_u16 * 4096 / timescale (timescale ~9930/tick) ; duration from the model animation resource, not extracted"},
+    "run": {"fn": "0x8009CA60", "scope": "READ: type-3 flat rides; types 1/6/7 override status-2 slot 71", "rule": "each animation phase completed: A+0xF2 += 1; A+0xF2 >= A+0xC0 -> SetStatus(11)", "phase_ticks": "READ-derived, constant positive delta only: max(1,ceil(((L-1)<<12)/min(delta,0x4000))); L=u16(mesh+0), copied to runtime descriptor+0x38; actual variable-delta and first-call timing in animation-phases.md"},
     "unload": {"fn": "0x8009CB5C", "cadence_ticks": 10, "empty": "A+0xF0 := 0; SetStatus(10)"},
     "throughput_formula": "guests_per_tick = capacity / (30*capacity + cycles*phase_ticks)"
   },
@@ -97,7 +98,7 @@
   },
   "corrections": [
     "behaviour.md: type 2 is Feature (toilets/bins/scenery), not a shop; V+0x5D is the toilet need (GUESS-high); ride slots 54/55/56 return 0",
-    "economy.md: record numbers are in FOLIO.GAZ but the type/theme index arrays are in TPW.BIN (0x800F0CCC..0x800F1090); all 197 records now parsed",
+    "economy.md: record numbers are in FOLIO.GAZ but the type/theme index arrays are in TPW.BIN (0x800F0CCC..0x800F1090); recs.py selected 197 records, see animation-phases.md for the 244-header census",
     "behaviour.md 3.5: 0x8009C1E8/0x8009EEE4/0x8009EFA8 are the closing-progress test/advance/retract; 0x8005BE44/0x8005BE70 are the player's upgrade queue; status 7 -> 2 -> 10 for rides"
   ]
 }

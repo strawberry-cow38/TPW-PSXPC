@@ -4,26 +4,28 @@ namespace TPW.Sim
 {
     /// <summary>What the cycle needs to know about the model that is playing on an attraction.
     ///
-    /// ⭐ THIS IS THE NEAREST THING THIS BUILD HAS TO A RIDE SCRIPT. On the PC versions a ride's
-    /// behaviour is scripted; on the PlayStation it is four hand-written C++ classes, and the only
-    /// per-ride timing that is DATA rather than code is here: the length of the animation phase that is
-    /// currently playing. Everything else about a cycle - when guests board, how many board at a time,
-    /// when it unloads - is fixed in the class.</summary>
+    /// READ: flat rides count completions of the selected model phase (0x8009CA60).
+    /// Tour, track and coaster status-2 handlers override this rule; their model lengths alone do
+    /// not determine their trip times. See findings/animation-phases.md §4.</summary>
     public interface IRideAnimation
     {
-        /// <summary>The phase now playing on the attraction's own animation handle, A+0x18
-        /// (0x80030364). Negative when the handle has none, which the caller reads as phase 0.</summary>
+        /// <summary>READ: the mapped sub-entry index from the attraction's handle at A+0x18.
+        /// 0x80030364 maps the logical phase A+0x64 through the container's signed map. This property
+        /// represents its RESULT, not the logical map index. Negative results fall back to mesh 0
+        /// (0x80065DC0..DC8).</summary>
         int CurrentPhase { get; }
 
-        /// <summary>The u16 at +0x38 of the 88-byte record for this phase (0x800300B8 → 0x800314D4).
+        /// <summary>READ: the u16 at +0x38 of this sub-entry's 88-byte runtime descriptor
+        /// (0x800300B8 → 0x800314D4). The builder copies it from u16(mesh+0) at 0x8002C5FC..604;
+        /// the descriptor itself is not stored on disc. See findings/ride-phase-lengths.md.
         ///
         /// ⚠ THE RECORDS ARE 88 BYTES, NOT 40. rides.md §4.3 said 40, which is the size of a BONE
         /// record in the same file; the phase stride is computed twice in the image as
-        /// `((n*3) &lt;&lt; 2 - n) &lt;&lt; 3` = 88n (0x8003010C and 0x8002FE58). Getting it wrong reads
+        /// `(((n*3) &lt;&lt; 2) - n) &lt;&lt; 3` = 88n (0x8003010C and 0x8002FE58). Getting it wrong reads
         /// a plausible number out of the middle of the wrong record.
         ///
-        /// ⚠ THE INDEX WRAPS. 0x800300E4 divides by the phase count and keeps the remainder, so a phase
-        /// past the end silently restarts rather than running off the table.</summary>
+        /// ⚠ THE MESH INDEX WRAPS. 0x800300E4 divides by container+4, the mesh count, and keeps the
+        /// remainder. This is separate from the logical phase-map count at container+0x1C.</summary>
         int PhaseLength(int phase);
 
         /// <summary>The build animation's length (0x80065994 → 0x80033AA4, keyed on A+0x6D). A different
@@ -35,7 +37,7 @@ namespace TPW.Sim
     /// <summary>The animation clock that drives a ride's cycle (0x800658D8), and with it the end of
     /// construction and the end of a run.
     ///
-    /// ⭐⭐ A RIDE'S RUN LENGTH IS ITS ANIMATION, NOT A TIMER. Status 2 does not count ticks; it counts
+    /// ⭐ A FLAT RIDE'S RUN LENGTH COMES FROM ITS ANIMATION. READ: status 2 counts
     /// PHASES of the model's animation, and the ride unloads when it has run <see cref="Attraction"/>'s
     /// cycles-per-load of them. So a longer model animation is literally a longer ride, and the
     /// duration slider multiplies whatever the artist drew.
@@ -95,9 +97,10 @@ namespace TPW.Sim
             if (halfSpeed) d >>= 1;          // arithmetic: a negative delta stays negative
 
             // ⚠ THE CLAMP IS A SIGNED TEST (`slti`, 0x80065938/0x80065940), so it only ever catches a
-            // delta that is too LARGE. A negative one - which the counter can produce when it wraps -
+            // delta that is too LARGE. A negative raw delta
             // passes straight through and winds the accumulator BACKWARDS. Reproduced rather than
-            // guarded, because a guard here would hide a wrap rather than fix it.
+            // guarded. The source is a software IRQ count; ordinary hardware-counter wrap is not
+            // evidence that this negative path occurs (findings/animation-phases.md §3).
             if (d > MaxDelta) d = MaxDelta;
 
             Accumulator += d;

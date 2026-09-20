@@ -6,6 +6,12 @@ against every entry on the disc by a script in `f/`. **UNMEASURED** = guess. Scr
 `fable/f/`: `x96parse.py` (container + mesh walker), `sublz.py` (sub-entry decompressor), `entries.txt`,
 `x96.txt`, and the disassembly dumps `fn_*.txt` this report was read from.
 
+**2026-09-20 correction, READ:** [animation-phases.md](animation-phases.md) identifies the complete
+88-byte runtime descriptor and **mesh+0 as the phase length**. `0x8003084C` returns the container
+base in v0; it stores the computed directory pointer separately. Direct archive counts are 244
+record-bearing containers, 17 without a record but with a four-slot map, and 7 model packs without
+a map. The earlier claim that all 261 map-bearing containers have a record and one mesh was wrong.
+
 ## 0. The answers, shortest form
 
 | # | question | answer | tag |
@@ -79,14 +85,15 @@ rides.md). Nothing ever compares word 0 with 0x96.
 +0x08 u32 ×3 = 0        (never read)
 +0x14 u32 recOff        definition record offset (0 = none)         ← rides.md's "recOff"
 +0x18 u32 size          == entry size in the table (MEASURED 268/268)
-+0x1C u32 ntab          phase table length (4 on all 261 record-bearing entries, 0 on the other 7)
++0x1C u32 ntab          phase-map length (4 on 261 entries, of which 244 bear records; 0 on 7)
 +0x20 s32 tab[ntab]     animation phase → sub-entry index, −1 = none (0x80030364; rides.md's A+0x64 phase)
       {u32 off, u32 unpacked} sub[nsub]   off = sub-entry offset from entry start;
                                           unpacked ≠ 0 → LZ-compressed, decompress with 0x800BFD9C (§3.5)
       sub-entries…  then the record at recOff (rides.md §1.3 layout)
 ```
-Two families (MEASURED, `f/x96.txt`): **261 entries** with ntab=4, one sub-entry `(0x38, 0)`, tab
-`[-1, 0, -1, -1]` on the samples read, record at the end (rides/shops/features/sideshows/coasters);
+Two map families (READ, direct archive re-scan 2026-09-20): **261 entries** with ntab=4;
+244 have a definition record, of which 220 have one mesh. All 59 flat rides have one raw sub-entry
+`(0x38, 0)` and map `[-1, 0, -1, -1]`; the 24 tour/track/coaster entries have multiple meshes.
 **7 entries** (0000, 0003, 0004, 0083, 0089, 0277, 0417) with ntab=0, recOff=0, 1..17 sub-entries — model
 packs (people etc., DERIVED from the count and the skeletons). Entry 0000 sub-entry 0 decompresses to a
 193-vertex, 17-bone, 301-face mesh.
@@ -102,7 +109,7 @@ all 25 decompressed ones (`x96parse.py`, `sublz.py`).
 ### 3.1 Header (0x48 bytes)
 | off | field | how known |
 |---|---|---|
-| +0x00 | u32 n0 — count of items covered by the per-block bit array (`ceil(n0/8)` rounded to 2 bytes = rec+52) | 0x8002C6D0 |
+| +0x00 | u32 animation length; its low u16 is copied to runtime descriptor+0x38. Also sizes the per-block bit array (`align2(ceil(n0/8)) & 0xFF` = rec+52) | READ 0x8002C5FC..604, 0x8002C6D0..6E8; animator modulo at 0x8002CC94 |
 | +0x04 | u32 n32 — **bones**: 32-byte GTE matrices in ARS, 40-byte records in the file after the blocks | 0x8002C700, 0x8002C904 |
 | +0x08 | u32 nvc — **vertices** (8 bytes each) and vertex **colours** (4 bytes each) | 0x8002C810 (×12) |
 | +0x0C | u32 m12 — 12-byte records after the bone records | 0x8002C924 |
@@ -156,8 +163,10 @@ each track starts `{u8 type, u8, u16, u16 boneIndex, u16 count}` and its size is
 0x800DDD78: type 0 → 36·count+0x2C, 1/8 → 32·count+0x28, 2/4 → 8·count+0x10, 3/5 → 12·count+0x14,
 6 → 20·count+0x1C, 7 → 16·count+0x18. Entry 39 ("The Dizzy Tree" per rides.md): 257 vertices, 262
 faces in 4 subgroups (tpages 0x1B, 0x18, 0x1B, 0x0B), 55 bones, 55 tracks (types 6 and 8), 12-entry
-trailing list. The per-handle phase (`+0x34`, from `tab[phase]`) and frame (`+0x38`, timer>>12) select
-the sub-entry and keyframe (0x8002FE14: `subEntry = frame % nsub`).
+trailing list. The per-handle sub-entry (`+0x34`, from `tab[phase]`) and frame (`+0x38`, timer>>12)
+select the mesh and keyframe. **READ correction:** 0x8002FE24 saves a1 (sub-entry) into s1, and
+0x8002FEE8 divides **s1** by nsub; a2 (frame) is held in s6. It is not `frame % nsub`.
+The animator's own time modulo is by mesh+0, at 0x8002CC94.
 
 ### 3.5 Compressed sub-entries and the `f4 01 00 30` observation
 Sub-entries with a non-zero second word are LZ-compressed; 0x800308C4 decompresses them once into a
