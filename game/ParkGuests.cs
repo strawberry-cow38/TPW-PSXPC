@@ -302,7 +302,14 @@ namespace TPWGodot
         /// to look at, and it is deliberately not dressed up as the real thing.</summary>
         public void Populate(int target)
         {
-            if (_guests.Count < target) Spawn();
+            // ⚠⚠ AT THE GATE, NOT ANYWHERE WALKABLE. `Spawn()` with no tile drops a guest on a RANDOM
+            // walkable tile, and walkable includes every attraction entrance and queue tile in the park.
+            // So --park-guests was teleporting guests INSIDE rides' enclosed entrance pockets, where they
+            // promptly queued and boarded a ride nothing could walk to. Master spotted it from a
+            // screenshot: "there's no way someone could have got on it." There wasn't. The harness put
+            // one there, and every conclusion drawn from a --park-guests run about who can reach what was
+            // measuring the harness.
+            if (_guests.Count < target) SpawnAtGate();
         }
 
         /// <summary>One park frame of the pathfinder (0x800EC8C4). Separate from <see cref="Tick"/>
