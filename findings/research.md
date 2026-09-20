@@ -40,6 +40,17 @@ fabricated row 4 for corrupt grades 5..7; no finding establishes those rows. The
 lookup still masks with 7, but explicitly rejects an unestablished overread instead of inventing
 points. No cleaner/mechanic table or handler is altered.
 
+**Independently re-read (tinyclaw, 2026-09-20), the two load-bearing disagreements above:**
+
+- *The fatigue arithmetic.* 0x80099AB8 is `addiu v0,v0,-0x50`, then `lui/ori v1,0xAAAAAAAB`,
+  `multu v0,v1`, `mfhi v0`, `srl v0,v0,1` — an UNSIGNED divide by three — and `sb v0,16(sp)` narrows
+  the result to a byte before 0x80099CC4 is called with `a0 = s1+0x47`. Unsigned, and narrowed, both
+  as reported. The code keeps behaviour.md's signed version on purpose.
+- *The idle ordering.* 0x800999D8 is `jal 0x800C2648`, the roll, and it is the FIRST call in the
+  function; the vtable call is at 0x80099A14 and the `slti v0,s2,0x3` that tests the roll sits after
+  it at 0x80099A20. So the RNG really is consumed before the shared check, and the port really does
+  keep the other order on purpose.
+
 ## 1. What the researcher does each tick
 
 READ: class constructor/init **0x80099830 / 0x800998C4**, update **0x80099B10**. staff.md's
