@@ -43,6 +43,17 @@ It is. parkopen.md's “per record” spawn description does not establish indiv
 records: `0x800724C8` passes the SAME range-record pointer for every guest. Research whole-percent
 loss and the litter ordinary/vomit byte order agree with their existing findings.
 
+**Independently re-read (tinyclaw, 2026-09-20), two of the disagreements above:**
+
+- *The stat setter really is signed.* 0x800924F0 is `lbu v0,0(a1)` then `sb v0,0(a0)`, and the test
+  that follows is `sll v0,v0,24` / `bgez` — a SIGN test on the stored byte — zeroing it when negative,
+  after which `lb v0,0(a0)` reloads it SIGNED and `slti v0,v0,0x65` caps at 100. So 128 really does
+  become -128 and then 0, where the port's integer properties return 100. Kept out of the code on
+  purpose; it can only differ on out-of-domain input.
+- *The ride's saved +0x88 really is the placement day.* 0x8009CE30 is `lhu v0,244(s0)` — 244 is 0xF4 —
+  and 0x8009CE38 is `sh v0,136(s3)`, 136 being 0x88. A+0xF4 to save+0x88, halfword, exactly as
+  reported, so economy.md's "dormant ticket" reading has nothing to do with this word.
+
 ## 1. Entry points and callers (READ)
 
 | Work | Routine and callers |
