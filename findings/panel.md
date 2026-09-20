@@ -168,6 +168,21 @@ entry for type-0x12 objects alone). **0x233 "Upgrade 3" never appears** — the 
 2. **0x2E "Ticket Price" is the park gate's**, not a ride's. And **0x363 "Stock"** is the track ride's
 Upgrades/Addons readout, not a shop's.
 
+## 4c. ⚠ OPEN: the 19px overhang (flagged 2026-09-20, master could not confirm)
+
+**The left info frame starts 19px LEFT of the panel's own rect** — frame x = 16 (global 0x80102B30),
+panel x = 35 (0x800446C4) — and both were re-read and are what the binary says. Asked master to check the
+real game; they do not know either, so it stays open by agreement rather than being guessed.
+
+**What it blocks:** the ornamental border (corner 0x169 + inner 0x148, edge 0x173/0x161, 0x8003EDCC) is
+NOT drawn on either frame. A decorative border running off the screen edge reads as a bug whether or not
+it is faithful, so the port draws the frames as plain gouraud fills until this is settled. The fills
+themselves are at the read coordinates and are correct; only the border waits.
+
+**How to settle it:** one screenshot of the real panel. If the left frame sits inside the backdrop, then
+one of the two rects is misread and the frame globals are the likelier suspect, since the panel's rect is
+written as four literals in its own init. If it really does overhang, draw the border and let it clip.
+
 ## 5. Not established
 Text y semantics (top vs baseline); legend slot → button icon; what sets the ctx+4 gate and the fade
 timing; spinner input step/repeat; three of the four frame edges; the backdrop quad colour; OT ordering
