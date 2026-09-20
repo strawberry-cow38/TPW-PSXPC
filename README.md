@@ -146,6 +146,8 @@ a number the real rules already read; none of them changes a rule.
 | `--park-guests=N` | keep N guests in the park regardless of the bus |
 | `--park-break=entry[!][@frame]` | wear a ride out, so a mechanic can be watched fixing it. ⚠ Plain, it sets reliability to **1**, and the game ejects only at exactly **0** — so the eject path is never exercised and "nobody was swallowed" passes vacuously. `!` takes it to 0 and through BrokenDown; `@frame` breaks it later, with people aboard |
 | `--park-upgrade=entry` | run the paid level-up a mechanic's state 54 ends with. The SAME call, not a second path |
+| `--park-price=entry,pounds[;...]` | set a stall's sale price — the one input the want formula is most sensitive to |
+| `--park-seats` | every attraction in the catalogue with its seat count at each upgrade level. Needs no placement, which matters because a map's catalogue is only ~20 entries |
 | `--park-nogate` | guests appear inside the fence and pay nothing, the way they did before the turnstile. ⭐ A CONTROL, not a rule — it exists so the gate's effect on the bank can be measured against its own absence in one binary, and it prints "no gate" so a run that forgot to arm it cannot be mistaken for a null result |
 | `--park-log-rides` | every ride's status changes, its animation clock, the mesh the RENDERER holds, and every staff member's state changes |
 | `--shot=PATH:running[:N]` | photograph when a ride is mid-cycle rather than at a frame number |
