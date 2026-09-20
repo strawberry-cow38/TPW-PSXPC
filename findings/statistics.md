@@ -27,6 +27,17 @@ really is the existing signed-16-bit cleanliness average. Need conditions really
 The feature-bit labels remain neutral: e.g. FOLIO entries 335/338/339 have flags `0x03`, while
 349 has `0x02`; naming every bit-1 object a staff room would be wrong even though 353 is one.
 
+**Independently re-read (tinyclaw, 2026-09-20), two of the rows above:**
+
+- *The occupancy statistic.* 0x80015CA4 popcounts one BYTE per iteration (`lbu a0,0(v0)` →
+  `jal 0x80015A44`) over s6 iterations, then builds 100·n by `n<<1 + n`, `<<3`, `+ n`, `<<2`
+  and divides by s6 (0x80015CC8..0x80015CDC). So it is `100 × popcount / bitmap_BYTES` and the
+  denominator really is bytes, not bits. shop-stock.md §7.5's "count features by flag" does not
+  describe this routine.
+- *The cadence gate.* 0x80013298 loads the advisor's flag byte, `andi v0,v0,0x8`, and branches
+  past `jal 0x80016870` when it is clear. The statistics loop genuinely is not called unless
+  that bit is set, so "288 ticks per cycle" is 288 ELIGIBLE calls and not wall-clock.
+
 ## 1. What owns the numbers, and who reads them
 
 **READ:** this object belongs to the **advisor**, at advisor+0x1BC, not the park-statistics window.

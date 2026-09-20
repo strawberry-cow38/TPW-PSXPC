@@ -27,6 +27,12 @@ influence 6/3/1, the litter 3, the five −1 thresholds, the leave `< 5` and exi
 roll `< 25 && rand(1000) < 100`, the bubble chain, the condition code's `> 75` / `< 25`, the window's
 buckets, the shop bonus's 70 / 75, the purchase formulas and the constructor's 50.
 
+**Independently re-read (tinyclaw, 2026-09-20):** the constructor at 0x8008C5B8..0x8008C5C8 sets
+`a0 = V+0x59`, `v1 = 0x32`, `jal 0x800924F0` — while V+0x58 and V+0x5A on either side each take
+their value from a `jal 0x800C2648` roll (0x8008C5CC, 0x8008C5E4). The "starts at 50, no die"
+claim is visible in one window with both of its neighbours disagreeing with it. Disagreement #2's
+guard also checks out: 0x80066F4C is `sltu v0,a1,a0` on the raw n against the month count.
+
 ## 1. The byte
 
 V+0x59 is a signed byte in the run V+0x58..V+0x5F, clamped 0..100 by the helpers (Visitor.cs `Stat`
