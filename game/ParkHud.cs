@@ -106,8 +106,27 @@ namespace TPWGodot
         /// <summary>The panel's transform while it paints; 0 scale = not painting it, so everything else —
         /// including the context menu, which is pinned to the cursor — keeps the HUD's Sx/Sy untouched.</summary>
         float _pSx, _pSy;
-        float PX(float psx) => _pSx > 0f ? (psx - PanelRectX) * _pSx : psx * Sx;
+        /// ⭐⭐ THE PANEL'S CHILDREN ARE PANEL-RELATIVE. MEASURED on the real game (tinyclaw): the backdrop
+        /// occupies x 35..474 and y 31..221 and NOTHING is drawn outside it, while the left frame's content
+        /// starts at x=51 — which is 35+16, the panel's origin plus the frame's own 16. So the frame globals
+        /// are offsets INTO the panel, not screen coordinates.
+        ///
+        /// ⚠ The three "proofs of absolute" this file used to carry were not proofs. The name centring in the
+        /// info frame and the slider labels centring in the control frame are RELATIVE relationships — they
+        /// hold under any translation, so they cannot tell the two readings apart. A measurement could, and
+        /// did. Watch for that shape: an invariant can never decide between two frames of reference.
+        /// ⚠⚠ X IS PANEL-RELATIVE, Y IS NOT, AND THAT ASYMMETRY IS REAL — or one of the two rect readings is
+        /// wrong. X relative is MEASURED. Y relative is not merely unproven, it does not fit: the info frame
+        /// is 64 + 152 = 216 tall-wards, past the panel's own 191, so a panel-relative Y would hang the frame
+        /// out of the bottom of its own backdrop. Absolute Y puts it at 64..216 inside the backdrop's 31..221,
+        /// which fits exactly. The likeliest resolution is that the DETAILS page's panel rect is not the one
+        /// read from 0x800446C4 — tinyclaw measured the PURCHASE panel and said so — and a second measurement
+        /// of the Details page settles it. Until then this draws what each axis's evidence supports.
+        float PX(float psx) => _pSx > 0f ? psx * _pSx : psx * Sx;
         float PY(float psy) => _pSy > 0f ? (psy - PanelRectY) * _pSy : psy * Sy;
+
+        /// <summary>The panel's own origin, for the few things recorded in SCREEN coordinates.</summary>
+        static int Rel(int abs, int origin) => abs - origin;
         float WX(float w) => (_pSx > 0f ? _pSx : Sx) * w;
         float WY(float h) => (_pSy > 0f ? _pSy : Sy) * h;
         float Right(float psxX) => Screen.X - (ParkHudLayout.ScreenWidth - psxX) * Sx;
@@ -217,7 +236,7 @@ namespace TPWGodot
             // 0x80102B20 sit immediately before the two frame rects in the same data block and read like a
             // gouraud quad's corners, so they are the best candidate.  ⚠ The info frame starts 19px LEFT of
             // this rect, which is either how the game looks or a sign this rect is not the backdrop at all.
-            Quad(on, 35, 31, 440, 191, Rgb((0x20, 0x20, 0x20)), Rgb((0x80, 0x80, 0x80)));   // backdrop
+            Quad(on, 0, PanelRectY, PanelRectW, PanelRectH, Rgb((0x20, 0x20, 0x20)), Rgb((0x80, 0x80, 0x80)));
             Frame(on, 16, 64, 280, 152);                                                     // info frame
             Frame(on, 280, 80, 180, 110);                                                    // control frame
             Text(on, Panel.Name, 156, 80, 1, false, lit);
@@ -237,8 +256,11 @@ namespace TPWGodot
             if (Panel.ShowCapacity) { Slider(on, 0x364, y, Panel.Capacity, Panel.CapacityMin, Panel.CapacityMax); y = 168; }
             if (Panel.ShowDuration) Slider(on, 0x2D5, y, Panel.Duration, Panel.DurationMin, Panel.DurationMax);
 
-            // The page-name strip, bottom right, with its icon (a ride's is 0x141).
-            Text(on, Label(0x39A), 354, 216, 0, false, lit);
+            // ⚠ The page-name strip is the one thing recorded in SCREEN coordinates (panel.md §1 has it at
+            // (306,197)-(506,223), "BOTTOM RIGHT"), and 506 is past the panel's own 440 — so it cannot be
+            // panel-relative as recorded. Converted here rather than left to draw off the edge. Its rect is
+            // the next thing to re-measure now that there is an emulator.
+            Text(on, Label(0x39A), Rel(354, PanelRectX), 216, 0, false, lit);
         }
 
         /// <summary>A labelled 0..100 bar: the label at the left, the bar at (bx, by) 80 wide.</summary>
