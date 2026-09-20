@@ -1959,7 +1959,12 @@ namespace TPWGodot
             /// aboard for good. Unloading ends when the ride is empty, and only the real count knows.</summary>
             public Func<int> RiderCount;
             public bool IsEmpty => (RiderCount?.Invoke() ?? 0) <= 0;
-            public bool MechanicAssigned => false;
+            /// <summary>Whether a mechanic is already on its way here. ⚠ THIS WAS A CONSTANT `false`,
+            /// and the answer was sitting one line away the whole time: MechanicClaim is exactly "the
+            /// mechanic that has taken this job" (A+0x54). A predicate that is always the same answer
+            /// cannot be seen to be wrong — the only symptom was a ride that always told the player
+            /// nobody was coming, even with a mechanic halfway across the park walking to it.</summary>
+            public bool MechanicAssigned => MechanicClaim != null;
             public void PostMessage(int id) { }
             /// <summary>Message 10 to everyone aboard and everyone queueing. Wired by the view; see
             /// ParkRideWorld.EjectAll for why doing nothing here swallowed guests permanently.</summary>

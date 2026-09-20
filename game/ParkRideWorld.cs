@@ -80,6 +80,21 @@ namespace TPWGodot
         /// <summary>The map changed under the queues; re-walk them on the next refresh.</summary>
         public void QueuesChanged() => _pathsDirty = true;
 
+        /// <summary>Run <paramref name="body"/> with the cursor pointing at <paramref name="g"/>, and put
+        /// it back afterwards.
+        ///
+        /// ⚠⚠ EVERY IQueueWorld/IShopWorld METHOD ON THIS CLASS IGNORES ITS `Visitor` PARAMETER and reads
+        /// `_guest`, `_target` and `_runtime` instead. That is fine for the one guest being ticked and is
+        /// a trap for anything that acts on a guest in a LIST — the world will happily answer about, and
+        /// mutate, whoever the cursor last pointed at. Anything iterating guests goes through here.</summary>
+        public void WithGuest(Guest g, Action<ParkRideWorld> body)
+        {
+            var sg = _guest; var st = _target; var sr = _runtime;
+            SetGuest(g);
+            try { body(this); }
+            finally { _guest = sg; _target = st; _runtime = sr; }
+        }
+
         /// <summary>Point the world at the guest whose turn it is.</summary>
         public bool SetGuest(Guest g)
         {
@@ -116,11 +131,11 @@ namespace TPWGodot
             readonly Action<Guest> _place;
             readonly int _capacity;
 
-            readonly IQueueWorld _queue;
+            readonly ParkRideWorld _queue;
             readonly IRandomSource _dice;
 
             public LoadAdapter(RideRuntime r, int capacity, Func<long> now, Func<int> days, Action<Guest> placeAtExit,
-                               IQueueWorld queue = null, IRandomSource dice = null)
+                               ParkRideWorld queue = null, IRandomSource dice = null)
             { _r = r; _capacity = capacity; _now = now; _days = days; _place = placeAtExit; _queue = queue; _dice = dice; }
 
             public long NowTick => _now();
@@ -162,8 +177,15 @@ namespace TPWGodot
                 foreach (var g in _r.Queue)
                 {
                     if (_queue != null && _dice != null)
-                        VisitorQueue.OnMessage(g.V, _queue, QueueMessage.Shuffle,
-                                               _dice.Next(3), (int)VisitorState.ShuffleForward);
+                    {
+                        // ⚠⚠ MOVE THE CURSOR FIRST. Every IQueueWorld method on this class IGNORES the
+                        // Visitor it is handed and acts on `_guest` — so sending a message on behalf of
+                        // a guest that is not the cursor frees SOMEBODY ELSE'S waypoint chain. A guest
+                        // whose chain vanishes mid-walk stops where it stands, which is exactly the
+                        // "stuck for ever while later joiners get on" this shuffle was meant to cure.
+                        _queue.WithGuest(g, w => VisitorQueue.OnMessage(g.V, w, QueueMessage.Shuffle,
+                                                                       _dice.Next(3), (int)VisitorState.ShuffleForward));
+                    }
                     else if (g.V.State == VisitorState.WaitingInQueue)
                         g.V.SetState(VisitorState.ShuffleForward);
                 }
