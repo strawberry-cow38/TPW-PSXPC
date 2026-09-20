@@ -1,7 +1,10 @@
 # The attraction panel — PAL SLES-026.88
 
 2026-09-20. **READ** = off the instructions at the quoted address; **INF** = inference; **GUESS** = guess.
-Coordinates are absolute on the 512x256 screen. `A` = the attraction sub-object the panel stores at
+Coordinates are absolute on the 512x256 screen, and **every text y is a BASELINE**: the font's glyph
+entries carry `yoff = -13, h = 13`, so a glyph occupies `y-13 .. y` (char table 0x800DD0E4, `'H'` → sprite
+0x19D 9x13). A first pass of this report had the strip at the top left and y as the text bottom; both were
+wrong and are corrected here. `A` = the attraction sub-object the panel stores at
 panel+0x270; `outer` = A−8 (the C getters take outer).
 
 ## 0. Shape
@@ -25,8 +28,9 @@ or a bin opens the main menu instead.
 | part | rect | address |
 | --- | --- | --- |
 | panel | (35,31) 440x191 | 0x80044684 |
-| title icon | (41,36) | 0x80044564 |
-| title text | (83,50), left | |
+| page-name strip | **(306,197)-(506,223), BOTTOM RIGHT** | 0x80044564 |
+| its icon | (318,201) + the sprite's own xoff/yoff | 0x80042CAC |
+| its text | baseline (354,216), left | |
 | info frame (left) | (16,64) 280x152 | 0x80044EBC |
 | control frame (right) | (280,80) 180x110, only while a page is active | 0x80044F64 |
 | 3D model view | (52,70) 224x140, zoom 1400, spins every frame | 0x8004A7EC / 0x8004B3B4 |
@@ -99,6 +103,14 @@ two call the **PANEL's** vtable, not the attraction's (0x800784BC..D4: `lw v0,16
 slot 28 is 0x80079C98, the ride panel's own). The Options list has no Open/Close row for types 1..7; the
 only "Open" entry (0x102 → attraction slot 27) is added for objects of type 0x12. **The panel does not
 open or close rides.** Recorded as a disagreement rather than silently swapped.
+
+## 4b. Labels that are NOT drawn by any of these routines
+Checked against the draw code rather than the string table, because grepping words produced four wrong
+answers: **0x7A "State of Repair"**, **0x2DF "Purchase Cost"**, **0x27B "Open"** and **0x401 "Close"** are
+not drawn by any attraction panel (0x396 "Close" is only the button legend, and 0x102 "Open" is an Options
+entry for type-0x12 objects alone). **0x233 "Upgrade 3" never appears** — the row is only ever Upgrade 1 or
+2. **0x2E "Ticket Price" is the park gate's**, not a ride's. And **0x363 "Stock"** is the track ride's
+Upgrades/Addons readout, not a shop's.
 
 ## 5. Not established
 Text y semantics (top vs baseline); legend slot → button icon; what sets the ctx+4 gate and the fade
