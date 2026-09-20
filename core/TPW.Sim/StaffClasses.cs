@@ -222,13 +222,14 @@ namespace TPW.Sim
     {
         /// <summary>Spread this many points evenly across the active research topics (up to 5).</summary>
         void ContributeResearch(int points);
-        /// <summary>The bank's research multiplier, BANK+4 -- the money put behind research.</summary>
+        /// <summary>The research BANK+4 effort, default 80, slider 70..100. No money is spent.
+        /// Map to ResearchSystem.Funding, and ContributeResearch to its same-named method.</summary>
         int ResearchFunding { get; }
     }
 
     /// <summary>The researcher (Update 0x80099B10, behaviour.md §3.3).
     ///
-    /// ⭐ A RESEARCHER ALTERNATES: roughly three ticks in ten it researches, the rest it walks a patrol.
+    /// ⭐ A RESEARCHER ALTERNATES: three IDLE DECISIONS in ten choose work; patrol legs take many ticks.
     /// It is not a stationary worker, and the walking is not decoration -- it is why a researcher tires
     /// like everyone else and why its output is a trickle rather than a steady rate.</summary>
     public static class Researcher
@@ -244,7 +245,9 @@ namespace TPW.Sim
         /// <summary>Idle (0x800999C0).</summary>
         public static void Idle(StaffMember staff, IResearchWorld world, IRandomSource rng)
         {
-            if (world.IsTypeOnStrike(staff.Kind)) return;
+            StaffBase.IdleCheck(staff, world); // slot 51; strike/rest can take over, behaviour.md §3.1.
+            // Retain behaviour.md §3.3's decision order. Binary rolls BEFORE slot 51; research.md §0.
+            if (staff.State != StaffState.Idle) return;
             staff.SetState(rng.Next(10) < ResearchChanceInTen
                 ? StaffClassStates.Researching
                 : StaffState.Patrolling);
@@ -253,8 +256,15 @@ namespace TPW.Sim
         /// <summary>State 31 (0x80099A70): one tick of work, then straight back to Idle.</summary>
         public static void Research(StaffMember staff, IResearchWorld world)
         {
-            int points = Handyman.BySkill(PointsBySkill, staff.Skill);
-            world.ContributeResearch(points * world.ResearchFunding);
+            int skill = staff.Skill & 7;
+            // Binary overreads rows 5..7. Their meaning is not established; do not invent row 4.
+            if (skill >= PointsBySkill.Length) throw new ArgumentOutOfRangeException(nameof(staff.Skill));
+            int points = PointsBySkill[skill];
+            world.ContributeResearch(unchecked(points * world.ResearchFunding));
+            // SOURCE DISAGREEMENT: keep behaviour.md §3.3's signed (effort-80)/3 and the existing
+            // staff-stat clamp. Binary uses unsigned division and a signed-byte add with only an
+            // upper bound (0x80099AB8..ADC / 0x80099CC4); see research.md §0. ⚠ DO NOT FIX silently.
+            staff.Tiredness += (world.ResearchFunding - ResearchSystem.DefaultFunding) / 3;
             staff.SetState(StaffState.Idle);
         }
     }
