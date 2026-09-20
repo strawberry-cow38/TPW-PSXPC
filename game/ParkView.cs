@@ -1122,7 +1122,10 @@ namespace TPWGodot
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
-            + RideReport() + _guests.StaffReport();
+            + RideReport() + _guests.StaffReport()
+            // ⭐ WHAT IS UNDER THE MOUSE, IN FULL. StateReport says a state is stuck; this says which
+            // guest and what it wanted, which is the half that explains it.
+            + (TileUnderMouse() is { } hov ? _guests.HoverReport(hov.X, hov.Z) : "");
         }
 
         /// <summary>Each placed ride's status, its animation clock and what it is carrying - the half of the park

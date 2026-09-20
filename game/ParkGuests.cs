@@ -987,6 +987,41 @@ namespace TPWGodot
                  + $"happy {happy / n}, tired {tired / n}, nausea {nausea / n} (of {n})";
         }
 
+        /// <summary>Every guest standing on one tile, in full. ⭐ THE PER-GUEST HALF OF StateReport:
+        /// that one says a state is stuck, this one says WHICH guest and what it wanted. A guest's state
+        /// alone never explains it -- the purpose and the target are what say whether it is waiting for
+        /// something reasonable or holding a goal nothing will ever satisfy.
+        ///
+        /// ⚠ ALL of them, not the first. Guests pile up several to a tile at queue heads and doorways,
+        /// which is exactly where they get stuck, so reporting one would report the wrong one.</summary>
+        public string HoverReport(int tileX, int tileZ)
+        {
+            var sb = new System.Text.StringBuilder();
+            int n = 0;
+            foreach (var g in _guests)
+            {
+                if (g.X / ParkTerrain.TileUnits != tileX || g.Z / ParkTerrain.TileUnits != tileZ) continue;
+                n++;
+                sb.Append($"\n  guest #{g.GetHashCode() & 0xFFFF}: {g.V.State}");
+                if (g.LastState != (VisitorState)(-1) && g.LastState != g.V.State) sb.Append($" (was {g.LastState})");
+                sb.Append($" for {_now - g.StateSince} ticks");
+                sb.Append($"; purpose {g.V.Purpose}");
+                sb.Append(g.V.HasTarget ? $"; target ({g.TargetTileX},{g.TargetTileZ})" : "; no target");
+                if (g.WaypointHead == WaypointPool.NoChain) sb.Append(" ⚠ no route");
+                if (g.V.InQueue) sb.Append("; queued");
+                if (g.Hidden) sb.Append("; ABOARD");
+                sb.Append($"; happy {g.V.Happiness} nausea {g.V.Nausea} tired {g.V.Tiredness}");
+            }
+            foreach (var st in _staff)
+            {
+                if (st.X / ParkTerrain.TileUnits != tileX || st.Z / ParkTerrain.TileUnits != tileZ) continue;
+                n++;
+                sb.Append($"\n  {st.S.Kind} #{st.GetHashCode() & 0xFFFF}: {st.S.State}"
+                        + (st.WaypointHead == WaypointPool.NoChain ? " ⚠ no route" : ""));
+            }
+            return n == 0 ? "" : $"\nunder the mouse ({tileX},{tileZ}), {n}:" + sb;
+        }
+
         /// <summary>Every state a guest is currently in, with the longest anyone has held it.
         ///
         /// ⭐ READ THE DURATION, NOT THE COUNT. Twenty guests idle is a park; ONE guest that has been
