@@ -1754,17 +1754,23 @@ static class Program
             AttractionDefinition rec;
             try { rec = AttractionDefinition.Read(e.Index, bytes); } catch { continue; }
             if (rec == null || !rec.IsRide || rec.Levels.Length == 0) continue;
-            int skinless = -1;
-            if (MeshContainer.IsContainer(bytes) && MeshContainer.TryParse(bytes, out var c, out _)
-                && c.Subs.Count > 0 && c.TryParseMesh(bytes, 0, out var m, out _))
+            // ⚠ ACROSS EVERY SUB-MESH, not just sub 0. The first version of this counted sub 0 alone and
+            // reported ZERO attachment bones for entry 373 -- a six-sub model whose bones are in sub 5.
+            // That wrong zero was the evidence used to kill the "seats are bones" rule.
+            int skinless = -1, subs = 0;
+            if (MeshContainer.IsContainer(bytes) && MeshContainer.TryParse(bytes, out var c, out _))
             {
-                var sk = m.Skeleton;
-                skinless = 0;
-                for (int b = 0; b < sk.Count; b++)
-                    if (sk.Bones[b].SkinCount == 0 && sk.Bones[b].Parent >= 0) skinless++;
+                skinless = 0; subs = c.Subs.Count;
+                for (int sub = 0; sub < c.Subs.Count; sub++)
+                {
+                    if (!c.TryParseMesh(bytes, sub, out var m, out _)) continue;
+                    var sk = m.Skeleton;
+                    for (int b = 0; b < sk.Count; b++)
+                        if (sk.Bones[b].SkinCount == 0 && sk.Bones[b].Parent >= 0) skinless++;
+                }
             }
             var seats = string.Join(",", Array.ConvertAll(rec.Levels, l => l.MaxSeats.ToString()));
-            Console.WriteLine($"{e.Index,5}  [{seats,-16}] {skinless,8}           entry {e.Index}");
+            Console.WriteLine($"{e.Index,5}  [{seats,-16}] {skinless,8}  subs {subs,2}");
         }
         return 0;
     }
