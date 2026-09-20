@@ -974,6 +974,12 @@ namespace TPWGodot
                     sb.Append($"\n  [{row.Label}] {_catalogueNames?[row.Label] ?? "?"}: "
                             + (row.Slider ? $"{row.Now} [{row.Min}..{row.Max}]" : row.Value ?? "(not wired)"));
             }
+            if (_contextFor != null)
+            {
+                sb.Append($"\ncontext {_contextFor.Rec.Entry} ({_contextFor.Type}):");
+                foreach (int id in ContextCommands(_contextFor))
+                    sb.Append($" [{id}] {_catalogueNames?[id] ?? "?"};");
+            }
             foreach (var a in _attractionsPlaced)
             {
                 int len = PhaseTicks(a);
@@ -1246,6 +1252,14 @@ namespace TPWGodot
             // price the blueprint carries (+8, from 0x8006AD58) times ten, the game's money unit (economy.md §4.6).
             Charge(rec);
             int rot = _placeRot;
+            // ⭐ STAMPING (master's, not the game's): hold SHIFT and the tool stays on the cursor so the next
+            // click places another one. Each stamp is charged and validated exactly like a single placement —
+            // the only thing skipped is the tool closing and its hand-over.
+            // ⚠ SO A RIDE STAMPED THIS WAY GETS NO QUEUE AND NO TRACK. The game hands a placed ride straight
+            // to the queue tool and a coaster to the track builder, and a stamp cannot do that for each copy;
+            // the hand-over happens for the LAST one, when shift comes off. Placing rides in bulk and building
+            // their queues afterwards is the trade.
+            if (Input.IsKeyPressed(Key.Shift)) { RefreshInfo(); return; }
             StopPlacing();
             // A coaster (type 1) or a track ride (6) hands over to a track builder; everything else with a queue
             // hands over to the queue tool (findings/rides.md §7b).
@@ -2154,6 +2168,9 @@ namespace TPWGodot
             public const int Age = 0x1DC, Users = 0x18C, Excitement = 0x37;
             public const int Reliability = 0x3ED, Repair = 0x25C, Life = 0x3FA;
             public const int Speed = 0x1A1, Capacity = 0x364, Duration = 0x2D5;
+            // The context list / Options page (0x8004A0B4)
+            public const int BuildQueue = 0x374, EditQueue = 0x37F, BuildTrack = 0x0, EditTrack = 0xD;
+            public const int EditPylons = 0x3DF, CallMechanic = 0xAE, Delete = 0x24D, ZoomTo = 0x174;
             // Upgrades page (0x80079E38)
             public const int UpgradeCost = 0x119, Stock = 0x363;
             // Shop Details (0x8007A9E4)
@@ -2164,6 +2181,40 @@ namespace TPWGodot
             public const int ShowExcitement = 0x350, Satisfaction = 0x2B9;
             public const int ChanceOfWinning = 0x116, PrizeCost = 0x313, GamePrice = 0xB6;
         }
+
+        /// <summary>The commands the game offers for an attraction — ⭐ THE SAME LIST TWICE OVER. In the park
+        /// CROSS pops it up at the cursor (0x800387AC → 0x800385D0), and inside the panel it IS the Options
+        /// page; both are filled by 0x8004A0B4, so they can never drift apart. Master's mapping for the port:
+        /// LMB opens the panel, RMB opens this.
+        ///
+        /// ⚠ Availability is the game's, where the port can answer it. "Call Mechanic" needs the ride broken
+        /// (status 4 or 5) and not condemned; Build/Edit Queue and Build/Edit Track change word by whether one
+        /// exists. "Zoom To" is deliberately absent: the game only offers it when the panel was opened from a
+        /// LIST, not from the park.</summary>
+        List<int> ContextCommands(PlacedAttraction a)
+        {
+            var cmds = new List<int>();
+            if (a == null) return cmds;
+            bool ride = a.IsRide;
+            if (ride) cmds.Add(HasQueue(a) ? PanelLabel.EditQueue : PanelLabel.BuildQueue);
+            if (a.Type == AttractionType.TrackRide || a.Type == AttractionType.RollerCoaster)
+                cmds.Add(HasTrack(a) ? PanelLabel.EditTrack : PanelLabel.BuildTrack);
+            if (a.Type == AttractionType.RollerCoaster && HasTrack(a)) cmds.Add(PanelLabel.EditPylons);
+            if (ride && (a.Status == AttractionStatus.AboutToBreakDown || a.Status == AttractionStatus.BrokenDown)
+                     && a.Wear.Lifetime != 0)
+                cmds.Add(PanelLabel.CallMechanic);
+            cmds.Add(PanelLabel.Delete);
+            return cmds;
+        }
+
+        /// <summary>⚠ STAND-INS, both of them, and they decide which WORD the command shows. The port does not
+        /// record which queue or which track belongs to which attraction yet, so these answer "no" and the
+        /// list always says Build rather than Edit.</summary>
+        static bool HasQueue(PlacedAttraction a) => false;
+        static bool HasTrack(PlacedAttraction a) => false;
+
+        /// <summary>The attraction whose context list is open (master: right button), or null.</summary>
+        PlacedAttraction _contextFor;
 
         /// <summary>The attraction whose panel is open, or null. ⚠ SELECTION ONLY SO FAR: the panel itself is
         /// not drawn yet, and what it shows per attraction type is being read off the disc rather than
@@ -2793,6 +2844,14 @@ void fragment() {
                     _runStart = null;
                 }
                 return;
+            }
+            // ⭐ MASTER'S MAPPING: left button opens the panel (above), right button opens the context list.
+            // Only with no tool running — while a tool is open the right button is that tool's cancel.
+            if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }
+                && !_pathMode && _placing < 0 && _queue == null && _track == null)
+            {
+                var hit = TileUnderMouse() is { } ct ? AttractionAt(ct) : null;
+                if (hit != null || _contextFor != null) { _contextFor = hit; RefreshInfo(); return; }
             }
             if (_pathMode && e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape } && _runStart != null)
             {
