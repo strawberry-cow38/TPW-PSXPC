@@ -310,16 +310,31 @@ namespace TPWGodot
         /// out a rate from what is BUILT - a park with nothing in it gets nobody, which is the single
         /// most surprising fact in the whole economy. One a tick is a placeholder so there is something
         /// to look at, and it is deliberately not dressed up as the real thing.</summary>
+        /// <summary>Path tiles only, for <see cref="Populate"/>. Rebuilt when the map changes.</summary>
+        readonly List<(int X, int Z)> _paths = new();
+
         public void Populate(int target)
         {
-            // ⚠⚠ AT THE GATE, NOT ANYWHERE WALKABLE. `Spawn()` with no tile drops a guest on a RANDOM
+            // ⚠⚠ ON A PATH, NOT ANYWHERE WALKABLE. `Spawn()` with no tile drops a guest on a RANDOM
             // walkable tile, and walkable includes every attraction entrance and queue tile in the park.
             // So --park-guests was teleporting guests INSIDE rides' enclosed entrance pockets, where they
             // promptly queued and boarded a ride nothing could walk to. Master spotted it from a
             // screenshot: "there's no way someone could have got on it." There wasn't. The harness put
             // one there, and every conclusion drawn from a --park-guests run about who can reach what was
             // measuring the harness.
-            if (_guests.Count < target) SpawnAtGate();
+            //
+            // ⚠ AND SENDING THEM THROUGH THE GATE INSTEAD WAS WORSE. That was the first fix, and on a
+            // park that is not open it left every guest standing at the bus stop waiting for a turnstile
+            // that never admits them -- which reads exactly like the sim has frozen. This flag exists to
+            // put guests IN a park now; it just has to put them somewhere a guest could legitimately be
+            // standing, which is a path tile and never a ride's own entrance.
+            if (_guests.Count >= target) return;
+            if (_paths.Count == 0)
+                foreach (var (x, z) in _walkable)
+                    if (_map[x, z].Type is TPW.Data.TileType.Path or TPW.Data.TileType.PathQueueOverlap)
+                        _paths.Add((x, z));
+            if (_paths.Count == 0) { SpawnAtGate(); return; }
+            Spawn(_paths[_rng.Next(_paths.Count)]);
         }
 
         /// <summary>One park frame of the pathfinder (0x800EC8C4). Separate from <see cref="Tick"/>
@@ -1445,7 +1460,7 @@ namespace TPWGodot
         public void MapChanged()
         {
             _rides?.QueuesChanged();
-            _walkable.Clear();
+            _walkable.Clear(); _paths.Clear();
             for (int x = 0; x < _map.Width; x++)
                 for (int z = 0; z < _map.Height; z++)
                     if (_map[x, z].IsWalkable) _walkable.Add((x, z));
