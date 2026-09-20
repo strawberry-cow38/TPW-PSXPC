@@ -70,7 +70,15 @@ Callers of OpenPark (all four, READ): 0x80075ABC (menu), 0x800622A0 (slot 36), 0
 (saved-park stream), 0x80059AA8 (memory-card mode byte). Callers of ClosePark: 0x80050600 (game
 start, at 0x8005081C) and slot 37.
 
-### 1a. ⚠ Is the GATE a route in? (open, 2026-09-20)
+### 1a. ✅ SETTLED: the gate IS a route in (2026-09-20)
+
+**Measured on the real game** (tinyclaw, emulator): selecting the park gate and pressing **✕** gives a
+context list with **"Open"** in it. So the port's gate click is the game's own behaviour, not a
+deviation. The reasoning below stands and its open question is now answered: the flag still has only
+three writers, and the gate reaches one of them **through the context list**, which is the untraced
+route this section guessed at.
+
+### 1a-old. ⚠ The reasoning, kept because it was right for the wrong-looking reason
 
 Master: "the real game DOES let u open the park from the gate, because WHY would it be selectable?" — a
 fair question, and the answer here is partial. **Re-checked: the flag at gp+0x06DC = 0x80102D30 has
