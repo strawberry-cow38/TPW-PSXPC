@@ -1500,6 +1500,31 @@ namespace TPWGodot
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
 
+        /// <summary>Move a slider on the selected attraction, as the panel's widget will. Returns what the
+        /// value actually became, which is NOT always what was asked: RidePanel.Apply clamps to the range of
+        /// the ride's current level, and a coaster's duration range is 1..1 on the disc, so its slider exists
+        /// and cannot move.
+        ///
+        /// ⚠ THIS IS THE WRITING HALF AND IT REACHES LIVE STATE. Speed and duration are read every tick by the
+        /// wear and cycle code, so moving a slider changes how fast a ride wears and how long a cycle takes —
+        /// this is the first thing in the port that can make a park worse. Proven headlessly before any pixels
+        /// exist, on purpose.</summary>
+        public (int Speed, int Duration)? MoveSlider(string which, int value)
+        {
+            if (_panelFor == null) return null;
+            int speed = _panelFor.SpeedSlider, duration = _panelFor.CyclesPerLoad, capacity = _panelFor.Capacity;
+            switch (which)
+            {
+                case "speed": speed = value; break;
+                case "duration": duration = value; break;
+                case "capacity": capacity = value; break;
+                default: return null;
+            }
+            TPW.Sim.RidePanel.Apply(_panelFor, speed, capacity, duration);
+            RefreshInfo();
+            return (_panelFor.SpeedSlider, _panelFor.CyclesPerLoad);
+        }
+
         /// <summary>Select the attraction on a tile, as a click on it does. For captures, so the panel can be
         /// driven headlessly the way every other tool in this port is.</summary>
         public bool SelectAttraction(int x, int z)
