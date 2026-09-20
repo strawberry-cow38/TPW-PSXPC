@@ -246,7 +246,16 @@ namespace TPWGodot
             // The opening balance: the park's game-mode init sets the bank to Money(50000, 0) (0x800588D0, at
             // 0x80058A94..0x80058AB8 through 0x800868B0; economy.md §1.2), what the HUD shows at the start. Whether a
             // level record overrides it later is not read.
-            _finances = new ParkFinances(ParkEconomy.OpeningBalance);
+            // ⭐ THE PARK NOW OWES WAGES. ParkFinances' own comment said the default of nothing was
+            // "the honest answer, because the port has no staff yet"; it has staff now, so the honest
+            // answer changed. The month just ended is the one to bill for — its length is on the
+            // calendar AFTER the rollover, and the day it ended on is the day before today.
+            _finances = new ParkFinances(ParkEconomy.OpeningBalance, () =>
+            {
+                var cal = _finances.Calendar;
+                int len = cal.LengthOfMonthJustEnded > 0 ? cal.LengthOfMonthJustEnded : cal.CurrentMonthLength;
+                return _park?.StaffWages(cal.TotalDays - 1, len) ?? Money.Zero;
+            });
 
             // ⚠ INSET FROM THE EDGES. Anchored full-rect with no offsets, the first label sits ON the top
             // edge and is clipped by it -- which looked like a missing widget rather than a margin bug.
@@ -1294,6 +1303,9 @@ namespace TPWGodot
                 // Say what was in the picture. A shot of a park is evidence about the park, and the
                 // counts are the half of it a screenshot cannot show.
                 if (_park != null && _park.HasMap) GD.Print("[tpw] " + _park.GuestReport());
+                if (_finances != null)
+                    GD.Print($"[tpw] money: balance {_finances.Bank.Balance}, {_finances.MonthsRun} month ends run"
+                           + (_finances.LastMonthEnd is { } me ? $", last one billed {me.Wages} in wages" : ", none yet"));
             }
             GetTree().Quit();
         }

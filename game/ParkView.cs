@@ -1871,6 +1871,11 @@ namespace TPWGodot
             return false;
         }
 
+        /// <summary>What the park owes its staff for the month just ended. Zero with no staff, which is
+        /// the right answer rather than a placeholder.</summary>
+        public Money StaffWages(int lastDay, int monthLength)
+            => _guests?.MonthlyWages(lastDay, monthLength) ?? Money.Zero;
+
         public bool Hire(int kind, int x, int z)
         {
             if (_guests == null || _map == null) return false;

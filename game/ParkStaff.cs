@@ -26,6 +26,12 @@ namespace TPWGodot
         /// barely over half the 15 this port had borrowed from the visitor while it was unread, and it
         /// gets faster the moment it is trained rather than at its next hire.</summary>
         public override int WalkSpeed => StaffMotion.Speed(S);
+
+        /// <summary>The park's total day when this one was hired. Wages are pro-rated over the days of
+        /// the month actually worked (Wages.Monthly), so a member taken on mid-month costs part of a
+        /// wage — and the game floors TWICE on the way there, which is why the day matters rather than
+        /// a fraction computed at the end.</summary>
+        public int HiredDay;
     }
 
     /// <summary>The park as the shared staff machine reads it (TPW.Sim.StaffBase, behaviour.md §3.1).

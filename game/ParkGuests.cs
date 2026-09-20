@@ -318,6 +318,7 @@ namespace TPWGodot
             // base's (0x80094590) only knows patrol, strike and rest. Sending a mechanic through the
             // base one made it walk all the way to a broken ride and then stand there with nothing to
             // do, go idle, and claim the same ride again — for ever.
+            st.HiredDay = (int)(_now / ParkClock.TicksPerDay);
             st.OnArrive = w =>
             {
                 var s2 = (Staffer)w;
@@ -341,6 +342,28 @@ namespace TPWGodot
             });
 
         public int StaffCount => _staff.Count;
+
+        /// <summary>What the park owes its staff for a month of <paramref name="monthLength"/> days that
+        /// ended on total day <paramref name="lastDay"/> (TPW.Sim.Wages).
+        ///
+        /// ⭐ PRO-RATED BY THE DAYS ACTUALLY WORKED, and the original floors twice on the way — a
+        /// percentage first, then the wage — so a mid-month hire is computed from its DAY rather than
+        /// from a fraction taken at the end. Collapsing the two divisions gives a different answer for
+        /// most part-months.
+        ///
+        /// ⚠ NOBODY STRIKES YET, so the striking branch (which pays nothing) is never taken here. That
+        /// is ParkStaffWorld's gap, not this one's.</summary>
+        public Money MonthlyWages(int lastDay, int monthLength)
+        {
+            var total = Money.Zero;
+            foreach (var st in _staff)
+            {
+                int worked = Math.Min(monthLength, lastDay - st.HiredDay + 1);
+                if (worked <= 0) continue;
+                total += Wages.Monthly(st.S.Skill, st.S.Kind, worked, monthLength);
+            }
+            return total;
+        }
 
         /// <summary>Each member of staff's state, tiredness and where it is standing — the half of the
         /// park a headcount cannot see. A staff member that is "there" but never moves and a staff
