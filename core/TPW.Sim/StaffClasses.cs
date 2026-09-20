@@ -24,8 +24,12 @@ namespace TPW.Sim
         /// <summary>Nearest UNCLAIMED litter by Manhattan tiles; claims it for this handyman and asks
         /// for a path. False when there is none or the request was refused.</summary>
         bool TryClaimNearestLitter(StaffMember staff);
-        /// <summary>The bin worth going to: over every bin more than 40% full, the lowest
-        /// `distance * (remaining + 1)` -- so near and full beats far and fuller.</summary>
+        /// <summary>The bin worth going to (0x80098F20): over every feature whose slot 33 is set and
+        /// whose capacity byte reads under <see cref="Handyman.BinPickBelow"/> (<see cref="Handyman.WantsEmptying"/>),
+        /// the lowest <see cref="Handyman.BinScore"/> -- so near and full beats far and fuller. READ
+        /// (0x80023E60 → 0x80024348): slot 33 is the record flag `rec+0x2E &amp; 1`, the SAME bit guests'
+        /// slot 54 reads, so a handyman services every guest-usable feature, toilets included, not only
+        /// bins. rides.md §1.3 guessed bit 2 for this filter; see findings/shop-stock.md §disagreements.</summary>
         bool TryChooseBin(StaffMember staff);
         /// <summary>The claimed litter is vomit (obj+0x1C == 0x9E) rather than ordinary rubbish.</summary>
         bool ClaimedLitterIsVomit(StaffMember staff);
@@ -36,7 +40,8 @@ namespace TPW.Sim
         /// <summary>How full the chosen bin was when the handyman got to it: the REMAINING capacity,
         /// 0..100. Below 40 means it was more than 60% full.</summary>
         int ChosenBinRemaining(StaffMember staff);
-        /// <summary>Set the bin back to empty and stamp its last-emptied time.</summary>
+        /// <summary>0x80024210 on the chosen feature: <see cref="FeatureStock.Refill"/> with today's
+        /// total-day count. Free, instant, and the only thing in the game that raises the byte.</summary>
         void EmptyChosenBin(StaffMember staff);
     }
 
@@ -78,8 +83,28 @@ namespace TPW.Sim
         public const int FullBinMorale = -10;
         /// <summary>Remaining capacity below which the bin counts as neglected.</summary>
         public const int NeglectedBinRemaining = 40;
+        /// <summary>Remaining capacity strictly below which a feature is worth a trip (0x80098FC4,
+        /// `slti 0x3C`): the low-stock threshold on the STAFF side. The guest's is 50
+        /// (VisitorQueue.FeatureLowStock), so a handyman starts caring ten points before a guest does.</summary>
+        public const int BinPickBelow = 60;
         /// <summary>Tiredness added by finishing either job.</summary>
         public const int JobTiredness = 5;
+
+        /// <summary>Does this feature's capacity byte make it a candidate for emptying? Strictly below
+        /// <see cref="BinPickBelow"/> (0x80098FC4..0x80098FC8).</summary>
+        public static bool WantsEmptying(int remaining) => remaining < BinPickBelow;
+
+        /// <summary>The score the bin choice MINIMISES, behaviour.md §3.6: `Manhattan distance ×
+        /// (remaining + 1)`, distance in tiles between the handyman and the feature.
+        ///
+        /// ⚠ DISPUTED, KEPT AS THE FINDINGS STATE IT. The instructions at 0x80099018..0x80099050 weight
+        /// only the y term: `|dx| + |dy| × (remaining + 1)` (the `mult` sits in the delay slot of the
+        /// y-sign branch and `|dx|` is added after `mflo`). That reads like a precedence slip in the
+        /// original source, and it changes which bin wins whenever two are at different x offsets. This
+        /// port keeps the report's formula pending review -- findings/shop-stock.md §disagreements item
+        /// 1 -- and the test that pins it says so; flip both together.</summary>
+        public static int BinScore(int dx, int dy, int remaining)
+            => (Math.Abs(dx) + Math.Abs(dy)) * (remaining + 1);
 
         /// <summary>Index a skill table the way the original does, but safely.
         ///

@@ -216,5 +216,34 @@ namespace TPW.Sim.Tests
             Researcher.Research(expert, w2);
             Assert.Equal(43, w2.ResearchPoints);                 // barely more than grade 4's 40
         }
+        // The staff-side low-stock line is 60, strictly (0x80098FC4, `slti 0x3C`): a bin reading 60 is
+        // left alone, 59 gets a visit. REJECTS `<= 60`, and REJECTS reusing the guest's 50 or the
+        // neglect threshold's 40 for the pick.
+        [Theory]
+        [InlineData(61, false)] [InlineData(60, false)] [InlineData(59, true)] [InlineData(0, true)]
+        public void ABinIsWorthATripStrictlyBelowSixtyRemaining(int remaining, bool wanted)
+        {
+            Assert.Equal(60, Handyman.BinPickBelow);
+            Assert.Equal(wanted, Handyman.WantsEmptying(remaining));
+        }
+
+        // ⚠ PINS THE FINDINGS' FORMULA, WHICH THE BINARY DISPUTES (see Handyman.BinScore). behaviour.md
+        // §3.6: Manhattan distance × (remaining + 1), so (3, 4, 10) is 7 × 11 = 77. The instructions at
+        // 0x80099018..0x80099050 weight only the y term, which would give 3 + 4 × 11 = 47. This test
+        // REJECTS that reading DELIBERATELY, per the port's disagreement policy; when the dispute is
+        // resolved in the binary's favour, change the expected values here and the formula together.
+        // It also REJECTS an unweighted distance (7), a signed distance (−1 × 11 = −11), and weighting
+        // by remaining alone (70).
+        [Theory]
+        [InlineData(3, 4, 10, 77)]
+        [InlineData(-3, 4, 10, 77)]
+        [InlineData(3, -4, 10, 77)]
+        [InlineData(0, 0, 59, 0)]
+        [InlineData(5, 0, 0, 5)]
+        public void BinScoreIsManhattanDistanceTimesRemainingPlusOne(int dx, int dy, int remaining, int expected)
+        {
+            Assert.Equal(expected, Handyman.BinScore(dx, dy, remaining));
+        }
+
     }
 }

@@ -81,7 +81,9 @@ namespace TPW.Sim
         void StepToNextWaypoint(Visitor guest);
         /// <summary>The slot-16 type of the guest's current target, or 0 when it has none.</summary>
         int TargetType(Visitor guest);
-        /// <summary>The target's slot 54 is non-zero (a shop with stock).</summary>
+        /// <summary>The target's slot 54 is non-zero. READ: for a feature that is the record flag
+        /// `rec+0x2E &amp; 1`, guests may use it (0x80023F0C); for everything else the base slot returns
+        /// 0 (0x80066108). Named for the contract VisitorQueue shares; it is not a stock level.</summary>
         bool TargetHasStock(Visitor guest);
         /// <summary>0x8009F614 found an entrance point on the target.</summary>
         bool TargetHasEntrance(Visitor guest);
