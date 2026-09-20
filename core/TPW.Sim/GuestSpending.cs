@@ -99,6 +99,15 @@ namespace TPW.Sim
     /// <summary>The purchase rules, as far as they are READ and no further. Sources: behaviour.md §2.5,
     /// economy.md §4.2, §4.3 and §5, and a re-read of 0x8008E5EC and 0x8008EE78 for this port.
     ///
+    /// ⚠ N IS AN INPUT, NOT A PLAUSIBLE DEFAULT. The original behaviour.md §2.5 left the per-product
+    /// coefficients undecoded, so this interface requires the host's need factor. A fabricated N would
+    /// have exactly the right shape and the wrong value, and tests written against it would agree.
+    ///
+    /// READ refinement (findings/visitor-rest.md, 2026-09-20): type-4 coefficients are now located at
+    /// definition bytes +0x33/+0x32/+0x36/+0x34, with all 37 records tabulated. The binary also divides
+    /// earlier than this report's Want formula. N remains an input here; the coefficient discovery
+    /// does not silently substitute that disputed arithmetic into the existing purchase contract.
+    ///
     /// ⚠ THE WANT IS IN POUNDS, NOT MONEY. Every number in the two routines is an int of pounds: the
     /// record's unit cost, the shop's price word, the want, the verdict. Money enters only at the two
     /// affordability tests and the two deductions, where 0x80092778 builds `pounds × 10`. Doing the

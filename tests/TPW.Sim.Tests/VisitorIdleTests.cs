@@ -292,5 +292,15 @@ namespace TPW.Sim.Tests
             Assert.Equal(40, v.Tiredness);
             Assert.Equal(20, v.WalkSpeed);          // rand(15)+15
         }
+        // REJECTS entering state 29 with the walking animation left over from state 3.
+        [Fact]
+        public void VomitEntryWritesAnimationTwelveAlongsideItsSixtyTickDeadline()
+        {
+            var g = Healthy(); g.Nausea = 93; g.Animation = 13;
+            var world = new FakeWorld { NowTick = 123 };
+            Assert.Equal(IdleAction.Vomit, VisitorIdle.Tick(g, world, new ScriptedRandom(4)));
+            Assert.Equal(12, g.Animation); Assert.Equal(183, g.WaitUntil);
+            Assert.Equal(VisitorState.Vomiting, g.State);
+        }
     }
 }

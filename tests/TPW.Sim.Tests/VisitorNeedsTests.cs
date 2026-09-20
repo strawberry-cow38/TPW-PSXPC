@@ -23,12 +23,15 @@ namespace TPW.Sim.Tests
             public int Vomit { get; set; }
             public bool Queueing { get; set; }
             public bool EntertainerAvailable { get; set; }
-            public int WatchTicks { get; set; } = 300;
+            public int WatchSkill { get; set; }
 
             public TileInfluence InfluenceAt(Visitor g) => Influence;
             public (int Litter, int Vomit) LitterNearby(Visitor g) => (Litter, Vomit);
             public bool InQueue(Visitor g) => Queueing;
-            public bool TryWatchEntertainer(Visitor g, out int t) { t = WatchTicks; return EntertainerAvailable; }
+            public IEnumerable<(StaffMember Entertainer, int Distance)> EntertainersWithDistances(Visitor g)
+            {
+                if (EntertainerAvailable) yield return (new StaffMember(StaffKind.Entertainer) { Skill = WatchSkill }, 0);
+            }
         }
 
         static Visitor Guest()
@@ -88,7 +91,7 @@ namespace TPW.Sim.Tests
         public void StandingInSomethingUnpleasantIsCheaperThanWalkingThroughIt()
         {
             var standing = Guest(); standing.SetState(VisitorState.Idle);
-            var walking = Guest(); walking.SetState(VisitorState.WalkToBin);
+            var walking = Guest(); walking.SetState(VisitorState.WalkToWaypoint);
             var world = new World { NowTick = 0, Influence = TileInfluence.Unpleasant };
 
             VisitorNeeds.Tick(standing, world, new Dice());
@@ -226,7 +229,7 @@ namespace TPW.Sim.Tests
         public void AGuestStopsForAnEntertainerOnlyWhenAllFourGatesPass()
         {
             var world = new World { NowTick = 800, Influence = TileInfluence.Entertainer,
-                                    EntertainerAvailable = true, WatchTicks = 360 };
+                                    EntertainerAvailable = true, WatchSkill = 1 };
 
             var free = Guest(); free.EntertainerNotBefore = 0;
             VisitorNeeds.Tick(free, world, new Dice());

@@ -31,7 +31,7 @@ namespace TPW.Sim
             { 0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 },
         };
 
-        /// <summary>The 21-entry desire curve at 0x800E3A04, indexed <c>(stat + 5) / 5</c>.
+        /// <summary>The 22 stored words of the desire curve at 0x800E3A04, indexed <c>(stat + 5) / 5</c>.
         ///
         /// ⭐ LOW DESIRE IS A PENALTY, NOT INDIFFERENCE. The first eight entries are -20, so a guest
         /// whose ride-desire is under 35 scores every ride NEGATIVELY and is actively pushed toward
