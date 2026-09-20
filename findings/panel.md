@@ -81,12 +81,20 @@ numeric readout); **spinner** 0x8004BFC4 (renders `< N >`, plain int unless mone
 | label | id | at | value |
 | --- | --- | --- | --- |
 | name | | (156,80) | slot 11 |
-| Age | 0x1DC | (66,114) | `totalDays − u16 A+0xF4`, shown in YEARS (0x8009EDBC) |
+| Age | 0x1DC | (66,114) | `totalDays − u16 A+0xF4` DAYS (0x8009EDBC), shown in YEARS — see below |
 | Users | 0x18C | (206,114) | slot 22 = A+0x14, guests served all-time |
 | Excitement | 0x37 | bar (176,134) w80 | slot 53, intensity |
 | Reliability | 0x3ED | bar (176,154) w80 | slot 88 — the **PROJECTED** value |
 | Repair | 0x25C | bar (176,174) w80 | `A+0xB4 >> 12` — the **LIVE** value |
 | Life | 0x3FA | bar (176,194) w80 | s16 A+0x68 |
+
+⭐ **THE AGE GETTER RETURNS DAYS; THE ROW SHOWS YEARS.** Re-read 2026-09-20 because "years" had been
+asserted without the arithmetic. 0x8009EDBC is `0x80066E78(calendar) − u16 A+0xF4`, and 0x80066E78 is
+`lw v0,16(a0)` = McAi+0x10, which transport.md already pins as the DAY counter (McAi+0x18 is months).
+The row divides: 0x80079520 loads 0x6719F361 and runs the magic-number sequence
+`q = (hi + ((n − hi) >> 1)) >> 8`, i.e. M' = 0x16719F361 over 2^41 = **÷365**. So a ride reads 0 for its
+first year. The getter has exactly two callers — this row and 0x800674C8, the park draw score — so the
+score's young test `(age << 12) / 2024 < 4` is in the same DAYS unit, true while the age is 0 or 1.
 
 ⭐ **RELIABILITY AND REPAIR ARE DIFFERENT NUMBERS** — what the current slider settings will wear the ride
 down to, against where it is now. Showing both side by side is the page's purpose.

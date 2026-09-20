@@ -647,12 +647,13 @@ namespace TPWGodot
             var kinds = new HashSet<int>();
             foreach (var a in _attractionsPlaced)
             {
-                // ⚠ `builtToday: false` IS STILL A STAND-IN AND IT COSTS A NEW RIDE ITS BONUS. The score
-                // adds +20 while an attraction's age is 0 or 1 whole days, and the port does not record the
-                // day a ride was built — so a brand-new park scores 20..24 here where the game scores 30..34,
-                // one guest a bus instead of one-or-two. Wants the build day on PlacedAttraction.
-                // (The LEVEL beside it is no longer a stand-in: the ride tracks its own now.)
-                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, a.Level, a.Rec.BaseIntensity, false));
+                // The young bonus is REAL now that the build day is recorded. ⚠ The test is the game's own
+                // arithmetic, not "built today": `(age << 12) / 2024 < 4` (0x800674F8..0x80067530), which is
+                // true while the age is 0 or 1 whole days. Written the long way because the obvious `age <= 1`
+                // is only *incidentally* the same answer, and this is the expression that was measured.
+                int age = AgeInDays(a);
+                draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, a.Level, a.Rec.BaseIntensity,
+                                                     (age << 12) / 2024 < 4));
                 kinds.Add(a.Rec.Entry);
             }
             int catalogue = Math.Max(1, _attractions.Count);
@@ -1646,6 +1647,7 @@ namespace TPWGodot
             a.Wear.Lifetime = rec.Levels.Length > 0 ? rec.Level0.Lifetime : 0;
             a.Status = AttractionLifecycle.Enter(AttractionStatus.JustPlaced, a);
             a.Status = AttractionLifecycle.Enter(AttractionStatus.UnderConstruction, a);
+            a.BuiltOnDay = ParkDay;
             a.Variant = _buildVariant;
             _buildVariant = (_buildVariant + 1) & 7;
             _attractionsPlaced.Add(a);
@@ -1687,6 +1689,12 @@ namespace TPWGodot
             public Transform3D Rest;
             public BoxSite Box;
             public int Ox, Oz, Rot;
+
+            /// <summary>The park day this was built, so the ride knows its own age. The game keeps it at
+            /// A+0xF4 and reads it back through 0x8009EDBC as `totalDays - that`, in DAYS; the Details page
+            /// then divides by 365 for the years it shows (0x80079520's magic-number divide), and the park
+            /// draw score asks the same getter for its young-ride bonus. One field, both readers.</summary>
+            public int BuiltOnDay;
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
@@ -1799,6 +1807,12 @@ namespace TPWGodot
         readonly List<GuestTarget> _guestTargets = new();
         /// <summary>Park ticks since the map loaded: the clock the loading cadences count on.</summary>
         long _clockTicks;
+
+        /// <summary>Days since the park opened — the port's McAi+0x10.</summary>
+        int ParkDay => (int)(_clockTicks / TPW.Sim.ParkClock.TicksPerDay);
+
+        /// <summary>A ride's age in DAYS, which is the unit both readers want.</summary>
+        int AgeInDays(PlacedAttraction a) => Math.Max(0, ParkDay - a.BuiltOnDay);
 
         /// <summary>The placed attractions as the guests' decision reads them (see GuestBrain).
         ///
@@ -2720,7 +2734,11 @@ void fragment() {
                     Name = _catalogueNames?[_panelFor.Rec.NameId] ?? $"#{_panelFor.Rec.Entry}",
                     // ⚠ Age and Users stay null - the port records neither the day a ride was built nor how
                     // many it has served - and the panel shows a dash rather than a plausible number.
-                    Age = null, Users = null,
+                    // ⭐ AGE IS IN YEARS, and the ride is not yet a year old for its first 365 days, so a new
+                    // ride reads 0 and stays there. That is the game: 0x80079520 divides the DAYS the getter
+                    // returns by 365 (magic-number divide, M'=0x16719F361 shift 8). Users stays a dash — the
+                    // port has no all-time served counter (slot 22 = A+0x14) to read.
+                    Age = (AgeInDays(_panelFor) / 365).ToString(), Users = null,
                     Excitement = _panelFor.BaseIntensity,
                     Reliability = -1,                       // ⚠ the PROJECTED value; not computed yet
                     Repair = _panelFor.Reliability,
