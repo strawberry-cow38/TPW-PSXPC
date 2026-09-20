@@ -13,9 +13,14 @@ namespace TPWGodot
         /// darkening and brightening as baked light); and sampling is NEAREST, no filtering. The product is a
         /// display-space colour, so it is converted to linear on the way out, or Godot's output encode would
         /// brighten it a second time.</summary>
-        public static Shader Shader(bool cull)
+        public static Shader Shader(bool cull) => Shader(cull ? "back" : "disabled");
+
+        /// <summary>The same by cull mode NAME, because "true" cannot say FRONT — and front is what a
+        /// single-sided polygon wants in this port's winding, the z-negation having reversed it. Asking for
+        /// `Shader(true)` on single-sided faces renders the model inside out.</summary>
+        public static Shader Shader(string cull)
         {
-            string key = cull ? "back" : "disabled";
+            string key = cull;
             if (_shaders.TryGetValue(key, out var sh)) return sh;
             sh = new Shader
             {

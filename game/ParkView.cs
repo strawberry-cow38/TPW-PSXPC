@@ -577,7 +577,12 @@ namespace TPWGodot
             var atlas = PageAtlas.Build(common, uses);
             if (atlas?.Image == null) return;
             var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
-            var matCull = new ShaderMaterial { Shader = PsxShading.Shader(true) };
+            // ⚠ FRONT, NOT BACK. The port negates z, which reverses winding, so a polygon the game draws
+            // from one side is cull_FRONT here (SingleSidedCull). This said Shader(true) = cull_back and the
+            // bus rendered INSIDE OUT — master spotted it; the near panels were culled and you saw the far
+            // wheels through the body. Every other single-sided surface in the park already used the
+            // constant; the bus was the one place that hardcoded the wrong sense.
+            var matCull = new ShaderMaterial { Shader = PsxShading.Shader(SingleSidedCull) };
             var tex = ImageTexture.CreateFromImage(Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false,
                                                                        Image.Format.Rgba8, atlas.Image.Rgba));
             mat.SetShaderParameter("atlas", tex);
