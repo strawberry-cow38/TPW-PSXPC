@@ -1097,17 +1097,16 @@ namespace TPWGodot
         {
             if (_bank != null && _bank.Balance.Pounds < TrackRun.PiecePrice[_track.World])
             { PlaySfx(ToolSound.Refused); return TrackRun.Step.Refused; }
-            int before = _track.Pieces.Count;
-            var step = _track.Lay(_map, _paths, c.X, c.Z);
+            var step = _track.Lay(_map, c.X, c.Z);
             switch (step)
             {
                 case TrackRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
-                case TrackRun.Step.Laid:
-                    Charge((_track.Pieces.Count - before) * TrackRun.PiecePrice[_track.World]);
+                case TrackRun.Step.Placed:
+                    Charge(TrackRun.PiecePrice[_track.World]);
                     RebuildGround(); PlaySfx(ToolSound.Lay); RefreshInfo();
                     break;
                 case TrackRun.Step.Closed:
-                    Charge((_track.Pieces.Count - before) * TrackRun.PiecePrice[_track.World]);
+                    Charge(TrackRun.PiecePrice[_track.World]);
                     RebuildGround(); PlaySfx(ToolSound.Lay); PlaySfx(ToolSound.Connected);
                     CloseTrack(false);
                     break;
@@ -1129,7 +1128,8 @@ namespace TPWGodot
         /// <summary>Which world's park is loaded, for the track price (TrackRun.PiecePrice).</summary>
         int _worldIndex = -1;
 
-        /// <summary>The builder's ghost: the segment from the track's end to the cursor, in ground markers.</summary>
+        /// <summary>The builder's ghost: the pylon under the cursor and the track it would assemble from the last
+        /// one, in ground markers.</summary>
         ArrayMesh TrackMesh()
         {
             if (_track == null || _common == null || _paths == null) return new ArrayMesh();

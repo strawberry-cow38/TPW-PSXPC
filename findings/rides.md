@@ -611,7 +611,21 @@ further builders of the same two shapes.
 So the port's flow is the one it already has for a ride and its queue: drop the station as a blueprint,
 then open the builder.
 
-⚠ What the builder DOES per click - which piece, how it snaps, what a slope costs - is not traced yet.
+### What a press in the builder does (READ)
+⭐ **YOU PLACE PYLONS AND THE TRACK ASSEMBLES BETWEEN THEM** (master; the code agrees). A press stores a
+POINT, not a run of tiles: 0x800A7CC8 takes the builder's candidate, reads two s16s out of it and writes
+them as a pair of u16s into the ride's own array at **+0x106** (4 bytes an entry, the count in the byte
+at **+0x104**), refusing the **thirty-third**. Nothing in a press touches the map.
+
+⭐ **THE CIRCUIT CLOSES BY LANDING BACK ON THE START.** The same routine compares the new point against
+the ride's start and sets **+0x18A** when they match — the flag the coaster's "may guests queue"
+override tests, so an unfinished track is unqueueable rather than merely unattractive.
+
+⭐ **WHERE THE RAILS LEAVE THE STATION** (0x800A6550, off the ride's own tile at +0x60/+0x64, by its turn
+at +0x74): rot 0 → (x−2, z+1), rot 1 → (x+1, z+4), rot 2 → (x+4, z+1), rot 3 → (x+1, z−2).
+
+⚠ What is NOT traced: how the track between two pylons is drawn (which sub-model, what slope), and
+whether the bill is the confirm's `unit × (pieces − 4)` or the per-press charge.
 What is known: the piece price is `defPrice(8, kind)` and the charge is `unit × (pieces − 4)`, or − 5
 in one branch (economy.md §4.6); the type-8 records that price it are the named specials (Water Jump,
 Mammoth Tunnel, Piranha, Firepit); and a ride's own archive entry carries 6 to 13 sub-models, which is
