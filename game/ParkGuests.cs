@@ -196,12 +196,18 @@ namespace TPWGodot
         public int Outstanding => _finder.ActiveRequests;
         public bool ParkIsOpen { get => _pathMap.ParkIsOpen; set => _pathMap.ParkIsOpen = value; }
 
-        /// <summary>Put a guest on a walkable tile. Returns null when the park has nowhere to stand -
-        /// a park with no paths laid, which is the state every park starts in.</summary>
-        public Guest Spawn()
+        /// <summary>Put a guest on a tile: <paramref name="at"/> when the caller knows where (the bus drops
+        /// its whole load on one tile), otherwise a random walkable one. Returns null when the park has
+        /// nowhere to stand - a park with no paths laid, which is the state every park starts in.
+        ///
+        /// ⭐ THE BUS DOES NOT DELIVER GUESTS WHERE IT PARKS. Arrivals (0x80067274) calls 0x800540B8(&amp;pos, 0)
+        /// BEFORE its per-guest loop, so every guest of a load appears on the same tile - the CENTRE of the
+        /// map's exit point 0 (`x·256 + 128`, `z·256 + 128`, ParkMap.SpawnTiles), beside the entrance road.
+        /// The bus's own position is never read by the spawn; the two are only correlated in time.</summary>
+        public Guest Spawn((int X, int Z)? at = null)
         {
             if (_walkable.Count == 0) return null;
-            var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
+            var (tx, tz) = at ?? _walkable[_rng.Next(_walkable.Count)];
 
             var g = new Guest
             {
