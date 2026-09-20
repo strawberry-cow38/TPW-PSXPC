@@ -20,6 +20,7 @@ namespace TPWGodot
         int _autoBreakAt = -1;
         bool _autoBreakHard;
         int _autoUpgrade = -1;
+        string _autoPrice;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -562,6 +563,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
+                else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-break="))
                 {
@@ -955,6 +957,13 @@ namespace TPWGodot
                         }
                     }
                     // Last, because the ride it names may have been placed by --park-queue.
+                    if (_autoPrice != null)
+                        foreach (var one in _autoPrice.Split(';'))
+                        {
+                            var pp = one.Split(',');
+                            bool priced = _park.SetStallPrice(int.Parse(pp[0]), int.Parse(pp[1]));
+                            GD.Print($"[tpw] --park-price {one}: {(priced ? "set" : "no such attraction")}");
+                        }
                     if (_autoUpgrade >= 0)
                     {
                         var before = _finances?.Bank.Balance ?? Money.Zero;

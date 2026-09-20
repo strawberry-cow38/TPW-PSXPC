@@ -2250,6 +2250,15 @@ namespace TPWGodot
         /// demand. A TEST HOOK — it is the same RidePanel.CompleteUpgrade call, not a second path — so
         /// the FINISH half can be watched before the REQUEST half exists. Returns the level it reached,
         /// or -1 if the ride was not found.</summary>
+        /// <summary>--park-price=ENTRY,POUNDS: set a stall's sale price, the thing the panel would set.
+        /// A TEST HOOK for the one input the want formula is most sensitive to.</summary>
+        public bool SetStallPrice(int entry, int pounds)
+        {
+            foreach (var a in _attractionsPlaced)
+                if (a.Rec.Entry == entry) { a.SalePrice = pounds; return true; }
+            return false;
+        }
+
         public int UpgradeNow(int entry)
         {
             foreach (var a in _attractionsPlaced)
