@@ -128,6 +128,9 @@ namespace TPWGodot
         /// a change to something DRAWN can be looked at, in a repo whose whole discipline is that a
         /// green build is not a picture. Needs a display; xvfb-run supplies one on a headless box.</summary>
         string _shotPath; int _shotFrame = 150; int _shotClock; bool _shotWhenRunning; int _shotHold;
+
+        /// <summary>--windowed: keep the game in a window. The game itself is fullscreen.</summary>
+        bool _windowed;
         Button _playAdvisor;
         OptionButton _advisorLanguage;
         bool _hasAdvisor;
@@ -531,6 +534,7 @@ namespace TPWGodot
                 else if (arg == "--cull-on") _tourCull = true;
                 else if (arg == "--model-play") _tourPlay = true;
                 else if (arg.StartsWith("--tour-frames=")) _tourHold = System.Math.Max(1, int.Parse(arg.Substring("--tour-frames=".Length)));
+                else if (arg == "--windowed") _windowed = true;
                 else if (arg == "--no-boot") _skipBoot = true;
                 else if (arg == "--boot") _bootNow = true;
                 else if (arg.StartsWith("--boot-from=")) _bootFrom = arg.Substring("--boot-from=".Length);
@@ -560,6 +564,18 @@ namespace TPWGodot
                     _parkView = System.Array.ConvertAll(arg.Substring("--park-view=".Length).Split(','),
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
             }
+
+            // ⭐ THE GAME IS FULLSCREEN; A CAPTURE IS NOT. The port carried no display mode at all, so it
+            // opened in Godot's default window. Every HUD coordinate here is a FRACTION of the viewport, so
+            // the layout has nothing to fill until the window is the screen.
+            //
+            // ⚠ A render must stay windowed whoever starts it. A fullscreen Godot takes over the display, and
+            // master plays on this same box from their own clone — a capture stealing the screen is far worse
+            // than a capture that is small. So --shot and --write-movie opt out THEMSELVES rather than trusting
+            // whichever script launched them to have remembered --windowed.
+            bool capturing = _shotPath != null
+                             || System.Array.Exists(OS.GetCmdlineArgs(), a => a.StartsWith("--write-movie"));
+            if (!_windowed && !capturing) DisplayServer.WindowSetMode(DisplayServer.WindowMode.Fullscreen);
 
             GD.Print($"[tpw] data: {_data.Message}");
             GD.Print($"[tpw] launcher said variant={variant}, we identified {_data.Variant?.Id ?? "(none)"}");
