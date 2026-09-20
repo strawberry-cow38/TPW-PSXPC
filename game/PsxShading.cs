@@ -27,11 +27,23 @@ namespace TPWGodot
                 Code = $@"shader_type spatial;
 render_mode unshaded, cull_{key};
 uniform sampler2D atlas : filter_nearest;
+// ⭐ AFFINE TEXTURE MAPPING, BECAUSE THE HARDWARE HAS NO OTHER KIND. The GPU interpolates texture
+// coordinates linearly in SCREEN space and ignores z entirely — nocash's spec puts it plainly, ""the GPU
+// supports only linear interpolations... texture coordinates are NOT linear to the screen coordinates"" —
+// which is the PlayStation's famous texture wobble. Godot interpolates perspective-correctly, so the port
+// was strictly BETTER than the console and therefore wrong, most visibly at glancing angles.
+// The trick: a varying is interpolated perspective-correctly, i.e. (sum l*A/w) / (sum l/w). Pass UV*w and w
+// separately and divide, and the w cancels to leave sum(l*UV) — the screen-linear value the GPU produces.
+varying vec3 uvw;
 vec3 to_linear(vec3 c) {{
     return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
 }}
+void vertex() {{
+    vec4 clip = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+    uvw = vec3(UV * clip.w, clip.w);
+}}
 void fragment() {{
-    vec4 t = texture(atlas, UV);
+    vec4 t = texture(atlas, uvw.xy / uvw.z);
     if (t.a < 0.25) discard;
     ALBEDO = to_linear(clamp(t.rgb * COLOR.rgb * 2.0, 0.0, 1.0));
 }}
