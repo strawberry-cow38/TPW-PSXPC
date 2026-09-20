@@ -166,12 +166,19 @@ namespace TPW.Data
         /// kind indexes it directly below 40; kinds 40..51 are the 2-tile family and pick their base through two
         /// gp globals.
         ///
-        /// ⚠ +6 TURNED OUT TO BE THE PIECE'S TURN, NOT ITS MODEL (it lands at piece +0x6C, and its reader
-        /// takes the record's width on 0/2 and its depth on 1/3). The MESH comes from the class at +1:
-        /// `owner[0xDC + class * 4]`, with classes 11 and 99 drawing nothing. What fills that table is still
-        /// unread, so until it is, the port picks pieces by MEASURING the sub-models: a car is small and long
-        /// (under two thirds of a tile wide) and always in a matching set at the end of the list, the station is
-        /// the biggest thing there, and the track is the one-tile piece that is flat and not merely a box.</summary>
+        /// ⚠⚠ AND THE TABLE TURNED OUT TO BE THE TRACK RIDE'S, NOT THE COASTER'S. The piece class at
+        /// 0x800E5C90 and the descriptor table at 0x800F8A30 belong to the type-6 TRACK RIDE; a coaster is a
+        /// different class (vtable 0x800E65A0) whose own kind → model path is not read yet. For a track ride
+        /// the answer is complete: the owner is the THEME's track-ride entry (jungle 215 Dino Karts), and
+        /// `owner + 0xDC` is eleven sub-model indices into that entry — slots 0..3 and 8..9 the piece classes,
+        /// 4..7 the four cars. Dino Karts resolves class 0 → sub 1, 1 → 2, 2 → 3, 3 → 4, 8 → 9, 9 → 10, and
+        /// measuring those meshes independently gives a corner where class 1 wants one and straights where
+        /// classes 0 and 2 do. See rides.md.
+        ///
+        /// ⚠ So this measuring tape is still what the port uses, and it is only defensible until a coaster's
+        /// own mapping is read: a car is small and long (under two thirds of a tile wide) and always in a
+        /// matching set, the station is the biggest thing there, and the track is the one-tile piece that is
+        /// flat and not merely a box.</summary>
         public readonly struct Pieces
         {
             public readonly int Straight, Support, Column;
