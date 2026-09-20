@@ -44,6 +44,68 @@ namespace TPWGodot
         readonly ImageTexture _atlas;
         readonly int _atlasW, _atlasH;
 
+        /// <summary>The common sheet (FOLIO 416) baked for 3D, and the sheet itself for its sprite rects.
+        /// ⚠ A SECOND ATLAS, because riders are not drawn from the people sheet at all: a rider is a HEAD
+        /// out of 416, the same sheet the HUD and the particles use. findings/rider-positions.md §8.</summary>
+        ImageTexture _heads;
+        TextureSheet _headSheet;
+        int _headsW, _headsH;
+
+        /// <summary>Bake the common sheet too, once, so riders can be drawn. Safe to call repeatedly.</summary>
+        public void SetCommonSheet(TextureSheet common)
+        {
+            if (_heads != null || common == null) return;
+            var img = common.RenderSprites("common");
+            if (img == null || img.Width <= 0 || img.Height <= 0) return;
+            var rgba = (byte[])img.Rgba.Clone();
+            for (int i = 0; i < rgba.Length; i += 4)
+                if (rgba[i] == 24 && rgba[i + 1] == 16 && rgba[i + 2] == 28) rgba[i + 3] = 0;
+            _heads = ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, rgba));
+            _headSheet = common;
+            _headsW = img.Width; _headsH = img.Height;
+        }
+
+        public bool HasHeads => _heads != null;
+
+        /// <summary>Draw a rider: sprite <paramref name="sprite"/> of the common sheet, centred on the seat
+        /// rather than standing on it, mirrored in x when the game mirrors it, and rolled in the screen
+        /// plane the way the original rolls the quad.</summary>
+        public void DrawHead(MeshInstance3D inst, int sprite, bool mirror, float roll, Vector3 centre, Vector3 cameraForward)
+        {
+            if (_heads == null || _headSheet == null || sprite < 0 || sprite >= _headSheet.Sprites.Count) return;
+            var sp = _headSheet.Sprites[sprite];
+            float w = sp.W * TilesPerTexel, h = sp.H * TilesPerTexel;
+            if (inst.Mesh is QuadMesh q && (q.Size.X != w || q.Size.Y != h)) q.Size = new Vector2(w, h);
+            if (inst.MaterialOverride is StandardMaterial3D m)
+            {
+                int px = (sp.PageX - _headSheet.VramX) / 64 * TextureSheet.PageTexels + sp.U;
+                int py = (sp.PageY - _headSheet.VramY) / TextureSheet.PageTexels * TextureSheet.PageTexels + sp.V;
+                m.AlbedoTexture = _heads;
+                m.Uv1Scale = new Vector3((mirror ? -sp.W : sp.W) / (float)_headsW, sp.H / (float)_headsH, 1);
+                m.Uv1Offset = new Vector3((mirror ? px + sp.W : px) / (float)_headsW, py / (float)_headsH, 0);
+            }
+            var towards = -cameraForward;
+            if (towards.LengthSquared() < 1e-6f) towards = Vector3.Back;
+            towards = towards.Normalized();
+            var right = Vector3.Up.Cross(towards);
+            right = right.LengthSquared() < 1e-6f ? Vector3.Right : right.Normalized();
+            var up = towards.Cross(right).Normalized();
+            if (roll != 0f)
+            {
+                float c = Mathf.Cos(roll), sn = Mathf.Sin(roll);
+                var r2 = right * c + up * sn;
+                up = up * c - right * sn;
+                right = r2;
+            }
+            inst.Transform = new Transform3D(new Basis(right, up, towards), centre);
+        }
+
+        /// <summary>Put a guest's material back on the people atlas after it has been a rider.</summary>
+        public void RestoreWalkTexture(MeshInstance3D inst)
+        {
+            if (inst?.MaterialOverride is StandardMaterial3D m && m.AlbedoTexture != _atlas) m.AlbedoTexture = _atlas;
+        }
+
         GuestSprites(PeopleSheet people, ImageTexture atlas, int w, int h)
         { _people = people; _atlas = atlas; _atlasW = w; _atlasH = h; }
 
@@ -108,6 +170,12 @@ namespace TPWGodot
             else if (inst.Mesh is QuadMesh q2 && q2.Size.Y != h) q2.Size = new Vector2(w, h);
             if (inst.MaterialOverride is StandardMaterial3D m)
             {
+                // ⚠⚠ PUT THE PEOPLE ATLAS BACK. A guest that has been a rider is still pointing at the
+                // COMMON sheet, and drawing people-sheet UVs against it lands somewhere in the HUD font --
+                // master's screenshot was a guest walking around as the letters "dF". Setting it here, in
+                // the draw, is the only place that cannot be skipped; doing it on the way out of the seat
+                // is not, because the way out is whatever the guest does next.
+                if (m.AlbedoTexture != _atlas) m.AlbedoTexture = _atlas;
                 // The sprite's rectangle in the baked sheet: its page's corner plus its own texels.
                 int px = (sp.PageX - sheet.VramX) / 64 * TextureSheet.PageTexels + sp.U;
                 int py = (sp.PageY - sheet.VramY) / TextureSheet.PageTexels * TextureSheet.PageTexels + sp.V;

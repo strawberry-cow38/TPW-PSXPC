@@ -987,6 +987,57 @@ namespace TPWGodot
                  + $"happy {happy / n}, tired {tired / n}, nausea {nausea / n} (of {n})";
         }
 
+        /// <summary>Every guest standing on one tile, in full. ⭐ THE PER-GUEST HALF OF StateReport:
+        /// that one says a state is stuck, this one says WHICH guest and what it wanted. A guest's state
+        /// alone never explains it -- the purpose and the target are what say whether it is waiting for
+        /// something reasonable or holding a goal nothing will ever satisfy.
+        ///
+        /// ⚠ ALL of them, not the first. Guests pile up several to a tile at queue heads and doorways,
+        /// which is exactly where they get stuck, so reporting one would report the wrong one.</summary>
+        /// <summary>Guests carrying a QUEUE purpose while standing around. ⚠⚠ A guest that has left a ride
+        /// still wearing QueueWalk is a guest the arrival handler will promote back into WaitingInQueue --
+        /// a queue it is not in, with no target and no route -- so it stands still until something else
+        /// shakes it loose. This is that state, counted: it must be zero.</summary>
+        public int StaleQueuePurpose
+        {
+            get
+            {
+                int n = 0;
+                foreach (var g in _guests)
+                    if ((g.V.Purpose == Purpose.QueueWalk || g.V.Purpose == Purpose.QueueShuffle)
+                        && (g.V.State == VisitorState.Wander || g.V.State == VisitorState.Idle)) n++;
+                return n;
+            }
+        }
+
+        public string HoverReport(int tileX, int tileZ)
+        {
+            var sb = new System.Text.StringBuilder();
+            int n = 0;
+            foreach (var g in _guests)
+            {
+                if (g.X / ParkTerrain.TileUnits != tileX || g.Z / ParkTerrain.TileUnits != tileZ) continue;
+                n++;
+                sb.Append($"\n  guest #{g.GetHashCode() & 0xFFFF}: {g.V.State}");
+                if (g.LastState != (VisitorState)(-1) && g.LastState != g.V.State) sb.Append($" (was {g.LastState})");
+                sb.Append($" for {_now - g.StateSince} ticks");
+                sb.Append($"; purpose {g.V.Purpose}");
+                sb.Append(g.V.HasTarget ? $"; target ({g.TargetTileX},{g.TargetTileZ})" : "; no target");
+                if (g.WaypointHead == WaypointPool.NoChain) sb.Append(" ⚠ no route");
+                if (g.V.InQueue) sb.Append("; queued");
+                if (g.Hidden) sb.Append("; ABOARD");
+                sb.Append($"; happy {g.V.Happiness} nausea {g.V.Nausea} tired {g.V.Tiredness}");
+            }
+            foreach (var st in _staff)
+            {
+                if (st.X / ParkTerrain.TileUnits != tileX || st.Z / ParkTerrain.TileUnits != tileZ) continue;
+                n++;
+                sb.Append($"\n  {st.S.Kind} #{st.GetHashCode() & 0xFFFF}: {st.S.State}"
+                        + (st.WaypointHead == WaypointPool.NoChain ? " ⚠ no route" : ""));
+            }
+            return n == 0 ? "" : $"\nunder the mouse ({tileX},{tileZ}), {n}:" + sb;
+        }
+
         /// <summary>Every state a guest is currently in, with the longest anyone has held it.
         ///
         /// ⭐ READ THE DURATION, NOT THE COUNT. Twenty guests idle is a park; ONE guest that has been
@@ -1349,7 +1400,20 @@ namespace TPWGodot
             g.Inst.Visible = true;
             if (_sprites == null) { g.Inst.Position = feet + new Vector3(0, 0.21f, 0); return; }
             g.Facing = GuestSprites.FacingFor(outward.X, outward.Z, CameraForward);
+            _sprites.RestoreWalkTexture(g.Inst);
             _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+        }
+
+        /// <summary>Draw a rider as the head the game draws: sheet 416, picked by the guest's own visitor
+        /// type and the seat's orientation. Falls back to the standing sprite when the common sheet has
+        /// not been baked, so a park without it still shows somebody in the seat.</summary>
+        public void DrawRiderHead(Guest g, Vector3 seat, int facing, int band, float roll, Vector3 outward)
+        {
+            if (g?.Inst == null) return;
+            g.Inst.Visible = true;
+            if (_sprites == null || !_sprites.HasHeads) { DrawRider(g, seat, outward); return; }
+            int sprite = TPW.Sim.RiderSprites.For(g.V.VisitorType, facing, band, out bool mirror);
+            _sprites.DrawHead(g.Inst, sprite, mirror, roll, seat, CameraForward);
         }
 
         /// <summary>The riders of one ride, in boarding order -- which is the order the seats are handed
@@ -1359,6 +1423,7 @@ namespace TPWGodot
         /// <summary>The people sheet to draw guests from, and where the camera is looking, which is what
         /// decides which of the eight drawn facings each guest shows (GuestSprites).</summary>
         public void SetSprites(GuestSprites sprites) => _sprites = sprites;
+        public void SetCommonSheet(TextureSheet common) => _sprites?.SetCommonSheet(common);
         public Vector3 CameraForward { get; set; } = new Vector3(0, 0, -1);
 
         /// <summary>Re-aim and re-dress every guest and every member of staff for the camera where it is

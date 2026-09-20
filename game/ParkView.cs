@@ -346,6 +346,7 @@ namespace TPWGodot
             _guests?.Clear();
             _guests = new ParkGuests(map, this);
             _guestSprites ??= GuestSprites.From(_modelSheets);
+            _guestSprites?.SetCommonSheet(_commonSheet);
             var cli = System.Environment.GetCommandLineArgs();
             GuestSprites.Debug = Array.IndexOf(cli, "--guest-debug") >= 0;
             _cameraDebug = Array.IndexOf(cli, "--camera-debug") >= 0;
@@ -1119,10 +1120,15 @@ namespace TPWGodot
             + $"\n{_guests.QueueWaitReport()}"
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"
             + (_guests.HiddenGuests != (_guests.Rides?.Totals().Riding ?? 0) ? " ⚠ SWALLOWED GUESTS" : "")
+            + $"; stale queue purpose {_guests.StaleQueuePurpose}"
+            + (_guests.StaleQueuePurpose > 0 ? " ⚠ THESE WILL FREEZE" : "")
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
             + (_guests.StaffCount > 0 ? $", {_guests.StaffCount} staff" : "")
-            + RideReport() + _guests.StaffReport();
+            + RideReport() + _guests.StaffReport()
+            // ⭐ WHAT IS UNDER THE MOUSE, IN FULL. StateReport says a state is stuck; this says which
+            // guest and what it wanted, which is the half that explains it.
+            + (TileUnderMouse() is { } hov ? _guests.HoverReport(hov.X, hov.Z) : "");
         }
 
         /// <summary>Each placed ride's status, its animation clock and what it is carrying - the half of the park
@@ -1223,6 +1229,7 @@ namespace TPWGodot
         }
 
         string _infoLive = "";
+        (int X, int Z)? _lastHoverTile;
 
         void RefreshInfo()
         {
@@ -1492,6 +1499,36 @@ namespace TPWGodot
                 if (bone < 0 || bone >= pose.Bones.Length) continue;
                 var b = pose.Bones[bone];
                 var seat = xform * ((new Vector3(b.X, b.Y, -b.Z) - centre) * scale);
+                // ⭐ WHICH HEAD, FROM THE SEAT'S OWN ORIENTATION. The original composes R = Mcam.R x Bone.R
+                // and reads three angles off it: facing = ratan2(R31, R33), band = asin(-R32), roll =
+                // ratan2(R12, R22) (findings/rider-positions.md §8.4). Rewritten here in Godot's frame,
+                // with every sign traced rather than guessed:
+                //   * the model->Godot map negates z, so a bone axis (x,y,z) is (x, y, -z) here;
+                //   * Godot's camera basis Z points TOWARD the viewer, PSX camera z points INTO the screen,
+                //     so psx_z(v) = -Dot(v, camZ);
+                //   * facing = atan2(R31, R33) + half turn, and R31/R33 are both psx_z of a bone axis, so
+                //     the two negations cancel the half turn: atan2(Dot(sx, camZ), Dot(sz, camZ));
+                //   * band's -R32 is psx_z of the seat's UP negated, i.e. +Dot(sy, camZ) -- how far the
+                //     seat's up axis leans toward the viewer, which is the elevation the bands mean;
+                //   * roll is ZERO when the seat's up projects onto the camera's up, so R22 is +Dot(sy,
+                //     camY). ⚠ I had a minus here from "psx y is down" and it put roll at pi for an
+                //     ordinary upright seat under an ordinary camera -- every head drawn UPSIDE DOWN,
+                //     which master read as "looking directly upwards". The sign rule was right in the
+                //     abstract and wrong here; the check that settles it is that an upright seat under an
+                //     upright camera must roll by nothing.
+                // ⚠ The handedness conversion is the part that can be plausibly wrong, so this is checked
+                // by looking at the picture, not by re-reading the algebra.
+                var cam = _camera.GlobalTransform.Basis;
+                var seatBasis = xform.Basis * new Basis(
+                    new Vector3(b.R.M00, b.R.M10, -b.R.M20),
+                    new Vector3(b.R.M01, b.R.M11, -b.R.M21),
+                    new Vector3(b.R.M02, b.R.M12, -b.R.M22));
+                float lean = Mathf.Clamp(seatBasis.Y.Normalized().Dot(cam.Z), -1f, 1f);
+                int a4096 = (int)Math.Round(Mathf.Asin(lean) / Mathf.Tau * 4096f);
+                int band = Math.Clamp((a4096 + 256) >> 9, 0, 2);
+                int yaw = (int)Math.Round(Mathf.Atan2(seatBasis.X.Dot(cam.Z), seatBasis.Z.Dot(cam.Z)) / Mathf.Tau * 4096f);
+                int facing = ((yaw + 256) >> 9) & 7;
+                float roll = Mathf.Atan2(seatBasis.Y.Dot(cam.X), seatBasis.Y.Dot(cam.Y));
                 // ⚠ FACING IS THE ONE PART NOT TAKEN FROM THE GAME YET. The original picks the sprite from
                 // the octant of the COMPOSED camera x ride x bone rotation; this faces each rider away from
                 // the ride's middle, which agrees for anything that spins and is a stand-in for anything
@@ -1499,7 +1536,10 @@ namespace TPWGodot
                 // axes the game calls forward.
                 var outward = seat - hub;
                 if (outward.LengthSquared() < 1e-6f) outward = xform.Basis.Z;
-                _guests.DrawRider(riders[i], seat, outward.Normalized());
+                _guests.DrawRiderHead(riders[i], seat, facing, band, roll, outward.Normalized());
+                if (_logRides && i == 0 && _riderLogTick % 25 == 0)
+                    GD.Print($"[tpw] rider0 {a.Rec.Entry}: seatUp {seatBasis.Y.Normalized()} camZ {cam.Z} "
+                           + $"lean {lean:0.000} a4096 {a4096} band {band} yaw {yaw} facing {facing} roll {roll:0.00}");
                 if (_logRides && _riderLogTick % 25 == 0)
                     GD.Print($"[tpw] rider {i} of {a.Rec.Entry} -> seat bone {bone} at {seat} (tick {tick})");
             }
@@ -3001,7 +3041,14 @@ void fragment() {
         ParkHud _hud;
 
         /// <summary>Give the HUD the common sheet, the executable's tables and the language's strings.</summary>
-        public void SetHud(TextureSheet common, byte[] exe, StringTable strings) => _hud?.Setup(common, exe, strings);
+        public void SetHud(TextureSheet common, byte[] exe, StringTable strings)
+        {
+            _hud?.Setup(common, exe, strings);
+            // Riders are heads out of this same sheet, so the guests need it too (GuestSprites.SetCommonSheet).
+            _guests?.SetCommonSheet(common);
+            _commonSheet = common;
+        }
+        TextureSheet _commonSheet;
 
         /// <summary>What the HUD shows of the park: the balance in pounds and the date (day and month 1-based).</summary>
         public void SetHudStatus(long pounds, int day, int month, int year)
@@ -3521,11 +3568,29 @@ void fragment() {
                 _cursorMesh.Mesh = TrackMesh();
             }
             if (_placing >= 0) UpdatePlacementGhost();
+
+            // ⚠ THE HOVER READOUT NEEDS ITS OWN REFRESH. RefreshInfo runs on discrete events -- a tool
+            // opened, a tile laid, an attraction placed -- and MOVING THE MOUSE IS NOT ONE OF THEM, so the
+            // "under the mouse" section was only ever rebuilt when something else happened and read as
+            // simply absent. Rebuild it when the hovered tile changes, and only while the F3 overlay is
+            // actually on screen, so a normal game pays nothing for it.
+            if (_info != null && _info.IsVisibleInTree())
+            {
+                var hoverTile = TileUnderMouse();
+                if (hoverTile != _lastHoverTile) { _lastHoverTile = hoverTile; RefreshInfo(); }
+            }
+
             float dt = (float)delta;
             // ⚠ THE KEYBOARD IS POLLED, SO THE MODAL GATE IN _UnhandledInput CANNOT SEE IT. The mouse is
             // event-driven and stops at that gate; these keys are read straight from the device every frame,
             // so they need their own check or the camera drives around behind a panel that covers the screen.
-            if (_panelFor != null || _contextFor != null) return;
+            //
+            // ⚠⚠ THE PANEL ONLY, NOT THE RIGHT-CLICK LIST. The panel IS the screen, so driving behind it is
+            // meaningless; a context list is a small popup over a park you can still see, and freezing the
+            // camera under it is just a control that stopped working. Worse, PlaceGameCamera below eases the
+            // game camera toward its target yaw -- so blocking here did not merely refuse NEW input, it
+            // stranded a turn that was already in flight halfway round.
+            if (_panelFor != null) return;
             var move = Vector2.Zero;
             if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) move.Y -= 1;
             if (Input.IsKeyPressed(Key.S) || Input.IsKeyPressed(Key.Down)) move.Y += 1;
@@ -3575,7 +3640,9 @@ void fragment() {
             if (e is InputEventMouseMotion mm)
             {
                 _hud.ContextPick = _contextFor != null ? _hud.ContextRowAt(mm.Position) : -1;
-                return true;
+                // Swallowed under the panel, which owns the whole screen. Under a context list the park is
+                // still there and still wants to know where the mouse is.
+                return _panelFor != null;
             }
             if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape })
             {
