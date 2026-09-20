@@ -5,6 +5,28 @@ Fifth report. Scope: the park-open gate only. Every address is in the RAW image 
 READ = read from the disassembly at the quoted address. GUESS = inference, tagged with how strong.
 Helper scripts beside this file; new one: `unpak.py` (port of the UNPAK decompressor 0x80018EF0).
 
+## 0a. OBSERVED ON THE CONSOLE — the park IS opened from the gate
+
+**2026-09-20, tinyclaw, pcsx_rearmed headless, PAL SCPH-5502, save state `practice.state`.** With
+the park gate the selected object, pressing **✕ (libretro `_B`)** brings up the context list at the
+cursor and its one row is **"Open"**. Screenshot in-channel; the control is the same state run with
+no input at all, which keeps the plain Build/OK radial.
+
+⭐ SO THE GATE PATH IS THE GAME'S, NOT A PORT DEVIATION. `parkopen.md` §2.1 has the park MENU entry
+12 as the trigger, and that is still true; what was not established is that the gate's own context
+list carries the same command. It does. The port's "click the gate to open the park" is faithful
+and should not be listed as a deviation.
+
+⚠ AND IT IS THE CONTEXT LIST, NOT THE PANEL. The command arrives on ✕, the same button that opens a
+placed shop's context list (verified in the same session: a shop with no queue offers exactly
+"Delete"). Nothing here says what ○ does.
+
+⚠ ○ COULD NOT BE REPRODUCED DOING ANYTHING. Pressed from two different selected objects at four
+delays (100, 300, 500, 700 frames after the restore), every final frame came back BYTE-IDENTICAL to
+a do-nothing control. That is a negative result about these two states, not a refutation of
+"○ opens the attraction panel" — both states have the root radial already open, and ○ may mean
+something else there. Treat the panel-on-○ reading as unconfirmed until someone sees one open.
+
 ## 0. Corrections to earlier reports
 
 1. **behaviour.md §2.6 called 0x80103958 == 1 "GUESS: park open". Wrong.** 0x80103958 is the
