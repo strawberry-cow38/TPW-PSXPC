@@ -624,6 +624,22 @@ override tests, so an unfinished track is unqueueable rather than merely unattra
 ⭐ **WHERE THE RAILS LEAVE THE STATION** (0x800A6550, off the ride's own tile at +0x60/+0x64, by its turn
 at +0x74): rot 0 → (x−2, z+1), rot 1 → (x+1, z+4), rot 2 → (x+4, z+1), rot 3 → (x+1, z−2).
 
+### Where the next pylon actually lands (READ, 0x800221B0)
+⭐ **THE BUILDER DOES NOT JOIN TWO POINTS WITH A CORNER — IT RUNS ALONG ONE AXIS IN TWO-TILE STEPS.** Its
+per-frame update takes the last point (tool +0x28 / +0x2C) and the cursor (tool +0x00 / +0x04), refuses
+outright if any of the four is negative, and then:
+
+- `|dz| < |dx|` → the run goes along **X**, step `±2`; otherwise along **Z**, step `±2` (a tie goes to Z).
+- pieces = `abs(delta) >> 1`, so an odd distance is **rounded down** and the cursor's off-axis half is
+  simply thrown away.
+- the walk then calls 0x80022140 per step with the "last piece" flag `s4 < 1`, and a step that fails
+  clears the tool's valid flag at +0x18 — which is the flag the place handler (0x800225C0) tests before it
+  will add anything.
+
+So a press lands the pylon on a two-tile lattice along ONE axis from the last one, never on the raw
+cursor tile, and the track it assembles is a straight run. The two-tile step is also why the kinds the
+generator emits for a run are the 4x3x4 family.
+
 ### The pieces the track is made of (READ)
 ⭐ **THERE IS A PIECE TABLE, AND IT IS PLAIN DATA IN THE EXE: 80 descriptors of 8 bytes at 0x800F8A30.**
 (⚠ my earlier note said 0x80108A30 and "RAM-resident, loader not found" — that was an address typo: the

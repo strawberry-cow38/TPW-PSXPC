@@ -71,21 +71,43 @@ namespace TPW.Data
             return t.Raw0 == (byte)TileType.Grass && (t.Flags & 0x02) == 0;
         }
 
-        /// <summary>The ghost: the pylon that would go down, and the span of track it would assemble from the last
-        /// one. The span is drawn tile by tile so the player can see where the rails will run.</summary>
+        /// <summary>The ghost: where the pylon would land once the cursor is projected onto the dominant axis,
+        /// and the run of track that would reach it.</summary>
         public List<(int X, int Z, int Sprite, bool Takes)> Ghost(PathTool tool, ParkMap map, int cx, int cz, out bool valid)
         {
             var ghost = new List<(int, int, int, bool)>();
-            valid = !Circuit && _pylons.Count < MaxPylons && Takes(map, cx, cz);
-            foreach (var (x, z) in Span(End, (cx, cz)))
+            var at = Project(End, (cx, cz));
+            valid = !Circuit && _pylons.Count < MaxPylons && PieceCount(End, (cx, cz)) >= 1 && Takes(map, at.X, at.Z);
+            foreach (var (x, z) in Span(End, at))
                 ghost.Add((x, z, tool.Marker(valid ? 0 : 1), valid));
-            ghost.Add((cx, cz, tool.Marker(valid ? 6 : 1), valid));
+            ghost.Add((at.X, at.Z, tool.Marker(valid ? 6 : 1), valid));
             return ghost;
         }
 
-        /// <summary>The tiles the track runs over between two pylons: straight along whichever axis is longer,
-        /// then along the other, the way the rest of the game's runs are laid out. The pylons themselves are not
-        /// in it.</summary>
+        /// <summary>⭐ WHERE THE NEXT PYLON ACTUALLY LANDS. The builder does not join two points with a corner:
+        /// its update (0x800221B0) takes |dx| and |dz| off the last point, picks the DOMINANT AXIS — X when
+        /// |dz| &lt; |dx|, Z otherwise, so a tie goes to Z — and walks that axis alone in steps of <b>two tiles</b>
+        /// (`addiu s5, zero, 2`), laying `abs(delta) &gt;&gt; 1` pieces. So the cursor's off-axis half is thrown away
+        /// and an odd distance is rounded down: the pylon lands on a two-tile lattice along one axis, which is
+        /// why the game's track comes out in straight runs and never in an L.</summary>
+        public static (int X, int Z) Project((int X, int Z) from, (int X, int Z) to)
+        {
+            int dx = to.X - from.X, dz = to.Z - from.Z;
+            if (Math.Abs(dz) < Math.Abs(dx)) return (from.X + (Math.Abs(dx) >> 1) * 2 * Math.Sign(dx), from.Z);
+            return (from.X, from.Z + (Math.Abs(dz) >> 1) * 2 * Math.Sign(dz));
+        }
+
+        /// <summary>How many pieces that run is: `abs(delta) &gt;&gt; 1`, and the piece family it lays is the
+        /// two-tile one (kinds 40..51, size 4x3x4 half-tiles).</summary>
+        public static int PieceCount((int X, int Z) from, (int X, int Z) to)
+        {
+            int dx = to.X - from.X, dz = to.Z - from.Z;
+            return Math.Max(Math.Abs(dx), Math.Abs(dz)) >> 1;
+        }
+
+        /// <summary>The tiles the track covers between two pylons, one at a time. The game lays TWO-TILE pieces
+        /// (see <see cref="Project"/>); this walks every tile because the port draws the ride's own one-tile
+        /// piece on each of them, which is the same ground covered.</summary>
         public static IEnumerable<(int X, int Z)> Span((int X, int Z) from, (int X, int Z) to)
         {
             int x = from.X, z = from.Z;
@@ -93,15 +115,18 @@ namespace TPW.Data
             while (z != to.Z) { z += Math.Sign(to.Z - z); if ((x, z) != to) yield return (x, z); }
         }
 
-        /// <summary>A press at (cx, cz): one pylon goes down, and the track is what runs between them.</summary>
+        /// <summary>A press at (cx, cz): the run is projected onto the dominant axis, one pylon goes down at
+        /// its end, and the track is what runs between.</summary>
         public Step Lay(ParkMap map, int cx, int cz)
         {
-            if (Circuit || _pylons.Count >= MaxPylons || !Takes(map, cx, cz)) return Step.Refused;
-            _pylons.Add((cx, cz));
-            Mark(map, cx, cz, (byte)TileType.TrackPiece);
-            foreach (var (x, z) in Span(_pylons.Count > 1 ? _pylons[^2] : Start, (cx, cz)))
-                Mark(map, x, z, (byte)TileType.TrackPiece);
-            if ((cx, cz) == Start) { Circuit = true; return Step.Closed; }
+            var at = Project(End, (cx, cz));
+            if (Circuit || _pylons.Count >= MaxPylons || PieceCount(End, (cx, cz)) < 1 || !Takes(map, at.X, at.Z))
+                return Step.Refused;
+            var from = End;
+            _pylons.Add(at);
+            Mark(map, at.X, at.Z, (byte)TileType.TrackPiece);
+            foreach (var (x, z) in Span(from, at)) Mark(map, x, z, (byte)TileType.TrackPiece);
+            if (at == Start) { Circuit = true; return Step.Closed; }
             return Step.Placed;
         }
 
