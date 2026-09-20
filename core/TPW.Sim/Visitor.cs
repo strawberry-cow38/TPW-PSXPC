@@ -269,7 +269,33 @@ namespace TPW.Sim
         /// rand(4)*2 when a queued guest fidgets (§2.4).</summary>
         public int Facing { get; set; }
 
-        /// <summary>P+0x2C: the "wait until" deadline in ticks, and the decision cooldown.</summary>
+        /// <summary>P+0x2C: the "wait until" deadline in ticks, and the decision cooldown.
+        ///
+        /// ⚠⚠ NINE SUBSYSTEMS WRITE THIS ONE FIELD, and that is the game's own design rather than a
+        /// port simplification — it really is a single word. Every one of them overwrites whatever the
+        /// last set, so a deadline is only as long as the next writer allows:
+        ///
+        ///   VisitorArrival    the shop and stall dwells (120, +rand(300))
+        ///   VisitorQueue      the fidget roll (rand(300)), the unload wait, the SHUFFLE STAGGER (3xrand(3))
+        ///   VisitorIdle       +60
+        ///   VisitorNeeds      the entertainer watch
+        ///   VisitorDecision   now, and +360 as the after-a-failure cooldown
+        ///   VisitorWander     now
+        ///   VisitorEntrance   now, at four points in the gate machine
+        ///
+        /// ⚠ THIS HAS ALREADY COST ONE REAL BUG. A guest told to shuffle up a queue kept the FIDGET
+        /// deadline the wait state had just rolled — up to 300 ticks — because the port set the state
+        /// by hand instead of sending message 6, which is the only writer that replaces it with the
+        /// stagger. Measured as a 236-tick stall on every board. Before setting a state that another
+        /// subsystem's timer gates, ask which deadline the guest is carrying.
+        ///
+        /// ⚠ AND IT MAKES THE DECISION COOLDOWN CONDITIONAL. VisitorDecision's +360 after a failed
+        /// route survives only until the next writer, and the failure path ends in Wander, which sets
+        /// `now`. So a guest with an unreachable target retries far sooner than 360 ticks. Whether the
+        /// original has the same collision is NOT established — the writers are the same field there
+        /// too, so it probably does, and a park with a disconnected piece really does hammer the
+        /// pathfinder. Measured: 5 route failures on a fully connected park against tens of thousands
+        /// on one with a stranded ride exit.</summary>
         public long WaitUntil { get; set; }
 
         /// <summary>V+0x61: index into the 8-entry visitor-type table at 0x800F79E8, which supplies the
