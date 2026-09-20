@@ -1,0 +1,59 @@
+{
+  "timestamp_utc": "2026-09-20T23:01:06.148592+00:00",
+  "worktree": "/home/ec2-user/tpwport-pranks",
+  "branch": "pranks",
+  "scope": "Negative producer audit; no core or game changes.",
+  "baseline_simulation": {
+    "passed": 1574,
+    "failed": 0,
+    "skipped": 0
+  },
+  "runs": [
+    {
+      "command": [
+        "dotnet",
+        "test",
+        "tests/TPW.Sim.Tests/"
+      ],
+      "exit_code": 0,
+      "output": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  TPW.Sim -> /home/ec2-user/tpwport-pranks/core/TPW.Sim/bin/Debug/net8.0/TPW.Sim.dll\n  TPW.Sim.Tests -> /home/ec2-user/tpwport-pranks/tests/TPW.Sim.Tests/bin/Debug/net8.0/TPW.Sim.Tests.dll\nTest run for /home/ec2-user/tpwport-pranks/tests/TPW.Sim.Tests/bin/Debug/net8.0/TPW.Sim.Tests.dll (.NETCoreApp,Version=v8.0)\nVSTest version 17.12.0 (arm64)\n\nStarting test execution, please wait...\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:  1574, Skipped:     0, Total:  1574, Duration: 2 s - TPW.Sim.Tests.dll (net8.0)\n",
+      "failed": 0,
+      "passed": 1574,
+      "skipped": 0,
+      "total": 1574
+    },
+    {
+      "command": [
+        "python3",
+        "tools/test_prank_callers.py"
+      ],
+      "exit_code": 0,
+      "output": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\n",
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": [
+        "python3",
+        "tools/test_stinkbomb_audit.py"
+      ],
+      "exit_code": 0,
+      "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nOK\n",
+      "total": 8,
+      "passed": 8,
+      "skipped": 0
+    }
+  ],
+  "artifact_sha256": {
+    "tools/audit_prank_callers.py": "9f294508800b25d7933bdb288eecfd43e168fc66627cbcefe1f45e6ee672959e",
+    "tools/test_prank_callers.py": "6e21e937eddda58dd3785fe62149e9c50a00aff435d526ab93cb77d3d50c6625",
+    "tools/mutate_prank_callers.py": "055e049779dd1380f04e9577c13178170a7307e3050f450fbd79b9267085a880",
+    "findings/pranks.md": "4905c1946a4bee15b003f1d9c445ea1ebd759639ca7864fffb6ab672de71299c",
+    "findings/pranks-audit.json": "d7008538d2f3a4829d74c220ccee64216d0c0486d4e3e279f26abba05cfca0bf",
+    "findings/pranks-mutations.json": "80a07d1c9a9bd0c596a8c5de920dc081cb04a1b805dd065df8180c355610f93b"
+  },
+  "final_artifact_check_utc": "2026-09-20T23:03:18.074808+00:00",
+  "final_note": "After final manifest review, the 10 search tests and 16-mutant sweep were rerun. Core and game remain unchanged since the recorded final dotnet run."
+}
