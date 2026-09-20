@@ -44,6 +44,11 @@ that is actually checked.
 
 ## Status
 
+⭐ **[STATUS.md](STATUS.md) is the current picture** — every system, who owns it, what is proved and
+what is merely built, plus the open bugs and the questions that need a human. This section is the
+project's opening position and is kept for the record; it was accurate on 2026-09-18 and the line
+below about the game not existing stopped being true shortly afterwards.
+
 Early — but the chain is joined end to end, verified rather than asserted.
 
 Run headless on 2026-09-18 against a real PAL disc:
