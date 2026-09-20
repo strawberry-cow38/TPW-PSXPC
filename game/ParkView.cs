@@ -111,6 +111,10 @@ namespace TPWGodot
         float _yaw = 0f, _pitch = -0.85f, _distance = 30f;
         /// <summary>The game's own camera (ParkCamera): fixed height and distance, quarter turns only. Off: the
         /// port's free camera, which can go where the game's never does.</summary>
+        /// <summary>⭐ THE GAME'S OWN CAMERA IS THE DEFAULT (master's rule). The free camera is the port's
+        /// debugging one and G swaps them. ⚠ It is switched on in <see cref="Load"/>, NOT here: the setter
+        /// needs the map — with none it stores `value &amp;&amp; _map != null`, so a field initialiser of true
+        /// would quietly leave it FALSE and the default would look like it had simply not been applied.</summary>
         bool _gameCam;
         readonly ParkCamera _gcam = new();
         bool _cameraDebug;
@@ -437,6 +441,9 @@ namespace TPWGodot
             for (int i = 0; i < map.Tiles.Length; i++)
                 if (map.Tiles[i].IsWalkable) { _focus = At(i % map.Width + 0.5f, i / map.Width + 0.5f, map.Tiles[i].HeightUnits); break; }
             UpdateCamera();
+            // ⭐ The game's camera is the default, and this is the earliest it CAN be: the setter carries the
+            // free camera's focus and turn across, so it needs both the map and the focus chosen just above.
+            GameCamera = true;
         }
 
         /// <summary>The ground: every quad textured from the atlas at the game's (u, v) on its page.</summary>

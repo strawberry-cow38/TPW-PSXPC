@@ -133,8 +133,9 @@ namespace TPWGodot
         /// green build is not a picture. Needs a display; xvfb-run supplies one on a headless box.</summary>
         string _shotPath; int _shotFrame = 150; int _shotClock; bool _shotWhenRunning; int _shotHold;
 
-        /// <summary>--windowed: keep the game in a window. The game itself is fullscreen.</summary>
-        bool _windowed;
+        /// <summary>--fullscreen: take the whole screen. The default is a window, which is what master
+        /// wants to develop against — a fullscreen Godot is a nuisance to alt-tab out of all day.</summary>
+        bool _fullscreen;
         Button _playAdvisor;
         OptionButton _advisorLanguage;
         bool _hasAdvisor;
@@ -538,7 +539,8 @@ namespace TPWGodot
                 else if (arg == "--cull-on") _tourCull = true;
                 else if (arg == "--model-play") _tourPlay = true;
                 else if (arg.StartsWith("--tour-frames=")) _tourHold = System.Math.Max(1, int.Parse(arg.Substring("--tour-frames=".Length)));
-                else if (arg == "--windowed") _windowed = true;
+                else if (arg == "--fullscreen") _fullscreen = true;
+                else if (arg == "--windowed") { }        // still accepted: it is what the capture scripts pass
                 else if (arg == "--no-boot") _skipBoot = true;
                 else if (arg == "--boot") _bootNow = true;
                 else if (arg.StartsWith("--boot-from=")) _bootFrom = arg.Substring("--boot-from=".Length);
@@ -572,17 +574,17 @@ namespace TPWGodot
                         v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
             }
 
-            // ⭐ THE GAME IS FULLSCREEN; A CAPTURE IS NOT. The port carried no display mode at all, so it
-            // opened in Godot's default window. Every HUD coordinate here is a FRACTION of the viewport, so
-            // the layout has nothing to fill until the window is the screen.
+            // ⭐ A WINDOW BY DEFAULT, FULLSCREEN ON REQUEST. This went fullscreen-by-default earlier today and
+            // master asked for it back: developing against it means alt-tabbing all day. --fullscreen still
+            // takes the whole screen, and the layout fills whatever it is given either way, because every HUD
+            // coordinate here is a FRACTION of the viewport.
             //
-            // ⚠ A render must stay windowed whoever starts it. A fullscreen Godot takes over the display, and
-            // master plays on this same box from their own clone — a capture stealing the screen is far worse
-            // than a capture that is small. So --shot and --write-movie opt out THEMSELVES rather than trusting
-            // whichever script launched them to have remembered --windowed.
+            // ⚠ A capture must NEVER take the display whoever starts it. master plays on this same box from
+            // their own clone, so --shot and --write-movie refuse fullscreen THEMSELVES rather than trusting
+            // whichever script launched them. That guard stays even though the default is now a window.
             bool capturing = _shotPath != null
                              || System.Array.Exists(OS.GetCmdlineArgs(), a => a.StartsWith("--write-movie"));
-            if (!_windowed && !capturing) DisplayServer.WindowSetMode(DisplayServer.WindowMode.Fullscreen);
+            if (_fullscreen && !capturing) DisplayServer.WindowSetMode(DisplayServer.WindowMode.Fullscreen);
 
             GD.Print($"[tpw] data: {_data.Message}");
             GD.Print($"[tpw] launcher said variant={variant}, we identified {_data.Variant?.Id ?? "(none)"}");
@@ -1016,8 +1018,12 @@ namespace TPWGodot
             _music.Play(module, waves, $"module #{entry}");
         }
 
+        /// <summary>⭐ THE DEBUG MENU IS NOT PART OF THE GAME, so opening the park closes it (master's rule).
+        /// F3 brings it back. It is closed rather than hidden-and-restored: coming out of the park should
+        /// leave you where the game leaves you, not put the developer chrome back over it.</summary>
         void ShowPark(bool on)
         {
+            if (on) SetDebugMenu(false);
             if (on && _maps.Count > 0)
             {
                 int sel = System.Math.Clamp(_parkChoice.Selected, 0, _maps.Count - 1);
