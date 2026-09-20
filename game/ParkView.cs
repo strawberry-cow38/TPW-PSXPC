@@ -240,7 +240,15 @@ namespace TPWGodot
 
         /// <summary>The park's bank: placing charges it (<see cref="PlaceAttraction"/>), and what it cannot pay for
         /// cannot be picked. Null leaves everything free, as the port was before.</summary>
-        public void SetBank(Bank bank) { _bank = bank; RefreshPickerPrices(); }
+        public void SetBank(Bank bank)
+        {
+            _bank = bank;
+            // ⚠ ALSO THE STALLS ALREADY STANDING. Attractions placed by the load hooks exist before the
+            // host hands the bank over, and a stall with no bank takes money into nowhere — silently,
+            // because BookSale simply returns.
+            foreach (var a in _attractionsPlaced) a.Bank = bank;
+            RefreshPickerPrices();
+        }
 
         /// <summary>The picker, a tab per catalogue category in the game's own order, holding that category's
         /// attractions. A category the park has nothing for is left out, as the game leaves it out (0x8007D290).</summary>
@@ -1064,7 +1072,11 @@ namespace TPWGodot
                         // there is no "skip him". So "people in the queue, they just don't get on after
                         // the first group" is answered by this one field and by nothing else in the
                         // report: the rider count, the status and the queue length all look healthy.
-                        + QueueHeadReport(a));
+                        + QueueHeadReport(a)
+                        + (a.Rec.Shop != null || a.Rec.SideShow != null
+                            ? $", sells at {Money.FromPounds(a.SalePrice)}: took {a.Takings} ({a.Profit} profit) "
+                              + $"from {a.Served} sales over {a.Visits} visits, satisfaction {a.Satisfaction}"
+                            : ""));
             }
             return sb.ToString();
         }
@@ -1807,6 +1819,11 @@ namespace TPWGodot
                 RiderCount = () => _guests?.Rides?.RuntimeFor(rec.Entry)?.Riders.Count ?? 0,
             };
             a.Eject = () => _guests?.Rides?.EjectAll(rec.Entry, g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
+            // ⚠ THE STALL'S OWN PRICE, FROM THE RECORD, AT PLACEMENT. The game sets it here (and the
+            // panel would change it afterwards); leaving it zero would have every shop giving its stock
+            // away and the want maths reading a free product as irresistible.
+            a.SalePrice = a.Rec.Shop?.DefaultPrice ?? a.Rec.SideShow?.PlayPrice ?? 0;
+            a.Bank = _bank;
             a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
             // ⭐ RUN THE GAME'S OWN PLACEMENT INITIALISER. It sets level 0, full reliability, the lifetime from
             // the record, and the three sliders to the record's defaults — capacity to half the seats, speed to
@@ -1828,8 +1845,72 @@ namespace TPWGodot
         /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
         /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
         /// list walks them to find the one under the cursor.</summary>
-        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob, IRidePanelWorld
+        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob, IRidePanelWorld, IShopSite
         {
+            // --- IShopSite: a shop or sideshow as the guest standing at it sees it ------------------
+            //
+            // ⚠ EVERY ONE OF THESE IS PER-INSTANCE. Two Burger Bars priced differently is the whole
+            // point of the panel, so none of it can live on the record.
+
+            /// <summary>Type 4's product bytes, or null. Read straight off the record — there is nothing
+            /// per-instance about WHAT a shop sells, only what it charges.</summary>
+            public ShopProduct? Product => Rec.Shop is { } sh
+                ? new ShopProduct(sh.UnitCost, sh.Kind, sh.NeedAValue, sh.NeedBValue, sh.HappinessValue, sh.NauseaValue)
+                : (ShopProduct?)null;
+
+            /// <summary>Type 5's game, or null.</summary>
+            public SideShowGame? Game => Rec.SideShow is { } ss
+                ? new SideShowGame(ss.PlayPrice, ss.WinChance, ss.Prize)
+                : (SideShowGame?)null;
+
+            /// <summary>shop+0x88. ⚠ Starts at the record's own default because the panel that would
+            /// change it does not exist yet; a placed shop really does start there.</summary>
+            public int SalePrice { get; set; }
+
+            /// <summary>shop+0x8A and shop+0x7C. ⚠ BOTH ZERO FOR THE SAME REASON — no panel sets them,
+            /// and zero is what a freshly placed stall carries, not a placeholder.</summary>
+            public int QualitySlider { get; set; }
+            public int SecondSlider { get; set; }
+
+            /// <summary>What this stall has taken, and what it has made after the unit cost. The game
+            /// keeps both words per stall; the month-end report cannot break income down without them.</summary>
+            public Money Takings, Profit;
+
+            /// <summary>+0x80 and the visit counter: how satisfied people have been, over how many
+            /// visits — bought or not.</summary>
+            public int Satisfaction, Visits;
+
+            /// <summary>Where the money goes. Set by the view, which owns the bank.</summary>
+            public Bank Bank;
+
+            public void BookSale(ShopSale sale)
+            {
+                if (Bank == null) return;
+                Bank.Receive(Money.FromPounds(sale.Price));
+                Takings += Money.FromPounds(sale.Price);
+                Profit += Money.FromPounds(sale.Price - sale.UnitCost);
+            }
+
+            public void BookPlay(SideShowPlay play)
+            {
+                if (Bank == null) return;
+                Bank.Receive(Money.FromPounds(play.Game.Price));
+                Takings += Money.FromPounds(play.Game.Price);
+                // ⚠ A WON PRIZE IS PAID OUT OF THE BANK, not deducted from the income. A sideshow with a
+                // generous prize really can lose money on a play, which is the whole tension of the
+                // slider; netting it against the takings would hide that.
+                bool won = play.Roll < play.Game.Chance;
+                if (won) Bank.Spend(Money.FromPounds(play.Game.Prize));
+                Profit += Money.FromPounds(play.Game.Price - (won ? play.Game.Prize : 0));
+            }
+
+            public void RecordSatisfaction(int amount) { Satisfaction += amount; Visits++; }
+            public void CountServed() { Served++; }
+
+            /// <summary>Guests served, the stall's own counter (target+0x14). Separate from the ride
+            /// runtime's Served, which counts rides given.</summary>
+            public int Served;
+
             // --- IRideJob: the same object as a mechanic acts on it ---------------------------------
             int IRideJob.Id => Rec.Entry;
             AttractionStatus IRideJob.Status { get => Status; set => Status = AttractionLifecycle.Enter(value, this); }
@@ -2088,6 +2169,7 @@ namespace TPWGodot
                     Built = a.Status != AttractionStatus.JustPlaced,
                     DoorX = door.X, DoorZ = door.Z,
                     CentreX = cx, CentreZ = cz,
+                    Site = a,
                     ExitX = a.Rec.ExitTile(a.Ox, a.Oz, a.Rot)?.X ?? -1,
                     ExitZ = a.Rec.ExitTile(a.Ox, a.Oz, a.Rot)?.Z ?? -1,
                 });

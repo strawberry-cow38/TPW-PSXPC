@@ -315,7 +315,14 @@ namespace TPWGodot
         /// not because the game does that.</summary>
         public bool TryPathToLeavePoint(Visitor g) => TryPathToEntrance(g);
 
-        public void CountGuestServed(Visitor g) { if (_runtime != null) _runtime.Served++; }
+        /// <summary>target+0x14 += 1 (0x80063164). ⚠ TWO COUNTERS, ONE CALL: the ride runtime counts
+        /// rides given, and a STALL keeps its own tally of who bought — the shop line would read "0
+        /// sales" beside real takings without this, which looks like the money came from nowhere.</summary>
+        public void CountGuestServed(Visitor g)
+        {
+            if (_runtime != null) _runtime.Served++;
+            _target?.Site?.CountServed();
+        }
 
         // ---- the type-2 feature's stock (findings/shop-stock.md) ------------------------------------
         //
@@ -355,16 +362,32 @@ namespace TPWGodot
         static Exception NotWired([System.Runtime.CompilerServices.CallerMemberName] string member = null)
             => new NotSupportedException($"IShopWorld.{member}: the park has no shop wiring yet. "
                                        + "Wire it rather than giving this a default - see ParkRideWorld.");
-        public ShopProduct Product(Visitor g) => throw NotWired();
-        public int SalePrice(Visitor g) => throw NotWired();
-        public int QualitySlider(Visitor g) => throw NotWired();
-        public int SecondSlider(Visitor g) => throw NotWired();
-        public void BookSale(Visitor g, ShopSale sale) => throw NotWired();
-        public SideShowGame Game(Visitor g) => throw NotWired();
-        public void BookPlay(Visitor g, SideShowPlay play) => throw NotWired();
-        public void RecordSatisfaction(Visitor g, int amount) => throw NotWired();
-        public void PostEvent(int id, int value) => throw NotWired();
-        public bool TrySpawnProp(Visitor g) => throw NotWired();
-        public void ReleaseModel(Visitor g) => throw NotWired();
+
+        /// <summary>The stall the current guest is standing at. ⭐ EVERY MEMBER BELOW GOES THROUGH HERE
+        /// and throws on a null rather than answering zero: a shop that sells for nothing, or takes
+        /// money into no bank, is exactly the kind of wrong that looks like it works.</summary>
+        IShopSite Site => _target?.Site ?? throw NotWired();
+
+        public ShopProduct Product(Visitor g) => Site.Product ?? throw NotWired();
+        public int SalePrice(Visitor g) => Site.SalePrice;
+        public int QualitySlider(Visitor g) => Site.QualitySlider;
+        public int SecondSlider(Visitor g) => Site.SecondSlider;
+        public void BookSale(Visitor g, ShopSale sale) => Site.BookSale(sale);
+        public SideShowGame Game(Visitor g) => Site.Game ?? throw NotWired();
+        public void BookPlay(Visitor g, SideShowPlay play) => Site.BookPlay(play);
+        public void RecordSatisfaction(Visitor g, int amount) => Site.RecordSatisfaction(amount);
+
+        /// <summary>⚠ DELIBERATELY A NO-OP, NOT A THROW. The event goes to the message-box state
+        /// machine (0x800139B4 on 0x8010265C) and what each id means to it is NOT TRACED — so there is
+        /// nothing to wire it to yet, and dropping it changes no money and no guest.</summary>
+        public void PostEvent(int id, int value) { }
+
+        /// <summary>⚠ NO PROP POOL IN THE PORT, so a guest that buys a balloon never carries one. It is
+        /// a drawing, not a rule: the purchase, the money and every stat effect have already happened by
+        /// the time this is called, and the original treats a full pool the same way.</summary>
+        public bool TrySpawnProp(Visitor g) => false;
+
+        /// <summary>⚠ NO GUEST MODEL HANDLE IN THE PORT (V+0x24), so there is nothing to release.</summary>
+        public void ReleaseModel(Visitor g) { }
     }
 }

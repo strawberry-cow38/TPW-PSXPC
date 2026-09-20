@@ -923,7 +923,22 @@ namespace TPWGodot
             // chooses 18 or 19 by whether the guest is standing on it. Here it always waits, and the
             // ride's own "shuffle everyone up" is what moves the queue. The difference shows as a
             // queue that closes up in steps rather than continuously.
-            if (!VisitorQueue.HasQueue(_rides.TargetType(g.V))) { g.V.HasTarget = false; return; }
+            // ⭐⭐ A SHOP, A STALL AND A FEATURE ARE VISITED, NOT QUEUED — and this used to DROP THE
+            // TARGET for all three, so a guest walked to a shop and then forgot why. Nothing ever
+            // bought anything, which is how a park whose only income is the gate looks from outside.
+            // VisitorArrival.AtAttraction's own two arms, reproduced: a type-2 building is a flat 120
+            // ticks, a stall is 120 plus up to 300 more, and both clear flag 0x01 on arrival
+            // (0x8008DC04, 0x8008DCC8).
+            int type = _rides.TargetType(g.V);
+            if (!VisitorQueue.HasQueue(type))
+            {
+                if (type != 2 && type != 4 && type != 5) { g.V.HasTarget = false; return; }
+                g.V.Flag1 = false;
+                g.V.WaitUntil = _now + VisitorArrival.ShopDwellTicks
+                              + (type == 2 ? 0 : _dice.Next(VisitorArrival.StallExtraDwellMax));
+                g.V.SetState(VisitorState.UsingAttraction);
+                return;
+            }
             g.V.SetState(VisitorState.JoiningQueue);
         }
 
@@ -954,6 +969,16 @@ namespace TPWGodot
                 case VisitorState.WaitingInQueue:
                     if (!_rides.SetGuest(g)) { g.V.SetState(VisitorState.Idle); return true; }
                     VisitorQueue.Wait(g.V, _rides, _dice);
+                    return true;
+
+                // ⭐ THE DWELL, THEN THE TILL. A guest inside a shop or a stall waits out the time
+                // the arrival set and then goes through the SAME unloading arm a ride uses — that is
+                // where VisitorQueue.Unload dispatches by type to the two purchase routines. Without
+                // this the guest stands in the doorway for ever with its target still set.
+                case VisitorState.UsingAttraction:
+                    if (!_rides.SetGuest(g)) { g.V.HasTarget = false; g.V.SetState(VisitorState.Idle); return true; }
+                    if (g.V.WaitUntil > _now) return true;
+                    g.V.SetState((VisitorState)22);
                     return true;
 
                 // 21: the ride owns the guest completely. Nothing here, by design.

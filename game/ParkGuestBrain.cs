@@ -30,6 +30,11 @@ namespace TPWGodot
         /// is reachable can still strand everyone it unloads, because they leave through the other side.</summary>
         public int ExitX = -1, ExitZ = -1;
 
+        /// <summary>The placed stall itself, for the half of a visit that is per-INSTANCE: its price,
+        /// its sliders, and where the money it takes goes. Null for anything that is not a shop or a
+        /// sideshow — and the purchase code is only reached for types 4 and 5.</summary>
+        public IShopSite Site;
+
         /// <summary>Record +0x2E bit 1 on a feature: staff may rest here (READ, 0x8002433C via the
         /// wrapper 0x80024110). Staff state 49 searches the object list for the NEAREST one of these
         /// whose status byte is also non-zero (0x800660DC).</summary>
