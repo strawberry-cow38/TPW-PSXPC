@@ -106,6 +106,8 @@ namespace TPWGodot
         /// port's free camera, which can go where the game's never does.</summary>
         bool _gameCam;
         readonly ParkCamera _gcam = new();
+        bool _cameraDebug;
+        int _cameraShout;
         /// <summary>The game camera's eye and look-at point at the last two park frames, in Godot space. ⭐ THE
         /// CAMERA RUNS AT THE GAME'S 25 Hz AND IS DRAWN BETWEEN THEM: its height easing is per frame, not per unit
         /// of frame time, so stepping it at the render rate would change how it moves; planting the view on the
@@ -285,10 +287,13 @@ namespace TPWGodot
             if (exe != null && world != null) map = ParkPaths.LayStartingPaths(map, exe, AssetSelfTest.GameExecutableBase, world.Index);
             _map = map;
             _common = common;
+
             _guests?.Clear();
             _guests = new ParkGuests(map, this);
             _guestSprites ??= GuestSprites.From(_modelSheets);
-            GuestSprites.Debug = System.Environment.GetCommandLineArgs() is { } cl && Array.IndexOf(cl, "--guest-debug") >= 0;
+            var cli = System.Environment.GetCommandLineArgs();
+            GuestSprites.Debug = Array.IndexOf(cli, "--guest-debug") >= 0;
+            _cameraDebug = Array.IndexOf(cli, "--camera-debug") >= 0;
             _guests.SetSprites(_guestSprites);
             _guests.SetBrain(GuestTargets);
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
@@ -1768,6 +1773,9 @@ void fragment() {
                 {
                     _gEyePrev = _gEyeCur; _gLookPrev = _gLookCur;
                     _gcam.Step(_map, frameTime);
+                    if (_cameraDebug && (_cameraShout++ % 25) == 0)
+                        GD.Print($"[cam] eye tile {_gcam.EyeX >> 8},{_gcam.EyeZ >> 8}  ground {_gcam.Ground} " +
+                                 $"(map floor {_map.ModalHeight}) eyeY {_gcam.EyeY}");
                     TakeGameCamera();
                 }
                 if (_gate != null)

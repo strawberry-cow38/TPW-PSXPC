@@ -2341,6 +2341,100 @@ static class Program
                     : null;
                 return Movies(disc, outDir, Array.IndexOf(args, "--frames") >= 0, only);
             }
+            // --tilefield E: the histogram of byte +6's top two bits over map entry E — the per-tile height the
+            // camera's own ground sampler adds (0x80050938 with its third argument, 0x8004D208: (b6 >> 6) << 10).
+            int tfAt = Array.IndexOf(args, "--tilefield");
+            if (tfAt >= 0 && tfAt + 1 < args.Length)
+            {
+                var af5 = disc.Find(AssetSelfTest.AssetArchive);
+                if (af5 == null) { Console.WriteLine("no asset archive on this disc"); return 1; }
+                if (!GazArchive.TryParse(disc.ReadFile(af5), out var gz5, out string gerr5))
+                { Console.WriteLine("archive: " + gerr5); return 1; }
+                int me = int.Parse(args[tfAt + 1]);
+                ParkMap found = null;
+                foreach (var (entry, map) in ParkMap.FindAll(gz5)) if (entry.Index == me) { found = map; break; }
+                if (found == null) { Console.WriteLine($"entry {me} is not a park map"); return 1; }
+                var hist = new int[4];
+                var firstAt = new (int X, int Z)[4];
+                for (int z = 0; z < found.Height; z++)
+                    for (int x = 0; x < found.Width; x++)
+                    {
+                        int f = found[x, z].CameraLift >> 10;
+                        if (f < 0 || f > 3) continue;
+                        if (hist[f]++ == 0) firstAt[f] = (x, z);
+                    }
+                Console.WriteLine($"map #{me}: {found.Width}x{found.Height} tiles");
+                int noGround = 0; int minH = int.MaxValue, maxH = int.MinValue;
+                for (int z = 0; z < found.Height; z++)
+                    for (int x = 0; x < found.Width; x++)
+                    {
+                        var t = found[x, z];
+                        if (t.NoGround) noGround++;
+                        minH = Math.Min(minH, t.HeightUnits); maxH = Math.Max(maxH, t.HeightUnits);
+                    }
+                Console.WriteLine($"  no-ground tiles {noGround}, height {minH}..{maxH} units");
+                int bMin = int.MaxValue, bMax = int.MinValue, bCount = 0;
+                var heights = new SortedDictionary<int, int>();
+                for (int z = 0; z < found.Height; z++)
+                    for (int x = 0; x < found.Width; x++)
+                    {
+                        var t = found[x, z];
+                        heights[t.HeightUnits] = heights.TryGetValue(t.HeightUnits, out int hc) ? hc + 1 : 1;
+                        if (t.Unbuildable) continue;
+                        bCount++; bMin = Math.Min(bMin, t.HeightUnits); bMax = Math.Max(bMax, t.HeightUnits);
+                    }
+                Console.WriteLine($"  buildable tiles {bCount}, height {bMin}..{bMax}");
+                Console.Write("  height histogram:");
+                foreach (var kv in heights) if (kv.Value >= 40) Console.Write($" {kv.Key}x{kv.Value}");
+                Console.WriteLine();
+                var world5 = ParkWorlds.ForMap(me);
+                if (world5 != null && world5.GroundSheet < gz5.Entries.Count &&
+                    TextureSheet.TryParse(gz5.Read(gz5.Entries[world5.GroundSheet]), out var gsh5, out _))
+                {
+                    int wet = 0, wetMin = int.MaxValue, wetMax = int.MinValue;
+                    for (int z = 0; z < found.Height; z++)
+                        for (int x = 0; x < found.Width; x++)
+                        {
+                            int sprite = found[x, z].GroundSprite;
+                            if (sprite < 0 || sprite >= gsh5.Sprites.Count || !gsh5.Sprites[sprite].Scrolls) continue;
+                            wet++; wetMin = Math.Min(wetMin, found[x, z].HeightUnits); wetMax = Math.Max(wetMax, found[x, z].HeightUnits);
+                        }
+                    Console.WriteLine($"  water tiles (scrolling ground sprite): {wet}" + (wet > 0 ? $", height {wetMin}..{wetMax}" : ""));
+                }
+                int rgAt = Array.IndexOf(args, "--region");
+                if (rgAt >= 0 && rgAt + 4 < args.Length)
+                {
+                    int rx0 = int.Parse(args[rgAt + 1]), rz0 = int.Parse(args[rgAt + 2]);
+                    int rx1 = int.Parse(args[rgAt + 3]), rz1 = int.Parse(args[rgAt + 4]);
+                    var gsheet = ParkWorlds.ForMap(me) is { } w6 && w6.GroundSheet < gz5.Entries.Count &&
+                                 TextureSheet.TryParse(gz5.Read(gz5.Entries[w6.GroundSheet]), out var gs6, out _) ? gs6 : null;
+                    for (int z = rz0; z <= rz1 && z < found.Height; z++)
+                    {
+                        Console.Write($"  z={z,3}: ");
+                        for (int x = rx0; x <= rx1 && x < found.Width; x++)
+                        {
+                            var t = found[x, z];
+                            bool scrolls = gsheet != null && t.GroundSprite < gsheet.Sprites.Count && gsheet.Sprites[t.GroundSprite].Scrolls;
+                            Console.Write($"[{x,2}] h{t.HeightUnits,4} s{t.GroundSprite,4}{(scrolls ? "~" : " ")}f{t.Flags:x2} t{t.Raw0}  ");
+                        }
+                        Console.WriteLine();
+                    }
+                    return 0;
+                }
+                int mid = found.Height / 2;
+                Console.Write($"  heights along z={mid}: ");
+                for (int x = 0; x < found.Width; x += 2) Console.Write(found[x, mid].HeightUnits + " ");
+                Console.WriteLine();
+                Console.Write($"  heights along x={found.Width / 2}: ");
+                for (int z = 0; z < found.Height; z += 3) Console.Write(found[found.Width / 2, z].HeightUnits + " ");
+                Console.WriteLine();
+                for (int f = 0; f < 4; f++)
+                    Console.WriteLine($"  lift {f} ({f * 1024,5} units): {hist[f],6} tiles" +
+                                      (hist[f] > 0 ? $"   first at {firstAt[f].X},{firstAt[f].Z}" +
+                                       $"  (height {found[firstAt[f].X, firstAt[f].Z].HeightUnits}, sprite {found[firstAt[f].X, firstAt[f].Z].GroundSprite}," +
+                                       $" no-ground {found[firstAt[f].X, firstAt[f].Z].NoGround})" : ""));
+                return 0;
+            }
             // --people OUT.rgba: one row per person the game knows (PeopleSheet's twelve blocks), five frames of
             // one facing each, so who is a guest and who is staff can be settled by looking.
             int ppAt = Array.IndexOf(args, "--people");

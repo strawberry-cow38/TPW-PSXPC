@@ -40,6 +40,8 @@ namespace TPW.Data
         public int EyeY, LookY;
         public int EyeX, EyeZ;
         int _ground;
+        /// <summary>The ground the camera is holding its height above (see <see cref="Step"/>).</summary>
+        public int Ground => _ground;
         bool _started;
 
         /// <summary>Start looking at (x, z) world units from yaw <paramref name="yaw"/>, heights settled.</summary>
@@ -73,7 +75,14 @@ namespace TPW.Data
             // too. The game re-reads it only while the camera is over the map (0x800508C8) and takes 0 for corners
             // off it; the ground it draws there is the edge continued (ParkTerrain.TryQuadAt), so that is what the
             // camera now keeps its height above.
-            _ground = GroundHeight(map, EyeX, EyeZ);
+            //
+            // ⚠ AND A SECOND ONE, master again: "make the sea not sink the camera when moving over it, should stay
+            // the same height as on the shore". THE CAMERA WILL NOT GO BELOW THE PARK'S OWN GROUND LEVEL
+            // (ParkMap.ModalHeight). The sea here is not a surface of its own: it is terrain a tile below the park
+            // wearing a water texture, so the game's camera sinks into it — its step samples the ground under the
+            // eye wherever the eye is inside the map (0x80055104) and only freezes the height OFF the map. Holding
+            // the modal height as a floor keeps the shore's height out over the sea and leaves every hill alone.
+            _ground = Math.Max(GroundHeight(map, EyeX, EyeZ), map.ModalHeight);
             int ground = _ground;
             int eye = ground + Above;
             EyeY -= (EyeY - eye) >> 3;

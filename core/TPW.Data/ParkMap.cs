@@ -58,6 +58,12 @@ namespace TPW.Data
         /// <summary>The shade at this tile's corner: an index into the map's <see cref="ParkMap.ShadeTable"/>,
         /// bits 0-5 of +6. Like the height, it belongs to the corner, so a quad blends four of them.</summary>
         public int ShadeIndex => Shade & 0x3F;
+        /// <summary>⭐ BITS 6-7 OF +6 ARE A HEIGHT, NOT PART OF THE SHADE, and they are what stops the camera
+        /// sinking. The ground sampler takes a third argument (0x80050938, called with 1 from 0x80050918, which
+        /// is the camera's own reader) and when it is set the sampler ADDS this per corner: 0x8004D208 returns
+        /// (byte +6 >> 6) &lt;&lt; 10, so 0, 1024, 2048 or 3072 world units — four, eight or twelve tiles. Everything
+        /// else reads the ground without it.</summary>
+        public int CameraLift => (Shade >> 6) << 10;
         /// <summary>Flags bit 0: the terrain routine draws no ground here at all. On map #203 that is one patch
         /// of 63 grass tiles (x 5-20, z 48-68), drawn by something else.</summary>
         public bool NoGround => (Flags & 1) != 0;
@@ -99,6 +105,33 @@ namespace TPW.Data
     /// entrance strip with a path leading in.</summary>
     public sealed class ParkMap
     {
+        /// <summary>The height the most tiles stand at: the park's own ground level.
+        ///
+        /// ⭐ WHAT IT IS FOR. The sea is not a separate surface in this game — it is terrain, a tile or more BELOW
+        /// the park, wearing a water texture, and the game's camera sinks into it because its own step samples the
+        /// ground under the eye wherever the eye is (0x80055104). Master asked for a camera that stays at the
+        /// shore's height out over the sea, and this is the floor it holds to. On map #203 it is 256, where 1,763
+        /// of 3,256 tiles stand, against 176 at zero for the sea; a map whose park sits at zero gets a floor of
+        /// zero and nothing changes.</summary>
+        public int ModalHeight
+        {
+            get
+            {
+                if (_modalHeight >= 0) return _modalHeight;
+                var count = new System.Collections.Generic.Dictionary<int, int>();
+                int best = 0, bestN = -1;
+                for (int z = 0; z < Height; z++)
+                    for (int x = 0; x < Width; x++)
+                    {
+                        int h = this[x, z].HeightUnits;
+                        int n = count[h] = count.TryGetValue(h, out int c) ? c + 1 : 1;
+                        if (n > bestN) { bestN = n; best = h; }
+                    }
+                return _modalHeight = best;
+            }
+        }
+        int _modalHeight = -1;
+
         public const int TileBytes = 8;
 
         public int Width { get; private set; }
