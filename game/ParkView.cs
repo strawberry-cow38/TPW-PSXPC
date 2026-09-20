@@ -1425,11 +1425,25 @@ namespace TPWGodot
             var riders = _guests?.RidersOf(a.Rec.Entry);
             var mesh = _attractionMesh?.Invoke(a.Rec.Entry);
             var pose = mesh == null ? null : PoseFor(mesh, tick);
-            if (_logRides && a.IsRide && Engine.GetFramesDrawn() % 600 == 0)
+            // ⚠ COUNT CALLS, NOT FRAMES. Gating this on Engine.GetFramesDrawn() % 600 printed almost
+            // nothing: this runs on the SIM tick, which happens on a small fraction of render frames, so
+            // the two counters rarely coincide and the log looked like a function that was never called.
+            if (_logRides && a.IsRide && ++_riderLogTick % 25 == 0)
+            {
+                // ⚠ THE QUEUE IS PART OF THIS REPORT because "a guest is aboard" is only believable
+                // alongside how it got there. A ride whose door is not a queue tile has an EMPTY queue
+                // path, and VisitorQueue.TryQueueSlot then refuses every join -- so riders with no queue
+                // would mean something is boarding guests that should not be able to.
+                var run = _guests?.Rides?.RuntimeFor(a.Rec.Entry);
+                string door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot) is { } e && _map != null
+                              && e.X >= 0 && e.Z >= 0 && e.X < _map.Width && e.Z < _map.Height
+                    ? $"({e.X},{e.Z}) {_map[e.X, e.Z].Type}" : "none";
                 GD.Print($"[tpw] riders {a.Rec.Entry}: {riders?.Count.ToString() ?? "no runtime"} aboard, "
+                       + $"queue {run?.Queue.Count ?? -1} on a {run?.Path.Count ?? -1}-tile path, door {door}, "
                        + $"mesh {(mesh == null ? "none" : mesh.Seats.Length + " seats")}, "
                        + $"pose {(pose == null ? "none" : pose.Bones.Length + " bones")}"
                        + (mesh?.SeatError is { } se ? $", seat error: {se}" : ""));
+            }
             if (riders == null || riders.Count == 0) return;
             if (mesh == null || mesh.Seats.Length == 0) return;
             if (pose == null || pose.Bones.Length == 0) return;
@@ -1456,7 +1470,7 @@ namespace TPWGodot
                 var outward = seat - hub;
                 if (outward.LengthSquared() < 1e-6f) outward = xform.Basis.Z;
                 _guests.DrawRider(riders[i], seat, outward.Normalized());
-                if (_logRides && Engine.GetFramesDrawn() % 600 == 0)
+                if (_logRides && _riderLogTick % 25 == 0)
                     GD.Print($"[tpw] rider {i} of {a.Rec.Entry} -> seat bone {bone} at {seat} (tick {tick})");
             }
         }
@@ -1472,6 +1486,7 @@ namespace TPWGodot
             return p;
         }
         readonly Dictionary<(TPW.Data.Mesh Mesh, int Tick), MeshPose> _seatPoses = new();
+        int _riderLogTick;
 
         /// <summary>The footprint's corner for the attraction under the mouse. 0x8001C454, run every frame with the
         /// cursor's tile, puts the corner at the cursor less half the turned footprint, rounded down (w >> 1, d >> 1):
