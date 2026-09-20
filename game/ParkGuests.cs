@@ -42,6 +42,9 @@ namespace TPWGodot
 
         /// <summary>Where the walk is up to: the waypoint pool index of the next corner, or
         /// <see cref="WaypointPool.NoChain"/>.</summary>
+        /// <summary>On a ride: not drawn, and not walked. The ride owns it (state 21).</summary>
+        public bool Hidden;
+
         public int WaypointHead { get; set; } = WaypointPool.NoChain;
 
         /// <summary>The last thing the pathfinder said, or null while a request is outstanding.
@@ -83,6 +86,7 @@ namespace TPWGodot
         readonly SimRandom _dice;
         readonly List<(int X, int Z)> _walkable = new();
         GuestBrain _brain;
+        ParkRideWorld _rides;
 
         /// <summary>The flags a guest walks with: paths, queues, the gate and the tiles beside it.
         ///
@@ -115,10 +119,45 @@ namespace TPWGodot
         /// <summary>Give the guests something to want. Until this is set they walk to random tiles;
         /// with it they run the real decision (TPW.Sim.VisitorDecision) against the placed
         /// attractions.</summary>
+        /// <summary>The queue-and-ride world, shared with the park so the rides load from the same
+        /// lists the guests stand in.</summary>
+        public ParkRideWorld Rides => _rides;
+
         public void SetBrain(Func<IReadOnlyList<GuestTarget>> targets)
             => _brain = new GuestBrain(_map, targets,
                    (g, tx, tz) => _finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
                    () => _now);
+
+        /// <summary>Build the queue world. Separate from the brain because the rides need it too.</summary>
+        public void SetRideWorld(Func<IReadOnlyList<GuestTarget>> targets)
+        {
+            _rides = new ParkRideWorld(_map, () => _now,
+                (g, tx, tz) => _finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
+                SetSingleWaypoint, FreeChain);
+            _rideTargets = targets;
+        }
+
+        Func<IReadOnlyList<GuestTarget>> _rideTargets;
+
+        /// <summary>One waypoint straight to a point, for the shuffle-forward step, which moves a guest
+        /// one place up a queue rather than asking the pathfinder for a route.</summary>
+        bool SetSingleWaypoint(Guest g, int x, int z)
+        {
+            FreeChain(g);
+            int i = _waypoints.Alloc();
+            if (i < 0) return false;
+            _waypoints.Encode(i, x, z);
+            _waypoints.SetNext(i, -1);
+            g.WaypointHead = i;
+            return true;
+        }
+
+        int FreeChain(Guest g)
+        {
+            if (g.WaypointHead != WaypointPool.NoChain) _waypoints.FreeChain(g.WaypointHead);
+            g.WaypointHead = WaypointPool.NoChain;
+            return 0;
+        }
 
         /// <summary>Running totals since the park loaded. ⚠ THE INSTANTANEOUS COUNT IS A BAD
         /// INSTRUMENT: with an 8-tick decision stagger and a 360-tick cooldown after a failure, how
@@ -195,8 +234,13 @@ namespace TPWGodot
         public void Tick()
         {
             _now++;
+            // The rides a guest can be standing at change whenever something is built, and the scripted
+            // harness does not always say so. Refreshing here means the two can never disagree.
+            if (_rides != null && _rideTargets != null) _rides.SetRides(_rideTargets());
             foreach (var g in _guests)
             {
+                // On a ride: the ride owns it entirely (state 21).
+                if (g.Hidden) continue;
                 // ⚠ A FAILED SEARCH MUST BE ANSWERED OR THE PARK LOCKS UP. The guest asked, the search
                 // was accepted, and it came back with "no route" - message 2. If the guest simply keeps
                 // its target and asks again, it does so every tick, holds one of the TEN request slots
@@ -216,6 +260,7 @@ namespace TPWGodot
                 }
                 if (g.WaypointHead != WaypointPool.NoChain) { Walk(g); continue; }
                 if (g.Waiting) continue;                       // the answer has not come back yet
+                if (RunQueueState(g)) continue;
                 AskForARoute(g);
             }
         }
@@ -246,6 +291,83 @@ namespace TPWGodot
             }
 
             Wander(g);
+        }
+
+        /// <summary>The guest got where it was going.
+        ///
+        /// ⭐ ARRIVING AT A RIDE MEANS JOINING ITS QUEUE, not riding it. The guest goes into state 41
+        /// and the RIDE decides when to take it - see TPW.Sim.RideLoading. Nothing in the guest's own
+        /// machine puts it on a ride.
+        ///
+        /// ⚠ THIS IS A SHORT CUT THROUGH TPW.Sim.VisitorArrival, which owns the real 23-case purpose
+        /// table. Only the two cases that matter here are taken: a queued type joins the queue, and
+        /// anything else is simply done. Wiring the full table needs the turnstile and the walking
+        /// purposes, which are not connected yet.</summary>
+        void Arrived(Guest g)
+        {
+            if (!g.V.HasTarget || _rides == null) { g.V.HasTarget = false; return; }
+            if (!_rides.SetGuest(g)) { g.V.HasTarget = false; return; }
+
+            // ⭐ ARRIVING WHILE WALKING UP A QUEUE IS A DIFFERENT ARRIVAL. Purposes 3 and 10 mean the
+            // guest was walking to its place IN the queue, not to the ride - so it stops and waits
+            // rather than joining all over again. Without this it re-joins for ever and never reaches
+            // the state the ride will actually take it from.
+            //
+            // ⚠ SIMPLIFIED: the real arrival (VisitorArrival purpose 3/10) re-queries the slot and
+            // chooses 18 or 19 by whether the guest is standing on it. Here it always waits, and the
+            // ride's own "shuffle everyone up" is what moves the queue. The difference shows as a
+            // queue that closes up in steps rather than continuously.
+            if (g.V.Purpose == Purpose.QueueWalk || g.V.Purpose == Purpose.QueueShuffle)
+            {
+                g.V.SetState(VisitorState.WaitingInQueue);
+                return;
+            }
+
+            if (!VisitorQueue.HasQueue(_rides.TargetType(g.V))) { g.V.HasTarget = false; return; }
+            g.V.SetState(VisitorState.JoiningQueue);
+        }
+
+        /// <summary>Drive the guest's queue-and-ride states. True when it handled the tick.</summary>
+        bool RunQueueState(Guest g)
+        {
+            if (_rides == null) return false;
+
+            switch (g.V.State)
+            {
+                case VisitorState.JoiningQueue:
+                    if (!_rides.SetGuest(g)) { g.V.HasTarget = false; g.V.SetState(VisitorState.Idle); return true; }
+                    switch (VisitorQueue.JoinQueue(g.V, _rides))
+                    {
+                        case JoinOutcome.Walking: g.Waiting = true; g.Answer = null; break;
+                        // ⚠ A REFUSED PATHFIND LEAVES THE STATE ALONE and it tries again next tick -
+                        // the guest is already in the list with its in-queue bit set by then.
+                        case JoinOutcome.PathRefused: break;
+                        default: g.V.SetState(VisitorState.Idle); g.V.HasTarget = false; break;
+                    }
+                    return true;
+
+                case VisitorState.ShuffleForward:
+                    if (!_rides.SetGuest(g)) { g.V.SetState(VisitorState.Idle); return true; }
+                    VisitorQueue.Shuffle(g.V, _rides);
+                    return true;
+
+                case VisitorState.WaitingInQueue:
+                    if (!_rides.SetGuest(g)) { g.V.SetState(VisitorState.Idle); return true; }
+                    VisitorQueue.Wait(g.V, _rides, _dice);
+                    return true;
+
+                // 21: the ride owns the guest completely. Nothing here, by design.
+                case (VisitorState)21:
+                    return true;
+
+                case (VisitorState)22:
+                    if (!_rides.SetGuest(g)) { g.V.SetState(VisitorState.Idle); return true; }
+                    VisitorQueue.Unload(g.V, _rides, _dice);
+                    g.V.HasTarget = false;
+                    g.V.SetState(VisitorState.Idle);
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>No target, or the decision gave up: walk somewhere on the paths so the guest is not
@@ -287,7 +409,7 @@ namespace TPWGodot
                     g.WaypointHead = next < 0 ? WaypointPool.NoChain : next;
                     // Arrived: the guest wants something else now. The real machine does this through
                     // the arrival purposes (TPW.Sim.VisitorArrival), which are not wired here yet.
-                    if (g.WaypointHead == WaypointPool.NoChain) g.V.HasTarget = false;
+                    if (g.WaypointHead == WaypointPool.NoChain) Arrived(g);
                     continue;
                 }
 
@@ -303,6 +425,8 @@ namespace TPWGodot
 
         void Place(Guest g)
         {
+            g.Inst.Visible = !g.Hidden;
+            if (g.Hidden) return;
             float u = ParkTerrain.TileUnits;
             int gh = ParkCamera.GroundHeight(_map, g.X, g.Z);
             var feet = new Vector3(g.X / u, gh / u, -g.Z / u);
@@ -326,6 +450,22 @@ namespace TPWGodot
             g.Facing = GuestSprites.FacingFor(dx, -dz, CameraForward);
             g.Walked += Math.Abs(dx) + Math.Abs(dz);
             g.Frame = g.Walked / 48 % TPW.Data.PeopleSheet.WalkFrames;
+        }
+
+        /// <summary>Put a guest off a ride at its exit tile, or at its door when it has no exit.
+        ///
+        /// ⚠ THE EXIT IS NOT THE ENTRANCE. A ride with a separate exit puts guests out the other side,
+        /// which is what stops the queue and the people leaving from walking through each other. A
+        /// shop or a feature has no exit tile at all and the door is right.</summary>
+        public void PlaceAtExit(Guest g, AttractionDefinition rec, int ox, int oz, int rot)
+        {
+            var (w, d) = rec.Footprint(rot);
+            var exit = rec.ExitTile(ox, oz, rot)
+                    ?? rec.EntranceTile(ox, oz, rot)
+                    ?? (ox + w / 2, oz + d / 2);
+            g.X = Centre(exit.X);
+            g.Z = Centre(exit.Z);
+            Place(g);
         }
 
         /// <summary>Take every guest out of the park, and their routes with them. Called when the map
@@ -353,6 +493,7 @@ namespace TPWGodot
         /// <summary>Rebuild the walkable list after the map changes.</summary>
         public void MapChanged()
         {
+            _rides?.QueuesChanged();
             _walkable.Clear();
             for (int x = 0; x < _map.Width; x++)
                 for (int z = 0; z < _map.Height; z++)

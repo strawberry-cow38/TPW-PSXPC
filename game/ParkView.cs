@@ -297,6 +297,8 @@ namespace TPWGodot
             _cameraDebug = Array.IndexOf(cli, "--camera-debug") >= 0;
             _guests.SetSprites(_guestSprites);
             _guests.SetBrain(GuestTargets);
+            _guests.SetRideWorld(GuestTargets);
+            _guests.MapChanged();
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
             _gateAnglePrev = _gateAngleCur = _gateRecentAt = 0;
             Array.Clear(_gateRecent);
@@ -819,12 +821,17 @@ namespace TPWGodot
         }
 
         /// <summary>What the guests are doing, for a caption on a capture.</summary>
-        public string GuestReport() => _guests == null ? "no guests"
-            : $"guests {_guests.Count}, {_guests.WithTarget} heading somewhere now "
+        public string GuestReport()
+        {
+            if (_guests == null) return "no guests";
+            var (q, r, served) = _guests.Rides?.Totals() ?? (0, 0, 0);
+            return $"guests {_guests.Count}, {q} queueing, {r} riding, {served} served; "
+                 + $"{_guests.WithTarget} heading somewhere now "
             + $"({_guests.ChoseTarget} decisions made, {_guests.RouteFailed} routes failed), "
             + $"{_guests.Outstanding}/{Pathfinder.MaxRequests} searches out, "
             + $"{_guests.FreeNodes}/{Pathfinder.NodePoolSize} nodes and "
             + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free";
+        }
 
         void RefreshInfo()
         {
@@ -895,6 +902,8 @@ namespace TPWGodot
             if (!ok) return false;
             AttractionPlacement.Place(_map, rec, x, z, rot & 3);
             _paths?.LayDoors(_map, rec, x, z, rot & 3);
+            _guests?.OnBuildItemPlaced();
+            _guests?.MapChanged();
             Charge(rec);
             var inst = new MeshInstance3D { Mesh = AttractionMesh(entry), Transform = AttractionTransform(rec, x, z, rot & 3) };
             AddChild(inst);
@@ -1153,8 +1162,9 @@ namespace TPWGodot
             switch (step)
             {
                 case QueueRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
-                case QueueRun.Step.Laid: RebuildGround(); PlaySfx(ToolSound.Lay); break;
-                case QueueRun.Step.Finished: RebuildGround(); FinishQueue(); break;
+                // Laying queue changes what the guests can walk on and how long the queue is.
+                case QueueRun.Step.Laid: RebuildGround(); _guests?.MapChanged(); PlaySfx(ToolSound.Lay); break;
+                case QueueRun.Step.Finished: RebuildGround(); _guests?.MapChanged(); FinishQueue(); break;
             }
             RefreshInfo();
             return step;
@@ -1281,6 +1291,9 @@ namespace TPWGodot
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
+            /// <summary>A+0xF8: the day the queue last had somebody in it. The part-load timeout
+            /// measures how long it has been EMPTY, not how long loading has taken.</summary>
+            public int QueueEmptySince;
             /// <summary>The running model's own phase length, and the build rig's: both are the mesh's
             /// first halfword, which is what the animation descriptor's +0x38 is copied from
             /// (0x8002C5FC → 0x8002C604, rides.md §0 item 7). Supplied by the view, which owns the
@@ -1340,6 +1353,8 @@ namespace TPWGodot
         /// <summary>The people sheet the guests are drawn from, baked once (GuestSprites).</summary>
         GuestSprites _guestSprites;
         readonly List<GuestTarget> _guestTargets = new();
+        /// <summary>Park ticks since the map loaded: the clock the loading cadences count on.</summary>
+        long _clockTicks;
 
         /// <summary>The placed attractions as the guests' decision reads them (see GuestBrain).
         ///
@@ -1407,6 +1422,21 @@ namespace TPWGodot
                 {
                     var worn = a.Wear.Tick(a.Status, a, isTrackOrCoaster: a.Rec.Type is 1 or 6);
                     if (worn != a.Status) a.Status = AttractionLifecycle.Enter(worn, a);
+                }
+
+                // ⭐ THE RIDE PULLS GUESTS OFF THE QUEUE. Statuses 10 and 11 are where a guest gets on
+                // and off; nothing in the guest's own machine does it (TPW.Sim.RideLoading).
+                if (a.IsRide && _guests?.Rides is { } rw
+                    && rw.RuntimeFor(a.Rec.Entry) is { } run
+                    && (a.Status == AttractionStatus.Loading || a.Status == AttractionStatus.Unloading))
+                {
+                    var load = new ParkRideWorld.LoadAdapter(run, Math.Max(1, a.MaxSeats),
+                        () => _clockTicks, () => (int)(_clockTicks / TPW.Sim.ParkClock.TicksPerDay),
+                        g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
+                    var after = a.Status == AttractionStatus.Loading
+                        ? TPW.Sim.RideLoading.Load(load, ref a.QueueEmptySince)
+                        : TPW.Sim.RideLoading.Unload(load);
+                    if (after != a.Status) a.Status = AttractionLifecycle.Enter(after, a);
                 }
 
                 var next = AttractionLifecycle.Tick(a.Status, a);
@@ -1886,6 +1916,7 @@ void fragment() {
                 // would on hardware. It does not matter while ExpansionsPerSlice is unbounded and every
                 // search finishes the frame it starts, and it will matter the moment that is set.
                 if (_guests != null) _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
+                _clockTicks++;
                 _guests?.Populate(DebugGuestCount);
                 _guests?.RunPathfinder();
                 _guests?.Tick();
