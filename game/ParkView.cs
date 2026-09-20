@@ -1616,6 +1616,17 @@ namespace TPWGodot
             }
         }
 
+        /// <summary>Whether any placed ride is mid-cycle right now (<c>--shot=PATH:running</c>).</summary>
+        public bool AnyRideRunning
+        {
+            get
+            {
+                foreach (var a in _attractionsPlaced)
+                    if (a.IsRide && a.Status == AttractionStatus.Running && a.Cycle.Accumulator > 0) return true;
+                return false;
+            }
+        }
+
         /// <summary>Print each ride's status changes with the frame they happen on (<c>--park-log-rides</c>).</summary>
         public bool LogRides { set => _logRides = value; }
         bool _logRides;

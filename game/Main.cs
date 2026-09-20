@@ -113,7 +113,7 @@ namespace TPWGodot
         /// <summary>--shot=PATH[:FRAME]: render until FRAME, write the window to PATH and quit. Exists so
         /// a change to something DRAWN can be looked at, in a repo whose whole discipline is that a
         /// green build is not a picture. Needs a display; xvfb-run supplies one on a headless box.</summary>
-        string _shotPath; int _shotFrame = 150; int _shotClock;
+        string _shotPath; int _shotFrame = 150; int _shotClock; bool _shotWhenRunning; int _shotHold;
         Button _playAdvisor;
         OptionButton _advisorLanguage;
         bool _hasAdvisor;
@@ -475,10 +475,22 @@ namespace TPWGodot
                 {
                     // ⚠ A WINDOWS PATH HAS A COLON IN IT ("C:\\..."), so only the LAST colon can be the frame,
                     // and only when what follows it is a number. Splitting on the first wrote a file called "C".
+                    //
+                    // :running (optionally :running:N) waits for a ride to be mid-cycle instead of counting
+                    // frames. A capture is NOT frame-deterministic - the park catches up several sim frames
+                    // per drawn one, so the same frame number lands on a different animation tick each run,
+                    // which makes "photograph the ride mid-cycle" a lottery when spelled as a number.
                     var spec = arg.Substring("--shot=".Length);
-                    int colon = spec.LastIndexOf(':');
+                    int hold = -1, colon = spec.LastIndexOf(':');
                     if (colon > 1 && int.TryParse(spec.Substring(colon + 1), out int f))
-                    { _shotFrame = f; spec = spec.Substring(0, colon); }
+                    { hold = f; spec = spec.Substring(0, colon); colon = spec.LastIndexOf(':'); }
+                    if (colon > 1 && spec.Substring(colon + 1) == "running")
+                    {
+                        _shotWhenRunning = true; _shotFrame = int.MaxValue;
+                        if (hold >= 0) _shotHold = hold;
+                        spec = spec.Substring(0, colon);
+                    }
+                    else if (hold >= 0) _shotFrame = hold;
                     _shotPath = spec;
                 }
                 else if (arg.StartsWith("--advisor-line="))
@@ -1254,7 +1266,9 @@ namespace TPWGodot
             // the box feels like; counting through it shot the menu twice and looked like the park had failed
             // to draw. With --park, the clock starts when the park is actually on screen.
             bool parkUp = _autoPark < 0 || (_park?.Visible ?? false);
-            if (_shotPath != null && parkUp && ++_shotClock >= _shotFrame)
+            if (_shotPath != null && parkUp && (++_shotClock >= _shotFrame
+                                                || (_shotWhenRunning && _park != null && _park.AnyRideRunning
+                                                    && _shotHold-- <= 0)))
             {
                 // ⚠ Wait for the frame to be DRAWN before reading it back. Grabbing the texture inside
                 // _Process reads the previous frame at best and an empty one at worst, which looks
