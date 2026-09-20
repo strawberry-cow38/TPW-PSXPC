@@ -147,6 +147,7 @@ namespace TPW.Sim.Tests
             Mechanic.Idle(s, w, new Dice(0));
             Assert.Equal(MechanicStates.GoToUpgradeRide, s.State);
             Assert.True(s.HasTarget);
+            Assert.Equal(0, s.StackDepth);                     // 0x80093F80 is Set, not Push
             Assert.Equal(1, w.BrokenCalls);
             Assert.Equal(1, w.QueuedCalls);
         }
@@ -517,6 +518,7 @@ namespace TPW.Sim.Tests
             Assert.Same(me, offer.from); Assert.Same(next, offer.to); Assert.Equal(repair, offer.repair);
             Assert.True(next.HasTarget);
             Assert.Equal((StaffState)state, next.State);
+            Assert.Equal(0, next.StackDepth);
             Assert.Equal(StaffState.Idle, me.State);
             Assert.False(me.HasTarget);
         }
@@ -674,13 +676,15 @@ namespace TPW.Sim.Tests
 
         // ⚠ EVERYTHING ELSE ABORTS, INCLUDING 56/57/58: states 55+ fall off the end of the 0x800E467C
         // table into the default arm. A mechanic who has claimed a ride but not yet got a path loses it.
+        // The purpose is a job purpose here because that is what a mechanic in 56 carries (SetOff writes
+        // it later, so 56 still holds the LAST job's), and the walking arm would re-claim on it.
         // REJECTS grouping 56/57 with the walking states, which is what their names suggest.
         [Theory]
         [InlineData(0, false)] [InlineData(13, false)] [InlineData(50, false)]
         [InlineData(56, true)] [InlineData(57, true)] [InlineData(58, true)] [InlineData(49, true)]
         public void ThePickUpSweepAbortsEveryoneElseReleasingAnyClaim(int state, bool target)
         {
-            var s = InState((StaffState)state, target: target);
+            var s = InState((StaffState)state, MechanicStates.ToRepair, target: target);
             var w = new World();
             Mechanic.OnCataloguePickUp(s, w);
             Assert.Equal(StaffState.Idle, s.State);
