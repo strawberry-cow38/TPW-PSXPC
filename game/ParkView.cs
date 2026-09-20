@@ -3007,15 +3007,16 @@ void fragment() {
 
         /// <summary>Group 1's ride ambience, rolled with up to eleven retries (0x800B8FCC).
         ///
-        /// ⚠⚠ THIS IS A DELIBERATE DEVIATION AND THE ONLY ONE IN THE SOUND CODE. The game's own table at
-        /// 0x800E7028 is **4..14**, eleven contiguous ids, and it really does roll all of them at a running
-        /// ride: 0x800B8FCC has exactly one caller (the status-2 tick at 0x8009CAF0) and no data reference,
-        /// and the table is referenced from nowhere else, so there is no second list and no misread group —
-        /// `a0 = 1` is set two instructions before the play. Group 1 is ONE shared people-bank, and **9 and
-        /// 10 are the toilet's straining noises**, which master identified by ear coming out of a roller
-        /// coaster. They are dropped here at master's call. Restoring fidelity is putting 9 and 10 back in
-        /// this array; nothing else has to change.</summary>
-        static readonly int[] RideAmbience = { 4, 5, 6, 7, 8, 11, 12, 13, 14 };
+        /// ⭐ THE GAME'S OWN TABLE, WHOLE. 0x800E7028 holds 4..14, eleven contiguous ids, and a running ride
+        /// really does roll all of them: 0x800B8FCC has exactly one caller (the status-2 tick at 0x8009CAF0)
+        /// and no data reference, the table is referenced from nowhere else, and `a0 = 1` is set two
+        /// instructions before the play.
+        ///
+        /// ⚠ 9 and 10 sound like the toilet's straining noises, and they were dropped for a while because of
+        /// it. Master heard them in the REAL game and had them put back — group 1 is one shared people-bank
+        /// and the game genuinely reuses those two at a ride. So this is no longer a deviation, and the port
+        /// no longer has any deviation in its sound code.</summary>
+        static readonly int[] RideAmbience = { 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
         const int RideAmbienceRolls = 11;
         readonly AudioStreamPlayer3D[] _sfx3d = new AudioStreamPlayer3D[6];
         readonly int[] _sfx3dSound = new int[6];

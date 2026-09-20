@@ -933,11 +933,11 @@ once for all time — for three offsets out of four the sound NEVER plays. Found
 incremented both in the attraction step and made no sound at all until the global was moved onto the
 frame clock.
 
-⚠ **THE PORT DEVIATES HERE, ON PURPOSE.** Group 1 is one shared people-bank, and **9 and 10 are the
-toilet's straining noises** — master heard them coming out of a roller coaster. The original does play
-them: one caller, no data reference to either the helper or the table, `a0 = 1` two instructions before
-the play. So this is the game's own behaviour and the port drops those two ids anyway. It is the only
-deviation in the sound code and it is one array away from being reverted.
+✅ **THE PORT PLAYS ALL ELEVEN.** 9 and 10 sound like the toilet's straining noises and were dropped for
+a while on that basis; master then heard them in the REAL game and had them restored. Group 1 is one
+shared people-bank and the game genuinely reuses those two at a ride, which is what the read said all
+along — one caller, no data reference to either the helper or the table, `a0 = 1` two instructions
+before the play. No deviation remains in the sound code.
 
 ⚠ **0x8009C730's "sound (8,0)" above is unconfirmed.** An enumeration of every sound call site in the
 executable finds no (8,0) anywhere, and no site at all inside that function; group 8 sound 0 is never
