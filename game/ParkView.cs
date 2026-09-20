@@ -1073,6 +1073,7 @@ namespace TPWGodot
                         // the first group" is answered by this one field and by nothing else in the
                         // report: the rider count, the status and the queue length all look healthy.
                         + QueueHeadReport(a)
+                        + $", type {a.Rec.Type}"
                         + (a.Rec.Shop != null || a.Rec.SideShow != null
                             ? $", sells at {Money.FromPounds(a.SalePrice)}: took {a.Takings} ({a.Profit} profit) "
                               + $"from {a.Served} sales over {a.Visits} visits, satisfaction {a.Satisfaction}"
@@ -1891,6 +1892,11 @@ namespace TPWGodot
                 Profit += Money.FromPounds(sale.Price - sale.UnitCost);
             }
 
+            /// <summary>⚠ WIRED BUT NOT MEASURED. The shop half was watched taking £60 for a £30 unit
+            /// cost; no type-5 record has been placed in a test park yet, so this path has never run.
+            /// Its one risk is deliberate and stated above: a won prize is a Spend, and Bank.Spend does
+            /// not refuse — a sideshow with a prize larger than the balance takes the park negative.
+            /// Whether the game allows that is NOT established.</summary>
             public void BookPlay(SideShowPlay play)
             {
                 if (Bank == null) return;
