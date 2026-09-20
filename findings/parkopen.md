@@ -43,9 +43,16 @@ indistinguishable from "○ never arrived".
 
 ⚠ ○ COULD NOT BE REPRODUCED DOING ANYTHING. Pressed from two different selected objects at four
 delays (100, 300, 500, 700 frames after the restore), every final frame came back BYTE-IDENTICAL to
-a do-nothing control. That is a negative result about these two states, not a refutation of
-"○ opens the attraction panel" — both states have the root radial already open, and ○ may mean
-something else there. Treat the panel-on-○ reading as unconfirmed until someone sees one open.
+a do-nothing control. I hedged this as "a negative about these two
+states, not a refutation" — and the author of the ○ claim went back to the code and found it WAS a
+refutation: 0x80038D80 never tests a CIRCLE bit at all, it asks about LOGICAL button 0, and the
+logical table at 0x800E35C0 does not decode as index→button. The button was mapped without reading
+that table. The route 0x80038D80 → 0x80038900 stands; which button reaches it is now unknown.
+
+⭐ THE HEDGE WAS TOO GENEROUS, AND THAT IS WORTH RECORDING. Being careful about the scope of a
+negative result is right; softening it past what the evidence supports hands the other side a reason
+not to re-check. The measurement said "no button press produced any change"; the code said "no
+CIRCLE bit is ever tested". Those agree, and I had written them as if they might not.
 
 ## 0. Corrections to earlier reports
 
