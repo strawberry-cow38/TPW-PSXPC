@@ -13,6 +13,7 @@ as a lead, not a fact.
 | `behaviour.md` + `states.json` | what each state DOES, exits, fields read/written |
 | `staff.md` + `staff-mutations.json` | hire-to-placement lifecycle, staff virtual walk speeds, class sprite resources and frame tables, mechanic job/leave points; source disagreements and restoring mutation sweep |
 | `visitor-rest.md` | visitor remainder; decoded type-4 need coefficients for 37 definitions, influence producers 2/4, full message table, wander tables, retained binary disagreements and mutation checks |
+| `influence.md` + `influence-audit.json` + `influence-mutations.json` | twenty circular effectors, exact reader/writer addressing, producer lifetimes, bit-1 gap, complete record census and controlled mutation tests; core component only |
 | `economy.md` + `economy.json` | the BANK object, every flow of money, wages, prices |
 | `rides.md` + `rides.json` + locally generated `records.json` | building-type table, 197 definitions selected by the original parser, queues, throughput, breakdowns; phase report corrects the full count to 244 |
 | `animation-phases.md` + `ride-phase-lengths.md` | 88-byte runtime descriptor, disc lengths for 83 rides, conditional run times for 59 flat rides; reproducible extractor and mutation checks in `tools/` |

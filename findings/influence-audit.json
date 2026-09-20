@@ -1,0 +1,3744 @@
+{
+  "image": "/home/ec2-user/tpw/ext/TPW.BIN",
+  "image_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "record_manifest_sha256": "27e9ea09ab1d1762f811f004b09799400e44d51addb7c21808da5453381baae3",
+  "code_ranges": [
+    [
+      "0x80010000",
+      "0x800C0498"
+    ],
+    [
+      "0x800E8000",
+      "0x800EF000"
+    ]
+  ],
+  "direct_calls": {
+    "0x80053554": [
+      {
+        "site": "0x8008C2C4",
+        "opcode": "jal"
+      },
+      {
+        "site": "0x800959D4",
+        "opcode": "jal"
+      }
+    ],
+    "0x8005358C": [
+      {
+        "site": "0x80023CFC",
+        "opcode": "jal"
+      },
+      {
+        "site": "0x8008C378",
+        "opcode": "jal"
+      },
+      {
+        "site": "0x80095A98",
+        "opcode": "jal"
+      },
+      {
+        "site": "0x80095E5C",
+        "opcode": "jal"
+      },
+      {
+        "site": "0x800960EC",
+        "opcode": "jal"
+      },
+      {
+        "site": "0x800962A8",
+        "opcode": "jal"
+      }
+    ],
+    "0x8005CDC8": [
+      {
+        "site": "0x80053574",
+        "opcode": "jal"
+      }
+    ],
+    "0x8005CDE8": [
+      {
+        "site": "0x8005CDD0",
+        "opcode": "jal"
+      }
+    ],
+    "0x800961D8": [
+      {
+        "site": "0x80095A34",
+        "opcode": "jal"
+      }
+    ],
+    "0x8008C3CC": [
+      {
+        "site": "0x8008C32C",
+        "opcode": "jal"
+      }
+    ],
+    "0x800961E0": [
+      {
+        "site": "0x80095A28",
+        "opcode": "jal"
+      }
+    ],
+    "0x8008C3D4": [
+      {
+        "site": "0x8008C314",
+        "opcode": "jal"
+      }
+    ]
+  },
+  "literal_pointers": {
+    "0x80053554": [],
+    "0x8005358C": [],
+    "0x8005CDC8": [],
+    "0x8005CDE8": [],
+    "0x800961D8": [],
+    "0x8008C3CC": [],
+    "0x800961E0": [],
+    "0x8008C3D4": []
+  },
+  "identical_flag_setter_leaves": [
+    "0x8001E920",
+    "0x80045AE0",
+    "0x80046934",
+    "0x8006AF5C",
+    "0x80086520",
+    "0x8008C3CC",
+    "0x800961D8",
+    "0x8009BF58",
+    "0x800B6790"
+  ],
+  "counts": {
+    "files_inspected": 690,
+    "containers_magic_0x96": 536,
+    "other_record_types": 48,
+    "non_record_files": 154,
+    "attraction_records": 488,
+    "four_digit_records": 244,
+    "type_2": 182,
+    "would_be_skipped_by_old_0x40_guard": 94,
+    "type_3": 118,
+    "type_6": 16,
+    "type_1": 24,
+    "type_7": 8,
+    "type_5": 66,
+    "type_4": 74,
+    "prefixed_records": 244,
+    "skipped_unreadable": 0
+  },
+  "skipped": [],
+  "feature_flag_histogram": {
+    "0": 130,
+    "1": 18,
+    "2": 12,
+    "3": 6,
+    "4": 8,
+    "8": 8
+  },
+  "controls": {
+    "known_allocator_sites_recovered": true,
+    "known_flag_setters_recovered": true,
+    "feature_zero_and_nonzero_flags": true,
+    "short_records_actually_read": true
+  },
+  "records": [
+    {
+      "file": "0019.bin",
+      "type": 2,
+      "record_offset": 768,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "0020.bin",
+      "type": 2,
+      "record_offset": 3544,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0021.bin",
+      "type": 2,
+      "record_offset": 4356,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0022.bin",
+      "type": 2,
+      "record_offset": 592,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0023.bin",
+      "type": 2,
+      "record_offset": 780,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0024.bin",
+      "type": 2,
+      "record_offset": 932,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0025.bin",
+      "type": 2,
+      "record_offset": 652,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0026.bin",
+      "type": 2,
+      "record_offset": 1112,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0027.bin",
+      "type": 2,
+      "record_offset": 588,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0028.bin",
+      "type": 2,
+      "record_offset": 3756,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0029.bin",
+      "type": 2,
+      "record_offset": 3556,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0030.bin",
+      "type": 2,
+      "record_offset": 916,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "0031.bin",
+      "type": 2,
+      "record_offset": 880,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0032.bin",
+      "type": 2,
+      "record_offset": 2116,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "0033.bin",
+      "type": 2,
+      "record_offset": 3724,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0039.bin",
+      "type": 3,
+      "record_offset": 16480,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0040.bin",
+      "type": 3,
+      "record_offset": 14536,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0041.bin",
+      "type": 6,
+      "record_offset": 37100,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0042.bin",
+      "type": 3,
+      "record_offset": 20584,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0043.bin",
+      "type": 3,
+      "record_offset": 20976,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0044.bin",
+      "type": 1,
+      "record_offset": 13156,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0045.bin",
+      "type": 3,
+      "record_offset": 12552,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0046.bin",
+      "type": 1,
+      "record_offset": 9808,
+      "bytes_after_offset": 284,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0047.bin",
+      "type": 1,
+      "record_offset": 9556,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0048.bin",
+      "type": 3,
+      "record_offset": 17820,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0049.bin",
+      "type": 3,
+      "record_offset": 11868,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0050.bin",
+      "type": 3,
+      "record_offset": 11856,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0051.bin",
+      "type": 3,
+      "record_offset": 10704,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0052.bin",
+      "type": 3,
+      "record_offset": 10864,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0053.bin",
+      "type": 3,
+      "record_offset": 16920,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0054.bin",
+      "type": 3,
+      "record_offset": 14924,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0055.bin",
+      "type": 3,
+      "record_offset": 10484,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0056.bin",
+      "type": 7,
+      "record_offset": 8800,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0057.bin",
+      "type": 6,
+      "record_offset": 35224,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0058.bin",
+      "type": 5,
+      "record_offset": 2600,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0059.bin",
+      "type": 5,
+      "record_offset": 3892,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0060.bin",
+      "type": 4,
+      "record_offset": 6064,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0061.bin",
+      "type": 4,
+      "record_offset": 5608,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0062.bin",
+      "type": 4,
+      "record_offset": 5456,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0063.bin",
+      "type": 4,
+      "record_offset": 3600,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0064.bin",
+      "type": 4,
+      "record_offset": 6192,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0065.bin",
+      "type": 4,
+      "record_offset": 3152,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0066.bin",
+      "type": 5,
+      "record_offset": 5320,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0067.bin",
+      "type": 4,
+      "record_offset": 12712,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0068.bin",
+      "type": 4,
+      "record_offset": 3248,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0069.bin",
+      "type": 4,
+      "record_offset": 7720,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0070.bin",
+      "type": 5,
+      "record_offset": 7840,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0071.bin",
+      "type": 4,
+      "record_offset": 10536,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0072.bin",
+      "type": 5,
+      "record_offset": 9656,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0073.bin",
+      "type": 5,
+      "record_offset": 8404,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0074.bin",
+      "type": 5,
+      "record_offset": 9484,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0093.bin",
+      "type": 2,
+      "record_offset": 528,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0094.bin",
+      "type": 2,
+      "record_offset": 664,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0095.bin",
+      "type": 2,
+      "record_offset": 3688,
+      "bytes_after_offset": 112,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0096.bin",
+      "type": 2,
+      "record_offset": 2768,
+      "bytes_after_offset": 148,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0097.bin",
+      "type": 2,
+      "record_offset": 5208,
+      "bytes_after_offset": 112,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0098.bin",
+      "type": 2,
+      "record_offset": 864,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "0099.bin",
+      "type": 2,
+      "record_offset": 492,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0100.bin",
+      "type": 2,
+      "record_offset": 492,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0101.bin",
+      "type": 2,
+      "record_offset": 3460,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0102.bin",
+      "type": 2,
+      "record_offset": 648,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0103.bin",
+      "type": 2,
+      "record_offset": 1676,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0104.bin",
+      "type": 2,
+      "record_offset": 624,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0105.bin",
+      "type": 2,
+      "record_offset": 808,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "0106.bin",
+      "type": 2,
+      "record_offset": 752,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0107.bin",
+      "type": 2,
+      "record_offset": 744,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0108.bin",
+      "type": 2,
+      "record_offset": 1900,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0109.bin",
+      "type": 2,
+      "record_offset": 1512,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "0110.bin",
+      "type": 2,
+      "record_offset": 2048,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0111.bin",
+      "type": 2,
+      "record_offset": 652,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0112.bin",
+      "type": 2,
+      "record_offset": 3592,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0113.bin",
+      "type": 2,
+      "record_offset": 700,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0114.bin",
+      "type": 2,
+      "record_offset": 1832,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0115.bin",
+      "type": 2,
+      "record_offset": 1488,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0121.bin",
+      "type": 3,
+      "record_offset": 16064,
+      "bytes_after_offset": 240,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0122.bin",
+      "type": 3,
+      "record_offset": 21272,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0123.bin",
+      "type": 3,
+      "record_offset": 11400,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0124.bin",
+      "type": 3,
+      "record_offset": 12952,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0125.bin",
+      "type": 1,
+      "record_offset": 7816,
+      "bytes_after_offset": 248,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0126.bin",
+      "type": 1,
+      "record_offset": 16016,
+      "bytes_after_offset": 276,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0127.bin",
+      "type": 1,
+      "record_offset": 8276,
+      "bytes_after_offset": 248,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0128.bin",
+      "type": 3,
+      "record_offset": 12908,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0129.bin",
+      "type": 3,
+      "record_offset": 20564,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0130.bin",
+      "type": 6,
+      "record_offset": 44816,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0131.bin",
+      "type": 3,
+      "record_offset": 10568,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0132.bin",
+      "type": 3,
+      "record_offset": 10116,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0133.bin",
+      "type": 3,
+      "record_offset": 23820,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0134.bin",
+      "type": 3,
+      "record_offset": 13476,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0135.bin",
+      "type": 3,
+      "record_offset": 4344,
+      "bytes_after_offset": 228,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0136.bin",
+      "type": 3,
+      "record_offset": 7952,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0137.bin",
+      "type": 3,
+      "record_offset": 12504,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0138.bin",
+      "type": 3,
+      "record_offset": 13988,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0139.bin",
+      "type": 3,
+      "record_offset": 11948,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0140.bin",
+      "type": 3,
+      "record_offset": 8892,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0141.bin",
+      "type": 3,
+      "record_offset": 29876,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0142.bin",
+      "type": 7,
+      "record_offset": 5604,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0143.bin",
+      "type": 6,
+      "record_offset": 39132,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0144.bin",
+      "type": 5,
+      "record_offset": 4356,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0145.bin",
+      "type": 5,
+      "record_offset": 3888,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0146.bin",
+      "type": 4,
+      "record_offset": 3352,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0147.bin",
+      "type": 4,
+      "record_offset": 5612,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0148.bin",
+      "type": 5,
+      "record_offset": 10388,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0149.bin",
+      "type": 4,
+      "record_offset": 3544,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0150.bin",
+      "type": 4,
+      "record_offset": 7116,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0151.bin",
+      "type": 4,
+      "record_offset": 3412,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0152.bin",
+      "type": 4,
+      "record_offset": 4760,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0153.bin",
+      "type": 5,
+      "record_offset": 6368,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0154.bin",
+      "type": 5,
+      "record_offset": 9300,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0155.bin",
+      "type": 5,
+      "record_offset": 25380,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0156.bin",
+      "type": 5,
+      "record_offset": 6156,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0157.bin",
+      "type": 5,
+      "record_offset": 9796,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0158.bin",
+      "type": 4,
+      "record_offset": 6084,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0159.bin",
+      "type": 5,
+      "record_offset": 11064,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0160.bin",
+      "type": 4,
+      "record_offset": 7768,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0171.bin",
+      "type": 2,
+      "record_offset": 796,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0172.bin",
+      "type": 2,
+      "record_offset": 424,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0173.bin",
+      "type": 2,
+      "record_offset": 664,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0174.bin",
+      "type": 2,
+      "record_offset": 860,
+      "bytes_after_offset": 56,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0175.bin",
+      "type": 2,
+      "record_offset": 972,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0176.bin",
+      "type": 2,
+      "record_offset": 2328,
+      "bytes_after_offset": 112,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0177.bin",
+      "type": 2,
+      "record_offset": 4736,
+      "bytes_after_offset": 148,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0178.bin",
+      "type": 2,
+      "record_offset": 3532,
+      "bytes_after_offset": 148,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0179.bin",
+      "type": 2,
+      "record_offset": 1976,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0180.bin",
+      "type": 2,
+      "record_offset": 1336,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0181.bin",
+      "type": 2,
+      "record_offset": 840,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0182.bin",
+      "type": 2,
+      "record_offset": 444,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0183.bin",
+      "type": 2,
+      "record_offset": 352,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0184.bin",
+      "type": 2,
+      "record_offset": 352,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0185.bin",
+      "type": 2,
+      "record_offset": 876,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "0186.bin",
+      "type": 2,
+      "record_offset": 4180,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "0187.bin",
+      "type": 2,
+      "record_offset": 972,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0188.bin",
+      "type": 2,
+      "record_offset": 2988,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0189.bin",
+      "type": 2,
+      "record_offset": 2992,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0190.bin",
+      "type": 2,
+      "record_offset": 944,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0191.bin",
+      "type": 2,
+      "record_offset": 3380,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0192.bin",
+      "type": 2,
+      "record_offset": 936,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0193.bin",
+      "type": 2,
+      "record_offset": 648,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "0194.bin",
+      "type": 2,
+      "record_offset": 708,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0195.bin",
+      "type": 2,
+      "record_offset": 680,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0196.bin",
+      "type": 2,
+      "record_offset": 2368,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0197.bin",
+      "type": 2,
+      "record_offset": 2052,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "0198.bin",
+      "type": 2,
+      "record_offset": 548,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0199.bin",
+      "type": 2,
+      "record_offset": 708,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0200.bin",
+      "type": 2,
+      "record_offset": 2852,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0201.bin",
+      "type": 2,
+      "record_offset": 772,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0202.bin",
+      "type": 2,
+      "record_offset": 584,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0208.bin",
+      "type": 7,
+      "record_offset": 7708,
+      "bytes_after_offset": 264,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0209.bin",
+      "type": 3,
+      "record_offset": 11344,
+      "bytes_after_offset": 240,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0210.bin",
+      "type": 3,
+      "record_offset": 21448,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0211.bin",
+      "type": 3,
+      "record_offset": 19644,
+      "bytes_after_offset": 264,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0212.bin",
+      "type": 1,
+      "record_offset": 21280,
+      "bytes_after_offset": 236,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0213.bin",
+      "type": 1,
+      "record_offset": 10636,
+      "bytes_after_offset": 276,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0214.bin",
+      "type": 3,
+      "record_offset": 14252,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0215.bin",
+      "type": 6,
+      "record_offset": 44108,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0216.bin",
+      "type": 3,
+      "record_offset": 12828,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0217.bin",
+      "type": 3,
+      "record_offset": 9736,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0218.bin",
+      "type": 3,
+      "record_offset": 12696,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0219.bin",
+      "type": 1,
+      "record_offset": 12652,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0220.bin",
+      "type": 3,
+      "record_offset": 9672,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0221.bin",
+      "type": 3,
+      "record_offset": 17760,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0222.bin",
+      "type": 3,
+      "record_offset": 8356,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0223.bin",
+      "type": 3,
+      "record_offset": 24940,
+      "bytes_after_offset": 240,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0224.bin",
+      "type": 3,
+      "record_offset": 18228,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0225.bin",
+      "type": 3,
+      "record_offset": 10940,
+      "bytes_after_offset": 228,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0226.bin",
+      "type": 3,
+      "record_offset": 11352,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0227.bin",
+      "type": 3,
+      "record_offset": 11992,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0228.bin",
+      "type": 6,
+      "record_offset": 28928,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0229.bin",
+      "type": 5,
+      "record_offset": 1936,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0230.bin",
+      "type": 5,
+      "record_offset": 2572,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0231.bin",
+      "type": 5,
+      "record_offset": 4020,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0232.bin",
+      "type": 4,
+      "record_offset": 6740,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0233.bin",
+      "type": 4,
+      "record_offset": 4824,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0234.bin",
+      "type": 4,
+      "record_offset": 8024,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0235.bin",
+      "type": 4,
+      "record_offset": 4344,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0236.bin",
+      "type": 4,
+      "record_offset": 8636,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0237.bin",
+      "type": 4,
+      "record_offset": 2988,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0238.bin",
+      "type": 4,
+      "record_offset": 5188,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0239.bin",
+      "type": 4,
+      "record_offset": 3708,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0240.bin",
+      "type": 5,
+      "record_offset": 11224,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0241.bin",
+      "type": 4,
+      "record_offset": 3724,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0242.bin",
+      "type": 4,
+      "record_offset": 10100,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0243.bin",
+      "type": 5,
+      "record_offset": 7984,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0244.bin",
+      "type": 5,
+      "record_offset": 13276,
+      "bytes_after_offset": 116,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0245.bin",
+      "type": 5,
+      "record_offset": 31532,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0246.bin",
+      "type": 5,
+      "record_offset": 8964,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0247.bin",
+      "type": 4,
+      "record_offset": 4256,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0248.bin",
+      "type": 5,
+      "record_offset": 9440,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0249.bin",
+      "type": 5,
+      "record_offset": 3392,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0334.bin",
+      "type": 2,
+      "record_offset": 4332,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0335.bin",
+      "type": 2,
+      "record_offset": 1916,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 3
+    },
+    {
+      "file": "0336.bin",
+      "type": 2,
+      "record_offset": 792,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0337.bin",
+      "type": 2,
+      "record_offset": 764,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0338.bin",
+      "type": 2,
+      "record_offset": 728,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 3
+    },
+    {
+      "file": "0339.bin",
+      "type": 2,
+      "record_offset": 1900,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 3
+    },
+    {
+      "file": "0340.bin",
+      "type": 2,
+      "record_offset": 1968,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0341.bin",
+      "type": 2,
+      "record_offset": 3040,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0342.bin",
+      "type": 2,
+      "record_offset": 744,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0343.bin",
+      "type": 2,
+      "record_offset": 828,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0344.bin",
+      "type": 2,
+      "record_offset": 2344,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "0345.bin",
+      "type": 2,
+      "record_offset": 3348,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0346.bin",
+      "type": 2,
+      "record_offset": 1588,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0347.bin",
+      "type": 2,
+      "record_offset": 1656,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0348.bin",
+      "type": 2,
+      "record_offset": 744,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0349.bin",
+      "type": 2,
+      "record_offset": 1736,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "0350.bin",
+      "type": 2,
+      "record_offset": 832,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "0351.bin",
+      "type": 2,
+      "record_offset": 928,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "0352.bin",
+      "type": 2,
+      "record_offset": 536,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0353.bin",
+      "type": 2,
+      "record_offset": 1904,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "0354.bin",
+      "type": 2,
+      "record_offset": 1960,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "0360.bin",
+      "type": 3,
+      "record_offset": 14496,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0361.bin",
+      "type": 3,
+      "record_offset": 22180,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0362.bin",
+      "type": 3,
+      "record_offset": 12520,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0363.bin",
+      "type": 6,
+      "record_offset": 27924,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0364.bin",
+      "type": 3,
+      "record_offset": 16276,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0365.bin",
+      "type": 3,
+      "record_offset": 14512,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0366.bin",
+      "type": 3,
+      "record_offset": 11752,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0367.bin",
+      "type": 1,
+      "record_offset": 9152,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0368.bin",
+      "type": 1,
+      "record_offset": 13156,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0369.bin",
+      "type": 3,
+      "record_offset": 12848,
+      "bytes_after_offset": 264,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0370.bin",
+      "type": 3,
+      "record_offset": 28384,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0371.bin",
+      "type": 3,
+      "record_offset": 21432,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0372.bin",
+      "type": 7,
+      "record_offset": 7160,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0373.bin",
+      "type": 1,
+      "record_offset": 11516,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0374.bin",
+      "type": 3,
+      "record_offset": 6572,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0375.bin",
+      "type": 3,
+      "record_offset": 13196,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0376.bin",
+      "type": 3,
+      "record_offset": 10068,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0377.bin",
+      "type": 3,
+      "record_offset": 17256,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0378.bin",
+      "type": 6,
+      "record_offset": 39068,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0379.bin",
+      "type": 3,
+      "record_offset": 20296,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0380.bin",
+      "type": 5,
+      "record_offset": 4000,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0381.bin",
+      "type": 4,
+      "record_offset": 4284,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0382.bin",
+      "type": 4,
+      "record_offset": 6088,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0383.bin",
+      "type": 4,
+      "record_offset": 3704,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0384.bin",
+      "type": 4,
+      "record_offset": 5872,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0385.bin",
+      "type": 4,
+      "record_offset": 3872,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0386.bin",
+      "type": 4,
+      "record_offset": 4460,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0387.bin",
+      "type": 4,
+      "record_offset": 3700,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0388.bin",
+      "type": 5,
+      "record_offset": 9148,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0389.bin",
+      "type": 5,
+      "record_offset": 30352,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0390.bin",
+      "type": 4,
+      "record_offset": 5572,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0391.bin",
+      "type": 5,
+      "record_offset": 10796,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0392.bin",
+      "type": 5,
+      "record_offset": 36212,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0393.bin",
+      "type": 5,
+      "record_offset": 6552,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "0394.bin",
+      "type": 5,
+      "record_offset": 12956,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0019.bin",
+      "type": 2,
+      "record_offset": 768,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "e0020.bin",
+      "type": 2,
+      "record_offset": 3544,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0021.bin",
+      "type": 2,
+      "record_offset": 4356,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0022.bin",
+      "type": 2,
+      "record_offset": 592,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0023.bin",
+      "type": 2,
+      "record_offset": 780,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0024.bin",
+      "type": 2,
+      "record_offset": 932,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0025.bin",
+      "type": 2,
+      "record_offset": 652,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0026.bin",
+      "type": 2,
+      "record_offset": 1112,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0027.bin",
+      "type": 2,
+      "record_offset": 588,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0028.bin",
+      "type": 2,
+      "record_offset": 3756,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0029.bin",
+      "type": 2,
+      "record_offset": 3556,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0030.bin",
+      "type": 2,
+      "record_offset": 916,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "e0031.bin",
+      "type": 2,
+      "record_offset": 880,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0032.bin",
+      "type": 2,
+      "record_offset": 2116,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "e0033.bin",
+      "type": 2,
+      "record_offset": 3724,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0039.bin",
+      "type": 3,
+      "record_offset": 16480,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0040.bin",
+      "type": 3,
+      "record_offset": 14536,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0041.bin",
+      "type": 6,
+      "record_offset": 37100,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0042.bin",
+      "type": 3,
+      "record_offset": 20584,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0043.bin",
+      "type": 3,
+      "record_offset": 20976,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0044.bin",
+      "type": 1,
+      "record_offset": 13156,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0045.bin",
+      "type": 3,
+      "record_offset": 12552,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0046.bin",
+      "type": 1,
+      "record_offset": 9808,
+      "bytes_after_offset": 284,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0047.bin",
+      "type": 1,
+      "record_offset": 9556,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0048.bin",
+      "type": 3,
+      "record_offset": 17820,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0049.bin",
+      "type": 3,
+      "record_offset": 11868,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0050.bin",
+      "type": 3,
+      "record_offset": 11856,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0051.bin",
+      "type": 3,
+      "record_offset": 10704,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0052.bin",
+      "type": 3,
+      "record_offset": 10864,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0053.bin",
+      "type": 3,
+      "record_offset": 16920,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0054.bin",
+      "type": 3,
+      "record_offset": 14924,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0055.bin",
+      "type": 3,
+      "record_offset": 10484,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0056.bin",
+      "type": 7,
+      "record_offset": 8800,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0057.bin",
+      "type": 6,
+      "record_offset": 35224,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0058.bin",
+      "type": 5,
+      "record_offset": 2600,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0059.bin",
+      "type": 5,
+      "record_offset": 3892,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0060.bin",
+      "type": 4,
+      "record_offset": 6064,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0061.bin",
+      "type": 4,
+      "record_offset": 5608,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0062.bin",
+      "type": 4,
+      "record_offset": 5456,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0063.bin",
+      "type": 4,
+      "record_offset": 3600,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0064.bin",
+      "type": 4,
+      "record_offset": 6192,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0065.bin",
+      "type": 4,
+      "record_offset": 3152,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0066.bin",
+      "type": 5,
+      "record_offset": 5320,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0067.bin",
+      "type": 4,
+      "record_offset": 12712,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0068.bin",
+      "type": 4,
+      "record_offset": 3248,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0069.bin",
+      "type": 4,
+      "record_offset": 7720,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0070.bin",
+      "type": 5,
+      "record_offset": 7840,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0071.bin",
+      "type": 4,
+      "record_offset": 10536,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0072.bin",
+      "type": 5,
+      "record_offset": 9656,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0073.bin",
+      "type": 5,
+      "record_offset": 8404,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0074.bin",
+      "type": 5,
+      "record_offset": 9484,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0093.bin",
+      "type": 2,
+      "record_offset": 528,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0094.bin",
+      "type": 2,
+      "record_offset": 664,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0095.bin",
+      "type": 2,
+      "record_offset": 3688,
+      "bytes_after_offset": 112,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0096.bin",
+      "type": 2,
+      "record_offset": 2768,
+      "bytes_after_offset": 148,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0097.bin",
+      "type": 2,
+      "record_offset": 5208,
+      "bytes_after_offset": 112,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0098.bin",
+      "type": 2,
+      "record_offset": 864,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "e0099.bin",
+      "type": 2,
+      "record_offset": 492,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0100.bin",
+      "type": 2,
+      "record_offset": 492,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0101.bin",
+      "type": 2,
+      "record_offset": 3460,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0102.bin",
+      "type": 2,
+      "record_offset": 648,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0103.bin",
+      "type": 2,
+      "record_offset": 1676,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0104.bin",
+      "type": 2,
+      "record_offset": 624,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0105.bin",
+      "type": 2,
+      "record_offset": 808,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "e0106.bin",
+      "type": 2,
+      "record_offset": 752,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0107.bin",
+      "type": 2,
+      "record_offset": 744,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0108.bin",
+      "type": 2,
+      "record_offset": 1900,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0109.bin",
+      "type": 2,
+      "record_offset": 1512,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "e0110.bin",
+      "type": 2,
+      "record_offset": 2048,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0111.bin",
+      "type": 2,
+      "record_offset": 652,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0112.bin",
+      "type": 2,
+      "record_offset": 3592,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0113.bin",
+      "type": 2,
+      "record_offset": 700,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0114.bin",
+      "type": 2,
+      "record_offset": 1832,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0115.bin",
+      "type": 2,
+      "record_offset": 1488,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0121.bin",
+      "type": 3,
+      "record_offset": 16064,
+      "bytes_after_offset": 240,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0122.bin",
+      "type": 3,
+      "record_offset": 21272,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0123.bin",
+      "type": 3,
+      "record_offset": 11400,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0124.bin",
+      "type": 3,
+      "record_offset": 12952,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0125.bin",
+      "type": 1,
+      "record_offset": 7816,
+      "bytes_after_offset": 248,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0126.bin",
+      "type": 1,
+      "record_offset": 16016,
+      "bytes_after_offset": 276,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0127.bin",
+      "type": 1,
+      "record_offset": 8276,
+      "bytes_after_offset": 248,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0128.bin",
+      "type": 3,
+      "record_offset": 12908,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0129.bin",
+      "type": 3,
+      "record_offset": 20564,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0130.bin",
+      "type": 6,
+      "record_offset": 44816,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0131.bin",
+      "type": 3,
+      "record_offset": 10568,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0132.bin",
+      "type": 3,
+      "record_offset": 10116,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0133.bin",
+      "type": 3,
+      "record_offset": 23820,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0134.bin",
+      "type": 3,
+      "record_offset": 13476,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0135.bin",
+      "type": 3,
+      "record_offset": 4344,
+      "bytes_after_offset": 228,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0136.bin",
+      "type": 3,
+      "record_offset": 7952,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0137.bin",
+      "type": 3,
+      "record_offset": 12504,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0138.bin",
+      "type": 3,
+      "record_offset": 13988,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0139.bin",
+      "type": 3,
+      "record_offset": 11948,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0140.bin",
+      "type": 3,
+      "record_offset": 8892,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0141.bin",
+      "type": 3,
+      "record_offset": 29876,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0142.bin",
+      "type": 7,
+      "record_offset": 5604,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0143.bin",
+      "type": 6,
+      "record_offset": 39132,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0144.bin",
+      "type": 5,
+      "record_offset": 4356,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0145.bin",
+      "type": 5,
+      "record_offset": 3888,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0146.bin",
+      "type": 4,
+      "record_offset": 3352,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0147.bin",
+      "type": 4,
+      "record_offset": 5612,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0148.bin",
+      "type": 5,
+      "record_offset": 10388,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0149.bin",
+      "type": 4,
+      "record_offset": 3544,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0150.bin",
+      "type": 4,
+      "record_offset": 7116,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0151.bin",
+      "type": 4,
+      "record_offset": 3412,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0152.bin",
+      "type": 4,
+      "record_offset": 4760,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0153.bin",
+      "type": 5,
+      "record_offset": 6368,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0154.bin",
+      "type": 5,
+      "record_offset": 9300,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0155.bin",
+      "type": 5,
+      "record_offset": 25380,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0156.bin",
+      "type": 5,
+      "record_offset": 6156,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0157.bin",
+      "type": 5,
+      "record_offset": 9796,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0158.bin",
+      "type": 4,
+      "record_offset": 6084,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0159.bin",
+      "type": 5,
+      "record_offset": 11064,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0160.bin",
+      "type": 4,
+      "record_offset": 7768,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0171.bin",
+      "type": 2,
+      "record_offset": 796,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0172.bin",
+      "type": 2,
+      "record_offset": 424,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0173.bin",
+      "type": 2,
+      "record_offset": 664,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0174.bin",
+      "type": 2,
+      "record_offset": 860,
+      "bytes_after_offset": 56,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0175.bin",
+      "type": 2,
+      "record_offset": 972,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0176.bin",
+      "type": 2,
+      "record_offset": 2328,
+      "bytes_after_offset": 112,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0177.bin",
+      "type": 2,
+      "record_offset": 4736,
+      "bytes_after_offset": 148,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0178.bin",
+      "type": 2,
+      "record_offset": 3532,
+      "bytes_after_offset": 148,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0179.bin",
+      "type": 2,
+      "record_offset": 1976,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0180.bin",
+      "type": 2,
+      "record_offset": 1336,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0181.bin",
+      "type": 2,
+      "record_offset": 840,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0182.bin",
+      "type": 2,
+      "record_offset": 444,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0183.bin",
+      "type": 2,
+      "record_offset": 352,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0184.bin",
+      "type": 2,
+      "record_offset": 352,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0185.bin",
+      "type": 2,
+      "record_offset": 876,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "e0186.bin",
+      "type": 2,
+      "record_offset": 4180,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "e0187.bin",
+      "type": 2,
+      "record_offset": 972,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0188.bin",
+      "type": 2,
+      "record_offset": 2988,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0189.bin",
+      "type": 2,
+      "record_offset": 2992,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0190.bin",
+      "type": 2,
+      "record_offset": 944,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0191.bin",
+      "type": 2,
+      "record_offset": 3380,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0192.bin",
+      "type": 2,
+      "record_offset": 936,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0193.bin",
+      "type": 2,
+      "record_offset": 648,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "e0194.bin",
+      "type": 2,
+      "record_offset": 708,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0195.bin",
+      "type": 2,
+      "record_offset": 680,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0196.bin",
+      "type": 2,
+      "record_offset": 2368,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0197.bin",
+      "type": 2,
+      "record_offset": 2052,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "e0198.bin",
+      "type": 2,
+      "record_offset": 548,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0199.bin",
+      "type": 2,
+      "record_offset": 708,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0200.bin",
+      "type": 2,
+      "record_offset": 2852,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0201.bin",
+      "type": 2,
+      "record_offset": 772,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0202.bin",
+      "type": 2,
+      "record_offset": 584,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0208.bin",
+      "type": 7,
+      "record_offset": 7708,
+      "bytes_after_offset": 264,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0209.bin",
+      "type": 3,
+      "record_offset": 11344,
+      "bytes_after_offset": 240,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0210.bin",
+      "type": 3,
+      "record_offset": 21448,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0211.bin",
+      "type": 3,
+      "record_offset": 19644,
+      "bytes_after_offset": 264,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0212.bin",
+      "type": 1,
+      "record_offset": 21280,
+      "bytes_after_offset": 236,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0213.bin",
+      "type": 1,
+      "record_offset": 10636,
+      "bytes_after_offset": 276,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0214.bin",
+      "type": 3,
+      "record_offset": 14252,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0215.bin",
+      "type": 6,
+      "record_offset": 44108,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0216.bin",
+      "type": 3,
+      "record_offset": 12828,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0217.bin",
+      "type": 3,
+      "record_offset": 9736,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0218.bin",
+      "type": 3,
+      "record_offset": 12696,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0219.bin",
+      "type": 1,
+      "record_offset": 12652,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0220.bin",
+      "type": 3,
+      "record_offset": 9672,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0221.bin",
+      "type": 3,
+      "record_offset": 17760,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0222.bin",
+      "type": 3,
+      "record_offset": 8356,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0223.bin",
+      "type": 3,
+      "record_offset": 24940,
+      "bytes_after_offset": 240,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0224.bin",
+      "type": 3,
+      "record_offset": 18228,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0225.bin",
+      "type": 3,
+      "record_offset": 10940,
+      "bytes_after_offset": 228,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0226.bin",
+      "type": 3,
+      "record_offset": 11352,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0227.bin",
+      "type": 3,
+      "record_offset": 11992,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0228.bin",
+      "type": 6,
+      "record_offset": 28928,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0229.bin",
+      "type": 5,
+      "record_offset": 1936,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0230.bin",
+      "type": 5,
+      "record_offset": 2572,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0231.bin",
+      "type": 5,
+      "record_offset": 4020,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0232.bin",
+      "type": 4,
+      "record_offset": 6740,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0233.bin",
+      "type": 4,
+      "record_offset": 4824,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0234.bin",
+      "type": 4,
+      "record_offset": 8024,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0235.bin",
+      "type": 4,
+      "record_offset": 4344,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0236.bin",
+      "type": 4,
+      "record_offset": 8636,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0237.bin",
+      "type": 4,
+      "record_offset": 2988,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0238.bin",
+      "type": 4,
+      "record_offset": 5188,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0239.bin",
+      "type": 4,
+      "record_offset": 3708,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0240.bin",
+      "type": 5,
+      "record_offset": 11224,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0241.bin",
+      "type": 4,
+      "record_offset": 3724,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0242.bin",
+      "type": 4,
+      "record_offset": 10100,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0243.bin",
+      "type": 5,
+      "record_offset": 7984,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0244.bin",
+      "type": 5,
+      "record_offset": 13276,
+      "bytes_after_offset": 116,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0245.bin",
+      "type": 5,
+      "record_offset": 31532,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0246.bin",
+      "type": 5,
+      "record_offset": 8964,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0247.bin",
+      "type": 4,
+      "record_offset": 4256,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0248.bin",
+      "type": 5,
+      "record_offset": 9440,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0249.bin",
+      "type": 5,
+      "record_offset": 3392,
+      "bytes_after_offset": 68,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0334.bin",
+      "type": 2,
+      "record_offset": 4332,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0335.bin",
+      "type": 2,
+      "record_offset": 1916,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 3
+    },
+    {
+      "file": "e0336.bin",
+      "type": 2,
+      "record_offset": 792,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0337.bin",
+      "type": 2,
+      "record_offset": 764,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0338.bin",
+      "type": 2,
+      "record_offset": 728,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 3
+    },
+    {
+      "file": "e0339.bin",
+      "type": 2,
+      "record_offset": 1900,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 3
+    },
+    {
+      "file": "e0340.bin",
+      "type": 2,
+      "record_offset": 1968,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0341.bin",
+      "type": 2,
+      "record_offset": 3040,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0342.bin",
+      "type": 2,
+      "record_offset": 744,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0343.bin",
+      "type": 2,
+      "record_offset": 828,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0344.bin",
+      "type": 2,
+      "record_offset": 2344,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 1
+    },
+    {
+      "file": "e0345.bin",
+      "type": 2,
+      "record_offset": 3348,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0346.bin",
+      "type": 2,
+      "record_offset": 1588,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0347.bin",
+      "type": 2,
+      "record_offset": 1656,
+      "bytes_after_offset": 84,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0348.bin",
+      "type": 2,
+      "record_offset": 744,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0349.bin",
+      "type": 2,
+      "record_offset": 1736,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "e0350.bin",
+      "type": 2,
+      "record_offset": 832,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 8
+    },
+    {
+      "file": "e0351.bin",
+      "type": 2,
+      "record_offset": 928,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 4
+    },
+    {
+      "file": "e0352.bin",
+      "type": 2,
+      "record_offset": 536,
+      "bytes_after_offset": 52,
+      "old_guard_would_skip": true,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0353.bin",
+      "type": 2,
+      "record_offset": 1904,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 2
+    },
+    {
+      "file": "e0354.bin",
+      "type": 2,
+      "record_offset": 1960,
+      "bytes_after_offset": 64,
+      "old_guard_would_skip": false,
+      "feature_flag_0x2e": 0
+    },
+    {
+      "file": "e0360.bin",
+      "type": 3,
+      "record_offset": 14496,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0361.bin",
+      "type": 3,
+      "record_offset": 22180,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0362.bin",
+      "type": 3,
+      "record_offset": 12520,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0363.bin",
+      "type": 6,
+      "record_offset": 27924,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0364.bin",
+      "type": 3,
+      "record_offset": 16276,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0365.bin",
+      "type": 3,
+      "record_offset": 14512,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0366.bin",
+      "type": 3,
+      "record_offset": 11752,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0367.bin",
+      "type": 1,
+      "record_offset": 9152,
+      "bytes_after_offset": 260,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0368.bin",
+      "type": 1,
+      "record_offset": 13156,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0369.bin",
+      "type": 3,
+      "record_offset": 12848,
+      "bytes_after_offset": 264,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0370.bin",
+      "type": 3,
+      "record_offset": 28384,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0371.bin",
+      "type": 3,
+      "record_offset": 21432,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0372.bin",
+      "type": 7,
+      "record_offset": 7160,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0373.bin",
+      "type": 1,
+      "record_offset": 11516,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0374.bin",
+      "type": 3,
+      "record_offset": 6572,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0375.bin",
+      "type": 3,
+      "record_offset": 13196,
+      "bytes_after_offset": 272,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0376.bin",
+      "type": 3,
+      "record_offset": 10068,
+      "bytes_after_offset": 256,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0377.bin",
+      "type": 3,
+      "record_offset": 17256,
+      "bytes_after_offset": 252,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0378.bin",
+      "type": 6,
+      "record_offset": 39068,
+      "bytes_after_offset": 328,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0379.bin",
+      "type": 3,
+      "record_offset": 20296,
+      "bytes_after_offset": 292,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0380.bin",
+      "type": 5,
+      "record_offset": 4000,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0381.bin",
+      "type": 4,
+      "record_offset": 4284,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0382.bin",
+      "type": 4,
+      "record_offset": 6088,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0383.bin",
+      "type": 4,
+      "record_offset": 3704,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0384.bin",
+      "type": 4,
+      "record_offset": 5872,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0385.bin",
+      "type": 4,
+      "record_offset": 3872,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0386.bin",
+      "type": 4,
+      "record_offset": 4460,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0387.bin",
+      "type": 4,
+      "record_offset": 3700,
+      "bytes_after_offset": 72,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0388.bin",
+      "type": 5,
+      "record_offset": 9148,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0389.bin",
+      "type": 5,
+      "record_offset": 30352,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0390.bin",
+      "type": 4,
+      "record_offset": 5572,
+      "bytes_after_offset": 92,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0391.bin",
+      "type": 5,
+      "record_offset": 10796,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0392.bin",
+      "type": 5,
+      "record_offset": 36212,
+      "bytes_after_offset": 88,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0393.bin",
+      "type": 5,
+      "record_offset": 6552,
+      "bytes_after_offset": 76,
+      "old_guard_would_skip": false
+    },
+    {
+      "file": "e0394.bin",
+      "type": 5,
+      "record_offset": 12956,
+      "bytes_after_offset": 100,
+      "old_guard_would_skip": false
+    }
+  ],
+  "limitation": "No bit-1 producer established. A negative static search is not a dynamic proof of absence."
+}
