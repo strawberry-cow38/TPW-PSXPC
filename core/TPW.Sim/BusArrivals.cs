@@ -198,6 +198,11 @@ namespace TPW.Sim
         /// <summary>Its position in world units, which is what the draw uses.</summary>
         public int WorldX => Pos >> 8;
 
+        /// <summary>✅ CHECKED AGAINST THE MEASUREMENT: run with the emulator's own time step (δ = 9947) this
+        /// machine arrives every **694 ticks exactly**, which is what tinyclaw measured live (694 694 694 695
+        /// 697 694 694 — the ±1..3 there is the root counter, not the machine). At the nominal hardware step
+        /// (10082) it gives 687, matching arrivals.md's closed form of ≈688. The port runs at 10081, so its
+        /// bus is 687 ticks, 27.5 seconds.</summary>
         /// <summary>One sim tick. <paramref name="delta"/> is the game's own time step
         /// ([0x80103A90], ≈10081 a tick). Returns true on the tick the bus DROPS ITS LOAD — the phase 1→2 edge,
         /// and only with the park open and no batch being held.</summary>
@@ -216,7 +221,12 @@ namespace TPW.Sim
             if (Pos < Target) return false;
             bool arrived = Phase == 1 && parkOpen && !gateHolding;
             if (Phase != 2) B = ShortWait;
-            Target = Stops[Phase] << 16;
+            // ⚠ THE GAME READS PAST ITS OWN TABLE HERE AND GETS AWAY WITH IT. `tgt = table[phase] << 16` runs
+            // before the wrap check, so on the last phase it reads table[4] — one word past a four-word table —
+            // and the wrap two instructions later overwrites the result. Harmless on a PSX; in C# it is an
+            // IndexOutOfRangeException that would kill the park 27 seconds in. Skipped rather than clamped,
+            // because clamping would invent a value the game never uses.
+            if (Phase < Stops.Length) Target = Stops[Phase] << 16;
             Phase++;
             if (Phase > Wrap)
             {
