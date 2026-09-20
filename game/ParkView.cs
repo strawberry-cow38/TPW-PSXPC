@@ -208,6 +208,7 @@ namespace TPWGodot
             _attractionSub = subFor;
             _modelSheets = sheets;
             _attractionMeshes.Clear();
+            _attractionPoses.Clear();
             BuildPicker();
         }
 
@@ -833,7 +834,26 @@ namespace TPWGodot
             + $"({_guests.ChoseTarget} decisions made, {_guests.RouteFailed} routes failed), "
             + $"{_guests.Outstanding}/{Pathfinder.MaxRequests} searches out, "
             + $"{_guests.FreeNodes}/{Pathfinder.NodePoolSize} nodes and "
-            + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free";
+            + $"{_guests.FreeWaypoints}/{WaypointPool.Capacity} waypoints free"
+            + RideReport();
+        }
+
+        /// <summary>Each placed ride's status, its animation clock and what it is carrying - the half of the park
+        /// the guest counters cannot see, since a ride that takes people on and never lets them off looks the same
+        /// as a busy one from the guest side.</summary>
+        string RideReport()
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var a in _attractionsPlaced)
+            {
+                if (!a.IsRide) continue;
+                int len = PhaseTicks(a);
+                sb.Append($"\n  {a.Rec.Entry}: status {(int)a.Status} {a.Status}, "
+                        + $"tick {(len > 0 ? a.Cycle.Accumulator >> RideCycle.FixedShift : 0)}/{len}, "
+                        + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, "
+                        + $"reliability {a.Reliability}");
+            }
+            return sb.ToString();
         }
 
         void RefreshInfo()
@@ -991,8 +1011,7 @@ namespace TPWGodot
             var centre = def == null ? Vector3.Zero : new Vector3(def.Width * ParkTerrain.TileUnits / 2f, 0, -def.Depth * ParkTerrain.TileUnits / 2f);
             // ⚠ POSED AT TIME 0, NOT THE FILE'S REST: an animated model's moving parts sit at (0, 0, 0) in the file and
             // only get their places from the animation, so the rest pose scatters them (MeshPose).
-            (int X, int Y, int Z)[] posed = null;
-            if (mesh?.Tracks != null) { try { posed = MeshPose.Evaluate(mesh, 0).Vertices; } catch { posed = null; } }
+            var posed = PoseVertices(mesh, 0);
             m = mesh == null ? null : ModelMesh.Build(mesh, posed, _modelSheets, true, false, false, centre, 1f / ParkTerrain.TileUnits, out _);
             _attractionMeshes[entry] = m;
             // Its height for the hover box (0x80062C6C): the model's extent in y at its current frame (time 0 here).
@@ -1009,6 +1028,40 @@ namespace TPWGodot
             }
             return m;
         }
+
+        /// <summary>The model's vertices at one whole animation tick, or null when it does not animate.</summary>
+        static (int X, int Y, int Z)[] PoseVertices(TPW.Data.Mesh mesh, int tick)
+        {
+            if (mesh?.Tracks == null || mesh.Tracks.Count == 0) return null;
+            try { return MeshPose.Evaluate(mesh, tick).Vertices; } catch { return null; }
+        }
+
+        /// <summary>An attraction's model posed at <paramref name="tick"/> of its own animation, cached per tick.
+        ///
+        /// ⭐ A RUNNING RIDE IS ITS ANIMATION. The model's first halfword is both the phase length the cycle clock
+        /// races (TPW.Sim.RideCycle) and the end of its keys, so the clock's whole ticks index the animation
+        /// directly -- the ride is on screen doing exactly what the sim says it is doing. Measured across the
+        /// archive: 60 of the 94 animated entries move vertices, the Crazy Ape 98 of its 189 by up to 1054 units
+        /// (four tiles), so this is the difference between a ride and a statue.
+        ///
+        /// The poses are whole ticks and there are at most a model's length of them (41 for the Crazy Ape, 801 for
+        /// Zero G), so they are built once each and kept rather than rebuilt per frame.</summary>
+        ArrayMesh AttractionMeshAt(int entry, int tick)
+        {
+            if (tick <= 0) return AttractionMesh(entry);
+            if (_attractionPoses.TryGetValue((entry, tick), out var m)) return m;
+            var mesh = _attractionMesh?.Invoke(entry);
+            var posed = PoseVertices(mesh, tick);
+            if (mesh == null || posed == null) return AttractionMesh(entry);
+            var def = _attractions.Find(a => a.Rec.Entry == entry).Rec;
+            var centre = def == null ? Vector3.Zero : new Vector3(def.Width * ParkTerrain.TileUnits / 2f, 0, -def.Depth * ParkTerrain.TileUnits / 2f);
+            m = ModelMesh.Build(mesh, posed, _modelSheets, true, false, false, centre, 1f / ParkTerrain.TileUnits, out _);
+            // One park's rides cannot reach this; a browse that walked every model could.
+            if (_attractionPoses.Count > 4096) _attractionPoses.Clear();
+            _attractionPoses[(entry, tick)] = m;
+            return m;
+        }
+        readonly Dictionary<(int Entry, int Tick), ArrayMesh> _attractionPoses = new();
 
         /// <summary>The footprint's corner for the attraction under the mouse. 0x8001C454, run every frame with the
         /// cursor's tile, puts the corner at the cursor less half the turned footprint, rounded down (w >> 1, d >> 1):
@@ -1365,6 +1418,7 @@ namespace TPWGodot
             {
                 Rec = rec, Inst = inst, Rest = inst.Transform, Box = box, Ox = ox, Oz = oz, Rot = rot,
                 RunLength = () => _attractionMesh?.Invoke(rec.Entry)?.HeaderWord0 ?? 0,
+                RiderCount = () => _guests?.Rides?.RuntimeFor(rec.Entry)?.Riders.Count ?? 0,
             };
             a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
             // Read once, at placement (0x8009F524) - and never again, which is the point of it.
@@ -1424,10 +1478,12 @@ namespace TPWGodot
             /// <summary>The duration slider: half the level's maximum, so 5 for most rides and 25 for a
             /// bouncer (rides.md §4.3). ⚠ Its own slider does not exist yet either.</summary>
             public int CyclesPerLoad => Rec.Levels.Length > 0 ? Rec.Level0.DefaultCycles : 1;
-            /// <summary>⚠ NO RIDERS YET. Guests do not board (TPW.Sim.VisitorQueue is not wired to the
-            /// park), so a ride always unloads instantly and always wears at the empty-load rate. Both
-            /// are placeholders that disappear when the queue is connected, not decisions.</summary>
-            public bool IsEmpty => true;
+            /// <summary>Riders on board, from the ride's own runtime (ParkRideWorld). ⚠ THIS WAS THE
+            /// STUB THAT ATE THE RIDERS: while it answered a constant "empty", status 11 left for 10
+            /// on its FIRST tick, so at most one guest ever stepped off per unload and the rest stayed
+            /// aboard for good. Unloading ends when the ride is empty, and only the real count knows.</summary>
+            public Func<int> RiderCount;
+            public bool IsEmpty => (RiderCount?.Invoke() ?? 0) <= 0;
             public bool MechanicAssigned => false;
             public void PostMessage(int id) { }
             public void EjectEveryone() { }
@@ -1439,7 +1495,7 @@ namespace TPWGodot
             public int BuildAnimationLength => BuildLength?.Invoke() ?? 0;
 
             // IRideWearWorld
-            public int Riders => 0;
+            public int Riders => RiderCount?.Invoke() ?? 0;
             public int MaxSeats => Rec.Levels.Length > 0 ? Math.Max(1, Rec.Level0.MaxSeats) : 1;
             public int WearMultiplier => Rec.Levels.Length > 0 ? Rec.Level0.WearMultiplier : 5;
             public bool NoWear => false;
@@ -1506,6 +1562,7 @@ namespace TPWGodot
         {
             foreach (var a in _attractionsPlaced)
             {
+                var wasStatus = a.Status;
                 // ⭐ ONE CLOCK DRIVES BOTH. Construction and a run are the same accumulator against
                 // different animation lengths (0x800658D8), which is why the build finishes with the
                 // animation rather than on a timer.
@@ -1539,8 +1596,29 @@ namespace TPWGodot
 
                 var next = AttractionLifecycle.Tick(a.Status, a);
                 if (next != a.Status) a.Status = AttractionLifecycle.Enter(next, a);
+
+                // A ride spends most of a capture standing still waiting for a queue, so say when it
+                // moves: without this, finding a frame where one is actually RUNNING is guesswork.
+                if (_logRides && a.Status != wasStatus)
+                    GD.Print($"[tpw] frame {Engine.GetFramesDrawn()}: {a.Rec.Entry} {wasStatus} -> {a.Status}, {a.Riders} aboard");
+
+                // ⭐ THIS READS THE MESH THE RENDERER IS HOLDING, not the clock that is supposed to drive
+                // it. A count taken off the simulation cannot see a view that has stopped listening to it
+                // (it was exactly that blindness that let "8 riding" print over a jammed-looking park), so
+                // the check for "does the ride move on screen" has to touch a.Inst.
+                if (_logRides && a.IsRide && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
+                {
+                    var box = drawn.GetAabb();
+                    GD.Print($"[tpw] frame {Engine.GetFramesDrawn()}: {a.Rec.Entry} tick {a.Cycle.Accumulator >> RideCycle.FixedShift}, "
+                           + $"drawing {(drawn == AttractionMesh(a.Rec.Entry) ? "the REST mesh" : "a posed mesh")}, "
+                           + $"aabb {box.Size.X:0.000}x{box.Size.Y:0.000}x{box.Size.Z:0.000} at {box.Position.Y:0.000}");
+                }
             }
         }
+
+        /// <summary>Print each ride's status changes with the frame they happen on (<c>--park-log-rides</c>).</summary>
+        public bool LogRides { set => _logRides = value; }
+        bool _logRides;
 
         /// <summary>Draw each attraction under construction moved by its build rig (0x800659C4): the rig's bone 1,
         /// posed at the build clock's whole ticks, applied to the whole model about a pivot at (width × 128, 0,
@@ -1549,6 +1627,8 @@ namespace TPWGodot
         /// centre it -- and then the attraction's own placement. The rigs grow the model from about a tenth of its
         /// size with a springy overshoot, some turning it and hopping it up on the way. The clock is eased between
         /// park frames here. Anything else stands at rest.</summary>
+        static int PhaseTicks(PlacedAttraction a) => a.PhaseLength(a.CurrentPhase);
+
         void PoseAttractions(double sinceFrame)
         {
             int frameTime = (int)(EntranceFlags.TimeUnitsPerSecond / ParticleSystem.FramesPerSecond);
@@ -1557,6 +1637,18 @@ namespace TPWGodot
                 if (a.Status != AttractionStatus.UnderConstruction || BuildRig(a.Variant) is not { } rig)
                 {
                     if (a.Inst.Transform != a.Rest) a.Inst.Transform = a.Rest;
+                    // ⭐ A RUNNING RIDE PLAYS ITS OWN MODEL. The cycle clock's whole ticks ARE the
+                    // animation's frames - the same halfword is the phase length it races and the end of
+                    // the model's keys - so the thing on screen is the thing the sim is counting. It
+                    // holds its last pose through loading and unloading, which is where guests get on
+                    // and off; only status 2 advances the clock (StepAttractions).
+                    if (a.IsRide && a.Cycle.Accumulator > 0 && PhaseTicks(a) is int len && len > 1)
+                    {
+                        int t = a.Cycle.Accumulator
+                              + (int)(Math.Min(frameTime, RideCycle.MaxDelta) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
+                        var posed = AttractionMeshAt(a.Rec.Entry, Math.Clamp(t >> RideCycle.FixedShift, 0, len - 1));
+                        if (posed != null && a.Inst.Mesh != posed) a.Inst.Mesh = posed;
+                    }
                     continue;
                 }
                 int clock = a.Cycle.Accumulator + (int)(Math.Min(frameTime, 0x4000) * Math.Clamp(sinceFrame * ParticleSystem.FramesPerSecond, 0, 1));
