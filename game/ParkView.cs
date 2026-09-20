@@ -1801,6 +1801,7 @@ namespace TPWGodot
             if (_map == null) return 0;
             if (_placing >= 0 && _placing < _attractions.Count) return _attractions[_placing].Rec.Price;
             if (_queue != null && _cursorTile is { } q) return _queue.GhostCost(_map, q.X, q.Z);
+            if (_track != null && _cursorTile is { } t) return _track.GhostCost(_map, t.X, t.Z);
             if (_pathMode && _paths != null && _cursorTile is { } cur)
             {
                 var run = _runStart is { } st ? PathTool.Run(st.X, st.Z, cur.X, cur.Z)
