@@ -70,10 +70,17 @@ refutation: 0x80038D80 never tests a CIRCLE bit at all, it asks about LOGICAL bu
 logical table at 0x800E35C0 does not decode as index→button. The button was mapped without reading
 that table. The route 0x80038D80 → 0x80038900 stands; which button reaches it is now unknown.
 
-⭐ THE HEDGE WAS TOO GENEROUS, AND THAT IS WORTH RECORDING. Being careful about the scope of a
-negative result is right; softening it past what the evidence supports hands the other side a reason
-not to re-check. The measurement said "no button press produced any change"; the code said "no
-CIRCLE bit is ever tested". Those agree, and I had written them as if they might not.
+⭐⭐ AND THEN THE HEDGE TURNED OUT TO BE RIGHT AFTER ALL. Later the same day I swept the same
+buttons from the same save with the root radial CLOSED first (△ at frame 60), and **every** button
+moved something — ○ included. So the zeros were entirely an artefact of the state, exactly as the
+original hedge said, and my "the hedge was too generous" correction was itself wrong.
+
+⚠ THE LESSON IS NOT "HEDGE MORE". It is that a button is live or dead depending on what is on
+screen — which is the whole point of a modal UI — so **a button is not dead until it has been swept
+from more than one state**. I published a null from one, a peer retracted a real finding of theirs
+partly on the strength of it, and the null did not survive a second state. Their retraction still
+stands on its own evidence (0x80038D80 tests LOGICAL button 0 and the table at 0x800E35C0 does not
+decode as index→button), which is the only reason this cost nothing.
 
 ## 0. Corrections to earlier reports
 
