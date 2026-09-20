@@ -242,4 +242,17 @@ save format.
 - Rejecting tests added to `VisitorNeedsTests` for the rules that had none: the growth is the die's
   value (0 or 1, never a flat +1 and never 2), only two stats move on a clock, the die is drawn even at
   the cap.
-- Sweep: `tools/mutate_needs.py`, results in `needs-mutations.json` — see that file for the count.
+- Sweep: `tools/mutate_needs.py`, results in `needs-mutations.json`. **87 distinct production
+  mutations, 87 killed, 0 survived, 0 invalid**, 119 executions (the first range was re-run once for
+  full test names; seven rules were re-run after their tests were strengthened). Each mutation changed
+  one rule, ran the whole suite, required an actual failing test and restored the source in `finally`.
+  Seven survived the first pass and each was a weak fixture, not a duplicated rule: the V+0x5D ≥ 90 and
+  need A ≥ 95 penalty thresholds were pinned on one side only; the walking tiredness die's SIZE was never
+  observed (every fixture's dice ignored the bound); Idle's vomit threshold had no case at exactly 92;
+  the burger arm's need-B feed was invisible because every food fixture carried a = 0, as fries and
+  burgers do on the disc (an ice-cream record now exercises it); the fries divisor was invisible at a
+  slider of 60 (60/14 = 60/15 = 60/16 = 4; sliders 28 and 30 now separate them). The seventh, the ride
+  nausea scale 1212 → 1213, is behaviourally EQUIVALENT over every reachable intensity 56..100 after the
+  `>> 12` (checked exhaustively), so it is pinned by value with a comment saying why — the word at
+  0x801031FC is a debug-menu lever (debug.md §3) and its value is the interface — and a coarser scale
+  mutation (1100) is killed by the arithmetic. Final suite: **1266 passed, 0 failed**.

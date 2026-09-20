@@ -224,6 +224,23 @@ namespace TPW.Sim.Tests
             Assert.Equal(50 - lost, g.Happiness);
         }
 
+        // ⚠ THE OTHER THREE THRESHOLDS, PINNED ON BOTH SIDES: V+0x5D at 90 ([0x80103220]), need A at 95
+        // ([0x80103224]), nausea at 85 ([0x8010321C]). REJECTS an off-by-one in EITHER direction -- the
+        // one-sided tests above let "89 or more" for the toilet need and "94 or more" for need A survive.
+        [Theory]
+        [InlineData("toilet", 89, 0)] [InlineData("toilet", 90, 1)]
+        [InlineData("needA", 94, 0)] [InlineData("needA", 95, 1)]
+        [InlineData("nausea", 84, 0)] [InlineData("nausea", 85, 1)]
+        public void EachPenaltyThresholdIsExact(string field, int value, int lost)
+        {
+            var g = Guest();
+            if (field == "toilet") g.RideDesire = value;
+            else if (field == "needA") g.NeedA = value;
+            else g.Nausea = value;
+            VisitorNeeds.Tick(g, new World { NowTick = VisitorNeeds.LitterPeriod }, new Dice());
+            Assert.Equal(50 - lost, g.Happiness);
+        }
+
         // Litter scales with how much of it there is, and only vomit adds nausea.
         [Fact]
         public void LitterDepressesAndOnlyVomitSickens()
