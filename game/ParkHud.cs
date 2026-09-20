@@ -89,23 +89,27 @@ namespace TPWGodot
         float Sx => Screen.Y / 384f;
         float Left(float psxX) => psxX * Sx;
 
-        /// <summary>⭐ THE HUD SPREADS, THE PANEL FILLS. Every other coordinate in this file belongs to the
-        /// park HUD, which anchors to the screen's edges — Left() from the left, Right() from the right — and
-        /// leaves the middle to the park. The attraction panel is not a HUD: it is a modal that COVERS the
-        /// PSX's screen, 440x191 of 512x240, and what matters is that share, not the pixel count. So the
-        /// panel maps every x as a FRACTION of the 512-wide screen onto the whole window, the way y already
-        /// maps onto the whole height — 35/512 of the way in stays 35/512 of the way in at any size or aspect.
+        /// <summary>⭐ THE HUD SPREADS, THE PANEL FILLS THE SCREEN. Every other coordinate in this file
+        /// belongs to the park HUD, which anchors to the screen's edges and leaves the middle to the park.
+        /// The attraction panel is not a HUD: it is a modal, and it is meant to BE the screen. On the PSX it
+        /// covers 440x191 of a 512x240 screen and the park shows around the edge; here its own rect is mapped
+        /// onto the whole window, so the backdrop reaches all four edges and every child keeps its place
+        /// WITHIN the panel — the name stays centred in the info frame, the sliders stay centred in the
+        /// control frame, because they are all carried by the same transform.
         ///
-        /// ⚠ This deliberately drops Sx's 4:3 pixel aspect FOR THE PANEL ONLY. Sx exists because a PSX pixel
-        /// is 1.6x taller than wide on a 4:3 set, which is right for a HUD sitting beside a 4:3 park view, but
-        /// applied to a full-screen modal on 16:9 it just leaves the panel stranded in the middle at 64% of
-        /// the width where the game has it at 86%.</summary>
-        float PanelSx => Screen.X / ParkHudLayout.ScreenWidth;
+        /// ⚠ The info frame starts at x=16, 19px LEFT of the panel's own 35, so it runs a little past the
+        /// left edge and is clipped. That is the overhang recorded in findings/panel.md, not a mistake here;
+        /// it costs nothing while the frames are plain fills, and it is why the border sprites will have to
+        /// wait for that question to be settled.</summary>
+        const int PanelRectX = 35, PanelRectY = 31, PanelRectW = 440, PanelRectH = 191;
 
-        /// <summary>The x-scale in force while the panel paints; 0 = none, so everything else — including the
-        /// context menu, which is pinned to the cursor — keeps the HUD's Sx.</summary>
-        float _panelSx;
-        float SxNow => _panelSx > 0f ? _panelSx : Sx;
+        /// <summary>The panel's transform while it paints; 0 scale = not painting it, so everything else —
+        /// including the context menu, which is pinned to the cursor — keeps the HUD's Sx/Sy untouched.</summary>
+        float _pSx, _pSy;
+        float PX(float psx) => _pSx > 0f ? (psx - PanelRectX) * _pSx : psx * Sx;
+        float PY(float psy) => _pSy > 0f ? (psy - PanelRectY) * _pSy : psy * Sy;
+        float WX(float w) => (_pSx > 0f ? _pSx : Sx) * w;
+        float WY(float h) => (_pSy > 0f ? _pSy : Sy) * h;
         float Right(float psxX) => Screen.X - (ParkHudLayout.ScreenWidth - psxX) * Sx;
 
         /// <summary>A sprite of the common sheet, upright, every texel that shows fully there (the HUD's opaque
@@ -152,9 +156,9 @@ namespace TPWGodot
             var tex = Tex(s);
             if (tex == null) return;
             var sp = _sheet.Sprites[s];
-            float sx = SxNow;
-            float x = (right ? Right(px) : px * sx) + sp.OffsetX * sx, y = (py + sp.OffsetY) * Sy;
-            float w = sp.W * sx, h = sp.H * Sy;
+            float x = right ? Right(px) + sp.OffsetX * Sx : PX(px) + WX(sp.OffsetX);
+            float y = PY(py + sp.OffsetY);
+            float w = right ? sp.W * Sx : WX(sp.W), h = WY(sp.H);
             var pts = new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + h), new Vector2(x, y + h) };
             var uv = mirror ? new[] { new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) }
                             : new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) };
@@ -200,8 +204,8 @@ namespace TPWGodot
         void PaintPanel(CanvasItem on)
         {
             if (Panel == null) return;
-            _panelSx = PanelSx;
-            try { PaintPanelAt(on); } finally { _panelSx = 0f; }
+            _pSx = Screen.X / PanelRectW; _pSy = Screen.Y / PanelRectH;
+            try { PaintPanelAt(on); } finally { _pSx = _pSy = 0f; }
         }
 
         void PaintPanelAt(CanvasItem on)
@@ -270,8 +274,7 @@ namespace TPWGodot
         /// <summary>A rectangle in PSX coordinates, shaded top colour to bottom colour.</summary>
         void Quad(CanvasItem on, int px, int py, int pw, int ph, Color top, Color bottom)
         {
-            float sx = SxNow;
-            float x = px * sx, y = py * Sy, w = pw * sx, h = ph * Sy;
+            float x = PX(px), y = PY(py), w = WX(pw), h = WY(ph);
             on.DrawPrimitive(new[] { new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + h), new Vector2(x, y + h) },
                              new[] { top, top, bottom, bottom }, new[] { Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero });
         }
