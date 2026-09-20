@@ -609,6 +609,18 @@ namespace TPWGodot
         /// a per-tile grid. The only producer wired is the entertainer's performance aura.</summary>
         readonly InfluenceMap _influence = new();
 
+        /// <summary>The park's research tree, and the catalogue it reads. ⚠⚠ NOTHING IN THE PORT
+        /// OWNED ONE, so Researcher.Research had nowhere to put its points even if it had been called —
+        /// which it was not. Set by the view, which owns the catalogue.</summary>
+        ParkResearchWorld _research;
+        public void SetResearch(Func<IReadOnlyList<TPW.Data.AttractionDefinition>> definitions,
+                                Func<IEnumerable<int>> placedEntries, Action<ushort> announce)
+        {
+            _research = new ParkResearchWorld(StaffWorld(), definitions, placedEntries,
+                                              () => System.Linq.Enumerable.Select(_staff, s => s.S), announce);
+            _research.Attach(new ResearchSystem(_research));
+        }
+
         /// <summary>One TPW.Sim.Entertainer per hired entertainer. The sim keeps the class's extra
         /// fields on this object rather than on StaffMember, so the host has to own one each.</summary>
         readonly Dictionary<StaffMember, Entertainer> _entertainers = new();
@@ -721,6 +733,8 @@ namespace TPWGodot
                 if (handy != null) handy.Current = st;
                 var ent = st.S.Kind == StaffKind.Entertainer ? EntertainerWorld() : null;
                 if (ent != null) ent.Current = st;
+                var res = st.S.Kind == StaffKind.Researcher ? _research : null;
+                if (res != null) res.Current = st;
 
                 if (st.Answer is { } m)
                 {
@@ -769,6 +783,17 @@ namespace TPWGodot
                         continue;
                     }
                 }
+                // ⚠ THE RESEARCHER'S Idle RUNS StaffBase.IdleCheck ITSELF, which the pre-pass above
+                // has already done this tick. That double call is what the sim's own note describes —
+                // the binary rolls BEFORE slot 51 and behaviour.md §3.3's order is retained — so the
+                // handler is given the state it expects rather than being "tidied" into one call.
+                if (res != null && RunResearcher(st, res))
+                {
+                    if (LogStaff && st.S.State != wasState)
+                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, "
+                                     + $"funding {res.ResearchFunding} [own]");
+                    continue;
+                }
                 if (handy != null && RunHandyman(st, handy))
                 {
                     if (LogStaff && st.S.State != wasState)
@@ -805,6 +830,69 @@ namespace TPWGodot
 
         /// <summary>Print each staff member's state changes (--park-log-rides).</summary>
         public bool LogStaff { get; set; }
+
+        /// <summary>The researcher's own two states (TPW.Sim.Researcher). ⚠⚠ NEITHER HAD A CALLER.
+        /// Research is a TRICKLE by design — three idle decisions in ten choose work and a patrol leg
+        /// is many ticks — so a researcher that never runs and a researcher that is merely slow look
+        /// identical for a long time, which is how this stayed hidden.</summary>
+        bool RunResearcher(Staffer st, ParkResearchWorld res)
+        {
+            switch (st.S.State)
+            {
+                case StaffState.Idle: Researcher.Idle(st.S, res, _dice); return true;
+                case StaffClassStates.Researching: Researcher.Research(st.S, res); return true;
+                default: return false;          // the shared states are the base's
+            }
+        }
+
+        /// <summary>Start researching one definition in one topic slot. ⚠ A HARNESS DOOR, NOT THE
+        /// GAME'S. The player picks topics in a panel this port does not have, so nothing selects one
+        /// on its own — and an auto-start here would be inventing the choice rather than testing the
+        /// machine. Returns what ResearchSystem.Start said, so a refused pick is visible instead of
+        /// looking like a silent success.</summary>
+        public string StartResearch(int slot, int type, int index)
+        {
+            if (_research?.System is not { } sys) return "no catalogue";
+            var def = new ResearchDefinition(type, index);
+            try
+            {
+                if (!sys.CanSelect(slot, def)) return $"refused: slot {slot} may not take type {type}#{index}";
+                return sys.Start(slot, def) ? $"slot {slot} researching type {type}#{index}" : "start refused";
+            }
+            catch (InvalidOperationException e)
+            {
+                // ⚠⚠ THE SIM'S OWN GUARD, AND IT IS RIGHT TO FIRE. RefreshTier walks five tier bins
+                // with NO BOUND in the original (0x8009BA98..C4) and the port fails explicitly instead
+                // of reproducing an overread. An EMPTY bin passes the two-thirds rule vacuously
+                // (3×0 >= 2×0), and this disc's rides use tiers 0..3 only — bin 4 is empty in all 498
+                // level blocks — so the walk runs off the end the moment the four real tiers pass.
+                //
+                // Caught HERE, at the harness door, and reported. Not "fixed": the sim's note says DO
+                // NOT FIX, and a host that swallows this quietly would turn a documented overread into
+                // a silent wrong answer. See findings/research.md.
+                return $"tier scan refused: {e.Message}";
+            }
+        }
+
+        /// <summary>Research progress in one line, for the report. ⭐ TOPIC PERCENTAGES, NOT A POINT
+        /// TOTAL: points accumulated says the researcher is running, which is the easy half; whether
+        /// any TOPIC moves is whether the system is wired to anything.</summary>
+        public string ResearchLine()
+        {
+            if (_research?.System is not { } sys) return "research: no catalogue";
+            int researchers = 0;
+            foreach (var st in _staff) if (st.S.Kind == StaffKind.Researcher) researchers++;
+            var parts = new List<string>();
+            for (int slot = 0; slot < ResearchSystem.TopicCount; slot++)
+            {
+                var t = sys.Topic(slot);
+                if (!t.Active && !t.Finished) continue;
+                parts.Add($"slot {slot} type {t.Definition.Type}#{t.Definition.Index} {t.Percent}%"
+                        + (t.Finished ? " done" : ""));
+            }
+            return $"research: funding {sys.Funding}, {researchers} researchers, "
+                 + (parts.Count == 0 ? "no active topics" : string.Join(", ", parts));
+        }
 
         /// <summary>The handyman's own states (TPW.Sim.Handyman). Returns true when it handled the
         /// state, so the shared machine does not also run on it.

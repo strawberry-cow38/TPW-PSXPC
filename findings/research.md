@@ -443,3 +443,50 @@ python3 tools/mutate_research.py
 outer+0x47 is passed by address; the signed load/add/store occurs inside 0x80099CC4. Similarly,
 `fn.py 8006AC04` can select the preceding function; the explicit aligned `ann.py` span above is
 necessary. Nop-elision in annotation must never be read as moving an instruction into a delay slot.
+
+## ⚠ NO TOPIC CAN BE STARTED ON THIS DISC — measured 2026-09-20
+
+Wiring the researcher end to end (game/ParkResearch.cs) turned up a hard stop that reading the code
+alone did not:
+
+```
+[tpw] --park-research 0,3,2: tier scan refused: Research tier scan overruns its five PSX bins.
+```
+
+`RefreshTier` walks five tier bins and advances while `3 × unlocked[cursor] >= 2 × totals[cursor]`.
+⭐ **An EMPTY bin passes that test vacuously** — `3×0 >= 2×0` is `0 >= 0` — so the walk only stops at
+a bin that is populated AND under two-thirds unlocked.
+
+**Bin 4 is empty on this disc.** Over all **498 ride level blocks** in `/home/ec2-user/tpw/ext/rip`
+(types 1/3/6/7, **0 skipped for length**), the research tier takes only four values:
+
+```
+tier 0 ×52    tier 1 ×220    tier 2 ×126    tier 3 ×100    tier 4 ×0
+```
+
+So as soon as tiers 0..3 pass, the cursor reaches 4, finds nothing, passes again, reaches 5 and runs
+off the end of both five-word arrays. The port throws there deliberately —
+⚠ `DO NOT FIX`, `0x8009BA98..C4` has no bound and no deterministic overread is established — and the
+host now catches it at the harness door and reports it rather than swallowing it.
+
+### What this does and does not establish
+
+- **Established:** with the port's current catalogue — every definition the port loads, all worlds —
+  the tier scan cannot terminate, so `CanSelect` throws and no topic can be selected.
+- **NOT established:** whether the retail game ever reaches it. The obvious candidate is that the
+  original's candidate set is ONE WORLD's definitions, not all four, and that a single world has a
+  populated tier 4. That is a checkable claim and it is not checked here.
+- **NOT established:** the definition ORDER. `ResearchDefinition(type, index)` is taken by the host
+  to mean "position among the definitions of that type in catalogue order"; the binary carries a
+  per-object definition selector at `A+0x6B` (rating.md §0) that would settle it. ⚠ A wrong order
+  does not crash — it researches the wrong ride, which looks exactly like working software.
+
+### The two record fields this needed
+
+`TPW.Data.RideLevel` read every level field from `+0x08` to `+0x2C` **except** `+0x24` and `+0x28` —
+record `+0x48+0x34×L` and `+0x4C+0x34×L`, the research **tier** and **work** (§3.2, READ). They are
+exactly what `IResearchCatalogueWorld.ReadResearchLevel` returns, and their absence is why nothing
+could be wired before. The values confirm the offsets rather than merely compiling: tier is an
+ordinal 0..3, and work takes seventeen distinct values, every one a multiple of fifty, 0..2750.
+Crazy Ape level 0 reads tier 0 / work 0 — a starter ride needing no research — and Eruption reads
+tier 3 / work 550.

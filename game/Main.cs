@@ -592,6 +592,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-save-after=")) _parkSaveAfter = int.Parse(arg.Substring("--park-save-after=".Length));
                 else if (arg.StartsWith("--park-save-proof=")) _parkSaveProof = arg.Substring("--park-save-proof=".Length);
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
+                else if (arg.StartsWith("--park-research=")) _autoResearch = arg.Substring("--park-research=".Length);
                 else if (arg.StartsWith("--park-break="))
                 {
                     // --park-break=ENTRY or ENTRY@FRAME. ⚠ BREAKING AT LOAD TESTS NOTHING ABOUT A LOADED
@@ -911,6 +912,14 @@ namespace TPWGodot
                         {
                             var v = System.Array.ConvertAll(hire.Split(','), int.Parse);
                             if (v.Length == 3) GD.Print($"[tpw] --park-hire {hire}: {(_park.Hire(v[0], v[1], v[2]) ? "hired" : "refused")}");
+                        }
+                    // ⚠ AFTER THE HIRES, because a topic is picked against the catalogue and the
+                    // catalogue's tier rule counts what is already built and who is already employed.
+                    if (_autoResearch != null)
+                        foreach (var pick in _autoResearch.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var v = System.Array.ConvertAll(pick.Split(','), int.Parse);
+                            if (v.Length == 3) GD.Print($"[tpw] --park-research {pick}: {_park.StartResearch(v[0], v[1], v[2])}");
                         }
                     if (_autoLay != null)
                         foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
@@ -1538,6 +1547,7 @@ namespace TPWGodot
             }
         }
 
+        string _autoResearch;
         string _shotTarget;
         void TakeShot()
         {

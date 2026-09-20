@@ -33,15 +33,29 @@ namespace TPW.Data
         /// <summary>+0x1C / +0x20: the duration slider's range, in animation phases per run. 1 for a
         /// coaster; up to 60 for the bouncers.</summary>
         public readonly int CyclesMin, CyclesMax;
+        /// <summary>+0x24 and +0x28 (record +0x48 and +0x4C at level L; research.md §3.2, READ).
+        ///
+        /// ⭐ THE RESEARCH FIELDS, AND THEY WERE THE ONLY TWO THIS STRUCT SKIPPED. Everything between
+        /// +0x08 and +0x2C was already read; these two sat in the gap and the research system could
+        /// not run without them, because TPW.Sim.IResearchCatalogueWorld.ReadResearchLevel is exactly
+        /// this pair.
+        ///
+        /// ⚠ TIER IS AN ORDINAL, NOT A COST. research.md §0 records that 0x8006A9A8 was once called a
+        /// "required research cost"; it indexes five bins. WORK is the thing progress is measured
+        /// against. ⚠ TIER 0 WITH NONZERO WORK AUTO-UNLOCKS — that rule lives in ResearchSystem, not
+        /// here, and it is why a zero here is load-bearing rather than missing data.</summary>
+        public readonly int ResearchTier, ResearchWork;
+
         /// <summary>+0x2C: level 0 is the build price, 1 and 2 are the upgrade prices. In pounds; the
         /// bank stores ten times this (economy.md §4.6).</summary>
         public readonly int Price;
 
         public RideLevel(int wearMultiplier, int maxSeats, int lifetime, int speedMin, int speedMax,
-                         int cyclesMin, int cyclesMax, int price)
+                         int cyclesMin, int cyclesMax, int researchTier, int researchWork, int price)
         {
             WearMultiplier = wearMultiplier; MaxSeats = maxSeats; Lifetime = lifetime;
             SpeedMin = speedMin; SpeedMax = speedMax; CyclesMin = cyclesMin; CyclesMax = cyclesMax;
+            ResearchTier = researchTier; ResearchWork = researchWork;
             Price = price;
         }
 
@@ -212,6 +226,8 @@ namespace TPW.Data
                         speedMax:       BitConverter.ToInt32(d, b + 0x18),
                         cyclesMin:      BitConverter.ToInt32(d, b + 0x1C),
                         cyclesMax:      BitConverter.ToInt32(d, b + 0x20),
+                        researchTier:   BitConverter.ToInt32(d, b + 0x24),
+                        researchWork:   BitConverter.ToInt32(d, b + 0x28),
                         price:          BitConverter.ToInt32(d, b + 0x2C)));
                 }
                 a.Levels = levels.ToArray();

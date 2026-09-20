@@ -363,6 +363,12 @@ namespace TPWGodot
             // rubbish litters instead of walking to one.
             _guests.SlowClockDay = () => _finances?.Calendar.TotalDays ?? 0;
             _guests.NearestBin = NearestBinTile;
+            // ⭐ AND THE RESEARCH TREE, WHICH NOTHING HAS EVER OWNED. Rebuilt with the park for the
+            // same reason the gate is: ParkGuests is new here, so a system wired once at boot would be
+            // silently dropped on the first load and the researcher would go back to wandering.
+            _guests.SetResearch(() => System.Linq.Enumerable.Select(_attractions, a => a.Rec).ToList(),
+                                () => System.Linq.Enumerable.Select(_attractionsPlaced, a => a.Rec.Entry),
+                                id => _advisor.Post(id));
             _guests.LogStaff = _logRides;
             _guests.MapChanged();
             _gate = null; _gateModel = null; _gateMesh.Mesh = null; _gateAngleDrawn = int.MinValue;
@@ -796,6 +802,11 @@ namespace TPWGodot
         /// <summary>The nearest placed litter bin within six tiles of (x, z), or null. ⭐ A BIN IS A
         /// FEATURE WITH RECORD BYTE +0x2E BIT 2 SET (behaviour.md §0 item 8) — the same byte family
         /// that says whether staff may rest there. Six tiles is the idle pass's own radius.</summary>
+        /// <summary>--park-research=SLOT,TYPE,INDEX: start one research topic. The panel that does
+        /// this for a player does not exist yet.</summary>
+        public string StartResearch(int slot, int type, int index)
+            => _guests?.StartResearch(slot, type, index) ?? "no guests";
+
         (int X, int Z)? NearestBinTile(int x, int z)
         {
             (int X, int Z)? best = null;
@@ -1117,6 +1128,7 @@ namespace TPWGodot
             + $"\n{_guests.NeedReport()}"
             + $"\n{_guests.LitterLine()}"
             + $"\n{_guests.InfluenceLine()}"
+            + $"\n{_guests.ResearchLine()}"
             + $"\n{_guests.StateReport()}"
             + $"\n{_guests.QueueWaitReport()}"
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"
