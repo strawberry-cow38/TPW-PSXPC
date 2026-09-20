@@ -145,6 +145,33 @@ IndexOutOfRangeException on the first bus, 27 seconds into the game.
 694 694 694 695 697 694 694, whose ±1..3 is the root counter — and at the nominal hardware step
 (10082) it gives 687, matching this report's closed form of ≈688.
 
+## 2.7 Where a guest actually appears (SOURCED, 2026-09-20)
+
+⭐ **NOT AT THE BUS.** `Arrivals` fixes the head-count (0x80067380) and then calls
+`0x800540B8(&pos, exitIdx)` at 0x80067384..0x8006738C **before** the per-guest loop, so **every guest of
+one load gets the same position**. `exitIdx` is 0, from the bus tick's delay slot at 0x80052740.
+
+`0x800540B8(out, i)` (0x800540B8..0x80054140): `e = [0x8010393C] + 2*i`; `out.x = (e[0] << 8) + 128`;
+`out.z = (e[1] << 8) + 128`; `out.y = 0x80050938(x, z, 0)` (terrain height). That is the **tile centre of
+exit point 0** — a gate tile beside the entrance road, `ParkMap.SpawnTiles` in the port. On map 0203 it
+is tile (18, 5) → (4736, 1408), which transport.md measured live with twelve guests standing on it.
+
+⭐ **AND THE BUS'S POSITION IS NEVER READ BY THE SPAWN.** The only readers of `[0x80103968]` in the whole
+image are 0x80052684 and 0x800526E8 (the tick) and 0x80057CB4 (the draw). The two are correlated in
+TIME — the spawn happens once `pos >= tgt` — and in nothing else.
+
+Per guest (0x80067398..0x800673D8): `v = 0x80051480()` (0 → skipped); `type = rand(8)` (0x800C2648);
+`0x800926AC(v, type)` = `sb type, 0x61(v)`; `0x80093FC0(v+8, x, z)` = `sh x, 0x18(e); sh z, 0x1A(e)`.
+The **height is not passed** — the entity samples the terrain itself (0x800935C0 → 0x80050938 when its y
+argument is 0). Then state 36 walks it to a **binary constant**: table 0x800E0D28 = `{5376, 1620},
+{5376, 2640}`, and for index 0 `x = 5376 + rand(426) - 213`, `z = 1605` (0x80059A1C..0x80059A8C). The
+target being static is only possible because the gate sits in the same place on every map, which
+transport.md §2.5's tile survey confirms.
+
+⚠ **No bus sound.** Every `jal` in the bus segment (0x8005262C..0x800527D4) and in `Arrivals`
+(0x80067274..0x800673FC) was listed; none is an audio call. A negative worth the words it took to make
+it checkable.
+
 ## 3. Head-count per bus: `Arrivals` 0x80067274 (SOURCED)
 
 ```
