@@ -17,6 +17,7 @@ namespace TPW.Sim.Tests
         // 3's wording taken literally (the record's unit cost as-is), REJECTS q/4 rounded up.
         [Theory]
         [InlineData(40, 0, 0, 30)]
+        [InlineData(100, 0, 0, 75)]       // pins the 75 itself: 40 × 75 and 40 × 76 both truncate to 30
         [InlineData(40, 100, 0, 40)]      // 75 + 25 = 100%
         [InlineData(40, 0, 100, 20)]      // 75 − 25 = 50%
         [InlineData(40, 3, 3, 30)]        // 3/4 truncates to 0 on both sides
@@ -54,12 +55,12 @@ namespace TPW.Sim.Tests
         }
 
         // Each term truncates on its own before the sum (four separate mfhi/sra sequences). REJECTS
-        // summing the products and dividing once: 33 × 20 + 33 × 40 = 1980 / 100 = 19, not 6 + 13.
+        // summing the products and dividing once: 39 × 20 + 33 × 40 = 2100 / 100 = 21, not 7 + 13 = 20.
         [Fact]
         public void EachTermOfTheNeedFactorTruncatesSeparately()
         {
             var p = new ShopProduct(40, 0, 20, 40, 0, 0);
-            Assert.Equal(119, GuestSpending.NeedFactor(33, 33, 0, 100, p));
+            Assert.Equal(120, GuestSpending.NeedFactor(39, 33, 0, 100, p));
         }
 
         // ⭐ HAPPINESS SCALES WILLINGNESS TO PAY, and the span is exactly 2x across its range: the factor
