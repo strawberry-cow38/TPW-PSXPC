@@ -90,6 +90,66 @@ A stale build is invisible from the output; it looks like your change not workin
 The launcher already does the right thing (it builds the game project by name),
 so this bites developers at a terminal, not users.
 
+## Driving it headless
+
+Every part of the port can be built, run and photographed from a command line, which
+is how nearly every claim in `findings/` was checked. The pattern:
+
+    TPW_DATA=/path/to/tpw.iso xvfb-run -a <godot> --path game --rendering-driver opengl3 -- \
+        --no-boot --park=203 --park-open --shot=/tmp/a.png:1200
+
+`--no-boot` skips the intro, `--park=N` opens a map, `--shot=PATH:FRAME` photographs it
+and exits. On a headless box `xvfb-run -a` is required and `TPW_DATA` must point at the
+disc image, or the port starts, prints "No game data found" and photographs an empty
+launcher.
+
+⚠ **A CAPTURE IS NOT FRAME-DETERMINISTIC.** The park's catch-up loop runs up to ten
+simulation frames per drawn one, sized from the real frame delta, so how far the sim has
+got by frame 1200 depends on how fast that machine drew the first 1199. Two runs of the
+identical command put a ride on animation tick 14 and tick 29. **Do not use a frame
+number as a control** — address the state instead (`--shot=PATH:running`), or log the
+state you care about and check the two runs agree on it.
+
+### Building a park without a mouse
+
+| flag | what it does |
+|---|---|
+| `--park=N` | open map entry N |
+| `--park-open` | open the park to guests (the bus only brings anyone to an OPEN park) |
+| `--park-place=entry,x,z,rot;...` | place attractions at a footprint corner |
+| `--park-lay=x0,z0,x1,z1;...` | lay path runs as the path tool would |
+| `--park-queue=entry,x,z,rot:cx,cz:...` | place a ride, then click its queue tool at each tile |
+| `--park-track=...` / `--park-select=x,z` / `--park-slider=...` | the track builder and the attraction panel |
+| `--park-view=x,z,yaw,pitch,distance` | put the camera somewhere specific |
+| `--park-hire=kind,x,z;...` | hire staff (0 mechanic, 1 entertainer, 2 cleaner, 3 guard, 4 researcher) |
+
+⚠ **A QUEUE MUST END ON A PATH TILE.** A queue run that stops one tile short of your path
+looks connected and can never be routed into — see `findings/paths.md` §0 item 7. It is
+the game's own rule and it will cost you an afternoon.
+
+### Test hooks, which are not rules
+
+These exist so a behaviour can be watched without playing the game to it. Each one moves
+a number the real rules already read; none of them changes a rule.
+
+| flag | why it exists |
+|---|---|
+| `--park-guests=N` | keep N guests in the park regardless of the bus |
+| `--park-break=entry` | wear a ride out now, so a mechanic can be watched fixing it |
+| `--park-log-rides` | every ride's status changes, its animation clock, the mesh the RENDERER holds, and every staff member's state changes |
+| `--shot=PATH:running[:N]` | photograph when a ride is mid-cycle rather than at a frame number |
+
+### Reading the park back
+
+The shot prints one line per run: guests, how many are queueing, riding and served, the
+pathfinder's outstanding searches and free pools, how many connected pieces the walkable
+map is in, and then a line per ride and per staff member.
+
+⚠ **`failures N stranded / M SAME AREA` is two numbers on purpose.** A single total of
+failed routes can never be zero in a park with an island in it, so it only ever climbs and
+says nothing. The second is the one to gate on: it means the walker and its destination
+were in the same connected piece and the search still found nothing, and it should be 0.
+
 ## Conventions
 
 Every claim recorded here is marked **sourced**, **derived** or **unmeasured**.
