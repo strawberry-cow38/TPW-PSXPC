@@ -143,7 +143,10 @@ namespace TPWGodot
                     },
                 },
             };
-            g.Block = _sprites != null ? _rng.Next(_sprites.Blocks) : 0;
+            // The body its type calls for: the game's own eight-slot list, four bodies over eight types
+            // (PeopleSheet.GuestBlocks). Staff and the world's costumed character are NOT in it.
+            g.V.VisitorType = _rng.Next(TPW.Data.PeopleSheet.GuestBlocks.Length);
+            g.Block = TPW.Data.PeopleSheet.GuestBlocks[g.V.VisitorType];
             _parent.AddChild(g.Inst);
             _guests.Add(g);
             Place(g);

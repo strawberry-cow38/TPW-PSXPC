@@ -19,10 +19,17 @@ namespace TPW.Data
     /// and eight rows that turn a full circle, and rendering the frames before it shows a figure waving
     /// its arms about on the spot.
     ///
-    /// ⚠ WHICH BLOCK A PARTICULAR GUEST GETS IS NOT ESTABLISHED. A visitor's type is a byte the spawner
-    /// rolls (V+0x61, rand(8), 0x800926AC) and the only two readers of it are a stats table
-    /// (0x800F79E8, eight pairs of numbers) and an identity remap — neither picks a person. The choice
-    /// is made somewhere this has not traced, so the port picks a block per guest and says so.</summary>
+    /// ⭐ AND WHICH PERSON A GUEST IS comes from the table at 0x800E002C: four worlds of fourteen archive
+    /// entries, and the first EIGHT of each world are the guest bodies, indexed by the type byte the
+    /// spawner rolls (V+0x61 = rand(8), 0x800926AC). Every world lists the same eight:
+    /// 272, 272, 273, 273, 270, 270, 271, 271 — so there are FOUR guest bodies and each serves two of
+    /// the eight types. The ninth entry is the world's own costumed character (267 / 265 / 259 / 275,
+    /// one per theme), the next four are the staff (263, 264, 266, 274), and the last is a per-world
+    /// entry in the 401..404 range. <see cref="GuestBlocks"/>, <see cref="StaffBlocks"/> and
+    /// <see cref="CostumeBlocks"/> are those, as indices into <see cref="Blocks"/>.
+    ///
+    /// ⚠ Master, on the first park full of them: "u have a bunch of staff mixed in and maybe some
+    /// costumed guests" — which is exactly what picking any of the twelve gives you.</summary>
     public sealed class PeopleSheet
     {
         /// <summary>The archive entry the sprites live in.</summary>
@@ -36,6 +43,16 @@ namespace TPW.Data
             (272, 0), (273, 66), (270, 132), (271, 198), (267, 440), (265, 506),
             (275, 577), (259, 643), (263, 264), (264, 308), (266, 352), (274, 396),
         };
+
+        /// <summary>The eight guest slots of 0x800E002C's per-world list, as indices into <see cref="Blocks"/>:
+        /// entries 272, 272, 273, 273, 270, 270, 271, 271. A guest's type byte indexes this directly.</summary>
+        public static readonly int[] GuestBlocks = { 0, 0, 1, 1, 2, 2, 3, 3 };
+
+        /// <summary>The staff of every world (263, 264, 266, 274), as indices into <see cref="Blocks"/>.</summary>
+        public static readonly int[] StaffBlocks = { 8, 9, 10, 11 };
+
+        /// <summary>The costumed character each world has one of (267, 265, 259, 275), by world.</summary>
+        public static readonly int[] CostumeBlocks = { 4, 5, 7, 6 };
 
         readonly TextureSheet _sheet;
         /// <summary>The first walking sprite of each block, in <see cref="Blocks"/>' order.</summary>

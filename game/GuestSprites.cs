@@ -17,6 +17,9 @@ namespace TPWGodot
     /// so the row is picked from the direction the guest is walking RELATIVE TO THE CAMERA, which is the
     /// same thing wherever the two agree and stays right where they do not.
     ///
+    /// ⭐ GUESTS ONLY. Which person a guest is drawn as is the game's (PeopleSheet.GuestBlocks); the staff
+    /// and the world's costumed character are in the same sheet and are not guests.
+    ///
     /// ⚠ THE SIZE IS NOT SOURCED YET. The game's sprite call takes a divisor per axis and scales
     /// ((size − 1) &lt;&lt; 8) / divisor (0x80055470), so what a guest measures on screen is the caller's to
     /// choose and this has not found the guest's call site. <see cref="TilesPerTexel"/> is therefore set

@@ -2341,6 +2341,48 @@ static class Program
                     : null;
                 return Movies(disc, outDir, Array.IndexOf(args, "--frames") >= 0, only);
             }
+            // --people OUT.rgba: one row per person the game knows (PeopleSheet's twelve blocks), five frames of
+            // one facing each, so who is a guest and who is staff can be settled by looking.
+            int ppAt = Array.IndexOf(args, "--people");
+            if (ppAt >= 0 && ppAt + 1 < args.Length)
+            {
+                var af4 = disc.Find(AssetSelfTest.AssetArchive);
+                if (af4 == null) { Console.WriteLine("no asset archive on this disc"); return 1; }
+                if (!GazArchive.TryParse(disc.ReadFile(af4), out var gz4, out string gerr4))
+                { Console.WriteLine("archive: " + gerr4); return 1; }
+                var people = PeopleSheet.Read(gz4);
+                if (people == null) { Console.WriteLine("no people sheet"); return 1; }
+                var psh = people.Sheet269;
+                int facing = Array.IndexOf(args, "--facing") is int fa && fa >= 0 && fa + 1 < args.Length ? int.Parse(args[fa + 1]) : 5;
+                int cw = 28, ch = 30, cols = PeopleSheet.WalkFrames, rows = PeopleSheet.Blocks.Length;
+                int gw = cw * cols, gh = ch * rows;
+                var grid = new byte[gw * gh * 4];
+                for (int i = 0; i < gw * gh; i++) { grid[i * 4] = 24; grid[i * 4 + 1] = 16; grid[i * 4 + 2] = 28; grid[i * 4 + 3] = 255; }
+                for (int b = 0; b < rows; b++)
+                    for (int f = 0; f < cols; f++)
+                    {
+                        int si = people.WalkSprite(b, facing, f);
+                        var img = psh.RenderSprite(si);
+                        if (img == null) continue;
+                        var sp = psh.Sprites[si];
+                        int cx = f * cw + cw / 2, cy = b * ch + ch - 4;
+                        for (int y = 0; y < img.Height; y++)
+                            for (int x = 0; x < img.Width; x++)
+                            {
+                                int o = (y * img.Width + x) * 4;
+                                if (img.Rgba[o + 3] == 0) continue;
+                                int X = cx + sp.OffsetX + x, Y = cy + sp.OffsetY + y;
+                                if (X < 0 || Y < 0 || X >= gw || Y >= gh) continue;
+                                int d = (Y * gw + X) * 4;
+                                grid[d] = img.Rgba[o]; grid[d + 1] = img.Rgba[o + 1]; grid[d + 2] = img.Rgba[o + 2]; grid[d + 3] = 255;
+                            }
+                    }
+                System.IO.File.WriteAllBytes(args[ppAt + 1], grid);
+                Console.WriteLine($"{rows} people x {cols} frames of facing {facing} -> {gw}x{gh} RGBA at {args[ppAt + 1]}");
+                for (int b = 0; b < rows; b++)
+                    Console.WriteLine($"  row {b}: entry {PeopleSheet.Blocks[b].Entry}, block base {PeopleSheet.Blocks[b].Base}, walk at {people.WalkSprite(b, 0, 0)}");
+                return 0;
+            }
             // --spritegrid E FIRST N COLS OUT.rgba: sprites FIRST..FIRST+N-1 of entry E laid out in a grid, each
             // placed by its own offsets inside its cell so the figures line up as the game draws them. For reading
             // an animation's order off the picture instead of guessing it.
