@@ -111,6 +111,24 @@ path writes the new tile's bit toward the neighbour and the neighbour's bit back
 | 0x40 | west | (−1, 0) |
 | 0x02 / 0x08 / 0x20 / 0x80 | NE / SE / SW / NW — model choice only, never walked | |
 
+⭐ **AND A PATH NEVER LINKS DIRECTLY TO A QUEUE — THE OVERLAP TILE IS THE ONLY BRIDGE** (READ,
+2026-09-20). 0x8004E20C dispatches on the kind being laid: **2 and 13 take the path linker, 0 and 4 go
+elsewhere** (0x8004E244..0x8004E274). Inside it, the neighbour test at 0x8004E290..0x8004E2C4 accepts a
+neighbour whose type equals the kind being laid, plus one extra case — `type == 13 && kind == 2`. **Type
+4 is never accepted.** So a path laid beside an existing queue joins nothing, and a queue laid beside an
+existing path joins nothing either.
+
+What connects them is the tile where a queue run ENDS ON a path: 0x8004E034 turns that 2↔4 collision into
+**13**, which is both a path for linking purposes and the queue's own "behind" neighbour, so the route
+runs path → 13 → queue. A queue that stops one tile short of the path leaves two structures that can
+never link, however they are laid and in whatever order. ⚠ This matters for a port because the symptom —
+guests refusing to enter a queue — looks like a pathfinder fault and is a linker one.
+
+⚠ **The ride's entrance is joined only if it has no links yet.** The queue branch reads the door tile's
+byte +2 and abandons the door join when it is non-zero (0x8004ED2C..0x8004ED3C — note the `nop` in the
+delay slot, without which the zeroing would read as unconditional). One queue per entrance, by
+construction.
+
 The pathfinder's direction table (overlay 0x8011417C = (1,0),(0,1),(−1,0),(0,−1)) and its bit table
 (0x801036D0 = 04,10,40,01) agree with this (READ from the decoded overlay and the image).
 
