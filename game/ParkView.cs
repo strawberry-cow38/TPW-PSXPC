@@ -637,8 +637,10 @@ namespace TPWGodot
             int catalogue = Math.Max(1, _attractions.Count);
             int capacity = 25 + 75 * kinds.Count / catalogue;
             int count = TPW.Sim.BusLoad.HeadCount(TPW.Sim.BusLoad.ParkScore(draws), capacity, _guests.Count, 0, BusDivisor);
-            for (int i = 0; i < count; i++) _guests.Spawn();
-            GD.Print($"[bus] arrived: score {TPW.Sim.BusLoad.ParkScore(draws)} capacity {capacity} -> {count} guests");
+            // Exit point 0's tile, the same one for the whole load (see ParkGuests.Spawn).
+            (int X, int Z)? at = _map.SpawnTiles.Count > 0 ? _map.SpawnTiles[0] : null;
+            for (int i = 0; i < count; i++) _guests.Spawn(at);
+            GD.Print($"[bus] arrived: score {TPW.Sim.BusLoad.ParkScore(draws)} capacity {capacity} -> {count} guests at {at}");
         }
 
         /// <summary>[0x80102E50], the divisor the draw is scaled by.</summary>
