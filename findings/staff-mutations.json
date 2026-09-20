@@ -1,0 +1,1870 @@
+{
+  "status": "passed",
+  "filter": "FullyQualifiedName~StaffTraceTests",
+  "mutation_count": 113,
+  "source_sha256": {
+    "core/TPW.Sim/StaffMotion.cs": "1c8b272ef1694884f72249d55f53acce1e657e2aeeee09f163929e53789a8e28",
+    "core/TPW.Sim/StaffAppearance.cs": "c3512dcca382b5bc0787cd206a98a1020ce4accb787ade5e63a50e4806c2dffb",
+    "core/TPW.Sim/StaffHiring.cs": "42353138dd08b0e03493eec97520ad1741d8bc8750e39192745a7725315820cd",
+    "core/TPW.Sim/StaffRideNavigation.cs": "2afdb678e5af4980bd89241d673736720d8c353dc57a768ba85e6b2c06f60bd5"
+  },
+  "test_sha256": "e3f02b1b311f58f834c414ec070225e0e16b06c020282c0471f7ca2d5d48f05d",
+  "mutations": [
+    {
+      "exit_code": 1,
+      "seconds": 7.3,
+      "summary": "Failed!  - Failed:     7, Passed:    40, Skipped:     0, Total:    47, Duration: 194 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Mechanic, first: 9) [22 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "mechanic selects cleaner table",
+      "old": "StaffKind.Mechanic => Mechanic.UnknownSecondColumn",
+      "new": "StaffKind.Mechanic => Handyman.UnusedThirdColumn",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.26,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 240 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [4 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Cleaner, first: 10) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "cleaner selects mechanic table",
+      "old": "StaffKind.Cleaner => Handyman.UnusedThirdColumn",
+      "new": "StaffKind.Cleaner => Mechanic.UnknownSecondColumn",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.16,
+      "summary": "Failed!  - Failed:     7, Passed:    40, Skipped:     0, Total:    47, Duration: 245 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Mechanic, first: 9) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "mechanic uses repair duration as speed",
+      "old": "StaffKind.Mechanic => Mechanic.UnknownSecondColumn",
+      "new": "StaffKind.Mechanic => Mechanic.RepairTicks",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 13.84,
+      "summary": "Failed!  - Failed:     8, Passed:    39, Skipped:     0, Total:    47, Duration: 256 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Researcher) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [29 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "base speed born at visitor maximum",
+      "old": "InitialBaseSpeed = 15",
+      "new": "InitialBaseSpeed = 29",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.52,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 225 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Researcher) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "base speed ignores current packed field",
+      "old": "return packedBaseSpeed & 0x1F;",
+      "new": "return 15;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.94,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 224 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Researcher) [9 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Guard) [2 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "base speed loses fifth bit",
+      "old": "packedBaseSpeed & 0x1F",
+      "new": "packedBaseSpeed & 0x0F",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.11,
+      "summary": "Failed!  - Failed:     3, Passed:    44, Skipped:     0, Total:    47, Duration: 196 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Researcher) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.OtherClassesUseThePackedBaseSpeed(kind: Entertainer) [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "base speed does not narrow",
+      "old": "packedBaseSpeed & 0x1F",
+      "new": "packedBaseSpeed",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.88,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 220 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Mechanic, first: 9) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Cleaner, first: 10) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "skill does not mask",
+      "old": "staff.Skill & 7",
+      "new": "staff.Skill",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.05,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 177 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [5 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Mechanic, first: 9) [2 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Cleaner, first: 10) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "skill uses only two bits",
+      "old": "staff.Skill & 7",
+      "new": "staff.Skill & 3",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.44,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 238 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Mechanic, first: 9) [6 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Cleaner, first: 10) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "absent skill rows silently clamp",
+      "old": "throw new ArgumentOutOfRangeException(nameof(staff.Skill));",
+      "new": "return table[table.Length - 1];",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.52,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 208 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [8 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "skill lookup always first row",
+      "old": "return table[row];",
+      "new": "return table[0];",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.69,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 201 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Mechanic, first: 9) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Mechanic speed row 0 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Mechanic && row == 0 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.98,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 215 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [2 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Mechanic speed row 1 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Mechanic && row == 1 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.68,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 276 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Mechanic speed row 2 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Mechanic && row == 2 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.19,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 204 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [5 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Mechanic speed row 3 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Mechanic && row == 3 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.11,
+      "summary": "Failed!  - Failed:     3, Passed:    44, Skipped:     0, Total:    47, Duration: 244 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [4 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Mechanic speed row 4 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Mechanic && row == 4 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.86,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 301 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 0, mechanic: 9, cleaner: 10) [2 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillUsesThreeBitsButAbsentRowsAreExplicitlyUnsupported(kind: Cleaner, first: 10) [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Cleaner speed row 0 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Cleaner && row == 0 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.77,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 225 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 1, mechanic: 12, cleaner: 15) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Cleaner speed row 1 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Cleaner && row == 1 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.76,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 276 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 2, mechanic: 14, cleaner: 20) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Cleaner speed row 2 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Cleaner && row == 2 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.41,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 189 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 3, mechanic: 16, cleaner: 20) [2 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Cleaner speed row 3 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Cleaner && row == 3 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.02,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 237 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.SkillControlsMechanicAndCleanerSpeed(skill: 4, mechanic: 18, cleaner: 18) [2 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "Cleaner speed row 4 changed",
+      "old": "return table[row];",
+      "new": "return table[row] + (staff.Kind == StaffKind.Cleaner && row == 4 ? 1 : 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.93,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 241 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [10 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "step ignores supplied base speed",
+      "old": "Speed(staff, packedBaseSpeed) * timescale",
+      "new": "Speed(staff) * timescale",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.08,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 175 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "step ignores timescale",
+      "old": "* timescale",
+      "new": "* 0x4000",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.89,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 257 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [13 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "step rounds up",
+      "old": "Speed(staff, packedBaseSpeed) * timescale)",
+      "new": "Speed(staff, packedBaseSpeed) * timescale + 0x3FFF)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.98,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 217 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StaffStepIsATruncatedEightPointEightDisplacement [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "step shift twelve",
+      "old": ">> VisitorWalking.StepShift",
+      "new": ">> 12",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.86,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 195 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "step arithmetic shift",
+      "old": "(uint)(Speed",
+      "new": "(int)(Speed",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.79,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 237 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.StepKeepsTheOriginalLowWordAndLogicalShift [13 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffMotion.cs",
+      "name": "step widens product",
+      "old": "(uint)(Speed(staff, packedBaseSpeed) * timescale)",
+      "new": "(ulong)((long)Speed(staff, packedBaseSpeed) * timescale)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.0,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 181 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Mechanic, resource: 263, first: 264, block: 8) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Mechanic wrong resource",
+      "old": "StaffKind.Mechanic => new(263, 264, 8)",
+      "new": "StaffKind.Mechanic => new(264, 264, 8)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.76,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 274 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Mechanic, resource: 263, first: 264, block: 8) [29 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Mechanic wrong sheet base",
+      "old": "StaffKind.Mechanic => new(263, 264, 8)",
+      "new": "StaffKind.Mechanic => new(263, 265, 8)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.34,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 196 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Mechanic, resource: 263, first: 264, block: 8) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Mechanic wrong people block",
+      "old": "StaffKind.Mechanic => new(263, 264, 8)",
+      "new": "StaffKind.Mechanic => new(263, 264, 9)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.92,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 226 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Guard, resource: 264, first: 308, block: 9) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Guard wrong resource",
+      "old": "StaffKind.Guard => new(264, 308, 9)",
+      "new": "StaffKind.Guard => new(265, 308, 9)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.97,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 212 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Guard, resource: 264, first: 308, block: 9) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Guard wrong sheet base",
+      "old": "StaffKind.Guard => new(264, 308, 9)",
+      "new": "StaffKind.Guard => new(264, 309, 9)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.89,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 273 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Guard, resource: 264, first: 308, block: 9) [6 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Guard wrong people block",
+      "old": "StaffKind.Guard => new(264, 308, 9)",
+      "new": "StaffKind.Guard => new(264, 308, 10)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.84,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 207 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Cleaner, resource: 266, first: 352, block: 10) [20 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Cleaner wrong resource",
+      "old": "StaffKind.Cleaner => new(266, 352, 10)",
+      "new": "StaffKind.Cleaner => new(267, 352, 10)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.12,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 281 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Cleaner, resource: 266, first: 352, block: 10) [16 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Cleaner wrong sheet base",
+      "old": "StaffKind.Cleaner => new(266, 352, 10)",
+      "new": "StaffKind.Cleaner => new(266, 353, 10)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.98,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 172 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Cleaner, resource: 266, first: 352, block: 10) [7 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Cleaner wrong people block",
+      "old": "StaffKind.Cleaner => new(266, 352, 10)",
+      "new": "StaffKind.Cleaner => new(266, 352, 11)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.51,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 202 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Researcher, resource: 274, first: 396, block: 11) [4 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Researcher wrong resource",
+      "old": "StaffKind.Researcher => new(274, 396, 11)",
+      "new": "StaffKind.Researcher => new(275, 396, 11)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.63,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 212 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Researcher, resource: 274, first: 396, block: 11) [4 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Researcher wrong sheet base",
+      "old": "StaffKind.Researcher => new(274, 396, 11)",
+      "new": "StaffKind.Researcher => new(274, 397, 11)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.22,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 204 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UniformedClassesHaveFixedResourceAndPeopleSheetRows(kind: Researcher, resource: 274, first: 396, block: 11) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "Researcher wrong people block",
+      "old": "StaffKind.Researcher => new(274, 396, 11)",
+      "new": "StaffKind.Researcher => new(274, 396, 12)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.85,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 346 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 0, resource: 403) [6 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "entertainer theme 0 wrong resource",
+      "old": "0 => 403",
+      "new": "0 => 404",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.03,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 274 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 1, resource: 401) [23 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "entertainer theme 1 wrong resource",
+      "old": "1 => 401",
+      "new": "1 => 402",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.85,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 250 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 2, resource: 402) [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "entertainer theme 2 wrong resource",
+      "old": "2 => 402",
+      "new": "2 => 403",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.64,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 247 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 3, resource: 404) [8 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "entertainer theme 3 wrong resource",
+      "old": "3 => 404",
+      "new": "3 => 405",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.72,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 370 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 1, resource: 401) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 0, resource: 403) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 2, resource: 402) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 3, resource: 404) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "entertainer given sheet base",
+      "old": "}, null, null)",
+      "new": "}, 440, null)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.8,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 296 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 1, resource: 401) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 0, resource: 403) [14 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 2, resource: 402) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EntertainersHaveSeparateFrameResources(theme: 3, resource: 404) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "entertainer given costume block",
+      "old": "}, null, null)",
+      "new": "}, null, 4)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.67,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 234 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UnknownArtHasNoInventedFallback [9 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "unknown theme silently substituted",
+      "old": "throw new ArgumentOutOfRangeException(nameof(theme))",
+      "new": "403",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.2,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 272 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.UnknownArtHasNoInventedFallback [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "unknown class silently substituted",
+      "old": "throw new ArgumentOutOfRangeException(nameof(kind))",
+      "new": "new(263, 264, 8)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 12.44,
+      "summary": "Failed!  - Failed:    10, Passed:    37, Skipped:     0, Total:    47, Duration: 439 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 4, camera: 0, frame: 0, expected: 32, mirror: True) [67 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 0, frame: 1, expected: 25, mirror: True) [10 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 0, frame: 4, expected: 12, mirror: False) [6 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 1, camera: 0, frame: 3, expected: 11, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 0, camera: 0, frame: 7, expected: 7, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 2, camera: 0, frame: 2, expected: 18, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 6, camera: 0, frame: 7, expected: 23, mirror: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "five walk frames",
+      "old": "WalkFrames = 8",
+      "new": "WalkFrames = 5",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 13.07,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 275 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidWalkFrameIsNotAValidSprite(frame: -1) [7 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "negative frame accepted",
+      "old": "(uint)frame >= WalkFrames",
+      "new": "frame >= WalkFrames",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.58,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 315 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidWalkFrameIsNotAValidSprite(frame: 8) [11 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "frame eight accepted",
+      "old": "(uint)frame >= WalkFrames",
+      "new": "(uint)frame > WalkFrames",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.41,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 407 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [17 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "camera rotation subtracted",
+      "old": "personFacing + cameraFacing",
+      "new": "personFacing - cameraFacing",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.19,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 235 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [11 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "camera rotation ignored",
+      "old": "personFacing + cameraFacing",
+      "new": "personFacing",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.3,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 385 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [18 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "relative facing not wrapped",
+      "old": "(personFacing + cameraFacing) & 7",
+      "new": "(personFacing + cameraFacing)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.21,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 212 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 4, camera: 0, frame: 0, expected: 32, mirror: True) [23 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "direction four not mirrored",
+      "old": "facing < 5",
+      "new": "facing < 4",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.11,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 387 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [54 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "direction five mirrored",
+      "old": "facing < 5",
+      "new": "facing <= 5",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.78,
+      "summary": "Failed!  - Failed:    10, Passed:    37, Skipped:     0, Total:    47, Duration: 259 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 4, camera: 0, frame: 0, expected: 32, mirror: True) [60 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 0, frame: 1, expected: 25, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 0, frame: 4, expected: 12, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 1, camera: 0, frame: 3, expected: 11, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 0, camera: 0, frame: 7, expected: 7, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 2, camera: 0, frame: 2, expected: 18, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 6, camera: 0, frame: 7, expected: 23, mirror: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "mirror flag reversed",
+      "old": "+ frame, mirror)",
+      "new": "+ frame, !mirror)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.28,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 200 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 0, frame: 4, expected: 12, mirror: False) [13 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 6, camera: 0, frame: 7, expected: 23, mirror: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "fold from seven",
+      "old": "8 - facing",
+      "new": "7 - facing",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.69,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 297 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 0, frame: 4, expected: 12, mirror: False) [4 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 6, camera: 0, frame: 7, expected: 23, mirror: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "no stored-facing fold",
+      "old": "mirror ? facing : 8 - facing",
+      "new": "facing",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.21,
+      "summary": "Failed!  - Failed:     9, Passed:    38, Skipped:     0, Total:    47, Duration: 324 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 4, camera: 0, frame: 0, expected: 32, mirror: True) [68 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 0, frame: 1, expected: 25, mirror: True) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 0, frame: 4, expected: 12, mirror: False) [3 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 1, camera: 0, frame: 3, expected: 11, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 2, frame: 0, expected: 24, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 2, camera: 0, frame: 2, expected: 18, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 6, camera: 0, frame: 7, expected: 23, mirror: False) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "frame ignores facing",
+      "old": "storedFacing * WalkFrames + frame",
+      "new": "frame",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.77,
+      "summary": "Failed!  - Failed:     8, Passed:    39, Skipped:     0, Total:    47, Duration: 178 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 0, frame: 1, expected: 25, mirror: True) [6 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 0, frame: 4, expected: 12, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 1, camera: 0, frame: 3, expected: 11, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 0, camera: 0, frame: 7, expected: 7, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 5, camera: 0, frame: 6, expected: 30, mirror: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 2, camera: 0, frame: 2, expected: 18, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 6, camera: 0, frame: 7, expected: 23, mirror: False) [12 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "frame ignores animation phase",
+      "old": "storedFacing * WalkFrames + frame",
+      "new": "storedFacing * WalkFrames",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.7,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 150 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 4, camera: 0, frame: 0, expected: 32, mirror: True) [17 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 3, camera: 0, frame: 1, expected: 25, mirror: True) [2 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 1, camera: 0, frame: 3, expected: 11, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 0, camera: 0, frame: 7, expected: 7, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 7, camera: 2, frame: 5, expected: 13, mirror: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.WalkUsesFiveStoredDirectionsAndEightFrames(person: 2, camera: 0, frame: 2, expected: 18, mirror: True) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffAppearance.cs",
+      "name": "mirror flag discarded",
+      "old": "+ frame, mirror)",
+      "new": "+ frame, false)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.76,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 172 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [9 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "always allocate mechanic",
+      "old": "world.AllocateAndEmploy(kind, variant)",
+      "new": "world.AllocateAndEmploy(StaffKind.Mechanic, variant)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.91,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 132 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [13 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "always allocate variant zero",
+      "old": "world.AllocateAndEmploy(kind, variant)",
+      "new": "world.AllocateAndEmploy(kind, 0)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.17,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 192 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.NoPoolNodeDoesNotStartPlacement [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "pool exhaustion falls through",
+      "old": "if (staff == null) return null;",
+      "new": "",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.55,
+      "summary": "Failed!  - Failed:     4, Passed:    43, Skipped:     0, Total:    47, Duration: 294 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [15 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "record kind ignored",
+      "old": "world.RecruitLevel(kind, variant)",
+      "new": "world.RecruitLevel(StaffKind.Guard, variant)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.66,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 177 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [15 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "record variant ignored",
+      "old": "world.RecruitLevel(kind, variant)",
+      "new": "world.RecruitLevel(kind, 0)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 4.91,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 128 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [9 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [7 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "skill uses full record word",
+      "old": "world.RecruitLevel(kind, variant) & 7",
+      "new": "world.RecruitLevel(kind, variant)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.92,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 138 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [10 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "pay grade used as skill",
+      "old": "world.RecruitLevel(kind, variant) & 7",
+      "new": "(world.RecruitLevel(kind, variant) & 7) + 1",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.48,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 163 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [14 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "morale not reset",
+      "old": "staff.Morale = InitialMorale;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.28,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 143 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [12 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "tiredness not reset",
+      "old": "staff.Tiredness = InitialTiredness;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.0,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 181 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [10 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "skill not reset",
+      "old": "staff.Skill = world.RecruitLevel(kind, variant) & 7;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.53,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 160 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [14 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "purpose not reset",
+      "old": "staff.Purpose = InitialPurpose;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.64,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 138 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [12 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "target not reset",
+      "old": "staff.HasTarget = false;",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.19,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 243 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [70 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "patrol assignment retained",
+      "old": "world.ClearPatrolArea(staff);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.05,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 251 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [15 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "appearance not initialized",
+      "old": "world.InitializeAppearance(staff, InitialAnimation, StaffMotion.InitialBaseSpeed);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.22,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 138 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [22 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "hire day omitted",
+      "old": "world.SetHireDay(staff, world.TotalDays);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 5.12,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 182 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [18 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "not held at hire",
+      "old": "world.SetHeld(staff, true);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.36,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 257 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [2 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "payment omitted",
+      "old": "world.TrySpend(Money.Zero);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.55,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 215 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [7 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "placement never finished",
+      "old": "world.FinishPlacement(staff);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.36,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 232 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [8 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "report morale silently changed",
+      "old": "InitialMorale = 100",
+      "new": "InitialMorale = 99",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.67,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 194 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [19 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "report tiredness silently changed",
+      "old": "InitialTiredness = 0",
+      "new": "InitialTiredness = 1",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.15,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 476 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [52 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "initial animation wrong",
+      "old": "InitialAnimation = 13",
+      "new": "InitialAnimation = 15",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.21,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 279 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [47 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [5 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "initial purpose wrong",
+      "old": "InitialPurpose = (StaffPurpose)2",
+      "new": "InitialPurpose = (StaffPurpose)0",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.43,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 282 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [32 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [7 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "begin preserves state stack",
+      "old": "staff.SetState(StaffState.Idle);\n            world.ClearPatrolArea",
+      "new": "staff.PushState(StaffState.Idle);\n            world.ClearPatrolArea",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.64,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 234 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Researcher) [21 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Mechanic) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Guard) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Entertainer) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.HireInitializesTheSelectedRecruitBeforeTheDrop(kind: Cleaner) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "employment date shifted",
+      "old": "world.SetHireDay(staff, world.TotalDays);",
+      "new": "world.SetHireDay(staff, world.TotalDays + 1);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.64,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 306 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [2 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "invalid placement accepted",
+      "old": "if (!world.IsPlacementPath(staff)) return false;",
+      "new": "world.IsPlacementPath(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.99,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 271 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "valid placement refused",
+      "old": "if (!world.IsPlacementPath(staff)) return false;",
+      "new": "if (world.IsPlacementPath(staff)) return false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.41,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 282 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [2 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "ghost never removed",
+      "old": "world.SetHeld(staff, false);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.57,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 201 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "placement keeps previous state",
+      "old": "world.SetHeld(staff, false);\n            staff.SetState(StaffState.Idle);",
+      "new": "world.SetHeld(staff, false);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.35,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 184 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [24 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "hire charges one pound",
+      "old": "world.TrySpend(Money.Zero);",
+      "new": "world.TrySpend(Money.FromPounds(1));",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.27,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 225 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [2 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "failed zero payment aborts placement",
+      "old": "world.TrySpend(Money.Zero);",
+      "new": "if (!world.TrySpend(Money.Zero)) return false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 7.62,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 304 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.InvalidDropKeepsHoldingThenValidDropCommitsForZero [3 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "placed member reported as refused",
+      "old": "            return true;",
+      "new": "            return false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.77,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 238 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.CancelReturnsTheEmployedNodeWithoutPayment [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffHiring.cs",
+      "name": "cancel leaves employee on wage list",
+      "old": "=> world.Release(staff);",
+      "new": "{ }",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.61,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 263 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [81 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "job retains old waypoints",
+      "old": "world.FreeWaypoints(staff);",
+      "new": ";",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 6.41,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 210 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [79 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "job selects queue head",
+      "old": "world.EntranceOutside(staff)",
+      "new": "world.QueuePath(staff)[0]",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.6,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 318 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [62 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [5 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "job changes controller state",
+      "old": "world.FreeWaypoints(staff);",
+      "new": "staff.SetState(StaffState.Idle); world.FreeWaypoints(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 11.16,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 202 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [9 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "leave explicitly frees path",
+      "old": "var path = world.QueuePath(staff);",
+      "new": "world.FreeWaypoints(staff); var path = world.QueuePath(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.79,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 222 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [4 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [11 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "leave changes controller state",
+      "old": "var path = world.QueuePath(staff);",
+      "new": "staff.SetState(StaffState.Idle); var path = world.QueuePath(staff);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.94,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 328 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [11 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "leave selects first queue tile",
+      "old": "path[path.Count - 1]",
+      "new": "path[0]",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.15,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 373 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EmptyQueueStillPathsToTheZeroCountWordsUpperBytes [8 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "empty queue falls back to entrance",
+      "old": "new QueueTile(0, 0)",
+      "new": "world.EntranceOutside(staff)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.36,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 365 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.EmptyQueueStillPathsToTheZeroCountWordsUpperBytes [10 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "empty queue refuses request",
+      "old": "var path = world.QueuePath(staff);",
+      "new": "var path = world.QueuePath(staff); if (path.Count == 0) return false;",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.67,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 307 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [4 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "queue X read signed",
+      "old": "(byte)tile.X",
+      "new": "(sbyte)tile.X",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.31,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 232 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [27 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "queue X not narrowed",
+      "old": "unchecked((byte)tile.X)",
+      "new": "tile.X",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.59,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 408 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [8 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "queue Y read signed",
+      "old": "(byte)tile.Y",
+      "new": "(sbyte)tile.Y",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.15,
+      "summary": "Failed!  - Failed:     1, Passed:    46, Skipped:     0, Total:    47, Duration: 439 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [24 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "queue Y not narrowed",
+      "old": "unchecked((byte)tile.Y)",
+      "new": "tile.Y",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 8.93,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 276 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [56 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [10 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EmptyQueueStillPathsToTheZeroCountWordsUpperBytes [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "destination x not centred",
+      "old": "(tile.X << 8) | 0x80",
+      "new": "(tile.X << 8)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.07,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 459 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [72 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [2 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EmptyQueueStillPathsToTheZeroCountWordsUpperBytes [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "destination y not centred",
+      "old": "(tile.Y << 8) + 0x80",
+      "new": "(tile.Y << 8)",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.57,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 264 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [43 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "destination x units wrong",
+      "old": "tile.X << 8",
+      "new": "tile.X << 7",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.29,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 238 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [43 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [15 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [9 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "destination y units wrong",
+      "old": "tile.Y << 8",
+      "new": "tile.Y << 7",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.02,
+      "summary": "Failed!  - Failed:     5, Passed:    42, Skipped:     0, Total:    47, Duration: 362 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [47 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [9 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [11 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "destination axes exchanged",
+      "old": "(tile.X << 8) | 0x80, (tile.Y << 8) + 0x80",
+      "new": "(tile.Y << 8) | 0x80, (tile.X << 8) + 0x80",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.07,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 384 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [52 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EmptyQueueStillPathsToTheZeroCountWordsUpperBytes [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "path flags wrong",
+      "old": "0x11, 0);",
+      "new": "0x10, 0);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 10.15,
+      "summary": "Failed!  - Failed:     6, Passed:    41, Skipped:     0, Total:    47, Duration: 415 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: True) [104 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: True) [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.QueueTailCoordinatesAreUnsignedBytes [< 1 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.EmptyQueueStillPathsToTheZeroCountWordsUpperBytes [< 1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "secondary flags wrong",
+      "old": "0x11, 0);",
+      "new": "0x11, 1);",
+      "status": "killed"
+    },
+    {
+      "exit_code": 1,
+      "seconds": 9.35,
+      "summary": "Failed!  - Failed:     2, Passed:    45, Skipped:     0, Total:    47, Duration: 274 ms - TPW.Sim.Tests.dll (net8.0)",
+      "failed_tests": [
+        "Failed TPW.Sim.Tests.StaffTraceTests.JobFreesOldPathAndRequestsTheOutsideEntranceCentre(accept: False) [6 ms]",
+        "Failed TPW.Sim.Tests.StaffTraceTests.LeaveRequestsTheLastStoredQueueTile(accept: False) [1 ms]"
+      ],
+      "compile_error": false,
+      "file": "core/TPW.Sim/StaffRideNavigation.cs",
+      "name": "path refusal ignored",
+      "old": "0x11, 0);",
+      "new": "0x11, 0) || true;",
+      "status": "killed"
+    }
+  ],
+  "restoration": "top-level try/finally; signals; durable --recover journal",
+  "interruption_checks": [
+    {
+      "reason": "signal 2",
+      "restored": true,
+      "completed_mutations": 9,
+      "source_sha256": {
+        "core/TPW.Sim/StaffMotion.cs": "1c8b272ef1694884f72249d55f53acce1e657e2aeeee09f163929e53789a8e28",
+        "core/TPW.Sim/StaffAppearance.cs": "bba4a29f244e19cb1aa54073f03f6af23fa519c9fbe2897ff3fb5455d504131e",
+        "core/TPW.Sim/StaffHiring.cs": "42353138dd08b0e03493eec97520ad1741d8bc8750e39192745a7725315820cd",
+        "core/TPW.Sim/StaffRideNavigation.cs": "2afdb678e5af4980bd89241d673736720d8c353dc57a768ba85e6b2c06f60bd5"
+      },
+      "restored_sha256": {
+        "core/TPW.Sim/StaffMotion.cs": "1c8b272ef1694884f72249d55f53acce1e657e2aeeee09f163929e53789a8e28",
+        "core/TPW.Sim/StaffAppearance.cs": "bba4a29f244e19cb1aa54073f03f6af23fa519c9fbe2897ff3fb5455d504131e",
+        "core/TPW.Sim/StaffHiring.cs": "42353138dd08b0e03493eec97520ad1741d8bc8750e39192745a7725315820cd",
+        "core/TPW.Sim/StaffRideNavigation.cs": "2afdb678e5af4980bd89241d673736720d8c353dc57a768ba85e6b2c06f60bd5"
+      }
+    }
+  ],
+  "baseline": {
+    "exit_code": 0,
+    "seconds": 14.66,
+    "summary": "Passed!  - Failed:     0, Passed:  1165, Skipped:     0, Total:  1165, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+    "failed_tests": [],
+    "compile_error": false
+  },
+  "final_verification": {
+    "exit_code": 0,
+    "seconds": 10.24,
+    "summary": "Passed!  - Failed:     0, Passed:  1165, Skipped:     0, Total:  1165, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)",
+    "failed_tests": [],
+    "compile_error": false
+  },
+  "killed": 113,
+  "survived": [],
+  "invalid": [],
+  "restored_sha256": {
+    "core/TPW.Sim/StaffMotion.cs": "1c8b272ef1694884f72249d55f53acce1e657e2aeeee09f163929e53789a8e28",
+    "core/TPW.Sim/StaffAppearance.cs": "c3512dcca382b5bc0787cd206a98a1020ce4accb787ade5e63a50e4806c2dffb",
+    "core/TPW.Sim/StaffHiring.cs": "42353138dd08b0e03493eec97520ad1741d8bc8750e39192745a7725315820cd",
+    "core/TPW.Sim/StaffRideNavigation.cs": "2afdb678e5af4980bd89241d673736720d8c353dc57a768ba85e6b2c06f60bd5"
+  },
+  "restored": true
+}
