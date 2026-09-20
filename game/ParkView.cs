@@ -161,6 +161,8 @@ namespace TPWGodot
             AddChild(_flags);
             _gateMesh = new MeshInstance3D();
             AddChild(_gateMesh);
+            _busMesh = new MeshInstance3D { Visible = false };
+            AddChild(_busMesh);
             _fxMesh = new MeshInstance3D();
             AddChild(_fxMesh);
             // The game's own field of view: projection distance H = 256 (SetGeomScreen at 0x80054C44, from
@@ -285,7 +287,7 @@ namespace TPWGodot
         /// <param name="common">The common sheet (#416), for the entrance flags; null leaves them out.</param>
         /// <param name="gatePack">The world's gate pack (ParkGate), drawn closed at the gate's base; null leaves it out.</param>
         public void Load(ParkMap map, string name, TextureSheet ground, ParkWorld world, SceneryPack scenery, TextureSheet common = null,
-                         SceneryPack gatePack = null, byte[] exe = null)
+                         SceneryPack gatePack = null, byte[] exe = null, SceneryPack busPack = null)
         {
             // The park as the game has it once loaded: road typed, the square inside the gate laid as path (ParkPaths).
             if (exe != null && world != null) map = ParkPaths.LayStartingPaths(map, exe, AssetSelfTest.GameExecutableBase, world.Index);
@@ -342,6 +344,7 @@ namespace TPWGodot
                 _flagMat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
                 _flagMat.SetShaderParameter("atlas", ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, img.Rgba)));
             }
+            BuildBus(common, busPack);
             int open = 0, placed = 0, skipped = 0;
             _ground.Mesh = null;
             _scenery.Mesh = null;
@@ -552,6 +555,102 @@ namespace TPWGodot
         }
 
         /// <summary>The gate's moving parts at the gate state's angle (ParkGate.State.Part), textured from the park atlas.</summary>
+        /// <summary>The bus, built once: archive entry 90 is a scenery-style pack of ONE model (156 vertices,
+        /// 146 faces, three tiles long), and its textures are on the COMMON sheet #416 rather than a world's
+        /// ground sheet — which is why one bus serves all four worlds.
+        ///
+        /// ⭐ HOW THE ENTRY WAS IDENTIFIED. The call that builds the bus's model object (0x800351BC at
+        /// 0x800508AC) is the same one the four gate packs go through, and those are handed 87, 86, 85 and 88 —
+        /// the gate entries this port already loads per world. So the id it takes is the folio entry, and the
+        /// bus is 90.</summary>
+        void BuildBus(TextureSheet common, SceneryPack pack)
+        {
+            _busMesh.Mesh = null;
+            _busMesh.Visible = false;
+            _bus = null;
+            if (common == null || pack == null || pack.Models.Count == 0) return;
+            var model = pack.Models[0];
+            var uses = new List<(ushort, ushort)>();
+            foreach (var t in model.Textures) uses.Add((t.TPage, t.Clut));
+            var atlas = PageAtlas.Build(common, uses);
+            if (atlas?.Image == null) return;
+            var mat = new ShaderMaterial { Shader = PsxShading.Shader(false) };
+            var matCull = new ShaderMaterial { Shader = PsxShading.Shader(true) };
+            var tex = ImageTexture.CreateFromImage(Image.CreateFromData(atlas.Image.Width, atlas.Image.Height, false,
+                                                                       Image.Format.Rgba8, atlas.Image.Rgba));
+            mat.SetShaderParameter("atlas", tex);
+            matCull.SetShaderParameter("atlas", tex);
+            var both = new Buffers(); var single = new Buffers();
+            float aw = atlas.Image.Width, ah = atlas.Image.Height;
+            int[] tri = { 0, 1, 2 }, quad = { 0, 1, 2, 2, 1, 3 };
+            foreach (var poly in model.Polygons)
+            {
+                var t = model.Textures[poly.Texture];
+                var b = t.DoubleSided ? both : single;
+                atlas.TryOrigin(t.TPage, t.Clut, out int ox, out int oy);
+                foreach (int k in poly.IsQuad ? quad : tri)
+                {
+                    int vi = poly.Corner(k);
+                    var (vx, vy, vz) = model.Position(vi);
+                    b.V.Add(new Vector3(vx / ParkTerrain.TileUnits, vy / ParkTerrain.TileUnits, -vz / ParkTerrain.TileUnits));
+                    byte g = model.Vertices[vi].Shade;
+                    b.C.Add(new Color(g / 255f, g / 255f, g / 255f));
+                    ushort uv = poly.Uv(k);
+                    b.UV.Add(new Vector2((ox + (uv & 0xFF)) / aw, (oy + (uv >> 8)) / ah));
+                    b.R.Add(0); b.R.Add(0); b.R.Add(0); b.R.Add(0);
+                }
+            }
+            _busMesh.Mesh = Surfaces(both, mat, single, matCull);
+            _bus = new TPW.Sim.BusRoute();
+            _busXPrev = _busXCur = _bus.WorldX;
+        }
+
+        /// <summary>Where the park draw puts the bus: (pos >> 8, 256, 1900) in world units, 0x80057CB0. Only the
+        /// X moves — it runs along the road at a fixed depth, one tile up.</summary>
+        void PlaceBus()
+        {
+            if (_bus == null) return;
+            _busMesh.Visible = _bus.OnRoad;
+            if (!_bus.OnRoad) return;
+            float f = Mathf.Clamp((float)(_frameClock * ParticleSystem.FramesPerSecond), 0f, 1f);
+            float x = Mathf.Lerp(_busXPrev, _busXCur, f) / ParkTerrain.TileUnits;
+            _busMesh.Position = new Vector3(x, BusY / (float)ParkTerrain.TileUnits, -BusZ / (float)ParkTerrain.TileUnits);
+        }
+
+        /// <summary>The bus has reached the stop: its load steps off. How many is the park's own business —
+        /// TPW.Sim.BusLoad works it out from what is built, and an empty park gets a bus with nobody on it,
+        /// which is the point of the whole design.
+        ///
+        /// ⚠ TWO INPUTS ARE STAND-INS and the head-count moves with them: an attraction's UPGRADE LEVEL (the
+        /// port does not track it yet, so every ride counts as level 0) and the gate's LANE COUNT (0, so the
+        /// `20 − lanes` cap never bites). Both are named in BusLoad.HeadCount and neither is guessed here.</summary>
+        void BusArrived()
+        {
+            if (_guests == null) return;
+            var draws = new List<TPW.Sim.AttractionDraw>();
+            var kinds = new HashSet<int>();
+            foreach (var a in _attractionsPlaced)
+            {
+                draws.Add(new TPW.Sim.AttractionDraw(0, a.Rec.BaseIntensity, false));
+                kinds.Add(a.Rec.Entry);
+            }
+            int catalogue = Math.Max(1, _attractions.Count);
+            int capacity = 25 + 75 * kinds.Count / catalogue;
+            int count = TPW.Sim.BusLoad.HeadCount(TPW.Sim.BusLoad.ParkScore(draws), capacity, _guests.Count, 0, BusDivisor);
+            for (int i = 0; i < count; i++) _guests.Spawn();
+            GD.Print($"[bus] arrived: score {TPW.Sim.BusLoad.ParkScore(draws)} capacity {capacity} -> {count} guests");
+        }
+
+        /// <summary>[0x80102E50], the divisor the draw is scaled by.</summary>
+        const int BusDivisor = 0x14000;
+
+        /// <summary>The bus's fixed depth and height, straight out of the draw (0x80057CB0: 256 and 1900).</summary>
+        public const int BusY = 256, BusZ = 1900;
+
+        TPW.Sim.BusRoute _bus;
+        MeshInstance3D _busMesh;
+        float _busXPrev, _busXCur;
+
         ArrayMesh GateMesh(int angle)
         {
             var both = new Buffers(); var single = new Buffers();
@@ -2102,6 +2201,15 @@ void fragment() {
                     _gateAngleCur = (short)_gate.Angle;
                     _gateRecent[_gateRecentAt++ % _gateRecent.Length] = _gateAngleCur;
                 }
+                if (_bus != null)
+                {
+                    _busXPrev = _busXCur;
+                    // ⚠ THE HOLD IS NOT WIRED: the game stops the bus dead while a gate batch is mid-admission
+                    // (batch == 1), and the port has no turnstile batch to ask, so it passes false. That makes
+                    // the loop run at its clean 694 ticks instead of the 705 a real park measures.
+                    if (_bus.Step(frameTime, ParkOpen, false)) BusArrived();
+                    _busXCur = _bus.WorldX;
+                }
                 if (_gate != null)
                     foreach (int i in _gate.TakeDueEffects())
                         if (i < _openingFx.Count && _openingFx[i].T != null)
@@ -2118,7 +2226,8 @@ void fragment() {
                 // search finishes the frame it starts, and it will matter the moment that is set.
                 if (_guests != null) _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
                 _clockTicks++;
-                _guests?.Populate(DebugGuestCount);
+                // The stand-in only runs where there is no bus: once the bus is on the road it is the arrivals.
+                if (_bus == null) _guests?.Populate(DebugGuestCount);
                 _guests?.RunPathfinder();
                 _guests?.Tick();
             }
@@ -2135,6 +2244,7 @@ void fragment() {
                 if (_gateRecentAt >= _gateRecent.Length && hi - lo <= GateAtRest) angle = hi;
                 if (angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(angle); _gateAngleDrawn = angle; }
             }
+            PlaceBus();
             _selectionMesh.Mesh = SelectionMesh();
             PoseAttractions(_frameClock);
             _hud.Cost = PendingCost();

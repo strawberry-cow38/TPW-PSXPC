@@ -147,4 +147,83 @@ namespace TPW.Sim
             return n <= 0 ? 0 : (int)n;
         }
     }
+
+    /// <summary>The bus itself: the four-phase machine the game runs once a sim tick, transcribed from
+    /// 0x8005262C..0x800527D4 (arrivals.md §2.2).
+    ///
+    /// ⭐ THE BUS IS THE CLOCK. Nothing about the park speeds it up — it counts down, drives on, drops its load
+    /// on the phase 1→2 edge, waits, drives off, and starts again. <see cref="BusSchedule"/> is that loop's
+    /// PERIOD (694 ticks); this is the loop, and it is what you have to run if you want to SEE a bus rather
+    /// than just have guests appear.
+    ///
+    /// ⭐ WHERE IT DRIVES. The park draw places it at (<see cref="Pos"/> &gt;&gt; 8, 256, 1900) world units
+    /// (0x80057CB0..0x80057CE4) and skips drawing it entirely while <see cref="A"/> is still counting — so the
+    /// bus runs along X at a fixed z of 1900 and one tile up, from −15 tiles to 16 (the stop) and on to 60.
+    ///
+    /// ⚠ The hold: while a gate batch is mid-admission (batch == 1) the bus does not move at all, and it will
+    /// not clear its own batch flag until it has driven past x = 25. That is the only park-dependent term in
+    /// the period, and it is why measured ADMISSION gaps read 705 rather than 694.</summary>
+    public sealed class BusRoute
+    {
+        /// <summary>The bus's model: folio entry 90, a scenery-style pack of one model. Identified by the call
+        /// that builds it (0x800351BC at 0x800508AC) being the same one the four GATE packs go through with
+        /// 87, 86, 85 and 88 — so the id it takes is the folio entry.</summary>
+        public const int ModelEntry = 90;
+
+        /// <summary>0x800E0F0C: where each phase drives to, in tiles. −15 is off-screen left, 16 is the stop,
+        /// 60 is off-screen right.</summary>
+        public static readonly int[] Stops = { -15, 16, 16, 60 };
+        /// <summary>[0x80102D40]: the phase the machine wraps after.</summary>
+        public const int Wrap = 4;
+        /// <summary>The long wait between buses (A) and the short one at each phase change (B), in time units.</summary>
+        public const int LongWait = 0xC8000, ShortWait = 0x50000;
+        /// <summary>The bus has to be past 25.0 tiles before it lets the gate start another batch.</summary>
+        public const int BatchClearPos = 0x190000;
+
+        public int A, B, Phase, Pos, Target, Batch;
+
+        public BusRoute() => Reset();
+
+        /// <summary>Game start, 0x8005084C..0x800508A8: phase 1, parked off-screen, the long wait running.</summary>
+        public void Reset()
+        {
+            Phase = 1; A = LongWait; B = 0; Batch = 0;
+            Pos = Stops[0] << 16; Target = Stops[1] << 16;
+        }
+
+        /// <summary>Whether the bus is on the road at all: the draw skips it while A is counting
+        /// (0x80057C98).</summary>
+        public bool OnRoad => A <= 0;
+
+        /// <summary>Its position in world units, which is what the draw uses.</summary>
+        public int WorldX => Pos >> 8;
+
+        /// <summary>One sim tick. <paramref name="delta"/> is the game's own time step
+        /// ([0x80103A90], ≈10081 a tick). Returns true on the tick the bus DROPS ITS LOAD — the phase 1→2 edge,
+        /// and only with the park open and no batch being held.</summary>
+        public bool Step(int delta, bool parkOpen, bool gateHolding)
+        {
+            if (A > 0) { A -= delta; return false; }
+            if (B > 0) { B -= delta; return false; }
+            if (Phase == 2)
+            {
+                if (Batch == 0) Batch = 2;
+                else if (Batch == 1) return false;     // a gate batch is being admitted: the bus waits
+            }
+            int speed = Math.Clamp((Target - Pos) >> 3, 0x100, 0x1000);
+            Pos += (int)((long)speed * delta >> 12);
+            if (Batch == 2 && Pos > BatchClearPos) Batch = 0;
+            if (Pos < Target) return false;
+            bool arrived = Phase == 1 && parkOpen && !gateHolding;
+            if (Phase != 2) B = ShortWait;
+            Target = Stops[Phase] << 16;
+            Phase++;
+            if (Phase > Wrap)
+            {
+                Phase = 1; A = LongWait;
+                Pos = Stops[0] << 16; Target = Stops[1] << 16;
+            }
+            return arrived;
+        }
+    }
 }
