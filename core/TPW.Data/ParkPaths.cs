@@ -674,7 +674,19 @@ namespace TPW.Data
     /// only if it is one of the run's corners and not a middle piece (two links); path or path and queue refuses
     /// except as the LAST tile, where it shows the join (code 5, marker #173); everything else refuses, and so does
     /// every tile after a refusal. Not ported: the bank check, and the attraction lookup for tiles with flag 0x10,
-    /// which nothing sets yet.</summary>
+    /// which nothing sets yet.
+    ///
+    /// ⚠⚠ A QUEUE THAT STOPS ONE TILE SHORT OF THE PATH LOOKS CONNECTED AND IS NOT. This is the game's
+    /// behaviour, not a port artefact, and it costs an afternoon every time. A path NEVER links straight to a
+    /// queue: 0x8004E20C's neighbour test takes a type equal to the kind being laid, plus `type == 13 &amp;&amp;
+    /// kind == 2`, and never type 4. The only bridge is the tile where the run ENDS ON a path, which becomes
+    /// **13** — a path for linking and the queue's own neighbour-behind, so the route runs path → 13 → queue.
+    /// Two tiles that merely touch are two structures that can never link, in any order.
+    ///
+    /// ✅ MEASURED both ways (tinyclaw, in the port): a queue ending at (21,34) with path at (21,33) — one tile
+    /// short — refuses every route, including from the adjacent tile. The same park with the run extended onto
+    /// (21,33) walks a mechanic the whole way and back. **The tell is the meeting tile's type: 13 bridged, 2 or
+    /// 4 did not.**</summary>
     public sealed class QueueRun
     {
         readonly PathTool _tool;
