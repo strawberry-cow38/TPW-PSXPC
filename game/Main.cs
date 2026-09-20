@@ -79,7 +79,8 @@ namespace TPWGodot
         /// tool pressed at each cursor tile in turn ("u" for the undo), the pointer then held at hx,hz. For captures of
         /// queue building.</summary>
         string _autoQueue;
-        /// <summary>From <c>--park-hover=x,z</c>: the cursor held on that tile, for captures of the hover box.</summary>
+        /// <summary>From <c>--park-hover=x,z[,x,z...]</c>: the cursor held on that tile, and any further pairs held
+        /// as hovered too, for captures of one hover box or of several overlapping.</summary>
         string _autoHover;
         /// <summary>From <c>--park-picker[=tab]</c>: the purchase catalogue open on that category, for captures.</summary>
         int _autoPicker = -1;
@@ -751,7 +752,8 @@ namespace TPWGodot
                     if (_autoHover != null)
                     {
                         var v = System.Array.ConvertAll(_autoHover.Split(','), int.Parse);
-                        if (v.Length == 2) _park.PinHover(v[0], v[1]);
+                        if (v.Length >= 2) _park.PinHover(v[0], v[1]);
+                        for (int hv = 2; hv + 1 < v.Length; hv += 2) _park.PinHoverAlso(v[hv], v[hv + 1]);
                     }
                     if (_autoQueue != null)
                     {

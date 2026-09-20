@@ -1089,6 +1089,10 @@ namespace TPWGodot
         /// <summary>Hold the cursor on tile (x, z) for the hover, instead of the mouse. For captures.</summary>
         public void PinHover(int x, int z) => _hoverPin = (x, z);
         (int X, int Z)? _hoverPin;
+        /// <summary>Extra tiles held as hovered besides <see cref="PinHover"/>'s, so a capture can put two boxes up
+        /// at once (the game keeps three: SelectionFades).</summary>
+        public void PinHoverAlso(int x, int z) => _hoverAlso.Add((x, z));
+        readonly List<(int X, int Z)> _hoverAlso = new();
 
         readonly Dictionary<int, int> _attractionHeights = new();
         /// <summary>The park gate as the hover sees it: a rectangle and height per world (0x800F2398 + world × 5:
@@ -1228,6 +1232,11 @@ namespace TPWGodot
         {
             if (_map == null || _pathMode || _placing >= 0 || _queue != null || (_picker != null && _picker.Visible)) return null;
             if ((_hoverPin ?? TileUnderMouse()) is not { } t) return null;
+            return TargetAt(t);
+        }
+
+        BoxSite TargetAt((int X, int Z) t)
+        {
             BoxSite hit = null;
             foreach (var a in _attractionsPlaced)
             {
@@ -1273,11 +1282,24 @@ namespace TPWGodot
             return mesh;
         }
 
-        /// <summary>The GPU's additive blend (B + F, clamped) done where the GPU does it, in DISPLAY space: the box reads
-        /// what is behind it and adds its colour to that. A plain additive blend adds in linear space and turns the
-        /// game's pale yellow-green glow into a dull one.</summary>
+        /// <summary>The GPU's additive blend (B + F, clamped): the box ADDS its colour to what is behind it, which is
+        /// what the console does and what lets everything behind the box still show through it.
+        ///
+        /// ⚠ IT READ THE SCREEN AND IT MUST NOT. Adding in DISPLAY space is the accurate thing -- Godot's blend_add
+        /// adds in the linear buffer, where the same numbers come out duller -- so this used to sample the screen
+        /// texture, add, and write the result opaquely. That works until something TRANSPARENT is behind the box:
+        /// the screen copy is taken once, before the transparent queue, so a transparent surface drawn before the
+        /// box (i.e. one BEHIND it, since that queue draws back to front) is not in the copy, and writing the copy
+        /// back paints over it. A hovered fountain lost its own water. Reported by master; reproduced.
+        ///
+        /// ⭐ SO IT ADDS THE DIFFERENCE. The screen is still read -- to work out how much light the display-space sum
+        /// asks for over what is already there -- but that amount is ADDED rather than written, which is what keeps
+        /// the colour the game gives and can no longer erase anything. Over an opaque background the two are the
+        /// same arithmetic and the box looks exactly as it did; over a transparent one the copy is out of date, so
+        /// the added amount is worked out against the wrong base and the glow is a little off there, which is a far
+        /// smaller price than the water vanishing. Two boxes overlapping likewise add, each a little bright.</summary>
         const string SelectionShader = @"shader_type spatial;
-render_mode unshaded, blend_mix, depth_draw_never, cull_back;
+render_mode unshaded, blend_add, depth_draw_never, cull_back;
 uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
 vec3 to_linear(vec3 c) {
     return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
@@ -1286,8 +1308,9 @@ vec3 to_display(vec3 c) {
     return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, c * 12.92, lessThan(c, vec3(0.0031308)));
 }
 void fragment() {
-    vec3 behind = texture(screen_tex, SCREEN_UV).rgb;
-    ALBEDO = to_linear(clamp(to_display(max(behind, vec3(0.0))) + COLOR.rgb, 0.0, 1.0));
+    vec3 behind = max(texture(screen_tex, SCREEN_UV).rgb, vec3(0.0));
+    vec3 want = to_linear(clamp(to_display(behind) + COLOR.rgb, 0.0, 1.0));
+    ALBEDO = max(want - behind, vec3(0.0));
     ALPHA = 1.0;
 }
 ";
@@ -1595,6 +1618,7 @@ void fragment() {
                 _fx?.Step();
                 _selection.Step();
                 _selection.Hover(hovered);
+                foreach (var t in _hoverAlso) _selection.Hover(TargetAt(t));
                 StepAttractions(frameTime);
             }
             if (_gate != null && _gate.Angle != _gateAngleDrawn) { _gateMesh.Mesh = GateMesh(); _gateAngleDrawn = _gate.Angle; }
