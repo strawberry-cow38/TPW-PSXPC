@@ -55,6 +55,12 @@ namespace TPW.Sim
         /// <summary>The unidentified second u16 of each visitor-type row. See <see cref="TypePreference"/>.</summary>
         public static readonly int[] SecondField = { 15, 20, 25, 18, 16, 14, 20, 10 };
 
+        /// <summary>What the preference lookup returns for visitor type 8, the type a costume purchase
+        /// writes: the u16 at 0x800F79E8 + 8 × 8 = 0x800F7A28, which is the first word of the idle-animation
+        /// table behaviour.md §1 names there, and reads 14 in the image. Same shape as
+        /// Wages.WordAfterWageTable: an out-of-table read, reproduced rather than clamped.</summary>
+        public const int CostumePreference = 14;
+
         /// <summary>Happiness threshold above which a type-4 shop gains its happiness bonus, for product
         /// kinds 2 and 3 (0x80103258 = 70) and for kind 6 (0x8010325C = 75).</summary>
         public const int ShopBonusThresholdKind23 = 70;

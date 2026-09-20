@@ -50,6 +50,55 @@ namespace TPW.Data
         public int DefaultCycles => Math.Max(CyclesMin, CyclesMax / 2);
     }
 
+    /// <summary>A shop's record body (type 4, 0x18 bytes; rides.md §1.3, re-read for the purchase port).
+    ///
+    /// ⚠ THE PRODUCT PARAMETERS ARE BYTES, NOT u16s. rides.md prints +0x30/+0x32/+0x34/+0x36 as four
+    /// u16s "not resolved" (7, 25, 5, 10 for Fries), and on the Drinks Shop that view shows 10240 at
+    /// +0x32. The getters are `lbu`: 0x800B711C at +0x30, 0x800B70F8 at +0x32, 0x800B70EC at +0x33,
+    /// 0x800B70E0 at +0x34, 0x800B70D4 at +0x36 -- so 10240 is +0x32 = 0 and +0x33 = 40, two different
+    /// numbers, and +0x31/+0x35/+0x37 are read by nothing. Each field says which getter and what the
+    /// purchase routine 0x8008E5EC does with it (TPW.Sim.ShopProduct carries the same five).</summary>
+    public readonly struct ShopFields
+    {
+        /// <summary>+0x2C u16: the sale price the shop opens with (0x800B7110 → A+0x88 through 0x800B7140).</summary>
+        public readonly int DefaultPrice;
+        /// <summary>+0x2E u16 (0x800B7104): what the unit cost is scaled from (economy.md §4.2).</summary>
+        public readonly int UnitCost;
+        /// <summary>+0x30 u8 (0x800B711C): 0..7, the product kind the purchase dispatches on.</summary>
+        public readonly int Kind;
+        /// <summary>+0x32 u8 (0x800B70F8, shop vtable slot 56): weight of need A in the want; taken off
+        /// need A by the food kinds.</summary>
+        public readonly int NeedAValue;
+        /// <summary>+0x33 u8 (0x800B70EC, slot 55): weight of need B in the want; taken off need B by the
+        /// drink kind.</summary>
+        public readonly int NeedBValue;
+        /// <summary>+0x34 u8 (0x800B70E0): weight of (100 − happiness) in the want; multiplies the
+        /// happiness a purchase pays.</summary>
+        public readonly int HappinessValue;
+        /// <summary>+0x36 u8 (0x800B70D4): weight of nausea against the want; the nausea a food purchase adds.</summary>
+        public readonly int NauseaValue;
+
+        public ShopFields(int defaultPrice, int unitCost, int kind, int needAValue, int needBValue, int happinessValue, int nauseaValue)
+        {
+            DefaultPrice = defaultPrice; UnitCost = unitCost; Kind = kind; NeedAValue = needAValue;
+            NeedBValue = needBValue; HappinessValue = happinessValue; NauseaValue = nauseaValue;
+        }
+    }
+
+    /// <summary>A sideshow's record body (type 5, 0x14 bytes; rides.md §1.3, READ at 0x800B79E0 /
+    /// 0x800B79D4 / 0x800B79C8): copied to the live object's A+0x84 / A+0x86 / A+0x78 at placement.</summary>
+    public readonly struct SideShowFields
+    {
+        /// <summary>+0x2C u16, pounds.</summary>
+        public readonly int PlayPrice;
+        /// <summary>+0x2E u16, a percentage.</summary>
+        public readonly int WinChance;
+        /// <summary>+0x30 u8, pounds. ⚠ A byte: no sideshow can offer more than £255.</summary>
+        public readonly int Prize;
+
+        public SideShowFields(int playPrice, int winChance, int prize) { PlayPrice = playPrice; WinChance = winChance; Prize = prize; }
+    }
+
     public sealed class AttractionDefinition
     {
         public int Entry, Type, NameId, Width, Depth, EntranceFacing, ExitFacing, Price;
@@ -75,6 +124,12 @@ namespace TPW.Data
 
         /// <summary>The three upgrade levels of a ride, or empty for everything else (rides.md §1.3).</summary>
         public RideLevel[] Levels = Array.Empty<RideLevel>();
+
+        /// <summary>A shop's product block, for type 4 only.</summary>
+        public ShopFields? Shop;
+
+        /// <summary>A sideshow's game, for type 5 only.</summary>
+        public SideShowFields? SideShow;
 
         /// <summary>The level a ride is placed at.</summary>
         public RideLevel Level0 => Levels.Length > 0 ? Levels[0] : default;
@@ -132,6 +187,13 @@ namespace TPW.Data
                 }
                 a.Levels = levels.ToArray();
             }
+            // The shop body runs to +0x38 and the sideshow body to +0x34 (rides.md §1.3); the last byte read
+            // is +0x36 and +0x30 respectively. Bytes, at the getters' own offsets -- see ShopFields.
+            if (type == 4 && r + 0x38 <= d.Length)
+                a.Shop = new ShopFields(BitConverter.ToUInt16(d, r + 0x2C), BitConverter.ToUInt16(d, r + 0x2E),
+                                        d[r + 0x30], d[r + 0x32], d[r + 0x33], d[r + 0x34], d[r + 0x36]);
+            if (type == 5 && r + 0x31 <= d.Length)
+                a.SideShow = new SideShowFields(BitConverter.ToUInt16(d, r + 0x2C), BitConverter.ToUInt16(d, r + 0x2E), d[r + 0x30]);
 
             int body = BitConverter.ToInt32(d, r + 0x1C);
             int pad = r + 0x20 + body, n = a.Width * a.Depth;

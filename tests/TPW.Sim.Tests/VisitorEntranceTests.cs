@@ -48,8 +48,17 @@ namespace TPW.Sim.Tests
             public bool TargetHasStock(Visitor g) => throw new NotSupportedException();
             public void ConsumeStock(Visitor g, int units) => throw new NotSupportedException();
             public int StockLevel(Visitor g) => throw new NotSupportedException();
-            public void BuyAtShop(Visitor g) => throw new NotSupportedException();
-            public void PlaySideShow(Visitor g) => throw new NotSupportedException();
+            public ShopProduct Product(Visitor g) => throw new NotSupportedException();
+            public int SalePrice(Visitor g) => throw new NotSupportedException();
+            public int QualitySlider(Visitor g) => throw new NotSupportedException();
+            public int SecondSlider(Visitor g) => throw new NotSupportedException();
+            public void BookSale(Visitor g, ShopSale s) => throw new NotSupportedException();
+            public SideShowGame Game(Visitor g) => throw new NotSupportedException();
+            public void BookPlay(Visitor g, SideShowPlay p) => throw new NotSupportedException();
+            public void RecordSatisfaction(Visitor g, int amount) => throw new NotSupportedException();
+            public void PostEvent(int id, int value) => throw new NotSupportedException();
+            public bool TrySpawnProp(Visitor g) => throw new NotSupportedException();
+            public void ReleaseModel(Visitor g) => throw new NotSupportedException();
         }
 
         /// <summary>One park: two lanes, an entrance building at tile (20, 5), two exits, a £40 fee.

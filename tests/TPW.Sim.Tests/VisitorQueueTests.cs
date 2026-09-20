@@ -48,6 +48,11 @@ namespace TPW.Sim.Tests
             public int StockLevelValue { get; set; } = 100;
             public int ShopBuys { get; private set; }
             public int SideShowPlays { get; private set; }
+            // The shop half (IShopWorld): a Fries stall at £30, which the default Guest() buys, and an
+            // Arcade, which it plays. VisitorPurchaseTests covers the routines; here they only need to run.
+            public ShopProduct ProductValue { get; set; } = new(40, 7, 20, 0, 5, 10);
+            public int Price { get; set; } = 30;
+            public SideShowGame GameValue { get; set; } = new(10, 30, 25);
 
             public int TargetType(Visitor g) => Type;
             public AttractionStatus RideStatus(Visitor g) => Status;
@@ -73,8 +78,17 @@ namespace TPW.Sim.Tests
             public bool TargetHasStock(Visitor g) => Stock;
             public void ConsumeStock(Visitor g, int units) => Consumed = units;
             public int StockLevel(Visitor g) => StockLevelValue;
-            public void BuyAtShop(Visitor g) => ShopBuys++;
-            public void PlaySideShow(Visitor g) => SideShowPlays++;
+            public ShopProduct Product(Visitor g) => ProductValue;
+            public int SalePrice(Visitor g) => Price;
+            public int QualitySlider(Visitor g) => 50;
+            public int SecondSlider(Visitor g) => 50;
+            public void BookSale(Visitor g, ShopSale s) => ShopBuys++;
+            public SideShowGame Game(Visitor g) => GameValue;
+            public void BookPlay(Visitor g, SideShowPlay p) => SideShowPlays++;
+            public void RecordSatisfaction(Visitor g, int amount) { }
+            public void PostEvent(int id, int value) { }
+            public bool TrySpawnProp(Visitor g) => true;
+            public void ReleaseModel(Visitor g) { }
         }
 
         /// <summary>A guest with a target, in the given state, with every stat well clear of a threshold.
@@ -674,24 +688,42 @@ namespace TPW.Sim.Tests
             Assert.Equal(VisitorState.Idle, g.State);
         }
 
-        // Types 4 and 5 hand off to two DIFFERENT purchase routines (§2.5, out of scope here) and then
+        // Types 4 and 5 hand off to two DIFFERENT purchase routines (§2.5, VisitorPurchase) and then
         // stand around without a target. REJECTS one routine for both, REJECTS keeping the target.
+        // ⚠ DICE: the purchase rolls AFTER the unload's three -- rand(25) for a sale, rand(100) for a
+        // play. REJECTS rolling the purchase die first.
         [Fact]
         public void ShopsAndSideShowsHandOffToTheirOwnPurchaseRoutines()
         {
             var shop = new World { Type = 4 };
-            var a = Guest(VisitorState.Unloading);
-            VisitorQueue.Unload(a, shop, new Dice(0, 0, 0));
+            var a = Guest(VisitorState.Unloading); var d1 = new Dice(0, 0, 0, 4);
+            Assert.Equal(UnloadOutcome.Bought, VisitorQueue.Unload(a, shop, d1));
+            Assert.Equal(new[] { 60, 300, 20, 25 }, d1.Bounds);
             Assert.Equal((1, 0), (shop.ShopBuys, shop.SideShowPlays));
             Assert.False(a.HasTarget);
             Assert.Equal(VisitorState.Idle, a.State);
 
             var stall = new World { Type = 5 };
-            var b = Guest(VisitorState.Unloading);
-            VisitorQueue.Unload(b, stall, new Dice(0, 0, 0));
+            var b = Guest(VisitorState.Unloading); var d2 = new Dice(0, 0, 0, 50);
+            Assert.Equal(UnloadOutcome.Bought, VisitorQueue.Unload(b, stall, d2));
+            Assert.Equal(new[] { 60, 300, 20, 100 }, d2.Bounds);
             Assert.Equal((0, 1), (stall.ShopBuys, stall.SideShowPlays));
             Assert.False(b.HasTarget);
             Assert.Equal(VisitorState.Idle, b.State);
+        }
+
+        // A refused purchase is DidNotBuy: the guest still drops its target and goes Idle (the handler
+        // ignores the routine's return), and no purchase die is rolled. REJECTS Bought on a refusal.
+        [Fact]
+        public void ARefusedPurchaseStillEndsInIdleWithoutATarget()
+        {
+            var shop = new World { Type = 4, Price = 500 };
+            var a = Guest(VisitorState.Unloading); var d = new Dice(0, 0, 0);
+            Assert.Equal(UnloadOutcome.DidNotBuy, VisitorQueue.Unload(a, shop, d));
+            Assert.Equal(new[] { 60, 300, 20 }, d.Bounds);
+            Assert.Equal(0, shop.ShopBuys);
+            Assert.False(a.HasTarget);
+            Assert.Equal(VisitorState.Idle, a.State);
         }
 
         // ───────────────────────── 23 goto entrance (0x8008F7BC) ─────────────────────────
