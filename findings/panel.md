@@ -132,6 +132,31 @@ Track 0x0/0xD; type 1 Edit Track and **Edit Pylons** 0x3DF; **Call Mechanic** 0x
 lifetime ≠ 0; **Delete** 0x24D always; **Zoom To** 0x174 when opened from a list. ⚠ There is **no
 Open/Close entry** for types 1..7 — the panel does not open or close a ride.
 
+### 3a. ⭐ THE COMMAND TABLE: label id → handler (READ 2026-09-20)
+
+The Options/context entries are **(u32 label id, u32 handler) pairs at 0x80102C20**, which is why none of
+these ids appears as an `addiu` immediate anywhere and grepping for them finds nothing:
+
+| label | id | handler |
+| --- | --- | --- |
+| Open | 0x102 | 0x8003BC18 |
+| Build Queue | 0x374 | 0x8003BC5C |
+| Edit Queue | 0x37F | 0x8003BC5C (same one; the id is what differs) |
+| **Delete** | **0x24D** | **0x8003BBE4** |
+| Build Track | 0x0 | 0x8003BC90 |
+| Edit Track | 0xD | 0x8003BC90 |
+| (0xD / 0x0 again) | | 0x8003BCC4 — the second pair, presumably the coaster's pylons |
+
+**Delete** (0x8003BBE4) resolves the selection through 0x80050530 → 0x8003C2BC and calls
+**0x800510C0(attraction, 1)**. That routine is shared with the placement tool's cancel (0x8001C7E4), and
+its `a1` is what separates them: **1** runs the record's teardown vtable (+0xE8/+0xEC), 0x80053C48,
+0x80051D74 and plays **(8, 5)**, the demolish sound; **0** skips straight past all of it. ⚠ **No refund**
+— nothing in either half touches money, so deleting a ride returns nothing.
+
+⚠ Not wired in the port: it has no removal path at all (nothing removes from `_attractionsPlaced`), so
+Delete needs one written that undoes `RegisterPlaced`'s bookkeeping — the tiles and the mesh — not just a
+list remove. Recorded here so that is a known job rather than a surprise.
+
 **Upgrades** (0x80079E38), only while `level+1 < researched` and the ride is not condemned: Upgrade Cost
 0x119 = `record+0x50 + 0x34*(level+1)`; for a track ride **Stock** 0x363 = `35 − u8(outer+0x1BD8)` ⭐
 which is the track-piece stock, matching the 35 piece objects the ride's constructor builds. Refusals:
