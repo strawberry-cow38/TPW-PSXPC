@@ -21,11 +21,13 @@ namespace TPWGodot
         readonly System.Func<IEnumerable<StaffMember>> _staff;
         readonly System.Func<Visitor, (int X, int Z)> _tileOf;
         readonly System.Func<StaffMember, (int X, int Z)> _staffTile;
+        readonly System.Func<Visitor, (int Litter, int Vomit)> _litterNearby;
 
         public ParkNeedsWorld(System.Func<long> now, System.Func<IEnumerable<StaffMember>> staff,
                               System.Func<Visitor, (int X, int Z)> tileOf,
-                              System.Func<StaffMember, (int X, int Z)> staffTile)
-        { _now = now; _staff = staff; _tileOf = tileOf; _staffTile = staffTile; }
+                              System.Func<StaffMember, (int X, int Z)> staffTile,
+                              System.Func<Visitor, (int Litter, int Vomit)> litterNearby)
+        { _now = now; _staff = staff; _tileOf = tileOf; _staffTile = staffTile; _litterNearby = litterNearby; }
 
         public long NowTick => _now();
 
@@ -41,10 +43,14 @@ namespace TPWGodot
         /// input, not a measured zero.</summary>
         public TileInfluence InfluenceAt(Visitor guest) => TileInfluence.None;
 
-        /// <summary>⚠ (0, 0) BECAUSE THE PORT HAS NO LITTER POOL WIRED. LitterPool exists in the sim and
-        /// nothing in the park owns one, so nobody is ever standing near rubbish. Again a gap: with a
-        /// pool wired this would cost happiness and add nausea.</summary>
-        public (int Litter, int Vomit) LitterNearby(Visitor guest) => (0, 0);
+        /// <summary>Rubbish within the strict radius of this guest: it costs happiness, and vomit also
+        /// adds nausea. ⭐ THE POOL IS WIRED NOW — this returned (0, 0) while nothing in the park owned
+        /// a LitterPool, which is a very convincing zero: every guest really was standing near no
+        /// rubbish, because no rubbish could exist.
+        ///
+        /// ⚠ CLAIMED PIECES STILL COUNT. A handyman walking towards a piece has not cleared it, so it
+        /// keeps costing everyone standing by it until it is actually deleted (0x80090198..244).</summary>
+        public (int Litter, int Vomit) LitterNearby(Visitor guest) => _litterNearby(guest);
 
         public bool InQueue(Visitor guest) => guest.InQueue;
 

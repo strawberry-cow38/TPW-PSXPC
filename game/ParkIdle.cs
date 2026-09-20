@@ -20,13 +20,16 @@ namespace TPWGodot
         readonly Func<StaffMember, (int X, int Z)> _staffTile;
         readonly Func<Visitor, (int X, int Z)?> _nearestBin;
         readonly Func<Visitor, int, int, bool> _walkTo;
+        readonly Action<Visitor> _dropLitter;
 
         public ParkIdleWorld(Func<long> now, Func<int> day, Func<IEnumerable<StaffMember>> staff,
                              Func<Visitor, (int X, int Z)> tileOf, Func<StaffMember, (int X, int Z)> staffTile,
-                             Func<Visitor, (int X, int Z)?> nearestBin, Func<Visitor, int, int, bool> walkTo)
+                             Func<Visitor, (int X, int Z)?> nearestBin, Func<Visitor, int, int, bool> walkTo,
+                             Action<Visitor> dropLitter)
         {
             _now = now; _day = day; _staff = staff; _tileOf = tileOf;
             _staffTile = staffTile; _nearestBin = nearestBin; _walkTo = walkTo;
+            _dropLitter = dropLitter;
         }
 
         public long NowTick => _now();
@@ -40,9 +43,17 @@ namespace TPWGodot
         /// suppresses a needs check and all littering; answering true on a guess would silence both.</summary>
         public bool IdleNeedsSuppressed => false;
 
-        /// <summary>Roll 3: a litter bin within 6 tiles, and walk to it. ⭐ THE BINS ARE REAL: a feature
-        /// whose record byte +0x2E has bit 2 set IS a litter bin (behaviour.md §0 item 8), and the park
-        /// already carries that flag on every placed attraction.</summary>
+        /// <summary>Roll 3: a litter bin within 6 tiles, and walk to it.
+        ///
+        /// ⭐ THE BINS ARE REAL AND THE SEARCH IS RIGHT: bit 2 of a feature record's +0x2E byte is the
+        /// Litter Bin and nothing else — entries 19, 98, 193 and 351, one per world. ⚠ An earlier
+        /// version of this comment said the flag was never set anywhere; that was a bad sweep of mine
+        /// (it skipped short records, which is exactly what a bin is), retracted in
+        /// findings/litter.md §8. A park with no bin placed is the only reason this returns nothing.
+        ///
+        /// ⚠ AND A BIN IS NOT SERVICED BY A HANDYMAN. Bit 2 and bit 0 are disjoint across all 182
+        /// feature records — the cleaner's bin round reads bit 0, which is toilets and the like, so
+        /// nothing in the port empties a Litter Bin. What does, if anything, is NOT ESTABLISHED.</summary>
         public BinSearch TryWalkToBin(Visitor guest)
         {
             if (_nearestBin(guest) is not { } bin) return BinSearch.NoBinInRange;
@@ -67,10 +78,16 @@ namespace TPWGodot
             return false;
         }
 
-        /// <summary>⚠ NOTHING, BECAUSE THE PORT HAS NO LITTER POOL WIRED. LitterPool exists in the sim
-        /// and nothing in the park owns one. This is a GAP: with a pool, roll 3 without a bin and roll 5
-        /// from misery would both leave rubbish, which then costs happiness and adds nausea to everyone
-        /// standing near it. Silently doing nothing here removes a whole feedback loop from the park.</summary>
-        public void DropLitter(Visitor guest) { }
+        /// <summary>Roll 3 with no bin in range, and roll 5 out of pure misery: leave rubbish where the
+        /// guest is standing. ⭐ THE POOL IS WIRED NOW — this used to be an empty body, which quietly
+        /// removed the whole dirt feedback loop: nobody littered, so nobody's happiness was ever docked
+        /// for standing near rubbish, so the handyman had nothing to do and the cleaner wage bought
+        /// nothing.
+        ///
+        /// ⚠ DISPUTED FOR ROLL 5, KEPT AS THE FINDINGS STATE IT. VisitorIdle's own note says the misery
+        /// branch creates a PARTICLE in the binary rather than a pool object; behaviour.md reads it as
+        /// litter and this port keeps behaviour.md. Both paths land here, so if that is ever settled the
+        /// fix is one branch in the sim, not here.</summary>
+        public void DropLitter(Visitor guest) => _dropLitter(guest);
     }
 }

@@ -95,6 +95,16 @@ namespace TPWGodot
         // Save's V+0x63 has unknown semantics; retain its byte, never invent behaviour for it.
         public byte Unknown63;
         public override int WalkSpeed => V.WalkSpeed;
+
+        /// <summary>The state this guest was in last tick, and the tick it entered the current one.
+        ///
+        /// ⭐ THE ONLY THING THAT MAKES A FREEZE NAME ITSELF. "Guests get stuck" has been reported four
+        /// separate ways from outside and every diagnostic so far has been per-SUBSYSTEM — the queue's
+        /// own wait, the gate's own counters — so a guest frozen in a state nobody owns is invisible to
+        /// all of them. A state and a duration together say which handler is not running, which is the
+        /// actual question every one of those reports was asking.</summary>
+        public VisitorState LastState = (VisitorState)(-1);
+        public long StateSince;
     }
 
     /// <summary>The guests in a park: spawning them, asking the pathfinder for routes, and walking them.
@@ -354,6 +364,12 @@ namespace TPWGodot
             {
                 var s2 = (Staffer)w;
                 if (s2.S.Kind == StaffKind.Mechanic) { var mw = MechanicWorld(); mw.Current = s2; Mechanic.Arrive(s2.S, mw, false); }
+                // ⚠ AND THE CLEANER'S IS ITS OWN TOO. Its arrival starts the job TIMER (0x80099418's
+                // slot 35): reaching the litter is not clearing it, and reaching the bin is not
+                // emptying it. Through the base's arrival a handyman walked to a piece of rubbish,
+                // found no purpose it knew, went Idle, and claimed the same piece again — the exact
+                // loop the mechanic's note describes, one class over.
+                else if (s2.S.Kind == StaffKind.Cleaner) { var hw = HandymanWorld(); hw.Current = s2; Handyman.Arrive(s2.S, hw); }
                 else StaffBase.Arrive(s2.S, StaffWorld(), false);
             };
             _parent.AddChild(st.Inst);
@@ -556,7 +572,45 @@ namespace TPWGodot
             },
             (v, tx, tz) => _byVisitor.TryGetValue(v, out var gg)
                         && _finder.Request(gg, gg.X, gg.Z, Centre(tx), Centre(tz), WalkFlags, 0)
-                        && (gg.Waiting = true));
+                        && (gg.Waiting = true),
+            // ⚠ THE GUEST'S OWN 8.8 POSITION, which Drop then scatters by ±100 (about 0.4 of a tile).
+            // Passing a tile centre would stack every piece on the middle of its tile.
+            v => { if (_byVisitor.TryGetValue(v, out var gg)) _litter.Pool.Drop(gg.X, gg.Z, _litter, _dice); });
+
+        /// <summary>The park's forty pieces of litter. ⭐ OWNED HERE because the guests who drop it, the
+        /// guests who are made miserable by it and the staff who clear it are all in this one list —
+        /// the pool is the only thing all three touch.</summary>
+        readonly ParkLitterWorld _litter = new();
+
+        /// <summary>Litter dropped / cleared, bins emptied, and how many of those were already past
+        /// the neglect line. ⭐ CURRENTLY THE ONLY WAY TO SEE ANY OF IT, because nothing draws litter.</summary>
+        public (int Live, int Dropped, int Cleaned, int Bins, int Neglected) LitterReport()
+            => (_litter.Pool.Count, _litter.Dropped, _litter.Cleaned, _litter.BinsEmptied, _litter.BinsNeglected);
+
+        /// <summary>Being sick, and watching an entertainer. ⚠ BOTH ARE EXITS THAT NOBODY WAS DRIVING
+        /// — see ParkActivityWorld. Wiring the needs clock and the idle pass earlier today is what made
+        /// states 28 and 29 reachable, and neither had a handler running, so a guest that entered one
+        /// never came out of it.</summary>
+        ParkActivityWorld ActivityWorld() => _activity ??= new ParkActivityWorld(
+            () => _now, _litter, _dice,
+            v => _byVisitor.TryGetValue(v, out var gg) ? (gg.X, gg.Z) : (0, 0),
+            st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X, sf.Z); return (0, 0); });
+        ParkActivityWorld _activity;
+
+        ParkHandymanWorld HandymanWorld() => _handyWorld ??= new ParkHandymanWorld(
+            StaffWorld(), _litter,
+            () => _rideTargets?.Invoke() ?? (IReadOnlyList<GuestTarget>)System.Array.Empty<GuestTarget>(),
+            id => _rides?.RuntimeFor(id)?.Stock,
+            // ⚠ WORLD POINTS, NOT TILES: a claimed piece of litter is walked to at its own scattered
+            // coordinate (0x80098E94..EB4), so this one does NOT apply Centre.
+            (st, wx, wz) =>
+            {
+                if (!_finder.Request(st, st.X, st.Z, wx, wz, WalkFlags, 0)) return false;
+                st.Waiting = true;
+                return true;
+            },
+            () => SlowClockDay?.Invoke() ?? 0);
+        ParkHandymanWorld _handyWorld;
 
         ParkStaffWorld StaffWorld() => _staffWorld ??= new ParkStaffWorld(
             () => _now,
@@ -624,12 +678,19 @@ namespace TPWGodot
                 var wasState = st.S.State;
                 var mech = st.S.Kind == StaffKind.Mechanic ? MechanicWorld() : null;
                 if (mech != null) mech.Current = st;
+                var handy = st.S.Kind == StaffKind.Cleaner ? HandymanWorld() : null;
+                if (handy != null) handy.Current = st;
 
                 if (st.Answer is { } m)
                 {
                     st.Answer = null;
                     bool found = m == PathMessage.Found;
                     if (mech != null) Mechanic.OnPathMessage(st.S, mech, found);
+                    // ⭐ A FAILED WALK TO LITTER MUST RELEASE THE CLAIM. The base's message handler
+                    // does not know about claims, so routing a handyman through it left the piece
+                    // reserved by someone who never arrived — and NearestUnclaimed skips claimed
+                    // pieces, so one refused path could retire a piece of rubbish permanently.
+                    else if (handy != null) Handyman.OnPathMessage(st.S, handy, found);
                     else StaffBase.OnPathMessage(st.S, found);
                 }
                 if (st.WaypointHead != WaypointPool.NoChain)
@@ -650,6 +711,13 @@ namespace TPWGodot
                 // worse — could never reach the branch that looks for work at all, because resting
                 // returns to Patrolling rather than to Idle.
                 if (st.S.State == StaffState.Idle) StaffBase.IdleCheck(st.S, world);
+                if (handy != null && RunHandyman(st, handy))
+                {
+                    if (LogStaff && st.S.State != wasState)
+                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                                     + $"litter {_litter.Pool.Count} live, tired {st.S.Tiredness} [own]");
+                    continue;
+                }
                 if (mech != null && RunMechanic(st, mech))
                 {
                     if (LogStaff && st.S.State != wasState)
@@ -679,6 +747,25 @@ namespace TPWGodot
 
         /// <summary>Print each staff member's state changes (--park-log-rides).</summary>
         public bool LogStaff { get; set; }
+
+        /// <summary>The handyman's own states (TPW.Sim.Handyman). Returns true when it handled the
+        /// state, so the shared machine does not also run on it.
+        ///
+        /// ⚠⚠ THIS SWITCH IS WHY THE CLEANER DID NOTHING. Every method it calls was ported and tested
+        /// months ago; not one of them had a caller. Without the Idle case a handyman never looks for
+        /// work, so it falls to the base's answer — patrol, which with no patrol rectangle is a random
+        /// wander. From outside, a hired cleaner walking around the park and a hired cleaner working
+        /// look exactly the same, which is how this survived so long.</summary>
+        bool RunHandyman(Staffer st, ParkHandymanWorld handy)
+        {
+            switch (st.S.State)
+            {
+                case StaffState.Idle: Handyman.Idle(st.S, handy, _dice); return true;
+                case StaffClassStates.CleaningLitter: Handyman.CleanLitter(st.S, handy); return true;
+                case StaffClassStates.EmptyingBin: Handyman.EmptyBin(st.S, handy); return true;
+                default: return false;          // the shared states are the base's
+            }
+        }
 
         /// <summary>The mechanic's own states (TPW.Sim.Mechanic). Returns true when it handled the
         /// state, so the shared machine does not also run on it.
@@ -752,9 +839,15 @@ namespace TPWGodot
             _ticking = true;
             _needs ??= new ParkNeedsWorld(() => _now, () => System.Linq.Enumerable.Select(_staff, s => s.S),
                                           v => _byVisitor.TryGetValue(v, out var gg) ? (gg.X >> 8, gg.Z >> 8) : (0, 0),
-                                          st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); });
+                                          st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); },
+                                          // ⚠ RAW 8.8, NOT TILES. LitterPool.Nearby shifts its own arguments down
+                                          // by 8; handing it tiles would put every piece beside the origin.
+                                          v => _byVisitor.TryGetValue(v, out var gg)
+                                             ? _litter.Pool.Nearby(gg.X, gg.Z) : (0, 0));
             foreach (var g in _guests)
             {
+                if (g.V.State != g.LastState) { g.LastState = g.V.State; g.StateSince = _now; }
+
                 // ⭐⭐ THE NEEDS CLOCK, WHICH HAD NO CALLER AT ALL. VisitorNeeds.Tick is "call before the
                 // state handler, every tick" and nothing in the game project called it, so every guest
                 // kept its spawn needs for its whole visit and no shop ever sold anything. Before the
@@ -877,6 +970,49 @@ namespace TPWGodot
             int n = _guests.Count;
             return $"average guest: need A {a / n}, need B {b / n}, bored {bored / n}, "
                  + $"happy {happy / n}, tired {tired / n}, nausea {nausea / n} (of {n})";
+        }
+
+        /// <summary>Every state a guest is currently in, with the longest anyone has held it.
+        ///
+        /// ⭐ READ THE DURATION, NOT THE COUNT. Twenty guests idle is a park; ONE guest that has been
+        /// in the same state for the whole run is a handler nobody is calling, and that is invisible in
+        /// a headcount. This is the instrument that found state 29: a guest went to be sick, the sim's
+        /// handler for it had no caller anywhere in the game project, and it stood there for ever.</summary>
+        public string StateReport()
+        {
+            if (_guests.Count == 0) return "no guests";
+            var count = new Dictionary<VisitorState, int>();
+            var oldest = new Dictionary<VisitorState, long>();
+            foreach (var g in _guests)
+            {
+                count.TryGetValue(g.V.State, out int n);
+                count[g.V.State] = n + 1;
+                long held = _now - g.StateSince;
+                if (!oldest.TryGetValue(g.V.State, out long o) || held > o) oldest[g.V.State] = held;
+            }
+            var parts = new List<string>();
+            foreach (var kv in count)
+                parts.Add($"{kv.Key} x{kv.Value} (oldest {oldest[kv.Key]})");
+            parts.Sort();
+            return "states: " + string.Join(", ", parts);
+        }
+
+        /// <summary>The dirt loop in one line. ⭐ READ IT AS A RATE, NOT A LEVEL: "live" alone cannot
+        /// tell a clean park from one whose forty slots are full and whose guests have given up
+        /// littering — dropped-minus-cleared is the number that says which.</summary>
+        public string LitterLine()
+        {
+            var (live, dropped, cleaned, bins, neglected) = LitterReport();
+            int cleaners = 0;
+            foreach (var st in _staff) if (st.S.Kind == StaffKind.Cleaner) cleaners++;
+            // ⭐ THE VOMIT SPLIT IS THE PROOF THAT STATE 29 RUNS AT ALL. VisitorActivity.Vomit is the
+            // only thing in the game that places kind 0x9E, so a non-zero vomit count cannot be
+            // produced by the ordinary littering path — it says the handler fired, which is exactly
+            // the thing that had no caller. Zero here with guests present is a freeze, not a tidy park.
+            var (rubbish, vomit) = _litter.Pool.SaveCounts();
+            return $"litter: {live} live of {LitterPool.Capacity} ({rubbish} rubbish, {vomit} vomit), "
+                 + $"{dropped} dropped, {cleaned} cleared, "
+                 + $"{bins} bins emptied ({neglected} of them already neglected), {cleaners} cleaners";
         }
 
         public string QueueWaitReport()
@@ -1048,6 +1184,25 @@ namespace TPWGodot
         /// <summary>Drive the guest's queue-and-ride states. True when it handled the tick.</summary>
         bool RunQueueState(Guest g)
         {
+            // ⚠⚠ THE TWO ACTIVITY STATES COME FIRST AND DO NOT NEED A RIDE. They sit above the
+            // `_rides == null` guard deliberately: a guest being sick in a park with no ride manager
+            // is still stuck, and putting them below meant the freeze survived in exactly the
+            // stripped-down harness most likely to be used to reproduce it.
+            switch (g.V.State)
+            {
+                case VisitorState.Vomiting:
+                    VisitorActivity.Vomit(g.V, ActivityWorld(), _dice);
+                    return true;
+                case VisitorState.WatchEntertainer:
+                    // ⚠ THE ENTERTAINER MUST STILL EXIST. The sim throws rather than guessing, because
+                    // the original dereferences the pointer before testing it — so a guest watching
+                    // someone who has been fired is the original's crash, not a state to invent an
+                    // answer for. Sack the watch instead of reproducing an access violation.
+                    if (g.V.WatchedEntertainer == null) { g.V.PopState(); return true; }
+                    VisitorActivity.Watch(g.V, ActivityWorld());
+                    return true;
+            }
+
             if (_rides == null) return false;
 
             switch (g.V.State)
@@ -1263,6 +1418,12 @@ namespace TPWGodot
             _leaving.Clear();
             foreach (var st in _staff)
             {
+                // ⚠ RELEASE THE LITTER CLAIM BEFORE THE HANDYMAN GOES. A claimed piece is skipped by
+                // NearestUnclaimed for ever, so a staff member deleted mid-walk would retire its target
+                // permanently — forty map changes and the park can hold no litter at all while looking
+                // perfectly clean. The rubbish itself stays: the original does not sweep the park
+                // because somebody put a path down.
+                if (st.S.TargetLitter != null) HandymanLitter.Unclaim(st.S);
                 FreeChain(st);
                 st.Inst?.QueueFree();
             }

@@ -271,3 +271,69 @@ alone cannot distinguish. The JSON preserves the initial survivors under `prior_
 original test hashes under `earlier_sweeps`, and the final green suite. Every recorded production
 source hash matches the restored file. `--append` reproduces the selective rerun without discarding
 that history; running the driver without it executes all 111 mutations afresh.
+
+## 8. Which features a handyman actually services (measured 2026-09-20)
+
+### ⚠ RETRACTION FIRST
+
+An earlier version of this section claimed **"the bin flag is never set in the data"** and that
+`ParkView.NearestBinTile` could therefore never succeed. **That was wrong.** The flag is set, on
+exactly the four entries `behaviour.md` §0 item 8 already names — 19, 98, 193, 351, one Litter Bin per
+world — and `behaviour.md` was right the whole time.
+
+⭐ **The absence was manufactured by my own filter.** The sweep skipped any record whose header offset
+left fewer than 0x40 bytes in the file. Litter bins are small records at the end of small files, so
+that test dropped **94 of 488 records**, and every bin was among them. With the filter relaxed to the
+0x2F bytes actually read, the four bins and the four Security Cameras (30, 105, 185, 350) appear
+immediately and match `behaviour.md` entry for entry.
+
+**Scope of the retraction:** only the "never set" claim and everything downstream of it — the
+`NearestBinTile` search is fine and finds bins when one is placed. The hand-verified readings below
+were checked against the executable, not against that sweep, and are unaffected.
+
+### The four accessors, verified by hand
+
+`ann.py 80024324 80024354` prints the whole set — four identical `lbu v0,46(a0)` / `jr ra` /
+`andi v0,v0,<mask>` leafs on the feature record's `+0x2E`:
+
+| address | mask | bit | carried by |
+|---|---|---|---|
+| `0x80024348` | `0x1` | 0 | guests may use it, **and cleaners service it** (READ, both readers) |
+| `0x8002433C` | `0x2` | 1 | the Staff Room (32, 109, 197, 353) + four space-world features |
+| `0x80024330` | `0x4` | 2 | the **Litter Bin**, exactly (19, 98, 193, 351) |
+| `0x80024324` | `0x8` | 3 | the **Security Camera**, exactly (30, 105, 185, 350) |
+
+Full `+0x2E` histogram over the 182 type-2 records: `0x00 ×130, 0x01 ×18, 0x02 ×12, 0x03 ×6,
+0x04 ×8, 0x08 ×8`. **No feature carries more than one of these bits**, which is the part that matters.
+
+### ⭐ SO A HANDYMAN NEVER EMPTIES A LITTER BIN
+
+`0x80098F20`'s filter is slot 33 → `0x80024348` → **bit 0** (verified by hand, and `0x80098FC4:
+slti v0,v0,0x3c` gives `BinPickBelow = 60` strictly, inside that same function). Bit 0 and bit 2 are
+disjoint in the data: all 8 litter-bin records read `0x04` and not one of them reads `0x05`.
+
+So the handyman's "bin round" is really a **service-the-guest-usable-features** round — toilets and
+the like — and TPW's actual Litter Bin object is not in it. ⚠ §4's line "Toilets are included, not
+just litter bins" has it exactly backwards and should be read as corrected here: toilets are included
+and **litter bins are not**.
+
+⭐ **CONFIRMED FROM PLAY, 2026-09-20.** Asked directly, strawberry_cow — who has played the game —
+answered without prompting: *"handymen dont touch bins. just toilets."* That is the same split the two
+bits make, arrived at from the opposite end, and it is the kind of confirmation a disassembly cannot
+give itself. The bit-0 filter is not a port limitation to be fixed later; it is the behaviour.
+
+He added what the handyman DOES clear: *"they sweep litter and stinkbombs on paths."* Litter is this
+pool. ⚠ **"Stinkbomb" has no name in the port and no identified record**, and it is not safe to assume
+it is the vomit kind (0x9E) just because both are unpleasant things on a path — the pool's six ordinary
+sprites are `0x9A 0x9B 0x9C 0x9D 0xA0 0x9F` and §2 records that their individual identities are NOT
+ESTABLISHED. One of them may be it. That is a lead to chase, not a mapping to wire.
+
+⚠ **STILL NOT ESTABLISHED: what a full litter bin does, or whether anything empties it.** The
+confirmation above says the handyman does not, and says nothing about what replaces him. Do not wire a
+guess.
+
+### Verified by hand for this work
+
+- `0x80098FC4: slti v0,v0,0x3c` — `BinPickBelow = 60`, strictly below, inside `0x80098F20..0x80099194`.
+- `0x80024348: andi v0,v0,0x1` — the handyman's filter is bit 0. `rides.md` §1.3's guess of bit 2 for
+  this filter is wrong, and wrong in a way that would have looked right: bit 2 IS the bin.
