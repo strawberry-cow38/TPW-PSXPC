@@ -1845,7 +1845,7 @@ namespace TPWGodot
         /// <summary>A placed attraction: its model, where it stands, and its status, which it drives itself from
         /// placement to running (TPW.Sim.AttractionLifecycle). Kept in the order placed, the order the game's own
         /// list walks them to find the one under the cursor.</summary>
-        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob, IRidePanelWorld, IShopSite
+        sealed class PlacedAttraction : IAttractionWorld, IRideAnimation, IRideWearWorld, IRideJob, IRideUpgradeWorld, IShopSite
         {
             // --- IShopSite: a shop or sideshow as the guest standing at it sees it ------------------
             //
@@ -1938,9 +1938,47 @@ namespace TPWGodot
             int IRideJob.Closing { get => Closing; set => Closing = value; }
             public StaffMember MechanicClaim;
             StaffMember IRideJob.Claim { get => MechanicClaim; set => MechanicClaim = value; }
-            /// <summary>⚠ NOT WIRED: the paid level-up (RidePanel.CompleteUpgrade) needs the panel and
-            /// the bank, and nothing in the port queues an upgrade, so nothing can reach this.</summary>
-            void IRideJob.CompleteUpgrade() { }
+            /// <summary>State 54's finish: the paid level-up (0x8009C56C(ride, 0)), which is
+            /// RidePanel.CompleteUpgrade — the level goes up, the settings reset to the new level's
+            /// defaults, the new level's price is taken and the effect plays.
+            ///
+            /// ⚠⚠ THIS WAS AN EMPTY METHOD and the mechanic already reaches it. A mechanic would walk
+            /// to the ride, spend its repair time upgrading, leave, and the ride would be exactly as it
+            /// was — the third silently-empty method found in this class today, after EjectEveryone and
+            /// MechanicAssigned. An empty override is invisible: it compiles, it runs, it returns.</summary>
+            void IRideJob.CompleteUpgrade() => RidePanel.CompleteUpgrade(this);
+
+            // --- IRideUpgradeWorld -----------------------------------------------------------------
+            //
+            // ⚠ TWO HALVES, AND ONLY ONE IS MINE. CompleteUpgrade — the FINISH — uses Level, ReadLevel,
+            // TrySpend and ShowUpgradeEffect, and those are wired below. The REQUEST half
+            // (RidePanel.RequestUpgrade) asks about research, mechanics and a 15-slot queue, and nothing
+            // in the port offers an upgrade yet; those throw rather than answering a plausible zero,
+            // because "no levels researched" and "not wired" are the same answer from the outside and
+            // one of them silently means the button never works.
+
+            public bool TrySpend(Money amount)
+            {
+                if (Bank == null || Bank.Balance < amount) return false;
+                Bank.Spend(amount);
+                return true;
+            }
+
+            /// <summary>Sound (8, final ? 10 : 11) and a sparkle (0x8009C61C..670). ⚠ THE SOUND IS NOT
+            /// PLAYED HERE — the park owns the mixer — so the host is told and decides. Silent by
+            /// itself rather than wrong.</summary>
+            public Action<bool> UpgradeEffect;
+            public void ShowUpgradeEffect(bool finalLevel) => UpgradeEffect?.Invoke(finalLevel);
+
+            static Exception UpgradeNotWired([System.Runtime.CompilerServices.CallerMemberName] string m = null)
+                => new NotSupportedException($"IRideUpgradeWorld.{m}: the port has no upgrade REQUEST path "
+                                           + "(no panel button, no research wiring, no upgrade queue). "
+                                           + "Wire it rather than answering zero - see ParkView.PlacedAttraction.");
+
+            public int ResearchedLevelCount => throw UpgradeNotWired();
+            public int MechanicCount => throw UpgradeNotWired();
+            public bool MechanicsOnStrike => throw UpgradeNotWired();
+            public bool TryEnqueueUpgrade() => throw UpgradeNotWired();
 
             public AttractionDefinition Rec;
             public MeshInstance3D Inst;
@@ -2197,6 +2235,21 @@ namespace TPWGodot
         /// HOOK. Wear takes several minutes of running to cross the threshold on its own, which is too
         /// long to watch a mechanic with; nothing here changes the wear rule, it only moves the number
         /// the rule already reads.</summary>
+        /// <summary>--park-upgrade=ENTRY: run the paid level-up a mechanic's state 54 ends with, on
+        /// demand. A TEST HOOK — it is the same RidePanel.CompleteUpgrade call, not a second path — so
+        /// the FINISH half can be watched before the REQUEST half exists. Returns the level it reached,
+        /// or -1 if the ride was not found.</summary>
+        public int UpgradeNow(int entry)
+        {
+            foreach (var a in _attractionsPlaced)
+                if (a.Rec.Entry == entry)
+                {
+                    ((IRideJob)a).CompleteUpgrade();
+                    return a.Level;
+                }
+            return -1;
+        }
+
         public bool Break(int entry, bool hard = false)
         {
             foreach (var a in _attractionsPlaced)

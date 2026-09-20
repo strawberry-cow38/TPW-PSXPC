@@ -19,6 +19,7 @@ namespace TPWGodot
         bool _noGate;
         int _autoBreakAt = -1;
         bool _autoBreakHard;
+        int _autoUpgrade = -1;
         GameDataResult _data;
         Label _status;
         Label _selfTest;
@@ -560,6 +561,7 @@ namespace TPWGodot
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
+                else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-break="))
                 {
@@ -953,6 +955,13 @@ namespace TPWGodot
                         }
                     }
                     // Last, because the ride it names may have been placed by --park-queue.
+                    if (_autoUpgrade >= 0)
+                    {
+                        var before = _finances?.Bank.Balance ?? Money.Zero;
+                        int lvl = _park.UpgradeNow(_autoUpgrade);
+                        GD.Print($"[tpw] --park-upgrade {_autoUpgrade}: level {lvl}, "
+                               + $"bank {before} -> {_finances?.Bank.Balance}");
+                    }
                     if (_autoBreak >= 0)
                     {
                         if (_autoBreakAt < 0)
