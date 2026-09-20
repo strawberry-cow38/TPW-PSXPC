@@ -1134,6 +1134,29 @@ namespace TPWGodot
         /// <summary>The piece of the map a guest is standing in once it has walked through the gate:
         /// the first path tile the entrance's own walk-in scan would find, or the biggest piece there is
         /// when no entrance is wired. This is the "here" that everything else is measured against.</summary>
+        /// <summary>Is this tile joined to the rest of the park — can a guest standing inside the gate
+        /// walk to it? For anything that wants to ASK before the fact: the build tool, a panel row, a
+        /// warning when a ride is placed with its exit on a stub.
+        ///
+        /// ⭐ NOT A RULE, AND IT MUST NOT BECOME ONE. The game validates none of this — the queue tool's
+        /// join marker at build time is the only feedback it ever gives, and it happily lets you place a
+        /// ride nobody can reach. Warn, colour a row, refuse nothing.
+        ///
+        /// ⚠ CALL <see cref="MapChanged"/> AFTER A BUILD FIRST. The flood fill is cached, and asking on
+        /// a stale one answers about the park as it was before the path was laid — which is precisely
+        /// the moment a placer wants to ask.</summary>
+        public bool JoinedToGate(int x, int z)
+        {
+            if (_area == null) RebuildAreas();
+            return AreaAt(x, z) == GateArea();
+        }
+
+        /// <summary>The three connectivity questions an attraction has, separately, because they have
+        /// different answers: guests reach it through the DOOR, leave it through the EXIT, and queue on
+        /// tiles that have to meet a path. Any of them can be false while the others are true.</summary>
+        public (bool Door, bool Exit) AttractionJoined(GuestTarget t)
+            => (JoinedToGate(t.DoorX, t.DoorZ), t.ExitX < 0 || JoinedToGate(t.ExitX, t.ExitZ));
+
         /// <summary>The tile the reachability check measures from: where a guest stands after walking in.</summary>
         public (int X, int Z) GateTile { get; private set; } = (-1, -1);
 
@@ -1187,13 +1210,16 @@ namespace TPWGodot
             var bad = new List<string>();
             foreach (var t in targets)
             {
-                if (AreaAt(t.DoorX, t.DoorZ) != gate) bad.Add($"#{t.Id} door ({t.DoorX},{t.DoorZ}) in piece {AreaAt(t.DoorX, t.DoorZ)}");
+                // ⭐ THROUGH THE SAME PUBLIC ANSWER THE BUILD TOOL GETS. If the printed line and the
+                // API could disagree, the one nobody runs is the one that would be wrong.
+                var joined = AttractionJoined(t);
+                if (!joined.Door) bad.Add($"#{t.Id} door ({t.DoorX},{t.DoorZ}) in piece {AreaAt(t.DoorX, t.DoorZ)}");
                 // ⭐ THE EXIT IS ITS OWN QUESTION AND IT IS THE ONE THAT STRANDS PEOPLE. A ride whose
                 // door is reachable takes guests in happily and then puts them down on the far side; if
                 // THAT tile is not joined to the park they stand there failing every route, waiting out
                 // the decision cooldown between each one. From outside it reads as "guests freeze at the
                 // exit of rides for a while after they get off", which is exactly how it was reported.
-                if (t.ExitX >= 0 && AreaAt(t.ExitX, t.ExitZ) != gate)
+                if (!joined.Exit)
                     bad.Add($"#{t.Id} EXIT ({t.ExitX},{t.ExitZ}) in piece {AreaAt(t.ExitX, t.ExitZ)}");
             }
             // ⭐ THE PIECE NUMBERS ARE THE DIAGNOSIS, not decoration. All the strays sharing ONE piece

@@ -683,6 +683,28 @@ namespace TPWGodot
         /// until it is, and the gate simply is not wired then.</summary>
         ParkFinances _finances;
 
+        /// <summary>Can a guest standing inside the gate walk to this tile? For the build tool and the
+        /// attraction panel, which want to WARN about a ride nobody can reach rather than discover it
+        /// as two guests standing very still. Rebuilds the park's connectivity first, so it is safe to
+        /// call straight after a placement. ⚠ A DIAGNOSTIC: the game refuses no build over this.</summary>
+        public bool TileJoinedToGate(int x, int z)
+        {
+            if (_guests == null) return true;
+            _guests.MapChanged();
+            return _guests.JoinedToGate(x, z);
+        }
+
+        /// <summary>Whether a placed attraction's door and its exit are each joined to the park. False
+        /// on the exit is the one that strands people: they queue and ride happily, then get put down
+        /// somewhere they cannot walk out of.</summary>
+        public (bool Door, bool Exit) AttractionJoined(int entry)
+        {
+            if (_guests == null) return (true, true);
+            foreach (var t in GuestTargets())
+                if (t.Id == entry) { _guests.MapChanged(); return _guests.AttractionJoined(t); }
+            return (true, true);
+        }
+
         /// <summary>--park-nogate: guests appear inside the fence and pay nothing, the way they did
         /// before the turnstile existed. A CONTROL, not a rule — it exists so the gate's effect on the
         /// bank can be measured against its own absence in the same binary.</summary>
@@ -1017,9 +1039,27 @@ namespace TPWGodot
                 sb.Append($"\n  {a.Rec.Entry}: status {(int)a.Status} {a.Status}, "
                         + $"tick {(len > 0 ? a.Cycle.Accumulator >> RideCycle.FixedShift : 0)}/{len}, "
                         + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, "
-                        + $"reliability {a.Reliability}");
+                        + $"reliability {a.Reliability}"
+                        // ⭐ THE QUEUE HEAD'S STATE IS THE WHOLE LOADING STORY. RideLoading.Load boards
+                        // only a head in 18, and a head in any other state blocks the ride entirely —
+                        // there is no "skip him". So "people in the queue, they just don't get on after
+                        // the first group" is answered by this one field and by nothing else in the
+                        // report: the rider count, the status and the queue length all look healthy.
+                        + QueueHeadReport(a));
             }
             return sb.ToString();
+        }
+
+        /// <summary>The queue's length and what state its front guest is in — the two numbers that say
+        /// whether a ride CAN load. See RideLoading.Load's state-18 rule.</summary>
+        string QueueHeadReport(PlacedAttraction a)
+        {
+            if (_guests?.Rides is not { } rw || rw.RuntimeFor(a.Rec.Entry) is not { } run) return "";
+            if (run.Queue.Count == 0) return ", queue empty";
+            var head = run.Queue[0];
+            bool boardable = head.V.State == (VisitorState)18;
+            return $", queue {run.Queue.Count} head in {head.V.State}"
+                 + (boardable ? " (BOARDABLE)" : " ⚠ NOT BOARDABLE — the ride cannot load past it");
         }
 
         void RefreshInfo()
