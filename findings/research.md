@@ -649,3 +649,45 @@ behaviour; nothing in play should reach it now that the offset is right.)
 - **Nothing here says the original does not overread.** It does — 0x8009BAFC has the same unbounded
   walk. The port's choice to stop on slot 4 is a decision about a value nothing consumes, not a claim
   about what the hardware returns.
+
+
+## 10. The four entry points the panel needs — 2026-09-21
+
+`Candidates`, `TierCeiling`, `Progress` and `ApplyFundingSlider` were ported, tested and had **no
+caller in `game/`**. They are what a research panel is made of: the shortlist you pick from, the tier
+that gates it, the stored percentage, and the funding slider. All four are reachable now, and the
+report carries the three that are readable:
+
+```
+--park-funding 250: funding := 250 -> 100
+--park-research 0,0: slot 0 researching type 3#2 (#0 of 6 offered)
+--park-research 1,0: slot 1 researching type 4#1 (#0 of 2 offered)
+--park-research 4,0: slot 4 offers nothing
+
+research: funding 100, 2 researchers,
+  slot 0 type 3#2 4% (stored 0 levels, 4%),  slot 1 type 4#1 7% (stored 0 levels, 7%),
+  slot 2 type 5#0 3% (stored 0 levels, 3%),  slot 3 type 2#7 10% (stored 0 levels, 10%);
+  offered per slot (count@ceiling) 0:6@1 1:2@1 2:2@1 3:2@1 4:0@5
+```
+
+**`--park-research=SLOT,CHOICE` picks by position in the game's own shortlist**, which is what the
+menu does; `SLOT,TYPE,INDEX` still names a definition directly, because a control needs to be able to
+ask for something and be told no.
+
+**Controls, all four refusing for their own reason:**
+
+| asked | answered |
+|---|---|
+| `--park-funding=250` | `250 -> 100` — the upper clamp |
+| `--park-funding=10` | `10 -> 70` — the lower clamp |
+| `--park-research=1,99` | `slot 1 offers 2, not #99` |
+| `--park-research=4,0` | `slot 4 offers nothing` — type 8 has no records |
+| `--park-research=0,0` twice | `start refused` — `Start` refuses an occupied slot |
+
+⚠ **`offered per slot` prints slot 4's ceiling as 5, and that is the overrun's leftover** (§9.2)
+showing itself rather than hiding. Nothing reads it; it is printed so that nobody later mistakes it
+for a computed ceiling.
+
+⚠ **`stored` is printed beside the live percentage on purpose.** `Topic.Percent` is the live
+fixed-point and `ResearchSystem.Progress` is the record a save keeps; they are allowed to differ
+mid-level, and printing one while calling it the other is how a save round-trip bug hides.

@@ -836,6 +836,12 @@ namespace TPWGodot
         public string StartResearch(int slot, int type, int index)
             => _guests?.StartResearch(slot, type, index) ?? "no guests";
 
+        public string StartResearch(int slot, int choice)
+            => _guests?.StartResearch(slot, choice) ?? "no guests";
+
+        public string SetResearchFunding(int value)
+            => _guests?.SetResearchFunding(value) ?? "no guests";
+
         /// <summary>Whether a route to a provably unreachable target is refused before the pathfinder
         /// sees it (--park-nopreflight turns it off). See ParkGuests.Seek.</summary>
         public bool Preflight { get; set; } = true;

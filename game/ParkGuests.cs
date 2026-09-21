@@ -1174,6 +1174,37 @@ namespace TPWGodot
         /// on its own — and an auto-start here would be inventing the choice rather than testing the
         /// machine. Returns what ResearchSystem.Start said, so a refused pick is visible instead of
         /// looking like a silent success.</summary>
+        /// <summary>⭐ THE GAME'S OWN SHORTLIST, WHICH NOTHING CALLED. `ResearchSystem.Candidates` is
+        /// the list a player actually picks from — every definition of the slot's types that passes
+        /// `CanSelect` — and the port had it tested and unreachable, so every harness pick was a raw
+        /// (type, index) that might not have been offerable at all. Picking BY POSITION in this list
+        /// is what the menu does, and it is the only way a test can select something legitimate
+        /// without hardcoding what the catalogue happens to contain.</summary>
+        public string StartResearch(int slot, int choice)
+        {
+            if (_research?.System is not { } sys) return "no catalogue";
+            try
+            {
+                var list = sys.Candidates(slot);
+                if (list.Count == 0) return $"slot {slot} offers nothing";
+                if (choice < 0 || choice >= list.Count)
+                    return $"slot {slot} offers {list.Count}, not #{choice}";
+                var pick = list[choice];
+                return sys.Start(slot, pick)
+                     ? $"slot {slot} researching type {pick.Type}#{pick.Index} (#{choice} of {list.Count} offered)"
+                     : "start refused";
+            }
+            catch (InvalidOperationException e) { return $"tier scan refused: {e.Message}"; }
+        }
+
+        /// <summary>Funding, 70..100, clamped by the sim (ResearchSystem.ApplyFundingSlider).</summary>
+        public string SetResearchFunding(int value)
+        {
+            if (_research?.System is not { } sys) return "no catalogue";
+            sys.ApplyFundingSlider(value);
+            return $"funding := {value} -> {sys.Funding}";
+        }
+
         public string StartResearch(int slot, int type, int index)
         {
             if (_research?.System is not { } sys) return "no catalogue";
@@ -1211,11 +1242,28 @@ namespace TPWGodot
             {
                 var t = sys.Topic(slot);
                 if (!t.Active && !t.Finished) continue;
+                // ⭐ THE STORED RECORD, NOT JUST THE LIVE TOPIC. ResearchSystem.Progress is what a
+                // save keeps and what LevelCount reads; a topic's own Percent is the live fixed-point
+                // and they are allowed to differ mid-level. Printing one and calling it the other is
+                // how a save-round-trip bug hides.
+                var stored = sys.Progress(t.Definition);
                 parts.Add($"slot {slot} type {t.Definition.Type}#{t.Definition.Index} {t.Percent}%"
+                        + $" (stored {stored.CompletedLevels} levels, {stored.Percent}%)"
                         + (t.Finished ? " done" : ""));
+            }
+            // ⭐ THE CEILING AND THE SHORTLIST, BESIDE THE TOPIC THEY GATE. "slot 1 offers nothing"
+            // and "slot 1 offers 9" are the difference between a catalogue that is exhausted and one
+            // the tier rule is holding shut, and a percentage on its own can say neither.
+            var offer = new List<string>();
+            for (int slot = 0; slot < ResearchSystem.TopicCount; slot++)
+            {
+                int n; try { n = sys.Candidates(slot).Count; } catch (InvalidOperationException) { n = -1; }
+                int ceiling; try { ceiling = sys.TierCeiling(slot); } catch (InvalidOperationException) { ceiling = -1; }
+                offer.Add($"{slot}:{n}@{ceiling}");
             }
             return $"research: funding {sys.Funding}, {researchers} researchers, "
                  + (parts.Count == 0 ? "no active topics" : string.Join(", ", parts))
+                 + $"; offered per slot (count@ceiling) {string.Join(" ", offer)}"
                  + $"; idle decisions: {ResearchPicked} took the work, {ResearchPatrolled} patrolled, "
                  + $"{ResearchDiverted} never chose"
                  + $"; rest: {_staffWorld?.RestGranted ?? 0} of {_staffWorld?.RestAsked ?? 0} asked "

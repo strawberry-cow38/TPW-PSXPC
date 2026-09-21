@@ -611,6 +611,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-save-proof=")) _parkSaveProof = arg.Substring("--park-save-proof=".Length);
                 else if (arg.StartsWith("--park-hire=")) _autoHire = arg.Substring("--park-hire=".Length);
                 else if (arg.StartsWith("--park-research=")) _autoResearch = arg.Substring("--park-research=".Length);
+                else if (arg.StartsWith("--park-funding=")) _autoFunding = int.Parse(arg.Substring("--park-funding=".Length));
                 else if (arg.StartsWith("--park-break="))
                 {
                     // --park-break=ENTRY or ENTRY@FRAME. ⚠ BREAKING AT LOAD TESTS NOTHING ABOUT A LOADED
@@ -934,11 +935,17 @@ namespace TPWGodot
                         }
                     // ⚠ AFTER THE HIRES, because a topic is picked against the catalogue and the
                     // catalogue's tier rule counts what is already built and who is already employed.
+                    if (_autoFunding != int.MinValue)
+                        GD.Print($"[tpw] --park-funding {_autoFunding}: {_park.SetResearchFunding(_autoFunding)}");
                     if (_autoResearch != null)
                         foreach (var pick in _autoResearch.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
                         {
                             var v = System.Array.ConvertAll(pick.Split(','), int.Parse);
-                            if (v.Length == 3) GD.Print($"[tpw] --park-research {pick}: {_park.StartResearch(v[0], v[1], v[2])}");
+                            // SLOT,CHOICE picks by position in the game's own shortlist (Candidates);
+                            // SLOT,TYPE,INDEX still names a definition directly, which is what a
+                            // control needs when the point is to be REFUSED.
+                            if (v.Length == 2) GD.Print($"[tpw] --park-research {pick}: {_park.StartResearch(v[0], v[1])}");
+                            else if (v.Length == 3) GD.Print($"[tpw] --park-research {pick}: {_park.StartResearch(v[0], v[1], v[2])}");
                         }
                     if (_autoLay != null)
                         foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
@@ -1595,6 +1602,9 @@ namespace TPWGodot
         /// RATE instead of a coin flip.</summary>
         int _autoPeltEvery = -1;
         string _autoResearch;
+        /// <summary>--park-funding=N. The sim clamps to 70..100, so a value outside that is a control:
+        /// the report prints what was asked for and what it became.</summary>
+        int _autoFunding = int.MinValue;
         string _shotTarget;
         void TakeShot()
         {
