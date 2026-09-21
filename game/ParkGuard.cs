@@ -1,0 +1,167 @@
+using System;
+using System.Collections.Generic;
+using TPW.Sim;
+
+namespace TPWGodot
+{
+    /// <summary>The park as a GUARD reads it (TPW.Sim.IGuardWorld).
+    ///
+    /// ⚠⚠ THE LAST OF THE FIVE STAFF CLASSES, and the sixth "ported but never called" system found in
+    /// two days. `Guard` — Dispatch, Idle, Chase, GoToExitPoint, CrossGate, LeavePark, GoToSpawnPoint,
+    /// TakePost, Arrive, OnMessage — had ZERO call sites in the game project and `IGuardWorld` had no
+    /// implementation anywhere. A hired guard drew a wage and wandered, and every pelted entertainer
+    /// took the no-guard branch: −5 more morale and nobody comes.
+    ///
+    /// ⭐ THE ARRIVE SHAPE IS THE SAFE ONE, AND I CHECKED BEFORE WIRING because the handyman's was not.
+    /// `Guard.Arrive` handles its own six purposes and ends `default: StaffBase.Arrive(...)`, so
+    /// routing every guard arrival through it is correct. `Handyman.Arrive` has no such fall-through,
+    /// and routing everything through THAT is what left a cleaner walking patrol legs for ever without
+    /// ever returning to Idle. Three shapes exist — sets a default then overrides, handles only its own
+    /// silently, handles only its own and throws — and which one you have decides the wiring.</summary>
+    sealed class ParkGuardWorld : IGuardWorld
+    {
+        readonly ParkStaffWorld _base;
+        readonly Func<IEnumerable<Guest>> _guests;
+        readonly Func<Visitor, Guest> _guestOf;
+        readonly Func<Staffer, int, int, PathFlags, bool> _ask;      // tile coords
+        readonly Func<Staffer, int, int, bool> _askWorld;            // raw 8.8
+        readonly Action<Staffer> _freeChain;
+        readonly Action<Visitor, int> _message;
+        readonly Func<IReadOnlyList<(int X, int Z)>> _spawnTiles;
+        readonly Func<(int X, int Z)?> _gateArea;
+        readonly IRandomSource _dice;
+
+        public ParkGuardWorld(ParkStaffWorld shared, Func<IEnumerable<Guest>> guests,
+                              Func<Visitor, Guest> guestOf,
+                              Func<Staffer, int, int, PathFlags, bool> askTile,
+                              Func<Staffer, int, int, bool> askWorld,
+                              Action<Staffer> freeChain, Action<Visitor, int> message,
+                              Func<IReadOnlyList<(int X, int Z)>> spawnTiles,
+                              Func<(int X, int Z)?> gateArea, IRandomSource dice)
+        { _base = shared; _guests = guests; _guestOf = guestOf; _ask = askTile; _askWorld = askWorld;
+          _freeChain = freeChain; _message = message; _spawnTiles = spawnTiles; _gateArea = gateArea;
+          _dice = dice; }
+
+        public Staffer Current { get => _base.Current; set => _base.Current = value; }
+
+        public long NowTick => _base.NowTick;
+        public bool IsTypeOnStrike(StaffKind kind) => _base.IsTypeOnStrike(kind);
+        public bool HasPatrolRect(StaffMember s) => _base.HasPatrolRect(s);
+        public bool TryPathIntoPatrolArea(StaffMember s) => _base.TryPathIntoPatrolArea(s);
+        public bool StrikeMusterExists => _base.StrikeMusterExists;
+        public bool TryPathToStrikeMuster(StaffMember s) => _base.TryPathToStrikeMuster(s);
+        public bool TryPathToRest(StaffMember s) => _base.TryPathToRest(s);
+
+        // ---- the guest the guard is chasing -------------------------------------------------------
+
+        /// <summary>⚠ THE GUEST MAY HAVE LEFT THE PARK MID-CHASE. The sim asks this every tick of a
+        /// chase precisely because a culprit can be removed underneath it, and a host that answered
+        /// true unconditionally would have guards chasing freed objects for 3600 ticks.</summary>
+        public bool GuestExists(Visitor guest) => guest != null && _guestOf(guest) != null;
+
+        /// <summary>Same TILE, not the same position. A guard that has to reach the guest's exact 8.8
+        /// coordinate never catches anybody, because both are still moving.</summary>
+        public bool OnGuestTile(StaffMember staff, Visitor guest)
+        {
+            if (Current == null || !ReferenceEquals(Current.S, staff)) return false;
+            var g = _guestOf(guest);
+            return g != null && (g.X >> 8) == (Current.X >> 8) && (g.Z >> 8) == (Current.Z >> 8);
+        }
+
+        /// <summary>Slot 40 on the guest — the same door `ParkEntrance` already posts through
+        /// (VisitorMessages.OnMessage). Message 4 is the catch.</summary>
+        public void SendGuestMessage(Visitor guest, int message)
+        {
+            // ⭐ COUNTED HERE BECAUSE THE SIM KEEPS NO TALLY. A catch is the guard's whole point and
+            // nothing else in the park records that one happened; without this the only evidence a
+            // guard ever did its job would be a morale number that several other things also move.
+            if (message == Guard.CatchMessage) Caught++;
+            _message(guest, message);
+        }
+
+        /// <summary>How many guests a guard has caught. Host bookkeeping, not the sim's.</summary>
+        public int Caught { get; private set; }
+
+        public void FreeWaypoints(StaffMember staff)
+        { if (Current != null && ReferenceEquals(Current.S, staff)) _freeChain(Current); }
+
+        /// <summary>The drawn animation. ⚠ THE PORT HAS NO GUARD ART, so this only records which clip
+        /// the sim asked for — 15 idle, 30 chase — and nothing draws differently yet. A GAP, and the
+        /// reason it is stored rather than discarded is that a discarded value cannot be measured.</summary>
+        public void SetAnimation(StaffMember staff, int animation)
+        { if (Current != null && ReferenceEquals(Current.S, staff)) Current.Anim = animation; }
+
+        /// <summary>Re-path to wherever the culprit is NOW. ⚠ Called every tick of a chase, which is
+        /// what makes it a chase rather than a walk to where the guest used to be.</summary>
+        public void PathToGuest(StaffMember staff, Visitor guest, int flags, int secondaryFlags)
+        {
+            if (Current == null || !ReferenceEquals(Current.S, staff)) return;
+            var g = _guestOf(guest);
+            if (g != null) _ask(Current, g.X >> 8, g.Z >> 8, (PathFlags)flags);
+        }
+
+        // ---- the gate and the way out -------------------------------------------------------------
+
+        /// <summary>READ: point index 1 is the exit, 0 is the spawn point (0x800599A4). ⭐ THESE ARE A
+        /// BINARY CONSTANT, NOT MAP DATA — every map puts its gate in the same place, which is the only
+        /// reason a fixed pair of world coordinates works. So "has exits" is really "does this park
+        /// have a gate at all", and a no-gate debug park has none.</summary>
+        public bool HasExits => _gateArea() != null;
+
+        public void PathToParkPoint(StaffMember staff, int pointIndex, int flags, int secondaryFlags)
+        {
+            if (Current == null || !ReferenceEquals(Current.S, staff)) return;
+            var (x, z) = ParkPoints.Aim(pointIndex, _dice);
+            // ⚠ RAW WORLD UNITS. ParkPoints.Aim answers in 8.8 and its x is a TILE BOUNDARY (5376 is
+            // exactly 21.0 tiles), not a centre — rounding it to a tile and re-centring would move the
+            // guard half a tile off the line the game actually walks people down.
+            _askWorld(Current, x, z);
+        }
+
+        /// <summary>READ: replace the path with ONE waypoint at (my x, gate y), 0x80098594. ⭐ A
+        /// STRAIGHT LINE, NOT A ROUTE — crossing the gate is the one move that does not ask the
+        /// pathfinder, which is why a guard can cross a turnstile a guest would have to queue for.</summary>
+        public void SetGateWaypoint(StaffMember staff)
+        {
+            if (Current == null || !ReferenceEquals(Current.S, staff)) return;
+            var (_, z) = ParkPoints.Aim(0, _dice);
+            _askWorld(Current, Current.X, z);
+        }
+
+        /// <summary>Off the map the way guests leave. ⚠ Uses the map's own spawn tiles rather than an
+        /// invented "outside", so a guard leaves by the road the buses use.</summary>
+        public void PathToRandomExit(StaffMember staff, int flags, int secondaryFlags)
+        {
+            if (Current == null || !ReferenceEquals(Current.S, staff)) return;
+            var tiles = _spawnTiles();
+            if (tiles.Count == 0) return;
+            var (x, z) = tiles[_dice.Next(tiles.Count)];
+            _ask(Current, x, z, (PathFlags)flags);
+        }
+
+        /// <summary>READ (0x80098090..0x800981D8): sample x then y in 8.8 units around the entrance,
+        /// upper bounds EXCLUSIVE, clamp to the map, stop at the first accepted path. ⭐ FALSE MEANS NO
+        /// ACCEPTED PATH IN FIVE TRIES, not "no tile there" — the guard then goes Idle rather than
+        /// standing on a post it could not reach.</summary>
+        public bool TryPathToPost(StaffMember staff, int attempts, int xRadius, int minY, int maxY,
+                                  int flags, int secondaryFlags)
+        {
+            if (Current == null || !ReferenceEquals(Current.S, staff)) return false;
+            if (_gateArea() is not { } gate) return false;
+            for (int i = 0; i < attempts; i++)
+            {
+                int x = gate.X + _dice.Next(xRadius * 2 + 1) - xRadius;
+                int z = gate.Z + minY + _dice.Next(maxY - minY);
+                if (_ask(Current, x, z, (PathFlags)flags)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>READ: the word at 0x80103950, changed by arrivals 14 and 16. ⚠ ITS PURPOSE IS NOT
+        /// ESTABLISHED — do not relabel it a guest count or clamp it. Both gate arrivals increment and
+        /// both crossings decrement, which is what makes it balance.</summary>
+        public int Counter80103950 { get; set; }
+        /// <summary>READ: the word at 0x80103954, incremented by arrival 16. NOT ESTABLISHED.</summary>
+        public int Counter80103954 { get; set; }
+    }
+}

@@ -695,6 +695,10 @@ namespace TPWGodot
             _research.Attach(new ResearchSystem(_research));
         }
 
+        /// <summary>One TPW.Sim.Guard per hired guard — the class keeps its culprit and gate direction
+        /// on this object rather than on StaffMember, so the host owns one each.</summary>
+        readonly Dictionary<StaffMember, Guard> _guards = new();
+
         /// <summary>One TPW.Sim.Entertainer per hired entertainer. The sim keeps the class's extra
         /// fields on this object rather than on StaffMember, so the host has to own one each.</summary>
         readonly Dictionary<StaffMember, Entertainer> _entertainers = new();
@@ -719,8 +723,36 @@ namespace TPWGodot
         /// It is also the only producer the influence map has, and the other end of a guest's state 28.</summary>
         ParkEntertainerWorld EntertainerWorld() => _entWorld ??= new ParkEntertainerWorld(
             StaffWorld(), _influence, () => _guests,
-            st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); });
+            st => { foreach (var sf in _staff) if (sf.S == st) return (sf.X >> 8, sf.Z >> 8); return (0, 0); },
+            // ⭐ HIRING ORDER, because the sim keeps the first entry on an equal distance.
+            () => { var list = new List<Guard>();
+                    foreach (var sf in _staff) if (sf.S.Kind == StaffKind.Guard) list.Add(GuardFor(sf.S));
+                    return list; });
         ParkEntertainerWorld _entWorld;
+
+        /// <summary>⚠⚠ THE LAST STAFF CLASS. Guard had no caller and IGuardWorld no implementation, so
+        /// a hired guard wandered and every pelted entertainer took the no-guard branch.</summary>
+        ParkGuardWorld GuardWorld() => _guardWorld ??= new ParkGuardWorld(
+            StaffWorld(), () => _guests,
+            v => _byVisitor.TryGetValue(v, out var gg) ? gg : null,
+            (st, tx, tz, fl) => Ask(st, tx, tz, fl) && (st.Waiting = true),
+            (st, wx, wz) => Seek(st, st.X, st.Z, wx, wz, WalkFlags, 0) && (st.Waiting = true),
+            st => FreeChain(st),
+            // ⭐ THE SAME DOOR THE GATE USES, and it is SYNCHRONOUS as the original is: the catch
+            // runs inside the guard's tick rather than being queued.
+            (v, m) => { if (_entrance != null) _entrance.DeliverMessage(v, m, 0, 0); },
+            () => _map.SpawnTiles,
+            // ⚠ THE GATE'S TILE, NOT ITS AREA ID. GateArea() answers which connected PIECE the gate
+            // belongs to, which is a different question and would have posted every guard to tile
+            // (1,1) — a compile error caught it, and it would not have been visible at runtime.
+            // ⚠ THE EXISTING GateTile PROPERTY — "where a guest stands after walking in" — NOT
+            // GateArea(), which answers which connected PIECE the gate is in. Both are small ints and
+            // both look like an answer; only the return type told me apart. The post the guard takes
+            // is meant to be inside the park by the gate, which is exactly what this already is.
+            () => GateTile.X < 0 ? null : GateTile,
+            _dice);
+        ParkGuardWorld _guardWorld;
+
 
         ParkHandymanWorld HandymanWorld() => _handyWorld ??= new ParkHandymanWorld(
             StaffWorld(), _litter,
@@ -809,6 +841,8 @@ namespace TPWGodot
                 if (ent != null) ent.Current = st;
                 var res = st.S.Kind == StaffKind.Researcher ? _research : null;
                 if (res != null) res.Current = st;
+                var grd = st.S.Kind == StaffKind.Guard ? GuardWorld() : null;
+                if (grd != null) grd.Current = st;
 
                 if (st.Answer is { } m)
                 {
@@ -857,6 +891,13 @@ namespace TPWGodot
                         continue;
                     }
                 }
+                if (grd != null && RunGuard(st, grd))
+                {
+                    if (LogStaff && st.S.State != wasState)
+                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                                     + $"gate counter {grd.Counter80103950} [own]");
+                    continue;
+                }
                 // ⚠ THE RESEARCHER'S Idle RUNS StaffBase.IdleCheck ITSELF, which the pre-pass above
                 // has already done this tick. That double call is what the sim's own note describes —
                 // the binary rolls BEFORE slot 51 and behaviour.md §3.3's order is retained — so the
@@ -904,6 +945,32 @@ namespace TPWGodot
 
         /// <summary>Print each staff member's state changes (--park-log-rides).</summary>
         public bool LogStaff { get; set; }
+
+        /// <summary>The guard's own states (TPW.Sim.Guard). ⭐ ITS ARRIVAL FALLS THROUGH TO THE BASE
+        /// for purposes it does not own (`default: StaffBase.Arrive`), which is why every guard arrival
+        /// can safely be routed to Guard.Arrive — checked before wiring, because the handyman's does
+        /// NOT fall through and routing everything through that one cost a day.</summary>
+        bool RunGuard(Staffer st, ParkGuardWorld grd)
+        {
+            var g = _guards.TryGetValue(st.S, out var have) ? have : (_guards[st.S] = new Guard(st.S));
+            switch (st.S.State)
+            {
+                case StaffState.Idle: g.Idle(grd); return true;
+                case GuardStates.Chase: g.Chase(grd); return true;
+                case GuardStates.ToExitPoint: g.GoToExitPoint(grd); return true;
+                case GuardStates.AtGate: g.CrossGate(grd); return true;
+                case GuardStates.CrossGate: g.CrossGate(grd); return true;
+                case GuardStates.LeavePark: g.LeavePark(grd); return true;
+                case GuardStates.ToSpawnPoint: g.GoToSpawnPoint(grd); return true;
+                case GuardStates.TakePost: g.TakePost(grd); return true;
+                default: return false;          // the shared states are the base's
+            }
+        }
+
+        /// <summary>The guard holding this staff member's class object, for the entertainer's shock
+        /// dispatch — which is the only thing in the park that sends a guard anywhere.</summary>
+        public Guard GuardFor(StaffMember staff)
+            => _guards.TryGetValue(staff, out var g) ? g : (_guards[staff] = new Guard(staff));
 
         /// <summary>The researcher's own two states (TPW.Sim.Researcher). ⚠⚠ NEITHER HAD A CALLER.
         /// Research is a TRICKLE by design — three idle decisions in ten choose work and a patrol leg
@@ -1281,6 +1348,51 @@ namespace TPWGodot
         /// <summary>The influence circles, and who is standing in one. ⭐ THE COUNT ALONE IS NOT THE
         /// TEST: twenty areas with nobody inside them changes nothing a guest feels, and "areas &gt; 0"
         /// would pass on a park where the aura is placed somewhere no one goes.</summary>
+        /// <summary>Pelt the first entertainer with the first guest, on command (--park-pelt).
+        ///
+        /// ⚠⚠ A HARNESS DOOR, AND IT EXISTS BECAUSE THE CHAIN WOULD OTHERWISE BE UNTESTABLE. Pelting
+        /// happens on one idle roll in a park where the guest has to be beside a performing
+        /// entertainer, and a performance needs a guest adjacent first. Measured over 3000 frames with
+        /// two entertainers hired: ZERO performances and zero pelts, so the guard's whole reason to
+        /// exist — dispatch, chase, catch — never fired once and "2 guards, 0 caught" proves nothing
+        /// either way. A feature whose trigger is that rare needs a way to pull it.
+        ///
+        /// ⭐ IT FORCES THE TRIGGER, NOT THE OUTCOME. It calls the same Entertainer.Pelted the idle
+        /// roll calls and then gets out of the way; everything after — the shock, the guard search,
+        /// the chase and the catch — runs on its own or does not.</summary>
+        public string Pelt()
+        {
+            Staffer ent = null;
+            foreach (var st in _staff) if (st.S.Kind == StaffKind.Entertainer) { ent = st; break; }
+            if (ent == null) return "no entertainer hired";
+            if (_guests.Count == 0) return "no guests";
+            var w = EntertainerWorld();
+            w.Current = ent;
+            var e = _entertainers.TryGetValue(ent.S, out var have) ? have : (_entertainers[ent.S] = new Entertainer(ent.S));
+            e.Pelted(_guests[0].V, w, _dice);
+            return $"{ent.S.Kind} pelted, now {ent.S.State}, morale {ent.S.Morale}";
+        }
+
+        /// <summary>The guards, and whether any of them is doing anything. ⭐ "3 guards" is a payroll
+        /// line; a guard in Chase or holding a post is the feature. The gate counter is printed raw
+        /// because its meaning is NOT ESTABLISHED and a label would be an invention.</summary>
+        public string GuardLine()
+        {
+            int n = 0, chasing = 0, posted = 0, caught = 0;
+            foreach (var st in _staff)
+            {
+                if (st.S.Kind != StaffKind.Guard) continue;
+                n++;
+                if (st.S.State == GuardStates.Chase) chasing++;
+                if (st.S.State == GuardStates.TakePost || st.S.Purpose == GuardStates.Post) posted++;
+            }
+            caught = _guardWorld?.Caught ?? 0;
+            var w = _entWorld;
+            return $"guards: {n}, {chasing} chasing, {posted} on post, {caught} caught"
+                 + $", gate counter {(_guardWorld?.Counter80103950 ?? 0)}"
+                 + (w == null ? "" : $"; dispatch offered {w.Asked} ({w.Busy} busy, {w.TooFar} too far)");
+        }
+
         public string InfluenceLine()
         {
             int watched = 0, ents = 0;

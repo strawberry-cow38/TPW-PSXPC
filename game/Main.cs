@@ -585,6 +585,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
                 else if (arg == "--park-nopreflight") _noPreflight = true;
+                else if (arg.StartsWith("--park-pelt=")) _autoPeltAt = int.Parse(arg.Substring("--park-pelt=".Length));
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
                 else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
                 else if (arg == "--park-seats") _autoSeats = true;
@@ -1553,6 +1554,10 @@ namespace TPWGodot
         }
 
         bool _noPreflight;
+        /// <summary>--park-pelt=FRAME. ⚠ A FRAME, NOT LOAD TIME: guests are populated per tick, so a
+        /// pelt at park-load finds an empty park and reports "no guests" — which is exactly what the
+        /// first version did, and it looked like the flag was broken rather than early.</summary>
+        int _autoPeltAt = -1;
         string _autoResearch;
         string _shotTarget;
         void TakeShot()
@@ -1591,6 +1596,13 @@ namespace TPWGodot
             // ⭐ BREAK IT WITH PEOPLE ON IT. The shot clock is the only frame counter that waits for the
             // park to be up, so the delayed break rides on it rather than on a second one that would
             // count through the asset self-test.
+            // ⚠ ON THE SHOT CLOCK, like the delayed break — it is the only counter that waits for the
+            // park to be up, so this does not count through the asset self-test.
+            if (_autoPeltAt >= 0 && parkUp && _park != null && _shotClock >= _autoPeltAt)
+            {
+                GD.Print($"[tpw] --park-pelt@{_autoPeltAt}: {_park.Pelt()}");
+                _autoPeltAt = -1;
+            }
             if (_autoBreakAt >= 0 && parkUp && _park != null && _shotClock >= _autoBreakAt)
             {
                 GD.Print($"[tpw] --park-break {_autoBreak}@{_autoBreakAt}: {(_park.Break(_autoBreak, _autoBreakHard) ? "broken" : "refused")}");

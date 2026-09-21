@@ -29,6 +29,7 @@ namespace TPWGodot
         readonly InfluenceMap _influence;
         readonly Func<IEnumerable<Guest>> _guests;
         readonly Func<StaffMember, (int X, int Z)> _staffTile;
+        readonly Func<IEnumerable<Guard>> _guardsOf;
 
         /// <summary>The aura each entertainer is holding, which the binary keeps at E+0x4C. Kept beside
         /// the StaffMember for the same reason the mechanic's ride and the handyman's bin are: the sim's
@@ -37,10 +38,18 @@ namespace TPWGodot
 
         public ParkEntertainerWorld(ParkStaffWorld shared, InfluenceMap influence,
                                     Func<IEnumerable<Guest>> guests,
-                                    Func<StaffMember, (int X, int Z)> staffTile)
-        { _base = shared; _influence = influence; _guests = guests; _staffTile = staffTile; }
+                                    Func<StaffMember, (int X, int Z)> staffTile,
+                                    Func<IEnumerable<Guard>> guardsOf)
+        { _base = shared; _influence = influence; _guests = guests; _staffTile = staffTile;
+          _guardsOf = guardsOf; }
 
         public Staffer Current { get => _base.Current; set => _base.Current = value; }
+
+        /// <summary>Why a shocked entertainer got no guard: how many were offered, how many were busy,
+        /// how many were out of range. Host bookkeeping — the sim keeps no tally.</summary>
+        public int Asked { get; private set; }
+        public int Busy { get; private set; }
+        public int TooFar { get; private set; }
 
         public long NowTick => _base.NowTick;
         public bool IsTypeOnStrike(StaffKind kind) => _base.IsTypeOnStrike(kind);
@@ -91,14 +100,30 @@ namespace TPWGodot
             _influence.Release(area);
         }
 
-        /// <summary>⚠ EMPTY, BECAUSE THERE ARE NO GUARDS IN THE PORT. `Guard` is the sixth system with
-        /// no caller — `IGuardWorld` has no implementation and nothing constructs one. So a pelted
-        /// entertainer always takes the no-guard branch: −5 more morale and nobody comes. That is the
-        /// honest consequence of the gap, and it is why this returns empty rather than throwing: the
-        /// sim ASKS for the list on every shock, and an exception there would take the park down for a
-        /// missing feature rather than reporting it.</summary>
+        /// <summary>The park's guards with their Manhattan tile distance from this entertainer, in
+        /// HIRING ORDER — READ refinement of behaviour.md §3.2, 0x80095F8C..0x80095FAC. ⭐ THE ORDER IS
+        /// PART OF THE BEHAVIOUR: the sim keeps the first entry on a tie, so which guard comes when two
+        /// are equally close is decided by who you hired first.
+        ///
+        /// ⚠ This returned EMPTY until the guard was wired, and the consequence was not cosmetic: a
+        /// pelted entertainer always took the no-guard branch, −5 more morale and nobody comes.</summary>
         public IEnumerable<(Guard guard, int distanceTiles)> GuardsWithDistances(StaffMember staff)
-            => System.Array.Empty<(Guard, int)>();
+        {
+            var (sx, sz) = _staffTile(staff);
+            foreach (var g in _guardsOf())
+            {
+                var (gx, gz) = _staffTile(g.Staff);
+                int d = Math.Abs(gx - sx) + Math.Abs(gz - sz);
+                // ⭐ SAY WHY NOBODY CAME. The sim picks the nearest guard that is NotBusy and strictly
+                // under 7 tiles, and silently takes the no-guard branch when none qualifies — so
+                // "0 chasing" cannot distinguish a broken dispatch from a park where every guard
+                // happened to be asleep four tiles too far away. This records both reasons.
+                Asked++;
+                if (!Guard.NotBusy(g.Staff)) Busy++;
+                else if (d >= 7) TooFar++;
+                yield return (g, d);
+            }
+        }
 
         /// <summary>The position service the influence map needs. ⚠ 8.8 WORLD UNITS — InfluenceMap
         /// converts each coordinate itself with an arithmetic shift, so handing it tiles would put

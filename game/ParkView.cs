@@ -805,6 +805,9 @@ namespace TPWGodot
         /// that says whether staff may rest there. Six tiles is the idle pass's own radius.</summary>
         /// <summary>--park-research=SLOT,TYPE,INDEX: start one research topic. The panel that does
         /// this for a player does not exist yet.</summary>
+        /// <summary>--park-pelt: throw something at an entertainer so the guard chain can be watched.</summary>
+        public string Pelt() => _guests?.Pelt() ?? "no guests";
+
         public string StartResearch(int slot, int type, int index)
             => _guests?.StartResearch(slot, type, index) ?? "no guests";
 
@@ -1133,6 +1136,7 @@ namespace TPWGodot
             + $"\n{_guests.NeedReport()}"
             + $"\n{_guests.LitterLine()}"
             + $"\n{_guests.InfluenceLine()}"
+            + $"\n{_guests.GuardLine()}"
             + $"\n{_guests.ResearchLine()}"
             + $"\n  preflight {(_guests.Preflight ? "on" : "OFF")}, {_guests.PreflightRefused} routes refused as unreachable"
             + $"\n{_guests.StateReport()}"
