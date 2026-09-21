@@ -148,6 +148,7 @@ a number the real rules already read; none of them changes a rule.
 | `--park-upgrade=entry` | run the paid level-up a mechanic's state 54 ends with. The SAME call, not a second path |
 | `--park-price=entry,pounds[;...]` | set a stall's sale price — the one input the want formula is most sensitive to |
 | `--park-seats` | every attraction in the catalogue with its seat count at each upgrade level. Needs no placement, which matters because a map's catalogue is only ~20 entries |
+| `--park-devheads` | turn on the shipped-but-unreachable head override (0x801029F4): every rider wears one of the six developer photographs instead of its type's head. Nothing on the disc sets that word, so this is the only way to see it |
 | `--park-nogate` | guests appear inside the fence and pay nothing, the way they did before the turnstile. ⭐ A CONTROL, not a rule — it exists so the gate's effect on the bank can be measured against its own absence in one binary, and it prints "no gate" so a run that forgot to arm it cannot be mistaken for a null result |
 | `--park-log-rides` | every ride's status changes, its animation clock, the mesh the RENDERER holds, and every staff member's state changes |
 | `--shot=PATH:running[:N]` | photograph when a ride is mid-cycle rather than at a frame number |

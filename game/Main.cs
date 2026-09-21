@@ -594,6 +594,9 @@ namespace TPWGodot
                     _autoRequestUpgrade = int.Parse(arg.Substring("--park-request-upgrade=".Length));
                 else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
                 else if (arg == "--park-seats") _autoSeats = true;
+                // ⚠ SET AT PARSE TIME, NOT AT PARK BUILD. It is a static on the sim side standing in for
+                // gp+0x3A0, and the first riders can be drawn before any park hook runs.
+                else if (arg == "--park-devheads") TPW.Sim.RiderSprites.DeveloperHeadsEnabled = true;
                 else if (arg.StartsWith("--park-save=")) _parkSavePath = arg.Substring("--park-save=".Length);
                 else if (arg.StartsWith("--park-load=")) _parkLoadPath = arg.Substring("--park-load=".Length);
                 else if (arg.StartsWith("--park-save-after=")) _parkSaveAfter = int.Parse(arg.Substring("--park-save-after=".Length));

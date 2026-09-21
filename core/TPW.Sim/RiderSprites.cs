@@ -25,6 +25,17 @@ namespace TPW.Sim
             new[] { 105, 106, 107, 108, 109, 108, 107, 106, 100, 101, 102, 103, 104, 103, 102, 101,  99 },
         };
 
+        /// <summary>⭐ THE DEVELOPERS' FACES (0x800F1EEC, DUMPED: 564, 565, 566, 567, 568, 569 -- six
+        /// u32s, in order, and the next word is already the ASCII "INTRO.ST"). Six 26..32 x 38..46
+        /// photographs of real people on sheet 416.</summary>
+        public static readonly int[] DeveloperHeads = { 564, 565, 566, 567, 568, 569 };
+
+        /// <summary>The override at 0x801029F4 (gp+0x3A0). ⚠ NOTHING ON THE DISC SETS IT -- the word is
+        /// zero in the image and a census by gp offset and by absolute store finds no writer, so on real
+        /// hardware these faces can never appear. A debug switch that shipped, not an easter egg anyone
+        /// could reach. Exposed here as `--park-devheads` because the mechanism is fully READ.</summary>
+        public static bool DeveloperHeadsEnabled;
+
         /// <summary>The sprite for a rider, and whether the quad is mirrored in x.
         /// READ: the mirror test is `4 &lt; facing` on the UNMASKED facing, and band 2 zeroes the facing.</summary>
         public static int For(int type, int facing, int band, out bool mirror)
@@ -32,6 +43,12 @@ namespace TPW.Sim
             band = band < 0 ? 0 : band > 2 ? 2 : band;
             if (band == 2) facing = 0;
             mirror = facing > 4;
+            // ⚠ THE OVERRIDE IS TAKEN BEFORE THE TABLE, AND IT IGNORES FACING AND BAND -- one face per
+            // visitor type, so a rider keeps the same photograph however he turns. The modulus is the
+            // game's own (0x801029F0 = 6), not the table's length by coincidence.
+            if (DeveloperHeadsEnabled)
+                return DeveloperHeads[((type % DeveloperHeads.Length) + DeveloperHeads.Length)
+                                      % DeveloperHeads.Length];
             var row = Table[((type % Types) + Types) % Types];
             return band == 2 ? row[16] : row[(facing & 7) + 8 * band];
         }

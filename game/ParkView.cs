@@ -3647,6 +3647,12 @@ void fragment() {
             {
                 Charge(cost);
                 RebuildGround();
+                // ⚠⚠ REBUILDING THE GROUND IS THE MESH, NOT THE MAP THE GUESTS WALK ON. Without this the
+                // new tiles are not in the walkable list at all, so the player lays a path to a new ride
+                // and his guests go on treating it as unreachable -- and it does not look like a missing
+                // rebuild, it looks like the pathfinder being stupid. The QUEUE tool has always called
+                // this (QueueRun.Step.Laid) and so does a delete; only the PATH tool never did.
+                _guests?.MapChanged();
                 PlaySfx(ToolSound.Lay);
                 if (laid == run.Count && endsOnPath) PlaySfx(ToolSound.Connected);
             }
@@ -3773,7 +3779,7 @@ void fragment() {
             var run = PathTool.Run(x0, z0, x1, z1);
             int cost = _paths.RunCost(_map, run);
             int laid = _paths.Lay(_map, run);
-            if (laid > 0) { Charge(cost); RebuildGround(); }
+            if (laid > 0) { Charge(cost); RebuildGround(); _guests?.MapChanged(); }
             return laid;
         }
 
