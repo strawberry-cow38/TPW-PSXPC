@@ -27,6 +27,25 @@ did nothing.
 | PROVED | Panel commands: Delete, Build/Edit Queue | catboy | today | Controls for both; Build/Edit Track and Call Mechanic still unwired |
 | PROVED | Sounds: tools, placement, UI, ride ambience | catboy | today | Every call site in the executable enumerated; probe-verified |
 
+## One run, everything at once — 2026-09-21
+
+Each system below was proved on its own. This is the four of them in the same park, 4,000 frames,
+40 guests, one tour ride, six staff:
+
+```
+guards:   7 chases, 4 caught, 4 told and 4 taken out of the park,
+          8 admitted by the turnstile (46 seen 150x, all 150 with the counter up), 4 posts taken
+research: two topics at 20% and 36%, rest 57 of 57 granted
+litter:   30 vomit of 32 live, 3 cleared
+states:   WatchEntertainer x6, UsingAttraction x4, LeavingPark x4
+gate:     273 guests actually left
+```
+
+No exceptions, and every readout legible. ⚠ The park was in **2 pieces** — the ride's footprint sat
+across the corridor — so 23 guests spent the run stranded and the ride served nobody. The harness
+says so at the moment it happens now (`--park-lay …: 7 tiles took path, park now in 2 piece(s)`),
+which is the only reason that is a footnote rather than a day of chasing "the ride is broken".
+
 ## Guests & rides
 
 | state | system | owner | last moved | note |
