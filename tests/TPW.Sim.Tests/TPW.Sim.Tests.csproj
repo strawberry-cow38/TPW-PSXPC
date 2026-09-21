@@ -11,7 +11,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\TPW.Sim\TPW.Sim.csproj" />
+    <ProjectReference Include="..\..\core\TPW.Data\TPW.Data.csproj" />
     <None Include="../../findings/rating-audit.json" Link="rating-audit.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../findings/goals-audit.json" Link="goals-audit.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../findings/scenario-audit.json" Link="scenario-audit.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

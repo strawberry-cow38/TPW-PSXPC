@@ -1,0 +1,1424 @@
+{
+  "binary_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "archive_sha256": "5666a0eeb18998a31fafbe845e7490cf65da76e722a69aec8b30ff2ee1a3c951",
+  "overlay_sha256": "4db2f12d84b0b27cbf6386d764fac4d613c3f551546a6b28715b4bf9a79d2f8a",
+  "disc": {
+    "sector_bytes": 2048,
+    "payload_offset": 0,
+    "files": [
+      {
+        "name": "AAAAAAAA.AAA",
+        "lba": 23,
+        "bytes": 2048,
+        "directory": false
+      },
+      {
+        "name": "ADVISOR.TPW",
+        "lba": 24,
+        "bytes": 346816512,
+        "directory": false
+      },
+      {
+        "name": "BF.STR",
+        "lba": 169368,
+        "bytes": 2932736,
+        "directory": false
+      },
+      {
+        "name": "END.STR",
+        "lba": 170800,
+        "bytes": 4020224,
+        "directory": false
+      },
+      {
+        "name": "ENGLISH.STR",
+        "lba": 172763,
+        "bytes": 4020224,
+        "directory": false
+      },
+      {
+        "name": "FOLIO.GAZ",
+        "lba": 174726,
+        "bytes": 16164376,
+        "directory": false,
+        "extracted_sha256": "5666a0eeb18998a31fafbe845e7490cf65da76e722a69aec8b30ff2ee1a3c951",
+        "first_iso_byte": 357838848
+      },
+      {
+        "name": "FRENCH.STR",
+        "lba": 182619,
+        "bytes": 4020224,
+        "directory": false
+      },
+      {
+        "name": "GRAV.STR",
+        "lba": 184582,
+        "bytes": 12140544,
+        "directory": false
+      },
+      {
+        "name": "JUG.STR",
+        "lba": 190510,
+        "bytes": 11763712,
+        "directory": false
+      },
+      {
+        "name": "LEGAL.GFX",
+        "lba": 196254,
+        "bytes": 165403,
+        "directory": false
+      },
+      {
+        "name": "LOG.BAK",
+        "lba": 196335,
+        "bytes": 28895,
+        "directory": false
+      },
+      {
+        "name": "MIR.STR",
+        "lba": 196350,
+        "bytes": 14041088,
+        "directory": false
+      },
+      {
+        "name": "SLES_026.88",
+        "lba": 203206,
+        "bytes": 49152,
+        "directory": false,
+        "extracted_sha256": "cd1049ee0c4c8c3c9b6462ad579327782e1cbdd87f4319dc58e5e55b8c9e13ed",
+        "first_iso_byte": 416165888
+      },
+      {
+        "name": "SPANISH.STR",
+        "lba": 203230,
+        "bytes": 4020224,
+        "directory": false
+      },
+      {
+        "name": "SYSTEM.CNF",
+        "lba": 205193,
+        "bytes": 62,
+        "directory": false,
+        "extracted_sha256": "ff6bd24eadb899e37c3b6ab980caa8a51760e8c5c93ca377e20609f14ebff839",
+        "first_iso_byte": 420235264
+      },
+      {
+        "name": "TPW.BIN",
+        "lba": 205194,
+        "bytes": 1065308,
+        "directory": false,
+        "extracted_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+        "first_iso_byte": 420237312
+      },
+      {
+        "name": "TPW.OVL",
+        "lba": 205715,
+        "bytes": 43967,
+        "directory": false,
+        "extracted_sha256": "4db2f12d84b0b27cbf6386d764fac4d613c3f551546a6b28715b4bf9a79d2f8a",
+        "first_iso_byte": 421304320
+      },
+      {
+        "name": "ZZZZZZZZ.ZZZ",
+        "lba": 205737,
+        "bytes": 27648000,
+        "directory": false
+      }
+    ],
+    "directory_entries": 18,
+    "extracted_files_compared": 5,
+    "other_files_not_payload_scanned": 13
+  },
+  "census": {
+    "rip_files": 690,
+    "numeric_entries_scanned": 422,
+    "numeric_entries_skipped": 0,
+    "derivative_files_not_rescanned": 268,
+    "parks": 8,
+    "park_records_skipped": 0,
+    "catalogue_groups": 64,
+    "catalogue_occurrences": 263,
+    "catalogue_occurrences_skipped": 0,
+    "unique_catalogue_assets": 196,
+    "occurrences_by_type": {
+      "3": 54,
+      "6": 8,
+      "8": 10,
+      "1": 12,
+      "2": 103,
+      "4": 48,
+      "5": 24,
+      "7": 4
+    },
+    "overlays_scanned": 12,
+    "overlays_skipped": 0
+  },
+  "initializer": {
+    "address": "0x8002ED50",
+    "instructions": 914,
+    "stub": "memset only"
+  },
+  "parks": [
+    {
+      "world": 0,
+      "park": 0,
+      "objective_address": "0x800E1930",
+      "objective_file_offset": 858416,
+      "objective_sha256": "65bb328fba0a0a3a4cf44f7e3c18d8169d9b99cc2d8eb1d7f105a986664ed814",
+      "advertised_gold_tickets": 7,
+      "map_pair_address": "0x800DDE88",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0CF0",
+          "file_offset": 920816,
+          "count": 8,
+          "stride": 4,
+          "bytes": 32,
+          "sha256": "b52556c3dbcbdbe23b3187495bb215742a735d1e080fee45ff5e9b65cd5b0c56"
+        },
+        {
+          "type": 7,
+          "source_address": "0x800F0D54",
+          "file_offset": 920916,
+          "count": 0,
+          "stride": 4,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "type": 6,
+          "source_address": "0x80102888",
+          "file_offset": 993416,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "3588f8328fc3447802d7d6cbd1ff995536be64263ebdc03880c3e88ab3a7b238"
+        },
+        {
+          "type": 8,
+          "source_address": "0x800F0D44",
+          "file_offset": 920900,
+          "count": 2,
+          "stride": 8,
+          "bytes": 16,
+          "sha256": "13284dbd02dc5f062bfaa63f956c0553feaa1c2b8b789ba97519d2e7a55e816b"
+        },
+        {
+          "type": 1,
+          "source_address": "0x80102880",
+          "file_offset": 993408,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "7d77cd3c850b580eb161cc980642c3d9a70344ff6e127935aa11c79218f2a968"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0D10",
+          "file_offset": 920848,
+          "count": 13,
+          "stride": 4,
+          "bytes": 52,
+          "sha256": "e75b5ace6411f90467c4f9cae4fecf4c173c1aa7a2c74f7f3393f76cbea7d368"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F0CCC",
+          "file_offset": 920780,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "5c707d350e3f09cfdc930b6581f305af40c88d7dd52c2a33e499b77a98818b73"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F0CE4",
+          "file_offset": 920804,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "266b32ae8f2c38bf8446b4b0347cdeae250f65b6a85d3051d8f3054d8f340984"
+        }
+      ]
+    },
+    {
+      "world": 0,
+      "park": 1,
+      "objective_address": "0x800E1964",
+      "objective_file_offset": 858468,
+      "objective_sha256": "fca7a16710ca46c83155210a69ff20abe6180abb9b2b8677a0fc1074e237ccb4",
+      "advertised_gold_tickets": 6,
+      "map_pair_address": "0x800DDE90",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0D54",
+          "file_offset": 920916,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "b607b65caa50b4eb3028bea49dfe0ca39df6bb5c6c51042675f77c2b2fdac3f8"
+        },
+        {
+          "type": 7,
+          "source_address": "0x80102898",
+          "file_offset": 993432,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "64b0fa84942457f27b3c69a1aec2579a3011f2c094d09179d732adadd0dba722"
+        },
+        {
+          "type": 6,
+          "source_address": "0x801028A4",
+          "file_offset": 993444,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "f682108a9234d87641fd8dc232214c24a6dfd0beaeb2c5290a50ac431afd9dd5"
+        },
+        {
+          "type": 8,
+          "source_address": "0x801028AC",
+          "file_offset": 993452,
+          "count": 1,
+          "stride": 8,
+          "bytes": 8,
+          "sha256": "4adeb4453cb2e0d4f186667f3052bf6c34b102cf0fa25910f6964f4f8a55ab84"
+        },
+        {
+          "type": 1,
+          "source_address": "0x801028B8",
+          "file_offset": 993464,
+          "count": 2,
+          "stride": 4,
+          "bytes": 8,
+          "sha256": "0f102e4d36cff5816a86bcb28e62d97646c176bedfe8f22955a7b2addefbd461"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0D6C",
+          "file_offset": 920940,
+          "count": 13,
+          "stride": 4,
+          "bytes": 52,
+          "sha256": "e75b5ace6411f90467c4f9cae4fecf4c173c1aa7a2c74f7f3393f76cbea7d368"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F0DA0",
+          "file_offset": 920992,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "e0b406970e72fd0c798fd4f8b7124da9aaa3f5d8b79de98425ec91008dd7cab6"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F0DB8",
+          "file_offset": 921016,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "cc6b87f44924131d7a1e9e6f781e2dfdda53c564c7c02cd8da8599bef65d70b6"
+        }
+      ]
+    },
+    {
+      "world": 1,
+      "park": 0,
+      "objective_address": "0x800E1998",
+      "objective_file_offset": 858520,
+      "objective_sha256": "4d2308cfc6b54e550455b697d907fc183e58326d6ea305ed5b7e7ff87b73cdbd",
+      "advertised_gold_tickets": 5,
+      "map_pair_address": "0x800DDE98",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0DC4",
+          "file_offset": 921028,
+          "count": 8,
+          "stride": 4,
+          "bytes": 32,
+          "sha256": "67cc610cd895709f60f669152f3e9e061b8816d31e52970d11fa6189843d3d43"
+        },
+        {
+          "type": 7,
+          "source_address": "0x801028C8",
+          "file_offset": 993480,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "191949ff18d4ffd269d06c4b0bcd641257c885d3ea94c7556134740595c2d3fc"
+        },
+        {
+          "type": 6,
+          "source_address": "0x801028D0",
+          "file_offset": 993488,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "3e319ce95c67010ec1de0f761ecac25551319fdb7e95886e420c22594cc484bf"
+        },
+        {
+          "type": 8,
+          "source_address": "0x801028D8",
+          "file_offset": 993496,
+          "count": 1,
+          "stride": 8,
+          "bytes": 8,
+          "sha256": "5c9a54b2b7aa5563d0e3786388c79ad44938657a97362b0c30955689d3244154"
+        },
+        {
+          "type": 1,
+          "source_address": "0x801028E4",
+          "file_offset": 993508,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "dd5e8ff17033e3d207902e855fc1f6d5ff1b0b34c5edfb94234d9e86078aca5a"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0DE4",
+          "file_offset": 921060,
+          "count": 14,
+          "stride": 4,
+          "bytes": 56,
+          "sha256": "a0e921dd2f8a609cd58b578eb62512f709659554c081478ad2620acecd36187e"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F0E1C",
+          "file_offset": 921116,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "7e6780aa568fb8a7498c8996babbcbe2d5a1b244e6160b7fedc0e76f98836120"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F0E34",
+          "file_offset": 921140,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "7a6e3b77013b6ccf3bb56dff3ebe3ba989747f895fee227144b955c454944aa4"
+        }
+      ]
+    },
+    {
+      "world": 1,
+      "park": 1,
+      "objective_address": "0x800E19CC",
+      "objective_file_offset": 858572,
+      "objective_sha256": "19dbc7f7f9ca3d75c9b794fde839cc516e647923b68107157a801ee93194a240",
+      "advertised_gold_tickets": 6,
+      "map_pair_address": "0x800DDEA0",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0E40",
+          "file_offset": 921152,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "482b000395cf521d6ca0ccd8b4abbc088f3852f911de5d9f705a13e001c5962a"
+        },
+        {
+          "type": 7,
+          "source_address": "0x800F0E58",
+          "file_offset": 921176,
+          "count": 0,
+          "stride": 4,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "type": 6,
+          "source_address": "0x801028F4",
+          "file_offset": 993524,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "775be457774803ff0221f0d18f407c9718a2f4c635445a691f6061bd5d651581"
+        },
+        {
+          "type": 8,
+          "source_address": "0x800F0E58",
+          "file_offset": 921176,
+          "count": 2,
+          "stride": 8,
+          "bytes": 16,
+          "sha256": "00659378950138992bc805c38d1f6d1114379e7fb6a19054b4417e5ba69d2d41"
+        },
+        {
+          "type": 1,
+          "source_address": "0x80102900",
+          "file_offset": 993536,
+          "count": 2,
+          "stride": 4,
+          "bytes": 8,
+          "sha256": "a0a5b05e13bc0f7a66e64a46a8538761bc3cc7acfadcfd9f56017635cd895020"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0E68",
+          "file_offset": 921192,
+          "count": 14,
+          "stride": 4,
+          "bytes": 56,
+          "sha256": "a0e921dd2f8a609cd58b578eb62512f709659554c081478ad2620acecd36187e"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F0EA0",
+          "file_offset": 921248,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "7e9c489cdca087a055d5018a8631a6144d6417512f779073174bd349e81f5ada"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F0EB8",
+          "file_offset": 921272,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "d579142586bb17320e3487b66348d63ce658cc82e1c97ff6fb4afe149027c015"
+        }
+      ]
+    },
+    {
+      "world": 2,
+      "park": 0,
+      "objective_address": "0x800E1A00",
+      "objective_file_offset": 858624,
+      "objective_sha256": "94be7e3f33d10d8fd77d97832d5a65d2e351679a4fd2767d3bed02532da70f72",
+      "advertised_gold_tickets": 5,
+      "map_pair_address": "0x800DDEA8",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0EC4",
+          "file_offset": 921284,
+          "count": 7,
+          "stride": 4,
+          "bytes": 28,
+          "sha256": "64eed5f86b6cf8b7fef70ab71d0ee1de7eb61572580201e54712a965c227ac6c"
+        },
+        {
+          "type": 7,
+          "source_address": "0x800F0EE0",
+          "file_offset": 921312,
+          "count": 0,
+          "stride": 4,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "type": 6,
+          "source_address": "0x80102914",
+          "file_offset": 993556,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "e3f69f6c094ffb4e3b3a0ba41d7996137e03ebdf85952d227d04b9e161a06c5b"
+        },
+        {
+          "type": 8,
+          "source_address": "0x8010291C",
+          "file_offset": 993564,
+          "count": 1,
+          "stride": 8,
+          "bytes": 8,
+          "sha256": "3478af7d895d85fb71e1c84813ac8dce11a4fcd1be230cf3cba471ea702c8bd3"
+        },
+        {
+          "type": 1,
+          "source_address": "0x80102928",
+          "file_offset": 993576,
+          "count": 2,
+          "stride": 4,
+          "bytes": 8,
+          "sha256": "d023323df92d5007d474391fdd9a97f9f5fce8fc61670b8c00a452bffea7a9d7"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0EE0",
+          "file_offset": 921312,
+          "count": 12,
+          "stride": 4,
+          "bytes": 48,
+          "sha256": "aafebae400a127136580e5011f2884d27a34c07d393a3610a8d5148e81fc4d5c"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F0F10",
+          "file_offset": 921360,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "c132431bd680bfc847c1bac0c57685b668c80efa700ad81434375cc2b1f1b764"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F0F28",
+          "file_offset": 921384,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "a3260ffa7b59e5d0c66b50d98a8c5111fbd84283607cef392a73c3771e04ea18"
+        }
+      ]
+    },
+    {
+      "world": 2,
+      "park": 1,
+      "objective_address": "0x800E1A34",
+      "objective_file_offset": 858676,
+      "objective_sha256": "22c64f2ecb033801fe2be7a3d370ee9b5c9a6ff1f175420acf238bb4ba6cd5ba",
+      "advertised_gold_tickets": 6,
+      "map_pair_address": "0x800DDEB0",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0F34",
+          "file_offset": 921396,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "9186f5653d9ddcd061f959a653b489958f347193150d9b87a4edf0a1a3fc10c1"
+        },
+        {
+          "type": 7,
+          "source_address": "0x80102938",
+          "file_offset": 993592,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "6fea016a651b6460fdd05e8073e5114413e814d86781e4dc4e8c3592dc851128"
+        },
+        {
+          "type": 6,
+          "source_address": "0x80102940",
+          "file_offset": 993600,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "4f2d892d6af406902c1aae6e58a78b2e6865fd4b782fc96b12de65d3bf3dc03e"
+        },
+        {
+          "type": 8,
+          "source_address": "0x800F0F4C",
+          "file_offset": 921420,
+          "count": 2,
+          "stride": 8,
+          "bytes": 16,
+          "sha256": "3cb77a114451ff61a0c8a08b6d20e5b8b5553d6641d8b0a88049a16191fcc8dc"
+        },
+        {
+          "type": 1,
+          "source_address": "0x8010294C",
+          "file_offset": 993612,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "c245aff91259378234ae88c46d0e6a690a75034a5fc42bd61f2e3d03c9158b33"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0F5C",
+          "file_offset": 921436,
+          "count": 12,
+          "stride": 4,
+          "bytes": 48,
+          "sha256": "aafebae400a127136580e5011f2884d27a34c07d393a3610a8d5148e81fc4d5c"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F0F8C",
+          "file_offset": 921484,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "62cbe593c54bfc83ff7ce9fe38cfa111f77276da739a6c876d9b4347f1ab4d50"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F0FA4",
+          "file_offset": 921508,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "8090606cc70c8941c0b2cb34c5835aa2ab036fc04893ad7a3a786c32b926ce66"
+        }
+      ]
+    },
+    {
+      "world": 3,
+      "park": 0,
+      "objective_address": "0x800E1A68",
+      "objective_file_offset": 858728,
+      "objective_sha256": "8894a125b4e2ab8d1bf2abdd5939f3338900109398b849bf3769e6f921877360",
+      "advertised_gold_tickets": 5,
+      "map_pair_address": "0x800DDEB8",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F0FB0",
+          "file_offset": 921520,
+          "count": 7,
+          "stride": 4,
+          "bytes": 28,
+          "sha256": "388c4b4d08dafae347fb0a63761b6857726c1490a6ffbb97565f12414d73958a"
+        },
+        {
+          "type": 7,
+          "source_address": "0x800F0FCC",
+          "file_offset": 921548,
+          "count": 0,
+          "stride": 4,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "type": 6,
+          "source_address": "0x8010295C",
+          "file_offset": 993628,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "494444232cb28e8b3187070c6228604e533c27f3b373f5c69ebb8ae3f592565e"
+        },
+        {
+          "type": 8,
+          "source_address": "0x80102980",
+          "file_offset": 993664,
+          "count": 1,
+          "stride": 8,
+          "bytes": 8,
+          "sha256": "6dd5638ec006e23e1dd909cf1b9eda151d230fc3b9848e28967c8afab84df160"
+        },
+        {
+          "type": 1,
+          "source_address": "0x80102964",
+          "file_offset": 993636,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "f4f8196762b106d158c5b6f673048b78055e86ba781e6a462e99b9b99116c863"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F0FCC",
+          "file_offset": 921548,
+          "count": 13,
+          "stride": 4,
+          "bytes": 52,
+          "sha256": "61ded374f780f8be3571e46113b32c5f7032aa095aa079bdb99bea73a3031e18"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F1000",
+          "file_offset": 921600,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "f65845a4c46d49d0038209971b604cf79fa9222c78a3a48493b1d140f866ace0"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F1018",
+          "file_offset": 921624,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "3aa25be46b4cee14438eea3f1f03d86f6e930194520bb4aff84021b6dad5b84d"
+        }
+      ]
+    },
+    {
+      "world": 3,
+      "park": 1,
+      "objective_address": "0x800E1A9C",
+      "objective_file_offset": 858780,
+      "objective_sha256": "1d5895bbb6b2e9bf81a5ceec01e8811ec0bb8190fc3ecb72e96c2cfbd438de7f",
+      "advertised_gold_tickets": 5,
+      "map_pair_address": "0x800DDEC0",
+      "groups": [
+        {
+          "type": 3,
+          "source_address": "0x800F1024",
+          "file_offset": 921636,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "d39e83362c7badcf512fefb54b80449b3733c4ddf7bcd302c5556580f1548cb2"
+        },
+        {
+          "type": 7,
+          "source_address": "0x80102970",
+          "file_offset": 993648,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "56c3ad8c9471c09492859f6c8de4c752170d6958b7b0fef66ee5079f33cd1dcb"
+        },
+        {
+          "type": 6,
+          "source_address": "0x80102978",
+          "file_offset": 993656,
+          "count": 1,
+          "stride": 4,
+          "bytes": 4,
+          "sha256": "341a912962462e12f3bccc420321c90e73df0d9d76d3ea925656f2777f11b74b"
+        },
+        {
+          "type": 8,
+          "source_address": "0x800F103C",
+          "file_offset": 921660,
+          "count": 0,
+          "stride": 8,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "type": 1,
+          "source_address": "0x80102990",
+          "file_offset": 993680,
+          "count": 2,
+          "stride": 4,
+          "bytes": 8,
+          "sha256": "0d6a1c4db46601b28c67a61e303097b07c45dbc88f6e429ec953b2a3b42ea0c1"
+        },
+        {
+          "type": 2,
+          "source_address": "0x800F103C",
+          "file_offset": 921660,
+          "count": 12,
+          "stride": 4,
+          "bytes": 48,
+          "sha256": "7d0c16e7c16ab77d96592420b02fcce336f912249e3987946816f6cff65ea014"
+        },
+        {
+          "type": 4,
+          "source_address": "0x800F106C",
+          "file_offset": 921708,
+          "count": 6,
+          "stride": 4,
+          "bytes": 24,
+          "sha256": "e04e0d6e6993a2c0ce8174a0d7cb81e21151b61648eff699c810ad2dc1f47fda"
+        },
+        {
+          "type": 5,
+          "source_address": "0x800F1084",
+          "file_offset": 921732,
+          "count": 3,
+          "stride": 4,
+          "bytes": 12,
+          "sha256": "62ee2b9a5706454af822756265f4a327ba452b33d09f418689ef6bc55ca6daa3"
+        }
+      ]
+    }
+  ],
+  "maps": [
+    {
+      "world": 0,
+      "park": 0,
+      "entry": 203,
+      "archive_offset": 3674112,
+      "bytes": 27552,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 205,
+      "scenery_count": 102,
+      "spawn_count": 2,
+      "parsed_bytes": 27552,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 0,
+      "park": 1,
+      "entry": 204,
+      "archive_offset": 3702784,
+      "bytes": 27684,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 205,
+      "scenery_count": 113,
+      "spawn_count": 2,
+      "parsed_bytes": 27684,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 1,
+      "park": 0,
+      "entry": 116,
+      "archive_offset": 2654208,
+      "bytes": 27300,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 118,
+      "scenery_count": 81,
+      "spawn_count": 2,
+      "parsed_bytes": 27300,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 1,
+      "park": 1,
+      "entry": 117,
+      "archive_offset": 2682880,
+      "bytes": 27300,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 118,
+      "scenery_count": 81,
+      "spawn_count": 2,
+      "parsed_bytes": 27300,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 2,
+      "park": 0,
+      "entry": 34,
+      "archive_offset": 1597440,
+      "bytes": 28212,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 36,
+      "scenery_count": 157,
+      "spawn_count": 2,
+      "parsed_bytes": 28212,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 2,
+      "park": 1,
+      "entry": 35,
+      "archive_offset": 1626112,
+      "bytes": 28356,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 36,
+      "scenery_count": 169,
+      "spawn_count": 2,
+      "parsed_bytes": 28356,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 3,
+      "park": 0,
+      "entry": 355,
+      "archive_offset": 6946816,
+      "bytes": 27504,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 359,
+      "scenery_count": 98,
+      "spawn_count": 2,
+      "parsed_bytes": 27504,
+      "unparsed_bytes": 0
+    },
+    {
+      "world": 3,
+      "park": 1,
+      "entry": 356,
+      "archive_offset": 6975488,
+      "bytes": 27504,
+      "width": 44,
+      "height": 74,
+      "scenery_entry": 359,
+      "scenery_count": 98,
+      "spawn_count": 2,
+      "parsed_bytes": 27504,
+      "unparsed_bytes": 0
+    }
+  ],
+  "preload_controls": [
+    {
+      "world": 0,
+      "park": 0,
+      "entries": 32,
+      "ordered_sha256": "bc5d49339a8b29fc2babfd47aface3df0178805fef9a5446a1ff4c8658d70981"
+    },
+    {
+      "world": 0,
+      "park": 1,
+      "entries": 32,
+      "ordered_sha256": "ee54bcbf049e34a03ccd1f9d96519d49f48263fe0b5eeaafdd39bfa79d7f64b1"
+    },
+    {
+      "world": 1,
+      "park": 0,
+      "entries": 34,
+      "ordered_sha256": "7acc4dad1c254fbfe0be383ff7d474967df1ccd4ea010cc776f4fb824c339b88"
+    },
+    {
+      "world": 1,
+      "park": 1,
+      "entries": 32,
+      "ordered_sha256": "573278a154bcb5024989d5ba17306e5f484abd9bfb7a7d26372338773fe7fdf8"
+    },
+    {
+      "world": 2,
+      "park": 0,
+      "entries": 31,
+      "ordered_sha256": "eb0accea5f6c8a740cd8f4be8b368ad67dc68bc98f3408b965499cefe68a31d9"
+    },
+    {
+      "world": 2,
+      "park": 1,
+      "entries": 30,
+      "ordered_sha256": "fcb342feb8e79c5b49ce3b573cb18f282a60ca5346465ce40e133ea08c557670"
+    },
+    {
+      "world": 3,
+      "park": 0,
+      "entries": 31,
+      "ordered_sha256": "cf65791d57b23fa7a7762b55ba83c7a73b20988c7bb7fb92f24388b58a4b7668"
+    },
+    {
+      "world": 3,
+      "park": 1,
+      "entries": 31,
+      "ordered_sha256": "b46666e4b5657a2f217375dc0e178674373c32ccbd226e2074a9f857beb13042"
+    }
+  ],
+  "overlays": [
+    {
+      "index": 0,
+      "file_offset": 104,
+      "compressed_bytes": 2974,
+      "decoded_bytes": 4532,
+      "consumed_bytes": 2974,
+      "sha256": "a652951bb481df4a93fbbd908be28d77ad51bc6e469d096d2be0840f133c0f9f"
+    },
+    {
+      "index": 1,
+      "file_offset": 3078,
+      "compressed_bytes": 1454,
+      "decoded_bytes": 2120,
+      "consumed_bytes": 1454,
+      "sha256": "4cd11600d401b317375e6be6a8df1a683780fe6a48bce196eb47c93628ef8f70"
+    },
+    {
+      "index": 2,
+      "file_offset": 4532,
+      "compressed_bytes": 16493,
+      "decoded_bytes": 35000,
+      "consumed_bytes": 16493,
+      "sha256": "488b8375c5e0b8658a33477ca3dcdde2194ada42825018c8c93dc71c48f45fd0"
+    },
+    {
+      "index": 3,
+      "file_offset": 21025,
+      "compressed_bytes": 617,
+      "decoded_bytes": 45788,
+      "consumed_bytes": 617,
+      "sha256": "5a1b6fa5fcc01f269d9a8f2da3446ad1994cdf6cf322589c0c1b858d9a0401c5"
+    },
+    {
+      "index": 4,
+      "file_offset": 21642,
+      "compressed_bytes": 1108,
+      "decoded_bytes": 1672,
+      "consumed_bytes": 1108,
+      "sha256": "897a04a3980824e9fb28c2692c84390dbb306d07c132bfcde5b4fafa82f39517"
+    },
+    {
+      "index": 5,
+      "file_offset": 22750,
+      "compressed_bytes": 2231,
+      "decoded_bytes": 3204,
+      "consumed_bytes": 2231,
+      "sha256": "23dc92d96c58d0fb768b5d48819b312d7382cb542a6af15fbb7d189ca175dc84"
+    },
+    {
+      "index": 6,
+      "file_offset": 24981,
+      "compressed_bytes": 1796,
+      "decoded_bytes": 2716,
+      "consumed_bytes": 1796,
+      "sha256": "8ddf291c7b668aea1a82d0d52043b84f79d9c341e35f5173e770a16e1bbc6931"
+    },
+    {
+      "index": 7,
+      "file_offset": 26777,
+      "compressed_bytes": 2806,
+      "decoded_bytes": 4384,
+      "consumed_bytes": 2806,
+      "sha256": "dc9ac609bf00cc82a49e1266e190c29c8d6fbcb6ab9684d7cf2887b16067386d"
+    },
+    {
+      "index": 8,
+      "file_offset": 29583,
+      "compressed_bytes": 2036,
+      "decoded_bytes": 3420,
+      "consumed_bytes": 2036,
+      "sha256": "7e2ee7b832e9ad96cb26023fbf65c36f7b12259b74ae0af2bdebd1ddd0a8e852"
+    },
+    {
+      "index": 9,
+      "file_offset": 31619,
+      "compressed_bytes": 2430,
+      "decoded_bytes": 3768,
+      "consumed_bytes": 2430,
+      "sha256": "162bb4979952d9231e3d0b894cd8471f53dea08d5f4f5cb599102994e2e6bafc"
+    },
+    {
+      "index": 10,
+      "file_offset": 34049,
+      "compressed_bytes": 1917,
+      "decoded_bytes": 2672,
+      "consumed_bytes": 1917,
+      "sha256": "95e1acd37cddee680fd0fe4b94fb0beffb6db54312d493cdead2968d128bb896"
+    },
+    {
+      "index": 11,
+      "file_offset": 35966,
+      "compressed_bytes": 8001,
+      "decoded_bytes": 13260,
+      "consumed_bytes": 8001,
+      "sha256": "3cf9bdb4d06952963d99be4bcd3402a47ae57f8c9d7858753c84a61c34b5d67b"
+    }
+  ],
+  "scans": [
+    {
+      "image": "TPW.BIN",
+      "bytes": 1065308,
+      "aligned_words": 266327,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [
+          "0x80016994"
+        ],
+        "0x80059AA8": [
+          "0x8006C5C8"
+        ],
+        "0x80067DBC": [
+          "0x800676FC",
+          "0x80067944"
+        ],
+        "0x8006E22C": [
+          "0x800527F8"
+        ],
+        "0x80067CD8": [
+          "0x80067DD8"
+        ]
+      },
+      "pointer_candidates": [
+        {
+          "at": "0x800F322C",
+          "target": "0x80102E88"
+        }
+      ],
+      "address_pair_candidates": [
+        [
+          "0x80067D30",
+          "0x800E1930"
+        ],
+        [
+          "0x80067D38",
+          "0x800E1964"
+        ],
+        [
+          "0x80067D58",
+          "0x800E1998"
+        ],
+        [
+          "0x80067D60",
+          "0x800E19CC"
+        ],
+        [
+          "0x80067D80",
+          "0x800E1A00"
+        ],
+        [
+          "0x80067D88",
+          "0x800E1A34"
+        ],
+        [
+          "0x80067DA8",
+          "0x800E1A68"
+        ],
+        [
+          "0x80067DB0",
+          "0x800E1A9C"
+        ]
+      ],
+      "research_gp_accesses": [
+        "0x8006A92C",
+        "0x8006AC04"
+      ]
+    },
+    {
+      "image": "TPW.OVL/0",
+      "bytes": 4532,
+      "aligned_words": 1133,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/1",
+      "bytes": 2120,
+      "aligned_words": 530,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/2",
+      "bytes": 35000,
+      "aligned_words": 8750,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [
+          "0x80117A30"
+        ],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/3",
+      "bytes": 45788,
+      "aligned_words": 11447,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/4",
+      "bytes": 1672,
+      "aligned_words": 418,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/5",
+      "bytes": 3204,
+      "aligned_words": 801,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/6",
+      "bytes": 2716,
+      "aligned_words": 679,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/7",
+      "bytes": 4384,
+      "aligned_words": 1096,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/8",
+      "bytes": 3420,
+      "aligned_words": 855,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/9",
+      "bytes": 3768,
+      "aligned_words": 942,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/10",
+      "bytes": 2672,
+      "aligned_words": 668,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [],
+        "0x80067CD8": []
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    },
+    {
+      "image": "TPW.OVL/11",
+      "bytes": 13260,
+      "aligned_words": 3315,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": {
+        "0x80017024": [],
+        "0x80059AA8": [],
+        "0x80067DBC": [],
+        "0x8006E22C": [
+          "0x80114B00"
+        ],
+        "0x80067CD8": [
+          "0x80117154",
+          "0x801171A0"
+        ]
+      },
+      "pointer_candidates": [],
+      "address_pair_candidates": [],
+      "research_gp_accesses": []
+    }
+  ],
+  "research_toggle": {
+    "record_address": "0x800F3224",
+    "file_offset": 930340,
+    "sequence_address": "0x800E1B04",
+    "sequence_file_offset": 858884,
+    "length": 10,
+    "repetitions": 8,
+    "target_address": "0x80102E88",
+    "initial": 0,
+    "after_sequence": 1,
+    "after_second_sequence": 0
+  },
+  "scripts": {
+    "schedule_entry": 1,
+    "schedule_offset": 32768,
+    "schedule_bytes": 1500,
+    "code_entry": 2,
+    "code_offset": 34816,
+    "code_bytes": 3604,
+    "rules": 125,
+    "rules_skipped": 0,
+    "opcodes": {
+      "Greater": 136,
+      "Equal": 40,
+      "NotEqual": 51,
+      "Action8": 133,
+      "PostMessage": 107,
+      "Less": 76,
+      "ElapsedGreater": 69,
+      "Set": 50
+    }
+  },
+  "controls": {
+    "all_eight_selectors": true,
+    "all_64_count_getters": true,
+    "all_ordinary_entry_getters": true,
+    "all_eight_preload_orders": true,
+    "all_422_rip_entries_match": true,
+    "all_eight_maps_end_exactly": true,
+    "selector_address_search_positive": true,
+    "interpreter_search_positive": true,
+    "research_pointer_positive": true,
+    "unlock_sequence_sets_and_clears": true,
+    "script_post_positive": true,
+    "no_nine_weekly_award_messages_in_scripts": true
+  },
+  "limitations": [
+    "Static PAL analysis, no console measurement.",
+    "All aligned direct calls and pointers scanned, including data candidates; indirect calls/aliases not excluded.",
+    "Address-pair search is conservative within 16 following words, not a proof against arbitrary pointer construction.",
+    "No signature sweep for unknown VMs or compressed park streams; known map/catalogue producers were followed.",
+    "Media and padding payloads are not rescanned; disc-check.md and psx-assets.md retain their scope."
+  ]
+}
