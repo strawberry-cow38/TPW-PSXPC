@@ -2728,7 +2728,21 @@ namespace TPWGodot
                 {
                     Id = a.Rec.Entry,
                     TypeIndex = a.Rec.Type,
-                    Intensity = a.Rec.BaseIntensity,
+                    // ⭐⭐ THE LIVE INTENSITY, NOT THE RECORD'S. Slot 53 -- what a guest matches against
+                    // its own taste -- is the base scaled by the SPEED and DURATION sliders
+                    // (RidePanel.Intensity). Handing over the record's base means turning a ride's speed
+                    // up does not make it any more attractive, and the whole slider -> intensity ->
+                    // preference chain is dead: the panel moves, the number on it moves, and no guest
+                    // ever notices.
+                    //
+                    // ⚠ THE EVIDENCE WAS ON SCREEN THE WHOLE TIME. The ride report prints "intensity base
+                    // 65 live 48" side by side, and the value being handed to the guests was the first of
+                    // the two. A diagnostic that shows both numbers is only useful if somebody checks
+                    // which one is being used.
+                    //
+                    // Rides only: a shop or a feature returns a literal zero for intensity in the
+                    // original (0x80066110), so their base is what belongs here.
+                    Intensity = a.IsRide ? TPW.Sim.RidePanel.Intensity(a) : a.Rec.BaseIntensity,
                     Usable = a.Rec.Type == 2 && a.Rec.UsableByGuests ? 1 : 0,
                     Open = AttractionLifecycle.OpenToGuests(a.Status),
                     StaffMayRest = a.Rec.Type == 2 && a.Rec.StaffMayRest,
