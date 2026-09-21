@@ -82,3 +82,4 @@ build/
 .vs/
 *.user
 findings/records.json
+__pycache__/
