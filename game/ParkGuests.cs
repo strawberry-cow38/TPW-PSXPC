@@ -1580,8 +1580,12 @@ namespace TPWGodot
             // which of the eight sprites it wears is the walk direction measured against that same
             // camera — so both halves move together when the view turns. Deciding it on the STEP left
             // a standing guest wearing a facing from a camera angle that no longer existed.
-            g.Facing = GuestSprites.FacingFor(g.DirX, -g.DirZ, CameraForward);
-            _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+            // ⭐ CARDINAL FACING PLUS THE CAMERA'S OCTANT. A person stores which of FOUR ways it walks;
+            // the eight drawn angles come from adding where the camera is standing. Deriving eight straight
+            // from the velocity -- which is what this did -- gives a person who turns as you orbit them and
+            // reads correctly from exactly one angle. findings/people-sprites.md.
+            g.Facing = PeopleSheet.CardinalFacing(g.DirX, g.DirZ);
+            _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
         }
 
         /// <summary>Draw a rider in its seat, wherever the ride is holding it this frame.
@@ -1596,9 +1600,9 @@ namespace TPWGodot
             if (g?.Inst == null) return;
             g.Inst.Visible = true;
             if (_sprites == null) { g.Inst.Position = feet + new Vector3(0, 0.21f, 0); return; }
-            g.Facing = GuestSprites.FacingFor(outward.X, outward.Z, CameraForward);
+            g.Facing = PeopleSheet.CardinalFacing((int)(outward.X * 256), (int)(-outward.Z * 256));
             _sprites.RestoreWalkTexture(g.Inst);
-            _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+            _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
         }
 
         /// <summary>Draw a rider as the head the game draws: sheet 416, picked by the guest's own visitor
@@ -1622,6 +1626,11 @@ namespace TPWGodot
         public void SetSprites(GuestSprites sprites) => _sprites = sprites;
         public void SetCommonSheet(TextureSheet common) => _sprites?.SetCommonSheet(common);
         public Vector3 CameraForward { get; set; } = new Vector3(0, 0, -1);
+
+        /// <summary>Where the camera stands, as an octant (GuestSprites.CameraOctant). Set from the view's
+        /// right vector; it is added to every person's own cardinal facing to choose the drawing.</summary>
+        public int CameraOctant { get; private set; }
+        public Vector3 CameraRight { set => CameraOctant = GuestSprites.CameraOctant(value); }
 
         /// <summary>Re-aim and re-dress every guest and every member of staff for the camera where it is
         /// NOW. Called once a drawn frame, not once a sim tick.
