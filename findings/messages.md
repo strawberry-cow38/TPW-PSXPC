@@ -161,3 +161,35 @@ the component, tests, proof/runner, and this report/audits are new files in this
 - A wider reader census for record `+0x10C`, or any new lifetime/expiry interpretation beyond §3.
 - Whole-image alternate entry paths, malformed retail-record behavior, or arbitrary original-card
   compatibility beyond the existing save codec's documented scope.
+
+
+## Save seam wired (2026-09-21)
+
+Items **1** and **4** of the required-calls list above are done, and item 4's other half (the HUD badge
+reading `Count`) was already in place — `ParkView` owns one `ParkMessages`, the advisor's `ShowCaption`
+pushes into it, and `ParkHud.Messages` is its count. **What was missing was only the save seam, and it
+was missing in the quiet way:** `Capture()` wrote no messages at all and `IParkSaveHost.RestoreMessage`
+**threw**. So every save silently dropped the player's message box, and a real game save carrying a
+single card would have failed to load by name. An empty list captures and restores as an empty list,
+so nothing in the round trip could see it.
+
+- `ParkView.ResetMessages()` is called from `BeginPark`, which is required-call 1's "fresh instance
+  when BeginPark rebuilds managers". Without it a load into an occupied park APPENDS the saved cards
+  to the ones already standing.
+- `LocateMessageTarget` / `ResolveMessageTarget` are implemented for placed attractions as the
+  **(class kind, index within that kind)** pair save.md §3.6 describes, matching the loader's
+  `0x8005BEC0(type, index)`. Anything else throws, which is the contract's "missing save target
+  mappings throw as port validation" rather than a card that silently stops jumping the camera.
+- The capture runs **after** the attractions are captured, because the index is a position in the live
+  list.
+
+**Proved, not asserted:** the save proof now carries two cards — an ordinary kind-0 and a kind-2 whose
+target is the fixture's shop (entry 237, the only type 4) — and checks the restored kind-2 card's
+target is *reference-equal* to the restored attraction, not merely two bytes that came back.
+Teeth-checked both ways: making the capture a no-op fails with "message list lost its cards (0)", and
+making the resolver return the first attraction regardless of type fails with "kind-2 card's target did
+not resolve back to the restored attraction".
+
+⚠ Still not wired, and from the same list: item 2's kind resolution (every card the port creates is
+kind 0, because the advisor is its only producer), item 3's poster retraction, and item 5's whole L2
+list UI.

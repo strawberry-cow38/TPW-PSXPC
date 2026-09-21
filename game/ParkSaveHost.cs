@@ -10,7 +10,7 @@ namespace TPWGodot;
 /// <summary>The unpacked save stream over the live park. Wire offsets are READ in findings/save.md
 /// §3; zero-filled UNKNOWN/unmodeled storage is a port policy, not a claim about PSX RAM.
 /// No card header, compression, or alternate JSON snapshot is introduced.</summary>
-internal sealed class ParkSaveHost : IParkSaveHost
+internal sealed class ParkSaveHost : IParkSaveHost, IParkMessageSaveHost
 {
     readonly ParkView park;
     readonly Action resetSession;
@@ -65,6 +65,10 @@ internal sealed class ParkSaveHost : IParkSaveHost
         // has to write them after the CalendarSave above is built, not into a section of its own.
         park.History.Capture(result.Calendar, cal.TotalMonths);
         park.CaptureAttractions(result);
+        // ⚠ AFTER the attractions, because a kind-2 card's target index is a position in the live
+        // list and LocateMessageTarget walks that list — capturing first would work today only
+        // because nothing reorders it, which is the kind of accident that breaks silently later.
+        result.Messages.AddRange(park.Messages.CaptureMessages(this));
         foreach (var st in Guests.SaveStaff)
         {
             int block = Array.IndexOf(StaffOrder, st.S.Kind);
@@ -106,6 +110,7 @@ internal sealed class ParkSaveHost : IParkSaveHost
             throw new ArgumentException("Save layout does not match this park's assets.");
         resetSession(); // Fresh bank, loans, debt, calendar and main clock, wired back into Main/HUD.
         park.ReloadForSave(); // Fresh original map, people, pathfinder, ride claims, gate and bus.
+        park.ResetMessages();  // … and a fresh message list, or a reload appends to the old cards.
         park.ParkOpen = layout.Restricted;
         Guests.ParkIsOpen = park.ParkOpen;
     }
@@ -186,7 +191,27 @@ internal sealed class ParkSaveHost : IParkSaveHost
         if (Guests.Research is not { } r) { RequireZero(topics, "live research topics"); return; }
         r.RestoreTopics(topics);
     }
-    public void RestoreMessage(ParkSaveMessage saved) => throw NotWired("park message manager");
+    /// <summary>⭐ THE LIST WAS LIVE AND THE SAVE SEAM WAS NOT. ParkMessages is instantiated, the
+    /// advisor pushes into it and the HUD badge counts it — but Capture wrote no messages and this
+    /// door THREW, so a park's cards were dropped on every save and any real game save carrying one
+    /// would have failed to load by name. findings/messages.md's "required calls" item 4.</summary>
+    public void RestoreMessage(ParkSaveMessage saved) => park.Messages.RestoreMessage(saved, this);
+
+    /// <summary>READ: save.md §3.6 — the target lookup on load is 0x8005BEC0(type, index), so the
+    /// pair is a CLASS KIND and a position within that kind's live list, the same enumeration the
+    /// catalogue counts use (1 coaster, 2 feature, 3 flat, 4 shop, 5 sideshow, 6 track, 7 tour).
+    /// Only kind-2 cards with a target reach here.
+    ///
+    /// ⚠ THROWS RATHER THAN RETURNING -1 FOR ANYTHING ELSE, and that is the contract: "missing save
+    /// target mappings throw as port validation". A card whose target silently became "none" would
+    /// still open — it would just quietly stop jumping the camera anywhere.</summary>
+    public (sbyte Type, byte Index) LocateMessageTarget(object target)
+        => park.LocateAttractionTarget(target)
+           ?? throw NotWired($"message target of type {target?.GetType().Name ?? "null"}");
+
+    public object ResolveMessageTarget(sbyte type, byte index)
+        => park.AttractionTarget(type, index)
+           ?? throw NotWired($"message target {type}/{index}: no such attraction was restored");
     public void FinishPark() => park.FinishSavedPark();
 
     internal static int Get32(byte[] b, int at) => BinaryPrimitives.ReadInt32LittleEndian(b.AsSpan(at));
@@ -202,6 +227,30 @@ public partial class ParkView
     internal ParkGuests SaveGuests => _guests ?? throw ParkSaveHost.NotWired("guest manager");
     internal ParkFinances SaveFinances => _finances ?? throw ParkSaveHost.NotWired("park finances");
     internal void ReloadForSave() => (_reloadForSave ?? throw ParkSaveHost.NotWired("original map/assets"))();
+
+    /// <summary>A placed attraction's saved object-list address, or null when this is not one.
+    /// PlacedAttraction is private to ParkView, so the walk lives here rather than handing the type
+    /// out; the save host only ever needs the pair.</summary>
+    internal (sbyte Type, byte Index)? LocateAttractionTarget(object target)
+    {
+        if (target is not PlacedAttraction a) return null;
+        int index = 0;
+        foreach (var other in _attractionsPlaced)
+        {
+            if (ReferenceEquals(other, a)) return (checked((sbyte)a.Rec.Type), checked((byte)index));
+            if (other.Rec.Type == a.Rec.Type) index++;
+        }
+        return null;
+    }
+
+    /// <summary>The inverse: the index-th placed attraction of that class kind, or null.</summary>
+    internal object AttractionTarget(sbyte type, byte index)
+    {
+        int seen = 0;
+        foreach (var a in _attractionsPlaced)
+            if (a.Rec.Type == type && seen++ == index) return a;
+        return null;
+    }
     internal ParkSaveLayout SaveLayout(int mapEntry)
     {
         var world = ParkWorlds.ForMap(mapEntry) ?? throw ParkSaveHost.NotWired("world catalogue");

@@ -3079,8 +3079,15 @@ namespace TPWGodot
 
         /// <summary>The park's message list (TPW.Sim.ParkMessages): 32 cards, oldest evicted, never
         /// expiring on their own. The advisor is its only producer so far.</summary>
-        readonly TPW.Sim.ParkMessages _messages = new();
+        TPW.Sim.ParkMessages _messages = new();
         public TPW.Sim.ParkMessages Messages => _messages;
+
+        /// <summary>⚠ A FRESH LIST PER PARK, which findings/messages.md's contract asks for by name
+        /// ("create a fresh instance when BeginPark rebuilds managers"). Loading over an occupied park
+        /// would otherwise APPEND the saved cards to the ones already standing, and the save proof's
+        /// occupied-reload control would read a doubled count — the one place that particular mistake
+        /// is visible at all.</summary>
+        internal void ResetMessages() => _messages = new TPW.Sim.ParkMessages();
 
         readonly TPW.Sim.ParkAdvisor _advisor = new();
         long _advisorTicks;

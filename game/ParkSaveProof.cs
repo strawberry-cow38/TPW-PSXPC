@@ -157,6 +157,16 @@ public partial class ParkView
         // accident. The people/happiness rows come off the same nine guests the fixture already pins.
         History.RecordMonth(25, 2, 2, 805, _guests.SaveVisitors.Select(g => g.V), 91);
         History.RecordMonth(26, 3, 2, 836, _guests.SaveVisitors.Select(g => g.V), 58);
+        // ⭐ AND TWO CARDS IN THE MESSAGE LIST. Capture wrote none and RestoreMessage THREW, so the
+        // player's message box was dropped on every save and a real game save carrying one failed to
+        // load — and neither was visible, because an empty list captures and restores as an empty list.
+        //
+        // ⚠ ONE OF THEM CARRIES A TARGET, and that is the half that can actually go wrong. A kind-2
+        // card stores its object as a (class kind, index-within-kind) pair (save.md §3.6, lookup
+        // 0x8005BEC0), so it has to survive as a POINTER TO THE SAME RESTORED ATTRACTION, not merely as
+        // two bytes that come back. The shop is entry 237, the only type-4 in the fixture.
+        Messages.Push(0x131, 0);
+        Messages.Push(0x142, 2, _attractionsPlaced.Single(a => a.Rec.Entry == 237));
         CheckSaveProof();
     }
 
@@ -189,6 +199,16 @@ public partial class ParkView
             + $"{History.Read(TPW.Sim.HistoryRow.Overall, 27, 1)}/{History.Read(TPW.Sim.HistoryRow.Overall, 27, 2)}");
         ParkSaveProof.Require(History.Read(TPW.Sim.HistoryRow.People, 27, 1) == 9,
             "park history head count was not carried");
+        // ⚠ THE LAST TWO, not "the two" — the advisor is a live producer into the same list and a
+        // fixture that demanded exactly two would fail the day a rule fires during the run.
+        ParkSaveProof.Require(Messages.Count >= 2, $"message list lost its cards ({Messages.Count})");
+        var plain = Messages.Records[^2];
+        var targeted = Messages.Records[^1];
+        ParkSaveProof.Require(plain.TextId == 0x131 && plain.Kind == 0 && plain.Target == null,
+            $"ordinary card did not survive: {plain.TextId:X}/{plain.Kind}");
+        ParkSaveProof.Require(targeted.TextId == 0x142 && targeted.Kind == 2
+            && ReferenceEquals(targeted.Target, _attractionsPlaced.Single(a => a.Rec.Entry == 237)),
+            "kind-2 card's target did not resolve back to the restored attraction");
     }
 
     internal string SaveProofSnapshot()
