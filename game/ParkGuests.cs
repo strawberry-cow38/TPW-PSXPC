@@ -624,6 +624,34 @@ namespace TPWGodot
         readonly Dictionary<(VisitorState, Purpose), int> _strandedStates = new();
         readonly Dictionary<string, int> _strandedTiles = new();
 
+        /// <summary>⚠⚠ THE SAME-AREA FAILURES, BROKEN DOWN. The report has carried
+        /// "N SAME AREA (this one should be 0)" for as long as it has existed and nobody chased a
+        /// non-zero one, because a bare count cannot be acted on — it says a route failed between two
+        /// tiles the area map calls connected, and nothing about WHICH.
+        ///
+        /// ⭐ AND IT IS NOT A CONTRADICTION, WHICH IS WHY IT NEEDS NAMING RATHER THAN ASSERTING. The
+        /// area map unions a pair when an edge exists in EITHER direction (RebuildAreas' own note); the
+        /// search is DIRECTED. So "same piece" is a strong maybe, and a one-way link — a queue tile
+        /// joins only the tile behind it along the run — is exactly a place where the two disagree
+        /// legitimately. A guest standing on one can be weakly connected to the whole park and unable
+        /// to walk anywhere.</summary>
+        readonly Dictionary<string, int> _sameAreaFrom = new();
+        readonly Dictionary<string, int> _sameAreaTo = new();
+        readonly Dictionary<(VisitorState, Purpose), int> _sameAreaStates = new();
+        readonly HashSet<Visitor> _sameAreaGuests = new();
+
+        /// <summary>Where the same-area failures happened, for the report. Empty is the healthy
+        /// answer and says so, rather than printing nothing and looking like a missing line.</summary>
+        public string SameAreaReport()
+        {
+            if (_sameAreaFrom.Count == 0) return "no same-area failures";
+            var st = new List<string>();
+            foreach (var kv in _sameAreaStates) st.Add($"{kv.Key.Item1}/{kv.Key.Item2}x{kv.Value}");
+            return $"⚠ SAME-AREA failures — {_sameAreaGuests.Count} distinct guests, in {string.Join(" ", st)}"
+                 + $"; standing on {string.Join(" ", _sameAreaFrom.Keys)}"
+                 + $"; heading for {string.Join(" ", _sameAreaTo.Keys)}";
+        }
+
         /// <summary>Where the stranded route failures are coming FROM: the piece each failing guest was
         /// standing in, and how many distinct guests are doing it. A big number from two guests in the
         /// wrong piece is a different fault from the same number spread over everyone.</summary>
@@ -1302,7 +1330,18 @@ namespace TPWGodot
                     g.V.Happiness = Stat.Sub(g.V.Happiness, _rng.Next(15));
                     g.V.Boredom = Stat.Add(g.V.Boredom, _rng.Next(2));
                     RouteFailed++;
-                    if (SameArea(g)) RouteFailedSameArea++;
+                    if (SameArea(g))
+                    {
+                        RouteFailedSameArea++;
+                        int gx = g.X >> 8, gz = g.Z >> 8;
+                        _sameAreaFrom[$"{_map[gx, gz].Type}@({gx},{gz})"] = 1;
+                        if (g.TargetTileX >= 0 && g.TargetTileZ >= 0 && g.TargetTileX < _map.Width
+                            && g.TargetTileZ < _map.Height)
+                            _sameAreaTo[$"{_map[g.TargetTileX, g.TargetTileZ].Type}@({g.TargetTileX},{g.TargetTileZ})"] = 1;
+                        _sameAreaGuests.Add(g.V);
+                        var sk = (g.V.State, g.V.Purpose);
+                        _sameAreaStates[sk] = _sameAreaStates.GetValueOrDefault(sk) + 1;
+                    }
                     else
                     {
                         RouteFailedStranded++;
