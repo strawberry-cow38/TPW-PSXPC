@@ -291,3 +291,65 @@ resources occupy these archive ranges; these are asset identities, not guesses b
 | 402 | 0x767800 | 8256 | 0x1FC0 |
 | 403 | 0x76A000 | 11340 | 0x2BCC |
 | 404 | 0x76D000 | 14036 | 0x3654 |
+
+## 6. The guard chain, end to end (2026-09-21)
+
+**It fires now. Measured:** `pelt -> shock -> dispatch -> chase -> mid-walk catch`, in one run, with
+the log reading `staff #2 Guard walkstep: PathReady -> 39, purpose 8` and the park reporting
+`1 caught`. It had never once completed before today. Four separate breaks were stacked on it, and
+each one hid the next, which is why "the guard never chases" survived so long as a single symptom.
+
+### 6.1 What was broken
+
+1. **`ParkEntertainerWorld.FreeWaypoints` and `.SetAnimation` threw.** The class note said
+   "everything the entertainer never calls THROWS"; the premise was wrong. `Guard.Dispatch`
+   (0x80098494) opens with exactly those two calls, on the GUARD, through the world the ENTERTAINER
+   was handed. Every dispatch raised before `Shock` could `PopState`, so the entertainer stayed in
+   state 32 for the rest of the park's life and re-dispatched every tick: one run read
+   **1769 offers, 0 busy, 0 too far, 0 chasing**. The exception was in the log **7,076 times** and
+   my own grep filtered it out.
+2. **`FreeWaypoints`/`SetAnimation` no-opped even once wired**, because both tested
+   `ReferenceEquals(Current.S, staff)` and `Current` is whoever's tick is running — the entertainer,
+   not the guard. Every `IGuardWorld` member takes its `StaffMember` explicitly; that is the argument
+   to trust. They resolve the host's Staffer by member now.
+3. **A leftover waypoint chain pre-empted the class switch.** The host's walk branch tested only
+   `WaypointHead != NoChain`, and a chain OUTLIVES a state change — nothing clears it when a class
+   PUSHES a state on top. An entertainer pelted mid-stroll was stepped along its old chain and
+   `continue`d, so `Entertainer.Tick` never ran at all. ⚠ The gate is on the states that actually
+   walk, **2 (`WalkToDestination`) and 3 (`PathReady`)** — `Walking = 11` is the REQUEST, and gating
+   on it froze every staff member the moment its path arrived. The obvious name was the wrong state.
+4. **A stale path answer overwrote the chase the tick it started.** The port DEFERS path messages:
+   the pathfinder calls `OnPathMessage`, which only parks the result on `Answer`, and the staff loop
+   consumes it at the top of that member's next iteration. The original has no such gap — delivery is
+   a direct virtual call, `person->vtable[0x144](person+adjust, &msg)` (pathfinder.md). So a message
+   the original would have processed BEFORE `Dispatch` ran arrives after it here, and the shared
+   handler sets the state from the purpose byte alone — wiping state 33. The guard's `FreeWaypoints`
+   door drops the queued answer, which is what `Dispatch` calling `FreeWaypoints` first is FOR.
+5. **`Guard.WalkStep` (0x80097A1C) had no caller.** It is the state-3 override that checks, on every
+   step, whether the guard is standing on the culprit's tile. Without it a chase is a walk to a tile
+   the guest has already left, repeated — which is precisely why the chase ran and nobody was ever
+   caught. Wiring it produced the first catch.
+
+### 6.2 READ, and ⚠ DO NOT FIX: the path-message handler ignores the state
+
+`StaffBase.OnPathMessage`, slot 40 at **0x800942D8**, branches on the purpose byte and nothing else:
+`0x80094304..0x80094358` reads purpose at P+0x2C and sets state **0** for purpose 5, **5** for
+purpose 1, **13** otherwise. There is no test of the current state anywhere in it. So an entertainer
+with a walk in flight genuinely loses a shock when its answer lands, and that is the game's
+behaviour, not the port's. What was wrong was the harness reporting "pelted" for something that then
+vanished; `--park-pelt` now refuses while the entertainer is mid-walk and retries, printing the frame
+it actually landed on.
+
+⚠ NOT ESTABLISHED: whether the entertainer's class vtable overrides slot 40. The base handler's
+content is READ; the claim that the entertainer uses it is inherited from the existing port, not
+re-verified here.
+
+### 6.3 What is still not proved
+
+- The catch's aftermath. The caught guest's guard goes to state **39** (`ToExitPoint`) and then
+  straight to `Idle` in the next tick, so `GoToExitPoint` is bailing — the throw-out walk has never
+  been watched to the gate.
+- `0 on post`: `TakePost` has still never been seen to place a guard at the gate.
+- The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
+  chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
+  base machine wanders it away. The park report's `map in N connected pieces` line is the check.

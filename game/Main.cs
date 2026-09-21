@@ -1613,10 +1613,21 @@ namespace TPWGodot
             // count through the asset self-test.
             // ⚠ ON THE SHOT CLOCK, like the delayed break — it is the only counter that waits for the
             // park to be up, so this does not count through the asset self-test.
+            // ⭐ RETRY UNTIL IT STICKS. The pelt is refused while the entertainer has a walk in
+            // flight, because the shared path-message handler would overwrite the shock before anything
+            // could act on it (ParkGuests.Pelt). Retrying is not fabricating the event -- the point of
+            // the flag is to WATCH the chain, and sampling a frame where the chain cannot start tells
+            // you nothing. The frame it actually landed on is printed, so it is never mistaken for the
+            // frame that was asked for.
             if (_autoPeltAt >= 0 && parkUp && _park != null && _shotClock >= _autoPeltAt)
             {
-                GD.Print($"[tpw] --park-pelt@{_autoPeltAt}: {_park.Pelt()}");
-                _autoPeltAt = -1;
+                string said = _park.Pelt();
+                if (!said.StartsWith("not now"))
+                {
+                    GD.Print($"[tpw] --park-pelt@{_autoPeltAt} landed at frame {_shotClock}: {said}");
+                    _autoPeltAt = -1;
+                }
+                else if (_shotClock % 200 == 0) GD.Print($"[tpw] --park-pelt waiting at {_shotClock}: {said}");
             }
             if (_autoBreakAt >= 0 && parkUp && _park != null && _shotClock >= _autoBreakAt)
             {

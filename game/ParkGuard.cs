@@ -37,10 +37,14 @@ namespace TPWGodot
                               Func<Staffer, int, int, bool> askWorld,
                               Action<Staffer> freeChain, Action<Visitor, int> message,
                               Func<IReadOnlyList<(int X, int Z)>> spawnTiles,
-                              Func<(int X, int Z)?> gateArea, IRandomSource dice)
+                              Func<(int X, int Z)?> gateArea, IRandomSource dice,
+                              Func<StaffMember, Staffer> stafferOf)
         { _base = shared; _guests = guests; _guestOf = guestOf; _ask = askTile; _askWorld = askWorld;
           _freeChain = freeChain; _message = message; _spawnTiles = spawnTiles; _gateArea = gateArea;
-          _dice = dice; }
+          _dice = dice; _stafferOf = stafferOf; }
+
+        /// <summary>The host's Staffer for a StaffMember the sim names. See FreeWaypoints.</summary>
+        readonly Func<StaffMember, Staffer> _stafferOf;
 
         public Staffer Current { get => _base.Current; set => _base.Current = value; }
 
@@ -57,7 +61,18 @@ namespace TPWGodot
         /// <summary>⚠ THE GUEST MAY HAVE LEFT THE PARK MID-CHASE. The sim asks this every tick of a
         /// chase precisely because a culprit can be removed underneath it, and a host that answered
         /// true unconditionally would have guards chasing freed objects for 3600 ticks.</summary>
-        public bool GuestExists(Visitor guest) => guest != null && _guestOf(guest) != null;
+        /// <summary>⭐ SAY WHICH ABORT ENDED THE CHASE. Guard.Chase has three exits that all cost the
+        /// same −5 and all land in the same state, so "0 chasing" cannot tell a culprit who left the
+        /// park from one who joined a queue from a deadline. The sim keeps no tally; this does.</summary>
+        public int CulpritGone { get; private set; }
+        public int LastCulpritState { get; private set; } = -1;
+
+        public bool GuestExists(Visitor guest)
+        {
+            bool ok = guest != null && _guestOf(guest) != null;
+            if (ok) LastCulpritState = (int)guest.State; else CulpritGone++;
+            return ok;
+        }
 
         /// <summary>Same TILE, not the same position. A guard that has to reach the guest's exact 8.8
         /// coordinate never catches anybody, because both are still moving.</summary>
@@ -82,14 +97,20 @@ namespace TPWGodot
         /// <summary>How many guests a guard has caught. Host bookkeeping, not the sim's.</summary>
         public int Caught { get; private set; }
 
+        /// <summary>⚠⚠ RESOLVE THE STAFFER BY THE MEMBER THE SIM HANDED US, NOT BY `Current`. Both of
+        /// these used to no-op unless `Current.S` WAS the staff, on the assumption that the sim only ever
+        /// acts on the staffer whose tick is running. `Guard.Dispatch` disproves that: it is called from
+        /// inside the ENTERTAINER's Shock handler and acts on a different staff member entirely, so the
+        /// Current test failed and the two calls did nothing. Every IGuardWorld member takes its
+        /// StaffMember explicitly, and that is the argument to trust.</summary>
         public void FreeWaypoints(StaffMember staff)
-        { if (Current != null && ReferenceEquals(Current.S, staff)) _freeChain(Current); }
+        { if (_stafferOf(staff) is { } s) _freeChain(s); }
 
         /// <summary>The drawn animation. ⚠ THE PORT HAS NO GUARD ART, so this only records which clip
         /// the sim asked for — 15 idle, 30 chase — and nothing draws differently yet. A GAP, and the
         /// reason it is stored rather than discarded is that a discarded value cannot be measured.</summary>
         public void SetAnimation(StaffMember staff, int animation)
-        { if (Current != null && ReferenceEquals(Current.S, staff)) Current.Anim = animation; }
+        { if (_stafferOf(staff) is { } s) s.Anim = animation; }
 
         /// <summary>Re-path to wherever the culprit is NOW. ⚠ Called every tick of a chase, which is
         /// what makes it a chase rather than a walk to where the guest used to be.</summary>

@@ -731,7 +731,13 @@ namespace TPWGodot
             // ⭐ HIRING ORDER, because the sim keeps the first entry on an equal distance.
             () => { var list = new List<Guard>();
                     foreach (var sf in _staff) if (sf.S.Kind == StaffKind.Guard) list.Add(GuardFor(sf.S));
-                    return list; });
+                    return list; },
+            // ⚠⚠ THE ENTERTAINER REACHES INTO THE GUARD'S WORLD, and finding out cost a morning.
+            // Guard.Dispatch runs inside Entertainer.Shock and calls FreeWaypoints and SetAnimation on
+            // the world it was handed — this one. Both THREW, so every dispatch raised before PopState
+            // and the entertainer never left state 32: one run showed the guard offered 1769 times, never
+            // busy, never too far, and never once chasing.
+            GuardWorld);
         ParkEntertainerWorld _entWorld;
 
         /// <summary>⚠⚠ THE LAST STAFF CLASS. Guard had no caller and IGuardWorld no implementation, so
@@ -741,7 +747,20 @@ namespace TPWGodot
             v => _byVisitor.TryGetValue(v, out var gg) ? gg : null,
             (st, tx, tz, fl) => Ask(st, tx, tz, fl) && (st.Waiting = true),
             (st, wx, wz) => Seek(st, st.X, st.Z, wx, wz, WalkFlags, 0) && (st.Waiting = true),
-            st => FreeChain(st),
+            // ⚠⚠ CANCELLING A WALK MUST ALSO DROP THE ANSWER THAT IS ALREADY IN THE POST. The port
+            // DEFERS a path message: the pathfinder calls OnPathMessage during its own frame, which only
+            // parks it on `Answer`, and the staff loop consumes it at the top of that member's next
+            // iteration. The original has no such gap — pathfinder.md's delivery is a direct virtual
+            // call, `person->vtable[0x144](person+adjust, &msg)`, acted on where it lands. So a message
+            // that the original would have processed BEFORE Guard.Dispatch ran instead arrives after it
+            // here, and StaffBase.OnPathMessage sets the state from the purpose byte alone (READ:
+            // 0x80094304..0x80094358) — wiping state 33 the tick it was set, purpose Patrol -> 5
+            // RandomWander. That is why "dispatch asked 1, offered 1, 0 chasing" was the reading for
+            // every run: the chase started and was overwritten before Guard.Chase could tick once.
+            // ⭐ Dropping the stale answer here is host bookkeeping, not a change to the sim: the
+            // binary's Dispatch opens with FreeWaypoints precisely because it is CANCELLING that walk,
+            // and an answer to a cancelled walk is not news.
+            st => { st.Answer = null; FreeChain(st); },
             // ⭐ THE SAME DOOR THE GATE USES, and it is SYNCHRONOUS as the original is: the catch
             // runs inside the guard's tick rather than being queued.
             (v, m) => { if (_entrance != null) _entrance.DeliverMessage(v, m, 0, 0); },
@@ -754,7 +773,8 @@ namespace TPWGodot
             // both look like an answer; only the return type told me apart. The post the guard takes
             // is meant to be inside the park by the gate, which is exactly what this already is.
             () => GateTile.X < 0 ? null : GateTile,
-            _dice);
+            _dice,
+            st => { foreach (var sf in _staff) if (sf.S == st) return sf; return null; });
         ParkGuardWorld _guardWorld;
 
 
@@ -831,8 +851,12 @@ namespace TPWGodot
         void TickStaff()
         {
             var world = StaffWorld();
+            // ⚠ NUMBER THEM. Four guards all logging "staff Guard: ..." is one member's story told
+            // four ways, and I read a chase ending off a line that belonged to a different guard.
+            int who = -1;
             foreach (var st in _staff)
             {
+                who++;
                 // "Nearest" is measured from where THIS member stands, so the world is pointed at it
                 // before every call, exactly as GuestBrain is set per guest.
                 world.Current = st;
@@ -860,12 +884,41 @@ namespace TPWGodot
                     else if (handy != null) Handyman.OnPathMessage(st.S, handy, found);
                     else StaffBase.OnPathMessage(st.S, found);
                 }
-                if (st.WaypointHead != WaypointPool.NoChain)
+                // ⚠⚠ A LEFTOVER CHAIN IS NOT A WALK. This used to read only
+                // `st.WaypointHead != NoChain`, and a chain OUTLIVES a state change: every walk sets
+                // State = Walking (StaffBase 159/172/191, StaffClasses 149/160, Guard 182/217/233/241/
+                // 251/313) but nothing clears the chain when a class PUSHES a state on top. So an
+                // entertainer pelted mid-stroll sat in state 32 while this branch stepped it along the
+                // old chain and `continue`d — Entertainer.Tick never ran, Shock never asked for a
+                // guard, and the arrival popped 32 straight off the stack. The pelt was swallowed
+                // whenever the entertainer happened to be walking, which is most of the time.
+                // ⭐ The state is the authority on what a member is DOING; the chain is only how it
+                // gets there. Same family as keying a flow check on a field two flows share.
+                // ⚠ AND THE WALKING STATES ARE 2 AND 3, NOT 11. `Walking = 11` is the REQUEST; the
+                // path-ready message puts the member in 3 and the per-tick walk lives in 2 (StaffState's
+                // own notes, behaviour.md §3.1 row "2 (arrival)"). Gating on 11 froze every staff member
+                // the moment its path arrived — the obvious name was the wrong state.
+                if ((st.S.State == StaffState.WalkToDestination || st.S.State == StaffState.PathReady)
+                    && st.WaypointHead != WaypointPool.NoChain)
                 {
+                    // ⚠⚠ THE GUARD'S STATE-3 OVERRIDE, 0x80097A1C, HAD NO CALLER. Guard.WalkStep is
+                    // the MID-WALK catch: purpose 8 checks every step whether it is standing on the
+                    // culprit's tile, rather than only when it arrives where the guest used to be. A
+                    // chase with only the arrival check is a walk to a stale tile, repeated — which is
+                    // why the chase ran and nobody was ever caught. True means the chase ended, and the
+                    // ordinary step must not also run.
+                    if (grd != null && GuardFor(st.S).WalkStep(grd))
+                    {
+                        if (LogStaff && st.S.State != wasState)
+                            Godot.GD.Print($"[tpw] staff #{who} Guard walkstep: {wasState} -> {st.S.State}, "
+                                         + $"purpose {st.S.Purpose}");
+                        continue;
+                    }
                     // ⭐ THE MECHANIC'S WALK COSTS ARE ITS OWN, and they run BEFORE the base's. Walking
                     // to a breakdown RESTS a mechanic and demoralises it, which is backwards from every
                     // other class and is what the code says (Mechanic's class note).
                     if (mech != null) Mechanic.Arrive(st.S, mech, true);
+                    else if (grd != null) GuardFor(st.S).Arrive(grd, true);
                     else StaffBase.Arrive(st.S, world, true);
                     Walk(st);
                     continue;
@@ -890,7 +943,7 @@ namespace TPWGodot
                         || st.S.State == EntertainerStates.Shocked)
                     {
                         if (LogStaff && st.S.State != wasState)
-                            Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, "
+                            Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, "
                                          + $"{_influence.Count} influence areas, morale {st.S.Morale} [own]");
                         continue;
                     }
@@ -898,7 +951,7 @@ namespace TPWGodot
                 if (grd != null && RunGuard(st, grd))
                 {
                     if (LogStaff && st.S.State != wasState)
-                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                        Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
                                      + $"gate counter {grd.Counter80103950} [own]");
                     continue;
                 }
@@ -909,21 +962,21 @@ namespace TPWGodot
                 if (res != null && RunResearcher(st, res))
                 {
                     if (LogStaff && st.S.State != wasState)
-                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, "
+                        Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, "
                                      + $"funding {res.ResearchFunding} [own]");
                     continue;
                 }
                 if (handy != null && RunHandyman(st, handy))
                 {
                     if (LogStaff && st.S.State != wasState)
-                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                        Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
                                      + $"litter {_litter.Pool.Count} live, tired {st.S.Tiredness} [own]");
                     continue;
                 }
                 if (mech != null && RunMechanic(st, mech))
                 {
                     if (LogStaff && st.S.State != wasState)
-                        Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                        Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
                                      + $"jobs {(_rideJobs?.Invoke().Count ?? -1)}, tired {st.S.Tiredness} [own]");
                     continue;
                 }
@@ -942,7 +995,7 @@ namespace TPWGodot
                     default: WanderStaff(st); break;
                 }
                 if (LogStaff && st.S.State != wasState)
-                    Godot.GD.Print($"[tpw] staff {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                    Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
                                  + $"jobs {(_rideJobs?.Invoke().Count ?? -1)}, tired {st.S.Tiredness}");
             }
         }
@@ -960,7 +1013,17 @@ namespace TPWGodot
             switch (st.S.State)
             {
                 case StaffState.Idle: g.Idle(grd); return true;
-                case GuardStates.Chase: g.Chase(grd); return true;
+                case GuardStates.Chase:
+                    // ⭐ WHICH OF CHASE'S THREE IDENTICAL-LOOKING ABORTS FIRED. All three cost the same
+                    // −5 and all three land in the same state, so the state log alone cannot tell a
+                    // culprit who left the park from one who joined a queue from a deadline — and the
+                    // first thing this printed was `culprit NULL`, which is what turned a week-old
+                    // "the guard never chases" into a one-line answer.
+                    if (LogStaff)
+                        Godot.GD.Print($"[tpw] guard chase: culprit {(g.Culprit == null ? "NULL" : "set")}, "
+                                     + $"waiting {st.Waiting}, chain {st.WaypointHead != WaypointPool.NoChain}, "
+                                     + $"now {_now} busyUntil {st.S.BusyUntil}");
+                    g.Chase(grd); return true;
                 case GuardStates.ToExitPoint: g.GoToExitPoint(grd); return true;
                 case GuardStates.AtGate: g.CrossGate(grd); return true;
                 case GuardStates.CrossGate: g.CrossGate(grd); return true;
@@ -1402,6 +1465,32 @@ namespace TPWGodot
             foreach (var st in _staff) if (st.S.Kind == StaffKind.Entertainer) { ent = st; break; }
             if (ent == null) return "no entertainer hired";
             if (_guests.Count == 0) return "no guests";
+            // ⚠⚠ REFUSE A PELT THAT WOULD BE EATEN, AND SAY SO. `Pelted` PUSHES state 32, and the
+            // shared path-message handler (StaffBase.OnPathMessage, 0x800942D8) SETS the state with no
+            // regard for what is on top of it -- READ: 0x80094304..0x80094358 branches on the purpose
+            // byte alone, purpose 5 -> state 0, purpose 1 -> state 5, else 13. So an entertainer with a
+            // walk in flight loses the shock the moment its path answer lands, and the guard is never
+            // asked. That is the ORIGINAL's behaviour and is NOT to be fixed; what was wrong was the
+            // harness pelting into it and reporting "pelted" for something that then vanished. Three
+            // runs in four read `dispatch asked 0x` for exactly this reason and cost a morning.
+            if (ent.Answer != null || ent.S.State == StaffState.Walking
+                || ent.S.State == StaffState.PathReady || ent.WaypointHead != WaypointPool.NoChain)
+                return $"not now: {ent.S.Kind} is mid-walk (state {ent.S.State}), a pelt would be eaten";
+            // ⚠ AND A GUARD HAS TO BE IN RANGE WHEN THE SHOCK ENDS, NOT WHEN THE PELT LANDS. Shock
+            // waits rand(5)*60 ticks before it looks, and it takes the nearest NotBusy guard STRICTLY
+            // under 7 tiles (Entertainer.GuardRangeTiles). A guard four tiles away at pelt time can be
+            // eight away by then, so this asks for FOUR as a margin rather than seven. It is a harness
+            // precondition for observing the chain, not a rule the game has — the game is perfectly
+            // happy to pelt an entertainer nobody can help, which is what the -5 no-guard arm is for.
+            int near = int.MaxValue;
+            foreach (var sf in _staff)
+            {
+                if (sf.S.Kind != StaffKind.Guard || !TPW.Sim.Guard.NotBusy(sf.S)) continue;
+                int d = Math.Abs((sf.X >> 8) - (ent.X >> 8)) + Math.Abs((sf.Z >> 8) - (ent.Z >> 8));
+                if (d < near) near = d;
+            }
+            if (near > 4)
+                return near == int.MaxValue ? "not now: no free guard" : $"not now: nearest free guard is {near} tiles away";
             var w = EntertainerWorld();
             w.Current = ent;
             var e = _entertainers.TryGetValue(ent.S, out var have) ? have : (_entertainers[ent.S] = new Entertainer(ent.S));
@@ -1426,7 +1515,9 @@ namespace TPWGodot
             var w = _entWorld;
             return $"guards: {n}, {chasing} chasing, {posted} on post, {caught} caught"
                  + $", gate counter {(_guardWorld?.Counter80103950 ?? 0)}"
-                 + (w == null ? "" : $"; dispatch offered {w.Asked} ({w.Busy} busy, {w.TooFar} too far)");
+                 + (w == null ? "" : $"; dispatch asked {w.Calls}x, offered {w.Asked} ({w.Busy} busy, {w.TooFar} too far)")
+                 + $"; chase saw culprit gone {_guardWorld?.CulpritGone ?? 0}x, last culprit state "
+                 + $"{_guardWorld?.LastCulpritState ?? -1}";
         }
 
         public string InfluenceLine()

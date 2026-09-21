@@ -39,9 +39,14 @@ namespace TPWGodot
         public ParkEntertainerWorld(ParkStaffWorld shared, InfluenceMap influence,
                                     Func<IEnumerable<Guest>> guests,
                                     Func<StaffMember, (int X, int Z)> staffTile,
-                                    Func<IEnumerable<Guard>> guardsOf)
+                                    Func<IEnumerable<Guard>> guardsOf,
+                                    Func<ParkGuardWorld> guardWorld)
         { _base = shared; _influence = influence; _guests = guests; _staffTile = staffTile;
-          _guardsOf = guardsOf; }
+          _guardsOf = guardsOf; _guardWorld = guardWorld; }
+
+        /// <summary>The guard's own world, for the two members <see cref="Guard.Dispatch"/> reaches
+        /// through this one. Lazy, because it is built after this is.</summary>
+        readonly Func<ParkGuardWorld> _guardWorld;
 
         public Staffer Current { get => _base.Current; set => _base.Current = value; }
 
@@ -109,6 +114,19 @@ namespace TPWGodot
         /// pelted entertainer always took the no-guard branch, −5 more morale and nobody comes.</summary>
         public IEnumerable<(Guard guard, int distanceTiles)> GuardsWithDistances(StaffMember staff)
         {
+            // ⚠ THE CALL AND THE ENUMERATION ARE DIFFERENT EVENTS. This is an iterator, so a body
+            // counter only moves when somebody walks it — and "Shock asked and got an empty list" then
+            // looks identical to "Shock never asked". One run read `offered 0` and cost an hour for
+            // exactly that reason. Calls is incremented eagerly, here, before the deferred part.
+            Calls++;
+            return Enumerate(staff);
+        }
+
+        /// <summary>How many times Shock asked for a guard, whatever the list then held.</summary>
+        public int Calls { get; private set; }
+
+        IEnumerable<(Guard guard, int distanceTiles)> Enumerate(StaffMember staff)
+        {
             var (sx, sz) = _staffTile(staff);
             foreach (var g in _guardsOf())
             {
@@ -158,8 +176,20 @@ namespace TPWGodot
         public bool GuestExists(Visitor guest) => throw NotWired("GuestExists");
         public bool OnGuestTile(StaffMember staff, Visitor guest) => throw NotWired("OnGuestTile");
         public void SendGuestMessage(Visitor guest, int message) => throw NotWired("SendGuestMessage");
-        public void FreeWaypoints(StaffMember staff) => throw NotWired("FreeWaypoints");
-        public void SetAnimation(StaffMember staff, int animation) => throw NotWired("SetAnimation");
+        // ⚠⚠ THESE TWO ARE ON THE ENTERTAINER'S PATH AFTER ALL, and the claim above that they are
+        // not was wrong for four hours of running time. Entertainer.Shock ends in
+        // `chosen.Dispatch(Culprit, world)` and Dispatch's first two statements are FreeWaypoints and
+        // SetAnimation — on the GUARD, through the world the ENTERTAINER was handed. Throwing here
+        // raised out of the staff loop before Shock could PopState, so the entertainer stayed in state
+        // 32 for the rest of the park's life and re-dispatched every tick: 1769 offers in one run,
+        // 0 busy, 0 too far, 0 chasing. The exception was in the log 7,076 times and my own grep
+        // filtered it out — the throw did its job, the reader did not.
+        //
+        // ⭐ THE THROW IS STILL RIGHT FOR EVERYTHING ELSE. What was wrong was the premise "the
+        // entertainer's handlers never call this", not the policy. So these two forward to the real
+        // guard world and the other fourteen members keep throwing.
+        public void FreeWaypoints(StaffMember staff) => _guardWorld().FreeWaypoints(staff);
+        public void SetAnimation(StaffMember staff, int animation) => _guardWorld().SetAnimation(staff, animation);
         public void PathToGuest(StaffMember staff, Visitor guest, int flags, int secondaryFlags)
             => throw NotWired("PathToGuest");
         public bool HasExits => throw NotWired("HasExits");
