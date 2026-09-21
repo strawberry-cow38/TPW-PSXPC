@@ -1602,8 +1602,29 @@ namespace TPWGodot
                 happy += g.V.Happiness; tired += g.V.Tiredness; nausea += g.V.Nausea;
             }
             int n = _guests.Count;
+            // ⭐ THE GAME'S OWN VIEW OF THE SAME GUESTS, WHICH IS NOT THE MEAN. VisitorCondition.Of
+            // classifies each guest by FIRST MATCH down a fixed ladder, and the Park Statistics window
+            // shows the three commonest — so an average of 78 nausea and "most common: queasy" are
+            // different claims and the second is the one the game makes. The three entry points that
+            // produce it (TopThree, PercentWith, Icon) were ported, tested and never called.
+            //
+            // ⚠ EXACT MATCH, WHICH IS THE ORIGINAL'S OWN ODDITY: a guest with BOTH needs high reads as
+            // code 7 and is therefore counted in NEITHER the need-A nor the need-B percentage. The
+            // hungriest guests in the park are the ones the "hungry" statistic cannot see, so the
+            // BothNeedsHigh share is printed beside them rather than folded in.
+            var visitors = new List<Visitor>(_guests.Count);
+            foreach (var g in _guests) visitors.Add(g.V);
+            var top = TPW.Sim.VisitorCondition.TopThree(visitors);
+            var worstParts = new List<string>();
+            foreach (var c in top)
+                worstParts.Add($"{c} {TPW.Sim.VisitorCondition.PercentWith(visitors, c)}% "
+                             + $"(icon 0x{TPW.Sim.VisitorCondition.Icon(c):X2})");
+            string worst = worstParts.Count == 0 ? "nothing above threshold" : string.Join(", ", worstParts);
             return $"average guest: need A {a / n}, need B {b / n}, bored {bored / n}, "
-                 + $"happy {happy / n}, tired {tired / n}, nausea {nausea / n} (of {n})";
+                 + $"happy {happy / n}, tired {tired / n}, nausea {nausea / n} (of {n})"
+                 + $"; commonest complaints: {worst}"
+                 + $"; both needs high {TPW.Sim.VisitorCondition.PercentWith(visitors, TPW.Sim.GuestCondition.BothNeedsHigh)}%"
+                 + " (counted in neither single-need figure)";
         }
 
         /// <summary>Every guest standing on one tile, in full. ⭐ THE PER-GUEST HALF OF StateReport:
