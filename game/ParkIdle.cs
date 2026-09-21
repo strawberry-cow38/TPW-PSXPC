@@ -97,5 +97,7 @@ namespace TPWGodot
         /// litter and this port keeps behaviour.md. Both paths land here, so if that is ever settled the
         /// fix is one branch in the sim, not here.</summary>
         public void DropLitter(Visitor guest) => _dropLitter(guest);
+        public void AdvisorEvent(int index, int amount) => Advisor?.Invoke(index, amount);
+        public System.Action<int, int> Advisor;
     }
 }

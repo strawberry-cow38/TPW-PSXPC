@@ -44,6 +44,8 @@ namespace TPW.Sim.Tests
             public BinSearch TryWalkToBin(Visitor guest) => BinResult;
             public bool TryPeltEntertainer(Visitor guest) => false;
             public void DropLitter(Visitor guest) => Pool.Drop(GuestPosition.X, GuestPosition.Y, this, Dice);
+            public readonly System.Collections.Generic.List<(int, int)> Events = new();
+            public void AdvisorEvent(int index, int amount) => Events.Add((index, amount));
             public object TryAllocateLitter() => Pool.TryAllocate(this, Dice);
             public void PlaceLitter(object piece, int x, int y, int kind) => ((Litter)piece).Place(x, y, kind);
             public TileInfluence InfluenceAt(Visitor guest) => TileInfluence.None;

@@ -2822,7 +2822,15 @@ namespace TPWGodot
             var sb = new System.Text.StringBuilder();
             foreach (var (rec, name) in _attractions)
             {
-                if (rec.Levels.Length == 0) continue;
+                // ⚠ THIS SKIP ONCE READ AS "THE MAP HAS NO SHOPS". A shop or sideshow has no upgrade
+                // levels, so it fell out of a list whose PURPOSE was seat counts -- and I then quoted
+                // that filtered list as the map's whole catalogue and concluded there was nowhere to
+                // buy anything. Say what was left out instead of dropping it silently.
+                if (rec.Levels.Length == 0)
+                {
+                    sb.Append($"\n  (no levels) {rec.Entry,4} type {rec.Type}  {name}");
+                    continue;
+                }
                 sb.Append($"\n  seats {rec.Entry,4} type {rec.Type} [{string.Join(",", rec.Levels.Select(l => l.MaxSeats))}]  {name}");
             }
             return sb.Length == 0 ? "no catalogue" : sb.ToString();

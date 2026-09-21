@@ -46,6 +46,8 @@ namespace TPW.Sim
         /// The findings' version is retained; see findings/litter.md §0. Delegate to LitterPool.Drop
         /// with the guest's position and the shared random source to supply real pieces.</summary>
         void DropLitter(Visitor guest);
+        /// <summary>Bump one of the advisor's 20 event counters (0x800139B4).</summary>
+        void AdvisorEvent(int index, int amount);
     }
 
     /// <summary>State 0 -- Idle (0x8008D058). The guest stands around; every tick it first decides
@@ -60,6 +62,10 @@ namespace TPW.Sim
     /// also why <see cref="IRandomSource"/> exists rather than a static.</summary>
     public static class VisitorIdle
     {
+        /// <summary>Advisor event 2: guest misbehaviour. Raised by BOTH the pelt roll (0x8008D584) and
+        /// the misery-litter roll (0x8008D734), one apiece.</summary>
+        public const int AdvisorEventMisbehaviour = 2;
+
         /// <summary>Tiredness at or above this and the guest goes home.</summary>
         public const int LeaveTiredness = 99;
         /// <summary>Happiness below this and the guest goes home.</summary>
@@ -105,8 +111,15 @@ namespace TPW.Sim
                     return IdleAction.Wander;
                 case 2:
                     // 10 in 1000. The guest's own state does not change either way.
-                    if (rng.Next(1000) < 10 && world.TryPeltEntertainer(guest)) return IdleAction.PeltEntertainer;
-                    return IdleAction.Nothing;
+                    if (rng.Next(1000) >= 10) return IdleAction.Nothing;
+                    // ⭐ THE COUNTER DOES NOT CARE WHETHER ANYONE WAS HIT. At 0x8008D54C the "no
+                    // entertainer found" branch is `beq s0,zero,0x8008D578` -- and 0x8008D578 IS the
+                    // counter. Both paths arrive at it, so a guest who winds up to throw something with
+                    // nobody in range still counts as misbehaving. An `&&` reads more naturally and
+                    // silently drops every miss, which on a park with no entertainers is all of them.
+                    bool hit = world.TryPeltEntertainer(guest);
+                    world.AdvisorEvent(AdvisorEventMisbehaviour, 1);
+                    return hit ? IdleAction.PeltEntertainer : IdleAction.Nothing;
                 case 3: return RollBin(guest, world);
                 case 4: return RollVomit(guest, world, rng);
                 case 5:
@@ -115,6 +128,9 @@ namespace TPW.Sim
                     if (guest.Happiness < LitterHappiness && rng.Next(1000) < 100 && !world.IdleNeedsSuppressed)
                     {
                         world.DropLitter(guest);
+                        // The second of event 2's two writers (0x8008D734). ⚠ Roll 3's "no bin" drop is
+                        // NOT one of them -- statistics.md names exactly these two addresses.
+                        world.AdvisorEvent(AdvisorEventMisbehaviour, 1);
                         return IdleAction.DropLitterFromMisery;
                     }
                     return IdleAction.Nothing;
