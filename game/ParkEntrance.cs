@@ -36,12 +36,16 @@ namespace TPWGodot
                                  Func<Guest, int> freeChain,
                                  Func<IEnumerable<Guest>> guests, Func<IEnumerable<StaffMember>> staff,
                                  Func<Visitor, Guest> byVisitor,
-                                 Func<IReadOnlyList<GuestTarget>> targets, Action<Guest> remove)
+                                 Func<IReadOnlyList<GuestTarget>> targets, Action<Guest> remove,
+                                 Action<StaffMember, int> staffMessage = null)
         {
             _map = map; _now = now; _finances = finances; _bus = bus; _dice = dice;
             _pathTo = pathToTile; _setWaypoint = setWaypoint; _freeChain = freeChain;
             _guests = guests; _staff = staff; _byVisitor = byVisitor; _targets = targets; _remove = remove;
+            _staffMessage = staffMessage;
         }
+
+        readonly Action<StaffMember, int> _staffMessage;
 
         public long NowTick => _now();
 
@@ -226,10 +230,20 @@ namespace TPWGodot
         Func<IQueueWorld> _queue = () => null;
         public void SetQueueWorld(Func<IQueueWorld> q) => _queue = q ?? (() => null);
 
-        /// <summary>⚠ NOT WIRED: a guard waiting in state 46 gets message 9 like a guest, and no guard
-        /// in the port ever reaches 46 because nothing posts them to the gate. Named rather than
-        /// silently empty, because "the guards never came" is a symptom somebody will chase.</summary>
-        public void DeliverStaffMessage(StaffMember staff, int id) { }
+        /// <summary>⭐ WIRED NOW, AND THE NOTE THAT USED TO BE HERE WAS MADE FALSE BY A FIX ELSEWHERE.
+        /// It said "no guard in the port ever reaches 46 because nothing posts them to the gate" — true
+        /// when it was written, and wrong from the moment Guard.Arrive's purpose table was connected:
+        /// a guard escorting somebody out now reaches state 46 twice a trip (findings/staff.md §6.4).
+        ///
+        /// ⚠⚠ AND THE EMPTY BODY WAS WORSE THAN A NO-OP, because Turnstile.Admit counts it as SENT.
+        /// The broadcast at VisitorEntrance:816 does `DeliverStaffMessage(staff, 9); sent++;`, so a
+        /// swallowed message still moved the admission counter — the turnstile believed it had admitted
+        /// a guard that was never told. Message 9 is what puts a guard in CrossGate (Guard.OnMessage).
+        ///
+        /// ⭐ Same family as every other never-called thing here: enabling one pass armed a door
+        /// downstream of it that had been dead so long its comment had become a description of the
+        /// world rather than of the code.</summary>
+        public void DeliverStaffMessage(StaffMember staff, int id) => _staffMessage?.Invoke(staff, id);
 
         // ── the QUEUE half of IVisitorMessageWorld ────────────────────────────────────────────────
         //

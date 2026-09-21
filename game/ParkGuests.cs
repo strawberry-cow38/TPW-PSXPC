@@ -533,7 +533,21 @@ namespace TPWGodot
                 () => _guests, () => System.Linq.Enumerable.Select(_staff, s => s.S),
                 v => _byVisitor.TryGetValue(v, out var g) ? g : null,
                 () => _rideTargets?.Invoke() ?? (IReadOnlyList<GuestTarget>)System.Array.Empty<GuestTarget>(),
-                RemoveGuest);
+                RemoveGuest,
+                // ⭐ THE TURNSTILE'S BROADCAST REACHES THE GUARD NOW. Admit sends message 9 to every
+                // person in state 46, guests AND staff, and the staff half landed in an empty body —
+                // while still counting as sent. A guard's message 9 is what puts it in CrossGate.
+                (st, id) =>
+                {
+                    foreach (var sf in _staff)
+                        if (sf.S == st)
+                        {
+                            var gw = GuardWorld(); gw.Current = sf;
+                            GuardFor(st).OnMessage(gw, id);
+                            StaffAdmitted++;
+                            return;
+                        }
+                });
             _entrance.SetQueueWorld(() => _rides);
         }
 
@@ -1584,6 +1598,10 @@ namespace TPWGodot
         /// <summary>The guards, and whether any of them is doing anything. ⭐ "3 guards" is a payroll
         /// line; a guard in Chase or holding a post is the feature. The gate counter is printed raw
         /// because its meaning is NOT ESTABLISHED and a label would be an invention.</summary>
+        /// <summary>Staff the turnstile has admitted through the gate. Counted because the broadcast
+        /// used to land in an empty body and still increment the turnstile's own `sent`.</summary>
+        public int StaffAdmitted { get; private set; }
+
         public string GuardLine()
         {
             int n = 0, chasing = 0, posted = 0, caught = 0;
@@ -1602,6 +1620,7 @@ namespace TPWGodot
                  + (w == null ? "" : $"; dispatch asked {w.Calls}x, offered {w.Asked} ({w.Busy} busy, {w.TooFar} too far)")
                  + $"; chase saw culprit gone {_guardWorld?.CulpritGone ?? 0}x, last culprit state "
                  + $"{_guardWorld?.LastCulpritState ?? -1}"
+                 + $"; {StaffAdmitted} admitted by the turnstile"
                  + $"; post: {_guardWorld?.PostTaken ?? 0} taken of {_guardWorld?.PostTried ?? 0} tiles tried, "
                  + $"{_guardWorld?.PostGaveUp ?? 0} gave up after five, {_guardWorld?.PostNoGate ?? 0} with no gate";
         }
