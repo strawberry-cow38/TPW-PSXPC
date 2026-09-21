@@ -1564,6 +1564,97 @@ namespace TPWGodot
             }
         }
 
+        // ── the advisor on screen ─────────────────────────────────────────────────────────────────────
+        /// <summary>Put the advisor where the original puts him: HIS OWN little scene, in the corner.
+        ///
+        /// ⭐⭐ HE IS NOT IN THE PARK. The original gives him a camera of his own at (0,0,-256) looking at
+        /// the origin, draws him with SetGeomOffset(416,176) on the 512x256 frame, and then puts the park's
+        /// view back (findings/advisor-presentation.md §1). So he is a screen-space overlay that happens to
+        /// be 3D, not a character standing somewhere. Reproduced here by hanging him off the park camera at
+        /// a fixed depth and projecting that screen point, which keeps him in the corner whatever the park
+        /// camera is doing -- and the corner is on the RIGHT, so x anchors to the right edge exactly as the
+        /// HUD's own right-hand items do.
+        ///
+        /// ⭐ THE ENTRANCE IS THE WHOLE CHARACTER. Scale runs 0 -> 1200 over his fifty frames and the spin
+        /// runs 0 -> 0x8000, which through the >> 1 is FOUR FULL TURNS: he screws himself up out of nothing
+        /// rather than walking on. Leaving unwinds it. While he talks the spin only wanders about +-8.8
+        /// degrees, so he sways.</summary>
+        void StepAdvisorVisual()
+        {
+            bool show = _advisor.State is TPW.Sim.AdvisorState.Arriving
+                                       or TPW.Sim.AdvisorState.Speaking
+                                       or TPW.Sim.AdvisorState.Leaving;
+            if (_advisorRoot == null)
+            {
+                if (!show) return;
+                _advisorRoot = new Node3D { Name = "Advisor" };
+                _camera.AddChild(_advisorRoot);
+                _advisorBody = new MeshInstance3D();
+                _advisorFace = new MeshInstance3D();
+                _advisorRoot.AddChild(_advisorBody);
+                _advisorRoot.AddChild(_advisorFace);
+            }
+            _advisorRoot.Visible = show;
+            if (!show) return;
+
+            // His screen place, in the HUD's own PSX frame: 416 of 512 across, 176 of 240 down. Past the
+            // middle, so it anchors to the right edge the way ParkHud.Right does.
+            var screen = GetViewport().GetVisibleRect().Size;
+            float sy = screen.Y / 240f, sx = screen.Y / 384f;
+            float px = screen.X - (512 - AdvisorScreenX) * sx, py = AdvisorScreenY * sy;
+            var at = _camera.ProjectPosition(new Vector2(px, py), AdvisorDepth);
+            // World units per screen pixel at that depth, measured rather than derived from the projection.
+            float perPixel = at.DistanceTo(_camera.ProjectPosition(new Vector2(px, py - 100f), AdvisorDepth)) / 100f;
+
+            // READ: the draw's matrix is diag(Scale >> 2) over 4096, and at H = 256 one model unit is one
+            // pixel. The x row carries the 1.6 stretch the PSX applies to its 512-wide frame.
+            float unit = (_advisor.Scale >> 2) / 4096f * sy * perPixel;
+            if (unit <= 0f) { _advisorRoot.Visible = false; return; }
+            float spin = -(_advisor.Spin >> 1 & 0xFFF) / 4096f * Mathf.Tau;
+
+            var basis = new Basis(Vector3.Back, spin)
+                        .Scaled(new Vector3(unit * AdvisorStretch, unit, unit));
+            _advisorRoot.Transform = new Transform3D(basis, _camera.ToLocal(at));
+
+            int gesture = Math.Clamp((int)_advisor.Gesture, 0, 4);
+            SetAdvisorPart(_advisorBody, gesture + 1, ref _advisorBodySub);
+            // READ: mood 16 means NO FACE. The others pick a static sub-mesh that rides the body's bone.
+            SetAdvisorPart(_advisorFace, _advisor.Mood == 16 ? -1 : _advisor.Mood + 1, ref _advisorFaceSub);
+        }
+
+        /// <summary>His screen place and how he is scaled there. READ 0x800136F4 for the offset and the
+        /// projection distance; the depth is this port's own choice and only has to be in front.</summary>
+        const int AdvisorScreenX = 416, AdvisorScreenY = 176;
+        /// <summary>⚠ NO EXTRA STRETCH, AND THAT IS NOT AN OMISSION. The original multiplies his x row by
+        /// 1.6 to get from model units to its 512-wide frame -- but this port already maps a PSX x by
+        /// Screen.Y/384 and a PSX y by Screen.Y/240, and 384 is 240 x 1.6, so the port's own anamorphic
+        /// mapping IS that 1.6. Applying it again makes him half again too wide. The two cancel exactly,
+        /// which is why the scale below is uniform.</summary>
+        const float AdvisorDepth = 6f, AdvisorStretch = 1f;
+
+        Node3D _advisorRoot;
+        MeshInstance3D _advisorBody, _advisorFace;
+        int _advisorBodySub = -2, _advisorFaceSub = -2;
+
+        /// <summary>Swap one of his two meshes to sub-entry <paramref name="sub"/> of FOLIO entry 0, or
+        /// hide it when there is none. ⚠ ENTRY 0, not the port's AdvisorModel (entry 83 sub 10): that one
+        /// is the LANGUAGE SCREEN's advisor, identified from that screen's own display list. The park draws
+        /// a different model and we had the wrong one recorded.</summary>
+        void SetAdvisorPart(MeshInstance3D inst, int sub, ref int current)
+        {
+            if (sub == current) return;
+            current = sub;
+            if (sub < 0 || _attractionSub == null) { inst.Visible = false; return; }
+            var mesh = _attractionSub(AdvisorModelEntry, sub);
+            if (mesh == null) { inst.Visible = false; return; }
+            inst.Mesh = ModelMesh.Build(mesh, PoseVertices(mesh, 0), _modelSheets, true, false, false,
+                                        Vector3.Zero, 1f, out _);
+            inst.Visible = true;
+        }
+
+        /// <summary>READ 0x80012E4C: the park's advisor is bound to FOLIO entry 0.</summary>
+        const int AdvisorModelEntry = 0;
+
         /// <summary>A model's pose at one whole tick, kept per model so a ride full of guests poses once.</summary>
         MeshPose PoseFor(TPW.Data.Mesh mesh, int tick)
         {
@@ -2611,6 +2702,7 @@ namespace TPWGodot
             // Whatever the rules posted this tick goes to the advisor, who decides when it is said.
             while (_advisorWorld.TakeMessage() is { } id) _advisor.Post(id);
             if (_hud != null) _hud.Messages = _advisor.Delivered;
+            StepAdvisorVisual();
         }
 
         // ── the advisor's host: how a message actually reaches the player ──────────────────────────────
