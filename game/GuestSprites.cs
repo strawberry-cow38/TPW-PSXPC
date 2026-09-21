@@ -176,10 +176,17 @@ namespace TPWGodot
             // `facing` arrives RELATIVE to the camera (person facing + camera octant); fold it to one of
             // the five stored drawings and mirror the half that reads the other way. A negative facing
             // means a POSE instead: those are facing-independent, so no fold and no mirror.
-            bool mirror = false;
-            int index;
-            if (pose >= 0) index = PeopleSheet.PoseSprite(block, pose, poseFrames, frame);
-            else { var f = PeopleSheet.Fold(facing); mirror = f.Mirror; index = _people.WalkSprite(block, f.Stored, frame); }
+            // ⚠ THE MIRROR APPLIES TO THE POSES TOO. A pose table still has five facings -- they simply
+            // hold the SAME ids -- so the sprite does not change with direction, but the draw still flips
+            // it for relative facings 0..4. That is why a standing guest faces you (the idle art is a front
+            // view) and yet is not identical from every angle: he faces you over one shoulder or the other.
+            // Skipping the flip for poses, which is what "facing-independent" tempts you into, makes every
+            // idle guest in the park face the same way.
+            var fold = PeopleSheet.Fold(facing);
+            bool mirror = fold.Mirror;
+            int index = pose >= 0
+                ? PeopleSheet.PoseSprite(block, pose, poseFrames, frame)
+                : _people.WalkSprite(block, fold.Stored, frame);
             var sheet = _people.Sheet269;
             if (index < 0 || index >= sheet.Sprites.Count) return;
             var sp = sheet.Sprites[index];
