@@ -579,3 +579,29 @@ The guard now *waits* at the gate — 64 tick-samples instead of 8 — and is le
 turnstile rather than letting itself through. Posts taken drops because the round trip is longer
 when it has a real gate in it; that is the fix showing, not a regression.
 
+
+### 6.11 All five class dispatch tables, audited against the binary
+
+§6.10's second defect is a SHAPE — a host switch standing in for a class's Update table — so the
+table was pulled out of the binary for every staff class rather than just the guard. Update is
+**vtable slot 7**; the five Person vtables are in §2. Each function tests the state byte at +0x35 and
+either indexes a jump table (guard, mechanic) or runs an if-chain (entertainer, cleaner, researcher).
+
+| class | Update | handled states, from the binary | host | agrees |
+|---|---|---|---|---|
+| Guard | 0x80098290 | 0, 33, 39, **46**, 47, 48, 55, 59 (table 0x800E4978) | `RunGuard` | ✓ |
+| Mechanic | 0x8009710C | 0, 14, 16, 17, 52, 54, 56, 57, 58 (table 0x800E458C) | `RunMechanic` | ✓ |
+| Cleaner | 0x80099418 | 0, 27, 51 | `RunHandyman` | ✓ |
+| Researcher | 0x80099B10 | 0, 31 | `RunResearcher` | ✓ |
+| Entertainer | 0x80095C5C | 0, 12, 32 | calls `Entertainer.Tick` | ✓ |
+
+**All five host switches have the right SET of cases, the guard included — before the fix as well as
+after.** ⚠ That is the point worth keeping: a case-label diff would have passed §6.10's bug. The
+binary's row for state 46 EXISTS; it points at 0x800983D0, the function's own epilogue. The
+out-of-range default points at 0x800983BC, which calls the shared base pass 0x80094AC4. A real
+handler points at neither. Three different behaviours that all read as "46 is handled" from a list of
+labels, and the port had picked a fourth. The audit has to resolve what each row DOES.
+
+The entertainer is the one class the host does not re-dispatch — it calls the sim's own `Tick` — and
+it is correspondingly the one place where the sim's tests actually constrain the running game.
+
