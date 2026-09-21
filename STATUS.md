@@ -53,7 +53,7 @@ did nothing.
 | state | system | owner | last moved | note |
 | --- | --- | --- | --- | --- |
 | built | Front-end: menus, boot, movies, music | ? | 2d ago | Nobody has claimed this row |
-| not started | Saving / loading a park | — | today | Nothing written. This is the gap between a working park and a game. |
+| built | Saving / loading a park | ? | today | ⚠ THIS ROW SAID "not started, nothing written" while `ParkSaveHost.cs`, `ParkSaveProof.cs`, `findings/savehost.md` and a round-trip proof all existed. Corrected by looking rather than by reading the row. Still needs a UI — `--park-save` / `--park-load` are the only doors. |
 | not started | Scenarios + win conditions | — | today | Nothing written |
 
 ## Known bugs
