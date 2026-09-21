@@ -56,6 +56,7 @@ namespace TPW.Sim.Tests
             public int WearMultiplier => RidePanel.WearMultiplier(this);
             public bool NoWear => false;
             public void PostMessage(int id) { }
+            public void AdvisorEvent(int index, int amount) { }
             public bool IsRide => true;
             public bool BuildAnimationComplete => false;
             public int Reliability { get => Wear.ReliabilityPoints; set => Wear.Reliability = value << 12; }

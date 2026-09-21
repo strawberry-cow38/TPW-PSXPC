@@ -256,6 +256,7 @@ namespace TPWGodot
             _rides = new ParkRideWorld(_map, () => _now,
                 (g, tx, tz) => Seek(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
                 SetSingleWaypoint, FreeChain);
+            _rides.Advisor = (i, n) => AdvisorEvent?.Invoke(i, n);
             _rideTargets = targets;
         }
 
@@ -1276,6 +1277,10 @@ namespace TPWGodot
             MechanicWorld().QueuedForUpgrade = queued;
             MechanicWorld().DequeueUpgrade = dequeue;
         }
+
+        /// <summary>Report one of the advisor's twenty event counters, set by the park. Null until then,
+        /// so a park without an advisor simply does not count.</summary>
+        public Action<int, int> AdvisorEvent;
 
         public int HiddenGuests { get { int n = 0; foreach (var g in _guests) if (g.Hidden) n++; return n; } }
 

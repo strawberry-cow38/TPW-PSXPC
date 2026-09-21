@@ -355,6 +355,7 @@ namespace TPWGodot
             _guests.SetRideWorld(GuestTargets);
             // Both ends of the upgrade queue: the panel fills it, the mechanics empty it.
             _guests.SetUpgradeQueue(QueuedForUpgrade, DequeueUpgrade);
+            _guests.AdvisorEvent = AdvisorEvent;
             _guests.SetRideJobs(RideJobs);
             // ⭐ THE GATE, AND IT HAS TO BE RE-WIRED ON EVERY LOAD. ParkGuests is rebuilt above, so an
             // entrance wired once at boot would be silently dropped the first time a park is opened and
@@ -1227,6 +1228,7 @@ namespace TPWGodot
             + (_guests.HiddenGuests != (_guests.Rides?.Totals().Riding ?? 0) ? " ⚠ SWALLOWED GUESTS" : "")
             + $"; stale queue purpose {_guests.StaleQueuePurpose}"
             + (UpgradesQueued > 0 ? $"; {UpgradesQueued} upgrades queued" : "")
+            + AdvisorCounters()
             + (_guests.StaleQueuePurpose > 0 ? " ⚠ THESE WILL FREEZE" : "")
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
@@ -2280,6 +2282,8 @@ namespace TPWGodot
                 RiderCount = () => _guests?.Rides?.RuntimeFor(rec.Entry)?.Riders.Count ?? 0,
             };
             a.Eject = () => _guests?.Rides?.EjectAll(rec.Entry, g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
+            a.Say = id => _advisor?.Post((ushort)id);
+            a.Event = AdvisorEvent;
             // ⚠ THE STALL'S OWN PRICE, FROM THE RECORD, AT PLACEMENT. The game sets it here (and the
             // panel would change it afterwards); leaving it zero would have every shop giving its stock
             // away and the want maths reading a free product as irresistible.
@@ -2591,7 +2595,15 @@ namespace TPWGodot
             /// cannot be seen to be wrong — the only symptom was a ride that always told the player
             /// nobody was coming, even with a mechanic halfway across the park walking to it.</summary>
             public bool MechanicAssigned => MechanicClaim != null;
-            public void PostMessage(int id) { }
+            /// <summary>⚠ THIS WAS `{ }`. The four breakdown lines (0x3E..0x41) are ordinary advisor
+            /// messages, so an empty body here did not drop a debug print -- it made every breakdown
+            /// SILENT, and the advisor's own rules had nothing to say about a broken ride either
+            /// because <see cref="AdvisorEvent"/> below was empty too. Both doors are on the state-entry
+            /// path, so one dead function hid two features.</summary>
+            public Action<int> Say;
+            public void PostMessage(int id) => Say?.Invoke(id);
+            public Action<int, int> Event;
+            public void AdvisorEvent(int index, int amount) => Event?.Invoke(index, amount);
             /// <summary>Message 10 to everyone aboard and everyone queueing. Wired by the view; see
             /// ParkRideWorld.EjectAll for why doing nothing here swallowed guests permanently.</summary>
             public Action Eject;
@@ -2941,6 +2953,57 @@ namespace TPWGodot
             // them, because the advisor still speaks them; the list does not.
             if (_hud != null) _hud.Messages = _messages.Count;
             StepAdvisorVisual();
+        }
+
+        /// <summary>Report one of the advisor's twenty event counters. READ 0x800139B4: gated on the
+        /// advisor's statistics flag, index 0..19, others ignored.
+        ///
+        /// ⚠ THE COUNTER WRAPS BEFORE IT CLAMPS -- adding 32768 to zero gives −30000, not +30000. That is
+        /// the sim's business (ParkStatistics.AddEvent, marked DO NOT FIX there); this is only the door.</summary>
+        /// <summary>The advisor's event counters that are not zero. ⚠ These are what the CACHE holds, not
+        /// the live tally: slot 51+index only copies its counter when the refresh sweep reaches it, so a
+        /// fresh event takes up to a full 288-call cycle to appear here. That lag is the original's and is
+        /// the reason a counter can read zero for a while after something plainly happened.</summary>
+        string AdvisorCounters()
+        {
+            if (_statistics == null) return "";
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < TPW.Sim.ParkStatistics.CounterCount; i++)
+            {
+                int v = _statistics[(TPW.Sim.ParkStatistic)(TPW.Sim.ParkStatistics.FirstCounterSlot + i)];
+                int raw = _statistics.EventCounter(i);
+                if (v != 0 || raw != 0)
+                    sb.Append($" {(TPW.Sim.ParkStatistic)(TPW.Sim.ParkStatistics.FirstCounterSlot + i)}"
+                            + $"={v}" + (raw != v ? $" (raw {raw}, not swept yet)" : ""));
+            }
+            // ⚠ NAME THE SWEEP, NOT JUST THE VALUES. A raised counter does not appear here until the
+            // refresh cursor reaches slot 51+index (cursor 4*slot, and it only moves while the advisor
+            // is idle), so an empty list means EITHER nothing was raised OR the sweep has not got there
+            // -- two different bugs that look identical. Printing the cursor tells them apart.
+            sb.Append($" [sweep {_statistics.RefreshCursor}/{TPW.Sim.ParkStatistics.CycleTicks}"
+                    + $", first sweep {(_statistics.FirstSweepComplete ? "done" : "NOT DONE")}]");
+            return "\n  advisor events:" + sb;
+        }
+
+        /// <summary>Bump one of the advisor's 20 event counters (0x800139B4).
+        ///
+        /// ⭐⭐ NOTHING HAD EVER FED THESE. ParkStatistics.AddEvent was called by nobody, so counter
+        /// slots 51..70 stayed permanently ZERO and every advisor rule that reads one could never fire
+        /// -- a chunk of the unreachable 125. From outside it looks exactly like an advisor with
+        /// nothing to say rather than like a bug, which is why it survived this long.</summary>
+        public void AdvisorEvent(int index, int amount)
+        {
+            // ⚠ NAME EVERY GATE THE EVENT HAS TO PASS. "stats ok" only said the object existed; the
+            // add still drops silently if the world is missing or statistics are off, and a counter
+            // that stayed zero for that reason is indistinguishable from one nobody ever raised.
+            if (_logRides)
+            {
+                string world = _advisorWorld == null ? "null"
+                             : _advisorWorld.StatisticsEnabled ? "enabled" : "DISABLED";
+                GD.Print($"[tpw] advisor event {index} += {amount} "
+                       + $"(stats {(_statistics == null ? "null" : "ok")}, world {world})");
+            }
+            if (_statistics != null && _advisorWorld != null) _statistics.AddEvent(index, amount, _advisorWorld);
         }
 
         // ── the advisor's host: how a message actually reaches the player ──────────────────────────────

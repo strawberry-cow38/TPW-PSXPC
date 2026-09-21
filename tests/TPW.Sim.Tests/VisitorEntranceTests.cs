@@ -39,6 +39,7 @@ namespace TPW.Sim.Tests
             public int QueueIndexOf(Visitor g) => throw new NotSupportedException();
             public void AppendToQueue(Visitor g) => throw new NotSupportedException();
             public void LeaveQueueList(Visitor g) => throw new NotSupportedException();
+        public void AdvisorEvent(int index, int amount) { }
             public bool TryPathToSlot(Visitor g, int x, int y) => throw new NotSupportedException();
             public bool TrySetSingleWaypoint(Visitor g, int x, int y) => throw new NotSupportedException();
             public bool TargetHasEntrance(Visitor g) => throw new NotSupportedException();

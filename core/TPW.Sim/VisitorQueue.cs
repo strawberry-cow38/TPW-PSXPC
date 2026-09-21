@@ -122,6 +122,8 @@ namespace TPW.Sim
         /// me (not identified), and send message 6 to everyone who was behind me with a stagger that
         /// grows by rand(3) per guest and param2 = 19. The message 7 to ME is applied by the caller.</summary>
         void LeaveQueueList(Visitor guest);
+        /// <summary>Bump one of the advisor's 20 event counters (0x800139B4).</summary>
+        void AdvisorEvent(int index, int amount);
         /// <summary>0x800EC9F4 from where I stand to the slot, flags (0x10, 0). Accepted, not reachable.</summary>
         bool TryPathToSlot(Visitor guest, int x, int y);
         /// <summary>State 19's walk: allocate ONE waypoint (0x80093A70), place it at the slot at
@@ -443,7 +445,16 @@ namespace TPW.Sim
             {
                 guest.Bubble = BubbleBoredInQueue;
                 LeaveQueue(guest, world);
-                // sounds (gp, 3, 8) and (1, 0x17) follow; no dice.
+                // ⭐ THE FIRST OF THOSE TWO CALLS IS NOT A SOUND. `(gp, 3, 8)` is 0x800139B4 with event
+                // index 3 and amount 8 -- the advisor's queue-abandonment counter, read off its own
+                // argument list. It adds EIGHT, not one, so the counter measures how much queue-leaving
+                // is going on rather than how many guests did it. ⚠ DO NOT "FIX" THE 8.
+                //
+                // ⚠ AND IT BELONGS HERE, NOT IN LeaveQueueList. Three paths call LeaveQueue -- a message
+                // throwing the guest out, GiveUp, and this one -- and only boredom counts. Hooking the
+                // list removal instead would count a broken ride's ejections as guests losing patience.
+                world.AdvisorEvent(AdvisorEventQueueAbandoned, AdvisorQueueAbandonPoints);
+                // the second, (1, 0x17), is a sound; no dice.
                 return WaitOutcome.LeftBored;
             }
 
@@ -621,6 +632,11 @@ namespace TPW.Sim
             guest.PushState(VisitorState.WalkToBin);
             return true;
         }
+
+        /// <summary>Advisor event 3: a guest gave up on a queue (0x800908A4).</summary>
+        public const int AdvisorEventQueueAbandoned = 3;
+        /// <summary>...and it is worth EIGHT points, not one (0x800908A8).</summary>
+        public const int AdvisorQueueAbandonPoints = 8;
 
         /// <summary>0x8009E118 as the guest experiences it: off the list, message 7 to itself (so it is
         /// in 58 before this returns), bit 0x01 set (0x8009E194 -- §2.4 does not mention it), and

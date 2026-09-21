@@ -318,6 +318,10 @@ namespace TPWGodot
 
         public void AppendToQueue(Visitor g) { if (_runtime != null && !_runtime.Queue.Contains(_guest)) _runtime.Queue.Add(_guest); }
         public void LeaveQueueList(Visitor g) => _runtime?.Queue.Remove(_guest);
+        /// <summary>Raised by the queue's boredom branch, not by the list removal -- see
+        /// <see cref="VisitorQueue.Wait"/> for why the two are not the same guests.</summary>
+        public Action<int, int> Advisor;
+        public void AdvisorEvent(int index, int amount) => Advisor?.Invoke(index, amount);
 
         public bool TryPathToSlot(Visitor g, int x, int y) => _pathToTile(_guest, x >> 8, y >> 8);
         public bool TrySetSingleWaypoint(Visitor g, int x, int y) => _setSingleWaypoint(_guest, x, y);

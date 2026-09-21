@@ -250,6 +250,7 @@ namespace TPWGodot
         public int QueueIndexOf(Visitor guest) => _queue() is { } q ? q.QueueIndexOf(guest) : default;
         public void AppendToQueue(Visitor guest) { _queue()?.AppendToQueue(guest); }
         public void LeaveQueueList(Visitor guest) { _queue()?.LeaveQueueList(guest); }
+        public void AdvisorEvent(int index, int amount) { _queue()?.AdvisorEvent(index, amount); }
         public bool TryPathToSlot(Visitor guest, int x, int y) => _queue() is { } q ? q.TryPathToSlot(guest, x, y) : default;
         public bool TargetHasEntrance(Visitor guest) => _queue() is { } q ? q.TargetHasEntrance(guest) : default;
         public bool TryPathToEntrance(Visitor guest) => _queue() is { } q ? q.TryPathToEntrance(guest) : default;

@@ -68,6 +68,10 @@ namespace TPW.Sim
         public bool FirstSweepComplete { get; private set; }
         /// <summary>READ: signed cached value; no refresh or validity flag on a read.</summary>
         public short this[ParkStatistic statistic] => values[(int)statistic];
+        /// <summary>The RAW event counter, before the refresh sweep copies it into slot 51+index.
+        /// ⭐ THE READ THAT TELLS TWO BUGS APART: a zero cached slot means either nothing was ever
+        /// raised or the sweep has not reached it, and only the raw counter distinguishes them.</summary>
+        public short EventCounter(int index) => counters[index];
         public uint NextCheckDay(int rule) => nextCheckDay[rule];
         public uint LastFailureDay(int rule) => lastFailureDay[rule];
 
