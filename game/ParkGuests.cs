@@ -1969,6 +1969,7 @@ namespace TPWGodot
         void RebuildAreas()
         {
             _gateAreaCache = -1;
+            _areaSize.Clear();
             int w = _map.Width, h = _map.Height;
             _area = new int[w, h];
             var parent = new int[w * h];
@@ -1995,7 +1996,11 @@ namespace TPWGodot
                     int root = Find(x * h + z);
                     if (!id.TryGetValue(root, out int n)) id[root] = n = id.Count + 1;
                     _area[x, z] = n;
-                    if (_map[x, z].IsWalkable) hasWalkable.Add(n);
+                    if (_map[x, z].IsWalkable)
+                    {
+                        hasWalkable.Add(n);
+                        _areaSize[n] = _areaSize.GetValueOrDefault(n) + 1;
+                    }
                 }
             // Only pieces somebody can actually stand in. Every lone grass tile is its own piece and
             // counting those makes the number a map statistic instead of a park one.
@@ -2005,6 +2010,29 @@ namespace TPWGodot
 
         /// <summary>How many connected pieces the walkable map is in. One is a healthy park.</summary>
         public int Areas { get; private set; }
+
+        /// <summary>Walkable tiles in a piece, and the piece a tile is in. ⭐ A RIDE WHOSE DOOR SITS IN A
+        /// TWO-TILE PIECE IS UNREACHABLE and nothing else in the park says so: the guests simply never
+        /// arrive, the ride reports itself healthy and waiting, and the only trace is a routing failure
+        /// counted against the park as a whole. It cost two of us an hour each today.
+        ///
+        /// ⚠ NOT A REASON TO REFUSE THE PLACEMENT. The game lets you drop a ride anywhere and build its
+        /// queue afterwards, so an unreachable entrance is an ordinary half-finished state, not an error.
+        /// Naming it is right; forbidding it would break the way the game is played.</summary>
+        readonly Dictionary<int, int> _areaSize = new();
+        public int AreaOf(int x, int z) => AreaAt(x, z);
+        public int AreaTiles(int area) => _areaSize.GetValueOrDefault(area);
+
+        /// <summary>The piece the park's walkable network is, taken as the biggest one.</summary>
+        public int MainArea
+        {
+            get
+            {
+                int best = 0, n = 0;
+                foreach (var kv in _areaSize) if (kv.Value > n) { n = kv.Value; best = kv.Key; }
+                return best;
+            }
+        }
 
         /// <summary>The piece a tile belongs to, answering for a footprint or entrance tile with the
         /// piece of whichever neighbour has one.</summary>
