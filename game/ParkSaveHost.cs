@@ -61,6 +61,9 @@ internal sealed class ParkSaveHost : IParkSaveHost
             result.ResearchTopics = research.SaveTopics();
             result.Catalogue = ResearchSave.CaptureCatalogue(Layout, research);
         }
+        // ⚠ SAME RECORD, BOTH HALVES. The calendar section carries the history rings, so the capture
+        // has to write them after the CalendarSave above is built, not into a section of its own.
+        park.History.Capture(result.Calendar, cal.TotalMonths);
         park.CaptureAttractions(result);
         foreach (var st in Guests.SaveStaff)
         {
@@ -149,7 +152,10 @@ internal sealed class ParkSaveHost : IParkSaveHost
     {
         RequireZero(saved.Bytes.AsSpan(0, 20), "staff strike deadlines");
         RequireZero(saved.Bytes.AsSpan(32, 7), "annual rating/class strike state");
-        RequireZero(saved.Bytes.AsSpan(43, 175), "calendar history expansion");
+        // ⭐ THE 175 BYTES AT 0x2B ARE THE HISTORY GRAPH, and they were refused as "expansion" for as
+        // long as nothing in the port owned a ParkHistory. They are five packed rows of 35
+        // (ScoreHistoryCodec) plus the annual rating byte the record already carries separately.
+        park.History.Restore(saved);
         if (saved.Month >= Calendar.MonthLengths.Length || saved.Day >= Calendar.MonthLengths[saved.Month]
             || saved.TotalDays > int.MaxValue || saved.MonthsInDebt > DebtWatch.MonthsToBankruptcy)
             throw new FormatException("Invalid saved calendar/debt state.");

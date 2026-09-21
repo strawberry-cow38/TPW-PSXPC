@@ -146,6 +146,17 @@ public partial class ParkView
             research.StoreProgress(new ResearchDefinition(3, 2), 1, 37);
             research.StoreProgress(new ResearchDefinition(1, 0), 0, 100);
         }
+        // ⭐ AND TWO MONTHS OF HISTORY, for the same reason as the research above: the calendar's 175
+        // history bytes were REFUSED as zero for as long as nothing owned a ParkHistory, and a section
+        // that is empty on both sides of a save proves nothing at all. The calendar is at 27 months, so
+        // these fill the two most recent slots: RecordMonth(26) is what Read(row, 27, 1) reads back.
+        //
+        // ⚠ THE RATINGS ARE THE ASSERTION, not the guest-derived rows. 91 and 58 are numbers nothing
+        // else in this fixture produces, and they go into the row that takes its value DIRECTLY from the
+        // caller rather than through a mean — so a zeroed, defaulted or averaged history cannot pass by
+        // accident. The people/happiness rows come off the same nine guests the fixture already pins.
+        History.RecordMonth(25, 2, 2, 805, _guests.SaveVisitors.Select(g => g.V), 91);
+        History.RecordMonth(26, 3, 2, 836, _guests.SaveVisitors.Select(g => g.V), 58);
         CheckSaveProof();
     }
 
@@ -171,6 +182,13 @@ public partial class ParkView
             && r.ProgressPercent(new ResearchDefinition(3, 2), 1) == 37
             && r.Progress(new ResearchDefinition(1, 0)).CompletedLevels >= 1,
             "research catalogue progress was not carried");
+        // ⚠ BOTH MONTHS, AND IN ORDER. One would pass on a codec that wrote every slot the same value.
+        ParkSaveProof.Require(History.Read(TPW.Sim.HistoryRow.Overall, 27, 1) == 58
+            && History.Read(TPW.Sim.HistoryRow.Overall, 27, 2) == 91,
+            "park history rings were not carried: "
+            + $"{History.Read(TPW.Sim.HistoryRow.Overall, 27, 1)}/{History.Read(TPW.Sim.HistoryRow.Overall, 27, 2)}");
+        ParkSaveProof.Require(History.Read(TPW.Sim.HistoryRow.People, 27, 1) == 9,
+            "park history head count was not carried");
     }
 
     internal string SaveProofSnapshot()

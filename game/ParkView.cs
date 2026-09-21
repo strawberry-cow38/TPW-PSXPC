@@ -896,7 +896,28 @@ namespace TPWGodot
         public string RollDay(MonthEndResult? monthEnd, Money balanceBeforeCharges)
         {
             if (_finances == null) return null;
-            if (monthEnd is { } me) Score.RecordMonthEnd(_finances.Calendar, balanceBeforeCharges, me, ScoreWorld());
+            if (monthEnd is { } me)
+            {
+                Score.RecordMonthEnd(_finances.Calendar, balanceBeforeCharges, me, ScoreWorld());
+                // ⚠⚠ THE SIXTH NEVER-INSTANTIATED SYSTEM. TPW.Sim.ParkHistory is the park's five
+                // graph rings and the annual rating byte, complete with its save codec, and NOTHING in
+                // the game project ever constructed one — so the rating graph had no data and
+                // RestoreCalendar refused the save's 175 history bytes as "expansion" that must be zero.
+                //
+                // ⚠ THE MONTH INDEX IS THE COUNT BEFORE THE INCREMENT, and the port's calendar has
+                // ALREADY rolled by the time this runs. findings/rating.md §: "Writer 0x800670D4..67250,
+                // using the month count BEFORE increment", called at 0x80066DEC with the counter bumped
+                // two instructions later at 0x80066E04. So the slot is TotalMonths - 1 — the month that
+                // just ended — which is also the slot SlotFor(TotalMonths, 1) reads back.
+                // ⚠ The month/year pair is the POST-roll one, because RecordMonth's own annual test is
+                // `year != 0 && month == 0`, i.e. "January has just begun", which is the port's folding
+                // of the separate annual write at 0x80069350 into the same call.
+                var cal = _finances.Calendar;
+                if (cal.TotalMonths > 0)
+                    History.RecordMonth(cal.TotalMonths - 1, cal.Month, cal.Year, cal.TotalDays,
+                                        System.Linq.Enumerable.Select(_guests.SaveVisitors, g => g.V),
+                                        ParkScore.CalculateRating(ScoreWorld()));
+            }
             // ⚠ WORLD 0, PARK 0 UNTIL SOMETHING SAYS OTHERWISE. findings/scenario.md established this
             // morning that there is no scenario blob to load and no loader, so nothing tells the port
             // WHICH park's objectives these are. The records are real and complete — eight of them,
@@ -912,6 +933,11 @@ namespace TPWGodot
                 sb.Append($"{(a.Bonus ? "bonus" : "park")} objective bit {a.Bit} met, {a.GoldTickets} gold ticket, message {a.MessageId}; ");
             return sb.ToString();
         }
+
+        /// <summary>The park's five history rings and the annual rating byte. ⭐ OWNED HERE because
+        /// RollDay is the only month boundary the port has, and the save's calendar record is where
+        /// these bytes live (offset 0x2B, five packed rows).</summary>
+        public TPW.Sim.ParkHistory History { get; } = new();
 
         /// <summary>The score and the goals in one line, for the report.</summary>
         public string ScoreLine()

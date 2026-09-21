@@ -363,3 +363,18 @@ to run first. After: `39 -> Walking, purpose 14` (`ExitPoint`), the ejection wal
 - The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
   base machine wanders it away. The park report's `map in N connected pieces` line is the check.
+
+### 6.5 The pattern, audited rather than the instance fixed
+
+`FreeWaypoints`/`SetAnimation` no-opping on a foreign member is a SHAPE, not one bug, so I swept every
+`ReferenceEquals(Current.S, staff)` guard in the game project: **nine, across `ParkGuard.cs` (six) and
+`ParkLitter.cs` (three)**. For each I checked whether the sim ever reaches it from a DIFFERENT member's
+tick. Only one place in the whole sim does that — `Entertainer.Shock` calling `chosen.Dispatch(...)` —
+and it touches exactly the two that were wrong. The other seven are only ever reached from their own
+member's handler, so they stay as they are.
+
+Two near misses worth recording because they look like the same bug and are not:
+`Mechanic.HandJobOn` hands a ride to a COLLEAGUE, but through `world.TryClaimRideFor(staff, candidate,
+...)` in a world with no `Current` guard; and `VisitorActivity.Watch` reads
+`world.Position(entertainer)` from a GUEST's tick, but `ParkActivityWorld.Position(StaffMember)` is a
+direct lookup. Both cross member boundaries and both are already correct.
