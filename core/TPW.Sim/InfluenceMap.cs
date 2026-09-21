@@ -59,7 +59,9 @@ namespace TPW.Sim
     /// A list of circles, not a tile grid. The 0x240-byte pool contains a 0x10-byte header and
     /// twenty 0x1C-byte entries (0x80060228..304). No object id, drawable registration, suppression
     /// gate, owner tracking, automatic movement or per-frame clearing. Newest allocation is first.
-    /// Bit 1's producer is NOT ESTABLISHED; generic flag support does not assign it to scenery.</summary>
+    /// Bounded READ: the intact effector ownership routes have two flag writers (0x8008C3D0,
+    /// 0x800961DC), supplied only 4 and 2. No bit-1 producer or qualifying scenery record.
+    /// See findings/influence-bit1.md for the census, controls and limits of this negative.</summary>
     public sealed class InfluenceMap
     {
         /// <summary>READ: 0x80060270 / 0x80060304, shared by both established producers.</summary>
@@ -80,7 +82,9 @@ namespace TPW.Sim
         /// <summary>READ: allocation 0x80053554 / 0x8005CDE8 returns null on exhaustion;
         /// no eviction. This combines allocation with the producer's geometry/flag writes so no
         /// uninitialised payload is exposed. Release itself leaves the payload intact, as the binary
-        /// does; both known producers overwrite all fields the reader uses before returning.</summary>
+        /// does; both known producers overwrite all fields the reader uses before returning.
+        /// Pleasant is a synthetic/manual input here: the bounded retail writer census finds no
+        /// bit-1 producer. Do not map attraction record flags to it (findings/influence-bit1.md).</summary>
         public InfluenceArea TryCreateTiles(int x, int y, int radius, TileInfluence flags)
         {
             if (free.Count == 0) return null;

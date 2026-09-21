@@ -1,0 +1,953 @@
+{
+  "scope": "Audit-tool mutations only; no simulation behavior added.",
+  "prior_rejected_runs": [
+    {
+      "source_sha256": "250152c99f3fe8446fcdb17f312243940f74b57ab386734d86cab657a8b0461c",
+      "tests_sha256": "69fcb5bb034bc924561453cdd317d28b722db4c4082049c491caa1732e49bbe9",
+      "killed": 28,
+      "survivors": 0,
+      "invalid": 2,
+      "mutations": [
+        {
+          "name": "drop final scan word",
+          "old": "range(0, len(data) - 3, 4):",
+          "new": "range(0, len(data) - 7, 4):",
+          "status": "invalid",
+          "executed": 23,
+          "failures": 4,
+          "errors": 1,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+            "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection",
+            "test_bit1_audit.Bit1AuditTests.test_literal_pointer_and_tail_accounting",
+            "test_bit1_audit.Bit1AuditTests.test_signed_store_offset"
+          ],
+          "output": "........EF.F...F......F\n======================================================================\nERROR: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 45, in test_direct_and_branch_edges\n    self.assertEqual(0x90000000, audit.scan(packed(0x08000000), 0x8FFFFFFC, {0x90000000})['edges'][0]['target'])\nIndexError: list index out of range\n\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 60, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 26\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 196, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_literal_pointer_and_tail_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 51, in test_literal_pointer_and_tail_accounting\n    self.assertEqual([dict(site=0x80010004, target=target)], row['pointers'])\nAssertionError: Lists differ: [{'site': 2147549188, 'target': 2148098520}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2147549188, 'target': 2148098520}\n\n- [{'site': 2147549188, 'target': 2148098520}]\n+ []\n\n======================================================================\nFAIL: test_signed_store_offset (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 79, in test_signed_store_offset\n    self.assertEqual({'sw': 1}, row['store_opcode_counts'])\nAssertionError: {'sw': 1} != {}\n- {'sw': 1}\n+ {}\n\n----------------------------------------------------------------------\nRan 23 tests in 3.170s\n\nFAILED (failures=4, errors=1)\n"
+        },
+        {
+          "name": "JAL only",
+          "old": "if op in (2, 3):",
+          "new": "if op == 3:",
+          "status": "killed",
+          "executed": 23,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_direct_and_branch_edges",
+            "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection"
+          ],
+          "output": ".....F..F..F...........\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 42, in test_direct_and_branch_edges\n    self.assertEqual(['JAL', 'J', 'branch', 'branch'], [r['kind'] for r in rows])\nAssertionError: Lists differ: ['JAL', 'J', 'branch', 'branch'] != ['JAL', 'branch', 'branch']\n\nFirst differing element 1:\n'J'\n'branch'\n\nFirst list contains 1 additional elements.\nFirst extra element 3:\n'branch'\n\n- ['JAL', 'J', 'branch', 'branch']\n?        -----\n\n+ ['JAL', 'branch', 'branch']\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 196, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n----------------------------------------------------------------------\nRan 23 tests in 3.198s\n\nFAILED (failures=3)\n"
+        },
+        {
+          "name": "omit conditional branch ingress",
+          "old": "if op in (4, 5, 6, 7) or (op == 1 and rt in (0, 1, 16, 17)):",
+          "new": "if False:",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_direct_and_branch_edges"
+          ],
+          "output": "........F..............\n======================================================================\nFAIL: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 42, in test_direct_and_branch_edges\n    self.assertEqual(['JAL', 'J', 'branch', 'branch'], [r['kind'] for r in rows])\nAssertionError: Lists differ: ['JAL', 'J', 'branch', 'branch'] != ['JAL', 'J']\n\nFirst list contains 2 additional elements.\nFirst extra element 2:\n'branch'\n\n- ['JAL', 'J', 'branch', 'branch']\n+ ['JAL', 'J']\n\n----------------------------------------------------------------------\nRan 23 tests in 3.441s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "wrong J region at boundary",
+          "old": "((pc + 4) & 0xF0000000)",
+          "new": "(pc & 0xF0000000)",
+          "status": "invalid",
+          "executed": 23,
+          "failures": 0,
+          "errors": 1,
+          "skipped": 0,
+          "failing_tests": [],
+          "output": "........E..............\n======================================================================\nERROR: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 45, in test_direct_and_branch_edges\n    self.assertEqual(0x90000000, audit.scan(packed(0x08000000), 0x8FFFFFFC, {0x90000000})['edges'][0]['target'])\nIndexError: list index out of range\n\n----------------------------------------------------------------------\nRan 23 tests in 3.836s\n\nFAILED (errors=1)\n"
+        },
+        {
+          "name": "omit literal pointers",
+          "old": "if ins in targets:",
+          "new": "if False:",
+          "status": "killed",
+          "executed": 23,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection",
+            "test_bit1_audit.Bit1AuditTests.test_literal_pointer_and_tail_accounting"
+          ],
+          "output": ".....F.....F...F.......\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 374, in audit\n    raise ValueError('changed emitter handle/callback graph')\nValueError: changed emitter handle/callback graph\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed emitter handle/callback graph\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 196, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_literal_pointer_and_tail_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 51, in test_literal_pointer_and_tail_accounting\n    self.assertEqual([dict(site=0x80010004, target=target)], row['pointers'])\nAssertionError: Lists differ: [{'site': 2147549188, 'target': 2148098520}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2147549188, 'target': 2148098520}\n\n- [{'site': 2147549188, 'target': 2148098520}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 2.290s\n\nFAILED (failures=3)\n"
+        },
+        {
+          "name": "hide trailing bytes",
+          "old": "trailing_bytes=len(data) % 4",
+          "new": "trailing_bytes=0",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_literal_pointer_and_tail_accounting"
+          ],
+          "output": "...............F.......\n======================================================================\nFAIL: test_literal_pointer_and_tail_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 52, in test_literal_pointer_and_tail_accounting\n    self.assertEqual((11, 2, 0, 3), (row['bytes'], row['aligned_words'], row['skipped_words'], row['trailing_bytes']))\nAssertionError: Tuples differ: (11, 2, 0, 3) != (11, 2, 0, 0)\n\nFirst differing element 3:\n3\n0\n\n- (11, 2, 0, 3)\n?            ^\n\n+ (11, 2, 0, 0)\n?            ^\n\n\n----------------------------------------------------------------------\nRan 23 tests in 3.799s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "restore stack/GP store exclusion",
+          "old": "if op in STORES:\n            op_counts",
+          "new": "if op in STORES and rs not in (28, 29):\n            op_counts",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".........F.........F...\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 60, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 9\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 663\n\n----------------------------------------------------------------------\nRan 23 tests in 3.349s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "drop byte-store opcode",
+          "old": "40: 'sb', 41: 'sh'",
+          "new": "41: 'sh'",
+          "status": "killed",
+          "executed": 23,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+            "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+            "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+            "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".F.....F.F.......F.F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 69, in test_byte_half_and_partial_overlap\n    self.assertEqual(5, len(audit.scan(data, 0x1000, set())['field_store_candidates']))\nAssertionError: 5 != 3\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 245, in leaf_writes\n    raise ValueError(f'unsupported leaf instruction at {pc:#x}')\nValueError: unsupported leaf instruction at 0x1010\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 134, in test_copied_alias_and_negative_displacement\n    rows = self.valid(audit.leaf_writes, data, 0x1000, 0x1000, 0x1014)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: unsupported leaf instruction at 0x1010\n\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 60, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 24\n\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 178, in test_owner_access_accounting\n    self.assertEqual(4, len(row['accesses']))\nAssertionError: 4 != 3\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3037\n\n----------------------------------------------------------------------\nRan 23 tests in 3.440s\n\nFAILED (failures=5)\n"
+        },
+        {
+          "name": "drop partial-store opcode",
+          "old": "42: 'swl', 43: 'sw'",
+          "new": "43: 'sw'",
+          "status": "killed",
+          "executed": 23,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+            "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".F...F...F.......F.F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 69, in test_byte_half_and_partial_overlap\n    self.assertEqual(5, len(audit.scan(data, 0x1000, set())['field_store_candidates']))\nAssertionError: 5 != 4\n\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 323, in audit\n    payloads = {name: leaf_writes(data, BASE, start, end) for name, (start, end) in {\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 323, in <dictcomp>\n    payloads = {name: leaf_writes(data, BASE, start, end) for name, (start, end) in {\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 245, in leaf_writes\n    raise ValueError(f'unsupported leaf instruction at {pc:#x}')\nValueError: unsupported leaf instruction at 0x8008c3f0\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: unsupported leaf instruction at 0x8008c3f0\n\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 60, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 24\n\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 178, in test_owner_access_accounting\n    self.assertEqual(4, len(row['accesses']))\nAssertionError: 4 != 3\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3134\n\n----------------------------------------------------------------------\nRan 23 tests in 1.787s\n\nFAILED (failures=5)\n"
+        },
+        {
+          "name": "drop coprocessor store opcode",
+          "old": "58: 'swc2', 59: 'swc3'",
+          "new": "59: 'swc3'",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".........F.........F...\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 60, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 24\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3237\n\n----------------------------------------------------------------------\nRan 23 tests in 3.383s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "miss upper-byte field stores",
+          "old": "if any(20 <= b < 24 for b in touched):",
+          "new": "if 20 in touched:",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".F.................F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 69, in test_byte_half_and_partial_overlap\n    self.assertEqual(5, len(audit.scan(data, 0x1000, set())['field_store_candidates']))\nAssertionError: 5 != 2\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 2939\n\n----------------------------------------------------------------------\nRan 23 tests in 3.006s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "SWL lower extent wrong",
+          "old": "range(offset & ~3, offset + 1)",
+          "new": "range(offset, offset + 1)",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap"
+          ],
+          "output": ".F.....................\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 70, in test_byte_half_and_partial_overlap\n    self.assertEqual([20, 21, 22], audit.store_bytes(42, 22))\nAssertionError: Lists differ: [20, 21, 22] != [22]\n\nFirst differing element 0:\n20\n22\n\nFirst list contains 2 additional elements.\nFirst extra element 1:\n21\n\n- [20, 21, 22]\n+ [22]\n\n----------------------------------------------------------------------\nRan 23 tests in 3.635s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "SWR upper extent wrong",
+          "old": "range(offset, (offset & ~3) + 4)",
+          "new": "range(offset, offset + 4)",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".F.................F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 71, in test_byte_half_and_partial_overlap\n    self.assertEqual([21, 22, 23], audit.store_bytes(46, 21))\nAssertionError: Lists differ: [21, 22, 23] != [21, 22, 23, 24]\n\nSecond list contains 1 additional elements.\nFirst extra element 3:\n24\n\n- [21, 22, 23]\n+ [21, 22, 23, 24]\n?            ++++\n\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3240\n\n----------------------------------------------------------------------\nRan 23 tests in 3.308s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "halfword width one",
+          "old": "range(offset, offset + 2)",
+          "new": "range(offset, offset + 1)",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".F.................F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 72, in test_byte_half_and_partial_overlap\n    self.assertEqual([22, 23], audit.store_bytes(41, 22))\nAssertionError: Lists differ: [22, 23] != [22]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n23\n\n- [22, 23]\n+ [22]\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 205, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3238\n\n----------------------------------------------------------------------\nRan 23 tests in 3.691s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "unsigned instruction immediate",
+          "old": "return imm - 65536 if imm & 0x8000 else imm",
+          "new": "return imm",
+          "status": "killed",
+          "executed": 23,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_checked_words_and_signed_immediates",
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+            "test_bit1_audit.Bit1AuditTests.test_literal_domain",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": "...F.F.F......F....F...\n======================================================================\nFAIL: test_checked_words_and_signed_immediates (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 34, in test_checked_words_and_signed_immediates\n    self.assertEqual([-32768, -1, 32767], [audit.signed(x) for x in (32768, 65535, 32767)])\nAssertionError: Lists differ: [-32768, -1, 32767] != [32768, 65535, 32767]\n\nFirst differing element 0:\n-32768\n32768\n\n- [-32768, -1, 32767]\n?  -       ^^\n\n+ [32768, 65535, 32767]\n?         ^^^^^\n\n\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 135, in test_copied_alias_and_negative_displacement\n    self.assertEqual(([20], 1, True), (rows[0]['bytes'], rows[0]['value'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: ([20], 1, True) != ([65556], 1, False)\n\nFirst differing element 0:\n[20]\n[65556]\n\n- ([20], 1, True)\n+ ([65556], 1, False)\n\n======================================================================\nFAIL: test_literal_domain (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 112, in test_literal_domain\n    self.assertEqual([1, 65535, 0xFFFFFFFF], [audit.literal_a1(w) for w in (0x24050001, 0x3405FFFF, 0x2405FFFF)])\nAssertionError: Lists differ: [1, 65535, 4294967295] != [1, 65535, 65535]\n\nFirst differing element 2:\n4294967295\n65535\n\n- [1, 65535, 4294967295]\n+ [1, 65535, 65535]\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 208, in test_real_full_image_census\n    self.assertEqual((15, [], []), (len(partition['external']), partition['unexpected'], partition['missing']))\nAssertionError: Tuples differ: (15, [], []) != (16, [{'site': 2147615484, 'target': 2147877536, 'kind': 'branch'}], [])\n\nFirst differing element 0:\n15\n16\n\n- (15, [], [])\n+ (16, [{'kind': 'branch', 'site': 2147615484, 'target': 2147877536}], [])\n\n----------------------------------------------------------------------\nRan 23 tests in 2.329s\n\nFAILED (failures=5)\n"
+        },
+        {
+          "name": "drop GP roots",
+          "old": "if rs == 28 and GP + imm == POOL",
+          "new": "if rs == 4 and GP + imm == POOL",
+          "status": "killed",
+          "executed": 23,
+          "failures": 4,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection",
+            "test_bit1_audit.Bit1AuditTests.test_pool_root_references",
+            "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+          ],
+          "output": ".....F.....F......FF...\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 196, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_pool_root_references (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 91, in test_pool_root_references\n    self.assertEqual([0x1000, 0x1004, 0x1008],\nAssertionError: Lists differ: [4096, 4100, 4104] != [4108]\n\nFirst differing element 0:\n4096\n4108\n\nFirst list contains 2 additional elements.\nFirst extra element 1:\n4100\n\n- [4096, 4100, 4104]\n+ [4108]\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 209, in test_real_full_image_census\n    self.assertEqual(list(audit.POOL_REFS), [r['site'] for r in row['pool_gp_references']])\nAssertionError: Lists differ: [2147811780, 2147812376, 2147824980, 2147825008, 2147825040, 2147825088] != []\n\nFirst list contains 6 additional elements.\nFirst extra element 0:\n2147811780\n\n- [2147811780, 2147812376, 2147824980, 2147825008, 2147825040, 2147825088]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 2.570s\n\nFAILED (failures=4)\n"
+        },
+        {
+          "name": "omit final setter clone",
+          "old": "off + 8 <= len(data)",
+          "new": "off + 8 < len(data)",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_clone_search_has_nonmatching_controls"
+          ],
+          "output": "....F..................\n======================================================================\nFAIL: test_clone_search_has_nonmatching_controls (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 85, in test_clone_search_has_nonmatching_controls\n    self.assertEqual([0x1000, 0x1010], audit.scan(data, 0x1000, set())['identical_setters'])\nAssertionError: Lists differ: [4096, 4112] != [4096]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n4112\n\n- [4096, 4112]\n+ [4096]\n\n----------------------------------------------------------------------\nRan 23 tests in 3.149s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "omit materialized references",
+          "old": "if value in wanted:",
+          "new": "if False:",
+          "status": "killed",
+          "executed": 23,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_absolute_and_gp_alias_references",
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_constant_invalidation_and_delay"
+          ],
+          "output": "F....FF................\n======================================================================\nFAIL: test_absolute_and_gp_alias_references (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 99, in test_absolute_and_gp_alias_references\n    self.assertEqual([0x1004, 0x1008, 0x1010, 0x1018], [r['site'] for r in result])\nAssertionError: Lists differ: [4100, 4104, 4112, 4120] != [4104, 4112]\n\nFirst differing element 0:\n4100\n4104\n\nFirst list contains 2 additional elements.\nFirst extra element 2:\n4112\n\n- [4100, 4104, 4112, 4120]\n+ [4104, 4112]\n\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_constant_invalidation_and_delay (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 108, in test_constant_invalidation_and_delay\n    self.assertEqual([0x1008], [r['site'] for r in audit.constant_refs(data, 0x1000, {audit.POOL})])\nAssertionError: Lists differ: [4104] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n4104\n\n- [4104]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 2.369s\n\nFAILED (failures=3)\n"
+        },
+        {
+          "name": "retain constants across calls",
+          "old": "reset_at = pc + 8",
+          "new": "reset_at = pc + len(data) + 8",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_constant_invalidation_and_delay"
+          ],
+          "output": ".....FF................\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_constant_invalidation_and_delay (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 108, in test_constant_invalidation_and_delay\n    self.assertEqual([0x1008], [r['site'] for r in audit.constant_refs(data, 0x1000, {audit.POOL})])\nAssertionError: Lists differ: [4104] != [4104, 4108]\n\nSecond list contains 1 additional elements.\nFirst extra element 1:\n4108\n\n- [4104]\n+ [4104, 4108]\n\n----------------------------------------------------------------------\nRan 23 tests in 2.614s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "lose ADDIU alias displacement",
+          "old": "regs[rt] = add(regs[rs], imm)",
+          "new": "regs[rt] = regs[rs]",
+          "status": "killed",
+          "executed": 23,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+            "test_bit1_audit.Bit1AuditTests.test_new_aliased_writer"
+          ],
+          "output": ".....F.F........F......\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 135, in test_copied_alias_and_negative_displacement\n    self.assertEqual(([20], 1, True), (rows[0]['bytes'], rows[0]['value'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: ([20], 1, True) != ([-4], 0, False)\n\nFirst differing element 0:\n[20]\n[-4]\n\n- ([20], 1, True)\n+ ([-4], 0, False)\n\n======================================================================\nFAIL: test_new_aliased_writer (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 129, in test_new_aliased_writer\n    self.assertEqual((1, [20, 21, 22, 23], True), (rows[0]['value'], rows[0]['bytes'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: (1, [20, 21, 22, 23], True) != (0, [4, 5, 6, 7], False)\n\nFirst differing element 0:\n1\n0\n\n- (1, [20, 21, 22, 23], True)\n+ (0, [4, 5, 6, 7], False)\n\n----------------------------------------------------------------------\nRan 23 tests in 2.452s\n\nFAILED (failures=3)\n"
+        },
+        {
+          "name": "lose copied pointer aliases",
+          "old": "regs[rd] = regs[rs]",
+          "new": "regs[rd] = None",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement"
+          ],
+          "output": ".......F...............\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 240, in leaf_writes\n    raise ValueError('store with unbounded destination')\nValueError: store with unbounded destination\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 134, in test_copied_alias_and_negative_displacement\n    rows = self.valid(audit.leaf_writes, data, 0x1000, 0x1000, 0x1014)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: store with unbounded destination\n\n----------------------------------------------------------------------\nRan 23 tests in 3.229s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "ignore leaf flag overlap",
+          "old": "flag_overlap=any(20 <= b < 24 for b in touched)",
+          "new": "flag_overlap=False",
+          "status": "killed",
+          "executed": 23,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+            "test_bit1_audit.Bit1AuditTests.test_leaf_whole_word_write",
+            "test_bit1_audit.Bit1AuditTests.test_new_aliased_writer",
+            "test_bit1_audit.Bit1AuditTests.test_real_producer_domains_and_injections"
+          ],
+          "output": ".....F.F.....F..F....F.\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 321, in audit\n    domain = flag_domain(data)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 262, in flag_domain\n    raise ValueError('changed flag write extent')\nValueError: changed flag write extent\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed flag write extent\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 135, in test_copied_alias_and_negative_displacement\n    self.assertEqual(([20], 1, True), (rows[0]['bytes'], rows[0]['value'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: ([20], 1, True) != ([20], 1, False)\n\nFirst differing element 2:\nTrue\nFalse\n\n- ([20], 1, True)\n?           ^^^\n\n+ ([20], 1, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_leaf_whole_word_write (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 121, in test_leaf_whole_word_write\n    self.assertEqual((0x1004, [20, 21, 22, 23], 2, True),\nAssertionError: Tuples differ: (4100, [20, 21, 22, 23], 2, True) != (4100, [20, 21, 22, 23], 2, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (4100, [20, 21, 22, 23], 2, True)\n?                             ^^^\n\n+ (4100, [20, 21, 22, 23], 2, False)\n?                             ^^^^\n\n\n======================================================================\nFAIL: test_new_aliased_writer (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 129, in test_new_aliased_writer\n    self.assertEqual((1, [20, 21, 22, 23], True), (rows[0]['value'], rows[0]['bytes'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: (1, [20, 21, 22, 23], True) != (1, [20, 21, 22, 23], False)\n\nFirst differing element 2:\nTrue\nFalse\n\n- (1, [20, 21, 22, 23], True)\n?                       ^^^\n\n+ (1, [20, 21, 22, 23], False)\n?                       ^^^^\n\n\n======================================================================\nFAIL: test_real_producer_domains_and_injections (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 262, in flag_domain\n    raise ValueError('changed flag write extent')\nValueError: changed flag write extent\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 160, in test_real_producer_domains_and_injections\n    rows = self.valid(audit.flag_domain, self.data)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed flag write extent\n\n----------------------------------------------------------------------\nRan 23 tests in 0.786s\n\nFAILED (failures=5)\n"
+        },
+        {
+          "name": "accept empty leaf",
+          "old": "raise ValueError('empty leaf')",
+          "new": "return []",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_leaf_unknowns_fail_closed"
+          ],
+          "output": "............F..........\n======================================================================\nFAIL: test_leaf_unknowns_fail_closed (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 145, in test_leaf_unknowns_fail_closed\n    audit.leaf_writes(data, 0x1000, 0x1000, 0x1000+size)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 23 tests in 2.964s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "ignore unexpected ingress",
+          "old": "unexpected=[r for r in external if expected.get(r['site']) != r['target']]",
+          "new": "unexpected=[]",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_ingress_partition"
+          ],
+          "output": "..........F............\n======================================================================\nFAIL: test_ingress_partition (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 152, in test_ingress_partition\n    self.assertEqual([rows[2]], result['unexpected'])\nAssertionError: Lists differ: [{'site': 12288, 'target': 4100}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 12288, 'target': 4100}\n\n- [{'site': 12288, 'target': 4100}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 3.150s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "ignore missing ingress",
+          "old": "missing=[dict(site=p, target=t) for p, t in expected.items() if found.get(p) != t]",
+          "new": "missing=[]",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_ingress_partition"
+          ],
+          "output": "..........F............\n======================================================================\nFAIL: test_ingress_partition (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 153, in test_ingress_partition\n    self.assertEqual([dict(site=0x4000, target=0x1000)], result['missing'])\nAssertionError: Lists differ: [{'site': 16384, 'target': 4096}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 16384, 'target': 4096}\n\n- [{'site': 16384, 'target': 4096}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 3.105s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "allow empty ingress domain",
+          "old": "raise ValueError('empty ingress domain')",
+          "new": "return dict(external=[], internal_count=0, unexpected=[], missing=[])",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_ingress_partition"
+          ],
+          "output": "..........F............\n======================================================================\nFAIL: test_ingress_partition (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 156, in test_ingress_partition\n    audit.partition_ingress([], regions, expected)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 23 tests in 3.391s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "bit 2 instead of bit 1",
+          "old": "bit1=bool(flags & 1)",
+          "new": "bit1=bool(flags & 2)",
+          "status": "killed",
+          "executed": 23,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+            "test_bit1_audit.Bit1AuditTests.test_real_producer_domains_and_injections"
+          ],
+          "output": ".....F...............F.\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 409, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 213, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_real_producer_domains_and_injections (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 162, in test_real_producer_domains_and_injections\n    self.assertEqual([False, False], [r['bit1'] for r in rows])\nAssertionError: Lists differ: [False, False] != [False, True]\n\nFirst differing element 1:\nFalse\nTrue\n\n- [False, False]\n+ [False, True]\n\n----------------------------------------------------------------------\nRan 23 tests in 2.487s\n\nFAILED (failures=2)\n"
+        },
+        {
+          "name": "omit owner upper bytes",
+          "old": "offset+i for offset in offsets for i in range(4)",
+          "new": "offset+i for offset in offsets for i in range(1)",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting"
+          ],
+          "output": ".................F.....\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 178, in test_owner_access_accounting\n    self.assertEqual(4, len(row['accesses']))\nAssertionError: 4 != 3\n\n----------------------------------------------------------------------\nRan 23 tests in 3.305s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "hide owner stack exclusions",
+          "old": "stack_accesses_excluded=stack",
+          "new": "stack_accesses_excluded=[]",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting"
+          ],
+          "output": ".................F.....\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 179, in test_owner_access_accounting\n    self.assertEqual(1, len(row['stack_accesses_excluded']))\nAssertionError: 1 != 0\n\n----------------------------------------------------------------------\nRan 23 tests in 3.438s\n\nFAILED (failures=1)\n"
+        },
+        {
+          "name": "omit final overlay",
+          "old": "enumerate(directory):",
+          "new": "enumerate(directory[:-1]):",
+          "status": "killed",
+          "executed": 23,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "failing_tests": [
+            "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations"
+          ],
+          "output": ".....F.................\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    self.assertEqual(12, len(result['overlays']))\nAssertionError: 12 != 11\n\n----------------------------------------------------------------------\nRan 23 tests in 3.699s\n\nFAILED (failures=1)\n"
+        }
+      ]
+    }
+  ],
+  "source_sha256": "ec1d17518a17b0396d355c5a3b9f7ea7513b40a039df4099feda3f5ee3bdaa4e",
+  "tests_sha256": "7e3c4f6bf1f05d8c648f31e62de0c629690976119688a5527ed25e6a6efa3c0a",
+  "unchanged_control": {
+    "status": "passed",
+    "executed": 23,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": ".......................\n----------------------------------------------------------------------\nRan 23 tests in 3.718s\n\nOK\n"
+  },
+  "mutations": [
+    {
+      "name": "drop final scan word",
+      "old": "range(0, len(data) - 3, 4):",
+      "new": "range(0, len(data) - 7, 4):",
+      "status": "killed",
+      "executed": 23,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_direct_and_branch_edges",
+        "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+        "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection",
+        "test_bit1_audit.Bit1AuditTests.test_literal_pointer_and_tail_accounting",
+        "test_bit1_audit.Bit1AuditTests.test_signed_store_offset"
+      ],
+      "output": "........FF.F...F......F\n======================================================================\nFAIL: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 45, in test_direct_and_branch_edges\n    self.assertEqual([dict(site=0x8FFFFFFC, target=0x90000000, kind='J')],\nAssertionError: Lists differ: [{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}\n\n- [{'kind': 'J', 'site': 2415919100, 'target': 2415919104}]\n+ []\n\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 61, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 26\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 197, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_literal_pointer_and_tail_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 52, in test_literal_pointer_and_tail_accounting\n    self.assertEqual([dict(site=0x80010004, target=target)], row['pointers'])\nAssertionError: Lists differ: [{'site': 2147549188, 'target': 2148098520}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2147549188, 'target': 2148098520}\n\n- [{'site': 2147549188, 'target': 2148098520}]\n+ []\n\n======================================================================\nFAIL: test_signed_store_offset (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 80, in test_signed_store_offset\n    self.assertEqual({'sw': 1}, row['store_opcode_counts'])\nAssertionError: {'sw': 1} != {}\n- {'sw': 1}\n+ {}\n\n----------------------------------------------------------------------\nRan 23 tests in 4.044s\n\nFAILED (failures=5)\n"
+    },
+    {
+      "name": "JAL only",
+      "old": "if op in (2, 3):",
+      "new": "if op == 3:",
+      "status": "killed",
+      "executed": 23,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_direct_and_branch_edges",
+        "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection"
+      ],
+      "output": ".....F..F..F...........\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 42, in test_direct_and_branch_edges\n    self.assertEqual(['JAL', 'J', 'branch', 'branch'], [r['kind'] for r in rows])\nAssertionError: Lists differ: ['JAL', 'J', 'branch', 'branch'] != ['JAL', 'branch', 'branch']\n\nFirst differing element 1:\n'J'\n'branch'\n\nFirst list contains 1 additional elements.\nFirst extra element 3:\n'branch'\n\n- ['JAL', 'J', 'branch', 'branch']\n?        -----\n\n+ ['JAL', 'branch', 'branch']\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 197, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n----------------------------------------------------------------------\nRan 23 tests in 3.740s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "omit conditional branch ingress",
+      "old": "if op in (4, 5, 6, 7) or (op == 1 and rt in (0, 1, 16, 17)):",
+      "new": "if False:",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_direct_and_branch_edges"
+      ],
+      "output": "........F..............\n======================================================================\nFAIL: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 42, in test_direct_and_branch_edges\n    self.assertEqual(['JAL', 'J', 'branch', 'branch'], [r['kind'] for r in rows])\nAssertionError: Lists differ: ['JAL', 'J', 'branch', 'branch'] != ['JAL', 'J']\n\nFirst list contains 2 additional elements.\nFirst extra element 2:\n'branch'\n\n- ['JAL', 'J', 'branch', 'branch']\n+ ['JAL', 'J']\n\n----------------------------------------------------------------------\nRan 23 tests in 4.299s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "wrong J region at boundary",
+      "old": "((pc + 4) & 0xF0000000)",
+      "new": "(pc & 0xF0000000)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_direct_and_branch_edges"
+      ],
+      "output": "........F..............\n======================================================================\nFAIL: test_direct_and_branch_edges (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 45, in test_direct_and_branch_edges\n    self.assertEqual([dict(site=0x8FFFFFFC, target=0x90000000, kind='J')],\nAssertionError: Lists differ: [{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2415919100, 'target': 2415919104, 'kind': 'J'}\n\n- [{'kind': 'J', 'site': 2415919100, 'target': 2415919104}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 4.150s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit literal pointers",
+      "old": "if ins in targets:",
+      "new": "if False:",
+      "status": "killed",
+      "executed": 23,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection",
+        "test_bit1_audit.Bit1AuditTests.test_literal_pointer_and_tail_accounting"
+      ],
+      "output": ".....F.....F...F.......\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 379, in audit\n    raise ValueError('changed emitter handle/callback graph')\nValueError: changed emitter handle/callback graph\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed emitter handle/callback graph\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 197, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_literal_pointer_and_tail_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 52, in test_literal_pointer_and_tail_accounting\n    self.assertEqual([dict(site=0x80010004, target=target)], row['pointers'])\nAssertionError: Lists differ: [{'site': 2147549188, 'target': 2148098520}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 2147549188, 'target': 2148098520}\n\n- [{'site': 2147549188, 'target': 2148098520}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 3.213s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "hide trailing bytes",
+      "old": "trailing_bytes=len(data) % 4",
+      "new": "trailing_bytes=0",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_literal_pointer_and_tail_accounting"
+      ],
+      "output": "...............F.......\n======================================================================\nFAIL: test_literal_pointer_and_tail_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 53, in test_literal_pointer_and_tail_accounting\n    self.assertEqual((11, 2, 0, 3), (row['bytes'], row['aligned_words'], row['skipped_words'], row['trailing_bytes']))\nAssertionError: Tuples differ: (11, 2, 0, 3) != (11, 2, 0, 0)\n\nFirst differing element 3:\n3\n0\n\n- (11, 2, 0, 3)\n?            ^\n\n+ (11, 2, 0, 0)\n?            ^\n\n\n----------------------------------------------------------------------\nRan 23 tests in 4.008s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "restore stack/GP store exclusion",
+      "old": "if op in STORES:\n            op_counts",
+      "new": "if op in STORES and rs not in (28, 29):\n            op_counts",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".........F.........F...\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 61, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 9\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 663\n\n----------------------------------------------------------------------\nRan 23 tests in 3.618s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "drop byte-store opcode",
+      "old": "40: 'sb', 41: 'sh'",
+      "new": "41: 'sh'",
+      "status": "killed",
+      "executed": 23,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+        "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+        "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+        "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".F.....F.F.......F.F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 70, in test_byte_half_and_partial_overlap\n    self.assertEqual(5, len(audit.scan(data, 0x1000, set())['field_store_candidates']))\nAssertionError: 5 != 3\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 245, in leaf_writes\n    raise ValueError(f'unsupported leaf instruction at {pc:#x}')\nValueError: unsupported leaf instruction at 0x1010\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 135, in test_copied_alias_and_negative_displacement\n    rows = self.valid(audit.leaf_writes, data, 0x1000, 0x1000, 0x1014)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: unsupported leaf instruction at 0x1010\n\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 61, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 24\n\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 179, in test_owner_access_accounting\n    self.assertEqual(4, len(row['accesses']))\nAssertionError: 4 != 3\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3037\n\n----------------------------------------------------------------------\nRan 23 tests in 3.709s\n\nFAILED (failures=5)\n"
+    },
+    {
+      "name": "drop partial-store opcode",
+      "old": "42: 'swl', 43: 'sw'",
+      "new": "43: 'sw'",
+      "status": "killed",
+      "executed": 23,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+        "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".F...F...F.......F.F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 70, in test_byte_half_and_partial_overlap\n    self.assertEqual(5, len(audit.scan(data, 0x1000, set())['field_store_candidates']))\nAssertionError: 5 != 4\n\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 328, in audit\n    payloads = {name: leaf_writes(data, BASE, start, end) for name, (start, end) in {\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 328, in <dictcomp>\n    payloads = {name: leaf_writes(data, BASE, start, end) for name, (start, end) in {\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 245, in leaf_writes\n    raise ValueError(f'unsupported leaf instruction at {pc:#x}')\nValueError: unsupported leaf instruction at 0x8008c3f0\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: unsupported leaf instruction at 0x8008c3f0\n\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 61, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 24\n\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 179, in test_owner_access_accounting\n    self.assertEqual(4, len(row['accesses']))\nAssertionError: 4 != 3\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3134\n\n----------------------------------------------------------------------\nRan 23 tests in 2.080s\n\nFAILED (failures=5)\n"
+    },
+    {
+      "name": "drop coprocessor store opcode",
+      "old": "58: 'swc2', 59: 'swc3'",
+      "new": "59: 'swc3'",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_every_store_opcode_and_base",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".........F.........F...\n======================================================================\nFAIL: test_every_store_opcode_and_base (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 61, in test_every_store_opcode_and_base\n    self.assertEqual(27, len(row['field_store_candidates']))\nAssertionError: 27 != 24\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3237\n\n----------------------------------------------------------------------\nRan 23 tests in 3.920s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "miss upper-byte field stores",
+      "old": "if any(20 <= b < 24 for b in touched):",
+      "new": "if 20 in touched:",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".F.................F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 70, in test_byte_half_and_partial_overlap\n    self.assertEqual(5, len(audit.scan(data, 0x1000, set())['field_store_candidates']))\nAssertionError: 5 != 2\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 2939\n\n----------------------------------------------------------------------\nRan 23 tests in 3.681s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "SWL lower extent wrong",
+      "old": "range(offset & ~3, offset + 1)",
+      "new": "range(offset, offset + 1)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap"
+      ],
+      "output": ".F.....................\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 71, in test_byte_half_and_partial_overlap\n    self.assertEqual([20, 21, 22], audit.store_bytes(42, 22))\nAssertionError: Lists differ: [20, 21, 22] != [22]\n\nFirst differing element 0:\n20\n22\n\nFirst list contains 2 additional elements.\nFirst extra element 1:\n21\n\n- [20, 21, 22]\n+ [22]\n\n----------------------------------------------------------------------\nRan 23 tests in 4.338s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "SWR upper extent wrong",
+      "old": "range(offset, (offset & ~3) + 4)",
+      "new": "range(offset, offset + 4)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".F.................F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 72, in test_byte_half_and_partial_overlap\n    self.assertEqual([21, 22, 23], audit.store_bytes(46, 21))\nAssertionError: Lists differ: [21, 22, 23] != [21, 22, 23, 24]\n\nSecond list contains 1 additional elements.\nFirst extra element 3:\n24\n\n- [21, 22, 23]\n+ [21, 22, 23, 24]\n?            ++++\n\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3240\n\n----------------------------------------------------------------------\nRan 23 tests in 3.832s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "halfword width one",
+      "old": "range(offset, offset + 2)",
+      "new": "range(offset, offset + 1)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_byte_half_and_partial_overlap",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".F.................F...\n======================================================================\nFAIL: test_byte_half_and_partial_overlap (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 73, in test_byte_half_and_partial_overlap\n    self.assertEqual([22, 23], audit.store_bytes(41, 22))\nAssertionError: Lists differ: [22, 23] != [22]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n23\n\n- [22, 23]\n+ [22]\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 206, in test_real_full_image_census\n    self.assertEqual(3239, len(row['field_store_candidates']))\nAssertionError: 3239 != 3238\n\n----------------------------------------------------------------------\nRan 23 tests in 4.086s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "unsigned instruction immediate",
+      "old": "return imm - 65536 if imm & 0x8000 else imm",
+      "new": "return imm",
+      "status": "killed",
+      "executed": 23,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_checked_words_and_signed_immediates",
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+        "test_bit1_audit.Bit1AuditTests.test_literal_domain",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": "...F.F.F......F....F...\n======================================================================\nFAIL: test_checked_words_and_signed_immediates (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 34, in test_checked_words_and_signed_immediates\n    self.assertEqual([-32768, -1, 32767], [audit.signed(x) for x in (32768, 65535, 32767)])\nAssertionError: Lists differ: [-32768, -1, 32767] != [32768, 65535, 32767]\n\nFirst differing element 0:\n-32768\n32768\n\n- [-32768, -1, 32767]\n?  -       ^^\n\n+ [32768, 65535, 32767]\n?         ^^^^^\n\n\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 136, in test_copied_alias_and_negative_displacement\n    self.assertEqual(([20], 1, True), (rows[0]['bytes'], rows[0]['value'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: ([20], 1, True) != ([65556], 1, False)\n\nFirst differing element 0:\n[20]\n[65556]\n\n- ([20], 1, True)\n+ ([65556], 1, False)\n\n======================================================================\nFAIL: test_literal_domain (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 113, in test_literal_domain\n    self.assertEqual([1, 65535, 0xFFFFFFFF], [audit.literal_a1(w) for w in (0x24050001, 0x3405FFFF, 0x2405FFFF)])\nAssertionError: Lists differ: [1, 65535, 4294967295] != [1, 65535, 65535]\n\nFirst differing element 2:\n4294967295\n65535\n\n- [1, 65535, 4294967295]\n+ [1, 65535, 65535]\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 209, in test_real_full_image_census\n    self.assertEqual((15, [], []), (len(partition['external']), partition['unexpected'], partition['missing']))\nAssertionError: Tuples differ: (15, [], []) != (16, [{'site': 2147615484, 'target': 2147877536, 'kind': 'branch'}], [])\n\nFirst differing element 0:\n15\n16\n\n- (15, [], [])\n+ (16, [{'kind': 'branch', 'site': 2147615484, 'target': 2147877536}], [])\n\n----------------------------------------------------------------------\nRan 23 tests in 2.843s\n\nFAILED (failures=5)\n"
+    },
+    {
+      "name": "drop GP roots",
+      "old": "if rs == 28 and GP + imm == POOL",
+      "new": "if rs == 4 and GP + imm == POOL",
+      "status": "killed",
+      "executed": 23,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_injection_controls_require_every_detection",
+        "test_bit1_audit.Bit1AuditTests.test_pool_root_references",
+        "test_bit1_audit.Bit1AuditTests.test_real_full_image_census"
+      ],
+      "output": ".....F.....F......FF...\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_injection_controls_require_every_detection (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 197, in test_injection_controls_require_every_detection\n    self.assertEqual((5, 6, 0, True), (len(row['checks']), row['injections'], row['skipped'], row['passed']))\nAssertionError: Tuples differ: (5, 6, 0, True) != (5, 6, 0, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (5, 6, 0, True)\n?           ^^^\n\n+ (5, 6, 0, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_pool_root_references (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 92, in test_pool_root_references\n    self.assertEqual([0x1000, 0x1004, 0x1008],\nAssertionError: Lists differ: [4096, 4100, 4104] != [4108]\n\nFirst differing element 0:\n4096\n4108\n\nFirst list contains 2 additional elements.\nFirst extra element 1:\n4100\n\n- [4096, 4100, 4104]\n+ [4108]\n\n======================================================================\nFAIL: test_real_full_image_census (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 210, in test_real_full_image_census\n    self.assertEqual(list(audit.POOL_REFS), [r['site'] for r in row['pool_gp_references']])\nAssertionError: Lists differ: [2147811780, 2147812376, 2147824980, 2147825008, 2147825040, 2147825088] != []\n\nFirst list contains 6 additional elements.\nFirst extra element 0:\n2147811780\n\n- [2147811780, 2147812376, 2147824980, 2147825008, 2147825040, 2147825088]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 2.925s\n\nFAILED (failures=4)\n"
+    },
+    {
+      "name": "omit final setter clone",
+      "old": "off + 8 <= len(data)",
+      "new": "off + 8 < len(data)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_clone_search_has_nonmatching_controls"
+      ],
+      "output": "....F..................\n======================================================================\nFAIL: test_clone_search_has_nonmatching_controls (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 86, in test_clone_search_has_nonmatching_controls\n    self.assertEqual([0x1000, 0x1010], audit.scan(data, 0x1000, set())['identical_setters'])\nAssertionError: Lists differ: [4096, 4112] != [4096]\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n4112\n\n- [4096, 4112]\n+ [4096]\n\n----------------------------------------------------------------------\nRan 23 tests in 4.224s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit materialized references",
+      "old": "if value in wanted:",
+      "new": "if False:",
+      "status": "killed",
+      "executed": 23,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_absolute_and_gp_alias_references",
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_constant_invalidation_and_delay"
+      ],
+      "output": "F....FF................\n======================================================================\nFAIL: test_absolute_and_gp_alias_references (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 100, in test_absolute_and_gp_alias_references\n    self.assertEqual([0x1004, 0x1008, 0x1010, 0x1018], [r['site'] for r in result])\nAssertionError: Lists differ: [4100, 4104, 4112, 4120] != [4104, 4112]\n\nFirst differing element 0:\n4100\n4104\n\nFirst list contains 2 additional elements.\nFirst extra element 2:\n4112\n\n- [4100, 4104, 4112, 4120]\n+ [4104, 4112]\n\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_constant_invalidation_and_delay (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 109, in test_constant_invalidation_and_delay\n    self.assertEqual([0x1008], [r['site'] for r in audit.constant_refs(data, 0x1000, {audit.POOL})])\nAssertionError: Lists differ: [4104] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n4104\n\n- [4104]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 2.998s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "retain constants across calls",
+      "old": "reset_at = pc + 8",
+      "new": "reset_at = pc + len(data) + 8",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_constant_invalidation_and_delay"
+      ],
+      "output": ".....FF................\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_constant_invalidation_and_delay (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 109, in test_constant_invalidation_and_delay\n    self.assertEqual([0x1008], [r['site'] for r in audit.constant_refs(data, 0x1000, {audit.POOL})])\nAssertionError: Lists differ: [4104] != [4104, 4108]\n\nSecond list contains 1 additional elements.\nFirst extra element 1:\n4108\n\n- [4104]\n+ [4104, 4108]\n\n----------------------------------------------------------------------\nRan 23 tests in 2.731s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "lose ADDIU alias displacement",
+      "old": "regs[rt] = add(regs[rs], imm)",
+      "new": "regs[rt] = regs[rs]",
+      "status": "killed",
+      "executed": 23,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+        "test_bit1_audit.Bit1AuditTests.test_new_aliased_writer"
+      ],
+      "output": ".....F.F........F......\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 136, in test_copied_alias_and_negative_displacement\n    self.assertEqual(([20], 1, True), (rows[0]['bytes'], rows[0]['value'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: ([20], 1, True) != ([-4], 0, False)\n\nFirst differing element 0:\n[20]\n[-4]\n\n- ([20], 1, True)\n+ ([-4], 0, False)\n\n======================================================================\nFAIL: test_new_aliased_writer (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 130, in test_new_aliased_writer\n    self.assertEqual((1, [20, 21, 22, 23], True), (rows[0]['value'], rows[0]['bytes'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: (1, [20, 21, 22, 23], True) != (0, [4, 5, 6, 7], False)\n\nFirst differing element 0:\n1\n0\n\n- (1, [20, 21, 22, 23], True)\n+ (0, [4, 5, 6, 7], False)\n\n----------------------------------------------------------------------\nRan 23 tests in 3.036s\n\nFAILED (failures=3)\n"
+    },
+    {
+      "name": "lose copied pointer aliases",
+      "old": "regs[rd] = regs[rs]",
+      "new": "regs[rd] = None",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement"
+      ],
+      "output": ".......F...............\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 240, in leaf_writes\n    raise ValueError('store with unbounded destination')\nValueError: store with unbounded destination\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 135, in test_copied_alias_and_negative_displacement\n    rows = self.valid(audit.leaf_writes, data, 0x1000, 0x1000, 0x1014)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: store with unbounded destination\n\n----------------------------------------------------------------------\nRan 23 tests in 3.896s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "ignore leaf flag overlap",
+      "old": "flag_overlap=any(20 <= b < 24 for b in touched)",
+      "new": "flag_overlap=False",
+      "status": "killed",
+      "executed": 23,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_copied_alias_and_negative_displacement",
+        "test_bit1_audit.Bit1AuditTests.test_leaf_whole_word_write",
+        "test_bit1_audit.Bit1AuditTests.test_new_aliased_writer",
+        "test_bit1_audit.Bit1AuditTests.test_real_producer_domains_and_injections"
+      ],
+      "output": ".....F.F.....F..F....F.\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 321, in audit\n    domain = flag_domain(data)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 262, in flag_domain\n    raise ValueError('changed flag write extent')\nValueError: changed flag write extent\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed flag write extent\n\n======================================================================\nFAIL: test_copied_alias_and_negative_displacement (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 136, in test_copied_alias_and_negative_displacement\n    self.assertEqual(([20], 1, True), (rows[0]['bytes'], rows[0]['value'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: ([20], 1, True) != ([20], 1, False)\n\nFirst differing element 2:\nTrue\nFalse\n\n- ([20], 1, True)\n?           ^^^\n\n+ ([20], 1, False)\n?           ^^^^\n\n\n======================================================================\nFAIL: test_leaf_whole_word_write (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 122, in test_leaf_whole_word_write\n    self.assertEqual((0x1004, [20, 21, 22, 23], 2, True),\nAssertionError: Tuples differ: (4100, [20, 21, 22, 23], 2, True) != (4100, [20, 21, 22, 23], 2, False)\n\nFirst differing element 3:\nTrue\nFalse\n\n- (4100, [20, 21, 22, 23], 2, True)\n?                             ^^^\n\n+ (4100, [20, 21, 22, 23], 2, False)\n?                             ^^^^\n\n\n======================================================================\nFAIL: test_new_aliased_writer (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 130, in test_new_aliased_writer\n    self.assertEqual((1, [20, 21, 22, 23], True), (rows[0]['value'], rows[0]['bytes'], rows[0]['flag_overlap']))\nAssertionError: Tuples differ: (1, [20, 21, 22, 23], True) != (1, [20, 21, 22, 23], False)\n\nFirst differing element 2:\nTrue\nFalse\n\n- (1, [20, 21, 22, 23], True)\n?                       ^^^\n\n+ (1, [20, 21, 22, 23], False)\n?                       ^^^^\n\n\n======================================================================\nFAIL: test_real_producer_domains_and_injections (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 262, in flag_domain\n    raise ValueError('changed flag write extent')\nValueError: changed flag write extent\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 161, in test_real_producer_domains_and_injections\n    rows = self.valid(audit.flag_domain, self.data)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed flag write extent\n\n----------------------------------------------------------------------\nRan 23 tests in 1.116s\n\nFAILED (failures=5)\n"
+    },
+    {
+      "name": "accept empty leaf",
+      "old": "raise ValueError('empty leaf')",
+      "new": "return []",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_leaf_unknowns_fail_closed"
+      ],
+      "output": "............F..........\n======================================================================\nFAIL: test_leaf_unknowns_fail_closed (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 146, in test_leaf_unknowns_fail_closed\n    audit.leaf_writes(data, 0x1000, 0x1000, 0x1000+size)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 23 tests in 4.300s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "ignore unexpected ingress",
+      "old": "unexpected=[r for r in external if expected.get(r['site']) != r['target']]",
+      "new": "unexpected=[]",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_ingress_partition"
+      ],
+      "output": "..........F............\n======================================================================\nFAIL: test_ingress_partition (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 153, in test_ingress_partition\n    self.assertEqual([rows[2]], result['unexpected'])\nAssertionError: Lists differ: [{'site': 12288, 'target': 4100}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 12288, 'target': 4100}\n\n- [{'site': 12288, 'target': 4100}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 3.988s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "ignore missing ingress",
+      "old": "missing=[dict(site=p, target=t) for p, t in expected.items() if found.get(p) != t]",
+      "new": "missing=[]",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_ingress_partition"
+      ],
+      "output": "..........F............\n======================================================================\nFAIL: test_ingress_partition (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 154, in test_ingress_partition\n    self.assertEqual([dict(site=0x4000, target=0x1000)], result['missing'])\nAssertionError: Lists differ: [{'site': 16384, 'target': 4096}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'site': 16384, 'target': 4096}\n\n- [{'site': 16384, 'target': 4096}]\n+ []\n\n----------------------------------------------------------------------\nRan 23 tests in 3.774s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "allow empty ingress domain",
+      "old": "raise ValueError('empty ingress domain')",
+      "new": "return dict(external=[], internal_count=0, unexpected=[], missing=[])",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_ingress_partition"
+      ],
+      "output": "..........F............\n======================================================================\nFAIL: test_ingress_partition (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 157, in test_ingress_partition\n    audit.partition_ingress([], regions, expected)\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 23 tests in 3.951s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "bit 2 instead of bit 1",
+      "old": "bit1=bool(flags & 1)",
+      "new": "bit1=bool(flags & 2)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations",
+        "test_bit1_audit.Bit1AuditTests.test_real_producer_domains_and_injections"
+      ],
+      "output": ".....F...............F.\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 24, in valid\n    return fn(*args)\n  File \"/home/ec2-user/tpwport-bit1/tools/audit_bit1.py\", line 414, in audit\n    raise ValueError('changed evidence or failed positive control; reopen the trace')\nValueError: changed evidence or failed positive control; reopen the trace\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 214, in test_complete_audit_populations\n    result = self.valid(audit.audit)\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 26, in valid\n    self.fail('Rejected valid evidence: '+str(exc))\nAssertionError: Rejected valid evidence: changed evidence or failed positive control; reopen the trace\n\n======================================================================\nFAIL: test_real_producer_domains_and_injections (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 163, in test_real_producer_domains_and_injections\n    self.assertEqual([False, False], [r['bit1'] for r in rows])\nAssertionError: Lists differ: [False, False] != [False, True]\n\nFirst differing element 1:\nFalse\nTrue\n\n- [False, False]\n+ [False, True]\n\n----------------------------------------------------------------------\nRan 23 tests in 3.110s\n\nFAILED (failures=2)\n"
+    },
+    {
+      "name": "omit owner upper bytes",
+      "old": "offset+i for offset in offsets for i in range(4)",
+      "new": "offset+i for offset in offsets for i in range(1)",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting"
+      ],
+      "output": ".................F.....\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 179, in test_owner_access_accounting\n    self.assertEqual(4, len(row['accesses']))\nAssertionError: 4 != 3\n\n----------------------------------------------------------------------\nRan 23 tests in 6.882s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "hide owner stack exclusions",
+      "old": "stack_accesses_excluded=stack",
+      "new": "stack_accesses_excluded=[]",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_owner_access_accounting"
+      ],
+      "output": ".................F.....\n======================================================================\nFAIL: test_owner_access_accounting (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 180, in test_owner_access_accounting\n    self.assertEqual(1, len(row['stack_accesses_excluded']))\nAssertionError: 1 != 0\n\n----------------------------------------------------------------------\nRan 23 tests in 4.047s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "name": "omit final overlay",
+      "old": "enumerate(directory):",
+      "new": "enumerate(directory[:-1]):",
+      "status": "killed",
+      "executed": 23,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": [
+        "test_bit1_audit.Bit1AuditTests.test_complete_audit_populations"
+      ],
+      "output": ".....F.................\n======================================================================\nFAIL: test_complete_audit_populations (test_bit1_audit.Bit1AuditTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/ec2-user/tpwport-bit1/tools/test_bit1_audit.py\", line 215, in test_complete_audit_populations\n    self.assertEqual(12, len(result['overlays']))\nAssertionError: 12 != 11\n\n----------------------------------------------------------------------\nRan 23 tests in 3.932s\n\nFAILED (failures=1)\n"
+    }
+  ],
+  "final_unchanged_control": {
+    "status": "passed",
+    "executed": 23,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_tests": [],
+    "output": ".......................\n----------------------------------------------------------------------\nRan 23 tests in 4.154s\n\nOK\n"
+  },
+  "source_unchanged": true,
+  "killed": 30,
+  "survivors": 0,
+  "invalid": 0
+}

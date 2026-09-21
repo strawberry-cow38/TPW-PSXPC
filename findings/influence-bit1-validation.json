@@ -1,0 +1,72 @@
+{
+  "branch": "bit1",
+  "workspace": "/home/ec2-user/tpwport-bit1",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "tools/audit_bit1.py"
+      ],
+      "exit_code": 0,
+      "output": "main words: 266327 skipped: 0 trailing: 0 field-store candidates: 3239\nboot words: 11776 skipped: 0 trailing: 0 field-store candidates: 78\nOverlays: 12 words: 30634 field-store candidates: 246 skipped: 0\nIngress: 15 unexpected: 0 missing: 0\nFlag writers: 2 values: [4, 2] bit-1 writers: 0\nDomain/alias controls: 5 per-image controls: 14 skipped: 0\nBounded negative: the enumerated intact effector ownership routes write flags 2 or 4, never bit 1.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/test_bit1_audit.py"
+      ],
+      "exit_code": 0,
+      "output": ".......................\n----------------------------------------------------------------------\nRan 23 tests in 3.138s\n\nOK\n",
+      "tests": 23
+    },
+    {
+      "command": [
+        "python3",
+        "tools/test_prank_reachability.py"
+      ],
+      "exit_code": 0,
+      "output": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.005s\n\nOK\n",
+      "tests": 18
+    },
+    {
+      "command": [
+        "dotnet",
+        "test",
+        "tests/TPW.Sim.Tests/"
+      ],
+      "exit_code": 0,
+      "output": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  TPW.Sim -> /home/ec2-user/tpwport-bit1/core/TPW.Sim/bin/Debug/net8.0/TPW.Sim.dll\n  TPW.Sim.Tests -> /home/ec2-user/tpwport-bit1/tests/TPW.Sim.Tests/bin/Debug/net8.0/TPW.Sim.Tests.dll\nTest run for /home/ec2-user/tpwport-bit1/tests/TPW.Sim.Tests/bin/Debug/net8.0/TPW.Sim.Tests.dll (.NETCoreApp,Version=v8.0)\nVSTest version 17.12.0 (arm64)\n\nStarting test execution, please wait...\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:  1574, Skipped:     0, Total:  1574, Duration: 1 s - TPW.Sim.Tests.dll (net8.0)\n",
+      "failed": 0,
+      "passed": 1574,
+      "skipped": 0,
+      "total": 1574
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "game_unchanged": true,
+  "mutations": {
+    "killed": 30,
+    "survivors": 0,
+    "invalid": 0,
+    "source_unchanged": true
+  },
+  "new_behavioral_source_disagreements": 0,
+  "inherited_behavioral_disagreements_retained": 3,
+  "inherited_pelt_omissions_retained": 1,
+  "inherited_terminology_discrepancies_documented": 1,
+  "source_sha256": {
+    "tools/audit_bit1.py": "ec1d17518a17b0396d355c5a3b9f7ea7513b40a039df4099feda3f5ee3bdaa4e",
+    "tools/test_bit1_audit.py": "7e3c4f6bf1f05d8c648f31e62de0c629690976119688a5527ed25e6a6efa3c0a",
+    "tools/mutate_bit1_audit.py": "04d8bd12d360513885a62e5a804ed9921b2824d39ac35806c1bee3429b2d525c",
+    "core/TPW.Sim/InfluenceMap.cs": "5b71a5d7439d84138ee6550f09a9ee879b168b29c004499ff7eff2a9db6abe20",
+    "core/TPW.Sim/VisitorNeeds.cs": "d1c75ef27ca92ea250bace552a69795b96d79ebc99c9b9590701e6c6d303f23c"
+  }
+}
