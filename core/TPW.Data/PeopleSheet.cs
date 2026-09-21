@@ -13,11 +13,16 @@ namespace TPW.Data
     /// ⭐ WHICH SPRITES BELONG TO WHOM comes from the game's own table at 0x800DFFFC: twelve pairs of
     /// (archive entry of the person, first sprite of that person's block), looked up by entry at
     /// 0x800315A8. Those bases are <see cref="Blocks"/>. Inside a block the frames are grouped by what
-    /// they are, and the WALK is a run of forty that all share one palette: eight facings of five
-    /// frames, in facing-major order (<see cref="Facings"/> x <see cref="WalkFrames"/>). That reading is
-    /// off the pictures, not off the code — rendering a block as a grid shows five columns of a stride
-    /// and eight rows that turn a full circle, and rendering the frames before it shows a figure waving
-    /// its arms about on the spot.
+    /// they are, and the WALK is a run of forty that all share one palette: FIVE stored facings of EIGHT
+    /// frames, facing-major (<see cref="StoredFacings"/> x <see cref="WalkFrames"/>), with the other three
+    /// directions drawn by MIRRORING three of the five.
+    ///
+    /// ⚠⚠ THIS WAS READ OFF THE PICTURES AS EIGHT-BY-FIVE AND IT WAS EXACTLY TRANSPOSED. "Five columns of
+    /// a stride and eight rows that turn a circle" is what a 5x8 grid looks like when you read the axes
+    /// the other way round, and a grid render cannot tell you which axis the data runs along -- only the
+    /// code can. It shipped, and on screen one direction was right and the other seven pointed at random,
+    /// because only the view whose stored index happened to coincide with its own frames survived.
+    /// The layout here is now READ from 0x8002BDA8; findings/people-sprites.md has the trace.
     ///
     /// ⭐ AND WHICH PERSON A GUEST IS comes from the table at 0x800E002C: four worlds of fourteen archive
     /// entries, and the first EIGHT of each world are the guest bodies, indexed by the type byte the
@@ -34,8 +39,55 @@ namespace TPW.Data
     {
         /// <summary>The archive entry the sprites live in.</summary>
         public const int Sheet = 269;
-        public const int Facings = 8, WalkFrames = 5;
-        const int Walk = Facings * WalkFrames;
+        /// <summary>⚠⚠ FIVE STORED FACINGS OF EIGHT FRAMES, FACING-MAJOR -- not eight of five. The port
+        /// had it exactly transposed, which is why one direction looked right and the other seven looked
+        /// random: only the view whose stored index happened to land on its own frames was correct.
+        ///
+        /// The stored five are BACK, back-quarter, PROFILE (the art faces screen-RIGHT), front-quarter,
+        /// FRONT. The other three directions are those same sprites X-mirrored, so a person is drawn from
+        /// eight angles out of five drawings -- the same trick the rider heads use.
+        /// findings/people-sprites.md.</summary>
+        public const int StoredFacings = 5, WalkFrames = 8;
+        const int Walk = StoredFacings * WalkFrames;
+
+        /// <summary>READ 0x8002BB30 / 0x8003377C. Which stored drawing shows relative direction
+        /// <paramref name="rel"/>, and whether it is drawn mirrored. ⚠ The MIRRORED half is 0..4, not
+        /// 5..7 -- the stored profile faces screen-right, so the directions that read left are the flipped
+        /// ones.</summary>
+        public static (int Stored, bool Mirror) Fold(int rel)
+        {
+            rel &= 7;
+            return rel < StoredFacings ? (rel, true) : (8 - rel, false);
+        }
+
+        /// <summary>The poses before the walk, at these offsets from the BLOCK's first sprite. READ from
+        /// the person resource's own tables (findings/people-sprites.md §4): seven facing-independent
+        /// poses in the 26 sprites before the walk, one palette each.
+        ///
+        /// ⚠ FACING-INDEPENDENT. There is one drawing per frame, not one per direction -- a guest stands
+        /// and is sick the same way whichever way you look at it. So these are drawn without the fold and
+        /// without the mirror.
+        ///
+        /// ⚠ Sprites 0..7 and 16..19 are DEAD ART: the animation ids that would select them are never
+        /// written for a guest (census by two independent methods). Not exposed here, so nobody wires a
+        /// pose the game cannot reach.</summary>
+        public const int IdleFirst = 20, IdleFrames = 2;
+        public const int VomitFirst = 22, VomitFrames = 4;
+
+        /// <summary>A pose sprite: an offset from the block's own first sprite, not from the walk.</summary>
+        public static int PoseSprite(int block, int first, int frames, int frame)
+        {
+            if (block < 0 || block >= Blocks.Length) return -1;
+            return Blocks[block].Base + first + ((frame % frames) + frames) % frames;
+        }
+
+        /// <summary>READ 0x800932C8. A person's own facing is CARDINAL -- four directions, from the sign of
+        /// its step, with x winning unless it is zero. ⚠ DO NOT SYNTHESISE EIGHT FROM THE VELOCITY: the
+        /// quarter views exist only because the CAMERA's octant is added to this. A guest walking north is
+        /// stored as north whatever angle you view it from.
+        /// 0 = +y, 2 = -x, 4 = -y (and standing), 6 = +x, in the game's tile frame.</summary>
+        public static int CardinalFacing(int dx, int dy)
+            => dx == 0 ? (dy > 0 ? 0 : 4) : dx < 0 ? 2 : 6;
 
         /// <summary>The game's (person entry, first sprite) table, 0x800DFFFC, in its own order.</summary>
         public static readonly (int Entry, int Base)[] Blocks =
@@ -98,7 +150,13 @@ namespace TPW.Data
 
         /// <summary>The walk inside a block: the first run of forty consecutive sprites that share a
         /// palette, at or after the block's first sprite. The frames before it are the figure's idle and
-        /// gesture poses, which are drawn in several palettes and so break the run.</summary>
+        /// gesture poses, which are drawn in several palettes and so break the run.
+        ///
+        /// ✅ It lands on the right sprite: a guest block is 26 pose sprites then 40 walk sprites, and this
+        /// finds 26. ⚠ It cannot give the FRAMES PER FACING, which is 8 for guests but 9 for one costume
+        /// (entry 265) -- the real source is the person resource's own table (findings/people-sprites.md
+        /// §2), which the port does not parse. Fine while only guests are drawn; wrong the day a costume
+        /// is.</summary>
         static int FindWalk(TextureSheet sheet, int from)
         {
             for (int i = from; i + Walk <= sheet.Sprites.Count; i++)
@@ -111,12 +169,14 @@ namespace TPW.Data
             return from;
         }
 
-        /// <summary>The sprite for a person of block <paramref name="block"/> walking in
-        /// <paramref name="facing"/> (0..7) at <paramref name="frame"/> (0..4).</summary>
-        public int WalkSprite(int block, int facing, int frame)
+        /// <summary>The sprite for a person of block <paramref name="block"/> showing STORED drawing
+        /// <paramref name="stored"/> (0..4, from <see cref="Fold"/>) at <paramref name="frame"/> (0..7).
+        /// READ 0x8002BDA8: the ids are facing-major, so a facing's eight frames are consecutive.</summary>
+        public int WalkSprite(int block, int stored, int frame)
         {
             if (block < 0 || block >= _walk.Length) return -1;
-            return _walk[block] + (facing & (Facings - 1)) * WalkFrames + ((frame % WalkFrames) + WalkFrames) % WalkFrames;
+            int s = stored < 0 ? 0 : stored >= StoredFacings ? StoredFacings - 1 : stored;
+            return _walk[block] + s * WalkFrames + ((frame % WalkFrames) + WalkFrames) % WalkFrames;
         }
 
         /// <summary>Every sprite a walking person can be drawn as, for an atlas.</summary>

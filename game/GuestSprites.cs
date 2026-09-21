@@ -67,6 +67,9 @@ namespace TPWGodot
 
         public bool HasHeads => _heads != null;
 
+        /// <summary>The sprite a stored facing and frame resolve to, for diagnostics.</summary>
+        public int SpriteOf(int block, int stored, int frame) => _people?.WalkSprite(block, stored, frame) ?? -1;
+
         /// <summary>Draw a rider: sprite <paramref name="sprite"/> of the common sheet, centred on the seat
         /// rather than standing on it, mirrored in x when the game mirrors it, and rolled in the screen
         /// plane the way the original rolls the quad.</summary>
@@ -167,9 +170,16 @@ namespace TPWGodot
         /// <paramref name="facing"/> at <paramref name="frame"/>, standing on <paramref name="feet"/>.
         /// The sprite's own offsets put the figure where the game puts it: they are measured from the
         /// pen, with the feet at the bottom, so the quad is raised by half its height less the offset.</summary>
-        public void Draw(MeshInstance3D inst, int block, int facing, int frame, Vector3 feet, Vector3 cameraForward)
+        public void Draw(MeshInstance3D inst, int block, int facing, int frame, Vector3 feet, Vector3 cameraForward,
+                         int pose = -1, int poseFrames = 1)
         {
-            int index = _people.WalkSprite(block, facing, frame);
+            // `facing` arrives RELATIVE to the camera (person facing + camera octant); fold it to one of
+            // the five stored drawings and mirror the half that reads the other way. A negative facing
+            // means a POSE instead: those are facing-independent, so no fold and no mirror.
+            bool mirror = false;
+            int index;
+            if (pose >= 0) index = PeopleSheet.PoseSprite(block, pose, poseFrames, frame);
+            else { var f = PeopleSheet.Fold(facing); mirror = f.Mirror; index = _people.WalkSprite(block, f.Stored, frame); }
             var sheet = _people.Sheet269;
             if (index < 0 || index >= sheet.Sprites.Count) return;
             var sp = sheet.Sprites[index];
@@ -207,25 +217,27 @@ namespace TPWGodot
             // Looking straight down or up: world up and the view direction are parallel, so pick any right.
             right = right.LengthSquared() < 1e-6f ? Vector3.Right : right.Normalized();
             var up = towards.Cross(right).Normalized();
+            // Mirrored by the QUAD, never by negating a UV scale: a negative scale samples one texel past
+            // the rect, into whatever is beside it in the atlas (see DrawHead's note, and the HUD font).
+            if (mirror) right = -right;
             inst.Transform = new Transform3D(new Basis(right, up, towards), feet + up * (h / 2));
             if (Debug && (_shouted++ % 600) == 0)
                 GD.Print($"[guest] mesh {(inst.Mesh is QuadMesh qq ? qq.Orientation.ToString() + " " + qq.Size : inst.Mesh?.GetType().Name)} " +
                          $"basis x={inst.Transform.Basis.X} y={inst.Transform.Basis.Y} z={inst.Transform.Basis.Z} at {inst.Position} sprite {index} {sp.W}x{sp.H}");
         }
 
-        /// <summary>Which of the eight drawn facings a guest walking (dx, dz) shows the camera, given
-        /// where the camera is looking: row 0 is walking away from it, and they go round from there.</summary>
-        public static int FacingFor(float dx, float dz, Vector3 cameraForward)
+        /// <summary>READ 0x8003186C. Which way round the world is from where the camera sits, as an
+        /// octant: the tile-plane direction that maps to SCREEN-RIGHT, quantised. Octant 0 means
+        /// screen-right is the game's +x. This is ADDED to a person's own cardinal facing to get the
+        /// direction relative to the viewer, which is what picks the drawing.
+        ///
+        /// ⚠ The port's world negates the game's y into Godot's z, so the game-plane components of the
+        /// camera's right vector are (x, -z).</summary>
+        public static int CameraOctant(Vector3 cameraRight)
         {
-            var f = new Vector2(cameraForward.X, cameraForward.Z);
-            if (f.LengthSquared() < 1e-6f) f = new Vector2(0, -1);
-            f = f.Normalized();
-            var right = new Vector2(-f.Y, f.X);
-            var move = new Vector2(dx, dz);
-            if (move.LengthSquared() < 1e-6f) return 0;
-            move = move.Normalized();
-            float a = Mathf.Atan2(move.Dot(right), move.Dot(f));
-            return (int)Mathf.Round(a / (Mathf.Pi / 4)) & 7;
+            float rx = cameraRight.X, ry = -cameraRight.Z;
+            if (rx * rx + ry * ry < 1e-9f) return 0;
+            return (int)Mathf.Round(-Mathf.Atan2(ry, rx) / (Mathf.Pi / 4)) & 7;
         }
     }
 }

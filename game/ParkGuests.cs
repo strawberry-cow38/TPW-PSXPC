@@ -44,6 +44,8 @@ namespace TPWGodot
         /// <summary>How this one is drawn (GuestSprites): which person's sprites, which way it is walking
         /// as the camera sees it, and how far through the five-frame stride it is.</summary>
         public int Block, Facing, Frame, Walked;
+        /// <summary>Draws since this walker last covered any ground, for the standing pose.</summary>
+        public int LastWalked, StillFor;
 
         /// <summary>The last step this walker took, in WORLD units — which way it is actually going.
         ///
@@ -1570,6 +1572,8 @@ namespace TPWGodot
 
         void Place(Walker g)
         {
+            if (g.Walked == g.LastWalked) { if (g.StillFor < 1000) g.StillFor++; }
+            else { g.StillFor = 0; g.LastWalked = g.Walked; }
             g.Inst.Visible = !g.Hidden;
             if (g.Hidden) return;
             float u = ParkTerrain.TileUnits;
@@ -1580,9 +1584,31 @@ namespace TPWGodot
             // which of the eight sprites it wears is the walk direction measured against that same
             // camera — so both halves move together when the view turns. Deciding it on the STEP left
             // a standing guest wearing a facing from a camera angle that no longer existed.
-            g.Facing = GuestSprites.FacingFor(g.DirX, -g.DirZ, CameraForward);
-            _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+            // ⭐ CARDINAL FACING PLUS THE CAMERA'S OCTANT. A person stores which of FOUR ways it walks;
+            // the eight drawn angles come from adding where the camera is standing. Deriving eight straight
+            // from the velocity -- which is what this did -- gives a person who turns as you orbit them and
+            // reads correctly from exactly one angle. findings/people-sprites.md.
+            g.Facing = PeopleSheet.CardinalFacing(g.DirX, g.DirZ);
+            // ⭐ A GUEST THAT IS NOT WALKING IS NOT DRAWN WALKING. The 26 sprites before the walk are the
+            // poses, and the game shows the IDLE one whenever a person stands (findings/people-sprites.md
+            // §4): queueing, waiting at a door, stopped to look at something. Drawing a stride frame
+            // instead leaves the park full of people frozen mid-step, which is what it looked like.
+            // ⚠ Guests only: Place draws staff through here too, and a member of staff has no visitor
+            // state. Their own poses are a separate question (staff.md has different tables).
+            if (g is Guest sick && sick.V.State == VisitorState.Vomiting)
+                _sprites.Draw(g.Inst, g.Block, 0, g.Frame, feet, CameraForward,
+                              PeopleSheet.VomitFirst, PeopleSheet.VomitFrames);
+            else if (g.StillFor >= StillBeforeIdle)
+                _sprites.Draw(g.Inst, g.Block, 0, g.Frame, feet, CameraForward,
+                              PeopleSheet.IdleFirst, PeopleSheet.IdleFrames);
+            else
+                _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
         }
+
+        /// <summary>How many draws a guest must have gone nowhere before it stands rather than strides.
+        /// ⚠ NOT ZERO: a walker is momentarily still between steps, and switching on the first still draw
+        /// makes every guest flicker between standing and walking as it goes.</summary>
+        const int StillBeforeIdle = 3;
 
         /// <summary>Draw a rider in its seat, wherever the ride is holding it this frame.
         ///
@@ -1596,9 +1622,9 @@ namespace TPWGodot
             if (g?.Inst == null) return;
             g.Inst.Visible = true;
             if (_sprites == null) { g.Inst.Position = feet + new Vector3(0, 0.21f, 0); return; }
-            g.Facing = GuestSprites.FacingFor(outward.X, outward.Z, CameraForward);
+            g.Facing = PeopleSheet.CardinalFacing((int)(outward.X * 256), (int)(-outward.Z * 256));
             _sprites.RestoreWalkTexture(g.Inst);
-            _sprites.Draw(g.Inst, g.Block, g.Facing, g.Frame, feet, CameraForward);
+            _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
         }
 
         /// <summary>Draw a rider as the head the game draws: sheet 416, picked by the guest's own visitor
@@ -1622,6 +1648,11 @@ namespace TPWGodot
         public void SetSprites(GuestSprites sprites) => _sprites = sprites;
         public void SetCommonSheet(TextureSheet common) => _sprites?.SetCommonSheet(common);
         public Vector3 CameraForward { get; set; } = new Vector3(0, 0, -1);
+
+        /// <summary>Where the camera stands, as an octant (GuestSprites.CameraOctant). Set from the view's
+        /// right vector; it is added to every person's own cardinal facing to choose the drawing.</summary>
+        public int CameraOctant { get; private set; }
+        public Vector3 CameraRight { set => CameraOctant = GuestSprites.CameraOctant(value); }
 
         /// <summary>Re-aim and re-dress every guest and every member of staff for the camera where it is
         /// NOW. Called once a drawn frame, not once a sim tick.

@@ -3491,6 +3491,7 @@ void fragment() {
                 if (_guests != null)
                 {
                     _guests.CameraForward = -_camera.GlobalTransform.Basis.Z;
+                    _guests.CameraRight = _camera.GlobalTransform.Basis.X;
                     _guests.Redraw();
                     // ⚠⚠ AFTER Redraw, AND THAT ORDERING IS THE WHOLE FEATURE. Redraw calls Place on every
                     // guest, and Place hides anyone flagged Hidden -- which every rider is. Drawing the
