@@ -1321,6 +1321,7 @@ namespace TPWGodot
                               + $"from {a.Served} sales over {a.Visits} visits, satisfaction {a.Satisfaction}"
                             : ""));
                 if (a.Coaster != null) sb.Append(CoasterReport(a));
+                if (a.MovingRide != null) sb.Append(MovingRideReport(a));
             }
             return sb.ToString();
         }
@@ -1601,6 +1602,9 @@ namespace TPWGodot
         /// everybody looks more finished and is wrong.</summary>
         void DrawRiders(PlacedAttraction a, int tick)
         {
+            // Moving passengers belong to vehicles. Their attachment transforms are not yet
+            // ported; the station's seat-like bones would draw them back on the platform.
+            if (a.MovingRide != null) return;
             var riders = _guests?.RidersOf(a.Rec.Entry);
             var mesh = _attractionMesh?.Invoke(a.Rec.Entry);
             var pose = mesh == null ? null : PoseFor(mesh, tick);
@@ -2031,6 +2035,11 @@ namespace TPWGodot
                 owner.Coaster.Synchronize(_track);
                 deck = owner.Coaster.DeckHeight / (float)u;
             }
+            if (owner?.MovingRide is ParkTrackRideWorld movingTrack)
+            {
+                movingTrack.Synchronize(_track);
+                deck = movingTrack.DeckHeight / (float)u;
+            }
             foreach (var (x, z, pylon) in tiles)
             {
                 // Only a PYLON stands on the ground. The track between two of them is held up by them, which is
@@ -2326,6 +2335,7 @@ namespace TPWGodot
             };
             a.Eject = () => _guests?.Rides?.EjectAll(rec.Entry, g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
             if (rec.Coaster != null) CreateCoaster(a);
+            if (rec.Type is 6 or 7) CreateMovingRide(a);
             a.Say = id => _advisor?.Post((ushort)id);
             a.Event = AdvisorEvent;
             // ⚠ THE STALL'S OWN PRICE, FROM THE RECORD, AT PLACEMENT. The game sets it here (and the
@@ -2547,6 +2557,9 @@ namespace TPWGodot
             public QueueRun Queue;
             public TrackRun Track;
             public ParkCoasterWorld Coaster;
+            public ParkMovingRideWorld MovingRide;
+            public int MovingCarSub;
+            public readonly Dictionary<int, MeshInstance3D> MovingCars = new();
             public readonly Dictionary<int, MeshInstance3D> CoasterCars = new();
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
@@ -2816,7 +2829,7 @@ namespace TPWGodot
                     // original (0x80066110), so their base is what belongs here.
                     Intensity = a.IsRide ? TPW.Sim.RidePanel.Intensity(a) : a.Rec.BaseIntensity,
                     Usable = a.Rec.Type == 2 && a.Rec.UsableByGuests ? 1 : 0,
-                    Open = a.Coaster?.OpenToGuests ?? AttractionLifecycle.OpenToGuests(a.Status),
+                    Open = a.Coaster?.OpenToGuests ?? a.MovingRide?.OpenToGuests ?? AttractionLifecycle.OpenToGuests(a.Status),
                     StaffMayRest = a.Rec.Type == 2 && a.Rec.StaffMayRest,
                     Built = a.Status != AttractionStatus.JustPlaced,
                     DoorX = door.X, DoorZ = door.Z,
@@ -3125,7 +3138,7 @@ namespace TPWGodot
                 // animation rather than on a timer.
                 if (a.Status == AttractionStatus.UnderConstruction)
                     a.BuildAnimationComplete = a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
-                else if (a.Status == AttractionStatus.Running && a.IsRide && a.Coaster == null)
+                else if (a.Status == AttractionStatus.Running && a.IsRide && a.Coaster == null && a.MovingRide == null)
                 {
                     a.Cycle.RunTick(a, a.CyclesPerLoad, frameTime, halfSpeed: false);
                     // ⭐ A RUNNING RIDE MAKES NOISE, ON ITS OWN SIXTEENS AND A SHARED QUARTER. 0x8009CA94
@@ -3141,7 +3154,7 @@ namespace TPWGodot
                 // (0x800E6A8C), Feature (0x800DCA5C) and SideShow (0x800E6D64) all carry 0x80065B78 —
                 // a wrapper whose whole body is the same animation clock, with the completion discarded.
                 // So they run their model and never count a cycle. See findings/rides.md §0 item 9.
-                else if (a.Status == AttractionStatus.Running && a.Coaster == null)
+                else if (a.Status == AttractionStatus.Running && a.Coaster == null && a.MovingRide == null)
                     a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
 
                 // Wear runs on the ride's own tick and can send it to 4 or 5; the lifecycle's tick then
@@ -3159,7 +3172,8 @@ namespace TPWGodot
                 // eject's own report never printed — which read exactly like an eject that never ran.
                 if (_guests?.Rides is { } lw) lw.Log = _logRides;
                 if (a.Coaster != null) TickCoaster(a, frameTime);
-                if (a.IsRide && a.Coaster == null && _guests?.Rides is { } rw
+                if (a.MovingRide != null) TickMovingRide(a, frameTime);
+                if (a.IsRide && a.Coaster == null && a.MovingRide == null && _guests?.Rides is { } rw
                     && rw.RuntimeFor(a.Rec.Entry) is { } run
                     && (a.Status == AttractionStatus.Loading || a.Status == AttractionStatus.Unloading))
                 {
@@ -3177,7 +3191,8 @@ namespace TPWGodot
 
                 // READ: coaster completion belongs to each train (0x800B2244), not the flat
                 // ride's phase count. Shared construction/breakdown/closing hooks still run.
-                var next = a.Coaster != null && a.Status == AttractionStatus.Running
+                var next = (a.Coaster != null && a.Status == AttractionStatus.Running)
+                    || (a.MovingRide != null && a.Status is AttractionStatus.Running or AttractionStatus.Unloading)
                     ? a.Status : AttractionLifecycle.Tick(a.Status, a);
                 if (next != a.Status) a.Status = AttractionLifecycle.Enter(next, a);
 
@@ -3190,7 +3205,7 @@ namespace TPWGodot
                 // it. A count taken off the simulation cannot see a view that has stopped listening to it
                 // (it was exactly that blindness that let "8 riding" print over a jammed-looking park), so
                 // the check for "does the ride move on screen" has to touch a.Inst.
-                if (_logRides && a.Coaster == null && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
+                if (_logRides && a.Coaster == null && a.MovingRide == null && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
                 {
                     var box = drawn.GetAabb();
                     GD.Print($"[tpw] frame {Engine.GetFramesDrawn()}: {a.Rec.Entry} tick {a.Cycle.Accumulator >> RideCycle.FixedShift}, "
@@ -4323,7 +4338,7 @@ void fragment() {
         /// a stub sprite beside a deleted ride is invisible to anything but a screenshot otherwise.</summary>
         int _lastRefreshed, _lastDangling;
 
-        void CloseModal()
+        public void CloseModal()
         {
             _panelFor = null;
             _contextFor = null;

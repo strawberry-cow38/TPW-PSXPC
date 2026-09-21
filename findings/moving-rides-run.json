@@ -1,0 +1,915 @@
+{
+  "positive": {
+    "track": {
+      "evidence": {
+        "vehicle": "0",
+        "first": {
+          "kind": "track",
+          "entry": 215,
+          "route": "connected",
+          "tick": [
+            180,
+            99
+          ],
+          "active": 4,
+          "riders": 4,
+          "updates": 181,
+          "dispatches": 4,
+          "changes": 0,
+          "completed": 0,
+          "ready_now": 0,
+          "arrivals": 0,
+          "unloaded": 0,
+          "transitions": 1,
+          "vehicles": {
+            "0": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5760,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 0
+            },
+            "1": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5760,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 0
+            },
+            "2": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5760,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 0
+            },
+            "3": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5760,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 0
+            }
+          },
+          "drawn": {
+            "0": {
+              "position": [
+                5760.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            },
+            "1": {
+              "position": [
+                5760.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            },
+            "2": {
+              "position": [
+                5760.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            },
+            "3": {
+              "position": [
+                5760.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            }
+          }
+        },
+        "second": {
+          "kind": "track",
+          "entry": 215,
+          "route": "connected",
+          "tick": [
+            200,
+            107
+          ],
+          "active": 4,
+          "riders": 4,
+          "updates": 201,
+          "dispatches": 4,
+          "changes": 80,
+          "completed": 0,
+          "ready_now": 0,
+          "arrivals": 0,
+          "unloaded": 0,
+          "transitions": 2,
+          "vehicles": {
+            "0": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5680,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 20
+            },
+            "1": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5680,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 20
+            },
+            "2": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5680,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 20
+            },
+            "3": {
+              "state": "running",
+              "passengers": 1,
+              "position": [
+                5680,
+                512,
+                6528
+              ],
+              "laps": 0,
+              "changes": 20
+            }
+          },
+          "drawn": {
+            "0": {
+              "position": [
+                5680.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            },
+            "1": {
+              "position": [
+                5680.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            },
+            "2": {
+              "position": [
+                5680.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            },
+            "3": {
+              "position": [
+                5680.0,
+                512.0,
+                6528.0
+              ],
+              "model": 5,
+              "surfaces": 2
+            }
+          }
+        }
+      },
+      "command": [
+        "xvfb-run",
+        "-a",
+        "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+        "--path",
+        "/home/ec2-user/tpwport-trackrides/game",
+        "--rendering-driver",
+        "opengl3",
+        "--resolution",
+        "800x600",
+        "--fixed-fps",
+        "10",
+        "--",
+        "--no-boot",
+        "--park=203",
+        "--park-open",
+        "--park-guests=40",
+        "--park-log-rides",
+        "--park-place=215,24,24,0",
+        "--park-lay=21,19,21,22;21,22,26,22",
+        "--park-queue=215,24,24,0:25,22",
+        "--park-track=215,24,24,0:0,0:18,25:18,29:22,29:22,25",
+        "--park-select=24,24",
+        "--park-slider=duration,1",
+        "--park-deselect",
+        "--shot=/home/ec2-user/tpwport-trackrides/game/obj/moving-rides-proof/track-moving.png:1200"
+      ],
+      "log": "game/obj/moving-rides-proof/track-moving.log",
+      "log_sha256": "86358c778091f0037c51e57b9b607ef61b8e2908867a302e37340a2dd78cd9c8",
+      "screenshot": "game/obj/moving-rides-proof/track-moving.png",
+      "screenshot_sha256": "27bc4d72fc4d63bc705e5ab6c0c5c9a566fdf1732b58431d54bf12f7702fa110",
+      "served": 16,
+      "samples": 151,
+      "last": {
+        "kind": "track",
+        "entry": 215,
+        "route": "connected",
+        "tick": [
+          2980,
+          1219
+        ],
+        "active": 4,
+        "riders": 4,
+        "updates": 3000,
+        "dispatches": 12,
+        "changes": 10188,
+        "completed": 8,
+        "ready_now": 0,
+        "arrivals": 8,
+        "unloaded": 8,
+        "transitions": 8,
+        "vehicles": {
+          "8": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              4736,
+              512,
+              7500
+            ],
+            "laps": 0,
+            "changes": 499
+          },
+          "9": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              4736,
+              512,
+              7500
+            ],
+            "laps": 0,
+            "changes": 499
+          },
+          "10": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              4736,
+              512,
+              7500
+            ],
+            "laps": 0,
+            "changes": 499
+          },
+          "11": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              4736,
+              512,
+              7500
+            ],
+            "laps": 0,
+            "changes": 499
+          }
+        },
+        "drawn": {
+          "8": {
+            "position": [
+              4736.0,
+              512.0,
+              7500.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          },
+          "9": {
+            "position": [
+              4736.0,
+              512.0,
+              7500.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          },
+          "11": {
+            "position": [
+              4736.0,
+              512.0,
+              7500.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          },
+          "10": {
+            "position": [
+              4736.0,
+              512.0,
+              7500.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          }
+        }
+      }
+    },
+    "tour": {
+      "evidence": {
+        "vehicle": "0",
+        "first": {
+          "kind": "tour",
+          "entry": 208,
+          "route": "air-route",
+          "tick": [
+            120,
+            79
+          ],
+          "active": 2,
+          "riders": 4,
+          "updates": 121,
+          "dispatches": 1,
+          "changes": 19,
+          "completed": 0,
+          "ready_now": 0,
+          "arrivals": 0,
+          "unloaded": 0,
+          "transitions": 3,
+          "vehicles": {
+            "0": {
+              "state": "Departing",
+              "passengers": 3,
+              "position": [
+                6238,
+                256,
+                6528
+              ],
+              "laps": 0,
+              "changes": 19
+            },
+            "1": {
+              "state": "Loading",
+              "passengers": 1,
+              "position": [
+                6656,
+                256,
+                6528
+              ],
+              "laps": 0,
+              "changes": 0
+            }
+          },
+          "drawn": {
+            "0": {
+              "position": [
+                6238.0,
+                256.0,
+                6528.0
+              ],
+              "model": 1,
+              "surfaces": 2
+            },
+            "1": {
+              "position": [
+                6656.0,
+                256.0,
+                6528.0
+              ],
+              "model": 1,
+              "surfaces": 2
+            }
+          }
+        },
+        "second": {
+          "kind": "tour",
+          "entry": 208,
+          "route": "air-route",
+          "tick": [
+            140,
+            87
+          ],
+          "active": 2,
+          "riders": 5,
+          "updates": 141,
+          "dispatches": 1,
+          "changes": 39,
+          "completed": 0,
+          "ready_now": 0,
+          "arrivals": 0,
+          "unloaded": 0,
+          "transitions": 3,
+          "vehicles": {
+            "0": {
+              "state": "Departing",
+              "passengers": 3,
+              "position": [
+                5798,
+                256,
+                6528
+              ],
+              "laps": 0,
+              "changes": 39
+            },
+            "1": {
+              "state": "Loading",
+              "passengers": 2,
+              "position": [
+                6656,
+                256,
+                6528
+              ],
+              "laps": 0,
+              "changes": 0
+            }
+          },
+          "drawn": {
+            "0": {
+              "position": [
+                5798.0,
+                256.0,
+                6528.0
+              ],
+              "model": 1,
+              "surfaces": 2
+            },
+            "1": {
+              "position": [
+                6656.0,
+                256.0,
+                6528.0
+              ],
+              "model": 1,
+              "surfaces": 2
+            }
+          }
+        }
+      },
+      "command": [
+        "xvfb-run",
+        "-a",
+        "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+        "--path",
+        "/home/ec2-user/tpwport-trackrides/game",
+        "--rendering-driver",
+        "opengl3",
+        "--resolution",
+        "800x600",
+        "--fixed-fps",
+        "10",
+        "--",
+        "--no-boot",
+        "--park=203",
+        "--park-open",
+        "--park-guests=40",
+        "--park-log-rides",
+        "--park-place=208,24,24,0",
+        "--park-lay=21,19,21,25;21,25,22,25",
+        "--park-queue=208,24,24,0:22,25",
+        "--park-select=24,24",
+        "--park-slider=duration,1",
+        "--park-deselect",
+        "--shot=/home/ec2-user/tpwport-trackrides/game/obj/moving-rides-proof/tour-moving.png:1200"
+      ],
+      "log": "game/obj/moving-rides-proof/tour-moving.log",
+      "log_sha256": "6ae75d54da28cfcc417402c1b50780127f9606d07762cc894e34b54b383e1445",
+      "screenshot": "game/obj/moving-rides-proof/tour-moving.png",
+      "screenshot_sha256": "1ea0243f56161d4e0f98da7414f2bf0731ec55cfa68010f7ac467bbef787cc86",
+      "served": 12,
+      "samples": 151,
+      "last": {
+        "kind": "tour",
+        "entry": 208,
+        "route": "air-route",
+        "tick": [
+          2980,
+          1223
+        ],
+        "active": 3,
+        "riders": 9,
+        "updates": 3000,
+        "dispatches": 5,
+        "changes": 7314,
+        "completed": 3,
+        "ready_now": 1,
+        "arrivals": 24,
+        "unloaded": 6,
+        "transitions": 57,
+        "vehicles": {
+          "0": {
+            "state": "Touring",
+            "passengers": 3,
+            "position": [
+              7680,
+              2446,
+              13500
+            ],
+            "laps": 200,
+            "changes": 2786
+          },
+          "1": {
+            "state": "Unloading",
+            "passengers": 3,
+            "position": [
+              6656,
+              256,
+              6528
+            ],
+            "laps": 201,
+            "changes": 1939
+          },
+          "2": {
+            "state": "Touring",
+            "passengers": 3,
+            "position": [
+              2344,
+              2480,
+              6117
+            ],
+            "laps": 200,
+            "changes": 2589
+          }
+        },
+        "drawn": {
+          "0": {
+            "position": [
+              7680.0,
+              2446.0,
+              13500.0
+            ],
+            "model": 1,
+            "surfaces": 2
+          },
+          "1": {
+            "position": [
+              6656.0,
+              256.0,
+              6528.0
+            ],
+            "model": 1,
+            "surfaces": 2
+          },
+          "2": {
+            "position": [
+              2344.0,
+              2480.0,
+              6117.0
+            ],
+            "model": 1,
+            "surfaces": 2
+          }
+        }
+      }
+    }
+  },
+  "controls": {
+    "track-no-track": {
+      "rejected": true,
+      "reason": "No loaded same-vehicle movement reaches a nonempty scene mesh between reports",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+        "--path",
+        "/home/ec2-user/tpwport-trackrides/game",
+        "--rendering-driver",
+        "opengl3",
+        "--resolution",
+        "800x600",
+        "--fixed-fps",
+        "10",
+        "--",
+        "--no-boot",
+        "--park=203",
+        "--park-open",
+        "--park-guests=40",
+        "--park-log-rides",
+        "--park-place=215,24,24,0",
+        "--park-lay=21,19,21,22;21,22,26,22",
+        "--park-queue=215,24,24,0:25,22",
+        "--park-select=24,24",
+        "--park-slider=duration,1",
+        "--park-deselect",
+        "--shot=/home/ec2-user/tpwport-trackrides/game/obj/moving-rides-proof/track-no-track.png:400"
+      ],
+      "log": "game/obj/moving-rides-proof/track-no-track.log",
+      "log_sha256": "8c6b041841c5c6aad0f5a4610e060aad5dc8825879ac6299b361f92bbc8b12e4",
+      "screenshot": "game/obj/moving-rides-proof/track-no-track.png",
+      "screenshot_sha256": "8d5d217960c430ec7755790bdd92fa691fda09b78e3e2bf43db157467ae393f2",
+      "served": 0,
+      "samples": 51,
+      "last": {
+        "kind": "track",
+        "entry": 215,
+        "route": "no-track",
+        "tick": [
+          980,
+          425
+        ],
+        "active": 0,
+        "riders": 0,
+        "updates": 1000,
+        "dispatches": 0,
+        "changes": 0,
+        "completed": 0,
+        "ready_now": 0,
+        "arrivals": 0,
+        "unloaded": 0,
+        "transitions": 0,
+        "vehicles": {},
+        "drawn": {}
+      }
+    },
+    "track-frozen": {
+      "rejected": true,
+      "reason": "No loaded same-vehicle movement reaches a nonempty scene mesh between reports",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+        "--path",
+        "/home/ec2-user/tpwport-trackrides/game",
+        "--rendering-driver",
+        "opengl3",
+        "--resolution",
+        "800x600",
+        "--fixed-fps",
+        "10",
+        "--",
+        "--no-boot",
+        "--park=203",
+        "--park-open",
+        "--park-guests=40",
+        "--park-log-rides",
+        "--park-place=215,24,24,0",
+        "--park-lay=21,19,21,22;21,22,26,22",
+        "--park-queue=215,24,24,0:25,22",
+        "--park-track=215,24,24,0:0,0:18,25:18,29:22,29:22,25",
+        "--park-select=24,24",
+        "--park-slider=duration,1",
+        "--park-deselect",
+        "--shot=/home/ec2-user/tpwport-trackrides/game/obj/moving-rides-proof/track-frozen.png:400"
+      ],
+      "log": "game/obj/moving-rides-proof/track-frozen.log",
+      "log_sha256": "883fcbf9095cfaa3358525661ff81d96cccb831822362e5573b6e3179f0069e2",
+      "screenshot": "game/obj/moving-rides-proof/track-frozen.png",
+      "screenshot_sha256": "d473a076c21a02eb4a644823aa83c37abff3b70e7de9461baad2998a9e4f09a1",
+      "served": 0,
+      "samples": 51,
+      "last": {
+        "kind": "track",
+        "entry": 215,
+        "route": "connected",
+        "tick": [
+          980,
+          421
+        ],
+        "active": 4,
+        "riders": 4,
+        "updates": 1000,
+        "dispatches": 4,
+        "changes": 0,
+        "completed": 0,
+        "ready_now": 0,
+        "arrivals": 0,
+        "unloaded": 0,
+        "transitions": 2,
+        "vehicles": {
+          "0": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              5760,
+              512,
+              6528
+            ],
+            "laps": 0,
+            "changes": 0
+          },
+          "1": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              5760,
+              512,
+              6528
+            ],
+            "laps": 0,
+            "changes": 0
+          },
+          "2": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              5760,
+              512,
+              6528
+            ],
+            "laps": 0,
+            "changes": 0
+          },
+          "3": {
+            "state": "running",
+            "passengers": 1,
+            "position": [
+              5760,
+              512,
+              6528
+            ],
+            "laps": 0,
+            "changes": 0
+          }
+        },
+        "drawn": {
+          "0": {
+            "position": [
+              5760.0,
+              512.0,
+              6528.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          },
+          "1": {
+            "position": [
+              5760.0,
+              512.0,
+              6528.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          },
+          "2": {
+            "position": [
+              5760.0,
+              512.0,
+              6528.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          },
+          "3": {
+            "position": [
+              5760.0,
+              512.0,
+              6528.0
+            ],
+            "model": 5,
+            "surfaces": 2
+          }
+        }
+      }
+    },
+    "tour-frozen": {
+      "rejected": true,
+      "reason": "No loaded same-vehicle movement reaches a nonempty scene mesh between reports",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+        "--path",
+        "/home/ec2-user/tpwport-trackrides/game",
+        "--rendering-driver",
+        "opengl3",
+        "--resolution",
+        "800x600",
+        "--fixed-fps",
+        "10",
+        "--",
+        "--no-boot",
+        "--park=203",
+        "--park-open",
+        "--park-guests=40",
+        "--park-log-rides",
+        "--park-place=208,24,24,0",
+        "--park-lay=21,19,21,25;21,25,22,25",
+        "--park-queue=208,24,24,0:22,25",
+        "--park-select=24,24",
+        "--park-slider=duration,1",
+        "--park-deselect",
+        "--shot=/home/ec2-user/tpwport-trackrides/game/obj/moving-rides-proof/tour-frozen.png:400"
+      ],
+      "log": "game/obj/moving-rides-proof/tour-frozen.log",
+      "log_sha256": "b24448fe1a3312c634c2dd289a48836ecf6b78779569999a780874d4cccef087",
+      "screenshot": "game/obj/moving-rides-proof/tour-frozen.png",
+      "screenshot_sha256": "36fd79d88314763d34cdb2ca9b8b97e2e5749d16cd47b3e05416f095ac4b0d58",
+      "served": 0,
+      "samples": 51,
+      "last": {
+        "kind": "tour",
+        "entry": 208,
+        "route": "air-route",
+        "tick": [
+          980,
+          421
+        ],
+        "active": 2,
+        "riders": 6,
+        "updates": 1000,
+        "dispatches": 1,
+        "changes": 0,
+        "completed": 0,
+        "ready_now": 0,
+        "arrivals": 0,
+        "unloaded": 0,
+        "transitions": 3,
+        "vehicles": {
+          "0": {
+            "state": "Departing",
+            "passengers": 3,
+            "position": [
+              6656,
+              256,
+              6528
+            ],
+            "laps": 0,
+            "changes": 0
+          },
+          "1": {
+            "state": "Loading",
+            "passengers": 3,
+            "position": [
+              6656,
+              256,
+              6528
+            ],
+            "laps": 0,
+            "changes": 0
+          }
+        },
+        "drawn": {
+          "0": {
+            "position": [
+              6656.0,
+              256.0,
+              6528.0
+            ],
+            "model": 1,
+            "surfaces": 2
+          },
+          "1": {
+            "position": [
+              6656.0,
+              256.0,
+              6528.0
+            ],
+            "model": 1,
+            "surfaces": 2
+          }
+        }
+      }
+    }
+  },
+  "inputs_sha256": {
+    "game/ParkMovingRideWorld.cs": "c67c93c29ffeea0fb105fc4fe62ec60fc8d2ceec217422011b9930b84bbcb82b",
+    "game/ParkTrackRideWorld.cs": "2b5930141bf5e634f305c03fefc34130b9dd3f762e15c0be04ecd9c0fae0d6c7",
+    "game/ParkTourRideWorld.cs": "2b72f0608bee42475e9efcc50eb0764408a3511e16f5e77bf63b83f598d826d5",
+    "game/ParkMovingRides.cs": "41d3d29eae504f290d2d31086ace24ec538ed03715682247cabc5a10ae013619",
+    "game/ParkView.cs": "a1123a5d952bcc4e0e9d70dda74b27968f74a772f81a7e5c5cdabf6568672028",
+    "game/Main.cs": "9aebcfdfd06ab3a9f56e2cda09b8068312430de8dbb66130e18301fde6b40643",
+    "core/TPW.Data/Attraction.cs": "14d59825df642322db689a8a928b281e946ded433e0135c9e81d2d43d35f9d0c",
+    "core/TPW.Sim/PathedRide.cs": "a65e2f14407b186de4cc0b5bf88d60bf52b2a42126398889492acacd0ae5af51",
+    "core/TPW.Sim/TourRide.cs": "23d5e0262a2b12ebb1d8dd5b16d1d3810199035fe3284e3a38fec40f0f498f12",
+    "tools/prove_moving_rides.py": "43a5f20949b30d295295445afbba9cf43e7aa1f7293ea92dc934446ca8ef5b7d"
+  },
+  "source_sha256": {
+    "game/ParkTrackRideWorld.cs": "2b5930141bf5e634f305c03fefc34130b9dd3f762e15c0be04ecd9c0fae0d6c7",
+    "game/ParkTourRideWorld.cs": "2b72f0608bee42475e9efcc50eb0764408a3511e16f5e77bf63b83f598d826d5"
+  },
+  "restored_sha256": {
+    "game/ParkTrackRideWorld.cs": "2b5930141bf5e634f305c03fefc34130b9dd3f762e15c0be04ecd9c0fae0d6c7",
+    "game/ParkTourRideWorld.cs": "2b72f0608bee42475e9efcc50eb0764408a3511e16f5e77bf63b83f598d826d5"
+  }
+}

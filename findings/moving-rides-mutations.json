@@ -1,0 +1,706 @@
+{
+  "source_sha256": {
+    "game/ParkTrackRideWorld.cs": "2b5930141bf5e634f305c03fefc34130b9dd3f762e15c0be04ecd9c0fae0d6c7",
+    "core/TPW.Sim/PathedRide.cs": "a65e2f14407b186de4cc0b5bf88d60bf52b2a42126398889492acacd0ae5af51",
+    "game/ParkTourRideWorld.cs": "2b72f0608bee42475e9efcc50eb0764408a3511e16f5e77bf63b83f598d826d5",
+    "core/TPW.Sim/TourRide.cs": "23d5e0262a2b12ebb1d8dd5b16d1d3810199035fe3284e3a38fec40f0f498f12",
+    "game/ParkMovingRideWorld.cs": "c67c93c29ffeea0fb105fc4fe62ec60fc8d2ceec217422011b9930b84bbcb82b",
+    "core/TPW.Data/Attraction.cs": "14d59825df642322db689a8a928b281e946ded433e0135c9e81d2d43d35f9d0c"
+  },
+  "test_sha256": "8222620ace183c6edff06210eda1b9a3645634f9cd2dd75982e1f9fae4f29097",
+  "mutations": [
+    {
+      "name": "track ignores accepted points",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "run?.Pylons.ToArray()",
+      "new": "null",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan",
+        "TPW.Sim.Tests.ParkMovingRideTests.BuilderAcceptanceConnectivityAndReadoutAgree",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackWaitsForWholeLiveCapacityAndNextCadence",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.LifecycleEjectionClearsOnlyHostOwnership(tour: False)",
+        "TPW.Sim.Tests.ParkMovingRideTests.RouteEditReturnsPassengersAndRebuilds",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackSpeedIsSampledOnBoardingAndFrozenIsVisible",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/00/result.trx"
+    },
+    {
+      "name": "track ignores closure",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "connected = run?.Circuit ?? false;",
+      "new": "connected = false;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.BuilderAcceptanceConnectivityAndReadoutAgree",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackSpeedIsSampledOnBoardingAndFrozenIsVisible",
+        "TPW.Sim.Tests.ParkMovingRideTests.RouteEditReturnsPassengersAndRebuilds",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.LifecycleEjectionClearsOnlyHostOwnership(tour: False)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackWaitsForWholeLiveCapacityAndNextCadence"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/01/result.trx"
+    },
+    {
+      "name": "track does not eject on edit",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "EjectPassengers(); Controller.RunTicks = 0;",
+      "new": "Controller.RunTicks = 0;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.RouteEditReturnsPassengersAndRebuilds"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/02/result.trx"
+    },
+    {
+      "name": "track route has half length",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "* 256).ToArray()",
+      "new": "* 128).ToArray()",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.BuilderAcceptanceConnectivityAndReadoutAgree"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/03/result.trx"
+    },
+    {
+      "name": "track uses ride capacity per vehicle",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": ">= ride.TrackPassengersPerVehicle",
+      "new": ">= Capacity",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackWaitsForWholeLiveCapacityAndNextCadence"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/04/result.trx"
+    },
+    {
+      "name": "track does not move",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "foreach (var c in cars) Advance(c);",
+      "new": "foreach (var c in cars) { }",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/05/result.trx"
+    },
+    {
+      "name": "track freezes at unload gate",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "Status != AttractionStatus.Loading",
+      "new": "Status == AttractionStatus.Running",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/06/result.trx"
+    },
+    {
+      "name": "track never completes a lap",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "c.Track.CompleteLap(Duration);",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/07/result.trx"
+    },
+    {
+      "name": "track ignores live duration",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "c.Track.CompleteLap(Duration);",
+      "new": "c.Track.CompleteLap(1);",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/08/result.trx"
+    },
+    {
+      "name": "track loses completion history",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "if (c.Track.ReadyToUnload) Completed++;",
+      "new": "if (c.Track.ReadyToUnload) Completed = 0;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/09/result.trx"
+    },
+    {
+      "name": "track samples speed each tick",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "c.Progress += c.Speed;",
+      "new": "c.Progress += RideSliderEffects.TrackVehicleSpeed(LiveSpeed());",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackSpeedIsSampledOnBoardingAndFrozenIsVisible"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/10/result.trx"
+    },
+    {
+      "name": "track speed field disconnected",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "RideSliderEffects.TrackVehicleSpeed(LiveSpeed())",
+      "new": "0",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/11/result.trx"
+    },
+    {
+      "name": "track loads at ten ticks",
+      "path": "core/TPW.Sim/PathedRide.cs",
+      "old": "LoadCadence = 20",
+      "new": "LoadCadence = 10",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.LifecycleEjectionClearsOnlyHostOwnership(tour: False)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackWaitsForWholeLiveCapacityAndNextCadence"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/12/result.trx"
+    },
+    {
+      "name": "track starts partially loaded",
+      "path": "core/TPW.Sim/PathedRide.cs",
+      "old": "world.Riders < world.Capacity",
+      "new": "world.Riders < 1",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.RouteEditReturnsPassengersAndRebuilds",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackWaitsForWholeLiveCapacityAndNextCadence",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/13/result.trx"
+    },
+    {
+      "name": "track gate is duration not twice duration",
+      "path": "core/TPW.Sim/PathedRide.cs",
+      "old": "RunTicksPerDuration = 2",
+      "new": "RunTicksPerDuration = 1",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/14/result.trx"
+    },
+    {
+      "name": "track removes compaction skip",
+      "path": "core/TPW.Sim/PathedRide.cs",
+      "old": "world.UnloadVehicle(i);",
+      "new": "world.UnloadVehicle(i--);",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/15/result.trx"
+    },
+    {
+      "name": "tour does not tick transports",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "c.Tour.Tick(new TransportWorld(this, c));",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourBusyDockKeepsMovingAndStatusUsesDock",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/16/result.trx"
+    },
+    {
+      "name": "tour status never follows dock",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "SetStatus(TourRide.StatusAfterMovement(Status, docked?.Tour.State));",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/17/result.trx"
+    },
+    {
+      "name": "tour never loads",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "TourRide.LoadTick(this);",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourBusyDockKeepsMovingAndStatusUsesDock",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/18/result.trx"
+    },
+    {
+      "name": "tour never unloads",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "TourRide.UnloadTick(this);",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/19/result.trx"
+    },
+    {
+      "name": "tour fourth transport allowed",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "MaximumTransports = 3",
+      "new": "MaximumTransports = 4",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/20/result.trx"
+    },
+    {
+      "name": "tour retains dock on departure",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "if (ReferenceEquals(docked, c)) docked = null;",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourBusyDockKeepsMovingAndStatusUsesDock",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/21/result.trx"
+    },
+    {
+      "name": "tour does not claim returning dock",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "docked = c; c.Destination",
+      "new": "c.Destination",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/22/result.trx"
+    },
+    {
+      "name": "tour arrival never reported",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "return arrived;",
+      "new": "return false;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourBusyDockKeepsMovingAndStatusUsesDock",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/23/result.trx"
+    },
+    {
+      "name": "tour loses completion history",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "Completed++; break;",
+      "new": "Completed = 0; break;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/24/result.trx"
+    },
+    {
+      "name": "tour retirement orphans passengers",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "while (car.Passengers.Count != 0) host.ExitLast(car);",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/25/result.trx"
+    },
+    {
+      "name": "tour becomes a whole-ride-capacity machine",
+      "path": "core/TPW.Sim/TourRide.cs",
+      "old": "TransportSeats = 3",
+      "new": "TransportSeats = 8",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourBusyDockKeepsMovingAndStatusUsesDock",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/26/result.trx"
+    },
+    {
+      "name": "tour unload loses cadence",
+      "path": "core/TPW.Sim/TourRide.cs",
+      "old": "if (world.NowTick % GuestCadence == 0) world.UnloadLastGuest();",
+      "new": "world.UnloadLastGuest();",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/27/result.trx"
+    },
+    {
+      "name": "tour silently adopts disputed empty-vehicle gate",
+      "path": "core/TPW.Sim/TourRide.cs",
+      "old": "if (world.QueueHead != null) return;",
+      "new": "if (world.QueueHead != null || world.DockedPassengers != 0) return;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/28/result.trx"
+    },
+    {
+      "name": "host drops board transaction",
+      "path": "game/ParkMovingRideWorld.cs",
+      "old": "Board(guest); c.Passengers.Add(guest);",
+      "new": "c.Passengers.Add(guest);",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackWaitsForWholeLiveCapacityAndNextCadence",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.RouteEditReturnsPassengersAndRebuilds",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/29/result.trx"
+    },
+    {
+      "name": "host drops exit transaction",
+      "path": "game/ParkMovingRideWorld.cs",
+      "old": "Exit(guest); c.Passengers.RemoveAt",
+      "new": "c.Passengers.RemoveAt",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 378, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetirementAndAllocationKeepGuestOwnership",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 228, seats: 5)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 143, seats: 4)",
+        "TPW.Sim.Tests.ParkMovingRideTests.RouteEditReturnsPassengersAndRebuilds",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 363, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackRetainsCompactedArraySkipAndLaterEmptyScan",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourRetainsPartialQueueEmptyDispatch",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 41, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 215, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 57, seats: 1)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackDefinitionsRunAndUnloadVehicleBatches(entry: 130, seats: 2)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/30/result.trx"
+    },
+    {
+      "name": "host hides missing track",
+      "path": "game/ParkTrackRideWorld.cs",
+      "old": "accepted.Length == 0 ? \"no-track\"",
+      "new": "accepted.Length == 0 ? \"connected\"",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.BuilderAcceptanceConnectivityAndReadoutAgree"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/31/result.trx"
+    },
+    {
+      "name": "host reports occupancy as completion",
+      "path": "game/ParkMovingRideWorld.cs",
+      "old": "completed {Completed}",
+      "new": "completed {ready}",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 372, speed: 50)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TrackTickGateAndLiveLapLimitAreIndependent",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 142, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 208, speed: 35)",
+        "TPW.Sim.Tests.ParkMovingRideTests.TourDefinitionsMoveReturnAndUnloadAtCadence(entry: 56, speed: 30)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/32/result.trx"
+    },
+    {
+      "name": "host reuses vehicle identity after ejection",
+      "path": "game/ParkMovingRideWorld.cs",
+      "old": "cars.Clear();",
+      "new": "cars.Clear(); nextId = 0;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.LifecycleEjectionClearsOnlyHostOwnership(tour: True)",
+        "TPW.Sim.Tests.ParkMovingRideTests.LifecycleEjectionClearsOnlyHostOwnership(tour: False)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/33/result.trx"
+    },
+    {
+      "name": "host clears vehicles but leaves tour dock",
+      "path": "game/ParkTourRideWorld.cs",
+      "old": "base.EjectPassengers(transfer); docked = null;",
+      "new": "base.EjectPassengers(transfer);",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.LifecycleEjectionClearsOnlyHostOwnership(tour: True)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/34/result.trx"
+    },
+    {
+      "name": "track reads wrong passenger field",
+      "path": "core/TPW.Data/Attraction.cs",
+      "old": "a.TrackPassengersPerVehicle = BitConverter.ToInt32(d, r + 0xD0)",
+      "new": "a.TrackPassengersPerVehicle = BitConverter.ToInt32(d, r + 0xD4)",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.DefinitionDecodesClassSpecificFields"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/35/result.trx"
+    },
+    {
+      "name": "track car selector points at rails",
+      "path": "core/TPW.Data/Attraction.cs",
+      "old": "a.TrackCarSub = BitConverter.ToInt32(d, r + 0xEC)",
+      "new": "a.TrackCarSub = BitConverter.ToInt32(d, r + 0xDC)",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.DefinitionDecodesClassSpecificFields"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/36/result.trx"
+    },
+    {
+      "name": "tour reads high speed byte",
+      "path": "core/TPW.Data/Attraction.cs",
+      "old": "a.TourBaseSpeed = d[r + 0xD0]",
+      "new": "a.TourBaseSpeed = d[r + 0xD1]",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 32,
+      "failed": [
+        "TPW.Sim.Tests.ParkMovingRideTests.DefinitionDecodesClassSpecificFields"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/37/result.trx"
+    }
+  ],
+  "baseline": {
+    "returncode": 0,
+    "executed": 32,
+    "failed": [],
+    "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/baseline/result.trx"
+  },
+  "restored_baseline": {
+    "returncode": 0,
+    "executed": 32,
+    "failed": [],
+    "trx": "tests/TPW.Sim.Tests/TestResults/moving-rides-mutations/restored/result.trx"
+  },
+  "restored_sha256": {
+    "game/ParkTrackRideWorld.cs": "2b5930141bf5e634f305c03fefc34130b9dd3f762e15c0be04ecd9c0fae0d6c7",
+    "core/TPW.Sim/PathedRide.cs": "a65e2f14407b186de4cc0b5bf88d60bf52b2a42126398889492acacd0ae5af51",
+    "game/ParkTourRideWorld.cs": "2b72f0608bee42475e9efcc50eb0764408a3511e16f5e77bf63b83f598d826d5",
+    "core/TPW.Sim/TourRide.cs": "23d5e0262a2b12ebb1d8dd5b16d1d3810199035fe3284e3a38fec40f0f498f12",
+    "game/ParkMovingRideWorld.cs": "c67c93c29ffeea0fb105fc4fe62ec60fc8d2ceec217422011b9930b84bbcb82b",
+    "core/TPW.Data/Attraction.cs": "14d59825df642322db689a8a928b281e946ded433e0135c9e81d2d43d35f9d0c"
+  }
+}

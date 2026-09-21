@@ -16,6 +16,26 @@ Sources, read without changing either source tree:
   Virtual entries are eight bytes: signed adjustment at +0, function at +4.
   Record/model reads use the existing `tools/ride_phases.py` archive parser.
 
+## 0. SOURCE DISAGREEMENTS — retained rules
+
+This table indexes the retained disagreements already described in §6 and `rides.md` §0.
+The park hosts added in §8 do not silently resolve them.
+
+| Subject | Existing findings retained in code | Binary reading and addresses |
+|---|---|---|
+| Track/coaster breakdown | Running-only, direct transition to 5 below the threshold | Track `0x800A6754`, coaster `0x800B0B34`: first enter 4; zero reliability while already 4 enters 5 |
+| Wear scheduling | Existing running-only park wear gate | Tour `0x800A0EAC..ED4`, track `0x800A8E30..EA8`, coaster `0x800B0DF8..E48`: riders/movement can cause wear outside status 2 |
+| Tour short queue | Queue-empty departure, including partial loads | `0x800A12D4` additionally requires an empty vehicle; two or more vehicles request retirement, `0x800A12C8..31C` |
+| Coaster object names | Old “32 cars” interpretation remains flagged, not used as passenger capacity | `0x800B1ACC..BB8`: eight passenger train objects; the 32 embedded objects are route pieces |
+| Shared wear arithmetic | Existing reliability/lifetime arithmetic | `0x8009DDB4..DF0` computes lifetime bands before reliability clamping, with signed division by 61440 |
+| Coaster capacity denominator | Existing definition/slider mapping | `0x800AD728`: clamped record+D2 byte times station attachment count, not the common seat word |
+
+The task's sentence assigning a whole-ride-capacity wait to **tour** conflicts with this
+file's §1–3 table and the existing controllers. The host retains those controllers: **track**
+waits for the whole live capacity; **tour** normally departs at three passengers per transport
+and also keeps the disputed queue-empty branch. This is a brief/report discrepancy, not a new
+binary finding.
+
 ## 1. Answers and scope
 
 | Class | Loading | What duration actually controls | Unloading |
@@ -418,3 +438,212 @@ of the preview/controller pointers; end-to-end rendering/physics and park-adapte
 There is no invented default trip time, route length, speed, or attachment count in the C#.
 Tests use declared synthetic world inputs, including width-boundary states, not assumed disc
 measurements. They verify this control slice, not the omitted adapters or the live PSX game.
+
+
+## 8. Running park hosts — 2026-09-21
+
+Sections 1–7 record the earlier controller-only delivery. The host boundaries and validation
+counts in this section update that historical scope; they do not rewrite its control findings.
+
+`game/ParkMovingRides.cs` connects placed type-6/type-7 definitions to separate production
+`ParkTrackRideWorld` and `ParkTourRideWorld` adapters. `ParkMovingRideWorld` shares guest
+ownership, stable vehicle identities, and cumulative observations, not a common trip machine.
+The three engine-free host files are compiled verbatim into the sim test project as well as
+`game/`. Both classes use the park's real queue/rider lists, global tick and live sliders.
+Boarding reuses the queue-head removal, state 21, hide and staggered shuffle transaction;
+unloading selects the particular passenger, puts it at the real exit, shows it and sets state
+22. Lifecycle ejection clears host ownership before the existing message-10 transaction.
+A route edit instead returns each owned passenger through the exit transaction before rebuilding.
+
+### Track host
+
+The existing `TrackRun` and `--park-track` remain the builder. Only accepted pylons enter the
+host; refusal leaves the running instance alone, and undo invalidates connectivity and ejects
+its passengers. An open or absent route does not board or admit new guests. A closed route
+uses the class controller's one-per-20 boarding, **whole live capacity** wait, and extra
+cadence after the last boarding. Passenger batches use each definition's record+D0 count:
+1, 1, 2, 4, 1, 5, 1, 5 in the eight-entry order in §5.
+
+Vehicle progress wraps call `PathedRideVehicle.CompleteLap` from production `game/` code.
+The ride's `2*duration` gate and signed-byte vehicle lap limit remain independent. Motion
+continues in status 11; finished batches unload on the ten-tick scan with the original
+compacted-array skip. Reopening waits for a later empty scan. Duration is read at each lap;
+speed is initialized with `RideSliderEffects.TrackVehicleSpeed` at boarding.
+
+**READ:** `0x800A9360` indexes a generated piece by route position shifted eight bits and
+interpolates with the low byte; the builder uses two-tile pieces (`0x800221B0`). **GUESS-medium:**
+the host uses straight interpolation along the accepted axis-aligned spans, 256 route units
+per two-tile piece, and the initialized speed byte as a constant increment per park tick.
+It does not implement the binary's complete piece curves, traffic, acceleration or final
+vehicle offset. Vehicles currently share the starting position and can overlap.
+**GUESS-high:** height uses the renderer's level deck above the highest crossed terrain tile.
+
+The partial work's “first mesh with seats” selector was rejected: Dino Karts sub 1 has an
+attachment list but is a track piece. The host now reads car class 4 from record+DC (the word
+at +EC), matching `0x800A6088` and the eight-entry model table in `rides.md`. **GUESS-medium:**
+it draws that first car variant for every vehicle; exact variant selection is still missing.
+
+### Tour host
+
+Tours use no `TrackRun`. The map and a dock supply their route. Each transport ticks its own
+`TourTransport`, then the production host calls `TourRide.StatusAfterMovement` to derive the
+ride status from the current dock. Construction is handled by the shared lifecycle first;
+statuses 4–9 retain the controller's protection. Full transports, the retained partial-load
+queue-empty branch, the three-transport allocator ceiling, busy-dock sentinel **200**, and
+one-last-passenger-per-20-ticks unloading stay distinct from track behavior.
+
+**READ:** the base speed is the low byte of record+D0 (`0x800A1744`); departure/return use
+2/3, approach 2/5, docking 1/5 and retirement 4/3 before `TourVehicleSpeed` applies the slider
+(`0x800A3368..35A8`). Destination offsets are -900 for departure (`0x800A426C`), +2000/+1500
+for return (`0x800A3E90`) and +800/+600 for approach (`0x800A3FA4`), rotated with the station.
+Touring chooses map coordinates and a height from the documented random ranges (`0x800A3D80`);
+retirement chooses a map edge five tiles beyond the map (`0x800A4118`). Dock settling uses the
+truncating fifth and snap rule (`0x800A3C70`). These address reads agreed with the existing
+findings; no new binary-versus-findings control-rule disagreement was substituted.
+
+**GUESS-medium:** the dock is the station footprint center at ground height, pending the
+model attachment transform (`0x800A1504`). Destination following is straight-line movement
+at the state's target speed, pending `0x800A382C` steering/avoidance and speed integration.
+Clearance sees terrain, not object tops. The loading departure proximity gate is present;
+nonloading avoidance is not. **GUESS-high:** the sole non-station tour model (sub 1 in each of
+four definitions) supplies the drawn transport. Exact render selection/animation remains open.
+
+The retained partial-load retirement rule can retire a vehicle with passengers. On removal,
+the host returns those passengers through the park exit transaction rather than orphaning
+hidden guests. This is an explicit host policy, not evidence for the disputed binary branch.
+Retirement does not increment the normal-trip completion counter.
+
+### Readout and evidence boundary
+
+Next to each coaster readout, track/tour lines show route availability, vehicles and riders,
+updates, dispatches, actual position changes, cumulative completed trips with **ready-now**
+occupancy beside it, arrivals, unloaded passengers and transitions. Each vehicle has an ID,
+state, position and lap count. IDs are not reused after removal/rebuild. Render observations
+come from the actual scene nodes and include model index and nonempty mesh surface count.
+Thus `no-track` is different from `connected` with dispatches but zero movement. Tours say
+`air-route` and `track not-required`; a frozen tour still has dispatches and zero movement.
+Completion counts survive the short ready state and vehicle destruction.
+
+Passengers remain hidden during travel: the old flat-ride renderer's station bones are not
+the vehicle's seats. Drawing passengers at moving attachment transforms is not claimed here.
+Shared construction, repair, closing and existing wear behavior still run; flat animation
+completion and flat loading/unloading no longer advance either moving-ride machine.
+
+Reproduce the validation with:
+
+```
+dotnet test tests/TPW.Sim.Tests/
+dotnet build game/
+python3 tools/mutate_moving_rides.py
+python3 tools/prove_moving_rides.py --godot /path/to/Godot_mono
+python3 tools/dead_port_audit.py --all
+```
+
+The run proof explicitly builds `game/`, renders under Xvfb/OpenGL (not headless), and compares
+a loaded vehicle's position across two reports with the same ID and dispatch count. Both
+positions must equal those of the actual nonempty scene mesh. The new `--park-deselect`
+capture option calls the same modal-close action as the UI after setting duration through
+the live slider. This corrected an initial capture in which the slider panel hid the park;
+the retained proof captures show the park itself. Its controls are absent track,
+a connected track with advancement severed, and an air-route tour with destination movement
+severed. Each control must be rejected by the same movement oracle. The tour's successful run
+contains no track build at all. Sources are restored and `game/` rebuilt in `finally`.
+Capture policy fixes the renderer at 10 frames/second and an 800×600 window; the park still
+advances at its existing 25 Hz. This makes tick coverage independent of CPU load and is not
+a PSX trip-time measurement. The mutation audit records **38/38 killed**, with **32/32** host cases passing both before
+and after restoration (`moving-rides-mutations.json`). Each mutation was killed by an
+executed failing test; none was a compiler-error kill and there were no survivors in this run.
+The source hashes before and after restoration match. The full
+`dotnet test tests/TPW.Sim.Tests/` suite passes **1,879/1,879**, with zero skipped cases. Runtime results
+follow below.
+
+### Executed runtime results
+
+`moving-rides-run.json` records **2 accepted positive runs and 3 rejected controls**, with
+source, log and screenshot SHA-256 hashes. The complete proof invocation exited 0; its
+restored `dotnet build game/` reported **0 warnings and 0 errors**. Both sampled scene poses
+matched the simulation and had nonempty meshes (track model 5, tour model 1).
+
+| Run | Same loaded vehicle, first → second sample | Completed vehicles/trips | Ready now | Unloaded passengers | Oracle |
+|---|---|---:|---:|---:|---|
+| Dino Karts 215 | ID 1, ticks 180→200: `(5760,512,6528)` → `(5680,512,6528)` | 8 | 0 | 8 | Accepted |
+| Jurassic Tours 208 | ID 0, ticks 120→140: `(6238,256,6528)` → `(5798,256,6528)` | 3 | 1 | 6 | Accepted |
+| Track without track | 0 vehicles, 0 dispatches, 0 position changes | 0 | 0 | 0 | **REJECTED** |
+| Track frozen after dispatch | 4 vehicles, 4 passengers, 4 dispatches, 0 position changes | 0 | 0 | 0 | **REJECTED** |
+| Tour frozen after dispatch | 2 vehicles, 6 passengers, 1 dispatch, 0 position changes | 0 | 0 | 0 | **REJECTED** |
+
+End-of-run totals are separate from the two earlier movement samples. Track completion
+retains eight events after all eight ready vehicles have gone; tour unloading continues
+one passenger per cadence while other transports move. An earlier control process stopped
+before its screenshot and was not accepted as a valid control. The successful complete
+rerun used a separate copy of the same Godot 4.6 Mono executable and an absolute project path;
+that isolation changes no game rule. Its five completed captures, rather than the interrupted
+attempt, supply the JSON evidence. Rendered runs covered **2 definitions**; they are not a
+claim of twelve separate live catalogue runs.
+
+### Dead-port audit
+
+The committed baseline (`7767e6f`) reports **73 candidates in 34 files**;
+the completed work reports **69 candidates in 32 files**. The four names removed are
+`PathedRide.CompleteLap`, `TourRide.StatusAfterMovement`, `RidePanel.TrackVehicleSpeed` and
+`RidePanel.TourVehicleSpeed` (the last two are file labels; the actual class is
+`RideSliderEffects`). Full outputs are `moving-rides-dead-port-before.txt` and
+`moving-rides-dead-port-after.txt`.
+
+For resumption transparency, the supplied uncommitted partial files already made the textual
+audit report **69** on arrival, but `dotnet build game/` failed with five compiler errors.
+The clean baseline audit was run with committed `game/*.cs` in a temporary directory and
+unchanged core/tests. Thus the branch comparison is **73 → 69**, and this resumed worktree's
+literal before/after is **69 → 69**. The compiler fixes, mutation audit and live controls,
+not the identifier scan alone, establish the newly running hosts.
+
+### Still not established
+
+- PSX-equivalent trip times, steering, acceleration, spacing, collision/avoidance or full piece
+  geometry; straight host motion and a level deck establish movement, not complete physics.
+- Exact dock/vehicle seat transforms, attached passenger rendering, vehicle animation and
+  car variant choice. Tour terrain clearance does not include objects.
+- Acceptance of the retained disagreements in §0, including queue-empty partial-load tours
+  and running-only wear; these hosts do not settle those disputes or port the missing wear path.
+- Preview/test-controller behavior, exact finishing offsets, save/resume of active vehicles,
+  or replacing the pre-existing definition-entry-keyed guest lists with per-placement IDs.
+- Shared “served” accounting: the current adapter increments `RideRuntime.Served` on exit,
+  and `VisitorQueue.RideReward` increments it again. The observed park totals are therefore
+  twice the hosts' unload totals in these fixtures. The proof uses the host's explicit unload
+  count for passenger totals; correcting that pre-existing shared counter is outside this change.
+- A live rendered proof for every catalogue definition. Engine-free cases cover the eight
+  track seat inputs and four tour speed inputs; the rendered proof uses Dino Karts (215) and
+  Jurassic Tours (208). Synthetic cases are not twelve independent PSX measurements.
+
+### Destination geometry — verified against the binary, and it was untested
+
+The three tour destination tables were ported with addresses cited and **no test over any of
+them**. The 38-mutation audit above pinned cadences, seat counts, record offsets and the guest
+transactions; it never touched `Offset()`. Re-read from the branch targets, not from the port:
+
+| state | function | horizontal | rise | rot 0 | rot 1 | rot 2 | rot 3 |
+|---|---|---|---|---|---|---|---|
+| Departing | `0x800A426C` | `0x384` = 900 | none | X−900 | Z+900 | X+900 | Z−900 |
+| Returning | `0x800A3E90` | `0x7d0` = 2000 | `0x5dc` = 1500 | X+2000 | Z−2000 | X−2000 | Z+2000 |
+| Approaching | `0x800A3FA4` | `0x320` = 800 | `0x258` = 600 | X+800 | Z−800 | X−800 | Z+800 |
+
+All three switch on the same station rotation and write the same two stack words; the rise is
+applied **unconditionally**, outside the switch (`0x800A3F78`, `0x800A408C`). The port agrees on
+every cell. Docking aims at the dock itself, with no offset.
+
+**What the measurement showed.** Four mutations, each run against the suite with the new file
+excluded and then against the new file alone:
+
+| mutation | pre-existing 1,879 | new geometry cases |
+|---|---|---|
+| departure sign flip | 1 failed | 4 failed |
+| rot-0 axis swap (X→Z) | **1,879 passed** | 2 failed |
+| return rise 1500 → 1501 | **1,879 passed** | 4 failed |
+| approach 800 → 801 | **1,879 passed** | 4 failed |
+
+Three of the four were invisible to the whole suite. `tests/TPW.Sim.Tests/ParkTourGeometryTests.cs`
+closes that: 12 cases asserting the constant, the axis and the sign per rotation, measured as
+deltas from the car's own dock position so they survive any footprint or terrain change.
+
+⚠ This pins the destination each state *aims at*. It says nothing about the path taken to get
+there — straight-line following is still the GUESS-medium recorded above, pending `0x800A382C`.

@@ -112,6 +112,8 @@ namespace TPWGodot
         /// <summary>From <c>--park-slider=speed,75</c>: move a slider on the selected attraction and report
         /// what it actually became, so the clamping is provable without a mouse.</summary>
         string _autoSlider;
+        /// <summary>--park-deselect: close the modal after scripted slider edits, so a capture shows the park.</summary>
+        bool _autoDeselect;
         /// <summary>From <c>--park-context=x,z</c>: the right button's command list opened on that tile.</summary>
         string _autoContext;
         /// <summary>From <c>--park-picker[=tab]</c>: the purchase catalogue open on that category, for captures.</summary>
@@ -622,6 +624,7 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-hover=")) _autoHover = arg.Substring("--park-hover=".Length);
                 else if (arg.StartsWith("--park-select=")) _autoSelect = arg.Substring("--park-select=".Length);
                 else if (arg.StartsWith("--park-slider=")) _autoSlider = arg.Substring("--park-slider=".Length);
+                else if (arg == "--park-deselect") _autoDeselect = true;
                 else if (arg.StartsWith("--park-context=")) _autoContext = arg.Substring("--park-context=".Length);
                 else if (arg == "--park-picker") _autoPicker = 0;
                 else if (arg.StartsWith("--park-picker=")) _autoPicker = int.Parse(arg.Substring("--park-picker=".Length));
@@ -1041,6 +1044,11 @@ namespace TPWGodot
                         }
                     }
                     // LAST, so it reports the state everything else left behind.
+                    if (_autoDeselect)
+                    {
+                        _park.CloseModal();
+                        GD.Print("[panel] deselected after scripted edits");
+                    }
                     if (_autoTile != null)
                     {
                         foreach (var tl in _autoTile.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
