@@ -219,12 +219,60 @@ if exitPoints() == 0: return                              ; 0x8006729C  ([0x8010
 S     = Score(McAi)                                       ; 0x800672C8 → 0x80067400
 rate  = (S + [0x80102E54]) * 0x1333 / [0x80102E50]        ; 0x800672D0..0x80067314   statics 0, 0x14000
 lanes = lane0 + lane1                                     ; 0x80059150(0) + (1)
-cap   = 25 + 75 * kinds_built / kinds_in_catalogue        ; 0x800691F0 (per parkopen; structure re-read, counts not evaluated)
+cap   = 25 + 75 * kinds_built / kinds_in_catalogue        ; 0x800691F0 — RIDES ONLY, see §3.1
 now   = guests_now                                        ; 0x8005BE9C
 if [0x80102E60] != 0: count = min(20 − lanes, 20)         ; debug switch, ignores rate and cap
 else:                 count = min(cap − now, min(20 − lanes, rate))
 spawn `count` Visitors at exit point 0, type rand(8), state 36
 ```
+
+### 3.1 The cap counts RIDES, and only rides (SOURCED, 2026-09-21)
+
+`0x800691F0` zeroes two stack accumulators and makes **five identical passes** through the tally helper
+`0x8006914C`, each handed one category's catalogue count from the world record:
+
+| getter | world-record field | kind passed | type name |
+|---|---|---|---|
+| `0x8006A214` | +0x10 | 3 | NonPathedRide (flat rides) |
+| `0x8006A274` | +0x30 | 6 | PathedRide (track rides) |
+| `0x8006A244` | +0x20 | 7 | TourRide |
+| `0x8006A2A4` | +0x40 | 8 | TrackUpgrade |
+| `0x8006A2D4` | +0x50 | 1 | RollerCoaster |
+
+then `cap = 25 + 75 * built / total` at `0x800692B0..0x800692FC` (`5*t0`, then `(x << 4) - x` = `75*t0`,
+`div`, `addiu v0,v0,0x19`).
+
+**The pairings are corroborated by a second, independent site.** `0x8006A158` is the generic
+"catalogue count for kind" dispatcher — `kind - 1` bounded below 7, jump table `0x800E16B8` — and its
+table reads kind 1 → +0x50, 2 → +0x60, 3 → +0x10, 4 → +0x70, 5 → +0x80, 6 → +0x30, 7 → +0x20. Every
+kind the cap passes lands on the field the cap reads. Type names are the `CONTEXT_*` strings at
+`0x800DDDD4` (rides.md §0.1). Kind 8 has no dispatcher row, which is why the cap calls its getter
+directly.
+
+**✅ Type 8 is empty on this disc.** Census of every definition record — 488 files carrying the 0x96
+header and a type byte, which is the rip's **two** extractions of the same 244 records, so halve it:
+12 coaster, 91 feature, 59 flat, 37 shop, 33 sideshow, 8 track, 4 tour, **0 TrackUpgrade**. So the
+kind-8 pass contributes 0 to both halves and the port's catalogue, which has no type 8 at all, loses
+nothing by it. (Stated with the count because an empty category passes any "we handle it" test in
+silence.)
+
+**⭐ The absence is the finding.** Fields +0x60 (Feature), +0x70 (Shop) and +0x80 (SideShow) exist, have
+getters of their own, and the cap never calls them. A hundred shops do not raise the ceiling by one
+guest.
+
+**What "built" counts.** `0x8006914C` loops `i = 0..count-1` over the category's catalogue and adds
+`0x80069E30(mgr, kind, i) != 0 ? 1 : 0`. That callee walks the live object list (`0x80053BE0` head,
+`0x8006AE40` next), matching each object's class kind against `kind` and its definition index against
+`i`, and returns HOW MANY exist — collapsed to a bit by the caller. So the numerator is **distinct
+catalogue entries with at least one instance standing**, not instances. Eight of one ride is one.
+
+**⚠ This was mis-ported and it was the reason parks plateaued.** `ParkView.BusArrived` counted every
+attraction type in both halves of the ratio. World 0's catalogue is 47 entries of which 20 are rides,
+so three rides built gave `225/47 = 4` → cap 29 instead of `225/20 = 11` → cap 36, and every bus after
+the 29th guest arrived empty. Fixed 2026-09-21; measured after the fix, on the port: three rides →
+capacity 36 and the park settled at exactly 36 guests; five rides plus two shops and a feature →
+capacity **43** (= 25 + 75·5/20) and settled at 43. The shops and the feature moved it by nothing,
+which is the discriminator — the old expression would have said 37.
 
 `Score` 0x80067400: returns 0 if the attraction list is empty, else **10 +** Σ over placed attractions
 (iterator 0x8006DCA0/DD3C/DE68 over the kind-3 list at `[0x80103844]`), by type via jump table
@@ -337,8 +385,9 @@ held poke is overwritten.
   1589, 2977) and ~40 paid. 120 does not fit 20 per bus at 1388 frames per bus; if that run also had
   the force-bus pokes from parkopen §3.3 or started from a different state, that would explain it.
   Worth a re-measure of `*(u32*)(*(u32*)0x80103884+0xC)` rather than a derived count.
-- `cap` (0x800691F0): structure confirmed (5 catalogue categories, built/total), the theme's catalogue
-  counts were not evaluated, and no run reached the cap. UNMEASURED value.
+- `cap` (0x800691F0): the five categories are now READ and named (§3.1). What is still UNMEASURED is
+  the theme's catalogue counts themselves — 0x800DDDC4's four per-world records are BSS, every word of
+  them reads zero in the image, and the scenario loader fills them at run time.
 - Real hardware δ: nominal 10082/tick from the RCnt2 arithmetic gives ≈ 688 ticks; UNMEASURED.
 - Whether anything in the overlays writes the five knob words. UNMEASURED.
 

@@ -758,10 +758,21 @@ namespace TPWGodot
                 int age = AgeInDays(a);
                 draws.Add(new TPW.Sim.AttractionDraw(a.Rec.Type, a.Level, a.Rec.BaseIntensity,
                                                      (age << 12) / 2024 < 4));
-                kinds.Add(a.Rec.Entry);
+                // ⚠ THE CAP IS RIDES-ONLY AND THIS USED TO COUNT EVERYTHING. `kinds.Add(a.Rec.Entry)`
+                // with no filter, over a catalogue count of every type, put shops, features and sideshows
+                // into BOTH halves of the cap's ratio — and the binary reads five ride categories and
+                // ignores the other three outright (BusLoad.CountsTowardCap). It is not a rounding
+                // difference: world 0's catalogue is 47 entries, of which 20 are rides, so three rides
+                // built scored 225/47 = 4 rather than 225/20 = 11, and the park's ceiling sat at 29 guests
+                // instead of 36. That ceiling is exactly what `-> 0 guests` in the log below was: every bus
+                // after the park reached 29 arrived full-price and empty.
+                if (TPW.Sim.BusLoad.CountsTowardCap(a.Rec.Type)) kinds.Add(a.Rec.Entry);
             }
-            int catalogue = Math.Max(1, _attractions.Count);
-            int capacity = 25 + 75 * kinds.Count / catalogue;
+            // ⚠ The SCORE above still sees every type — its jump table has real branches for feature, shop
+            // and sideshow. Only the CAP is rides-only. Two different sums off one loop.
+            int catalogue = 0;
+            foreach (var (rec, _) in _attractions) if (TPW.Sim.BusLoad.CountsTowardCap(rec.Type)) catalogue++;
+            int capacity = TPW.Sim.BusLoad.PopulationCap(kinds.Count, catalogue);
             int score = TPW.Sim.BusLoad.ParkScore(draws, _guests.Dice);
             // ⭐ THE LANE COUNT IS REAL NOW. It was 0 while nothing queued at a turnstile, which was
             // correct then; with the gate wired, `20 - lanes` caps the load by how many are already
@@ -771,7 +782,10 @@ namespace TPWGodot
             // and the turnstile walks it in; with no entrance wired it falls back to appearing INSIDE the
             // park for nothing, which is what this did before.
             for (int i = 0; i < count; i++) _guests.SpawnAtGate();
-            GD.Print($"[bus] arrived: score {score} capacity {capacity} lanes {_guests.LanesWaiting} -> {count} guests");
+            // The cap's own inputs are on the line because a bare "capacity 29" cannot tell a full park
+            // from a miscounted denominator, and that is precisely the distinction that was missed here.
+            GD.Print($"[bus] arrived: score {score} capacity {capacity} ({kinds.Count} of {catalogue} ride "
+                   + $"entries built) guests {_guests.Count} lanes {_guests.LanesWaiting} -> {count} guests");
         }
 
         /// <summary>[0x80102E50], the divisor the draw is scaled by.</summary>

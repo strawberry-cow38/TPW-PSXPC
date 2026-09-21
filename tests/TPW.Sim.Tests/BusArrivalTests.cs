@@ -160,6 +160,47 @@ namespace TPW.Sim.Tests
         [Fact]
         public void TheMeasuredIntervalIsSixNinetyFour() => Assert.Equal(694, BusSchedule.DefaultIntervalTicks);
 
+        // ⭐ THE CAP IS RIDES-ONLY. Listed one type per line rather than as a set membership test, because
+        // the whole defect this replaced was a filter that was never written: a set nobody enumerates reads
+        // the same whether it holds five types or all eight.
+        [Theory]
+        [InlineData(1, true)]    // RollerCoaster, 0x800691F0 passes kind 1 -> world record +0x50
+        [InlineData(3, true)]    // NonPathedRide (flat), kind 3 -> +0x10
+        [InlineData(6, true)]    // PathedRide (track), kind 6 -> +0x30
+        [InlineData(7, true)]    // TourRide,           kind 7 -> +0x20
+        [InlineData(8, true)]    // TrackUpgrade,       kind 8 -> +0x40
+        [InlineData(2, false)]   // Feature  -- its getter (+0x60) exists and the cap never calls it
+        [InlineData(4, false)]   // Shop     -- +0x70, likewise
+        [InlineData(5, false)]   // SideShow -- +0x80, likewise
+        [InlineData(0, false)]   // Void
+        public void OnlyRidesAndTrackUpgradesCountTowardTheCap(int type, bool counted)
+            => Assert.Equal(counted, BusLoad.CountsTowardCap(type));
+
+        [Fact]
+        public void AnEmptyParkCapsAtTwentyFiveAndAFullCatalogueAtAHundred()
+        {
+            Assert.Equal(25, BusLoad.PopulationCap(0, 20));
+            Assert.Equal(100, BusLoad.PopulationCap(20, 20));
+        }
+
+        // ✅ MEASURED in the port, world 0 (14 flat + 3 coaster + 2 track + 1 tour = 20 ride entries):
+        // three rides built reported capacity 36 and the park settled at exactly 36 guests; five rides
+        // reported 43 and settled at 43. Both are this expression.
+        [Theory]
+        [InlineData(3, 36)]
+        [InlineData(5, 43)]
+        public void TheMeasuredParkCaps(int built, int cap) => Assert.Equal(cap, BusLoad.PopulationCap(built, 20));
+
+        // ⚠ THE FALSIFIER FOR THE BUG THIS REPLACED. The old reading counted every attraction type in both
+        // halves: five rides plus three shops over a 47-entry catalogue gives 37, not 43. If someone ever
+        // puts shops back into the numerator, the numbers stop matching the run.
+        [Fact]
+        public void ShopsAndFeaturesDoNotRaiseTheCeiling()
+        {
+            Assert.Equal(43, BusLoad.PopulationCap(5, 20));
+            Assert.NotEqual(BusLoad.PopulationCap(5 + 3, 47), BusLoad.PopulationCap(5, 20));
+        }
+
         [Fact]
         public void AskingTwiceOnTheSameTickDoesNotProduceTwoBuses()
         {

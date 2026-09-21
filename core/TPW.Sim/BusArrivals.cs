@@ -171,6 +171,56 @@ namespace TPW.Sim
             return s;
         }
 
+        /// <summary>⚠ THE POPULATION CAP COUNTS RIDES ONLY — NOT SHOPS, FEATURES OR SIDESHOWS. This is
+        /// the whole reason a park stops filling, so getting the denominator wrong changes the ceiling and
+        /// nothing else, silently.
+        ///
+        /// READ at 0x800691F0. It zeroes two accumulators on the stack and makes FIVE identical passes
+        /// through the tally helper 0x8006914C, each pass handed one category's catalogue count:
+        /// <code>
+        ///   0x8006A214 -> world record +0x10, passed with kind 3   NonPathedRide  (flat rides)
+        ///   0x8006A274 -> +0x30,              kind 6               PathedRide     (track rides)
+        ///   0x8006A244 -> +0x20,              kind 7               TourRide
+        ///   0x8006A2A4 -> +0x40,              kind 8               TrackUpgrade
+        ///   0x8006A2D4 -> +0x50,              kind 1               RollerCoaster
+        ///   cap = 25 + 75 * built / total     0x800692B0..0x800692FC  (5*t0, then (x&lt;&lt;4)-x = 75*t0)
+        /// </code>
+        /// ✅ THE PAIRINGS ARE CORROBORATED BY A SECOND, INDEPENDENT SITE. 0x8006A158 is the generic
+        /// "catalogue count for kind" dispatcher — `kind - 1` bounded below 7, jump table 0x800E16B8 — and
+        /// its table maps kind 1→+0x50, 2→+0x60, 3→+0x10, 4→+0x70, 5→+0x80, 6→+0x30, 7→+0x20. Every kind
+        /// the cap passes lands on the field the cap reads, so the five categories above are named by the
+        /// game's own mapping rather than by my reading order. The type names are the CONTEXT_* strings at
+        /// 0x800DDDD4 (rides.md §0.1): 1 RollerCoaster, 2 Feature, 3 NonPathedRide, 4 Shop, 5 SideShow,
+        /// 6 PathedRide, 7 TourRide, 8 TrackUpgrade.
+        ///
+        /// ⭐ WHAT IS ABSENT IS THE FINDING. Fields +0x60 (Feature), +0x70 (Shop) and +0x80 (SideShow)
+        /// exist, have getters, and the cap never calls them. A hundred shops do not raise the ceiling by
+        /// one guest.
+        ///
+        /// ⚠ AND NOTE WHAT "BUILT" COUNTS. The tally helper loops i = 0..count-1 over the category's
+        /// catalogue and adds `0x80069E30(mgr, kind, i) != 0 ? 1 : 0` — a walk of the live object list that
+        /// returns HOW MANY instances exist, collapsed to a bit. So it is distinct catalogue ENTRIES with at
+        /// least one built instance, not instances. Eight of one ride is one.</summary>
+        ///
+        /// ✅ AND TYPE 8 IS EMPTY, WHICH IS WHY ITS ABSENCE FROM THE PORT'S CATALOGUE COSTS NOTHING. A
+        /// census of every definition record on the disc — all 488 files with the 0x96 header and a type
+        /// byte, which is TWO extractions of the same 244 records, so halve it — gives 12 coaster, 91
+        /// feature, 59 flat, 37 shop, 33 sideshow, 8 track, 4 tour and **0 TrackUpgrade**. It is kept in
+        /// the predicate anyway, because the binary passes kind 8 and a category that is empty today is
+        /// not a category that may be dropped.
+        public static bool CountsTowardCap(int type)
+            => type == 1 || type == 3 || type == 6 || type == 7 || type == 8;
+
+        /// <summary>25 at the bottom, 100 once every ride in the catalogue has been built at least once.</summary>
+        public const int CapBase = 25, CapSpan = 75;
+
+        /// <summary>The cap itself. Both arguments are counted over <see cref="CountsTowardCap"/> types only.
+        /// ⚠ The catalogue count is NOT in TPW.BIN: 0x800DDDC4 is a table of four per-world records that live
+        /// in BSS and are filled by the scenario loader, so every word of it reads zero in the image. The
+        /// caller supplies it.</summary>
+        public static int PopulationCap(int entriesBuilt, int entriesInCatalogue)
+            => CapBase + CapSpan * entriesBuilt / Math.Max(1, entriesInCatalogue);
+
         /// <summary>Guests on the next bus.</summary>
         public static int HeadCount(int parkScore, int capacity, int guestsNow, int lanes, int divisor, int bonus = 0)
         {
