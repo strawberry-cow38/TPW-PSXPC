@@ -1474,7 +1474,16 @@ namespace TPWGodot
                 sb.Append($" for {_now - g.StateSince} ticks");
                 sb.Append($"; purpose {g.V.Purpose}");
                 sb.Append(g.V.HasTarget ? $"; target ({g.TargetTileX},{g.TargetTileZ})" : "; no target");
-                if (g.WaypointHead == WaypointPool.NoChain) sb.Append(" ⚠ no route");
+                // ⚠⚠ THE WARNING WAS ON EVERY IDLE GUEST, and it sent master hunting a routing bug in a
+                // park with 0 route failures. `WaypointHead == NoChain` means "not mid-walk", which is
+                // the NORMAL condition for a guest standing about: Wander, purpose Finished, no target,
+                // no chain is a guest doing exactly what it should. Printing ⚠ there makes the readout
+                // cry wolf on the healthy majority and tells you nothing about the sick one.
+                // ⭐ A MISSING ROUTE IS ONLY NEWS WHEN THE GUEST WANTS TO GO SOMEWHERE. Warn when it has
+                // a target and no way to it and is not waiting for an answer — that is a stuck guest.
+                if (g.WaypointHead == WaypointPool.NoChain)
+                    sb.Append(g.V.HasTarget && !g.Waiting ? " ⚠ no route TO ITS TARGET"
+                            : g.Waiting ? "; waiting for a route" : "; not walking");
                 if (g.V.InQueue) sb.Append("; queued");
                 if (g.Hidden) sb.Append("; ABOARD");
                 sb.Append($"; happy {g.V.Happiness} nausea {g.V.Nausea} tired {g.V.Tiredness}");
@@ -1484,7 +1493,8 @@ namespace TPWGodot
                 if (st.X / ParkTerrain.TileUnits != tileX || st.Z / ParkTerrain.TileUnits != tileZ) continue;
                 n++;
                 sb.Append($"\n  {st.S.Kind} #{st.GetHashCode() & 0xFFFF}: {st.S.State}"
-                        + (st.WaypointHead == WaypointPool.NoChain ? " ⚠ no route" : ""));
+                        + (st.WaypointHead != WaypointPool.NoChain ? "" 
+                         : st.Waiting ? "; waiting for a route" : "; not walking"));
             }
             return n == 0 ? "" : $"\nunder the mouse ({tileX},{tileZ}), {n}:" + sb;
         }
