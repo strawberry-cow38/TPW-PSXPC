@@ -1248,6 +1248,7 @@ namespace TPWGodot
                 int len = PhaseTicks(a);
                 sb.Append($"\n  {a.Rec.Entry}: status {(int)a.Status} {a.Status}, "
                         + $"tick {(len > 0 ? a.Cycle.Accumulator >> RideCycle.FixedShift : 0)}/{len}, "
+                        + Unreachable(a)
                         + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, level {a.Level}, "
                         + $"reliability {a.Reliability}, type {a.Rec.Type}"
                         + $", intensity base {a.Rec.BaseIntensity} live {RidePanel.Intensity(a)}"
@@ -2678,6 +2679,22 @@ namespace TPWGodot
 
         /// <summary>The placed rides as a mechanic acts on them. Live handles, not a snapshot: the
         /// claim, the status and the closing progress are all written back through them.</summary>
+        /// <summary>⚠ SAYS WHEN NOBODY CAN GET TO A RIDE. A ride whose door is cut off reports itself
+        /// perfectly healthy -- open, waiting, queue empty -- because from its own point of view nothing is
+        /// wrong: guests just never arrive. The park-wide routing-failure count is the only other trace and
+        /// it does not say WHICH ride. This has now cost an hour each to two different people chasing a
+        /// symptom somewhere else entirely, so the ride says it itself.</summary>
+        string Unreachable(PlacedAttraction a)
+        {
+            if (_guests == null || !a.IsRide) return "";
+            var door = a.Rec.EntranceTile(a.Ox, a.Oz, a.Rot);
+            if (door is not { } d) return "";
+            int area = _guests.AreaOf(d.X, d.Z);
+            if (area == _guests.MainArea) return "";
+            return $"⚠ DOOR CUT OFF ({_guests.AreaTiles(area)} walkable tiles, park has "
+                 + $"{_guests.AreaTiles(_guests.MainArea)}) - build it a queue; ";
+        }
+
         IReadOnlyList<IRideJob> RideJobs()
         {
             _rideJobs.Clear();
