@@ -399,7 +399,12 @@ namespace TPWGodot
         /// <summary>⚠ DELIBERATELY A NO-OP, NOT A THROW. The event goes to the message-box state
         /// machine (0x800139B4 on 0x8010265C) and what each id means to it is NOT TRACED — so there is
         /// nothing to wire it to yet, and dropping it changes no money and no guest.</summary>
-        public void PostEvent(int id, int value) { }
+        /// <summary>⚠ THIS WAS `{ }`. It carries thirteen of the advisor's twenty counters -- balloon,
+        /// costume and gift (5/6/7), the four shop verdict groups and the sideshow's (9..13) and the
+        /// four satisfaction groups and the sideshow's (14..18) -- so an empty body here left every
+        /// advisor rule about shops and sideshows unreachable. See GuestSpending's note for why the id
+        /// is a counter index and not a message-box id.</summary>
+        public void PostEvent(int id, int value) => Advisor?.Invoke(id, value);
 
         /// <summary>⚠ NO PROP POOL IN THE PORT, so a guest that buys a balloon never carries one. It is
         /// a drawing, not a rule: the purchase, the money and every stat effect have already happened by

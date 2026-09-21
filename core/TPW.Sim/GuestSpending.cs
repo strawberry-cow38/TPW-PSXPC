@@ -159,9 +159,16 @@ namespace TPW.Sim
         /// ⚠ ONE PAST THE TYPE TABLE; see VisitorTables.CostumePreference.</summary>
         public const int CostumeVisitorType = 8;
 
-        /// <summary>The message-box events the purchase routines post (0x800139B4 on the object at
-        /// 0x8010265C; behaviour.md §2.5 calls them "sounds", transport.md §2.1 identifies the object as
-        /// the message-box state machine). What the box does with each id is not traced.</summary>
+        /// <summary>⭐⭐ THESE ARE THE ADVISOR'S EVENT COUNTERS, and the ids are counter indices.
+        /// SETTLED BY DISASSEMBLY, 2026-09-21: the balloon site (0x8008EC44), the ride-warning site
+        /// (0x8009C768) and the queue-abandonment site (0x800908A0) all load the SAME object --
+        /// `lui a0,0x8010; lw a0,0x265C(a0)` -- and all three call 0x800139B4 with an index in a1 and an
+        /// amount in a2. statistics.md's §5 table names those same three addresses as the writers of
+        /// counters 5, 0 and 3, so the object at 0x8010265C is the statistics/advisor object.
+        ///
+        /// ⚠ THE OLDER READING SAID "message-box state machine, what it does with each id is not
+        /// traced" (behaviour.md §2.5 calls them sounds). That is the same call seen with less of the
+        /// picture; it left this door wired to nothing for as long as it stood.</summary>
         public const int EventBalloon = 5, EventCostume = 6, EventGift = 7, EventSideShowVerdict = 0xD, EventSideShowRating = 0x12;
 
         /// <summary>The verdict event by product kind, table 0x800E3B34 (0x8008ED74). Kinds 8 and up
