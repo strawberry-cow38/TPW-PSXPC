@@ -951,7 +951,14 @@ namespace TPWGodot
                         foreach (var run in _autoLay.Split(';', System.StringSplitOptions.RemoveEmptyEntries))
                         {
                             var v = System.Array.ConvertAll(run.Split(','), int.Parse);
-                            if (v.Length == 4) GD.Print($"[tpw] --park-lay {run}: {_park.LayRun(v[0], v[1], v[2], v[3])} tiles took path");
+                            // ⭐ THE PIECE COUNT AFTER EVERY RUN, because "N tiles took path" does not
+                            // say whether they JOINED anything. Four fixtures in a row today were built
+                            // in two or more disconnected pieces — staff could not reach the staff room,
+                            // guests could not reach the ride — and each one took a full run to find
+                            // out. A lay that drops the count from 3 to 1 is the one that mattered.
+                            if (v.Length == 4)
+                                GD.Print($"[tpw] --park-lay {run}: {_park.LayRun(v[0], v[1], v[2], v[3])} tiles took path"
+                                       + $", park now in {_park.WalkablePieces} piece(s)");
                         }
                     if (_autoGhost != null)
                     {

@@ -836,6 +836,10 @@ namespace TPWGodot
         public string StartResearch(int slot, int type, int index)
             => _guests?.StartResearch(slot, type, index) ?? "no guests";
 
+        /// <summary>How many separate walkable pieces the park's paths form. One is healthy; more than
+        /// one means somebody somewhere cannot reach something and will look broken instead.</summary>
+        public int WalkablePieces => _guests?.AreaCount ?? -1;
+
         public string StartResearch(int slot, int choice)
             => _guests?.StartResearch(slot, choice) ?? "no guests";
 
