@@ -363,6 +363,7 @@ namespace TPWGodot
             // rubbish litters instead of walking to one.
             _guests.SlowClockDay = () => _finances?.Calendar.TotalDays ?? 0;
             _guests.NearestBin = NearestBinTile;
+            _guests.Preflight = Preflight;
             // ⭐ AND THE RESEARCH TREE, WHICH NOTHING HAS EVER OWNED. Rebuilt with the park for the
             // same reason the gate is: ParkGuests is new here, so a system wired once at boot would be
             // silently dropped on the first load and the researcher would go back to wandering.
@@ -807,6 +808,10 @@ namespace TPWGodot
         public string StartResearch(int slot, int type, int index)
             => _guests?.StartResearch(slot, type, index) ?? "no guests";
 
+        /// <summary>Whether a route to a provably unreachable target is refused before the pathfinder
+        /// sees it (--park-nopreflight turns it off). See ParkGuests.Seek.</summary>
+        public bool Preflight { get; set; } = true;
+
         (int X, int Z)? NearestBinTile(int x, int z)
         {
             (int X, int Z)? best = null;
@@ -1129,6 +1134,7 @@ namespace TPWGodot
             + $"\n{_guests.LitterLine()}"
             + $"\n{_guests.InfluenceLine()}"
             + $"\n{_guests.ResearchLine()}"
+            + $"\n  preflight {(_guests.Preflight ? "on" : "OFF")}, {_guests.PreflightRefused} routes refused as unreachable"
             + $"\n{_guests.StateReport()}"
             + $"\n{_guests.QueueWaitReport()}"
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"

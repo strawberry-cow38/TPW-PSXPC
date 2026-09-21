@@ -584,6 +584,7 @@ namespace TPWGodot
                 else if (arg == "--park-log-rides") _logRides = true;
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
+                else if (arg == "--park-nopreflight") _noPreflight = true;
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
                 else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
                 else if (arg == "--park-seats") _autoSeats = true;
@@ -1181,6 +1182,10 @@ namespace TPWGodot
                 // a --park-nogate run reported the gate's own numbers back at me, which is exactly what
                 // a working control would have made impossible. The check is that it prints "no gate".
                 _park.NoGate = _noGate;
+                // ⚠ BEFORE the park loads, like NoGate: ParkGuests is rebuilt by ShowPark, so a flag
+                // set afterwards is a control that never arms — which has already cost a whole
+                // measurement on this project once.
+                _park.Preflight = !_noPreflight;
                 _park.Load(map, $"map #{entry}", ground, world, scenery, _commonSheet, gateModels, _exe, _busPack);
                 _park.SetToolSounds(_toolSounds, _parkSounds, _uiSounds, _guestSounds);
                 // The advisor's voice, in the language the front end picked. ⚠ AFTER Load, like NoGate
@@ -1547,6 +1552,7 @@ namespace TPWGodot
             }
         }
 
+        bool _noPreflight;
         string _autoResearch;
         string _shotTarget;
         void TakeShot()

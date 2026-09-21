@@ -184,11 +184,57 @@ namespace TPWGodot
         public void SetBrain(Func<IReadOnlyList<GuestTarget>> targets)
             => _brain = new GuestBrain(_map, targets, (g, tx, tz) => Ask(g, tx, tz, WalkFlags), () => _now);
 
+        /// <summary>⭐ EVERY PATH REQUEST IN THE PARK GOES THROUGH HERE, and it refuses one whose two
+        /// ends are in different connected pieces of the map before the pathfinder ever sees it.
+        ///
+        /// ⚠⚠ THIS IS A DELIBERATE DIVERGENCE FROM THE ORIGINAL, and it is the only one in this file.
+        /// The original asks, searches, and fails. So does this, with one exception: a target the
+        /// guest provably cannot reach is refused immediately instead of burning a full 200-slice
+        /// budget first. Measured reason (findings/pathfinder.md): requests are scheduled newest-first
+        /// and only the head runs each frame, so ONE unreachable target holds the head for many frames
+        /// while everything behind it waits — and the old requests at the tail then never run at all.
+        /// Four to seven of the ten slots ended up permanently held, and 99% of every route request in
+        /// the park failed as a result. The scheduling is faithful and must stay; the trigger is what
+        /// this removes.
+        ///
+        /// ⚠ IT IS NOT A PATHFINDING SHORTCUT. Same-piece requests still go to the pathfinder and can
+        /// still fail on flags, budget or a full pool. This only declines the ones whose answer is
+        /// already known from the connectivity pass the park computes anyway.
+        ///
+        /// Turn it off with --park-nopreflight to measure against the original's behaviour; the count
+        /// is reported so a park refusing a lot of these is visibly a park with a connectivity
+        /// problem, which is the thing that should be fixed instead.</summary>
+        public bool Preflight { get; set; } = true;
+        public int PreflightRefused { get; private set; }
+
+        bool Seek(IPathClient client, int fromX, int fromY, int toX, int toY, PathFlags flagA, int flagB)
+        {
+            if (Preflight && _area != null
+                && AreaAt(fromX >> 8, fromY >> 8) != AreaAt(toX >> 8, toY >> 8))
+            {
+                PreflightRefused++;
+                // ⭐⭐ DELIVER THE FAILURE, DO NOT JUST DECLINE. This is the whole difference between
+                // a faithful shortcut and a behaviour change, and the first version of this got it
+                // wrong. The original ASKS and FAILS, and failing costs the guest happiness and
+                // boredom and sends it to wander. Returning a silent false instead skips all of that:
+                // measured, average boredom went from 35 to ZERO and targets chosen fell 76-fold,
+                // because guests were quietly retrying a refused request forever instead of taking
+                // the hit and doing something else. A park that felt fixed and had stopped playing
+                // the game.
+                //
+                // The pathfinder answers on a later frame, so this does too — the message is left for
+                // the next tick rather than re-entering the caller mid-decision.
+                client.OnPathMessage(PathMessage.Failed);
+                return false;
+            }
+            return _finder.Request(client, fromX, fromY, toX, toY, flagA, flagB);
+        }
+
         /// <summary>Every path request in the park goes through here, so the tile asked for is always
         /// recorded against the walker and a failure can say which KIND of failure it was.</summary>
         bool Ask(Walker w, int tx, int tz, PathFlags flags)
         {
-            if (!_finder.Request(w, w.X, w.Z, Centre(tx), Centre(tz), flags, 0)) return false;
+            if (!Seek(w, w.X, w.Z, Centre(tx), Centre(tz), flags, 0)) return false;
             w.TargetTileX = tx; w.TargetTileZ = tz;
             return true;
         }
@@ -197,7 +243,7 @@ namespace TPWGodot
         public void SetRideWorld(Func<IReadOnlyList<GuestTarget>> targets)
         {
             _rides = new ParkRideWorld(_map, () => _now,
-                (g, tx, tz) => _finder.Request(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
+                (g, tx, tz) => Seek(g, g.X, g.Z, Centre(tx), Centre(tz), WalkFlags, 0),
                 SetSingleWaypoint, FreeChain);
             _rideTargets = targets;
         }
@@ -586,7 +632,7 @@ namespace TPWGodot
                 return NearestBin(gg.X >> 8, gg.Z >> 8);
             },
             (v, tx, tz) => _byVisitor.TryGetValue(v, out var gg)
-                        && _finder.Request(gg, gg.X, gg.Z, Centre(tx), Centre(tz), WalkFlags, 0)
+                        && Seek(gg, gg.X, gg.Z, Centre(tx), Centre(tz), WalkFlags, 0)
                         && (gg.Waiting = true),
             // ⚠ THE GUEST'S OWN 8.8 POSITION, which Drop then scatters by ±100 (about 0.4 of a tile).
             // Passing a tile centre would stack every piece on the middle of its tile.
@@ -656,7 +702,7 @@ namespace TPWGodot
             // coordinate (0x80098E94..EB4), so this one does NOT apply Centre.
             (st, wx, wz) =>
             {
-                if (!_finder.Request(st, st.X, st.Z, wx, wz, WalkFlags, 0)) return false;
+                if (!Seek(st, st.X, st.Z, wx, wz, WalkFlags, 0)) return false;
                 st.Waiting = true;
                 return true;
             },
@@ -668,7 +714,7 @@ namespace TPWGodot
             () => _rideTargets?.Invoke() ?? (IReadOnlyList<GuestTarget>)System.Array.Empty<GuestTarget>(),
             (st, tx, tz) =>
             {
-                if (!_finder.Request(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return false;
+                if (!Seek(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return false;
                 st.Waiting = true;
                 return true;
             });
@@ -941,7 +987,7 @@ namespace TPWGodot
             () => _rideJobs?.Invoke() ?? (IReadOnlyList<IRideJob>)System.Array.Empty<IRideJob>(),
             (st, tx, tz) =>
             {
-                if (!_finder.Request(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return false;
+                if (!Seek(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0)) return false;
                 st.Waiting = true;
                 return true;
             },
@@ -958,7 +1004,7 @@ namespace TPWGodot
         {
             if (_walkable.Count == 0) return;
             var (tx, tz) = _walkable[_rng.Next(_walkable.Count)];
-            if (_finder.Request(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0))
+            if (Seek(st, st.X, st.Z, Centre(tx), Centre(tz), WalkFlags, 0))
             {
                 st.Waiting = true;
                 st.S.SetState(StaffState.Walking);
@@ -1480,7 +1526,7 @@ namespace TPWGodot
         void Wander(Guest g)
         {
             _wander ??= new ParkWanderWorld(_map, _waypoints, () => _now,
-                (w, x, y, flags, _) => _finder.Request(w, w.X, w.Z, x, y, (PathFlags)flags, 0) && (w.Waiting = true));
+                (w, x, y, flags, _) => Seek(w, w.X, w.Z, x, y, (PathFlags)flags, 0) && (w.Waiting = true));
             _wander.Current = g;
             if (VisitorWander.Tick(g.V, _wander, _dice) != WanderOutcome.PathRequested) return;
         }
