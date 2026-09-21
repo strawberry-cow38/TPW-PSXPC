@@ -1246,6 +1246,34 @@ namespace TPWGodot
         /// guest is that a ride has it, so this must equal the riders aboard. Anything more is a guest
         /// that has been swallowed — still in the list, never drawn, never ticked, gone for good — which
         /// is what an unimplemented EjectEveryone did to everyone aboard a ride that broke down.</summary>
+        /// <summary>How many levels of an attraction have been researched. READ 0x8006AC04: an EXCLUSIVE
+        /// upper bound, which is what RidePanel.CanOfferUpgrade compares the next level against.</summary>
+        public int ResearchedLevels(int type, int index)
+            => _research?.System?.LevelCount(new TPW.Sim.ResearchDefinition(type, index)) ?? 0;
+
+        /// <summary>Hired staff of one kind, and whether that kind is out. ⚠ The port has no strike
+        /// model, so the strike answer is a documented false rather than a measurement.</summary>
+        public int CountStaff(StaffKind kind)
+        {
+            int n = 0;
+            foreach (var s in _staff) if (s.S.Kind == kind) n++;
+            return n;
+        }
+        public bool IsOnStrike(StaffKind kind) => StaffWorld().IsTypeOnStrike(kind);
+
+        /// <summary>Hand the park its whole catalogue, for tests that need a researched level without
+        /// waiting game months for one. ⚠ Debug only.</summary>
+        public bool AllResearchUnlocked { set { if (_research != null) _research.AllUnlocked = value; } }
+
+        /// <summary>Tell the mechanics which rides are waiting for an upgrade, and how to clear one.
+        /// Both halves are needed: a queue nothing claims and a claim with no queue are equally dead,
+        /// and the port had the second.</summary>
+        public void SetUpgradeQueue(Func<IRideJob, bool> queued, Action<IRideJob> dequeue)
+        {
+            MechanicWorld().QueuedForUpgrade = queued;
+            MechanicWorld().DequeueUpgrade = dequeue;
+        }
+
         public int HiddenGuests { get { int n = 0; foreach (var g in _guests) if (g.Hidden) n++; return n; } }
 
         /// <summary>What the guests actually WANT, averaged. ⭐ THE SHOPS' WHOLE INPUT: a purchase is

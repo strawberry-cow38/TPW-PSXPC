@@ -103,10 +103,14 @@ namespace TPWGodot
             return n;
         }
 
-        /// <summary>⚠ FALSE, AND A GAP. This is the scenario flag that hands a park the whole
-        /// catalogue up front; the port has no scenario loader, so every park researches from
-        /// scratch. Answering true would silently skip the system this file exists to start.</summary>
-        public bool AllResearchUnlocked => false;
+        /// <summary>⚠ FALSE BY DEFAULT, AND STILL A GAP. This is the scenario flag that hands a park the
+        /// whole catalogue up front; the port has no scenario loader, so every park researches from
+        /// scratch and answering true by default would silently skip the system this file exists to
+        /// start. It is now SETTABLE, because it is the only way to reach the upgrade chain in a test --
+        /// every ride needs a researched level before its panel will offer one, and research takes game
+        /// months. Set only by an explicit debug flag, never by a park.</summary>
+        public bool AllUnlocked;
+        public bool AllResearchUnlocked => AllUnlocked;
 
         /// <summary>⚠ FALSE, AND A GAP. Restricted mode limits which definitions a scenario offers.
         /// Same reason as above: no scenario loader, so nothing restricts anything.</summary>
