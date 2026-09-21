@@ -109,7 +109,7 @@ namespace TPW.Sim
     }
 
     /// <summary>READ: the 0x88-byte train object's completion fields, 0x800B2220..2C8.
-    /// Its segment geometry, velocity and acceleration are deliberately world-side.</summary>
+    /// CoasterTrainMotion supplies segment geometry, velocity and acceleration in the sim.</summary>
     public sealed class CoasterTrain
     {
         /// <summary>READ: this train equals the pointer at owner+0xE28. GUESS-high: preview/test

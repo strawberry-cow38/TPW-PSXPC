@@ -83,3 +83,6 @@ build/
 *.user
 findings/records.json
 __pycache__/
+
+# Local TRX/log detail; the portable coaster mutation audit lives in findings/.
+/tests/TPW.Sim.Tests/TestResults/coaster-mutations/
