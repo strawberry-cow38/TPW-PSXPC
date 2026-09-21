@@ -49,13 +49,23 @@ public readonly record struct ObjectiveState(uint ParkBits, uint BonusBits);
 
 /// <summary>Host seam only: each event grants ONE Gold Ticket (0x800677C8 -> 0x8006BFE4),
 /// incrementing spendable and lifetime totals 0x80103984/88 and refreshing the HUD. Then post
-/// MessageId via advisor 0x80014144 AND the type-2 list route 0x800693C8, in returned order.
+/// MessageId via advisor 0x80014144 and, when AddToMessageList is true, the type-2 list route
+/// 0x800693C8, in returned order. Minigame wins use only the advisor route (0x800B9AFC..B14).
 /// Neither ParkAdvisor nor ParkMessages is called here. Deliver each returned event once.
 /// READ: no all-complete victory transition and no money award in 0x80067928..0x80067CD8.</summary>
 public readonly record struct ObjectiveAward(bool Bonus, int Bit, ushort MessageId)
 {
     public int GoldTickets => 1; // READ: 0x800677BC.
+    /// <summary>READ: weekly 0x800677F0 posts to the list; minigame 0x800B9B10 instead
+    /// calls the temporary message destructor 0x800BA5E4. Its argument 2 is NOT a list type.</summary>
+    public bool AddToMessageList { get; init; } = true;
 }
+
+/// <summary>READ: common minigame-success helper 0x800B9A60. A replay or sandbox win still
+/// posts MessageId and displays TextId but grants no ticket. Deliver Award once if present;
+/// post the advisor message exactly once in either case. The host owns buttons, sound and
+/// minigame state. This is a result of a win, not a complete minigame simulation.</summary>
+public readonly record struct ObjectiveMinigameResult(ushort TextId, ushort MessageId, ObjectiveAward? Award);
 
 /// <summary>READ: startup descriptions from 0x800676DC, string IDs 0x161/0x34E/0x1EB.
 /// Host formats and inserts these as type 4 (0x8006768C); they are not reward events.</summary>
@@ -81,6 +91,26 @@ public sealed class ParkObjectives
 
     /// <summary>Port lifecycle API. Loader supplies both complete words; no award is replayed.</summary>
     public void Restore(ObjectiveState state) => State = state;
+
+    /// <summary>Call on entry to the common win path, independently of calendar/objective data.
+    /// READ: descriptor+0x16 -> 0x80023C0C -> 0x80058F90 -> 0x800BA45C stores game ID
+    /// at object+0x24; 0x800B9A84..ABC uses per-park bit (ID+4). Valid constructed IDs are 1..9.
+    /// Trigger readers for all nine overlays are in findings/objbytes.md. The Fortune Teller
+    /// caller (OVL1 0x801142B4..C4) suppresses this call when bit 10 is already set.
+    /// SOURCE DISAGREEMENT: debug.md calls this a calendar routine; the existing calendar path
+    /// is retained unchanged. This explicit host seam adds no calendar-triggered award.</summary>
+    public ObjectiveMinigameResult AfterMinigameWin(int minigameId, bool restrictedMode)
+    {
+        // Host input validation, not an invented native invalid-ID behavior: the constructor
+        // dispatch at 0x800BA494 admits nine cases. The native helper itself trusts object+0x24.
+        if (minigameId < 1 || minigameId > 9) throw new ArgumentOutOfRangeException(nameof(minigameId));
+        int bit = minigameId + 4; // READ: 0x800B9A90 / 0x800B9AB4.
+        if (restrictedMode || Has(false, bit))
+            return new(0x298, 0xC3, null); // READ: 0x800B9AE4..AF8; no latch in sandbox.
+        var result = new List<ObjectiveAward>();
+        Award(false, bit, 0xC5, result); // READ: latch before granting ONE ticket, 0x800B9AB0..BC.
+        return new(0x234, 0xC5, result[0] with { AddToMessageList = false });
+    }
 
     public IReadOnlyList<ObjectiveDescription> UnmetDescriptions(bool restrictedMode)
     {

@@ -16,6 +16,10 @@ There is also real bytecode: **FOLIO entries 1/2**, interpreted by **0x80017024*
 advisor rules. This was already established in `statistics.md`; it is not a newly discovered
 per-park objective VM. No VM is added here.
 
+**Follow-up:** [objbytes.md](objbytes.md) supplies readers for the remaining world sprite-list
+pointers, decodes world-map selection, accounts for the missing ticket sources, and bounds the
+remaining **30** objective bytes. The original findings and disagreement decisions below remain.
+
 ## §0 SOURCE DISAGREEMENTS
 
 Existing findings and their existing implementations are retained. The new decoder is an opt-in

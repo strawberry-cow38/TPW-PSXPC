@@ -23,6 +23,9 @@ public sealed class ParkObjectiveDefinition
     public uint FeatureValuePounds => Word(0x18); // READ: 0x80067BF0.
     public uint MaximumPathTiles => Word(0x1C); // READ: 0x80067C8C.
     public bool TutorialAwardEnabled => bytes[0x30] != 0; // READ: 0x80067A90.
+    /// <summary>READ: OVL11 0x8011715C/0x801171A8. Display total, not a victory threshold.
+    /// The other 30 bytes remain opaque: findings/objbytes.md bounds their reader search.</summary>
+    public byte AdvertisedGoldTickets => bytes[0x31];
 
     /// <summary>READ: 0x80067CD8 returns null outside world 0..3 / park 0..1.
     /// Returned owners have independent byte storage. Loader may supply another decoded record
