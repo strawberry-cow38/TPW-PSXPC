@@ -2697,11 +2697,17 @@ namespace TPWGodot
             // The advisor changes state a handful of times per message, so logging every change is cheap and
             // it is the only external sign of a machine whose whole job is to wait.
             if (_advisor.State != was)
-                GD.Print($"[advisor] {was} -> {_advisor.State} (tick {_advisorTicks}, queue {(_advisor.QueueEmpty ? "empty" : "waiting")})");
+                GD.Print($"[advisor] {was} -> {_advisor.State} (tick {_advisorTicks}, queue "
+                       + $"{(_advisor.QueueEmpty ? "empty" : "waiting")}, {_messages.Count} cards, "
+                       + $"{_advisor.Delivered} delivered)");
             _advisorTicks++;
             // Whatever the rules posted this tick goes to the advisor, who decides when it is said.
             while (_advisorWorld.TakeMessage() is { } id) _advisor.Post(id);
-            if (_hud != null) _hud.Messages = _advisor.Delivered;
+            // ⚠⚠ THE BADGE COUNTS CARDS, NOT DELIVERIES. 46 of the 289 messages carry the no-caption
+            // sentinel and astra proved the original branches past building the record entirely for
+            // those -- so they leave nothing to read and the badge must not move. `Delivered` counts
+            // them, because the advisor still speaks them; the list does not.
+            if (_hud != null) _hud.Messages = _messages.Count;
             StepAdvisorVisual();
         }
 
@@ -2723,6 +2729,14 @@ namespace TPWGodot
             // statistics can say and wrong for anything another system posts — hence the warning.
             if (param != 0 || value != 0)
                 GD.PushWarning($"[advisor] message text {textId} has a payload ({param}, {value}) and no formatter");
+            // ⭐ THE CARD IS THE MESSAGE; the caption is only how this port still shows it. Pushing here
+            // puts it in the park's real 32-record list, so when the L2 list gets a UI the advisor is
+            // already feeding it and nothing has to be re-plumbed.
+            //
+            // ⚠ KIND 0. findings/advisor-presentation.md §3: every statistic-rule message is kind 0 (the
+            // red icon). Kinds 2 and 3 -- jump-to-object and replay -- belong to messages other systems
+            // post, which do not come through here.
+            _messages.PushAdvisor((ushort)textId, 0);
             string text = _catalogueNames?[textId];
             if (_hud != null) _hud.AdvisorCaption = text;
             GD.Print($"[advisor] {_advisor.State} says text 0x{textId:X3}: {text ?? "(no string table)"}");
@@ -2733,6 +2747,11 @@ namespace TPWGodot
         public System.Action<int> AdvisorSpeak;
         public System.Action AdvisorStop;
         public System.Func<bool> AdvisorVoicePlaying;
+
+        /// <summary>The park's message list (TPW.Sim.ParkMessages): 32 cards, oldest evicted, never
+        /// expiring on their own. The advisor is its only producer so far.</summary>
+        readonly TPW.Sim.ParkMessages _messages = new();
+        public TPW.Sim.ParkMessages Messages => _messages;
 
         readonly TPW.Sim.ParkAdvisor _advisor = new();
         long _advisorTicks;
