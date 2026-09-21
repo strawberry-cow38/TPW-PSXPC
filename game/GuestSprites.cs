@@ -63,6 +63,16 @@ namespace TPWGodot
             _heads = ImageTexture.CreateFromImage(Image.CreateFromData(img.Width, img.Height, false, Image.Format.Rgba8, rgba));
             _headSheet = common;
             _headsW = img.Width; _headsH = img.Height;
+            // ⚠ THE OVERRIDE'S INDICES ARE THE GAME'S, AND THIS LIST IS THE PORT'S. findings say the six
+            // developer faces measure 26..32 x 38..46 texels; if what lands at 564..569 here is not that
+            // shape, the two lists do not line up and the override is drawing whatever else is there.
+            if (TPW.Sim.RiderSprites.DeveloperHeadsEnabled)
+                foreach (int i in TPW.Sim.RiderSprites.DeveloperHeads)
+                    GD.Print(i < common.Sprites.Count
+                        ? $"[tpw] devhead sprite {i}: {common.Sprites[i].W}x{common.Sprites[i].H}"
+                          + $" at page ({common.Sprites[i].PageX},{common.Sprites[i].PageY})"
+                          + $" uv ({common.Sprites[i].U},{common.Sprites[i].V})"
+                        : $"[tpw] devhead sprite {i}: OUT OF RANGE ({common.Sprites.Count} sprites)");
         }
 
         public bool HasHeads => _heads != null;

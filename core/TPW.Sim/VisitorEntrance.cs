@@ -121,6 +121,9 @@ namespace TPW.Sim
     /// <summary>Everything the entrance and exit states need beyond the turnstile itself.</summary>
     public interface IEntranceWorld : ITurnstileWorld
     {
+        /// <summary>Bump one of the advisor's 20 event counters (0x800139B4).</summary>
+        void AdvisorEvent(int index, int amount);
+
         /// <summary>0x800540AC(): how many exit points the map has (transport.md §1).</summary>
         int ExitCount { get; }
         /// <summary>0x800599A4(pointIndex, &amp;pos) then 0x800EC9F4 from where I stand. Point 0 is the
@@ -276,6 +279,8 @@ namespace TPW.Sim
         public const int VerdictBargainAt = 0xC00;
         /// <summary>The only verdict that refuses to pay (0x80090F78: `slti -1` then invert).</summary>
         public const int VerdictRefuse = -2;
+        /// <summary>Advisor event 19: the entry-price judgement (0x80090EBC).</summary>
+        public const int AdvisorEventEntryPrice = 19;
         /// <summary>Message 2 for a purpose with no arm: happiness -= rand(15) (0x8008FB54).</summary>
         public const int WanderHappinessLossMax = 15;
         /// <summary>... and boredom += rand(2) (0x8008FB6C).</summary>
@@ -435,7 +440,9 @@ namespace TPW.Sim
             int bargainAt = (q * VerdictBargainAt) >> 12;
             if (pounds < neutralBelow) return pounds > bargainAt ? 0 : 1;
             return pounds < refuseAt ? -1 : VerdictRefuse;
-            // sound (gp, 0x13, verdict) follows; no dice.
+            // ⭐ "(gp, 0x13, verdict)" IS NOT A SOUND EITHER. 0x13 is 19 and the third argument is the
+            // amount: it is 0x800139B4 again, feeding the advisor's entry-price counter with this very
+            // verdict. Same shape as the queue's "(gp, 3, 8)". See PayEntry for where it is raised.
         }
 
         /// <summary>State 37 -- pay entry fee (0x80090EDC).
@@ -468,6 +475,17 @@ namespace TPW.Sim
                 return PayOutcome.CannotAfford;
             }
             int verdict = FeeVerdict(Sum(world.AttractionIntensities), fee, rng);
+            // Advisor counter 19, with the verdict itself as the amount: +1 a bargain, 0 fair, -1 dear,
+            // -2 an outrage. Rules 15 and 16 read the running sum, so what the advisor says about the
+            // entry price is a majority verdict of everyone who has walked up to the gate.
+            //
+            // ⚠ THE ORIGINAL RAISES IT INSIDE THE VERDICT, AFTER ITS GATE TEST -- a park with no rides
+            // and no fee jumps to 0x80090EC8, past the counter, and counts nothing. Raising it here on
+            // the returned value is the same arithmetic, because the path it skips returns 0 and adding
+            // zero is what not counting looks like. The one thing that would NOT be the same is raising
+            // it before the affordability test above: a guest who cannot pay never reaches the verdict
+            // in the original either, and must not be counted as thinking the price fair.
+            world.AdvisorEvent(AdvisorEventEntryPrice, verdict);
             if (verdict < VerdictRefuse + 1)
             {
                 guest.SetState(VisitorState.LeavingPark);

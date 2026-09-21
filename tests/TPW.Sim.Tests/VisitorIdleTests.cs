@@ -36,6 +36,8 @@ namespace TPW.Sim.Tests
             public BinSearch TryWalkToBin(Visitor g) => BinResult;
             public bool TryPeltEntertainer(Visitor g) => EntertainerInRange;
             public void DropLitter(Visitor g) => LitterDropped++;
+            public readonly System.Collections.Generic.List<(int, int)> Events = new();
+            public void AdvisorEvent(int index, int amount) => Events.Add((index, amount));
         }
 
         /// <summary>A guest with nothing wrong with it: comfortably above every leave threshold.</summary>
@@ -100,6 +102,32 @@ namespace TPW.Sim.Tests
             var rng2 = new ScriptedRandom(19, 5);                     // 19 is not < 2, so it stays
             VisitorIdle.Tick(Healthy(), world2, rng2);
             Assert.Equal(new[] { 20, 6 }, rng2.Bounds);               // rand(20) first, THEN rand(6)
+        }
+
+        // ⭐⭐ WINDING UP TO THROW SOMETHING COUNTS EVEN WITH NOBODY TO HIT. At 0x8008D54C the
+        // "no entertainer found" branch is `beq s0,zero,0x8008D578`, and 0x8008D578 IS the counter --
+        // both paths arrive at it. REJECTS `rng.Next(1000) < 10 && world.TryPeltEntertainer(guest)`,
+        // which reads more naturally and drops every miss; on a park with no entertainers hired that is
+        // every single one, so the counter would sit at zero in exactly the park the advisor most wants
+        // to complain about.
+        [Theory]
+        [InlineData(true, IdleAction.PeltEntertainer)]
+        [InlineData(false, IdleAction.Nothing)]
+        public void WindingUpToThrowCountsAsMisbehaviourEvenWithNobodyInRange(bool inRange, IdleAction expected)
+        {
+            var w = new FakeWorld { EntertainerInRange = inRange };
+            Assert.Equal(expected, VisitorIdle.Tick(Healthy(), w, new ScriptedRandom(2, 5)));
+            Assert.Equal(new[] { (VisitorIdle.AdvisorEventMisbehaviour, 1) }, w.Events);
+        }
+
+        // ...but the 1-in-100 guard still has to pass: 10 is not < 10. The control for the test above,
+        // which would otherwise pass just as well against a counter raised on every idle tick.
+        [Fact]
+        public void TheThrowThatIsNeverAttemptedCountsAsNothing()
+        {
+            var w = new FakeWorld { EntertainerInRange = true };
+            Assert.Equal(IdleAction.Nothing, VisitorIdle.Tick(Healthy(), w, new ScriptedRandom(2, 10)));
+            Assert.Empty(w.Events);
         }
 
         // The leave check runs before the roll, so a doomed guest leaves whatever the dice say.

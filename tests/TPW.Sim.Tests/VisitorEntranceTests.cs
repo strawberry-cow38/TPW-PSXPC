@@ -70,6 +70,10 @@ namespace TPW.Sim.Tests
             public World() { Queue = new QueueStub { Owner = this }; }
             public readonly QueueStub Queue;
 
+            public readonly System.Collections.Generic.List<(int Index, int Amount)> Events
+                = new System.Collections.Generic.List<(int, int)>();
+            public void AdvisorEvent(int index, int amount) => Events.Add((index, amount));
+
             public long NowTick { get; set; }
             public (int X, int Y) Pos { get; set; }
             public MapTile Entrance { get; set; } = new MapTile(20, 5);
@@ -449,6 +453,29 @@ namespace TPW.Sim.Tests
             Assert.Equal(Money.FromPounds(60), g.Money);
             Assert.Equal(1, w.Booked); Assert.Equal(1, w.Admissions);
             Assert.Equal(new[] { 5001 }, dice.Bounds);
+        }
+
+        // ⭐⭐ WHAT THE GUEST THOUGHT OF THE PRICE GOES ON THE ADVISOR'S COUNTER, VERDICT AND ALL.
+        // Event 19 takes the verdict itself as its amount (+1 bargain, 0 fair, -1 dear, -2 outrage),
+        // which is what makes rules 15 and 16 a majority opinion of everyone who walked up rather than
+        // a headcount. The port had that call written down as "sound (gp, 0x13, verdict)"; 0x13 is 19.
+        //
+        // ⚠ AND A GUEST WHO CANNOT AFFORD IT HAS NO OPINION. The money test comes first (0x80090F68
+        // skips the verdict call entirely), so a broke guest must not land on the counter as thinking
+        // the price fair -- which is exactly what raising this before the test would do.
+        [Fact]
+        public void TheEntryVerdictGoesOnTheCounterAndABrokeGuestLeavesNoOpinion()
+        {
+            var paid = new World(); paid.Intensities.Add(100);
+            var g = Guest(VisitorState.PayEntryFee, 1); g.Money = Money.FromPounds(100);
+            Assert.Equal(PayOutcome.Paid, VisitorEntrance.PayEntryFee(g, paid, new Dice(0)));
+            Assert.Single(paid.Events);
+            Assert.Equal(VisitorEntrance.AdvisorEventEntryPrice, paid.Events[0].Index);
+
+            var broke = new World(); broke.Intensities.Add(100);
+            var b = Guest(VisitorState.PayEntryFee, 1); b.Money = Money.FromPounds(40);
+            Assert.Equal(PayOutcome.CannotAfford, VisitorEntrance.PayEntryFee(b, broke, new Dice(0)));
+            Assert.Empty(broke.Events);
         }
 
         // ⚠ STRICTLY MORE THAN THE FEE, and a guest that cannot pay rolls no verdict at all -- but has

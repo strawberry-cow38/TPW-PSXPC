@@ -649,7 +649,15 @@ namespace TPWGodot
         /// the honest answer then and a bug the moment one is.</summary>
         public int LanesWaiting => _entrance == null ? 0 : _entrance.LaneCount(0) + _entrance.LaneCount(1);
 
-        ParkIdleWorld IdleWorld() => _idle ??= new ParkIdleWorld(
+        ParkIdleWorld IdleWorld()
+        {
+            if (_idle != null) return _idle;
+            var w = NewIdleWorld();
+            w.Advisor = (i, n) => AdvisorEvent?.Invoke(i, n);
+            return _idle = w;
+        }
+
+        ParkIdleWorld NewIdleWorld() => new ParkIdleWorld(
             () => _now,
             () => SlowClockDay?.Invoke() ?? 0,
             () => System.Linq.Enumerable.Select(_staff, s => s.S),
