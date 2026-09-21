@@ -46,6 +46,9 @@ namespace TPWGodot
         public int Block, Facing, Frame, Walked;
         /// <summary>Draws since this walker last covered any ground, for the standing pose.</summary>
         public int LastWalked, StillFor;
+        /// <summary>Which animation this walker is playing, and the draws since its frame last stepped.
+        /// A change of animation resets the frame, which is why the id is kept rather than inferred.</summary>
+        public int Anim = -1, AnimTick;
 
         /// <summary>The last step this walker took, in WORLD units — which way it is actually going.
         ///
@@ -1606,6 +1609,20 @@ namespace TPWGodot
             // from the velocity -- which is what this did -- gives a person who turns as you orbit them and
             // reads correctly from exactly one angle. findings/people-sprites.md.
             g.Facing = PeopleSheet.CardinalFacing(g.DirX, g.DirZ);
+            // ⭐ READ 0x800323B0: the frame is a per-drawable counter that steps every FOURTH DRAW and
+            // resets to zero whenever the person's animation changes. It is NOT distance walked, which is
+            // what this port used -- that ties the stride to the speed, so a guest slowed by a crowd
+            // shuffles in slow motion and one hurrying flickers.
+            //
+            // ⚠ FOUR DRAWS ARE FOUR VIDEO FRAMES, AND THIS RUNS ON THE SIM TICK. A tick is
+            // ParkClock.FramesPerTick frames, so the counter steps every 4 / FramesPerTick ticks. Same
+            // trap as the advisor's clock, which cost an evening: a cadence in frames is not a cadence in
+            // ticks, and here the two differ by exactly the factor that makes a walk look half speed.
+            int anim = g is Guest ag && ag.V.State == VisitorState.Vomiting ? 2
+                     : g.StillFor >= StillBeforeIdle ? 1 : 0;
+            StepFrame(g, anim, anim == 2 ? PeopleSheet.VomitFrames
+                             : anim == 1 ? PeopleSheet.IdleFrames : PeopleSheet.WalkFrames);
+
             // ⭐ A GUEST THAT IS NOT WALKING IS NOT DRAWN WALKING. The 26 sprites before the walk are the
             // poses, and the game shows the IDLE one whenever a person stands (findings/people-sprites.md
             // §4): queueing, waiting at a door, stopped to look at something. Drawing a stride frame
@@ -1626,6 +1643,17 @@ namespace TPWGodot
         /// ⚠ NOT ZERO: a walker is momentarily still between steps, and switching on the first still draw
         /// makes every guest flicker between standing and walking as it goes.</summary>
         const int StillBeforeIdle = 3;
+
+        /// <summary>READ 0x800323B0 / 0x8003236C. One step of a walker's animation frame.</summary>
+        static void StepFrame(Walker g, int anim, int frames)
+        {
+            if (anim != g.Anim) { g.Anim = anim; g.Frame = 0; g.AnimTick = 0; return; }
+            const int drawsPerStep = 4;
+            int ticksPerStep = Math.Max(1, drawsPerStep / TPW.Sim.ParkClock.FramesPerTick);
+            if (++g.AnimTick < ticksPerStep) return;
+            g.AnimTick = 0;
+            g.Frame = frames <= 0 ? 0 : (g.Frame + 1) % frames;
+        }
 
         /// <summary>Draw a rider in its seat, wherever the ride is holding it this frame.
         ///
@@ -1688,14 +1716,14 @@ namespace TPWGodot
 
         /// <summary>A step of the walk: the facing the camera sees and how far through the stride, from
         /// how far the guest has actually moved. ⚠ The port's own timing — the game advances its frames
-        /// on the animation clock, which this has not traced.</summary>
+        /// on the animation clock. ✅ TRACED SINCE: the frame is not driven by distance at all -- see
+        /// <see cref="StepFrame"/>.</summary>
         void Stride(Walker g, int fromX, int fromZ)
         {
             int dx = g.X - fromX, dz = g.Z - fromZ;
             if (dx == 0 && dz == 0) return;
             g.DirX = dx; g.DirZ = dz;
             g.Walked += Math.Abs(dx) + Math.Abs(dz);
-            g.Frame = g.Walked / 48 % TPW.Data.PeopleSheet.WalkFrames;
         }
 
         /// <summary>Put a guest off a ride at its exit tile, or at its door when it has no exit.
