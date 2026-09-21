@@ -87,7 +87,14 @@ namespace TPWGodot
         public ResearchLevel ReadResearchLevel(ResearchDefinition definition, int level)
         {
             var d = Definition(definition);
-            if (d == null || level < 0 || level >= d.Levels.Length) return new ResearchLevel(0, 0);
+            if (d == null || level < 0) return new ResearchLevel(0, 0);
+            // A non-ride has ONE tier and ONE work word, not three level blocks (Attraction.cs).
+            // Level 0 is that word; there is no level 1 or 2, so those stay (0, 0) and LevelCount's
+            // free-completion loop stops after one — which is what "three levels" means for a ride
+            // and what "buy it once" means for a shop.
+            if (!d.IsRide) return level == 0 ? new ResearchLevel(d.ResearchTier, d.ResearchWork)
+                                             : new ResearchLevel(0, 0);
+            if (level >= d.Levels.Length) return new ResearchLevel(0, 0);
             var l = d.Levels[level];
             return new ResearchLevel(l.ResearchTier, l.ResearchWork);
         }

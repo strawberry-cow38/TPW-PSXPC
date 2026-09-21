@@ -164,6 +164,26 @@ namespace TPW.Data
         /// <summary>The three upgrade levels of a ride, or empty for everything else (rides.md §1.3).</summary>
         public RideLevel[] Levels = Array.Empty<RideLevel>();
 
+        /// <summary>⭐ RESEARCH FOR EVERYTHING THAT IS NOT A RIDE, which the port simply did not read.
+        /// READ 0x8006A9A8: the tier getter dispatches on type through the table at 0x800E1710, and the
+        /// two arms are different functions — rides (1/3/6/7) go to 0x8006AFC0, which indexes
+        /// `record + 0x48 + 0x34×level`; features, shops, sideshows and track upgrades (2/4/5/8) go to
+        /// 0x8006AA28 and read **one unindexed word, `record + 0x28`** (0x8006B008 = `[a0+40]`). Its two
+        /// neighbours are the same shape: 0x8006B014 reads `+0x24` and 0x8006B020 reads `+0x20`.
+        ///
+        /// The data says the same thing. Over the disc's non-ride records `+0x28` takes only the values
+        /// **0, 1, 2, 3** — 37 shops as 12/9/8/8, 44 features as 16/15/7/6, 33 sideshows as 16/13/4 —
+        /// which is the rides' own tier range, and `+0x24` is 0 or a multiple of fifty, which is the
+        /// rides' own work range.
+        ///
+        /// ⚠⚠ THE ABSENCE WAS NOT NEUTRAL. `ReadResearchLevel` answered (0, 0) for every non-ride, and
+        /// tier 0 with zero work is the AUTO-UNLOCK case — so every shop, feature and sideshow in the
+        /// game was already researched at park open. That is what made the shop tier scan read
+        /// `totals [8,0,0,0,0], unlocked [8,0,0,0,0]`, pass its two-thirds test on bin 0, pass the four
+        /// empty bins vacuously, and run off the end. research.md's "no topic can be started on this
+        /// disc" was this bug, not a property of the disc.</summary>
+        public int ResearchTier, ResearchWork;
+
         /// <summary>READ: coaster connection getters 0x800B1EB4/1EF4, heights 0x800B1EA8/1EE8,
         /// launch speed 0x800B1E90, direction bits 0x800B1E9C/1ED4. Not guest doors.</summary>
         public CoasterDefinition Coaster;
@@ -228,6 +248,12 @@ namespace TPW.Data
             // while it is < 3, so a third upgrade reads 0x34 bytes past the record into the model - for
             // a Crazy Ape, a £65,819 upgrade with 65,818 seats. Three are parsed here deliberately; a
             // port that offers a fourth would be reproducing a buffer overrun, not a feature.
+            // Non-rides carry one tier and one work word instead of three level blocks.
+            if (!a.IsRide && r + 0x2C <= d.Length)
+            {
+                a.ResearchWork = BitConverter.ToInt32(d, r + 0x24);
+                a.ResearchTier = BitConverter.ToInt32(d, r + 0x28);
+            }
             if (a.IsRide)
             {
                 var levels = new List<RideLevel>();

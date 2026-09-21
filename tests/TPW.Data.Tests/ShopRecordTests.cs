@@ -30,6 +30,45 @@ namespace TPW.Data.Tests
             return d;
         }
 
+        // ⭐ RESEARCH FOR A NON-RIDE, WHICH THE PORT READ AS ZERO FOR MONTHS. READ 0x8006A9A8: the
+        // tier getter dispatches on type through 0x800E1710, and types 2/4/5/8 take the arm that reads
+        // ONE unindexed word at record+0x28 (0x8006B008); the work getter 0x8006AA78 takes the matching
+        // arm to record+0x24 (0x8006B014). Rides go the other way, to record+0x48+0x34*level.
+        //
+        // ⚠ REJECTS the zero this used to answer. Tier 0 with zero work is the AUTO-UNLOCK case, so a
+        // non-ride that reads (0, 0) is not "unknown", it is "already researched" — which unlocked every
+        // shop in the game and broke the tier scan (research.md §9). A test that only asserted the
+        // fields exist would pass on the bug; these assert a NON-zero tier survives the read.
+        [Theory]
+        [InlineData(2)] [InlineData(4)] [InlineData(5)] [InlineData(8)]
+        public void ANonRideCarriesOneResearchTierAndOneWorkWord(int type)
+        {
+            var d = Record(type, 0x18,
+                0x2C, 0x01, 0, 0,              // +0x24 work = 300
+                0x03, 0, 0, 0);                // +0x28 tier = 3
+            var a = AttractionDefinition.Read(1, d);
+            Assert.Equal(type, a.Type);
+            Assert.False(a.IsRide);
+            Assert.Equal(300, a.ResearchWork);
+            Assert.Equal(3, a.ResearchTier);
+            Assert.Empty(a.Levels);            // and it does NOT acquire ride level blocks
+        }
+
+        // REJECTS the reverse: a ride must not pick these two words up as its research fields, because
+        // for a ride +0x24 is the first level block's own first word.
+        [Theory]
+        [InlineData(1)] [InlineData(3)] [InlineData(6)] [InlineData(7)]
+        public void ARideTakesItsTierFromItsLevelBlocksInstead(int type)
+        {
+            var d = Record(type, 0x18,
+                0x2C, 0x01, 0, 0,
+                0x03, 0, 0, 0);
+            var a = AttractionDefinition.Read(1, d);
+            Assert.True(a.IsRide);
+            Assert.Equal(0, a.ResearchWork);
+            Assert.Equal(0, a.ResearchTier);
+        }
+
         // ⭐ THE DRINKS SHOP SHAPE. Its bytes from +0x2C are 60 00 28 00 01 00 00 28 05 00 05 00: price 60,
         // unit cost 40, kind 1, then +0x32 = 0 and +0x33 = 40. REJECTS reading +0x32 as a u16, which
         // is rides.md's "10240" and would weight need A by ten thousand.

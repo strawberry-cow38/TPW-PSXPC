@@ -444,6 +444,9 @@ outer+0x47 is passed by address; the signed load/add/store occurs inside 0x80099
 `fn.py 8006AC04` can select the preceding function; the explicit aligned `ann.py` span above is
 necessary. Nop-elision in annotation must never be read as moving an instruction into a delay slot.
 
+## ⚠⚠ RETRACTED 2026-09-21 — see §9. The section below is kept for its measurements, which
+## stand; its CONCLUSION was two port bugs, not a property of the disc.
+
 ## ⚠ NO TOPIC CAN BE STARTED ON THIS DISC — measured 2026-09-20
 
 Wiring the researcher end to end (game/ParkResearch.cs) turned up a hard stop that reading the code
@@ -510,3 +513,132 @@ could be wired before. The values confirm the offsets rather than merely compili
 ordinal 0..3, and work takes seventeen distinct values, every one a multiple of fifty, 0..2750.
 Crazy Ape level 0 reads tier 0 / work 0 — a starter ride needing no research — and Eruption reads
 tier 3 / work 550.
+
+
+## 9. The retraction, and research actually running — 2026-09-21
+
+§8's headline was **wrong**, and the way it was wrong is worth more than the fix. It reported the
+overrun, attributed it to the empty **tier bin 4** over 498 ride level blocks, and concluded the
+scan "cannot terminate" for structural reasons. The first thing I did was make the exception name
+which scan it was:
+
+```
+tier scan refused: ... slot 1, totals [8,0,0,0,0], unlocked [8,0,0,0,0].
+```
+
+**Slot 1 is the SHOP scan.** Not the rides. Eight shops, every one of them at tier 0, every one of
+them already unlocked — so bin 0 passes the two-thirds test on the first call, the four empty bins
+pass vacuously, and the cursor runs off the end. Nothing to do with ride tiers, and it fires
+immediately rather than "effectively never". One line of diagnostic that the earlier pass did not
+print; every other word of §8's analysis was reasoning over a number that never named its subject.
+
+### 9.1 Why every shop was already researched: the port never read a non-ride's tier
+
+**READ 0x8006A9A8**, the research-tier getter. It dispatches on type through the table at
+**0x800E1710** (index `type - 1`, valid 1..17) and the eight live rows split cleanly in two:
+
+| types | target | reads |
+|---|---|---|
+| 1, 3, 6, 7 — the rides | `0x8006AA04` → `0x8006AFC0` | `record + 0x48 + 0x34×level` |
+| 2, 4, 5, 8 — feature, shop, sideshow, upgrade | `0x8006AA28` → `0x8006B008` | **`record + 0x28`**, no level |
+
+The work getter is the same shape: `0x8006AA78` returns 0 when the definition is already available
+(which is the port's `work = IsAvailable(...) ? 0 : data.Work`), and otherwise dispatches through
+`0x800E1758` to `0x8006AFE4` for rides and **`0x8006B014` = `record + 0x24`** for non-rides. Each
+offset was reached from its own consumer, not inferred from the one next to it.
+
+**The disc agrees.** Across every non-ride record, `+0x28` takes only the values **0, 1, 2, 3** —
+37 shops as 12/9/8/8, 44 features as 16/15/7/6, 33 sideshows as 16/13/4 — which is exactly the
+rides' tier range; and `+0x24` is 0 or a multiple of fifty, which is exactly the rides' work range.
+
+`AttractionDefinition.Read` parsed level blocks **only `if (a.IsRide)`**, so every non-ride carried
+an empty `Levels` array and `ReadResearchLevel` answered `(0, 0)`. ⚠ That is not a neutral default:
+**tier 0 with zero work is the auto-unlock case**, so every shop, feature and sideshow in the game
+was already researched at park open. The port now reads both words for types 2/4/5/8.
+
+### 9.2 The one ceiling nothing ever reads
+
+With the shops fixed, slots 0..3 all terminate and the overrun moves to **slot 4** —
+`totals [0,0,0,0,0]` — which is the ride-upgrade scan over **type 8, and type 8 has no records on
+this disc** (arrivals.md's census). Every bin is `(0, 0)`, `0 >= 0` passes, and the walk leaves the
+array on its first call. The original has the same unbounded walk (0x8009BAFC).
+
+But `ceilings[4]` **has no consumer**: `CanSelect` takes its slot-4 branch before the tier test and
+`Start`'s gate is explicitly `slot != 4`. So the overread's only product is a number the game never
+asks for, and throwing on it took the entire research system down for it. Slot 4 now stops instead
+of throwing; slots 0..3 still throw, because their ceilings ARE read and garbage there would be a
+wrong answer rather than an unused one.
+
+### 9.3 It runs
+
+```
+[tpw] --park-research 0,3,2: slot 0 researching type 3#2
+research tick  250: slot 0 type 3#2 4%
+research tick  750: slot 0 type 3#2 9%
+```
+
+A topic is selected and its progress moves. Each researcher contribution is worth exactly 4.5% of
+this topic — 2 contributions read 9%, and a six-researcher run read 27% off 6 — so the fixed-point
+arithmetic in `ContributeResearch` is linear and correct.
+
+⚠ **And then it stops — for a reason that is not research's, and that took two instruments to see.**
+
+```
+idle decisions: 3 took the work, 6 patrolled, 72 never chose
+```
+
+**3 of 9 real decisions took the work: 33%, against the documented 30% roll. The roll is fine.** The
+story is the 72. `Researcher.Idle` runs `IdleCheck` first, and the host's staff loop runs it once
+more as a pre-pass before any class gets a turn — so a researcher over the tiredness threshold is
+diverted to `GoAndRest` **before it ever reaches its own decision**. With no reachable staff room
+`GoAndRest` finds nothing, sets `Patrolling`, and the researcher walks, tires further, and never
+chooses again. 72 of 81 idle ticks, 89%, spent bouncing off a rest place that is not there.
+
+⚠⚠ **Two separate instruments lied about this on the way, in the same manner.**
+
+1. **The state log.** It showed ~100 `Idle -> Patrolling` against 2 `Idle -> 31` — a 2% outcome from
+   a 30% roll, which reads as a broken RNG. It is not. The whole diversion — `Idle` → `GoAndRest` →
+   *no rest place* → `Patrolling` — happens **inside one tick**, so a before/after line prints its
+   two endpoints and the middle is invisible. `Idle -> Patrolling` from a diversion and
+   `Idle -> Patrolling` from the roll are the same eight characters. Grepping for `GoAndRest` in the
+   log returns **zero** for the same reason, and zero there means "never printed", not "never
+   entered".
+2. **The first version of this counter**, which read `0 never chose` — because it was placed inside
+   `RunResearcher`, and the pre-pass diversion happens *before* `RunResearcher` is called. It was
+   built to catch exactly this case and was positioned where the case cannot occur. Moving it to the
+   pre-pass turned 0 into 72 with no other change.
+
+So the research RATE is still **NOT ESTABLISHED**: what is established is that contributions arrive,
+accumulate exactly, and that a park with nowhere for staff to sit down stops researching after about
+nine decisions.
+
+### 9.3b The offset has teeth
+
+`+0x28` was moved to each of its three neighbours and the park re-run. All three **crash**, and they
+crash in a way that says exactly what is wrong:
+
+```
+REAL     --park-research 0,3,2: slot 0 researching type 3#2
++0x2C    IndexOutOfRangeException at RefreshTier -> totals[tier]++
++0x24    IndexOutOfRangeException at RefreshTier -> totals[tier]++
++0x20    IndexOutOfRangeException at RefreshTier -> totals[tier]++
+```
+
+The bin index is the tier, so a word that is not a small ordinal walks straight out of the five-bin
+array. Only `+0x28` yields values the tier machinery can even accept — which is a stronger result
+than "the scan refuses", because a wrong-but-plausible word would have refused too.
+
+(⚠ `totals[tier]++` is unbounded in the original as well — `0x8009B7C0` shifts the tier and indexes
+a stack array with no check. The port throwing there is a wrong-data guard, not a modelled
+behaviour; nothing in play should reach it now that the offset is right.)
+
+### 9.4 What this retraction does NOT reach
+
+- **The ride scan was never the problem.** §8's arithmetic about tier bin 4 over the 498 ride level
+  blocks is still correct as arithmetic; it simply was not what the port was hitting.
+- **The one-world hypothesis stays falsified.** §8 checked it properly and it remains checked.
+- **The definition ORDER is still NOT ESTABLISHED** (§8). A wrong order researches the wrong ride and
+  looks exactly like working software; nothing here touched it.
+- **Nothing here says the original does not overread.** It does — 0x8009BAFC has the same unbounded
+  walk. The port's choice to stop on slot 4 is a decision about a value nothing consumes, not a claim
+  about what the hardware returns.

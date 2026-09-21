@@ -48,6 +48,8 @@ namespace TPW.Sim
     public sealed class ResearchSystem
     {
         public const int TopicCount = 5; // 0x8009B660.
+        /// <summary>The ride-upgrade slot: the one whose tier ceiling is never consulted.</summary>
+        public const int UpgradeSlot = 4;
         public const int ProgressRecordCount = 60; // 0x8006AEEC.
         public const int MaximumLevelCount = 3; // 0x8006AC88.
         public const int DefaultFunding = 80; // 0x8009B230/240.
@@ -267,8 +269,23 @@ namespace TPW.Sim
                 ceilings[slot] = cursor;
                 // ⚠ DO NOT FIX: the PSX has NO bound here and reads beyond both five-word arrays
                 // (0x8009BA98..C4). No deterministic overread is established. Fail explicitly.
+                //
+                // ⭐ EXCEPT FOR SLOT 4, WHERE THE ANSWER IS NEVER READ. Slot 4 is the ride-upgrade
+                // scan over type 8, and type 8 has NO records on this disc, so every bin is (0, 0) and
+                // `0 >= 0` walks the cursor straight off the end on the very first call — in the
+                // original too (0x8009BAFC has the same unbounded walk). But `ceilings[4]` has no
+                // consumer: CanSelect takes its slot-4 branch before the tier test (0x8009B3A0) and
+                // Start's tier gate is explicitly `slot != 4` (0x8009B448). So the overread's only
+                // product is a number nothing looks at, and throwing on it took the WHOLE research
+                // system down for a value the game never asks for. Stop instead, and leave the
+                // meaningless ceiling where it landed.
                 if (cursor == totals.Length)
-                    throw new InvalidOperationException("Research tier scan overruns its five PSX bins.");
+                {
+                    if (slot == UpgradeSlot) return;
+                    throw new InvalidOperationException(
+                        $"Research tier scan overruns its five PSX bins: slot {slot}, "
+                        + $"totals [{string.Join(",", totals)}], unlocked [{string.Join(",", unlocked)}].");
+                }
             }
             // No store on initial failure: the old ceiling survives, 0x8009BA84.
         }

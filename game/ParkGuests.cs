@@ -1007,7 +1007,20 @@ namespace TPWGodot
                 // state meant a tired mechanic was sent to rest out of the middle of a repair, and —
                 // worse — could never reach the branch that looks for work at all, because resting
                 // returns to Patrolling rather than to Idle.
-                if (st.S.State == StaffState.Idle) StaffBase.IdleCheck(st.S, world);
+                // ⚠⚠ THE DIVERT HAPPENS HERE, NOT IN THE CLASS HANDLER, AND THE FIRST VERSION OF THE
+                // COUNTER BELOW COULD NOT SEE IT. This pre-pass runs IdleCheck before any class gets
+                // a turn, so a tired researcher is already in GoAndRest by the time RunResearcher is
+                // called — and RunResearcher has no case for it, falls through to the shared machine,
+                // and GoAndRest with nowhere to rest sets Patrolling. The whole diversion opens and
+                // closes inside one tick, so the state log prints `Idle -> Patrolling` and it is
+                // IDENTICAL to the researcher's own roll choosing to patrol. Counting it inside the
+                // class handler read `0 never chose` while every decision was being taken away.
+                if (st.S.State == StaffState.Idle)
+                {
+                    StaffBase.IdleCheck(st.S, world);
+                    if (st.S.Kind == StaffKind.Researcher && st.S.State != StaffState.Idle)
+                        ResearchDiverted++;
+                }
                 // ⭐ Entertainer.Tick OWNS ITS OWN DISPATCH, unlike the mechanic's and the handyman's.
                 // It returns false only when the member is HELD, in which case the shared machine must
                 // be skipped as well — so the return value decides whether anything runs at all, and
@@ -1139,7 +1152,18 @@ namespace TPWGodot
         {
             switch (st.S.State)
             {
-                case StaffState.Idle: Researcher.Idle(st.S, res, _dice); return true;
+                case StaffState.Idle:
+                    // ⚠ THREE OUTCOMES, AND THE STATE LOG SHOWS TWO. Researcher.Idle runs IdleCheck
+                    // FIRST, so an idle researcher can leave for a rest without ever reaching its own
+                    // roll — and that exit looks identical in a before/after line to the roll choosing
+                    // to patrol. A measured 2 research ticks against ~100 idle decisions reads as a 2%
+                    // roll where the constant says 30%; separating "diverted" from "rolled and lost"
+                    // is the only way to tell a broken rate from a busy staff member.
+                    Researcher.Idle(st.S, res, _dice);
+                    if (st.S.State == StaffClassStates.Researching) ResearchPicked++;
+                    else if (st.S.State == StaffState.Patrolling) ResearchPatrolled++;
+                    else ResearchDiverted++;   // its OWN IdleCheck, the second of the two
+                    return true;
                 case StaffClassStates.Researching: Researcher.Research(st.S, res); return true;
                 default: return false;          // the shared states are the base's
             }
@@ -1191,7 +1215,9 @@ namespace TPWGodot
                         + (t.Finished ? " done" : ""));
             }
             return $"research: funding {sys.Funding}, {researchers} researchers, "
-                 + (parts.Count == 0 ? "no active topics" : string.Join(", ", parts));
+                 + (parts.Count == 0 ? "no active topics" : string.Join(", ", parts))
+                 + $"; idle decisions: {ResearchPicked} took the work, {ResearchPatrolled} patrolled, "
+                 + $"{ResearchDiverted} never chose";
         }
 
         /// <summary>The handyman's own states (TPW.Sim.Handyman). Returns true when it handled the
@@ -1295,6 +1321,13 @@ namespace TPWGodot
                 Turnstile.Admit(_entrance);
                 Turnstile.LaneTick(_entrance, 0);
                 Turnstile.LaneTick(_entrance, 1);
+                // ⚠ ONE SAMPLE OF A PERCENTAGE IS NOT A CURVE. Two runs of different lengths reported
+                // 18% and then 9%, which reads as progress going BACKWARDS and is not a thing a single
+                // endpoint can distinguish from a topic that finished and was replaced, an overflow, or
+                // a figure that never moved at all. Print it periodically and the question answers
+                // itself. Same rule as the ride report, which is why it rides on the same flag.
+                if (LogStaff && _now % 250 == 0 && _research != null)
+                    Godot.GD.Print($"[tpw] research tick {_now}: {ResearchLine()}");
             }
             _ticking = true;
             _needs ??= new ParkNeedsWorld(() => _now, () => System.Linq.Enumerable.Select(_staff, s => s.S),
@@ -1424,6 +1457,12 @@ namespace TPWGodot
         /// also had a non-zero gate counter (the batch's own precondition), and ticks on which one was
         /// in 46 after the staff loop. AtGateAfterStaff &gt; 0 with AtGateAtAdmit == 0 is a state that
         /// opens and closes inside one tick and can never be seen by a sampler at the top of it.</summary>
+        /// <summary>What an idle researcher's decision actually did: took the work, took a patrol leg,
+        /// or never got to choose because IdleCheck sent it to rest or to strike.</summary>
+        public int ResearchPicked { get; private set; }
+        public int ResearchPatrolled { get; private set; }
+        public int ResearchDiverted { get; private set; }
+
         public int AtGateAtAdmit { get; private set; }
         public int AtGateWithCounter { get; private set; }
         public int AtGateAfterStaff { get; private set; }
