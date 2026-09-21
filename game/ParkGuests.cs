@@ -2246,6 +2246,78 @@ namespace TPWGodot
             return AreaAt(x, z) == GateArea();
         }
 
+        /// <summary>⚠⚠ THE WEAK ANSWER AND THE REAL ONE, SIDE BY SIDE. `JoinedToGate` compares area
+        /// ids, and RebuildAreas unions a pair when an edge exists in EITHER direction while the search
+        /// is DIRECTED — so the port can tell a player "all attractions reachable" and then watch every
+        /// guest fail to route there. This walks the gate's piece twice with the SEARCH'S own step test,
+        /// forwards and backwards, and reports the tiles where the two disagree.
+        ///
+        /// ⭐ BOTH DIRECTIONS, because a guest has to get back as well as in. A tile you can walk to and
+        /// not leave is the shape that strands a guest at a ride exit; one you can leave and not reach
+        /// is a ride nobody arrives at. They are different bugs and the same line should not blur them.
+        ///
+        /// Returns the counts and a short list of example tiles, or an empty string when the weak and
+        /// directed answers agree — which is the healthy case and should say so rather than print
+        /// nothing and look like a missing line.</summary>
+        public string DirectedReachReport()
+        {
+            if (_map == null) return "";
+            if (_area == null) RebuildAreas();
+            int gate = GateArea();
+            var (gx, gz) = GateTile;
+            if (gx < 0) return "directed reach: no gate tile";
+
+            bool[,] outward = Flood(gx, gz, forward: true);
+            bool[,] inward = Flood(gx, gz, forward: false);
+            var noWayIn = new List<string>();
+            var noWayBack = new List<string>();
+            int inCount = 0, backCount = 0;
+            for (int x = 0; x < _map.Width; x++)
+                for (int z = 0; z < _map.Height; z++)
+                {
+                    if (!_map[x, z].IsWalkable || AreaAt(x, z) != gate) continue;
+                    // ⚠ NAME THE TYPE. An attraction's door and exit tiles are DIRECTIONAL BY DESIGN
+                    // (paths.md §9: they become type 7/8 with a facing bit), so a one-way door is the
+                    // game working, not a bug — and a check that cannot tell those from a one-way PATH
+                    // tile cries wolf on every park with a ride in it. The type is the discriminator.
+                    if (!outward[x, z]) { inCount++; if (noWayIn.Count < 6) noWayIn.Add($"{_map[x, z].Type}@({x},{z})"); }
+                    if (!inward[x, z]) { backCount++; if (noWayBack.Count < 6) noWayBack.Add($"{_map[x, z].Type}@({x},{z})"); }
+                }
+            if (inCount == 0 && backCount == 0)
+                return "directed reach: agrees with the area map on every tile in the gate's piece";
+            return $"⚠ DIRECTED REACH DISAGREES with the area map: {inCount} tiles the gate cannot reach"
+                 + (noWayIn.Count > 0 ? $" ({string.Join(" ", noWayIn)})" : "")
+                 + $", {backCount} that cannot reach the gate"
+                 + (noWayBack.Count > 0 ? $" ({string.Join(" ", noWayBack)})" : "")
+                 + " — a DOOR or ENTRANCE here is by design; a PATH here is a guest that cannot walk out";
+        }
+
+        /// <summary>Flood the map from one tile using the pathfinder's own step test in ONE direction.
+        /// <paramref name="forward"/> false walks the edges backwards, answering "who can reach here".</summary>
+        bool[,] Flood(int sx, int sz, bool forward)
+        {
+            int w = _map.Width, h = _map.Height;
+            var seen = new bool[w, h];
+            var queue = new Queue<(int X, int Z)>();
+            seen[sx, sz] = true; queue.Enqueue((sx, sz));
+            while (queue.Count > 0)
+            {
+                var (x, z) = queue.Dequeue();
+                for (int dir = 0; dir < 4; dir++)
+                {
+                    int nx = x + (dir == 0 ? 1 : dir == 2 ? -1 : 0);
+                    int nz = z + (dir == 1 ? 1 : dir == 3 ? -1 : 0);
+                    if (nx < 0 || nz < 0 || nx >= w || nz >= h || seen[nx, nz]) continue;
+                    // Forward: can I step from here to there. Backward: can somebody there step to here.
+                    bool ok = forward ? _finder.CanStepThrough(x, z, dir, WalkFlags)
+                                      : _finder.CanStepThrough(nx, nz, (dir + 2) & 3, WalkFlags);
+                    if (!ok) continue;
+                    seen[nx, nz] = true; queue.Enqueue((nx, nz));
+                }
+            }
+            return seen;
+        }
+
         /// <summary>The three connectivity questions an attraction has, separately, because they have
         /// different answers: guests reach it through the DOOR, leave it through the EXIT, and queue on
         /// tiles that have to meet a path. Any of them can be false while the others are true.</summary>

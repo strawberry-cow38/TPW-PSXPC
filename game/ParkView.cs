@@ -1242,6 +1242,7 @@ namespace TPWGodot
             + $"\n{_guests.Reachability()}"
             + $"\n{_guests.StrandedReport()}"
             + $"\n{_guests.SameAreaReport()}"
+            + $"\n{_guests.DirectedReachReport()}"
             + $"\n{_guests.NeedReport()}"
             + $"\n{_guests.LitterLine()}"
             + $"\n{_guests.InfluenceLine()}"
