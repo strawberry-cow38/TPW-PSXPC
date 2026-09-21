@@ -911,20 +911,38 @@ namespace TPWGodot
         {
             var sb = new System.Text.StringBuilder();
             foreach (var st in _staff)
+            {
+                // ⭐ THE PAY GRADE IS ONE-BASED ON SCREEN AND ZERO-BASED IN THE SAVE, and an
+                // off-by-one here once made a measured £100 look like it contradicted a formula
+                // predicting 150 (Wages.DisplayedPayGrade, economy.md §4.4).
+                int level = st.S.Skill & 7;
+                // ⚠⚠ THE CARD'S PRICE AND THE BILL ARE DIFFERENT NUMBERS, AND THAT IS THE ORIGINAL'S
+                // BUG, NOT A ROUNDING ERROR. The Training card draws TrainingBase[LEVEL] (0x80094DC0
+                // from 0x80085908) while the purchase handler raises the level FIRST and then prices
+                // it (0x80085728), so a grade-1 guard's card says £500 and the bank loses £550.
+                // Printing both is the only way a reader can see that on purpose rather than
+                // discovering it as a discrepancy later; a port that shows one of them is choosing
+                // which half of the bug to keep.
+                string money = level >= Wages.MaxLevel
+                    ? "at top grade"
+                    : $"card says {Wages.TrainingCardCost(level, st.S.Kind)}, bill would be "
+                      + $"{Wages.TrainingCost(level + 1, st.S.Kind)}, then earns "
+                      + $"{Wages.TrainingCardWage(level, st.S.Kind)}/month";
                 sb.Append($"\n  {st.S.Kind}: {st.S.State}, purpose {st.S.Purpose}, "
                         + $"tired {st.S.Tiredness} morale {st.S.Morale}, "
+                        + $"pay grade {Wages.DisplayedPayGrade(level)} ({money}), "
                         + $"at ({st.X >> 8},{st.Z >> 8}){(st.WaypointHead != WaypointPool.NoChain ? ", walking" : "")}");
+            }
             return sb.ToString();
         }
 
         /// <summary>One sim tick of every member of staff.
         ///
-        /// ⚠ THE CLASS HOOK IS NOT CONNECTED. This runs the SHARED machine (TPW.Sim.StaffBase) only -
-        /// tiredness, patrolling, wandering, resting, strikes and the arrival table. Each class's own
-        /// switch runs BEFORE that fall-through in the original, so a mechanic here cannot yet claim a
-        /// broken ride; it walks about like any other staff member. Deliberately left as a gap rather
-        /// than approximated, because "a mechanic that looks like it is working" is worse than one that
-        /// visibly is not.</summary>
+        /// ⚠ THIS COMMENT USED TO SAY "THE CLASS HOOK IS NOT CONNECTED" and it had been false for a
+        /// while: RunGuard, RunMechanic, RunHandyman and RunResearcher all run before the shared
+        /// fall-through now, and §6.11 audits each of them against the binary's own Update table. The
+        /// stale version was still describing a mechanic that "walks about like any other staff
+        /// member", which is exactly the sort of note a reader trusts instead of the code.</summary>
         void TickStaff()
         {
             var world = StaffWorld();
