@@ -355,16 +355,42 @@ stayed `(-1,-1)` and the guard threw nobody out. Resolving it through `GateArea(
 use — one cached flood fill — makes it depend on the map instead of on whether a readout happened
 to run first. After: `39 -> Walking, purpose 14` (`ExitPoint`), the ejection walk under way.
 
-### 6.4 What is still not proved
+### 6.4 The guard's arrival table was dead, which was the whole gate machine
 
-- The end of the throw-out. The guard walks with purpose 14 and then returns to patrol; whether the
-  guest is actually put outside the gate has not been watched.
+`Guard.Arrive`'s purpose switch is the gate: **8** (`ToCulprit`) returns to Chase so a chase that
+reaches its tile carries on; **14** (`ExitPoint`) starts the ejection and bumps the gate counter;
+**Gate** sends the guard to its POST or out of the park; **Post** is the only thing that returns a
+posted guard to Idle. The host's `OnArrive` handled the mechanic and the cleaner specially and gave
+**everything else to `StaffBase.Arrive`**, so none of it was reachable. That is the same bug as the
+cleaner's, one class further on, and it is why the report had read `0 on post` since the guard was
+wired and why the ejection walk ended in an ordinary patrol leg.
+
+⭐ Routing guards through `Guard.Arrive` is safe where routing cleaners through `Handyman.Arrive` was
+not: the guard's switch ends in `default: StaffBase.Arrive(...)`, so an ordinary patrol leg still
+gets the shared answer. That fall-through is the whole difference between the two classes.
+
+**Measured after, one run, one guard's lines:**
+```
+staff #2 Guard walkstep: PathReady -> 39, purpose 8      caught
+staff #2 Guard: 39 -> Walking, purpose 14                 walking them to the exit
+staff #2 Guard: 46 -> PathReady, purpose 16, counter 1    at the gate
+staff #2 Guard: 48 -> Walking, purpose 9                  out to a random exit
+staff #2 Guard: 59 -> Walking, purpose 15                 back to the spawn point
+staff #2 Guard: 46 -> PathReady, purpose 16, counter 1    at the gate again
+staff #2 Guard: 55 -> Walking, purpose 21                 TAKING A POST
+```
+
+### 6.5 What is still not proved
+
+- **The last leg.** `55 -> Walking, purpose 21` is followed by `Walking -> RandomWander`, so the walk
+  to the post itself is being refused and the guard wanders off instead of standing there. The
+  machine reaches `TakePost`; `TryPathToPost`'s five samples around `GateTile` do not yet land.
 - `0 on post`: `TakePost` has still never been seen to place a guard at the gate.
 - The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
   base machine wanders it away. The park report's `map in N connected pieces` line is the check.
 
-### 6.5 The pattern, audited rather than the instance fixed
+### 6.6 The pattern, audited rather than the instance fixed
 
 `FreeWaypoints`/`SetAnimation` no-opping on a foreign member is a SHAPE, not one bug, so I swept every
 `ReferenceEquals(Current.S, staff)` guard in the game project: **nine, across `ParkGuard.cs` (six) and

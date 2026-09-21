@@ -460,6 +460,24 @@ namespace TPWGodot
                         Handyman.Arrive(s2.S, hw);
                     else StaffBase.Arrive(s2.S, StaffWorld(), false);
                 }
+                // ⚠⚠ AND THE GUARD'S IS ITS OWN TOO — the same bug as the cleaner's above, one class
+                // further on, found the same way. Guard.Arrive is the WHOLE gate machine: purpose 8
+                // returns to Chase so a chase that reaches its tile carries on instead of wandering
+                // off; purpose 14 (ExitPoint) starts the ejection at the gate and bumps the gate
+                // counter; purpose Gate then sends the guard to its POST or out of the park; and
+                // purpose Post is the only thing that ever returns a posted guard to Idle. Routing
+                // guards through the base's arrival left every one of those unreachable, which is why
+                // the report has read "0 on post" since the guard was wired and why the ejection walk
+                // ended in an ordinary patrol.
+                // ⭐ SAFE TO ROUTE EVERYTHING THROUGH IT, unlike Handyman.Arrive: Guard.Arrive's
+                // switch ends in `default: StaffBase.Arrive(...)`, so an ordinary patrol leg still
+                // gets the shared answer. That fall-through is the difference and it is worth saying
+                // out loud, because the cleaner's crash was caused by assuming it was there.
+                else if (s2.S.Kind == StaffKind.Guard)
+                {
+                    var gw = GuardWorld(); gw.Current = s2;
+                    GuardFor(s2.S).Arrive(gw, false);
+                }
                 else StaffBase.Arrive(s2.S, StaffWorld(), false);
             };
             _parent.AddChild(st.Inst);
