@@ -215,17 +215,47 @@ namespace TPWGodot
         public IEnumerable<Visitor> Guests => _guests().Select(g => g.V);
         public IEnumerable<StaffMember> Staff => _staff();
 
+        /// <summary>⭐ THE GUEST HALF OF AN EJECTION, WHICH HAD NEVER BEEN WATCHED. The guard's half is
+        /// proved end to end (findings/staff.md §6); what happens to the GUEST after message 4 was read
+        /// off the code path and never seen. Three numbers instead of one, because a single "ejected"
+        /// count cannot separate a message that was never sent from one sent to a guest who had already
+        /// gone — and those two have the same cause and completely different fixes.
+        ///
+        /// READ 0x8008FC10: the message-4 row of the guest's slot-40 table (0x800E3B74[3]) is TWO
+        /// calls — 0x800519B0, which is this, and 0x80051D74, which walks a per-class table at
+        /// 0x800E0F6C telling every person the guest is gone. The port makes the first call only; no
+        /// staff list holds guests here, and the guard polls `GuestExists` for its culprit instead.
+        /// That is the same trade already recorded at ParkGuests.RemoveGuest, restated here because
+        /// this is the site that would have to change if a list ever does hold them.</summary>
+        public int ThrownOutSent { get; private set; }
+        public int ThrownOutStale { get; private set; }
+        public int ThrownOutRemoved { get; private set; }
+        bool _ejecting;
+
         public void RemoveFromPark(Visitor guest)
         {
             var g = _byVisitor(guest);
-            if (g != null) _remove(g);
+            if (g == null) return;
+            if (_ejecting) ThrownOutRemoved++;
+            _remove(g);
         }
 
         /// <summary>⚠ SYNCHRONOUS, as it is in the original: the message runs inside the caller's tick
         /// rather than being queued. VisitorMessages.OnMessage is the guest's slot 40.</summary>
         public void DeliverMessage(Visitor guest, int id, int param1, int param2)
         {
-            VisitorMessages.OnMessage(guest, this, (VisitorMessage)id, _dice);
+            // ⚠ THE FLAG IS SAVED AND RESTORED, NOT JUST SET. RemoveFromPark is reached from three
+            // different sim call sites and only one of them is the ejection; a flag left standing
+            // would credit the next ordinary leaver to the guard.
+            bool outer = _ejecting;
+            _ejecting = id == (int)VisitorMessage.ThrownOut;
+            if (_ejecting)
+            {
+                ThrownOutSent++;
+                if (_byVisitor(guest) == null) ThrownOutStale++;
+            }
+            try { VisitorMessages.OnMessage(guest, this, (VisitorMessage)id, _dice); }
+            finally { _ejecting = outer; }
         }
         Func<IQueueWorld> _queue = () => null;
         public void SetQueueWorld(Func<IQueueWorld> q) => _queue = q ?? (() => null);

@@ -589,7 +589,13 @@ namespace TPWGodot
                 else if (arg.StartsWith("--park-guests=")) _forcedGuests = int.Parse(arg.Substring("--park-guests=".Length));
                 else if (arg == "--park-nogate") _noGate = true;
                 else if (arg == "--park-nopreflight") _noPreflight = true;
-                else if (arg.StartsWith("--park-pelt=")) _autoPeltAt = int.Parse(arg.Substring("--park-pelt=".Length));
+                else if (arg.StartsWith("--park-pelt="))
+                {
+                    // FRAME, or FRAME+PERIOD to keep pelting every PERIOD frames after the first lands.
+                    var pspec = arg.Substring("--park-pelt=".Length).Split('+');
+                    _autoPeltAt = int.Parse(pspec[0]);
+                    if (pspec.Length == 2) _autoPeltEvery = int.Parse(pspec[1]);
+                }
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
                 else if (arg == "--park-research-all") _researchAll = true;
                 else if (arg.StartsWith("--park-request-upgrade="))
@@ -1581,6 +1587,13 @@ namespace TPWGodot
         /// pelt at park-load finds an empty park and reports "no guests" — which is exactly what the
         /// first version did, and it looked like the flag was broken rather than early.</summary>
         int _autoPeltAt = -1;
+        /// <summary>⚠ ONE PELT IS ONE TRIAL, AND THE CHAIN HAS SEVERAL WAYS TO END WITHOUT A CATCH
+        /// that are nobody's bug: the nearest guard can be 7 tiles away when the shock fires, and a
+        /// culprit who reaches a ride is chased to the deadline rather than caught (states 18/19/20
+        /// abort a chase, 21 does not — 0x800923A8). Sampling that once and reporting "0 caught" says
+        /// nothing about whether the catch works. FRAME+PERIOD re-arms the pelt so the run measures a
+        /// RATE instead of a coin flip.</summary>
+        int _autoPeltEvery = -1;
         string _autoResearch;
         string _shotTarget;
         void TakeShot()
@@ -1633,7 +1646,7 @@ namespace TPWGodot
                 if (!said.StartsWith("not now"))
                 {
                     GD.Print($"[tpw] --park-pelt@{_autoPeltAt} landed at frame {_shotClock}: {said}");
-                    _autoPeltAt = -1;
+                    _autoPeltAt = _autoPeltEvery > 0 ? _shotClock + _autoPeltEvery : -1;
                 }
                 else if (_shotClock % 200 == 0) GD.Print($"[tpw] --park-pelt waiting at {_shotClock}: {said}");
             }

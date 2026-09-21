@@ -1631,7 +1631,10 @@ namespace TPWGodot
                  + $"{_guardWorld?.ChasePathNoGuest ?? 0} with no guest"
                  + $"; {StaffAdmitted} admitted by the turnstile"
                  + $"; post: {_guardWorld?.PostTaken ?? 0} taken of {_guardWorld?.PostTried ?? 0} tiles tried, "
-                 + $"{_guardWorld?.PostGaveUp ?? 0} gave up after five, {_guardWorld?.PostNoGate ?? 0} with no gate";
+                 + $"{_guardWorld?.PostGaveUp ?? 0} gave up after five, {_guardWorld?.PostNoGate ?? 0} with no gate"
+                 + $"; thrown out: {_entrance?.ThrownOutSent ?? 0} told, "
+                 + $"{_entrance?.ThrownOutRemoved ?? 0} taken out of the park "
+                 + $"({_entrance?.ThrownOutStale ?? 0} already gone)";
         }
 
         public string InfluenceLine()

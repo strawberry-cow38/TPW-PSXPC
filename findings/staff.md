@@ -433,13 +433,44 @@ preflight that ever starts *allowing* things on that answer would be wrong.
 
 ### 6.7 What is still not proved
 
-- Whether the ejected guest actually ends up outside the park. The guard's half of the ejection is
-  now watched end to end; the GUEST's half — message 4, `VisitorMessages.OnMessage` — has not been
-  followed to a guest leaving.
-- `0 on post`: `TakePost` has still never been seen to place a guard at the gate.
+Two of the three items that stood here are now measured; see §6.9. What remains:
+
+- **A post taken is not a guard standing there.** `TryPathToPost` accepted a tile 4 times out of 4,
+  so the search and the path both work — but `Guard.Arrive` case `Post` sets state **Idle**, and
+  `Guard.Idle` (0x800981F8) promotes Idle straight to `Patrolling` on the next tick, which hands the
+  member back to `StaffBase.Patrol` and a fresh purpose. So the report's `posted` count is 0 at shot
+  time even in a run with 4 posts taken, and that is consistent rather than contradictory. Whether
+  the original leaves a guard standing at the gate, or whether a "post" is just a walk that ends near
+  it, is the open question — and the answer is in what 0x800981F8 does with 46, not in this port.
 - The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
   base machine wanders it away. The park report's `map in N connected pieces` line is the check.
+- The turnstile's staff broadcast is wired and still **unobserved**: `0 admitted by the turnstile` in
+  every run so far, including the two below. Nothing has reached state 46 at a moment the turnstile
+  was admitting.
+
+### 6.7b READ, and ⚠ DO NOT FIX: boarding a ride is not an escape, it is a stalemate
+
+`Guard.Chase` abandons for exactly three reasons, and all three cost the same **-5** morale
+(0x80097DC8 through 0x80098808): the culprit no longer exists (`0x800923D8`), the culprit is in a
+queue, or the chase deadline passed. The queue test is `0x800923A8`, and it is three literal
+comparisons on the guest's state byte at +0x35 — `0x12`, `0x14`, `0x13`, i.e. **18, 19 and 20 only**.
+
+**State 21 (`Loading` — aboard the ride) is not in that list.** A guest who gets past the queue and
+onto a ride is therefore neither caught nor abandoned: the guard keeps re-pathing to a rider it
+cannot reach until `BusyUntil` expires, and only then pays the -5. The port matches this exactly.
+
+This was not visible until today. Before the track and tour hosts were wired, nothing in the port
+put a guest into state 21 in the first place, so the case could not arise — the first run of the new
+ejection instrument produced `1 chases started, 0 caught, chase saw culprit gone 0x, last culprit
+state 21`, which is this stalemate and not a defect. Wiring the ride
+hosts made a pre-existing branch of the guard machine reachable for the first time; the branch was
+always correct, it had simply never had an input.
+
+⚠ **It also means one pelt is one coin flip.** The chain has at least three legitimate non-catch
+endings — no guard within 7 tiles when the shock fires (0x80095FDC), the culprit reaching a ride,
+and the gate-apron flag gap in §6.6 — so a single `--park-pelt` that reports `0 caught` is evidence
+about nothing. `--park-pelt=FRAME+PERIOD` re-arms it; measure a rate.
 
 ### 6.8 The pattern, audited rather than the instance fixed
 
@@ -455,3 +486,47 @@ Two near misses worth recording because they look like the same bug and are not:
 ...)` in a world with no `Current` guard; and `VisitorActivity.Watch` reads
 `world.Position(entertainer)` from a GUEST's tick, but `ParkActivityWorld.Position(StaffMember)` is a
 direct lookup. Both cross member boundaries and both are already correct.
+### 6.9 The guest half of an ejection, measured — and the control that makes it mean something
+
+**The chain completes.** Sixteen pelts at `--park-pelt=300+150` into a connected four-path park with
+one entertainer and four guards, 4,000 frames:
+
+```
+guards: 4, 15 chases started, 4 posts taken, 4 caught, gate counter 0;
+dispatch asked 16x, offered 64 (0 busy, 39 too far);
+post: 4 taken of 4 tiles tried, 0 gave up after five, 0 with no gate;
+thrown out: 4 told, 4 taken out of the park (0 already gone)
+```
+
+`4 told, 4 taken out` is the guest half. Message 4 reached four guests through the same slot-40 door
+the gate uses, `VisitorEntrance` answered it with `RemoveFromPark`, and the host removed all four.
+`0 already gone` says none of them was a stale pointer — `OnGuestTile` had resolved a live guest
+every time, which is what makes the send legitimate rather than lucky.
+
+**The control: sever the door, keep everything else.** `ParkGuardWorld.SendGuestMessage` still counts
+the catch but does not call `_message`. Same park, same seed, same 4,000 frames:
+
+| | door open | door severed |
+|---|---|---|
+| chases started | 15 | 13 |
+| **caught** | **4** | **4** |
+| posts taken | 4 | 4 |
+| **thrown out, told** | **4** | **0** |
+| **taken out of the park** | **4** | **0** |
+
+The guard's half is untouched and the guest's half goes to zero. That is the separation the counters
+exist for: **catching somebody and removing them are two different events**, and a single "ejected"
+number could not have told them apart. It also rules out the counters reading the catch by another
+name — they would have stayed at 4.
+
+⚠ **One pelt is one coin flip, and this is why the flag now repeats.** 16 pelts produced 15 chases
+and 4 catches. The other eleven ended legitimately: 39 of the 64 guard offers were over 7 tiles away
+(0x80095FDC), and a culprit who reaches a ride is chased to the deadline rather than abandoned
+(§6.7b). An earlier single-pelt run reported `1 chases started, 0 caught` and meant nothing at all.
+
+**READ 0x8008FC10, and what the port does not do.** The message-4 row of the guest's jump table
+(0x800E3B74[3]) is two calls: `0x800519B0`, which is `RemoveFromPark`, and `0x80051D74`, which walks
+a per-class table at 0x800E0F6C telling every person the guest is gone. The port makes the first
+only. Nothing here holds a guest pointer across ticks except `Guard.Culprit`, and the guard polls
+`GuestExists` for that instead — `chase saw culprit gone 0x` in both runs above.
+
