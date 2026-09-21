@@ -15,5 +15,6 @@
     <None Include="../../findings/rating-audit.json" Link="rating-audit.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../findings/goals-audit.json" Link="goals-audit.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../findings/scenario-audit.json" Link="scenario-audit.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../findings/objbytes-audit.json" Link="objbytes-audit.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

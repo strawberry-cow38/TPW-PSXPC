@@ -14,6 +14,11 @@ The existing `DebtWatch` already implements six-month bankruptcy; its documentat
 tinyclaw's console measurement of GAME OVER and the following movie. This report supplies the
 missing executable route, not a second debt-clock implementation.
 
+**Follow-up:** [objbytes.md](objbytes.md) accounts for the nine non-weekly minigame award paths,
+the advertised 50 tickets, and the campaign-completion consumers. It bounds the remaining **30**
+objective bytes as unread in the recovered pointer paths, with explicit search counts and controls.
+The original readings and source-disagreement decisions below are retained.
+
 ## §0 SOURCE DISAGREEMENTS
 
 Existing findings remain unchanged. The two inherited computational disagreements remain visible

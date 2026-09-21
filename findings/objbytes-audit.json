@@ -1,0 +1,5350 @@
+{
+  "controls": {
+    "all_13_images": true,
+    "all_12_overlays": true,
+    "all_words_counted": true,
+    "objective_address_positive": true,
+    "pointer_positive": true,
+    "weekly_grant_positive": true,
+    "end_sequence_positive": true,
+    "all_8_park_totals": true,
+    "all_4_worlds": true,
+    "all_9_minigames_controlled": true,
+    "common_27_cases": true,
+    "full_50_formats_progress": true
+  },
+  "scans": [
+    {
+      "image": "TPW.BIN",
+      "bytes": 1065308,
+      "sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+      "aligned_words": 266327,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x80013248",
+          "target": "0x8006BE3C"
+        },
+        {
+          "site": "0x8001347C",
+          "target": "0x800BCEA0"
+        },
+        {
+          "site": "0x800136D8",
+          "target": "0x800BCEA0"
+        },
+        {
+          "site": "0x8002389C",
+          "target": "0x80023C0C"
+        },
+        {
+          "site": "0x80023988",
+          "target": "0x80058F90"
+        },
+        {
+          "site": "0x8004A970",
+          "target": "0x800547F0"
+        },
+        {
+          "site": "0x8004DBD0",
+          "target": "0x800547F0"
+        },
+        {
+          "site": "0x8004DBE0",
+          "target": "0x80054818"
+        },
+        {
+          "site": "0x8004DBF0",
+          "target": "0x80054840"
+        },
+        {
+          "site": "0x80054304",
+          "target": "0x80054818"
+        },
+        {
+          "site": "0x80054874",
+          "target": "0x800547F0"
+        },
+        {
+          "site": "0x80058FD8",
+          "target": "0x800BA45C"
+        },
+        {
+          "site": "0x80066B9C",
+          "target": "0x8006BEC4"
+        },
+        {
+          "site": "0x80066BA4",
+          "target": "0x8006BE54"
+        },
+        {
+          "site": "0x80066C14",
+          "target": "0x8006BE48"
+        },
+        {
+          "site": "0x80066C34",
+          "target": "0x8006BE9C"
+        },
+        {
+          "site": "0x80067618",
+          "target": "0x80067590"
+        },
+        {
+          "site": "0x800676FC",
+          "target": "0x80067DBC"
+        },
+        {
+          "site": "0x8006770C",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x80067740",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x80067774",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x800677C8",
+          "target": "0x8006BFE4"
+        },
+        {
+          "site": "0x80067944",
+          "target": "0x80067DBC"
+        },
+        {
+          "site": "0x8006796C",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x80067994",
+          "target": "0x80067658"
+        },
+        {
+          "site": "0x800679A0",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x800679AC",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x800679F0",
+          "target": "0x80067658"
+        },
+        {
+          "site": "0x800679FC",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067A08",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x80067A7C",
+          "target": "0x80067658"
+        },
+        {
+          "site": "0x80067A88",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067AA0",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x80067B18",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067B28",
+          "target": "0x80067658"
+        },
+        {
+          "site": "0x80067B34",
+          "target": "0x80067590"
+        },
+        {
+          "site": "0x80067B58",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067B68",
+          "target": "0x800675C0"
+        },
+        {
+          "site": "0x80067B74",
+          "target": "0x80067590"
+        },
+        {
+          "site": "0x80067BA8",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067BB8",
+          "target": "0x800675C0"
+        },
+        {
+          "site": "0x80067BC4",
+          "target": "0x80067590"
+        },
+        {
+          "site": "0x80067C04",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067C14",
+          "target": "0x800675C0"
+        },
+        {
+          "site": "0x80067C20",
+          "target": "0x80067590"
+        },
+        {
+          "site": "0x80067C44",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067C54",
+          "target": "0x800675C0"
+        },
+        {
+          "site": "0x80067C60",
+          "target": "0x80067590"
+        },
+        {
+          "site": "0x80067CA0",
+          "target": "0x800677B8"
+        },
+        {
+          "site": "0x80067CB0",
+          "target": "0x800675C0"
+        },
+        {
+          "site": "0x80067DD8",
+          "target": "0x80067CD8"
+        },
+        {
+          "site": "0x8006BF78",
+          "target": "0x8006BEF0"
+        },
+        {
+          "site": "0x8006BFA4",
+          "target": "0x8006BE60"
+        },
+        {
+          "site": "0x80075EEC",
+          "target": "0x8006BE1C"
+        },
+        {
+          "site": "0x80083B78",
+          "target": "0x8006BE1C"
+        },
+        {
+          "site": "0x800A4CDC",
+          "target": "0x80054868"
+        },
+        {
+          "site": "0x800B9A8C",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x800B9AB0",
+          "target": "0x80067658"
+        },
+        {
+          "site": "0x800B9AB8",
+          "target": "0x8006BFE4"
+        },
+        {
+          "site": "0x800BD2E8",
+          "target": "0x800BCD00"
+        }
+      ],
+      "pointer_candidates": [
+        {
+          "site": "0x800DDDC4",
+          "target": "0x8010558C"
+        },
+        {
+          "site": "0x800DDDC8",
+          "target": "0x801054DC"
+        },
+        {
+          "site": "0x800DDDCC",
+          "target": "0x8010542C"
+        },
+        {
+          "site": "0x800DDDD0",
+          "target": "0x8010537C"
+        },
+        {
+          "site": "0x800F322C",
+          "target": "0x80102E88"
+        }
+      ],
+      "gp_candidates": [
+        {
+          "site": "0x8006A92C",
+          "target": "0x80102E88",
+          "op": 35
+        },
+        {
+          "site": "0x8006AC04",
+          "target": "0x80102E88",
+          "op": 35
+        },
+        {
+          "site": "0x8006BA8C",
+          "target": "0x80103988",
+          "op": 43
+        },
+        {
+          "site": "0x8006BA90",
+          "target": "0x80103984",
+          "op": 43
+        },
+        {
+          "site": "0x8006BAC8",
+          "target": "0x80103990",
+          "op": 43
+        },
+        {
+          "site": "0x8006BE2C",
+          "target": "0x80103984",
+          "op": 43
+        },
+        {
+          "site": "0x8006BE30",
+          "target": "0x80103984",
+          "op": 35
+        },
+        {
+          "site": "0x8006BE3C",
+          "target": "0x80103988",
+          "op": 35
+        },
+        {
+          "site": "0x8006BE48",
+          "target": "0x80103990",
+          "op": 43
+        },
+        {
+          "site": "0x8006BE54",
+          "target": "0x80103990",
+          "op": 35
+        },
+        {
+          "site": "0x8006BE6C",
+          "target": "0x80103990",
+          "op": 35
+        },
+        {
+          "site": "0x8006BFE4",
+          "target": "0x80103984",
+          "op": 35
+        },
+        {
+          "site": "0x8006BFE8",
+          "target": "0x80103988",
+          "op": 35
+        },
+        {
+          "site": "0x8006BFFC",
+          "target": "0x80103984",
+          "op": 43
+        },
+        {
+          "site": "0x8006C000",
+          "target": "0x80103988",
+          "op": 43
+        },
+        {
+          "site": "0x8006C024",
+          "target": "0x80103984",
+          "op": 35
+        },
+        {
+          "site": "0x8006C030",
+          "target": "0x80103984",
+          "op": 43
+        },
+        {
+          "site": "0x8006C284",
+          "target": "0x80103984",
+          "op": 36
+        },
+        {
+          "site": "0x8006C288",
+          "target": "0x80103988",
+          "op": 36
+        },
+        {
+          "site": "0x8006C28C",
+          "target": "0x80103990",
+          "op": 35
+        },
+        {
+          "site": "0x8006C69C",
+          "target": "0x80103984",
+          "op": 43
+        },
+        {
+          "site": "0x8006C6A8",
+          "target": "0x80103988",
+          "op": 43
+        },
+        {
+          "site": "0x8006C6B4",
+          "target": "0x80103990",
+          "op": 43
+        }
+      ],
+      "address_pair_candidates": [
+        {
+          "site": "0x80025EBC",
+          "target": "0x801053BC",
+          "op": 9
+        },
+        {
+          "site": "0x8002EB80",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8002ED68",
+          "target": "0x8010558C",
+          "op": 9
+        },
+        {
+          "site": "0x8002EF70",
+          "target": "0x801054DC",
+          "op": 9
+        },
+        {
+          "site": "0x8002F164",
+          "target": "0x8010542C",
+          "op": 9
+        },
+        {
+          "site": "0x8002F358",
+          "target": "0x8010537C",
+          "op": 9
+        },
+        {
+          "site": "0x80031E04",
+          "target": "0x80105638",
+          "op": 9
+        },
+        {
+          "site": "0x800326D8",
+          "target": "0x80105638",
+          "op": 9
+        },
+        {
+          "site": "0x80032BAC",
+          "target": "0x80105638",
+          "op": 9
+        },
+        {
+          "site": "0x80032C78",
+          "target": "0x80105638",
+          "op": 9
+        },
+        {
+          "site": "0x80036FF0",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x80040580",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x80054768",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8005479C",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x800547D0",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x800547F8",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80054820",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80054848",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80054884",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x800587B4",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8005881C",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8005890C",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80067D30",
+          "target": "0x800E1930",
+          "op": 9
+        },
+        {
+          "site": "0x80067D38",
+          "target": "0x800E1964",
+          "op": 9
+        },
+        {
+          "site": "0x80067D58",
+          "target": "0x800E1998",
+          "op": 9
+        },
+        {
+          "site": "0x80067D60",
+          "target": "0x800E19CC",
+          "op": 9
+        },
+        {
+          "site": "0x80067D80",
+          "target": "0x800E1A00",
+          "op": 9
+        },
+        {
+          "site": "0x80067D88",
+          "target": "0x800E1A34",
+          "op": 9
+        },
+        {
+          "site": "0x80067DA8",
+          "target": "0x800E1A68",
+          "op": 9
+        },
+        {
+          "site": "0x80067DB0",
+          "target": "0x800E1A9C",
+          "op": 9
+        },
+        {
+          "site": "0x80069768",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069850",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069C30",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069C60",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069C90",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069CC0",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069CF0",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069D20",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069D50",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069D80",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069F9C",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x80069FEC",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A02C",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A218",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A248",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A278",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A2A8",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A2D8",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A308",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A338",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A368",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A400",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A430",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A460",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A490",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A4C0",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A4F0",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A520",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A550",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A5A0",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A5DC",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A618",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A654",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A690",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A6CC",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006A708",
+          "target": "0x800DDDC4",
+          "op": 9
+        },
+        {
+          "site": "0x8006BA80",
+          "target": "0x80109B18",
+          "op": 9
+        },
+        {
+          "site": "0x8006BEA8",
+          "target": "0x80109B18",
+          "op": 9
+        },
+        {
+          "site": "0x8006BED0",
+          "target": "0x80109B18",
+          "op": 9
+        },
+        {
+          "site": "0x8006BF10",
+          "target": "0x80109B18",
+          "op": 9
+        },
+        {
+          "site": "0x8006C290",
+          "target": "0x80109B18",
+          "op": 9
+        },
+        {
+          "site": "0x8006C6B0",
+          "target": "0x80109B18",
+          "op": 9
+        },
+        {
+          "site": "0x80083020",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x80089B30",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089B60",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089B80",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089BD0",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089C24",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089CA0",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089D34",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089DB4",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x80089ECC",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x8008B510",
+          "target": "0x80105530",
+          "op": 9
+        },
+        {
+          "site": "0x8008CD64",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x8008F2A8",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x8009F2A0",
+          "target": "0x801054E4",
+          "op": 9
+        },
+        {
+          "site": "0x8009F2E4",
+          "target": "0x801054F4",
+          "op": 9
+        },
+        {
+          "site": "0x8009F300",
+          "target": "0x80105504",
+          "op": 9
+        },
+        {
+          "site": "0x800A0B48",
+          "target": "0x80105514",
+          "op": 9
+        },
+        {
+          "site": "0x800A0BBC",
+          "target": "0x80105514",
+          "op": 9
+        },
+        {
+          "site": "0x800A33E8",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x800A347C",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x800A3560",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x800A89AC",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x800B784C",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x800CDAA4",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800CDAB8",
+          "target": "0x800E1AB8",
+          "op": 43
+        },
+        {
+          "site": "0x800CDAC0",
+          "target": "0x800E1AB4",
+          "op": 43
+        },
+        {
+          "site": "0x800CDAC8",
+          "target": "0x800E1AB0",
+          "op": 43
+        },
+        {
+          "site": "0x800CDB18",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800CDB48",
+          "target": "0x800E1A68",
+          "op": 41
+        },
+        {
+          "site": "0x800CDB50",
+          "target": "0x800E1A68",
+          "op": 37
+        },
+        {
+          "site": "0x800CDB58",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800CFCC4",
+          "target": "0x80105556",
+          "op": 13
+        },
+        {
+          "site": "0x800D2368",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D23CC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2430",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2498",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2518",
+          "target": "0x800E1ACC",
+          "op": 43
+        },
+        {
+          "site": "0x800D2890",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D28D8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2908",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D292C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D29B0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2A3C",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800D2A50",
+          "target": "0x800E1A84",
+          "op": 43
+        },
+        {
+          "site": "0x800D2A80",
+          "target": "0x800E1A6C",
+          "op": 35
+        },
+        {
+          "site": "0x800D2AAC",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800D2ABC",
+          "target": "0x800E1A68",
+          "op": 37
+        },
+        {
+          "site": "0x800D2AC4",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D2ACC",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800D2AE0",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800D2AF0",
+          "target": "0x800E1A88",
+          "op": 43
+        },
+        {
+          "site": "0x800D2B4C",
+          "target": "0x800E1AC8",
+          "op": 35
+        },
+        {
+          "site": "0x800D2B74",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800D2B90",
+          "target": "0x800E1A88",
+          "op": 43
+        },
+        {
+          "site": "0x800D2BCC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2CB0",
+          "target": "0x800E1ACC",
+          "op": 35
+        },
+        {
+          "site": "0x800D2CB8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2D74",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D2D88",
+          "target": "0x800E1ACC",
+          "op": 35
+        },
+        {
+          "site": "0x800D2D98",
+          "target": "0x800E1ACC",
+          "op": 43
+        },
+        {
+          "site": "0x800D2E60",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D2E70",
+          "target": "0x800E1A80",
+          "op": 35
+        },
+        {
+          "site": "0x800D2E90",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D2E98",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D2ECC",
+          "target": "0x800E1AB0",
+          "op": 35
+        },
+        {
+          "site": "0x800D2EF0",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D2F54",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D2F78",
+          "target": "0x800E1AB0",
+          "op": 35
+        },
+        {
+          "site": "0x800D2FE4",
+          "target": "0x800E1AB4",
+          "op": 43
+        },
+        {
+          "site": "0x800D2FFC",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D302C",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800D3034",
+          "target": "0x800E1AB0",
+          "op": 35
+        },
+        {
+          "site": "0x800D3074",
+          "target": "0x800E1AB4",
+          "op": 43
+        },
+        {
+          "site": "0x800D3088",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D30B0",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D3140",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D3160",
+          "target": "0x800E1AB0",
+          "op": 35
+        },
+        {
+          "site": "0x800D3184",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D31F8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D322C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D32B4",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D3300",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D3320",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D33A0",
+          "target": "0x800E1A84",
+          "op": 35
+        },
+        {
+          "site": "0x800D33BC",
+          "target": "0x800E1AC8",
+          "op": 35
+        },
+        {
+          "site": "0x800D33DC",
+          "target": "0x800E1AC8",
+          "op": 35
+        },
+        {
+          "site": "0x800D3404",
+          "target": "0x800E1A84",
+          "op": 43
+        },
+        {
+          "site": "0x800D3494",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D34F0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D35CC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D36AC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D3718",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D3744",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D37A8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D37FC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D38AC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D3930",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D397C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D8FD8",
+          "target": "0x800E1A60",
+          "op": 35
+        },
+        {
+          "site": "0x800D8FF8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9000",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800D9008",
+          "target": "0x800E1A70",
+          "op": 43
+        },
+        {
+          "site": "0x800D9010",
+          "target": "0x800E1A68",
+          "op": 41
+        },
+        {
+          "site": "0x800D9028",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D907C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D90AC",
+          "target": "0x800E1A74",
+          "op": 43
+        },
+        {
+          "site": "0x800D90B8",
+          "target": "0x800E1A78",
+          "op": 43
+        },
+        {
+          "site": "0x800D90C4",
+          "target": "0x800E1A7C",
+          "op": 43
+        },
+        {
+          "site": "0x800D90D0",
+          "target": "0x800E1A80",
+          "op": 43
+        },
+        {
+          "site": "0x800D90D8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9120",
+          "target": "0x800E1A90",
+          "op": 9
+        },
+        {
+          "site": "0x800D9128",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9134",
+          "target": "0x800E1A68",
+          "op": 41
+        },
+        {
+          "site": "0x800D9170",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D91A8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D91D8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D920C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9218",
+          "target": "0x800E1A84",
+          "op": 43
+        },
+        {
+          "site": "0x800D9228",
+          "target": "0x800E1A88",
+          "op": 43
+        },
+        {
+          "site": "0x800D9230",
+          "target": "0x800E1A8C",
+          "op": 43
+        },
+        {
+          "site": "0x800D924C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9254",
+          "target": "0x800E1A68",
+          "op": 37
+        },
+        {
+          "site": "0x800D92A8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D92CC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D92F0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D933C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9374",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D93D0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D940C",
+          "target": "0x800E1AA0",
+          "op": 35
+        },
+        {
+          "site": "0x800D9428",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D947C",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800D9490",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800D952C",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D9534",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9540",
+          "target": "0x800E1A68",
+          "op": 41
+        },
+        {
+          "site": "0x800D9554",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D955C",
+          "target": "0x800E1A68",
+          "op": 37
+        },
+        {
+          "site": "0x800D9568",
+          "target": "0x800E1AA0",
+          "op": 43
+        },
+        {
+          "site": "0x800D9598",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D95C0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D95C8",
+          "target": "0x800E1A68",
+          "op": 37
+        },
+        {
+          "site": "0x800D95D4",
+          "target": "0x800E1AA0",
+          "op": 43
+        },
+        {
+          "site": "0x800D9604",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9628",
+          "target": "0x800E1AA0",
+          "op": 35
+        },
+        {
+          "site": "0x800D9640",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9680",
+          "target": "0x800E1AA0",
+          "op": 35
+        },
+        {
+          "site": "0x800D96B4",
+          "target": "0x800E1AA4",
+          "op": 43
+        },
+        {
+          "site": "0x800D96C0",
+          "target": "0x800E1A54",
+          "op": 35
+        },
+        {
+          "site": "0x800D96D4",
+          "target": "0x800E1AA4",
+          "op": 35
+        },
+        {
+          "site": "0x800D96E0",
+          "target": "0x800E1AA8",
+          "op": 43
+        },
+        {
+          "site": "0x800D96EC",
+          "target": "0x800E1AA8",
+          "op": 35
+        },
+        {
+          "site": "0x800D96F4",
+          "target": "0x800E1A58",
+          "op": 35
+        },
+        {
+          "site": "0x800D9708",
+          "target": "0x800E1AA0",
+          "op": 35
+        },
+        {
+          "site": "0x800D9724",
+          "target": "0x800E1A5C",
+          "op": 35
+        },
+        {
+          "site": "0x800D9748",
+          "target": "0x800E1A6C",
+          "op": 35
+        },
+        {
+          "site": "0x800D976C",
+          "target": "0x800E1A68",
+          "op": 37
+        },
+        {
+          "site": "0x800D9774",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D97D4",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D97EC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D97F4",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D9810",
+          "target": "0x800E1A74",
+          "op": 35
+        },
+        {
+          "site": "0x800D9824",
+          "target": "0x800E1A7C",
+          "op": 35
+        },
+        {
+          "site": "0x800D984C",
+          "target": "0x800E1A80",
+          "op": 35
+        },
+        {
+          "site": "0x800D9860",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D9898",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D98B4",
+          "target": "0x800E1A60",
+          "op": 35
+        },
+        {
+          "site": "0x800D98D4",
+          "target": "0x800E1A60",
+          "op": 35
+        },
+        {
+          "site": "0x800D98EC",
+          "target": "0x800E1A60",
+          "op": 35
+        },
+        {
+          "site": "0x800D990C",
+          "target": "0x800E1A64",
+          "op": 35
+        },
+        {
+          "site": "0x800D9934",
+          "target": "0x800E1A64",
+          "op": 35
+        },
+        {
+          "site": "0x800D9A54",
+          "target": "0x800E1AB0",
+          "op": 43
+        },
+        {
+          "site": "0x800D9A5C",
+          "target": "0x800E1AB4",
+          "op": 43
+        },
+        {
+          "site": "0x800D9A64",
+          "target": "0x800E1AB8",
+          "op": 43
+        },
+        {
+          "site": "0x800D9A74",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800D9A7C",
+          "target": "0x800E1ACC",
+          "op": 43
+        },
+        {
+          "site": "0x800D9AFC",
+          "target": "0x800E1AC8",
+          "op": 43
+        },
+        {
+          "site": "0x800D9B28",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9BB0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9BB8",
+          "target": "0x800E1ACC",
+          "op": 35
+        },
+        {
+          "site": "0x800D9C2C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9CA0",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800D9CA8",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800D9D4C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9D70",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9D94",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9DB8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9DDC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9E00",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9E24",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9E48",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9E6C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9E90",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9EB4",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9ED8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9EFC",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9F20",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9F44",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9F68",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9F90",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9FB8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800D9FE0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA008",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA030",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA058",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA080",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA0A8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA0D0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA0F8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA120",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA148",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA170",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA198",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA1C0",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA1E4",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA268",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800DA288",
+          "target": "0x800E1A78",
+          "op": 35
+        },
+        {
+          "site": "0x800DA29C",
+          "target": "0x800E1A6C",
+          "op": 35
+        },
+        {
+          "site": "0x800DA2B0",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800DA2BC",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800DA2D0",
+          "target": "0x800E1A88",
+          "op": 35
+        },
+        {
+          "site": "0x800DA2E0",
+          "target": "0x800E1A88",
+          "op": 43
+        },
+        {
+          "site": "0x800DA324",
+          "target": "0x800E1AC8",
+          "op": 35
+        },
+        {
+          "site": "0x800DA348",
+          "target": "0x800E1A6C",
+          "op": 43
+        },
+        {
+          "site": "0x800DA364",
+          "target": "0x800E1A88",
+          "op": 43
+        },
+        {
+          "site": "0x800DA3B0",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA3D8",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800DA480",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA4A0",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800DA4D0",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA4EC",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800DA524",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA584",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA59C",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA5B8",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800DA5F8",
+          "target": "0x800E1AB4",
+          "op": 43
+        },
+        {
+          "site": "0x800DA608",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA620",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA648",
+          "target": "0x800E1AB8",
+          "op": 35
+        },
+        {
+          "site": "0x800DA66C",
+          "target": "0x800E1AB4",
+          "op": 35
+        },
+        {
+          "site": "0x800DA680",
+          "target": "0x800E1AB4",
+          "op": 43
+        },
+        {
+          "site": "0x800DA6D4",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA7A8",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA86C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800DA92C",
+          "target": "0x800E1A50",
+          "op": 35
+        },
+        {
+          "site": "0x800F30A8",
+          "target": "0x80105577",
+          "op": 46
+        },
+        {
+          "site": "0x800F32A4",
+          "target": "0x800E1A41",
+          "op": 32
+        },
+        {
+          "site": "0x800F32A8",
+          "target": "0x800E1A61",
+          "op": 32
+        }
+      ]
+    },
+    {
+      "image": "OVL0",
+      "bytes": 4532,
+      "sha256": "a652951bb481df4a93fbbd908be28d77ad51bc6e469d096d2be0840f133c0f9f",
+      "aligned_words": 1133,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x801149D8",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL1",
+      "bytes": 2120,
+      "sha256": "4cd11600d401b317375e6be6a8df1a683780fe6a48bce196eb47c93628ef8f70",
+      "aligned_words": 530,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x801142B4",
+          "target": "0x800675A8"
+        },
+        {
+          "site": "0x801142C4",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL2",
+      "bytes": 35000,
+      "sha256": "488b8375c5e0b8658a33477ca3dcdde2194ada42825018c8c93dc71c48f45fd0",
+      "aligned_words": 8750,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL3",
+      "bytes": 45788,
+      "sha256": "5a1b6fa5fcc01f269d9a8f2da3446ad1994cdf6cf322589c0c1b858d9a0401c5",
+      "aligned_words": 11447,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL4",
+      "bytes": 1672,
+      "sha256": "897a04a3980824e9fb28c2692c84390dbb306d07c132bfcde5b4fafa82f39517",
+      "aligned_words": 418,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x80114654",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL5",
+      "bytes": 3204,
+      "sha256": "23dc92d96c58d0fb768b5d48819b312d7382cb542a6af15fbb7d189ca175dc84",
+      "aligned_words": 801,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x801148A0",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL6",
+      "bytes": 2716,
+      "sha256": "8ddf291c7b668aea1a82d0d52043b84f79d9c341e35f5173e770a16e1bbc6931",
+      "aligned_words": 679,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x8011443C",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL7",
+      "bytes": 4384,
+      "sha256": "dc9ac609bf00cc82a49e1266e190c29c8d6fbcb6ab9684d7cf2887b16067386d",
+      "aligned_words": 1096,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x80114AB8",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL8",
+      "bytes": 3420,
+      "sha256": "7e2ee7b832e9ad96cb26023fbf65c36f7b12259b74ae0af2bdebd1ddd0a8e852",
+      "aligned_words": 855,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x801149BC",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL9",
+      "bytes": 3768,
+      "sha256": "162bb4979952d9231e3d0b894cd8471f53dea08d5f4f5cb599102994e2e6bafc",
+      "aligned_words": 942,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x80114AE4",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL10",
+      "bytes": 2672,
+      "sha256": "95e1acd37cddee680fd0fe4b94fb0beffb6db54312d493cdead2968d128bb896",
+      "aligned_words": 668,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x801146D4",
+          "target": "0x800B9A60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    },
+    {
+      "image": "OVL11",
+      "bytes": 13260,
+      "sha256": "3cf9bdb4d06952963d99be4bcd3402a47ae57f8c9d7858753c84a61c34b5d67b",
+      "aligned_words": 3315,
+      "skipped_aligned_words": 0,
+      "trailing_bytes": 0,
+      "calls": [
+        {
+          "site": "0x80114D8C",
+          "target": "0x8006BFE4"
+        },
+        {
+          "site": "0x801155AC",
+          "target": "0x8006BE1C"
+        },
+        {
+          "site": "0x80116A3C",
+          "target": "0x8006BE1C"
+        },
+        {
+          "site": "0x80117154",
+          "target": "0x80067CD8"
+        },
+        {
+          "site": "0x80117180",
+          "target": "0x8006BF4C"
+        },
+        {
+          "site": "0x80117190",
+          "target": "0x8006BEF0"
+        },
+        {
+          "site": "0x801171A0",
+          "target": "0x80067CD8"
+        },
+        {
+          "site": "0x801171AC",
+          "target": "0x8006BE60"
+        }
+      ],
+      "pointer_candidates": [],
+      "gp_candidates": [],
+      "address_pair_candidates": []
+    }
+  ],
+  "overlays": [
+    {
+      "index": 0,
+      "file_offset": 104,
+      "compressed_bytes": 2974,
+      "decoded_bytes": 4532,
+      "consumed_bytes": 2974,
+      "sha256": "a652951bb481df4a93fbbd908be28d77ad51bc6e469d096d2be0840f133c0f9f"
+    },
+    {
+      "index": 1,
+      "file_offset": 3078,
+      "compressed_bytes": 1454,
+      "decoded_bytes": 2120,
+      "consumed_bytes": 1454,
+      "sha256": "4cd11600d401b317375e6be6a8df1a683780fe6a48bce196eb47c93628ef8f70"
+    },
+    {
+      "index": 2,
+      "file_offset": 4532,
+      "compressed_bytes": 16493,
+      "decoded_bytes": 35000,
+      "consumed_bytes": 16493,
+      "sha256": "488b8375c5e0b8658a33477ca3dcdde2194ada42825018c8c93dc71c48f45fd0"
+    },
+    {
+      "index": 3,
+      "file_offset": 21025,
+      "compressed_bytes": 617,
+      "decoded_bytes": 45788,
+      "consumed_bytes": 617,
+      "sha256": "5a1b6fa5fcc01f269d9a8f2da3446ad1994cdf6cf322589c0c1b858d9a0401c5"
+    },
+    {
+      "index": 4,
+      "file_offset": 21642,
+      "compressed_bytes": 1108,
+      "decoded_bytes": 1672,
+      "consumed_bytes": 1108,
+      "sha256": "897a04a3980824e9fb28c2692c84390dbb306d07c132bfcde5b4fafa82f39517"
+    },
+    {
+      "index": 5,
+      "file_offset": 22750,
+      "compressed_bytes": 2231,
+      "decoded_bytes": 3204,
+      "consumed_bytes": 2231,
+      "sha256": "23dc92d96c58d0fb768b5d48819b312d7382cb542a6af15fbb7d189ca175dc84"
+    },
+    {
+      "index": 6,
+      "file_offset": 24981,
+      "compressed_bytes": 1796,
+      "decoded_bytes": 2716,
+      "consumed_bytes": 1796,
+      "sha256": "8ddf291c7b668aea1a82d0d52043b84f79d9c341e35f5173e770a16e1bbc6931"
+    },
+    {
+      "index": 7,
+      "file_offset": 26777,
+      "compressed_bytes": 2806,
+      "decoded_bytes": 4384,
+      "consumed_bytes": 2806,
+      "sha256": "dc9ac609bf00cc82a49e1266e190c29c8d6fbcb6ab9684d7cf2887b16067386d"
+    },
+    {
+      "index": 8,
+      "file_offset": 29583,
+      "compressed_bytes": 2036,
+      "decoded_bytes": 3420,
+      "consumed_bytes": 2036,
+      "sha256": "7e2ee7b832e9ad96cb26023fbf65c36f7b12259b74ae0af2bdebd1ddd0a8e852"
+    },
+    {
+      "index": 9,
+      "file_offset": 31619,
+      "compressed_bytes": 2430,
+      "decoded_bytes": 3768,
+      "consumed_bytes": 2430,
+      "sha256": "162bb4979952d9231e3d0b894cd8471f53dea08d5f4f5cb599102994e2e6bafc"
+    },
+    {
+      "index": 10,
+      "file_offset": 34049,
+      "compressed_bytes": 1917,
+      "decoded_bytes": 2672,
+      "consumed_bytes": 1917,
+      "sha256": "95e1acd37cddee680fd0fe4b94fb0beffb6db54312d493cdead2968d128bb896"
+    },
+    {
+      "index": 11,
+      "file_offset": 35966,
+      "compressed_bytes": 8001,
+      "decoded_bytes": 13260,
+      "consumed_bytes": 8001,
+      "sha256": "3cf9bdb4d06952963d99be4bcd3402a47ae57f8c9d7858753c84a61c34b5d67b"
+    }
+  ],
+  "objective": {
+    "bytes_named_before": 22,
+    "newly_named_of_remaining_30": 0,
+    "unread_in_provenance_slice": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      50,
+      51
+    ],
+    "reads": [
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067728",
+        "offset": 12,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x8006775C",
+        "offset": 16,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067790",
+        "offset": 20,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067980",
+        "offset": 12,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x800679C8",
+        "offset": 16,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067A60",
+        "offset": 20,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067A90",
+        "offset": 48,
+        "size": 1
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067BF0",
+        "offset": 24,
+        "size": 4
+      },
+      {
+        "image": "TPW.BIN",
+        "site": "0x80067C8C",
+        "offset": 28,
+        "size": 4
+      },
+      {
+        "image": "OVL11",
+        "site": "0x8011715C",
+        "offset": 49,
+        "size": 1
+      },
+      {
+        "image": "OVL11",
+        "site": "0x801171A8",
+        "offset": 49,
+        "size": 1
+      }
+    ],
+    "records": 8,
+    "skipped_records": 0,
+    "scope": "Selector and wrapper direct consumers; conventional literal/GP references. Arbitrary computed aliases excluded."
+  },
+  "worlds": [
+    {
+      "world": 0,
+      "address": "0x8010558C",
+      "initialized_bytes": 172,
+      "spacing": 176,
+      "groups": [
+        {
+          "kind": "grass",
+          "record_offset": 136,
+          "source": "0x80102DE8",
+          "count": 2,
+          "element_bytes": 2,
+          "sprites": [
+            166,
+            167
+          ]
+        },
+        {
+          "kind": "path",
+          "record_offset": 144,
+          "source": "0x800E14D4",
+          "count": 16,
+          "element_bytes": 2,
+          "sprites": [
+            214,
+            207,
+            215,
+            203,
+            217,
+            221,
+            218,
+            219,
+            222,
+            202,
+            205,
+            208,
+            209,
+            204,
+            204,
+            220
+          ]
+        },
+        {
+          "kind": "queue",
+          "record_offset": 152,
+          "source": "0x80102DF4",
+          "count": 4,
+          "element_bytes": 2,
+          "sprites": [
+            213,
+            212,
+            210,
+            211
+          ]
+        }
+      ],
+      "ground_texture": 258,
+      "extra_textures": [
+        169,
+        170
+      ],
+      "random_grass_controls": [
+        {
+          "random": 0,
+          "sprite": 166
+        },
+        {
+          "random": 1,
+          "sprite": 167
+        },
+        {
+          "random": 2,
+          "sprite": 166
+        },
+        {
+          "random": 4294967295,
+          "sprite": 167
+        }
+      ]
+    },
+    {
+      "world": 1,
+      "address": "0x801054DC",
+      "initialized_bytes": 172,
+      "spacing": 176,
+      "groups": [
+        {
+          "kind": "grass",
+          "record_offset": 136,
+          "source": "0x80102E30",
+          "count": 2,
+          "element_bytes": 2,
+          "sprites": [
+            145,
+            145
+          ]
+        },
+        {
+          "kind": "path",
+          "record_offset": 144,
+          "source": "0x800E1534",
+          "count": 16,
+          "element_bytes": 2,
+          "sprites": [
+            220,
+            217,
+            221,
+            212,
+            223,
+            227,
+            224,
+            225,
+            228,
+            211,
+            215,
+            218,
+            219,
+            214,
+            214,
+            226
+          ]
+        },
+        {
+          "kind": "queue",
+          "record_offset": 152,
+          "source": "0x80102E3C",
+          "count": 4,
+          "element_bytes": 2,
+          "sprites": [
+            230,
+            230,
+            230,
+            229
+          ]
+        }
+      ],
+      "ground_texture": 168,
+      "extra_textures": [
+        91,
+        92
+      ],
+      "random_grass_controls": [
+        {
+          "random": 0,
+          "sprite": 145
+        },
+        {
+          "random": 1,
+          "sprite": 145
+        },
+        {
+          "random": 2,
+          "sprite": 145
+        },
+        {
+          "random": 4294967295,
+          "sprite": 145
+        }
+      ]
+    },
+    {
+      "world": 2,
+      "address": "0x8010542C",
+      "initialized_bytes": 172,
+      "spacing": 176,
+      "groups": [
+        {
+          "kind": "grass",
+          "record_offset": 136,
+          "source": "0x80102E00",
+          "count": 2,
+          "element_bytes": 2,
+          "sprites": [
+            198,
+            198
+          ]
+        },
+        {
+          "kind": "path",
+          "record_offset": 144,
+          "source": "0x800E14F4",
+          "count": 16,
+          "element_bytes": 2,
+          "sprites": [
+            237,
+            230,
+            238,
+            226,
+            240,
+            244,
+            241,
+            242,
+            245,
+            225,
+            228,
+            231,
+            232,
+            227,
+            227,
+            243
+          ]
+        },
+        {
+          "kind": "queue",
+          "record_offset": 152,
+          "source": "0x80102E0C",
+          "count": 4,
+          "element_bytes": 2,
+          "sprites": [
+            236,
+            235,
+            233,
+            234
+          ]
+        }
+      ],
+      "ground_texture": 82,
+      "extra_textures": [
+        17,
+        18
+      ],
+      "random_grass_controls": [
+        {
+          "random": 0,
+          "sprite": 198
+        },
+        {
+          "random": 1,
+          "sprite": 198
+        },
+        {
+          "random": 2,
+          "sprite": 198
+        },
+        {
+          "random": 4294967295,
+          "sprite": 198
+        }
+      ]
+    },
+    {
+      "world": 3,
+      "address": "0x8010537C",
+      "initialized_bytes": 172,
+      "spacing": 176,
+      "groups": [
+        {
+          "kind": "grass",
+          "record_offset": 136,
+          "source": "0x80102E18",
+          "count": 2,
+          "element_bytes": 2,
+          "sprites": [
+            152,
+            152
+          ]
+        },
+        {
+          "kind": "path",
+          "record_offset": 144,
+          "source": "0x800E1514",
+          "count": 16,
+          "element_bytes": 2,
+          "sprites": [
+            173,
+            164,
+            174,
+            161,
+            175,
+            179,
+            176,
+            177,
+            180,
+            160,
+            163,
+            165,
+            166,
+            162,
+            162,
+            178
+          ]
+        },
+        {
+          "kind": "queue",
+          "record_offset": 152,
+          "source": "0x80102E24",
+          "count": 4,
+          "element_bytes": 2,
+          "sprites": [
+            169,
+            169,
+            167,
+            168
+          ]
+        }
+      ],
+      "ground_texture": 400,
+      "extra_textures": [
+        332,
+        333
+      ],
+      "random_grass_controls": [
+        {
+          "random": 0,
+          "sprite": 152
+        },
+        {
+          "random": 1,
+          "sprite": 152
+        },
+        {
+          "random": 2,
+          "sprite": 152
+        },
+        {
+          "random": 4294967295,
+          "sprite": 152
+        }
+      ]
+    }
+  ],
+  "parks": [
+    {
+      "world": 0,
+      "park": 0,
+      "games": [
+        {
+          "entry": 215,
+          "type": 6,
+          "descriptor_offset": 44108,
+          "game": 7,
+          "bit": 11
+        },
+        {
+          "entry": 248,
+          "type": 5,
+          "descriptor_offset": 9440,
+          "game": 1,
+          "bit": 5
+        },
+        {
+          "entry": 244,
+          "type": 5,
+          "descriptor_offset": 13276,
+          "game": 4,
+          "bit": 8
+        }
+      ],
+      "ordinary_zero_game_occurrences": 29,
+      "advertised": 7,
+      "tutorial": true,
+      "expected_park_bits": 2366
+    },
+    {
+      "world": 0,
+      "park": 1,
+      "games": [
+        {
+          "entry": 243,
+          "type": 5,
+          "descriptor_offset": 7984,
+          "game": 5,
+          "bit": 9
+        },
+        {
+          "entry": 245,
+          "type": 5,
+          "descriptor_offset": 31532,
+          "game": 8,
+          "bit": 12
+        },
+        {
+          "entry": 246,
+          "type": 5,
+          "descriptor_offset": 8964,
+          "game": 3,
+          "bit": 7
+        }
+      ],
+      "ordinary_zero_game_occurrences": 29,
+      "advertised": 6,
+      "tutorial": false,
+      "expected_park_bits": 4750
+    },
+    {
+      "world": 1,
+      "park": 0,
+      "games": [
+        {
+          "entry": 159,
+          "type": 5,
+          "descriptor_offset": 11064,
+          "game": 1,
+          "bit": 5
+        },
+        {
+          "entry": 153,
+          "type": 5,
+          "descriptor_offset": 6368,
+          "game": 9,
+          "bit": 13
+        }
+      ],
+      "ordinary_zero_game_occurrences": 32,
+      "advertised": 5,
+      "tutorial": false,
+      "expected_park_bits": 8238
+    },
+    {
+      "world": 1,
+      "park": 1,
+      "games": [
+        {
+          "entry": 130,
+          "type": 6,
+          "descriptor_offset": 44816,
+          "game": 7,
+          "bit": 11
+        },
+        {
+          "entry": 154,
+          "type": 5,
+          "descriptor_offset": 9300,
+          "game": 5,
+          "bit": 9
+        },
+        {
+          "entry": 145,
+          "type": 5,
+          "descriptor_offset": 3888,
+          "game": 6,
+          "bit": 10
+        }
+      ],
+      "ordinary_zero_game_occurrences": 29,
+      "advertised": 6,
+      "tutorial": false,
+      "expected_park_bits": 3598
+    },
+    {
+      "world": 2,
+      "park": 0,
+      "games": [
+        {
+          "entry": 66,
+          "type": 5,
+          "descriptor_offset": 5320,
+          "game": 9,
+          "bit": 13
+        },
+        {
+          "entry": 70,
+          "type": 5,
+          "descriptor_offset": 7840,
+          "game": 5,
+          "bit": 9
+        }
+      ],
+      "ordinary_zero_game_occurrences": 29,
+      "advertised": 5,
+      "tutorial": false,
+      "expected_park_bits": 8718
+    },
+    {
+      "world": 2,
+      "park": 1,
+      "games": [
+        {
+          "entry": 41,
+          "type": 6,
+          "descriptor_offset": 37100,
+          "game": 7,
+          "bit": 11
+        },
+        {
+          "entry": 74,
+          "type": 5,
+          "descriptor_offset": 9484,
+          "game": 1,
+          "bit": 5
+        },
+        {
+          "entry": 73,
+          "type": 5,
+          "descriptor_offset": 8404,
+          "game": 2,
+          "bit": 6
+        }
+      ],
+      "ordinary_zero_game_occurrences": 27,
+      "advertised": 6,
+      "tutorial": false,
+      "expected_park_bits": 2158
+    },
+    {
+      "world": 3,
+      "park": 0,
+      "games": [
+        {
+          "entry": 393,
+          "type": 5,
+          "descriptor_offset": 6552,
+          "game": 2,
+          "bit": 6
+        },
+        {
+          "entry": 391,
+          "type": 5,
+          "descriptor_offset": 10796,
+          "game": 5,
+          "bit": 9
+        }
+      ],
+      "ordinary_zero_game_occurrences": 29,
+      "advertised": 5,
+      "tutorial": false,
+      "expected_park_bits": 590
+    },
+    {
+      "world": 3,
+      "park": 1,
+      "games": [
+        {
+          "entry": 363,
+          "type": 6,
+          "descriptor_offset": 27924,
+          "game": 7,
+          "bit": 11
+        },
+        {
+          "entry": 394,
+          "type": 5,
+          "descriptor_offset": 12956,
+          "game": 1,
+          "bit": 5
+        }
+      ],
+      "ordinary_zero_game_occurrences": 29,
+      "advertised": 5,
+      "tutorial": false,
+      "expected_park_bits": 2094
+    }
+  ],
+  "catalogue": {
+    "ordinary_examined": 253,
+    "type8_excluded": 10,
+    "nonzero_game_occurrences": 20
+  },
+  "common_award_cases": [
+    {
+      "game": 1,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147483681,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 1,
+      "restricted": false,
+      "before_bits": 2147483681,
+      "park_bits": 2147483681,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 1,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 2,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147483713,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 2,
+      "restricted": false,
+      "before_bits": 2147483713,
+      "park_bits": 2147483713,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 2,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 3,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147483777,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 3,
+      "restricted": false,
+      "before_bits": 2147483777,
+      "park_bits": 2147483777,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 3,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 4,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147483905,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 4,
+      "restricted": false,
+      "before_bits": 2147483905,
+      "park_bits": 2147483905,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 4,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 5,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147484161,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 5,
+      "restricted": false,
+      "before_bits": 2147484161,
+      "park_bits": 2147484161,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 5,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 6,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147484673,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 6,
+      "restricted": false,
+      "before_bits": 2147484673,
+      "park_bits": 2147484673,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 6,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 7,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147485697,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 7,
+      "restricted": false,
+      "before_bits": 2147485697,
+      "park_bits": 2147485697,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 7,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 8,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147487745,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 8,
+      "restricted": false,
+      "before_bits": 2147487745,
+      "park_bits": 2147487745,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 8,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    },
+    {
+      "game": 9,
+      "restricted": false,
+      "before_bits": 2147483649,
+      "park_bits": 2147491841,
+      "bonus_bits": 2166572391,
+      "tickets": 1,
+      "events": [
+        [
+          "hud"
+        ],
+        [
+          "text",
+          564
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          197
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 12,
+      "lifetime": 50,
+      "instructions": 118
+    },
+    {
+      "game": 9,
+      "restricted": false,
+      "before_bits": 2147491841,
+      "park_bits": 2147491841,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 74
+    },
+    {
+      "game": 9,
+      "restricted": true,
+      "before_bits": 2147483649,
+      "park_bits": 2147483649,
+      "bonus_bits": 2166572391,
+      "tickets": 0,
+      "events": [
+        [
+          "text",
+          664
+        ],
+        [
+          "message_init"
+        ],
+        [
+          "message",
+          195
+        ],
+        [
+          "advisor"
+        ],
+        [
+          "message_destroy",
+          2
+        ],
+        [
+          "buttons"
+        ],
+        [
+          "sound"
+        ]
+      ],
+      "spendable": 11,
+      "lifetime": 49,
+      "instructions": 51
+    }
+  ],
+  "trigger_cases": [
+    {
+      "game": 1,
+      "overlay": 10,
+      "start": "0x801146A4",
+      "end_exclusive": "0x801146F4",
+      "fields": [
+        {
+          "offset": 298,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 302,
+          "size": 2,
+          "value": 20
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 18
+    },
+    {
+      "game": 1,
+      "overlay": 10,
+      "start": "0x801146A4",
+      "end_exclusive": "0x801146F4",
+      "fields": [
+        {
+          "offset": 298,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 302,
+          "size": 2,
+          "value": 21
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 19
+    },
+    {
+      "game": 1,
+      "overlay": 10,
+      "start": "0x801146A4",
+      "end_exclusive": "0x801146F4",
+      "fields": [
+        {
+          "offset": 298,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 302,
+          "size": 2,
+          "value": 22
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 19
+    },
+    {
+      "game": 1,
+      "overlay": 10,
+      "start": "0x801146A4",
+      "end_exclusive": "0x801146F4",
+      "fields": [
+        {
+          "offset": 298,
+          "size": 2,
+          "value": 2
+        },
+        {
+          "offset": 302,
+          "size": 2,
+          "value": 21
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 8
+    },
+    {
+      "game": 1,
+      "overlay": 10,
+      "start": "0x801146A4",
+      "end_exclusive": "0x801146F4",
+      "fields": [
+        {
+          "offset": 298,
+          "size": 2,
+          "value": 0
+        },
+        {
+          "offset": 302,
+          "size": 2,
+          "value": 21
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 8
+    },
+    {
+      "game": 1,
+      "overlay": 10,
+      "start": "0x801146A4",
+      "end_exclusive": "0x801146F4",
+      "fields": [
+        {
+          "offset": 298,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 302,
+          "size": 2,
+          "value": -1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 18
+    },
+    {
+      "game": 2,
+      "overlay": 9,
+      "start": "0x80114A2C",
+      "end_exclusive": "0x80114B18",
+      "fields": [
+        {
+          "offset": 256,
+          "size": 4,
+          "value": 103
+        },
+        {
+          "offset": 260,
+          "size": 4,
+          "value": 103
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 21
+    },
+    {
+      "game": 2,
+      "overlay": 9,
+      "start": "0x80114A2C",
+      "end_exclusive": "0x80114B18",
+      "fields": [
+        {
+          "offset": 256,
+          "size": 4,
+          "value": 104
+        },
+        {
+          "offset": 260,
+          "size": 4,
+          "value": 104
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 27
+    },
+    {
+      "game": 2,
+      "overlay": 9,
+      "start": "0x80114A2C",
+      "end_exclusive": "0x80114B18",
+      "fields": [
+        {
+          "offset": 256,
+          "size": 4,
+          "value": 104
+        },
+        {
+          "offset": 260,
+          "size": 4,
+          "value": 103
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 34
+    },
+    {
+      "game": 2,
+      "overlay": 9,
+      "start": "0x80114A2C",
+      "end_exclusive": "0x80114B18",
+      "fields": [
+        {
+          "offset": 256,
+          "size": 4,
+          "value": 104
+        },
+        {
+          "offset": 260,
+          "size": 4,
+          "value": 105
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 27
+    },
+    {
+      "game": 2,
+      "overlay": 9,
+      "start": "0x80114A2C",
+      "end_exclusive": "0x80114B18",
+      "fields": [
+        {
+          "offset": 256,
+          "size": 4,
+          "value": -1
+        },
+        {
+          "offset": 260,
+          "size": 4,
+          "value": -1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 21
+    },
+    {
+      "game": 3,
+      "overlay": 8,
+      "start": "0x801148D4",
+      "end_exclusive": "0x801149F8",
+      "fields": [
+        {
+          "offset": 220,
+          "size": 2,
+          "value": 103
+        },
+        {
+          "offset": 222,
+          "size": 2,
+          "value": 103
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 31
+    },
+    {
+      "game": 3,
+      "overlay": 8,
+      "start": "0x801148D4",
+      "end_exclusive": "0x801149F8",
+      "fields": [
+        {
+          "offset": 220,
+          "size": 2,
+          "value": 104
+        },
+        {
+          "offset": 222,
+          "size": 2,
+          "value": 104
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 44
+    },
+    {
+      "game": 3,
+      "overlay": 8,
+      "start": "0x801148D4",
+      "end_exclusive": "0x801149F8",
+      "fields": [
+        {
+          "offset": 220,
+          "size": 2,
+          "value": 104
+        },
+        {
+          "offset": 222,
+          "size": 2,
+          "value": 103
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 50
+    },
+    {
+      "game": 3,
+      "overlay": 8,
+      "start": "0x801148D4",
+      "end_exclusive": "0x801149F8",
+      "fields": [
+        {
+          "offset": 220,
+          "size": 2,
+          "value": 104
+        },
+        {
+          "offset": 222,
+          "size": 2,
+          "value": 105
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 44
+    },
+    {
+      "game": 3,
+      "overlay": 8,
+      "start": "0x801148D4",
+      "end_exclusive": "0x801149F8",
+      "fields": [
+        {
+          "offset": 220,
+          "size": 2,
+          "value": -1
+        },
+        {
+          "offset": 222,
+          "size": 2,
+          "value": -1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 31
+    },
+    {
+      "game": 4,
+      "overlay": 6,
+      "start": "0x801143E8",
+      "end_exclusive": "0x801144AC",
+      "fields": [
+        {
+          "offset": 216,
+          "size": 4,
+          "value": 4
+        },
+        {
+          "offset": 228,
+          "size": 4,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 89
+    },
+    {
+      "game": 4,
+      "overlay": 6,
+      "start": "0x801143E8",
+      "end_exclusive": "0x801144AC",
+      "fields": [
+        {
+          "offset": 216,
+          "size": 4,
+          "value": 5
+        },
+        {
+          "offset": 228,
+          "size": 4,
+          "value": 2
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 65
+    },
+    {
+      "game": 4,
+      "overlay": 6,
+      "start": "0x801143E8",
+      "end_exclusive": "0x801144AC",
+      "fields": [
+        {
+          "offset": 216,
+          "size": 4,
+          "value": 5
+        },
+        {
+          "offset": 228,
+          "size": 4,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 66
+    },
+    {
+      "game": 4,
+      "overlay": 6,
+      "start": "0x801143E8",
+      "end_exclusive": "0x801144AC",
+      "fields": [
+        {
+          "offset": 216,
+          "size": 4,
+          "value": 5
+        },
+        {
+          "offset": 228,
+          "size": 4,
+          "value": 4
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 66
+    },
+    {
+      "game": 4,
+      "overlay": 6,
+      "start": "0x801143E8",
+      "end_exclusive": "0x801144AC",
+      "fields": [
+        {
+          "offset": 216,
+          "size": 4,
+          "value": 6
+        },
+        {
+          "offset": 228,
+          "size": 4,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 66
+    },
+    {
+      "game": 4,
+      "overlay": 6,
+      "start": "0x801143E8",
+      "end_exclusive": "0x801144AC",
+      "fields": [
+        {
+          "offset": 216,
+          "size": 4,
+          "value": 5
+        },
+        {
+          "offset": 228,
+          "size": 4,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 49
+    },
+    {
+      "game": 5,
+      "overlay": 5,
+      "start": "0x80114850",
+      "end_exclusive": "0x801148B8",
+      "fields": [
+        {
+          "offset": 188,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 194,
+          "size": 2,
+          "value": 2
+        },
+        {
+          "offset": 200,
+          "size": 2,
+          "value": 3
+        },
+        {
+          "offset": 206,
+          "size": 2,
+          "value": 4
+        },
+        {
+          "offset": 212,
+          "size": 2,
+          "value": 5
+        },
+        {
+          "offset": 218,
+          "size": 2,
+          "value": 6
+        },
+        {
+          "offset": 224,
+          "size": 2,
+          "value": 7
+        },
+        {
+          "offset": 230,
+          "size": 2,
+          "value": 8
+        },
+        {
+          "offset": 236,
+          "size": 2,
+          "value": 77
+        },
+        {
+          "offset": 244,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 97
+    },
+    {
+      "game": 5,
+      "overlay": 5,
+      "start": "0x80114850",
+      "end_exclusive": "0x801148B8",
+      "fields": [
+        {
+          "offset": 188,
+          "size": 2,
+          "value": 0
+        },
+        {
+          "offset": 194,
+          "size": 2,
+          "value": 2
+        },
+        {
+          "offset": 200,
+          "size": 2,
+          "value": 3
+        },
+        {
+          "offset": 206,
+          "size": 2,
+          "value": 4
+        },
+        {
+          "offset": 212,
+          "size": 2,
+          "value": 5
+        },
+        {
+          "offset": 218,
+          "size": 2,
+          "value": 6
+        },
+        {
+          "offset": 224,
+          "size": 2,
+          "value": 7
+        },
+        {
+          "offset": 230,
+          "size": 2,
+          "value": 8
+        },
+        {
+          "offset": 236,
+          "size": 2,
+          "value": 77
+        },
+        {
+          "offset": 244,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 91
+    },
+    {
+      "game": 5,
+      "overlay": 5,
+      "start": "0x80114850",
+      "end_exclusive": "0x801148B8",
+      "fields": [
+        {
+          "offset": 188,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 194,
+          "size": 2,
+          "value": 2
+        },
+        {
+          "offset": 200,
+          "size": 2,
+          "value": 3
+        },
+        {
+          "offset": 206,
+          "size": 2,
+          "value": 4
+        },
+        {
+          "offset": 212,
+          "size": 2,
+          "value": 5
+        },
+        {
+          "offset": 218,
+          "size": 2,
+          "value": 6
+        },
+        {
+          "offset": 224,
+          "size": 2,
+          "value": 7
+        },
+        {
+          "offset": 230,
+          "size": 2,
+          "value": 0
+        },
+        {
+          "offset": 236,
+          "size": 2,
+          "value": 77
+        },
+        {
+          "offset": 244,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 91
+    },
+    {
+      "game": 5,
+      "overlay": 5,
+      "start": "0x80114850",
+      "end_exclusive": "0x801148B8",
+      "fields": [
+        {
+          "offset": 188,
+          "size": 2,
+          "value": 1
+        },
+        {
+          "offset": 194,
+          "size": 2,
+          "value": 2
+        },
+        {
+          "offset": 200,
+          "size": 2,
+          "value": 3
+        },
+        {
+          "offset": 206,
+          "size": 2,
+          "value": 4
+        },
+        {
+          "offset": 212,
+          "size": 2,
+          "value": 5
+        },
+        {
+          "offset": 218,
+          "size": 2,
+          "value": 6
+        },
+        {
+          "offset": 224,
+          "size": 2,
+          "value": 7
+        },
+        {
+          "offset": 230,
+          "size": 2,
+          "value": 8
+        },
+        {
+          "offset": 236,
+          "size": 2,
+          "value": 77
+        },
+        {
+          "offset": 244,
+          "size": 1,
+          "value": 1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 5
+    },
+    {
+      "game": 6,
+      "overlay": 1,
+      "start": "0x80114298",
+      "end_exclusive": "0x801142D0",
+      "fields": [
+        {
+          "offset": 184,
+          "size": 4,
+          "value": 1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 30
+    },
+    {
+      "game": 6,
+      "overlay": 1,
+      "start": "0x80114298",
+      "end_exclusive": "0x801142D0",
+      "fields": [
+        {
+          "offset": 184,
+          "size": 4,
+          "value": 20
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 30
+    },
+    {
+      "game": 6,
+      "overlay": 1,
+      "start": "0x80114298",
+      "end_exclusive": "0x801142D0",
+      "fields": [
+        {
+          "offset": 184,
+          "size": 4,
+          "value": 1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 5
+    },
+    {
+      "game": 6,
+      "overlay": 1,
+      "start": "0x80114298",
+      "end_exclusive": "0x801142D0",
+      "fields": [
+        {
+          "offset": 184,
+          "size": 4,
+          "value": 1
+        }
+      ],
+      "park_bits": 1024,
+      "expected_win": false,
+      "events": [],
+      "instructions": 26
+    },
+    {
+      "game": 7,
+      "overlay": 4,
+      "start": "0x80114628",
+      "end_exclusive": "0x80114674",
+      "fields": [
+        {
+          "offset": 4225,
+          "size": 1,
+          "value": 0
+        },
+        {
+          "offset": 4108,
+          "size": 1,
+          "value": 1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 9
+    },
+    {
+      "game": 7,
+      "overlay": 4,
+      "start": "0x80114628",
+      "end_exclusive": "0x80114674",
+      "fields": [
+        {
+          "offset": 4225,
+          "size": 1,
+          "value": 1
+        },
+        {
+          "offset": 4108,
+          "size": 1,
+          "value": 2
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 20
+    },
+    {
+      "game": 7,
+      "overlay": 4,
+      "start": "0x80114628",
+      "end_exclusive": "0x80114674",
+      "fields": [
+        {
+          "offset": 4225,
+          "size": 1,
+          "value": 1
+        },
+        {
+          "offset": 4108,
+          "size": 1,
+          "value": 1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 21
+    },
+    {
+      "game": 7,
+      "overlay": 4,
+      "start": "0x80114628",
+      "end_exclusive": "0x80114674",
+      "fields": [
+        {
+          "offset": 4225,
+          "size": 1,
+          "value": 2
+        },
+        {
+          "offset": 4108,
+          "size": 1,
+          "value": 1
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 21
+    },
+    {
+      "game": 8,
+      "overlay": 0,
+      "start": "0x801149B4",
+      "end_exclusive": "0x801149EC",
+      "fields": [
+        {
+          "offset": 728,
+          "size": 2,
+          "value": 5
+        },
+        {
+          "offset": 40,
+          "size": 2,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 6
+    },
+    {
+      "game": 8,
+      "overlay": 0,
+      "start": "0x801149B4",
+      "end_exclusive": "0x801149EC",
+      "fields": [
+        {
+          "offset": 728,
+          "size": 2,
+          "value": 6
+        },
+        {
+          "offset": 40,
+          "size": 2,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 16
+    },
+    {
+      "game": 8,
+      "overlay": 0,
+      "start": "0x801149B4",
+      "end_exclusive": "0x801149EC",
+      "fields": [
+        {
+          "offset": 728,
+          "size": 2,
+          "value": 7
+        },
+        {
+          "offset": 40,
+          "size": 2,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 16
+    },
+    {
+      "game": 8,
+      "overlay": 0,
+      "start": "0x801149B4",
+      "end_exclusive": "0x801149EC",
+      "fields": [
+        {
+          "offset": 728,
+          "size": 2,
+          "value": 6
+        },
+        {
+          "offset": 40,
+          "size": 2,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 10
+    },
+    {
+      "game": 8,
+      "overlay": 0,
+      "start": "0x801149B4",
+      "end_exclusive": "0x801149EC",
+      "fields": [
+        {
+          "offset": 728,
+          "size": 2,
+          "value": -1
+        },
+        {
+          "offset": 40,
+          "size": 2,
+          "value": 0
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 6
+    },
+    {
+      "game": 9,
+      "overlay": 7,
+      "start": "0x80114A98",
+      "end_exclusive": "0x80114AD8",
+      "fields": [
+        {
+          "offset": 480,
+          "size": 4,
+          "value": 0
+        },
+        {
+          "offset": 484,
+          "size": 4,
+          "value": 2
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 14
+    },
+    {
+      "game": 9,
+      "overlay": 7,
+      "start": "0x80114A98",
+      "end_exclusive": "0x80114AD8",
+      "fields": [
+        {
+          "offset": 480,
+          "size": 4,
+          "value": 0
+        },
+        {
+          "offset": 484,
+          "size": 4,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": true,
+      "events": [
+        "win"
+      ],
+      "instructions": 15
+    },
+    {
+      "game": 9,
+      "overlay": 7,
+      "start": "0x80114A98",
+      "end_exclusive": "0x80114AD8",
+      "fields": [
+        {
+          "offset": 480,
+          "size": 4,
+          "value": 0
+        },
+        {
+          "offset": 484,
+          "size": 4,
+          "value": 4
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [
+        "loss"
+      ],
+      "instructions": 14
+    },
+    {
+      "game": 9,
+      "overlay": 7,
+      "start": "0x80114A98",
+      "end_exclusive": "0x80114AD8",
+      "fields": [
+        {
+          "offset": 480,
+          "size": 4,
+          "value": 1
+        },
+        {
+          "offset": 484,
+          "size": 4,
+          "value": 3
+        }
+      ],
+      "park_bits": 0,
+      "expected_win": false,
+      "events": [],
+      "instructions": 5
+    }
+  ],
+  "popcount_cases": [
+    {
+      "bits": 0,
+      "park": 0,
+      "bonus": 0
+    },
+    {
+      "bits": 1,
+      "park": 1,
+      "bonus": 1
+    },
+    {
+      "bits": 16384,
+      "park": 1,
+      "bonus": 0
+    },
+    {
+      "bits": 32768,
+      "park": 0,
+      "bonus": 0
+    },
+    {
+      "bits": 2147483648,
+      "park": 0,
+      "bonus": 0
+    },
+    {
+      "bits": 32767,
+      "park": 15,
+      "bonus": 5
+    },
+    {
+      "bits": 4294967295,
+      "park": 15,
+      "bonus": 5
+    }
+  ],
+  "full_completion_display": {
+    "earned": 50,
+    "total": 50,
+    "park_remaining": 0,
+    "park_total": 7,
+    "bonus_remaining": 0
+  },
+  "world_map": [
+    {
+      "index": 0,
+      "address": "0x801141F4",
+      "kind": 0,
+      "world": 0,
+      "park": 0
+    },
+    {
+      "index": 1,
+      "address": "0x80114210",
+      "kind": 0,
+      "world": 0,
+      "park": 1
+    },
+    {
+      "index": 2,
+      "address": "0x8011422C",
+      "kind": 0,
+      "world": 1,
+      "park": 0
+    },
+    {
+      "index": 3,
+      "address": "0x80114248",
+      "kind": 0,
+      "world": 1,
+      "park": 1
+    },
+    {
+      "index": 4,
+      "address": "0x80114264",
+      "kind": 0,
+      "world": 2,
+      "park": 0
+    },
+    {
+      "index": 5,
+      "address": "0x80114280",
+      "kind": 0,
+      "world": 2,
+      "park": 1
+    },
+    {
+      "index": 6,
+      "address": "0x8011429C",
+      "kind": 0,
+      "world": 3,
+      "park": 0
+    },
+    {
+      "index": 7,
+      "address": "0x801142B8",
+      "kind": 0,
+      "world": 3,
+      "park": 1
+    },
+    {
+      "index": 8,
+      "address": "0x801142D4",
+      "kind": 1,
+      "a": 0,
+      "b": 2,
+      "cost": 1
+    },
+    {
+      "index": 9,
+      "address": "0x801142F0",
+      "kind": 1,
+      "a": 0,
+      "b": 4,
+      "cost": 1
+    },
+    {
+      "index": 10,
+      "address": "0x8011430C",
+      "kind": 1,
+      "a": 4,
+      "b": 2,
+      "cost": 1
+    },
+    {
+      "index": 11,
+      "address": "0x80114328",
+      "kind": 1,
+      "a": 2,
+      "b": 1,
+      "cost": 2
+    },
+    {
+      "index": 12,
+      "address": "0x80114344",
+      "kind": 1,
+      "a": 4,
+      "b": 1,
+      "cost": 2
+    },
+    {
+      "index": 13,
+      "address": "0x80114360",
+      "kind": 1,
+      "a": 1,
+      "b": 6,
+      "cost": 2
+    },
+    {
+      "index": 14,
+      "address": "0x8011437C",
+      "kind": 1,
+      "a": 1,
+      "b": 3,
+      "cost": 2
+    },
+    {
+      "index": 15,
+      "address": "0x80114398",
+      "kind": 1,
+      "a": 6,
+      "b": 3,
+      "cost": 2
+    },
+    {
+      "index": 16,
+      "address": "0x801143B4",
+      "kind": 1,
+      "a": 6,
+      "b": 5,
+      "cost": 2
+    },
+    {
+      "index": 17,
+      "address": "0x801143D0",
+      "kind": 1,
+      "a": 3,
+      "b": 7,
+      "cost": 2
+    },
+    {
+      "index": 18,
+      "address": "0x801143EC",
+      "kind": 1,
+      "a": 5,
+      "b": 7,
+      "cost": 2
+    }
+  ],
+  "limitations": [
+    "No console measurement",
+    "Partial decision slices, not complete minigame simulation",
+    "Candidate scans are not a whole-program alias proof",
+    "No semantic names for the 30 unread objective bytes"
+  ]
+}

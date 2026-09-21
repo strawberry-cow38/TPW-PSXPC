@@ -316,11 +316,121 @@ public class ParkObjectivesTests
         Assert.Equal(new[]{1,2,3,4,0,1,2,3,4},awards.Select(a=>a.Bit));
         Assert.Equal(new[]{false,false,false,false,true,true,true,true,true},awards.Select(a=>a.Bonus));
         Assert.All(awards,a=>Assert.Equal(1,a.GoldTickets));
+        Assert.All(awards,a=>Assert.True(a.AddToMessageList));
         Assert.Equal(new ObjectiveState(0x8000001F,0x8000001F),o.State);
         Assert.Empty(o.AfterDay(Day(14,1),w)); Assert.Empty(o.UnmetDescriptions(false));
         Assert.Equal(20001,score.Income.Raw); Assert.Equal(0,score.Spending.Raw);
         var restored=New(score);restored.Restore(o.State); Assert.Empty(restored.AfterDay(Day(21,1),w));
         Assert.Empty(restored.AfterDay(Day(),new World())); Assert.Equal(o.State,restored.State);
         Assert.Equal(default,New().State);
+    }
+
+    // REJECTS an empty/partial audit, non-weekly bit/message/ticket drift, sandbox latching,
+    // replay grants, dropping unrelated bits, or mistaking a destructor argument for list type 2.
+    [Fact]
+    public void All27CommonMinigameResultsMatchOriginalInstructions()
+    {
+        using var json = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"objbytes-audit.json")));
+        var root = json.RootElement;
+        var controls = root.GetProperty("controls").EnumerateObject().ToArray();
+        Assert.Equal(12,controls.Length); Assert.All(controls,c=>Assert.True(c.Value.GetBoolean(),c.Name));
+        var cases = root.GetProperty("common_award_cases").EnumerateArray().ToArray();
+        Assert.Equal(27,cases.Length);
+        Assert.Equal(9,cases.Select(c=>c.GetProperty("game").GetInt32()).Distinct().Count());
+        foreach (var c in cases)
+        {
+            int game = c.GetProperty("game").GetInt32();
+            var initial = new ObjectiveState(c.GetProperty("before_bits").GetUInt32(),0x81234567);
+            var o = New(state:initial);
+            var result = o.AfterMinigameWin(game,c.GetProperty("restricted").GetBoolean());
+            var events = c.GetProperty("events").EnumerateArray().ToArray();
+            Assert.Equal(events.Single(e=>e[0].GetString()=="message")[1].GetInt32(),result.MessageId);
+            Assert.Equal(events.Single(e=>e[0].GetString()=="text")[1].GetInt32(),result.TextId);
+            Assert.Equal(c.GetProperty("tickets").GetInt32(),result.Award?.GoldTickets ?? 0);
+            Assert.Equal(c.GetProperty("park_bits").GetUInt32(),o.State.ParkBits);
+            Assert.Equal(c.GetProperty("bonus_bits").GetUInt32(),o.State.BonusBits);
+            if (result.Award is { } award)
+            {
+                Assert.Equal(game+4,award.Bit); Assert.False(award.Bonus);
+                Assert.Equal(result.MessageId,award.MessageId); Assert.False(award.AddToMessageList);
+            }
+        }
+        var triggers = root.GetProperty("trigger_cases").EnumerateArray().ToArray();
+        Assert.Equal(43,triggers.Length);
+        for (int game=1;game<=9;game++)
+        {
+            var rows = triggers.Where(c=>c.GetProperty("game").GetInt32()==game).ToArray();
+            Assert.NotEmpty(rows);
+            Assert.Contains(rows,c=>c.GetProperty("expected_win").GetBoolean());
+            Assert.Contains(rows,c=>!c.GetProperty("expected_win").GetBoolean());
+        }
+    }
+
+    // REJECTS sharing a minigame bit between parks, definition/calendar gating, overwriting
+    // tutorial/main/high bits, a bonus-bit latch, sandbox consuming the award, or replay on restore.
+    [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)]
+    [InlineData(6)] [InlineData(7)] [InlineData(8)] [InlineData(9)]
+    public void MinigameAwardsUseExistingPerParkState(int game)
+    {
+        var score = new ParkScore(); score.RecordIncome(Money.FromPounds(123));
+        var initial = new ObjectiveState(0x8000001F,uint.MaxValue);
+        var o = new ParkObjectives(null,score,initial);
+        Assert.Equal(new ObjectiveMinigameResult(0x298,0xC3,null),o.AfterMinigameWin(game,true));
+        Assert.Equal(initial,o.State);
+        var win = o.AfterMinigameWin(game,false);
+        Assert.Equal(new ObjectiveMinigameResult(0x234,0xC5,
+            new ObjectiveAward(false,game+4,0xC5) { AddToMessageList=false }),win);
+        Assert.Equal(initial with { ParkBits = initial.ParkBits | (1u << (game+4)) },o.State);
+        var loaded = New(state:o.State);
+        Assert.Null(loaded.AfterMinigameWin(game,false).Award);
+        Assert.Equal(o.State,loaded.State);
+        Assert.NotNull(New(state:initial).AfterMinigameWin(game,false).Award);
+        Assert.Equal(Money.FromPounds(123),score.Income); Assert.Equal(Money.FromPounds(0),score.Spending);
+    }
+
+    // REJECTS accepting IDs that the nine-case native constructor cannot produce, shift masking
+    // an invalid ID onto a weekly bit, or mutating state before host input validation.
+    [Theory]
+    [InlineData(-1)] [InlineData(0)] [InlineData(10)] [InlineData(int.MaxValue)]
+    public void MinigameHostBoundaryRejectsInvalidIds(int game)
+    {
+        var o = New(state:new(0x80000001,0x12345678)); var before=o.State;
+        Assert.Throws<ArgumentOutOfRangeException>(()=>o.AfterMinigameWin(game,false));
+        Assert.Equal(before,o.State);
+    }
+
+    // REJECTS using a tail neighbour, first opaque word, or a constant for the advertised total.
+    [Theory]
+    [InlineData(0,0,7)] [InlineData(0,1,6)] [InlineData(1,0,5)] [InlineData(1,1,6)]
+    [InlineData(2,0,5)] [InlineData(2,1,6)] [InlineData(3,0,5)] [InlineData(3,1,5)]
+    public void AdvertisedTotalIsAByteReadByTheWorldMap(int world,int park,byte expected)
+    {
+        var d=ParkObjectiveDefinition.ForPalPark(world,park);
+        Assert.Equal(expected,d.AdvertisedGoldTickets);
+        var raw=d.CopyRecord(); raw[0x31]=201;
+        Assert.Equal((byte)201,new ParkObjectiveDefinition(raw).AdvertisedGoldTickets);
+    }
+
+    // REJECTS inventing evaluator semantics for any of the 30 unread bytes; positive control
+    // changes the actually read admissions threshold and changes the decision.
+    [Fact]
+    public void ThirtyOpaqueBytesSurviveAndDoNotDriveEstablishedChecks()
+    {
+        int[] offsets = Enumerable.Range(0,12).Concat(Enumerable.Range(0x20,16)).Concat(new[]{0x32,0x33}).ToArray();
+        Assert.Equal(30,offsets.Length);
+        var raw=ParkObjectiveDefinition.ForPalPark(0,0).CopyRecord();
+        var world=new World {Admissions=101};
+        var expected=Messages(New(),world);
+        Assert.Equal(new ushort[]{0xAF},expected);
+        foreach (int offset in offsets)
+        {
+            var changed=(byte[])raw.Clone(); changed[offset]^=0xFF;
+            var d=new ParkObjectiveDefinition(changed); var o=new ParkObjectives(d,new ParkScore());
+            Assert.Equal(changed,d.CopyRecord()); Assert.Equal(expected,Messages(o,world));
+            Assert.Equal(New().UnmetDescriptions(false),new ParkObjectives(d,new ParkScore()).UnmetDescriptions(false));
+        }
+        BinaryPrimitives.WriteUInt32LittleEndian(raw.AsSpan(0x0C),101);
+        Assert.Empty(Messages(new ParkObjectives(new(raw),new ParkScore()),world));
     }
 }

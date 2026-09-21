@@ -1,0 +1,2092 @@
+{
+  "source_audit_sha256": "7d71a2ce2706202bae91d58a8d26963cc0e2e721f50e1965a0d58b9372150b52",
+  "objective_address_candidates": 230,
+  "classified": 230,
+  "unclassified": 0,
+  "dispositions": [
+    {
+      "site": "0x80067D30",
+      "target": "0x800E1930",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067D38",
+      "target": "0x800E1964",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067D58",
+      "target": "0x800E1998",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067D60",
+      "target": "0x800E19CC",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067D80",
+      "target": "0x800E1A00",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067D88",
+      "target": "0x800E1A34",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067DA8",
+      "target": "0x800E1A68",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x80067DB0",
+      "target": "0x800E1A9C",
+      "op": 9,
+      "disposition": "selector return"
+    },
+    {
+      "site": "0x800CDAA4",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDAA0",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800CDAB8",
+      "target": "0x800E1AB8",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDAB4",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800CDAC0",
+      "target": "0x800E1AB4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDABC",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800CDAC8",
+      "target": "0x800E1AB0",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDAC4",
+      "actual_target": "0x80101AB0"
+    },
+    {
+      "site": "0x800CDB18",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDB10",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800CDB48",
+      "target": "0x800E1A68",
+      "op": 41,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDB44",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800CDB50",
+      "target": "0x800E1A68",
+      "op": 37,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDB4C",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800CDB58",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800CDB54",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D2368",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2364",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D23CC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D23C8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2430",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D242C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2498",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2494",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2518",
+      "target": "0x800E1ACC",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2514",
+      "actual_target": "0x80101ACC"
+    },
+    {
+      "site": "0x800D2890",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D288C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D28D8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D28D4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2908",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2904",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D292C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2928",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D29B0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D29AC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2A3C",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2A38",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D2A50",
+      "target": "0x800E1A84",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2A4C",
+      "actual_target": "0x80101A84"
+    },
+    {
+      "site": "0x800D2A80",
+      "target": "0x800E1A6C",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2A7C",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800D2AAC",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2AA8",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800D2ABC",
+      "target": "0x800E1A68",
+      "op": 37,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2AB8",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D2AC4",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2AC0",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D2ACC",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2AC8",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D2AE0",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2ADC",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D2AF0",
+      "target": "0x800E1A88",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2AEC",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D2B4C",
+      "target": "0x800E1AC8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2B48",
+      "actual_target": "0x80101AC8"
+    },
+    {
+      "site": "0x800D2B74",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2B70",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800D2B90",
+      "target": "0x800E1A88",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2B8C",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D2BCC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2BC8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2CB0",
+      "target": "0x800E1ACC",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2CAC",
+      "actual_target": "0x80101ACC"
+    },
+    {
+      "site": "0x800D2CB8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2CB4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2D74",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2D70",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D2D88",
+      "target": "0x800E1ACC",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2D84",
+      "actual_target": "0x80101ACC"
+    },
+    {
+      "site": "0x800D2D98",
+      "target": "0x800E1ACC",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2D94",
+      "actual_target": "0x80101ACC"
+    },
+    {
+      "site": "0x800D2E60",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2E5C",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D2E70",
+      "target": "0x800E1A80",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2E6C",
+      "actual_target": "0x80101A80"
+    },
+    {
+      "site": "0x800D2E90",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2E8C",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D2E98",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2E94",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D2ECC",
+      "target": "0x800E1AB0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2EC8",
+      "actual_target": "0x80101AB0"
+    },
+    {
+      "site": "0x800D2EF0",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2EEC",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D2F54",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2F50",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D2F78",
+      "target": "0x800E1AB0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2F74",
+      "actual_target": "0x80101AB0"
+    },
+    {
+      "site": "0x800D2FE4",
+      "target": "0x800E1AB4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2FE0",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800D2FFC",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D2FF8",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D302C",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3028",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800D3034",
+      "target": "0x800E1AB0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3030",
+      "actual_target": "0x80101AB0"
+    },
+    {
+      "site": "0x800D3074",
+      "target": "0x800E1AB4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3070",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800D3088",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3084",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D30B0",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D30AC",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D3140",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D313C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D3160",
+      "target": "0x800E1AB0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D315C",
+      "actual_target": "0x80101AB0"
+    },
+    {
+      "site": "0x800D3184",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3180",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D31F8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D31F4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D322C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3228",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D32B4",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D32B0",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D3300",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D32FC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D3320",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D331C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D33A0",
+      "target": "0x800E1A84",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D339C",
+      "actual_target": "0x80101A84"
+    },
+    {
+      "site": "0x800D33BC",
+      "target": "0x800E1AC8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D33B8",
+      "actual_target": "0x80101AC8"
+    },
+    {
+      "site": "0x800D33DC",
+      "target": "0x800E1AC8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D33D8",
+      "actual_target": "0x80101AC8"
+    },
+    {
+      "site": "0x800D3404",
+      "target": "0x800E1A84",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3400",
+      "actual_target": "0x80101A84"
+    },
+    {
+      "site": "0x800D3494",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3490",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D34F0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D34EC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D35CC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D35C8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D36AC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D36A8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D3718",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3714",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D3744",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3740",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D37A8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D37A4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D37FC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D37F8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D38AC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D38A8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D3930",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D392C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D397C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D3978",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D8FD8",
+      "target": "0x800E1A60",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D8FD4",
+      "actual_target": "0x80101A60"
+    },
+    {
+      "site": "0x800D8FF8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D8FF4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9000",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D8FFC",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800D9008",
+      "target": "0x800E1A70",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9004",
+      "actual_target": "0x80101A70"
+    },
+    {
+      "site": "0x800D9010",
+      "target": "0x800E1A68",
+      "op": 41,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D900C",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D9028",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9024",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D907C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9078",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D90AC",
+      "target": "0x800E1A74",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D90A8",
+      "actual_target": "0x80101A74"
+    },
+    {
+      "site": "0x800D90B8",
+      "target": "0x800E1A78",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D90B4",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D90C4",
+      "target": "0x800E1A7C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D90C0",
+      "actual_target": "0x80101A7C"
+    },
+    {
+      "site": "0x800D90D0",
+      "target": "0x800E1A80",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D90CC",
+      "actual_target": "0x80101A80"
+    },
+    {
+      "site": "0x800D90D8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D90D4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9120",
+      "target": "0x800E1A90",
+      "op": 9,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D911C",
+      "actual_target": "0x80101A90"
+    },
+    {
+      "site": "0x800D9128",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9124",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9134",
+      "target": "0x800E1A68",
+      "op": 41,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9130",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D9170",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D916C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D91A8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D91A4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D91D8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D91D4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D920C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9208",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9218",
+      "target": "0x800E1A84",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9214",
+      "actual_target": "0x80101A84"
+    },
+    {
+      "site": "0x800D9228",
+      "target": "0x800E1A88",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9224",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D9230",
+      "target": "0x800E1A8C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D922C",
+      "actual_target": "0x80101A8C"
+    },
+    {
+      "site": "0x800D924C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9248",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9254",
+      "target": "0x800E1A68",
+      "op": 37,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9250",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D92A8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D92A4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D92CC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D92C8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D92F0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D92EC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D933C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9338",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9374",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9370",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D93D0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D93CC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D940C",
+      "target": "0x800E1AA0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9408",
+      "actual_target": "0x80101AA0"
+    },
+    {
+      "site": "0x800D9428",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9424",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D947C",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9478",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D9490",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D948C",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800D952C",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9528",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D9534",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9530",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9540",
+      "target": "0x800E1A68",
+      "op": 41,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D953C",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D9554",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9550",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D955C",
+      "target": "0x800E1A68",
+      "op": 37,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9558",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D9568",
+      "target": "0x800E1AA0",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9564",
+      "actual_target": "0x80101AA0"
+    },
+    {
+      "site": "0x800D9598",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9594",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D95C0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D95BC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D95C8",
+      "target": "0x800E1A68",
+      "op": 37,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D95C4",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D95D4",
+      "target": "0x800E1AA0",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D95D0",
+      "actual_target": "0x80101AA0"
+    },
+    {
+      "site": "0x800D9604",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9600",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9628",
+      "target": "0x800E1AA0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9624",
+      "actual_target": "0x80101AA0"
+    },
+    {
+      "site": "0x800D9640",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D963C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9680",
+      "target": "0x800E1AA0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D967C",
+      "actual_target": "0x80101AA0"
+    },
+    {
+      "site": "0x800D96B4",
+      "target": "0x800E1AA4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D96B0",
+      "actual_target": "0x80101AA4"
+    },
+    {
+      "site": "0x800D96C0",
+      "target": "0x800E1A54",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D96BC",
+      "actual_target": "0x80101A54"
+    },
+    {
+      "site": "0x800D96D4",
+      "target": "0x800E1AA4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D96D0",
+      "actual_target": "0x80101AA4"
+    },
+    {
+      "site": "0x800D96E0",
+      "target": "0x800E1AA8",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D96DC",
+      "actual_target": "0x80101AA8"
+    },
+    {
+      "site": "0x800D96EC",
+      "target": "0x800E1AA8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D96E8",
+      "actual_target": "0x80101AA8"
+    },
+    {
+      "site": "0x800D96F4",
+      "target": "0x800E1A58",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D96F0",
+      "actual_target": "0x80101A58"
+    },
+    {
+      "site": "0x800D9708",
+      "target": "0x800E1AA0",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9704",
+      "actual_target": "0x80101AA0"
+    },
+    {
+      "site": "0x800D9724",
+      "target": "0x800E1A5C",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9720",
+      "actual_target": "0x80101A5C"
+    },
+    {
+      "site": "0x800D9748",
+      "target": "0x800E1A6C",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9744",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800D976C",
+      "target": "0x800E1A68",
+      "op": 37,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9768",
+      "actual_target": "0x80101A68"
+    },
+    {
+      "site": "0x800D9774",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9770",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D97D4",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D97D0",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D97EC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D97E8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D97F4",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D97F0",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D9810",
+      "target": "0x800E1A74",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D980C",
+      "actual_target": "0x80101A74"
+    },
+    {
+      "site": "0x800D9824",
+      "target": "0x800E1A7C",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9820",
+      "actual_target": "0x80101A7C"
+    },
+    {
+      "site": "0x800D984C",
+      "target": "0x800E1A80",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9848",
+      "actual_target": "0x80101A80"
+    },
+    {
+      "site": "0x800D9860",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D985C",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D9898",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9894",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D98B4",
+      "target": "0x800E1A60",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D98B0",
+      "actual_target": "0x80101A60"
+    },
+    {
+      "site": "0x800D98D4",
+      "target": "0x800E1A60",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D98D0",
+      "actual_target": "0x80101A60"
+    },
+    {
+      "site": "0x800D98EC",
+      "target": "0x800E1A60",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D98E8",
+      "actual_target": "0x80101A60"
+    },
+    {
+      "site": "0x800D990C",
+      "target": "0x800E1A64",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9908",
+      "actual_target": "0x80101A64"
+    },
+    {
+      "site": "0x800D9934",
+      "target": "0x800E1A64",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9930",
+      "actual_target": "0x80101A64"
+    },
+    {
+      "site": "0x800D9A54",
+      "target": "0x800E1AB0",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9A50",
+      "actual_target": "0x80101AB0"
+    },
+    {
+      "site": "0x800D9A5C",
+      "target": "0x800E1AB4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9A58",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800D9A64",
+      "target": "0x800E1AB8",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9A60",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D9A74",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9A70",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800D9A7C",
+      "target": "0x800E1ACC",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9A78",
+      "actual_target": "0x80101ACC"
+    },
+    {
+      "site": "0x800D9AFC",
+      "target": "0x800E1AC8",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9AF4",
+      "actual_target": "0x80101AC8"
+    },
+    {
+      "site": "0x800D9B28",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9B24",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9BB0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9BAC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9BB8",
+      "target": "0x800E1ACC",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9BB4",
+      "actual_target": "0x80101ACC"
+    },
+    {
+      "site": "0x800D9C2C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9C28",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9CA0",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9C9C",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800D9CA8",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9CA4",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800D9D4C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9D48",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9D70",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9D6C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9D94",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9D90",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9DB8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9DB4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9DDC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9DD8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9E00",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9DFC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9E24",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9E20",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9E48",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9E44",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9E6C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9E68",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9E90",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9E8C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9EB4",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9EB0",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9ED8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9ED4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9EFC",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9EF8",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9F20",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9F1C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9F44",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9F40",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9F68",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9F64",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9F90",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9F8C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9FB8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9FB4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800D9FE0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800D9FDC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA008",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA004",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA030",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA02C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA058",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA054",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA080",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA07C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA0A8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA0A4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA0D0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA0CC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA0F8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA0F4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA120",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA11C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA148",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA144",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA170",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA16C",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA198",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA194",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA1C0",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA1BC",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA1E4",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA1E0",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA268",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA264",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800DA288",
+      "target": "0x800E1A78",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA284",
+      "actual_target": "0x80101A78"
+    },
+    {
+      "site": "0x800DA29C",
+      "target": "0x800E1A6C",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA298",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800DA2B0",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA2AC",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800DA2BC",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA2B8",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800DA2D0",
+      "target": "0x800E1A88",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA2CC",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800DA2E0",
+      "target": "0x800E1A88",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA2DC",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800DA324",
+      "target": "0x800E1AC8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA320",
+      "actual_target": "0x80101AC8"
+    },
+    {
+      "site": "0x800DA348",
+      "target": "0x800E1A6C",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA344",
+      "actual_target": "0x80101A6C"
+    },
+    {
+      "site": "0x800DA364",
+      "target": "0x800E1A88",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA360",
+      "actual_target": "0x80101A88"
+    },
+    {
+      "site": "0x800DA3B0",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA3AC",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA3D8",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA3D4",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800DA480",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA47C",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA4A0",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA49C",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800DA4D0",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA4CC",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA4EC",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA4E8",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800DA524",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA520",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA584",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA580",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA59C",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA598",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA5B8",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA5B4",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800DA5F8",
+      "target": "0x800E1AB4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA5F4",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA608",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA604",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA620",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA61C",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA648",
+      "target": "0x800E1AB8",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA644",
+      "actual_target": "0x80101AB8"
+    },
+    {
+      "site": "0x800DA66C",
+      "target": "0x800E1AB4",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA668",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA680",
+      "target": "0x800E1AB4",
+      "op": 43,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA67C",
+      "actual_target": "0x80101AB4"
+    },
+    {
+      "site": "0x800DA6D4",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA6D0",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA7A8",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA7A4",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA86C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA868",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800DA92C",
+      "target": "0x800E1A50",
+      "op": 35,
+      "disposition": "local high is 0x8010",
+      "lui": "0x800DA928",
+      "actual_target": "0x80101A50"
+    },
+    {
+      "site": "0x800F32A4",
+      "target": "0x800E1A41",
+      "op": 32,
+      "disposition": "character conversion data",
+      "reader": "0x8006F2F0"
+    },
+    {
+      "site": "0x800F32A8",
+      "target": "0x800E1A61",
+      "op": 32,
+      "disposition": "character conversion data",
+      "reader": "0x8006F2F0"
+    }
+  ],
+  "gp_positive_control": [
+    {
+      "site": "0x8006BE3C",
+      "target": "0x80103988",
+      "op": 35
+    }
+  ],
+  "character_table_controls": [
+    {
+      "character": 65,
+      "encoded": 33376,
+      "decoded": 65
+    },
+    {
+      "character": 97,
+      "encoded": 33409,
+      "decoded": 97
+    }
+  ],
+  "pointer_register_uses": [
+    "0x80067728",
+    "0x8006775C",
+    "0x80067790",
+    "0x80067954",
+    "0x80067980",
+    "0x800679C8",
+    "0x80067A60",
+    "0x80067A90",
+    "0x80067BF0",
+    "0x80067C8C"
+  ],
+  "pointer_register_ranges": [
+    {
+      "start": "0x80067714",
+      "end_exclusive": "0x800677A4",
+      "register": 16
+    },
+    {
+      "start": "0x80067954",
+      "end_exclusive": "0x80067CC4",
+      "register": 20
+    }
+  ],
+  "constructed_function_candidates": [
+    {
+      "image": "TPW.BIN",
+      "site": "0x800BA6CC",
+      "target": "0x800BA814"
+    }
+  ],
+  "function_pointer_words": [],
+  "live_bonus_count_calls": [
+    {
+      "image": "TPW.BIN",
+      "site": "0x80082FC8"
+    }
+  ],
+  "constructor_gap_controls": [
+    {
+      "address": "0x8010558C",
+      "rewritten_bytes": 172,
+      "untouched_gap_bytes": 4,
+      "sentinel": 90
+    },
+    {
+      "address": "0x801054DC",
+      "rewritten_bytes": 172,
+      "untouched_gap_bytes": 4,
+      "sentinel": 90
+    },
+    {
+      "address": "0x8010542C",
+      "rewritten_bytes": 172,
+      "untouched_gap_bytes": 4,
+      "sentinel": 90
+    },
+    {
+      "address": "0x8010537C",
+      "rewritten_bytes": 172,
+      "untouched_gap_bytes": 4,
+      "sentinel": 90
+    }
+  ],
+  "ticket_input_controls": {
+    "records": [
+      {
+        "index": 0,
+        "record": "0x800F320C",
+        "sequence": "0x800E1AD0",
+        "length": 10,
+        "repetitions": 4,
+        "target": "0x80102EC0",
+        "masks": [
+          1,
+          2,
+          4,
+          8,
+          256,
+          8,
+          4,
+          2,
+          1,
+          256
+        ]
+      },
+      {
+        "index": 1,
+        "record": "0x800F3218",
+        "sequence": "0x80102F08",
+        "length": 4,
+        "repetitions": 8,
+        "target": "0x801031CC",
+        "masks": [
+          4,
+          2,
+          64,
+          256
+        ]
+      },
+      {
+        "index": 2,
+        "record": "0x800F3224",
+        "sequence": "0x800E1B04",
+        "length": 10,
+        "repetitions": 8,
+        "target": "0x80102E88",
+        "masks": [
+          1,
+          2,
+          1,
+          2,
+          4,
+          1,
+          2,
+          1,
+          2,
+          8
+        ]
+      },
+      {
+        "index": 3,
+        "record": "0x800F3230",
+        "sequence": "0x800E1AE4",
+        "length": 10,
+        "repetitions": 4,
+        "target": "0x801029F4",
+        "masks": [
+          4,
+          8,
+          4,
+          8,
+          1,
+          4,
+          8,
+          4,
+          8,
+          2
+        ]
+      },
+      {
+        "index": 4,
+        "record": "0x800F323C",
+        "sequence": "0x800E1AF8",
+        "length": 6,
+        "repetitions": 4,
+        "target": "0x80103744",
+        "masks": [
+          4,
+          1,
+          8,
+          2,
+          1024,
+          8192
+        ]
+      },
+      {
+        "index": 5,
+        "record": "0x800F3248",
+        "sequence": "0x800E1B18",
+        "length": 10,
+        "repetitions": 16,
+        "target": "0x80102E60",
+        "masks": [
+          1,
+          2,
+          1,
+          2,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "records_decoded": 6,
+    "toggle_effects_executed": 3,
+    "other_toggle_effects_not_executed": 3,
+    "toggles": [
+      {
+        "index": 0,
+        "initial": 0,
+        "after_wrong": 0,
+        "after_sequence": 1,
+        "after_second_sequence": 0
+      },
+      {
+        "index": 2,
+        "initial": 0,
+        "after_wrong": 0,
+        "after_sequence": 1,
+        "after_second_sequence": 0
+      },
+      {
+        "index": 4,
+        "initial": 0,
+        "after_wrong": 0,
+        "after_sequence": 1,
+        "after_second_sequence": 0
+      }
+    ],
+    "world_map_grant_controls": [
+      {
+        "flag": 0,
+        "held_pad1": 128,
+        "pressed_pad1": 512,
+        "tickets": 0
+      },
+      {
+        "flag": 1,
+        "held_pad1": 0,
+        "pressed_pad1": 512,
+        "tickets": 0
+      },
+      {
+        "flag": 1,
+        "held_pad1": 128,
+        "pressed_pad1": 0,
+        "tickets": 0
+      },
+      {
+        "flag": 1,
+        "held_pad1": 128,
+        "pressed_pad1": 512,
+        "tickets": 2
+      }
+    ],
+    "balance_override_controls": [
+      {
+        "flag": 0,
+        "returned_and_stored": 11,
+        "lifetime": 49
+      },
+      {
+        "flag": 1,
+        "returned_and_stored": 255,
+        "lifetime": 49
+      }
+    ]
+  },
+  "scope": "Conventional literal/GP references plus the selector provenance slice, not arbitrary aliases"
+}

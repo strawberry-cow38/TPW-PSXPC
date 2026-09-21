@@ -56,6 +56,7 @@ class Machine:
                 if fn == 0: r[rd] = u(r[rt] << sh)
                 elif fn == 2: r[rd] = r[rt] >> sh
                 elif fn == 3: r[rd] = u(s(r[rt]) >> sh)
+                elif fn == 4: r[rd] = u(r[rt] << (r[rs] & 31))
                 elif fn == 8: jump = r[rs]
                 elif fn == 9: jump = r[rs]; r[rd] = pc + 8
                 elif fn == 16: r[rd] = self.hi
