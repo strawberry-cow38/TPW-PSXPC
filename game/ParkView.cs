@@ -267,7 +267,7 @@ namespace TPWGodot
             // ⚠ ALSO THE STALLS ALREADY STANDING. Attractions placed by the load hooks exist before the
             // host hands the bank over, and a stall with no bank takes money into nowhere — silently,
             // because BookSale simply returns.
-            foreach (var a in _attractionsPlaced) a.Bank = bank;
+            foreach (var a in _attractionsPlaced) { a.Bank = bank; a.Score = Score; }
             RefreshPickerPrices();
         }
 
@@ -358,6 +358,10 @@ namespace TPWGodot
             // entrance wired once at boot would be silently dropped the first time a park is opened and
             // every guest would go back to appearing inside the fence.
             if (_finances != null && !NoGate) _guests.SetEntrance(_finances, () => _bus);
+            // ⚠⚠ THE SECOND PLACE THE TURNSTILE IS BUILT, and wiring only the other one is why the
+            // park's entry takings read £0 while 29 guests had paid. A load builds it here; SetFinances
+            // builds it there. Ask who ELSE constructs the thing before hanging something off it.
+            if (_guests.Entrance is { } ent0) ent0.Score = Score;
             // ⭐ THE IDLE PASS NEEDS THE PARK'S OWN DAY AND ITS BINS. Without the day, "been here long
             // enough to go home" compares against zero for ever; without the bins, every guest with
             // rubbish litters instead of walking to one.
@@ -841,6 +845,67 @@ namespace TPWGodot
         {
             _finances = finances;
             if (_guests != null && finances != null && !NoGate) _guests.SetEntrance(finances, () => _bus);
+            foreach (var a in _attractionsPlaced) a.Score = Score;
+            if (_guests?.Entrance is { } e) e.Score = Score;
+        }
+
+        /// <summary>The park's own books BEYOND the balance: where the money came from, what it is
+        /// worth, and twelve years of monthly history.
+        ///
+        /// ⚠⚠ MERGED THIS MORNING WITH NO CALLER. RecordIncome had twenty-one tests and nothing in the
+        /// game ever called it, so the rating, the yearly figures and the value history were all
+        /// computed from nothing. Found by the dead-port audit, second only to the ride panel.</summary>
+        public ParkScore Score { get; } = new ParkScore();
+
+        /// <summary>The park's objectives. ⚠ SAME STORY: AfterDay had seven tests and no caller, so
+        /// nothing was ever checked and no Gold Ticket could ever be awarded.</summary>
+        public ParkObjectives Objectives { get; private set; }
+
+        ParkScoreWorld ScoreWorld() => _scoreWorld ??= new ParkScoreWorld(
+            () => _advisorWorld?.Visitors ?? System.Linq.Enumerable.Empty<Visitor>(),
+            () => _advisorWorld?.Attractions ?? System.Linq.Enumerable.Empty<StatisticAttraction>(),
+            () => _advisorWorld?.Staff ?? System.Linq.Enumerable.Empty<StatisticStaff>(),
+            () => System.Linq.Enumerable.Select(_attractions, a => a.Rec).ToList(),
+            () => _finances, () => ParkOpen, () => _map,
+            // ⭐ TOTAL ADMISSIONS, WHICH THE TURNSTILE ALREADY COUNTS — not the headcount. A goal
+            // measured against guests-now would un-meet itself every time somebody went home.
+            () => (uint)(_guests?.Entrance?.Counter_McAi1C ?? 0));
+        ParkScoreWorld _scoreWorld;
+
+        /// <summary>The park's day boundary: record the month when one ends, then check the goals.
+        ///
+        /// ⚠ ORDER MATTERS AND IT IS NOT ARBITRARY. The month's figures must be banked BEFORE the
+        /// objectives read them, or a goal measured against this month's takings sees last month's.</summary>
+        public string RollDay(MonthEndResult? monthEnd, Money balanceBeforeCharges)
+        {
+            if (_finances == null) return null;
+            if (monthEnd is { } me) Score.RecordMonthEnd(_finances.Calendar, balanceBeforeCharges, me, ScoreWorld());
+            // ⚠ WORLD 0, PARK 0 UNTIL SOMETHING SAYS OTHERWISE. findings/scenario.md established this
+            // morning that there is no scenario blob to load and no loader, so nothing tells the port
+            // WHICH park's objectives these are. The records are real and complete — eight of them,
+            // read out of the executable — and picking the first is a GUESS about which one applies,
+            // not about their contents. Named here so it is not mistaken for a decoded selection.
+            Objectives ??= ParkObjectiveDefinition.ForPalPark(0, 0) is { } def
+                         ? new ParkObjectives(def, Score) : null;
+            if (Objectives == null) return null;
+            var awards = Objectives.AfterDay(_finances.Calendar, ScoreWorld());
+            if (awards.Count == 0) return null;
+            var sb = new System.Text.StringBuilder();
+            foreach (var a in awards)
+                sb.Append($"{(a.Bonus ? "bonus" : "park")} objective bit {a.Bit} met, {a.GoldTickets} gold ticket, message {a.MessageId}; ");
+            return sb.ToString();
+        }
+
+        /// <summary>The score and the goals in one line, for the report.</summary>
+        public string ScoreLine()
+        {
+            if (_finances == null) return "score: no park";
+            int rating = ParkScore.CalculateRating(ScoreWorld());
+            var value = ParkScore.CalculateValue(ScoreWorld());
+            int unmet = Objectives?.UnmetDescriptions(false).Count ?? -1;
+            return $"score: rating {rating}/100, value {value}, income {Score.Income}, spending {Score.Spending}"
+                 + $", entry {Score.EntryTakings}, shops {Score.ShopProfit}, sideshows {Score.SideshowTakings}"
+                 + $"; objectives {(unmet < 0 ? "not started" : unmet + " unmet")}";
         }
 
         TPW.Sim.BusRoute _bus;
@@ -1137,6 +1202,7 @@ namespace TPWGodot
             + $"\n{_guests.LitterLine()}"
             + $"\n{_guests.InfluenceLine()}"
             + $"\n{_guests.GuardLine()}"
+            + $"\n{ScoreLine()}"
             + $"\n{_guests.ResearchLine()}"
             + $"\n  preflight {(_guests.Preflight ? "on" : "OFF")}, {_guests.PreflightRefused} routes refused as unreachable"
             + $"\n{_guests.StateReport()}"
@@ -2201,6 +2267,7 @@ namespace TPWGodot
             // away and the want maths reading a free product as irresistible.
             a.SalePrice = a.Rec.Shop?.DefaultPrice ?? a.Rec.SideShow?.PlayPrice ?? 0;
             a.Bank = _bank;
+            a.Score = Score;
             a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
             // ⭐ RUN THE GAME'S OWN PLACEMENT INITIALISER. It sets level 0, full reliability, the lifetime from
             // the record, and the three sliders to the record's defaults — capacity to half the seats, speed to
@@ -2259,11 +2326,16 @@ namespace TPWGodot
 
             /// <summary>Where the money goes. Set by the view, which owns the bank.</summary>
             public Bank Bank;
+            /// <summary>And where it is REMEMBERED. ⚠ The bank knows the balance; only this knows
+            /// where the money came from, and the park's yearly figures and its value history are
+            /// built from the source, not the total.</summary>
+            public ParkScore Score;
 
             public void BookSale(ShopSale sale)
             {
                 if (Bank == null) return;
                 Bank.Receive(Money.FromPounds(sale.Price));
+                Score?.RecordIncome(Money.FromPounds(sale.Price), ScoreIncome.Shop);
                 Takings += Money.FromPounds(sale.Price);
                 Profit += Money.FromPounds(sale.Price - sale.UnitCost);
             }
@@ -2282,12 +2354,13 @@ namespace TPWGodot
             {
                 if (Bank == null) return;
                 Bank.Receive(Money.FromPounds(play.Game.Price));
+                Score?.RecordIncome(Money.FromPounds(play.Game.Price), ScoreIncome.SideShow);
                 Takings += Money.FromPounds(play.Game.Price);
                 // ⚠ A WON PRIZE IS PAID OUT OF THE BANK, not deducted from the income. A sideshow with a
                 // generous prize really can lose money on a play, which is the whole tension of the
                 // slider; netting it against the takings would hide that.
                 bool won = play.Roll < play.Game.Chance;
-                if (won) Bank.Spend(Money.FromPounds(play.Game.Prize));
+                if (won) { Bank.Spend(Money.FromPounds(play.Game.Prize)); Score?.RecordSpending(Money.FromPounds(play.Game.Prize)); }
                 Profit += Money.FromPounds(play.Game.Price - (won ? play.Game.Prize : 0));
             }
 
@@ -2348,6 +2421,7 @@ namespace TPWGodot
             {
                 if (Bank == null || Bank.Balance < amount) return false;
                 Bank.Spend(amount);
+                Score?.RecordSpending(amount);
                 return true;
             }
 

@@ -1635,7 +1635,22 @@ namespace TPWGodot
             // The calendar advances on the DAY edge, which OnTick tests for -- see ParkFinances. It is
             // inside this loop and not outside it because spending several ticks in one frame must roll
             // several days, and a check after the loop would see only the last one.
-            while (_accum >= tickSeconds) { _accum -= tickSeconds; _clock.Advance(); _finances.OnTick(_clock); }
+            while (_accum >= tickSeconds)
+            {
+                _accum -= tickSeconds;
+                _clock.Advance();
+                // ⚠ THE BALANCE IS READ BEFORE THE CHARGES, because OnTick applies them and the
+                // month's history row wants what the park had when the month ENDED, not what was left
+                // after the wages came out. Reading it after would bank a number a month too late.
+                var before = _finances.Bank.Balance;
+                var monthEnd = _finances.OnTick(_clock);
+                // ⭐⭐ THE DAY BOUNDARY, WHICH NOTHING WAS DRIVING. ParkScore.RecordMonthEnd and
+                // ParkObjectives.AfterDay were both merged today with no caller at all, so the park's
+                // rating, its yearly figures, its twelve-year history and every goal it could ever
+                // meet were computed from a machine nobody started.
+                if (_park != null && _park.HasMap && _park.RollDay(monthEnd, before) is { } awarded)
+                    GD.Print($"[tpw] objectives: {awarded}");
+            }
             // The park HUD's balance and date (0x800390C8 / 0x80039008: the day and month shown 1-based, the year 2000 on).
             _park?.SetHudStatus(_finances.Bank.Balance.Pounds, _finances.Calendar.Day + 1, _finances.Calendar.Month + 1,
                                 _finances.Calendar.Year + 2000);

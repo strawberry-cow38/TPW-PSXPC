@@ -177,7 +177,17 @@ namespace TPWGodot
         /// <summary>0x80087258: balance += fee, and the takings and the fee history bucket with it.
         /// ⚠ ONLY THE BALANCE IS WIRED. The two history words are economy.md §4.1's and the port has
         /// nowhere to put them yet, so the month-end report cannot break income down by source.</summary>
-        public void BookEntryFee(Visitor guest) => _finances.Bank.Receive(EntryFee);
+        /// <summary>⭐ AND REMEMBERED AS ENTRANCE MONEY. The bank only learns the balance went up; the
+        /// park's yearly figures separate the gate from the shops from the sideshows, and that split
+        /// exists nowhere else.</summary>
+        public void BookEntryFee(Visitor guest)
+        {
+            _finances.Bank.Receive(EntryFee);
+            Score?.RecordIncome(EntryFee, ScoreIncome.Entrance);
+        }
+
+        /// <summary>The park's books beyond the balance. Set by the view.</summary>
+        public ParkScore Score;
 
         /// <summary>McAi+0x1C += 1. ⚠ READ that it increments; "admissions" is a GUESS, so the port
         /// counts it under the same doubt rather than giving it a confident name.</summary>
