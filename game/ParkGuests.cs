@@ -432,7 +432,24 @@ namespace TPWGodot
                 // emptying it. Through the base's arrival a handyman walked to a piece of rubbish,
                 // found no purpose it knew, went Idle, and claimed the same piece again — the exact
                 // loop the mechanic's note describes, one class over.
-                else if (s2.S.Kind == StaffKind.Cleaner) { var hw = HandymanWorld(); hw.Current = s2; Handyman.Arrive(s2.S, hw); }
+                else if (s2.S.Kind == StaffKind.Cleaner)
+                {
+                    var hw = HandymanWorld(); hw.Current = s2;
+                    // ⚠⚠ THE HANDYMAN'S ARRIVAL ONLY KNOWS ITS OWN TWO PURPOSES, and routing every
+                    // arrival through it is why a hired cleaner cleared NOTHING. Handyman.Arrive
+                    // starts a job timer for ToLitter or ToBin and does nothing at all otherwise —
+                    // unlike Mechanic.Arrive, which sets Idle FIRST and then overrides. So a cleaner
+                    // that finished an ordinary patrol leg arrived, was handed to a function with no
+                    // case for it, stayed in Walking, and NEVER RETURNED TO IDLE — and Idle is the
+                    // only state that looks for work. Measured: one `Idle -> Patrolling` at tick zero
+                    // with the park still clean, then PathReady -> Walking for ever at tiredness 100.
+                    //
+                    // The base's arrival is what maps Patrol -> Idle. Call the handyman's for the
+                    // handyman's purposes and the shared one for everything else.
+                    if (s2.S.Purpose == StaffClassStates.ToLitter || s2.S.Purpose == StaffClassStates.ToBin)
+                        Handyman.Arrive(s2.S, hw);
+                    else StaffBase.Arrive(s2.S, StaffWorld(), false);
+                }
                 else StaffBase.Arrive(s2.S, StaffWorld(), false);
             };
             _parent.AddChild(st.Inst);
