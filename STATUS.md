@@ -21,7 +21,7 @@ did nothing.
 | state | system | owner | last moved | note |
 | --- | --- | --- | --- | --- |
 | PROVED | Placement: attractions, footprints, doors, ghosts, cost | catboy | today | place / delete / replace proved with a control |
-| PROVED | Paths + queues: lay, undo, doors, the type-13 join | catboy | today | A queue one tile short of a path never connects — measured both ways |
+| PROVED | Paths + queues: lay, undo, doors, the type-13 join | catboy | today | A queue one tile short of a path never connects — measured both ways. ⚠ Laying a path rebuilt the ground mesh and never called `MapChanged`, so new tiles were not walkable and guests went on treating a new ride as unreachable; the queue tool and deletes always did. Fixed today. |
 | built | Track builder (coasters, track rides) | catboy | today | Builds; never driven end to end |
 | PROVED | Attraction panel (Details) + context menu | catboy | today | Measured against the game's own percentages |
 | PROVED | Panel commands: Delete, Build/Edit Queue | catboy | today | Controls for both; Build/Edit Track and Call Mechanic still unwired |
@@ -44,6 +44,7 @@ did nothing.
 | --- | --- | --- | --- | --- |
 | PROVED | Turnstile + entry fee | tinyclaw | today | Measured: 15 refused, 15 actually left |
 | PROVED | Statistics (72) + advisor rules (125) | astra | today | Two of the trickier claims spot-checked against the disc |
+| PROVED | Advisor event counters (20) | catboy | today | `ParkStatistics.AddEvent` had NO callers, so slots 51-70 were permanently zero and **37 of the 125 rules could never fire**. A binary census of `jal 0x800139B4` finds 14 call sites; the port feeds 13. The 14th (event 8) is deliberately unfed and says so at the enum. Raise → counter → sweep → the cached value a rule reads, observed in one readout. |
 | in progress | Research + ride upgrades | astra | today | In progress — nothing tracks upgrades yet, which quietly wrongs arrivals, the panel's upgrade page and the wear rate |
 | built | Economy: bank, wages, month end | ? | 1d ago |  |
 
@@ -61,9 +62,9 @@ did nothing.
 | --- | --- | --- | --- |
 | OPEN | Guests stuck in a queue while later joiners board | tinyclaw | Found by master. One 300-tick stall fixed (236 → 7); master still sees it. F3 readout added to name the guest. |
 | fixed | Guests stall at a ride exit, then walk off | tinyclaw | NOT a code bug — the game never checks exit connectivity either. The readout now names the ride, its exit tile and the disconnected piece. |
-| OPEN | `CompleteUpgrade()` is an empty stub | astra / catboy | Will quietly no-op the whole upgrade path — the chain looks correct and does nothing at the end. Mine; left alone while astra is RE'ing that path. |
-| OPEN | `PostMessage` drops every ride message | catboy | "Your ride is about to break down" and friends never reach the player |
-| OPEN | Rides never reach Running in catboy's headless parks | catboy | tinyclaw's park command gives them 50 riders and me 0. Stale assembly ruled out — dll rebuilt at the same minute as the run. Blocks proving the ride ambience's Running trigger. |
+| fixed | `CompleteUpgrade()` is an empty stub | astra / catboy | Both halves wired: the FINISH applies the level and dequeues, and the REQUEST half's four questions (research, mechanics, strike, the 15-slot queue) now answer instead of throwing. |
+| fixed | `PostMessage` drops every ride message | catboy | Was an empty body on the state-entry path, so every breakdown was silent. Wired to the advisor; a broken ride now says "A ride has broken down, and you don't have any mechanics to fix it!" |
+| fixed | Rides never reach Running in catboy's headless parks | catboy | Not the ride: the QUEUE. A `--park-queue` run that stops beside a path reports "Laid" and leaves the tool open; it has to END ON the path tile to report "Finished". Separately `LayPath` never told the guests the map changed. Both fixed — `Loading -> Running, 4 aboard`. |
 
 ## Open questions — need a human, not more disassembly
 
