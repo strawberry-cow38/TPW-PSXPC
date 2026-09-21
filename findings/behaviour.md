@@ -714,3 +714,33 @@ something other than a named constant, and a grep for the name proves nothing ei
 this audit means reading the host's guest tick and following where each of the twelve is handled,
 not counting identifiers. Two conclusions were nearly published off that grep in the hour this was
 written; the table above is the part that is measured.
+
+
+### State 21 wired, and the control that says it changed nothing
+
+`RunQueueState` dispatches six guest states and **21 (Loading) was not one of them**, so a guest
+aboard a ride fell through to `AskForARoute` — the decision machine, scoring attractions for somebody
+already on a ride. The binary gives 21 its own row (`0x800E3BEC[21]` → `0x8008E538`, ported as
+`VisitorQueue.Loading`), and the state is **reachable**: `Loading` appears in the state census of
+several runs, and nine guests sit in it in a park with a working tour ride.
+
+So the case is wired. **And the control is identical:**
+
+| | with the case | case removed |
+|---|---|---|
+| guests / riding / served | 40 / 9 / 6 | 40 / 9 / 6 |
+| decisions made | 212 | 212 |
+| routes failed | 3 | 3 |
+| `Loading` | x9 | x9 |
+
+Same park, same seed, same 2,500 frames, **not one number moved**. `VisitorQueue.Loading` sets three
+bits the ride host has already set, and `AskForARoute`'s own guards — the 8-tick stagger and the
+360-tick post-failure cooldown — absorbed the fall-through. ⚠ **So this is a fidelity fix, not a
+measured one**: the row exists in the game's table and the port now has it, and nothing observable
+depended on it today. Recorded that way rather than as a win, because the next reader deserves to
+know the control was flat.
+
+⚠ 22 (Unloading, `0x8008F110`) and 23 (GotoEntrance, `0x8008F7BC`) have rows too and are still
+unwired. Neither has been observed in any run, and `VisitorQueue.Unloading` does real work — it
+applies the target's effect by type — so wiring an unobserved handler would arm a path nothing has
+exercised.

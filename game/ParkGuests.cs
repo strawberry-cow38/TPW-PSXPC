@@ -2008,6 +2008,24 @@ namespace TPWGodot
             // stripped-down harness most likely to be used to reproduce it.
             switch (g.V.State)
             {
+                // ⭐ STATE 21 IS A ROW IN THE GAME'S TABLE AND WAS A FALL-THROUGH HERE. The guest
+                // Update table at 0x800E3BEC gives state 21 its own handler, 0x8008E538 — ported as
+                // VisitorQueue.Loading, which keeps three bits straight every tick a guest is aboard
+                // and ends nothing (the ride's unload code sets 22). With no case here a loading guest
+                // reached AskForARoute instead: the DECISION MACHINE, run on somebody who is already
+                // on a ride, scoring attractions and taking a path-request slot.
+                //
+                // ⚠ It is reachable — `Loading` appears in the state census of three separate runs
+                // today, which is why this is a fix rather than a note. Same shape as the guard's
+                // state 46 (staff.md §6.10): a row the binary has, a fall-through the host had.
+                case VisitorState.Loading:
+                    VisitorQueue.Loading(g.V);
+                    return true;
+                // ⚠ 22 (Unloading) and 23 (GotoEntrance) also have rows — 0x8008F110 and 0x8008F7BC —
+                // and are NOT wired here. Neither has been OBSERVED in any run, and VisitorQueue's
+                // versions of them do real work (22 applies the target's effect by type), so wiring an
+                // unobserved handler would arm a path nothing has exercised. Recorded in
+                // findings/behaviour.md rather than guessed at.
                 case VisitorState.Vomiting:
                     VisitorActivity.Vomit(g.V, ActivityWorld(), _dice);
                     return true;
