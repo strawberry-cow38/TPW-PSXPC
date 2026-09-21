@@ -64,6 +64,8 @@ namespace TPW.Sim.Tests
             public int QueueIndexOf(Visitor g) => Index;
             public void AppendToQueue(Visitor g) { Appended++; Index = Count; Count++; }
             public void LeaveQueueList(Visitor g) { LeftList++; if (Index >= 0) { Count--; Index = -1; } }
+            public readonly System.Collections.Generic.List<(int, int)> Events = new();
+            public void AdvisorEvent(int index, int amount) => Events.Add((index, amount));
             public bool TryPathToSlot(Visitor g, int x, int y) { SlotPathAsked = true; SlotPathDest = (x, y); return SlotPathAccepted; }
             public bool TrySetSingleWaypoint(Visitor g, int x, int y)
             {
@@ -525,6 +527,43 @@ namespace TPW.Sim.Tests
             Assert.True(goes.Flag1);
             Assert.Equal(1, world.Freed);
             Assert.True(goes.HasTarget);
+        }
+
+        // ⭐⭐ LEAVING BORED RAISES ADVISOR EVENT 3, AND NOTHING ELSE DOES. The original raises it at
+        // 0x800908A4 inside the boredom arm -- a call the port's own note had read as a sound, though
+        // its arguments are the counter's: index 3, amount EIGHT.
+        //
+        // ⚠ THE CONTROLS ARE THE POINT. Three paths call LeaveQueue: this one, GiveUp (a closed or
+        // broken ride turning the queue away) and a PathFailed message. I first hooked the counter onto
+        // the list removal they share, which counts all three -- a broken ride's ejected queue would
+        // have registered as guests losing patience, inflating the one number a rule tests against.
+        // REJECTS that placement: the two arms below leave the queue and must raise NOTHING.
+        [Fact]
+        public void OnlyTheBoredGuestRaisesTheAbandonmentCounter()
+        {
+            var goes = Guest(VisitorState.WaitingInQueue); goes.Boredom = 81; goes.InQueue = true;
+            var bored = new World { NowTick = 1, Count = 2, Index = 0 };
+            Assert.Equal(WaitOutcome.LeftBored, VisitorQueue.Wait(goes, bored, new Dice()));
+            Assert.Equal(new[] { (VisitorQueue.AdvisorEventQueueAbandoned,
+                                  VisitorQueue.AdvisorQueueAbandonPoints) }, bored.Events);
+            Assert.Equal((3, 8), bored.Events[0]);          // the literals, so a renamed constant cannot drift
+
+            var stays = Guest(VisitorState.WaitingInQueue); stays.Boredom = 80; stays.WaitUntil = long.MaxValue;
+            var patient = new World { NowTick = 1 };
+            Assert.Equal(WaitOutcome.Standing, VisitorQueue.Wait(stays, patient, new Dice()));
+            Assert.Empty(patient.Events);
+
+            var turned = Guest(); turned.InQueue = true;
+            var closed = new World { Status = AttractionStatus.ClosedByPlayer, Count = 2, Index = 1 };
+            Assert.Equal(JoinOutcome.LeftQueue, VisitorQueue.JoinQueue(turned, closed));
+            Assert.Equal(1, closed.LeftList);               // it really did leave the list...
+            Assert.Empty(closed.Events);                    // ...and that is still not abandonment
+
+            var thrown = Guest(VisitorState.ShuffleForward); thrown.InQueue = true; thrown.WaitUntil = 0;
+            var broke = new World { NowTick = 1, Count = 2, Index = 1, Status = AttractionStatus.BrokenDown };
+            Assert.Equal(ShuffleOutcome.LeftQueue, VisitorQueue.Shuffle(thrown, broke));
+            Assert.Equal(1, broke.LeftList);
+            Assert.Empty(broke.Events);
         }
 
         // The periodic increment lands BEFORE the check, so a guest at 80 on its stagger tick can tip over

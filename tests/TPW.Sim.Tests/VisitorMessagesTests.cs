@@ -12,6 +12,8 @@ namespace TPW.Sim.Tests
         {
             public int LeftList;
             public void LeaveQueueList(Visitor g) { LeftList++; Calls.Add("leave-list"); }
+            public readonly System.Collections.Generic.List<(int, int)> Events = new();
+            public void AdvisorEvent(int index, int amount) => Events.Add((index, amount));
             public AttractionStatus RideStatus(Visitor g) => throw new NotSupportedException();
             public int QueueCount(Visitor g) => throw new NotSupportedException();
             public int UpgradeLevel(Visitor g) => throw new NotSupportedException();
