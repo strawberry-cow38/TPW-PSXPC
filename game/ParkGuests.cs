@@ -44,6 +44,8 @@ namespace TPWGodot
         /// <summary>How this one is drawn (GuestSprites): which person's sprites, which way it is walking
         /// as the camera sees it, and how far through the five-frame stride it is.</summary>
         public int Block, Facing, Frame, Walked;
+        /// <summary>Draws since this walker last covered any ground, for the standing pose.</summary>
+        public int LastWalked, StillFor;
 
         /// <summary>The last step this walker took, in WORLD units — which way it is actually going.
         ///
@@ -1570,6 +1572,8 @@ namespace TPWGodot
 
         void Place(Walker g)
         {
+            if (g.Walked == g.LastWalked) { if (g.StillFor < 1000) g.StillFor++; }
+            else { g.StillFor = 0; g.LastWalked = g.Walked; }
             g.Inst.Visible = !g.Hidden;
             if (g.Hidden) return;
             float u = ParkTerrain.TileUnits;
@@ -1585,8 +1589,26 @@ namespace TPWGodot
             // from the velocity -- which is what this did -- gives a person who turns as you orbit them and
             // reads correctly from exactly one angle. findings/people-sprites.md.
             g.Facing = PeopleSheet.CardinalFacing(g.DirX, g.DirZ);
-            _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
+            // ⭐ A GUEST THAT IS NOT WALKING IS NOT DRAWN WALKING. The 26 sprites before the walk are the
+            // poses, and the game shows the IDLE one whenever a person stands (findings/people-sprites.md
+            // §4): queueing, waiting at a door, stopped to look at something. Drawing a stride frame
+            // instead leaves the park full of people frozen mid-step, which is what it looked like.
+            // ⚠ Guests only: Place draws staff through here too, and a member of staff has no visitor
+            // state. Their own poses are a separate question (staff.md has different tables).
+            if (g is Guest sick && sick.V.State == VisitorState.Vomiting)
+                _sprites.Draw(g.Inst, g.Block, 0, g.Frame, feet, CameraForward,
+                              PeopleSheet.VomitFirst, PeopleSheet.VomitFrames);
+            else if (g.StillFor >= StillBeforeIdle)
+                _sprites.Draw(g.Inst, g.Block, 0, g.Frame, feet, CameraForward,
+                              PeopleSheet.IdleFirst, PeopleSheet.IdleFrames);
+            else
+                _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
         }
+
+        /// <summary>How many draws a guest must have gone nowhere before it stands rather than strides.
+        /// ⚠ NOT ZERO: a walker is momentarily still between steps, and switching on the first still draw
+        /// makes every guest flicker between standing and walking as it goes.</summary>
+        const int StillBeforeIdle = 3;
 
         /// <summary>Draw a rider in its seat, wherever the ride is holding it this frame.
         ///

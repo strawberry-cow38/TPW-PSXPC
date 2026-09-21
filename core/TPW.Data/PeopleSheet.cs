@@ -60,6 +60,27 @@ namespace TPW.Data
             return rel < StoredFacings ? (rel, true) : (8 - rel, false);
         }
 
+        /// <summary>The poses before the walk, at these offsets from the BLOCK's first sprite. READ from
+        /// the person resource's own tables (findings/people-sprites.md §4): seven facing-independent
+        /// poses in the 26 sprites before the walk, one palette each.
+        ///
+        /// ⚠ FACING-INDEPENDENT. There is one drawing per frame, not one per direction -- a guest stands
+        /// and is sick the same way whichever way you look at it. So these are drawn without the fold and
+        /// without the mirror.
+        ///
+        /// ⚠ Sprites 0..7 and 16..19 are DEAD ART: the animation ids that would select them are never
+        /// written for a guest (census by two independent methods). Not exposed here, so nobody wires a
+        /// pose the game cannot reach.</summary>
+        public const int IdleFirst = 20, IdleFrames = 2;
+        public const int VomitFirst = 22, VomitFrames = 4;
+
+        /// <summary>A pose sprite: an offset from the block's own first sprite, not from the walk.</summary>
+        public static int PoseSprite(int block, int first, int frames, int frame)
+        {
+            if (block < 0 || block >= Blocks.Length) return -1;
+            return Blocks[block].Base + first + ((frame % frames) + frames) % frames;
+        }
+
         /// <summary>READ 0x800932C8. A person's own facing is CARDINAL -- four directions, from the sign of
         /// its step, with x winning unless it is zero. ⚠ DO NOT SYNTHESISE EIGHT FROM THE VELOCITY: the
         /// quarter views exist only because the CAMERA's octant is added to this. A guest walking north is

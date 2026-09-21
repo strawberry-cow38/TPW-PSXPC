@@ -170,12 +170,16 @@ namespace TPWGodot
         /// <paramref name="facing"/> at <paramref name="frame"/>, standing on <paramref name="feet"/>.
         /// The sprite's own offsets put the figure where the game puts it: they are measured from the
         /// pen, with the feet at the bottom, so the quad is raised by half its height less the offset.</summary>
-        public void Draw(MeshInstance3D inst, int block, int facing, int frame, Vector3 feet, Vector3 cameraForward)
+        public void Draw(MeshInstance3D inst, int block, int facing, int frame, Vector3 feet, Vector3 cameraForward,
+                         int pose = -1, int poseFrames = 1)
         {
             // `facing` arrives RELATIVE to the camera (person facing + camera octant); fold it to one of
-            // the five stored drawings and mirror the half that reads the other way.
-            var (stored, mirror) = PeopleSheet.Fold(facing);
-            int index = _people.WalkSprite(block, stored, frame);
+            // the five stored drawings and mirror the half that reads the other way. A negative facing
+            // means a POSE instead: those are facing-independent, so no fold and no mirror.
+            bool mirror = false;
+            int index;
+            if (pose >= 0) index = PeopleSheet.PoseSprite(block, pose, poseFrames, frame);
+            else { var f = PeopleSheet.Fold(facing); mirror = f.Mirror; index = _people.WalkSprite(block, f.Stored, frame); }
             var sheet = _people.Sheet269;
             if (index < 0 || index >= sheet.Sprites.Count) return;
             var sp = sheet.Sprites[index];
