@@ -92,6 +92,8 @@ namespace TPWGodot
         string _autoPlace, _autoGhost, _autoDelete, _autoReplace, _autoEditQueue, _autoTile, _autoSay;
         bool _logRides;
         int _forcedGuests = -1;
+        int _autoRequestUpgrade = -1;
+        bool _researchAll;
         string _autoHire;
         int _autoBreak = -1;
         /// <summary>From <c>--park-queue=entry,x,z,rot:cx,cz:cx,cz...[:~hx,hz]</c>: a ride placed at load, then its queue
@@ -587,6 +589,9 @@ namespace TPWGodot
                 else if (arg == "--park-nopreflight") _noPreflight = true;
                 else if (arg.StartsWith("--park-pelt=")) _autoPeltAt = int.Parse(arg.Substring("--park-pelt=".Length));
                 else if (arg.StartsWith("--park-upgrade=")) _autoUpgrade = int.Parse(arg.Substring("--park-upgrade=".Length));
+                else if (arg == "--park-research-all") _researchAll = true;
+                else if (arg.StartsWith("--park-request-upgrade="))
+                    _autoRequestUpgrade = int.Parse(arg.Substring("--park-request-upgrade=".Length));
                 else if (arg.StartsWith("--park-price=")) _autoPrice = arg.Substring("--park-price=".Length);
                 else if (arg == "--park-seats") _autoSeats = true;
                 else if (arg.StartsWith("--park-save=")) _parkSavePath = arg.Substring("--park-save=".Length);
@@ -1050,6 +1055,13 @@ namespace TPWGodot
                             bool priced = _park.SetStallPrice(int.Parse(pp[0]), int.Parse(pp[1]));
                             GD.Print($"[tpw] --park-price {one}: {(priced ? "set" : "no such attraction")}");
                         }
+                    // --park-request-upgrade=ENTRY: the PANEL's half. Unlike --park-upgrade it buys
+                    // nothing; it queues work and a mechanic has to walk over and do it, which is the
+                    // chain worth testing because both of its ends used to be stubs.
+                    if (_researchAll) _park.ResearchAll = true;
+                    if (_autoRequestUpgrade >= 0)
+                        GD.Print($"[tpw] --park-request-upgrade {_autoRequestUpgrade}: "
+                               + _park.RequestUpgrade(_autoRequestUpgrade));
                     if (_autoUpgrade >= 0)
                     {
                         var before = _finances?.Bank.Balance ?? Money.Zero;

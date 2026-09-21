@@ -193,10 +193,33 @@ namespace TPWGodot
             return true;
         }
 
-        /// <summary>⚠ THERE IS NO UPGRADE QUEUE IN THE PORT. The panel that appends to 0x801099EC does
-        /// not exist, so this is empty rather than approximated — an upgrade a player never asked for
-        /// would spend their money.</summary>
-        public bool TryClaimQueuedUpgrade(StaffMember staff) => false;
+        /// <summary>The rides a player has ASKED to have upgraded, and how to clear one once it is done.
+        /// Set by the host (ParkView owns the fifteen slots).
+        ///
+        /// ⚠⚠ THESE TWO RETURNED FALSE, ALWAYS. The comment said it was empty because no panel could
+        /// queue anything -- which was true, and which made the pair invisible: the mechanic asked "is
+        /// there an upgrade waiting" every tick, was told no, and there was nothing to notice. Both ends
+        /// of the feature were missing, and each one was a reason the other could not be tested.</summary>
+        public Func<IRideJob, bool> QueuedForUpgrade;
+        public Action<IRideJob> DequeueUpgrade;
+
+        /// <summary>READ 0x8005BA8C/0x8005BE70: claim the nearest ride the player has asked to upgrade.
+        /// The same selection shape as a repair -- nearest first, then test -- so a ride whose lifetime
+        /// has run out is passed over rather than filtered before choosing.</summary>
+        public bool TryClaimQueuedUpgrade(StaffMember staff)
+        {
+            if (QueuedForUpgrade == null) return false;
+            var r = Nearest(x => QueuedForUpgrade(x) && (x.Claim == null || ReferenceEquals(x.Claim, staff)));
+            if (r == null || r.Lifetime == 0) return false;
+            r.Claim = staff;
+            _target[staff] = r;
+            return true;
+        }
+
+        /// <summary>⚠ NOT THE SAME CALL. The mechanic takes a queued upgrade as REPAIR work when it is
+        /// already on its way somewhere; the original distinguishes them and the difference has not been
+        /// traced, so this stays refused rather than aliased to the one above. A wrong yes here sends a
+        /// mechanic to the wrong job; a no leaves the ordinary path working.</summary>
         public bool TryClaimQueuedUpgradeAsRepair(StaffMember staff) => false;
 
         public void ReleaseClaim(StaffMember staff)
@@ -259,6 +282,13 @@ namespace TPWGodot
             r.Claim = null;
         }
 
-        public void CompleteUpgrade(StaffMember staff) => TargetOf(staff)?.CompleteUpgrade();
+        /// <summary>READ 0x8005BE70: the ride comes OFF the queue when the work is finished, not when it
+        /// is claimed -- so a mechanic that dies or is re-tasked leaves the request standing.</summary>
+        public void CompleteUpgrade(StaffMember staff)
+        {
+            if (TargetOf(staff) is not { } r) return;
+            r.CompleteUpgrade();
+            DequeueUpgrade?.Invoke(r);
+        }
     }
 }

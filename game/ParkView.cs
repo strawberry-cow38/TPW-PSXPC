@@ -353,6 +353,8 @@ namespace TPWGodot
             _guests.SetSprites(_guestSprites);
             _guests.SetBrain(GuestTargets);
             _guests.SetRideWorld(GuestTargets);
+            // Both ends of the upgrade queue: the panel fills it, the mechanics empty it.
+            _guests.SetUpgradeQueue(QueuedForUpgrade, DequeueUpgrade);
             _guests.SetRideJobs(RideJobs);
             // ⭐ THE GATE, AND IT HAS TO BE RE-WIRED ON EVERY LOAD. ParkGuests is rebuilt above, so an
             // entrance wired once at boot would be silently dropped the first time a park is opened and
@@ -1144,6 +1146,7 @@ namespace TPWGodot
             + $"; {_guests.HiddenGuests} hidden vs {(_guests.Rides?.Totals().Riding ?? 0)} aboard"
             + (_guests.HiddenGuests != (_guests.Rides?.Totals().Riding ?? 0) ? " ⚠ SWALLOWED GUESTS" : "")
             + $"; stale queue purpose {_guests.StaleQueuePurpose}"
+            + (UpgradesQueued > 0 ? $"; {UpgradesQueued} upgrades queued" : "")
             + (_guests.StaleQueuePurpose > 0 ? " ⚠ THESE WILL FREEZE" : "")
             + $"; map in {_guests.Areas} connected pieces, failures {_guests.RouteFailedStranded} stranded "
             + $"/ {_guests.RouteFailedSameArea} SAME AREA (this one should be 0)"
@@ -1179,7 +1182,7 @@ namespace TPWGodot
                 int len = PhaseTicks(a);
                 sb.Append($"\n  {a.Rec.Entry}: status {(int)a.Status} {a.Status}, "
                         + $"tick {(len > 0 ? a.Cycle.Accumulator >> RideCycle.FixedShift : 0)}/{len}, "
-                        + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, "
+                        + $"cycle {a.CyclesRun}/{a.CyclesPerLoad}, {a.Riders}/{a.MaxSeats} aboard, level {a.Level}, "
                         + $"reliability {a.Reliability}, type {a.Rec.Type}"
                         + $", intensity base {a.Rec.BaseIntensity} live {RidePanel.Intensity(a)}"
                         // ⭐ EVERY LEVEL'S SEAT COUNT, not just the live one. The model ships every seat
@@ -2202,6 +2205,14 @@ namespace TPWGodot
             a.SalePrice = a.Rec.Shop?.DefaultPrice ?? a.Rec.SideShow?.PlayPrice ?? 0;
             a.Bank = _bank;
             a.BuildLength = () => BuildRig(a.Variant)?.HeaderWord0 ?? 0;
+            // ⭐ THE UPGRADE REQUEST, WHICH NOTHING IN THE PORT HAD. RidePanel.RequestUpgrade asks all
+            // three of these and then queues WORK FOR A MECHANIC -- it does not buy an upgrade. Levels
+            // come from research (0x8006AC04 exactly supplies this), the mechanic count and the strike
+            // from the staff world.
+            a.ResearchLevels = () => _guests?.ResearchedLevels((int)a.Type, DefinitionIndexOf(a.Rec.Entry)) ?? 0;
+            a.Mechanics = () => _guests?.CountStaff(TPW.Sim.StaffKind.Mechanic) ?? 0;
+            a.MechanicStrike = () => _guests?.IsOnStrike(TPW.Sim.StaffKind.Mechanic) ?? false;
+            a.Enqueue = () => EnqueueUpgrade(a);
             // ⭐ RUN THE GAME'S OWN PLACEMENT INITIALISER. It sets level 0, full reliability, the lifetime from
             // the record, and the three sliders to the record's defaults — capacity to half the seats, speed to
             // the MIDDLE of the level's range, duration to half its maximum. The port had never called it, so a
@@ -2362,10 +2373,18 @@ namespace TPWGodot
                                            + "(no panel button, no research wiring, no upgrade queue). "
                                            + "Wire it rather than answering zero - see ParkView.PlacedAttraction.");
 
-            public int ResearchedLevelCount => throw UpgradeNotWired();
-            public int MechanicCount => throw UpgradeNotWired();
-            public bool MechanicsOnStrike => throw UpgradeNotWired();
-            public bool TryEnqueueUpgrade() => throw UpgradeNotWired();
+            /// <summary>Set at placement; see ParkView's upgrade queue. Until they are, these still
+            /// throw rather than answer a plausible zero -- "no levels researched" and "not wired" look
+            /// identical from outside and one of them silently means the button never works.</summary>
+            public Func<int> ResearchLevels;
+            public Func<int> Mechanics;
+            public Func<bool> MechanicStrike;
+            public Func<bool> Enqueue;
+
+            public int ResearchedLevelCount => ResearchLevels?.Invoke() ?? throw UpgradeNotWired();
+            public int MechanicCount => Mechanics?.Invoke() ?? throw UpgradeNotWired();
+            public bool MechanicsOnStrike => MechanicStrike?.Invoke() ?? throw UpgradeNotWired();
+            public bool TryEnqueueUpgrade() => Enqueue?.Invoke() ?? throw UpgradeNotWired();
 
             public AttractionDefinition Rec;
             /// <summary>The animation tick its riders should be posed at this frame, set by StepAttractions
@@ -2503,6 +2522,31 @@ namespace TPWGodot
         }
         readonly List<PlacedAttraction> _attractionsPlaced = new();
 
+        /// <summary>READ 0x801099EC: fifteen ride slots waiting for a mechanic to upgrade them.
+        ///
+        /// ⚠ A DUPLICATE SUCCEEDS AND A NEW ENTRY WHEN FULL FAILS (0x8005BA8C). Asking twice for the same
+        /// ride is not an error and must not report one; asking for a sixteenth ride is refused, and the
+        /// panel is expected to notice. Requesting neither closes nor charges the ride -- the money is
+        /// taken when the mechanic FINISHES.</summary>
+        public const int UpgradeQueueSlots = 15;
+        readonly List<PlacedAttraction> _upgradeQueue = new();
+
+        bool EnqueueUpgrade(PlacedAttraction a)
+        {
+            if (_upgradeQueue.Contains(a)) return true;
+            if (_upgradeQueue.Count >= UpgradeQueueSlots) return false;
+            _upgradeQueue.Add(a);
+            return true;
+        }
+
+        /// <summary>Whether a ride is waiting for an upgrade, and taking it off the queue once one is
+        /// done. READ 0x8005BE70: the mechanic pulls it off after CompleteUpgrade, not when it claims.</summary>
+        bool QueuedForUpgrade(IRideJob r) => r is PlacedAttraction p && _upgradeQueue.Contains(p);
+        void DequeueUpgrade(IRideJob r) { if (r is PlacedAttraction p) _upgradeQueue.Remove(p); }
+
+        /// <summary>How many rides are waiting, for the readout.</summary>
+        public int UpgradesQueued => _upgradeQueue.Count;
+
         /// <summary>The park's guests. Null until a map is loaded.</summary>
         ParkGuests _guests;
         /// <summary>The people sheet the guests are drawn from, baked once (GuestSprites).</summary>
@@ -2620,6 +2664,10 @@ namespace TPWGodot
         /// cannot be used to test queueing, riding, wear or staff.</summary>
         public int ForcedGuests { get; set; } = -1;
 
+        /// <summary>--park-research-all: hand the park its whole catalogue. ⚠ Debug only; a real park
+        /// researches from scratch and the upgrade panel depends on that.</summary>
+        public bool ResearchAll { set { if (_guests != null) _guests.AllResearchUnlocked = value; } }
+
         /// <summary>--park-hire=kind,x,z;... : put staff in the park at load. kind is TPW.Sim.StaffKind
         /// (0 mechanic, 1 entertainer, 2 cleaner, 3 guard, 4 researcher). A test hook: the game hires
         /// from a panel this port does not have, and what a hire COSTS and where it appears are not
@@ -2654,6 +2702,25 @@ namespace TPWGodot
             foreach (var a in _attractionsPlaced)
                 if (a.Rec.Entry == entry) { a.SalePrice = pounds; return true; }
             return false;
+        }
+
+        /// <summary>Ask for a ride to be upgraded, the way the panel's button does: RidePanel.RequestUpgrade
+        /// checks research, a mechanic and the fifteen slots, then queues WORK. It does not buy anything --
+        /// the level and the money move when a mechanic finishes, which is <see cref="UpgradeNow"/>'s half.
+        /// Returns what happened, because "refused" has four different reasons and a bool hides them.</summary>
+        public string RequestUpgrade(int entry)
+        {
+            var a = _attractionsPlaced.Find(x => x.Rec.Entry == entry);
+            if (a == null) return "no such attraction";
+            if (!a.IsRide) return "not a ride";
+            if (!TPW.Sim.RidePanel.CanOfferUpgrade(a))
+                return $"no upgrade to offer (level {a.Level}, researched {a.ResearchedLevelCount}, "
+                     + $"lifetime {a.Lifetime})";
+            if (a.MechanicCount == 0) return "no mechanic hired";
+            if (a.MechanicsOnStrike) return "mechanics on strike";
+            return TPW.Sim.RidePanel.RequestUpgrade(a)
+                ? $"queued ({_upgradeQueue.Count}/{UpgradeQueueSlots})"
+                : $"queue full ({_upgradeQueue.Count}/{UpgradeQueueSlots})";
         }
 
         public int UpgradeNow(int entry)

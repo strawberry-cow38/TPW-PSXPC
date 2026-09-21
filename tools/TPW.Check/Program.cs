@@ -2361,6 +2361,25 @@ static class Program
             if (bnAt >= 0 && bnAt + 1 < args.Length) return Bones(g, int.Parse(args[bnAt + 1]));
             if (Array.IndexOf(args, "--seatbones") >= 0) return SeatBones(g);
             if (Array.IndexOf(args, "--seats") >= 0) return Seats(g);
+            if (Array.IndexOf(args, "--tiers") >= 0)
+            {
+                // Which rides can be upgraded with NO research? Research.LevelCount completes any level
+                // whose tier is 0 for free, so a ride whose level 1 is tier 0 offers an upgrade the
+                // moment it is built -- which is what the upgrade chain needs to be testable at all.
+                Console.WriteLine("entry  tiers by level        name");
+                foreach (var e2 in g.Entries)
+                {
+                    var by = g.Read(e2);
+                    if (by == null || by.Length < 0x40) continue;
+                    AttractionDefinition rec2;
+                    try { rec2 = AttractionDefinition.Read(e2.Index, by); } catch { continue; }
+                    if (rec2 == null || !rec2.IsRide || rec2.Levels.Length < 2) continue;
+                    if (rec2.Levels[0].ResearchTier != 0) continue;
+                    Console.WriteLine($"{e2.Index,5}  {string.Join("/", Array.ConvertAll(rec2.Levels, l => l.ResearchTier.ToString())),-18}  "
+                                      + $"work {string.Join("/", Array.ConvertAll(rec2.Levels, l => l.ResearchWork.ToString()))}");
+                }
+                return 0;
+            }
             if (Array.IndexOf(args, "--headdepth") >= 0)
             {
                 // Which of the 88 rider-head sprites are 8-bit? RenderSprites lays an 8-bit sprite into the
