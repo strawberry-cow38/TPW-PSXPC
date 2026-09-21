@@ -687,6 +687,9 @@ namespace TPWGodot
         /// OWNED ONE, so Researcher.Research had nowhere to put its points even if it had been called —
         /// which it was not. Set by the view, which owns the catalogue.</summary>
         ParkResearchWorld _research;
+
+        /// <summary>The park's research tree, for the save host. Null until a park is loaded.</summary>
+        public ResearchSystem Research => _research?.System;
         public void SetResearch(Func<IReadOnlyList<TPW.Data.AttractionDefinition>> definitions,
                                 Func<IEnumerable<int>> placedEntries, Action<ushort> announce)
         {

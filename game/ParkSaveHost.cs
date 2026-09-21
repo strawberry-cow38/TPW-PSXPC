@@ -56,6 +56,11 @@ internal sealed class ParkSaveHost : IParkSaveHost
                 MonthsInDebt = checked((byte)Finances.Debt.MonthsInDebt),
             },
         };
+        if (Guests.Research is { } research)
+        {
+            result.ResearchTopics = research.SaveTopics();
+            result.Catalogue = ResearchSave.CaptureCatalogue(Layout, research);
+        }
         park.CaptureAttractions(result);
         foreach (var st in Guests.SaveStaff)
         {
@@ -156,8 +161,25 @@ internal sealed class ParkSaveHost : IParkSaveHost
         setClock(tick);
         park.RestoreParkTick(tick);
     }
-    public void RestoreCatalogue(byte[] percentAndCompleted) => RequireZero(percentAndCompleted, "live research catalogue");
-    public void RestoreResearchTopics(byte[] topics) => RequireZero(topics, "live research topics");
+    /// <summary>⭐ THE RESEARCH TREE ROUND-TRIPS NOW. Both of these used to REFUSE any non-zero
+    /// section, because nothing in the port owned a ResearchSystem — so a park that had researched
+    /// anything could not be saved and reloaded at all. The system exists as of today; these are the
+    /// other half of it.
+    ///
+    /// ⚠ CATALOGUE BEFORE TOPICS, and the sim's own interface comment says so: a topic references a
+    /// definition's progress, so restoring the topics first points them at percentages that have not
+    /// been put back yet.</summary>
+    public void RestoreCatalogue(byte[] percentAndCompleted)
+    {
+        if (Guests.Research is not { } r) { RequireZero(percentAndCompleted, "live research catalogue"); return; }
+        ResearchSave.RestoreCatalogue(Layout, percentAndCompleted, r);
+    }
+
+    public void RestoreResearchTopics(byte[] topics)
+    {
+        if (Guests.Research is not { } r) { RequireZero(topics, "live research topics"); return; }
+        r.RestoreTopics(topics);
+    }
     public void RestoreMessage(ParkSaveMessage saved) => throw NotWired("park message manager");
     public void FinishPark() => park.FinishSavedPark();
 
