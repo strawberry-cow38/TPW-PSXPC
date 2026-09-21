@@ -581,18 +581,24 @@ A topic is selected and its progress moves. Each researcher contribution is wort
 this topic — 2 contributions read 9%, and a six-researcher run read 27% off 6 — so the fixed-point
 arithmetic in `ContributeResearch` is linear and correct.
 
-⚠ **And then it stops — for a reason that is not research's, and that took two instruments to see.**
+⚠ **It also appeared to stop — and that was MY PARK, not the port.** Recorded in full because the
+wrong reading survived three rounds of instrumentation and I published it before the last one.
 
 ```
-idle decisions: 3 took the work, 6 patrolled, 72 never chose
+park in 2 pieces:   3 took the work,  6 patrolled, 72 never chose;  rest: 0 of 69 (69 no route)
+park in 1 piece:    3 took the work, 14 patrolled,  8 never chose;  rest: 8 of 8 granted
 ```
 
-**3 of 9 real decisions took the work: 33%, against the documented 30% roll. The roll is fine.** The
-story is the 72. `Researcher.Idle` runs `IdleCheck` first, and the host's staff loop runs it once
-more as a pre-pass before any class gets a turn — so a researcher over the tiredness threshold is
-diverted to `GoAndRest` **before it ever reaches its own decision**. With no reachable staff room
-`GoAndRest` finds nothing, sets `Patrolling`, and the researcher walks, tires further, and never
-chooses again. 72 of 81 idle ticks, 89%, spent bouncing off a rest place that is not there.
+Same code, same seed, shorter run on the right. **The rest system works.** In the first park the
+staff room's door tile sat in the *smaller* of two connected pieces — the room's own footprint had
+blocked the path I laid past it — so every rest request was refused, tiredness never fell, and the
+loop's pre-pass diverted 89% of the researcher's idle ticks before they reached its own decision.
+Connect the park and the diversions fall from 72 to 8 and every one of them is granted.
+
+⚠⚠ **findings/staff.md §6.7 already says this: "the measurement needs a CONNECTED park … the park
+report's `map in N connected pieces` line is the check."** I wrote that, and then built four fixtures
+without once looking at it. The line is in the report now next to the rest breakdown so the next
+reading cannot be taken without it.
 
 ⚠⚠ **Two separate instruments lied about this on the way, in the same manner.**
 
@@ -608,9 +614,10 @@ chooses again. 72 of 81 idle ticks, 89%, spent bouncing off a rest place that is
    built to catch exactly this case and was positioned where the case cannot occur. Moving it to the
    pre-pass turned 0 into 72 with no other change.
 
-So the research RATE is still **NOT ESTABLISHED**: what is established is that contributions arrive,
-accumulate exactly, and that a park with nowhere for staff to sit down stops researching after about
-nine decisions.
+So the research RATE is still **NOT ESTABLISHED** — 3 of 17 decisions took the work in the connected
+park, against a documented 30%, which is far too small a sample to call. What IS established: a topic
+can be selected, contributions arrive, they accumulate exactly, staff rest when there is somewhere to
+rest, and a park in **two pieces** stops researching within about nine decisions.
 
 ### 9.3b The offset has teeth
 

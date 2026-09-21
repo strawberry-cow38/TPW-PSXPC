@@ -1217,7 +1217,16 @@ namespace TPWGodot
             return $"research: funding {sys.Funding}, {researchers} researchers, "
                  + (parts.Count == 0 ? "no active topics" : string.Join(", ", parts))
                  + $"; idle decisions: {ResearchPicked} took the work, {ResearchPatrolled} patrolled, "
-                 + $"{ResearchDiverted} never chose";
+                 + $"{ResearchDiverted} never chose"
+                 + $"; rest: {_staffWorld?.RestGranted ?? 0} of {_staffWorld?.RestAsked ?? 0} asked "
+                 + $"({_staffWorld?.RestNoRoom ?? 0} no staff room, {_staffWorld?.RestUnbuilt ?? 0} still building, "
+                 + $"{_staffWorld?.RestPathRefused ?? 0} no route at {_staffWorld?.RestRefusedAt ?? "none"}"
+                 + (_staffWorld?.RestRefusedAt is { } at && at != "none" && _map != null
+                    && int.TryParse(at.Split('(')[1].Split(',')[0], out var dx)
+                    && int.TryParse(at.Split(',')[1].Split(')')[0], out var dz)
+                    && dx >= 0 && dz >= 0 && dx < _map.Width && dz < _map.Height
+                    ? $", that tile is {_map[dx, dz].Type} in area {AreaOf(dx, dz)}" : "") + ")"
+                 + $"; map in {AreaCount} connected pieces, main area {MainArea}";
         }
 
         /// <summary>The handyman's own states (TPW.Sim.Handyman). Returns true when it handled the
@@ -2313,6 +2322,8 @@ namespace TPWGodot
         readonly Dictionary<int, int> _areaSize = new();
         public int AreaOf(int x, int z) => AreaAt(x, z);
         public int AreaTiles(int area) => _areaSize.GetValueOrDefault(area);
+        /// <summary>How many separate walkable pieces the park is in. One is healthy.</summary>
+        public int AreaCount { get { GateArea(); return _areaSize.Count; } }
 
         /// <summary>The piece the park's walkable network is, taken as the biggest one.</summary>
         public int MainArea

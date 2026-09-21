@@ -85,19 +85,46 @@ namespace TPWGodot
         /// ⚠ DISTANCE IS MEASURED IN TILES, NOT BY THE GAME'S METRIC. 0x800947CC compares a distance it
         /// computes through a vtable call this does not follow; Manhattan on tile centres is the port's
         /// choice, and it can pick a different staff room when two are close to equal.</summary>
+        /// <summary>⭐ FOUR REASONS A STAFF MEMBER NEVER RESTS, AND ONE RETURN VALUE. `false` here means
+        /// any of: no staff room in the park at all, one exists but is still under construction, one is
+        /// built and the pathfinder refused the walk, or the caller had no Current. Each needs a
+        /// different fix and the first two are the park's fault rather than the port's — so the count
+        /// is broken down. Measured need: research stops dead once its researchers tire, and "they
+        /// never rest" could not be told apart from "they rest and it does not help".</summary>
+        public int RestAsked { get; private set; }
+        public int RestNoRoom { get; private set; }
+        public int RestUnbuilt { get; private set; }
+        public int RestPathRefused { get; private set; }
+        public int RestGranted { get; private set; }
+        public string RestRefusedAt { get; private set; } = "none";
+
         public bool TryPathToRest(StaffMember staff)
         {
             if (Current == null || _targets == null) return false;
+            RestAsked++;
             GuestTarget best = null;
             int bestD = int.MaxValue;
+            bool sawUnbuilt = false;
             foreach (var t in _targets())
             {
-                if (!t.StaffMayRest || !t.Built) continue;
+                if (!t.StaffMayRest) continue;
+                if (!t.Built) { sawUnbuilt = true; continue; }
                 int d = Math.Abs(t.CentreX - (Current.X >> 8)) + Math.Abs(t.CentreZ - (Current.Z >> 8));
                 if (d >= bestD) continue;
                 bestD = d; best = t;
             }
-            return best != null && _pathTo(Current, best.DoorX, best.DoorZ);
+            if (best == null) { if (sawUnbuilt) RestUnbuilt++; else RestNoRoom++; return false; }
+            if (!_pathTo(Current, best.DoorX, best.DoorZ))
+            {
+                RestPathRefused++;
+                // ⚠ WHICH TILE, AND WHAT KIND OF TILE. "no route" is the same word for a door on the
+                // wrong side of the park and a door the pathfinder will not step on at all, and the
+                // second is a port bug while the first is the player's problem.
+                if (RestPathRefused <= 3) RestRefusedAt = $"({best.DoorX},{best.DoorZ}) from ({Current.X >> 8},{Current.Z >> 8})";
+                return false;
+            }
+            RestGranted++;
+            return true;
         }
     }
 
