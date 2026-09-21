@@ -1,0 +1,1344 @@
+{
+  "binary_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "archive_sha256": "5666a0eeb18998a31fafbe845e7490cf65da76e722a69aec8b30ff2ee1a3c951",
+  "definition_count": 244,
+  "coaster_count": 12,
+  "coasters": [
+    {
+      "name": "Big Dripper",
+      "folio": 44,
+      "record_address": "0x1BB364",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        3,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Caterpillar Coaster",
+      "folio": 46,
+      "record_address": "0x1C1650",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Candy Coaster",
+      "folio": 47,
+      "record_address": "0x1C3D54",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        3,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Hades",
+      "folio": 125,
+      "record_address": "0x2AF688",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        2,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Scatty Batty",
+      "folio": 126,
+      "record_address": "0x2B3690",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        3,
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "name": "Ghosta Coasta",
+      "folio": 127,
+      "record_address": "0x2B5854",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        2,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Chac Atak",
+      "folio": 212,
+      "record_address": "0x3AF320",
+      "launch_speed": 16,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Gorilla Thrilla",
+      "folio": 213,
+      "record_address": "0x3B218C",
+      "launch_speed": 16,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        0,
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "name": "Temple of Gloom",
+      "folio": 219,
+      "record_address": "0x3CE16C",
+      "launch_speed": 16,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        3,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Escape Velocity",
+      "folio": 367,
+      "record_address": "0x6D53C0",
+      "launch_speed": 16,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        3,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "Moonshot",
+      "folio": 368,
+      "record_address": "0x6D8B64",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "The Shocker",
+      "folio": 373,
+      "record_address": "0x6EE4FC",
+      "launch_speed": 0,
+      "duration_min": [
+        1,
+        1,
+        1
+      ],
+      "duration_max": [
+        1,
+        1,
+        1
+      ],
+      "raw_BC": [
+        4,
+        0,
+        1,
+        0
+      ]
+    }
+  ],
+  "tables": {
+    "Root": {
+      "address": "0x801018D0",
+      "count": 192,
+      "matches": true
+    },
+    "Normal": {
+      "address": "0x800F97B4",
+      "count": 192,
+      "matches": true
+    }
+  },
+  "movement_address": "0x800B1F84",
+  "vector_count": 32,
+  "vectors": [
+    {
+      "input": {
+        "name": "flat_friction",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8160,
+        "distance": 13160,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "uphill",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 1536,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 6624,
+        "distance": 11624,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "downhill",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": -1536,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 9696,
+        "distance": 14696,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "special_skips_forces",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 1536,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8192,
+        "distance": 13192,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "approach_brake",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 0,
+        "kind": 0,
+        "slope": -1536,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 7680,
+        "distance": 12680,
+        "segment": 0,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "special_skips_brake",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 0,
+        "kind": 1,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8192,
+        "distance": 13192,
+        "segment": 0,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "maximum",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 50000,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 75,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 15360,
+        "distance": 20360,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "maximum_then_minimum",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 50000,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 0,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 7048,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "minimum",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": -3000,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 7048,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "delta_zero_moves",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 0,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8160,
+        "distance": 7048,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "half_after_minimum",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 0,
+        "half": true,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8160,
+        "distance": 6024,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "logical_shift",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 16384,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 200000,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 16352,
+        "distance": 672352,
+        "segment": 3,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "force_low_word",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 1048577,
+        "speed": 10000,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 9967,
+        "distance": 14967,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "slider_low_word",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 2147483647,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 7048,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "forward_exact",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 129024,
+        "launch": true,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 0,
+        "segment": 3,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "forward_below",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 129023,
+        "launch": true,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 131071,
+        "segment": 2,
+        "launch": true,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "only_one_link",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 400000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 270976,
+        "segment": 3,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "unequal_handoff",
+        "lengths": [
+          256,
+          256,
+          512,
+          1536
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 150000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 62880,
+        "segment": 3,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "reciprocal_first",
+        "lengths": [
+          512,
+          512,
+          768,
+          512
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 194000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 196048,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "backward",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": -10000,
+        "launch": true,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 123104,
+        "segment": 1,
+        "launch": true,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "zero_length",
+        "lengths": [
+          512,
+          512,
+          0,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8160,
+        "distance": 13160,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "preview_wait",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": true,
+        "ready": false,
+        "laps": 0,
+        "preview": true,
+        "elapsed": 978944,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8192,
+        "distance": 5000,
+        "segment": 2,
+        "launch": true,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "preview_boundary",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": true,
+        "ready": false,
+        "laps": 0,
+        "preview": true,
+        "elapsed": 983040,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8160,
+        "distance": 13160,
+        "segment": 2,
+        "launch": true,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "return_midpoint",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 63488,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 65536,
+        "segment": 1,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "return_above",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 63520,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 65568,
+        "segment": 1,
+        "launch": false,
+        "laps": 1,
+        "ready": true
+      }
+    },
+    {
+      "input": {
+        "name": "prewrap_return",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 0,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 129024,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 0,
+        "segment": 1,
+        "launch": false,
+        "laps": 1,
+        "ready": true
+      }
+    },
+    {
+      "input": {
+        "name": "leaving_return",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 129024,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 0,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "launch_veto",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 70000,
+        "launch": true,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 72048,
+        "segment": 1,
+        "launch": true,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "preview_veto",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 70000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": true,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 72048,
+        "segment": 1,
+        "launch": false,
+        "laps": 0,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "live_duration",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 70000,
+        "launch": false,
+        "ready": false,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 3
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 72048,
+        "segment": 1,
+        "launch": false,
+        "laps": 1,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "signed_counter_wrap",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 1,
+        "kind": 1,
+        "slope": 0,
+        "speed": 2048,
+        "distance": 70000,
+        "launch": false,
+        "ready": false,
+        "laps": 32767,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 2048,
+        "distance": 72048,
+        "segment": 1,
+        "launch": false,
+        "laps": -32768,
+        "ready": false
+      }
+    },
+    {
+      "input": {
+        "name": "latched_ready",
+        "lengths": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "segment": 2,
+        "kind": 0,
+        "slope": 0,
+        "speed": 8192,
+        "distance": 5000,
+        "launch": false,
+        "ready": true,
+        "laps": 0,
+        "preview": false,
+        "elapsed": 0,
+        "delta": 4096,
+        "half": false,
+        "slider": 100,
+        "duration": 1
+      },
+      "expected": {
+        "speed": 8160,
+        "distance": 13160,
+        "segment": 2,
+        "launch": false,
+        "laps": 0,
+        "ready": true
+      }
+    }
+  ]
+}
