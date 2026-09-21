@@ -31,11 +31,11 @@ did nothing.
 
 | state | system | owner | last moved | note |
 | --- | --- | --- | --- | --- |
-| PROVED | Bus, arrivals, park draw score | catboy | today | Arrivals hard-wired to exit 0, per a measurement in transport.md |
+| PROVED | Bus, arrivals, park draw score | catboy | today | Arrivals hard-wired to exit 0, per a measurement in transport.md. ⚠ The population CAP counts rides only — flat/track/tour/coaster/track-upgrade — and counting shops and features too held every park at 29 guests; findings/arrivals.md §3.1. |
 | PROVED | Opening the park (click the gate) | catboy | today | Same sequence as the game's own menu entry `0x80075ABC` |
 | built | Guests: needs, decisions, spending, queueing, riding | tinyclaw | today | Boards cleanly in tinyclaw's park; see open bugs |
 | built | Rides: cycle, loading, wear, breakdown, closing | tinyclaw | today |  |
-| built | Staff: hire, motion, mechanic, guard, entertainer | tinyclaw | today |  |
+| PROVED | Staff: hire, motion, mechanic, guard, entertainer | tinyclaw | today | The guard chain runs end to end for the first time: pelt → shock → dispatch → chase → **mid-walk catch** → escort to the exit → back through the gate → take a post. Five stacked breaks, findings/staff.md §6. Last leg unproved: the walk to the post itself. |
 | built | Pathfinder | tinyclaw | today |  |
 
 ## Money & progression
@@ -47,6 +47,8 @@ did nothing.
 | PROVED | Advisor event counters (20) | catboy | today | `ParkStatistics.AddEvent` had NO callers, so slots 51-70 were permanently zero and **37 of the 125 rules could never fire**. A binary census of `jal 0x800139B4` finds 14 call sites; the port feeds 13. The 14th (event 8) is deliberately unfed and says so at the enum. Raise → counter → sweep → the cached value a rule reads, observed in one readout. |
 | in progress | Research + ride upgrades | astra | today | In progress — nothing tracks upgrades yet, which quietly wrongs arrivals, the panel's upgrade page and the wear rate |
 | built | Economy: bank, wages, month end | ? | 1d ago |  |
+| built | Park history graph (5 rings + annual rating) | tinyclaw | today | `TPW.Sim.ParkHistory` existed with its save codec and was never instantiated, so the graph had no data AND a save carrying one was refused. Fed at month end, round-tripped, teeth-checked. |
+| built | Message list (32 cards) | tinyclaw | today | Live and advisor-fed already; its SAVE seam was not — capture wrote none and restore threw. Both wired, including a kind-2 card's target resolving back to the same restored attraction. UI still absent. |
 
 ## Shell
 

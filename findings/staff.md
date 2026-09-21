@@ -380,17 +380,41 @@ staff #2 Guard: 46 -> PathReady, purpose 16, counter 1    at the gate again
 staff #2 Guard: 55 -> Walking, purpose 21                 TAKING A POST
 ```
 
-### 6.5 What is still not proved
+### 6.5 "0 on post" was my instrument asking for a state the game does not have
 
-- **The last leg.** `55 -> Walking, purpose 21` is followed by `Walking -> RandomWander`, so the walk
-  to the post itself is being refused and the guard wanders off instead of standing there. The
-  machine reaches `TakePost`; `TryPathToPost`'s five samples around `GateTile` do not yet land.
+The post leg works. Measured with counters that split the four causes apart:
+`post: 1 taken of 1 tiles tried, 0 gave up after five, 0 with no gate` — the first sample was
+accepted, and the guard's own lines read:
+
+```
+staff #1 Guard: 46 -> PathReady, purpose 16, counter 1     at the gate
+staff #1 Guard: 55 -> Walking, purpose 21                  walking to the post
+staff #1 Guard: Idle -> Patrolling, purpose 21             ARRIVED
+```
+
+⭐ **And arriving at a post means going Idle.** `Guard.Arrive`'s `case GuardStates.Post` is
+`SetState(StaffState.Idle)`, so the base machine takes the guard Idle → Patrolling → RandomWander on
+the next two ticks. **There is no standing-at-a-post state in this game.** "Take a post" is a walk to
+a tile near the gate and then back to ordinary patrol; the report's `N on post`, which counted
+`State == TakePost || Purpose == Post`, was sampling a transient that is two ticks wide. The honest
+measure is how many posts have been TAKEN, which is what the line prints now.
+
+⚠ Note which guard took it: **#1, not #2** — the one that caught the culprit ejected it, and a
+different guard reached `TakePost` through the spawn-point route. Both paths into the arrival table
+fire; they are not the same guard's story, and an unnumbered staff log cannot tell them apart, which
+is why the log numbers them.
+
+### 6.6 What is still not proved
+
+- Whether the ejected guest actually ends up outside the park. The guard's half of the ejection is
+  now watched end to end; the GUEST's half — message 4, `VisitorMessages.OnMessage` — has not been
+  followed to a guest leaving.
 - `0 on post`: `TakePost` has still never been seen to place a guard at the gate.
 - The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
   base machine wanders it away. The park report's `map in N connected pieces` line is the check.
 
-### 6.6 The pattern, audited rather than the instance fixed
+### 6.7 The pattern, audited rather than the instance fixed
 
 `FreeWaypoints`/`SetAnimation` no-opping on a foreign member is a SHAPE, not one bug, so I swept every
 `ReferenceEquals(Current.S, staff)` guard in the game project: **nine, across `ParkGuard.cs` (six) and

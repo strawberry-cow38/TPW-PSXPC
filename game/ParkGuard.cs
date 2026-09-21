@@ -97,6 +97,17 @@ namespace TPWGodot
         /// <summary>How many guests a guard has caught. Host bookkeeping, not the sim's.</summary>
         public int Caught { get; private set; }
 
+        /// <summary>⭐ WHY NOBODY IS STANDING AT THE GATE. "0 on post" has four different causes — the
+        /// machine never reached TakePost, there is no gate tile, all five samples were refused, or one
+        /// was accepted and the ROUTE later failed — and the state log can only see the first. The
+        /// original gives up silently after five tries (Guard.PostAttempts), so a park whose gate has
+        /// little walkable ground around it legitimately has no posted guards; that is not a defect,
+        /// and without these counts it is indistinguishable from one.</summary>
+        public int PostTried { get; private set; }
+        public int PostTaken { get; private set; }
+        public int PostGaveUp { get; private set; }
+        public int PostNoGate { get; private set; }
+
         /// <summary>⚠⚠ RESOLVE THE STAFFER BY THE MEMBER THE SIM HANDED US, NOT BY `Current`. Both of
         /// these used to no-op unless `Current.S` WAS the staff, on the assumption that the sim only ever
         /// acts on the staffer whose tick is running. `Guard.Dispatch` disproves that: it is called from
@@ -110,7 +121,23 @@ namespace TPWGodot
         /// the sim asked for — 15 idle, 30 chase — and nothing draws differently yet. A GAP, and the
         /// reason it is stored rather than discarded is that a discarded value cannot be measured.</summary>
         public void SetAnimation(StaffMember staff, int animation)
-        { if (_stafferOf(staff) is { } s) s.Anim = animation; }
+        {
+            // ⚠⚠ COUNT THE TRANSITION, NOT THE STATE, AND COUNT IT WHERE IT HAPPENS. Chase (33)
+            // pushes Walking on its very FIRST tick, so an instantaneous "how many are in state 33"
+            // reads 0 on a park whose chase works perfectly — the same mistake as the "on post" count,
+            // where TakePost's arrival sets Idle two ticks later.
+            // ⭐ And the obvious fix was ALSO wrong: counting `State == Chase && wasState != Chase` in
+            // the staff loop observes nothing, because Dispatch runs during the ENTERTAINER's iteration,
+            // so by the guard's own turn `wasState` is already 33. The chase animation is set exactly
+            // once, inside Dispatch, with the guard named — that is the event, so that is where it is
+            // counted.
+            if (animation == TPW.Sim.Guard.ChaseAnimation) ChasesStarted++;
+            if (_stafferOf(staff) is { } s) s.Anim = animation;
+        }
+
+        /// <summary>Chases STARTED since the park loaded, counted at Guard.Dispatch's own animation
+        /// call. The running total is the only readable form; see SetAnimation.</summary>
+        public int ChasesStarted { get; private set; }
 
         /// <summary>Re-path to wherever the culprit is NOW. ⚠ Called every tick of a chase, which is
         /// what makes it a chase rather than a walk to where the guest used to be.</summary>
@@ -168,13 +195,15 @@ namespace TPWGodot
                                   int flags, int secondaryFlags)
         {
             if (Current == null || !ReferenceEquals(Current.S, staff)) return false;
-            if (_gateArea() is not { } gate) return false;
+            if (_gateArea() is not { } gate) { PostNoGate++; return false; }
             for (int i = 0; i < attempts; i++)
             {
                 int x = gate.X + _dice.Next(xRadius * 2 + 1) - xRadius;
                 int z = gate.Z + minY + _dice.Next(maxY - minY);
-                if (_ask(Current, x, z, (PathFlags)flags)) return true;
+                PostTried++;
+                if (_ask(Current, x, z, (PathFlags)flags)) { PostTaken++; return true; }
             }
+            PostGaveUp++;
             return false;
         }
 

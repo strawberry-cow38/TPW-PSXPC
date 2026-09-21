@@ -1547,11 +1547,14 @@ namespace TPWGodot
             }
             caught = _guardWorld?.Caught ?? 0;
             var w = _entWorld;
-            return $"guards: {n}, {chasing} chasing, {posted} on post, {caught} caught"
+            return $"guards: {n}, {_guardWorld?.ChasesStarted ?? 0} chases started ({chasing} in one now), "
+                 + $"{_guardWorld?.PostTaken ?? 0} posts taken ({posted} walking to one now), {caught} caught"
                  + $", gate counter {(_guardWorld?.Counter80103950 ?? 0)}"
                  + (w == null ? "" : $"; dispatch asked {w.Calls}x, offered {w.Asked} ({w.Busy} busy, {w.TooFar} too far)")
                  + $"; chase saw culprit gone {_guardWorld?.CulpritGone ?? 0}x, last culprit state "
-                 + $"{_guardWorld?.LastCulpritState ?? -1}";
+                 + $"{_guardWorld?.LastCulpritState ?? -1}"
+                 + $"; post: {_guardWorld?.PostTaken ?? 0} taken of {_guardWorld?.PostTried ?? 0} tiles tried, "
+                 + $"{_guardWorld?.PostGaveUp ?? 0} gave up after five, {_guardWorld?.PostNoGate ?? 0} with no gate";
         }
 
         public string InfluenceLine()
