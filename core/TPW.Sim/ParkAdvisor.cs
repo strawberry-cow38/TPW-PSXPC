@@ -112,6 +112,11 @@ namespace TPW.Sim
         public const int SwayBase = 32568, SwaySpread = 400, SwaySlack = 5;
         /// <summary>READ 0x80014064. Five, and never the same one twice running.</summary>
         public const int GestureCount = 5;
+
+        /// <summary>READ 0x800EFB90, MEASURED against the archive. How long each gesture's clip runs, as
+        /// the table stores it: ONE LESS than the clip's own length, which is why the wrap test is a
+        /// strict greater-than. The five body clips are 51, 76, 126, 226 and 301 frames.</summary>
+        public static readonly int[] GestureLengths = { 50, 75, 125, 225, 300 };
         /// <summary>READ 0x80013D30. Twenty, oldest dropped when it overflows.</summary>
         public const int QueueSize = 20;
         /// <summary>READ 0x8001346C..A4. Completion hooks fire for these three after the recording ends.</summary>
@@ -129,6 +134,12 @@ namespace TPW.Sim
         /// original's raw units. See the constants: growing from nothing, spinning four times.</summary>
         public int Scale { get; private set; }
         public int Spin { get; private set; }
+
+        /// <summary>READ +0xF8. Which frame of the gesture's clip he is on. ⚠ IT ONLY MOVES WHILE HE IS
+        /// SPEAKING -- through the whole entrance he is held at frame 0, so the spin and the growth are the
+        /// entrance and the performance starts when he opens his mouth. Running past the clip's end rolls
+        /// a NEW gesture, so a long message is several performances rather than one on a loop.</summary>
+        public int Clip { get; private set; }
         /// <summary>READ +0xB6. The message he is delivering, or -1.</summary>
         public int Saying { get; private set; } = -1;
         /// <summary>Messages delivered since the park opened, for the readout.</summary>
@@ -222,6 +233,12 @@ namespace TPW.Sim
                         State = AdvisorState.Leaving;
                         break;
                     }
+                    Clip += step;
+                    if (Clip > GestureLengths[Math.Clamp((int)Gesture, 0, GestureLengths.Length - 1)])
+                    {
+                        Clip = 0;
+                        RollGesture(host);
+                    }
                     if (Spin < _sway - SwaySlack) Spin += step;
                     else if (Spin > _sway + SwaySlack) Spin -= step;
                     else _sway = SwayBase + host.Random(SwaySpread);
@@ -256,15 +273,23 @@ namespace TPW.Sim
         {
             var record = AdvisorMessages.All[id];
             Mood = record.Mood(_take[id]);
-            for (int i = 0; i < 8; i++)
-            {
-                byte roll = (byte)host.Random(GestureCount);
-                if (roll != Gesture) { Gesture = roll; break; }
-            }
+            RollGesture(host);
+            Clip = 0;
             Scale = 0;
             Spin = 0;
             _timer = TravelTicks;
             State = AdvisorState.Arriving;
+        }
+
+        /// <summary>READ 0x8001404C. A fresh gesture, re-rolled until it differs from the one before, so
+        /// he never performs the same way twice running.</summary>
+        void RollGesture(IParkAdvisorHost host)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                byte roll = (byte)host.Random(GestureCount);
+                if (roll != Gesture) { Gesture = roll; return; }
+            }
         }
 
         /// <summary>READ 0x80013EFC. The caption and the recording, and then the take rotates.</summary>

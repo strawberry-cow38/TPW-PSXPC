@@ -1617,9 +1617,30 @@ namespace TPWGodot
             _advisorRoot.Transform = new Transform3D(basis, _camera.ToLocal(at));
 
             int gesture = Math.Clamp((int)_advisor.Gesture, 0, 4);
-            SetAdvisorPart(_advisorBody, gesture + 1, ref _advisorBodySub);
-            // READ: mood 16 means NO FACE. The others pick a static sub-mesh that rides the body's bone.
-            SetAdvisorPart(_advisorFace, _advisor.Mood == 16 ? -1 : _advisor.Mood + 1, ref _advisorFaceSub);
+            var body = SetAdvisorPart(_advisorBody, gesture + 1, _advisor.Clip, ref _advisorBodyKey);
+            // READ: mood 16 means NO FACE. The others pick a static sub-mesh -- the hats and accessories
+            // that go with the KIND of message, which is why the byte is latched from the message and is
+            // the same for every take of it.
+            SetAdvisorPart(_advisorFace, _advisor.Mood == 16 ? -1 : _advisor.Mood + 1, 0, ref _advisorFaceKey);
+
+            // ⭐ THE FACE RIDES THE HEAD BONE. READ 0x800303D4: the original replaces the model matrix with
+            // scaleRot x (the bone matrix of the body clip's FIRST TRAILING-LIST entry) before drawing it.
+            // That trailing list is the same one a ride's seats come from, so the port already parses it.
+            // Left at the origin instead, the hat sits in his chest.
+            if (body != null && _advisorFace.Visible && body.Seats.Length > 0)
+            {
+                // ⚠⚠ RELATIVE TO THE REST POSE, NOT ABSOLUTE. The face sub-mesh's own vertices are already
+                // in model space -- at frame 0 it sits correctly on his head with no transform at all,
+                // which is how the first cut looked right. So what the bone contributes is the head's
+                // MOVEMENT, and applying the bone matrix outright moves an already-placed hat a second
+                // time: it drops into his chest, which is exactly what the first attempt drew.
+                var pose = PoseFor(body, _advisor.Clip);
+                var rest = PoseFor(body, 0);
+                int head = body.Seats[0];
+                if (pose != null && rest != null && head >= 0 && head < pose.Bones.Length
+                    && head < rest.Bones.Length)
+                    _advisorFace.Transform = BoneOf(pose, head) * BoneOf(rest, head).AffineInverse();
+            }
         }
 
         /// <summary>His screen place and how he is scaled there. READ 0x800136F4 for the offset and the
@@ -1634,22 +1655,42 @@ namespace TPWGodot
 
         Node3D _advisorRoot;
         MeshInstance3D _advisorBody, _advisorFace;
-        int _advisorBodySub = -2, _advisorFaceSub = -2;
+        (int Sub, int Frame) _advisorBodyKey = (-2, -2), _advisorFaceKey = (-2, -2);
 
         /// <summary>Swap one of his two meshes to sub-entry <paramref name="sub"/> of FOLIO entry 0, or
         /// hide it when there is none. ⚠ ENTRY 0, not the port's AdvisorModel (entry 83 sub 10): that one
         /// is the LANGUAGE SCREEN's advisor, identified from that screen's own display list. The park draws
         /// a different model and we had the wrong one recorded.</summary>
-        void SetAdvisorPart(MeshInstance3D inst, int sub, ref int current)
+        TPW.Data.Mesh SetAdvisorPart(MeshInstance3D inst, int sub, int frame, ref (int Sub, int Frame) key)
         {
-            if (sub == current) return;
-            current = sub;
-            if (sub < 0 || _attractionSub == null) { inst.Visible = false; return; }
+            if (sub < 0 || _attractionSub == null) { inst.Visible = false; key = (sub, frame); return null; }
             var mesh = _attractionSub(AdvisorModelEntry, sub);
-            if (mesh == null) { inst.Visible = false; return; }
-            inst.Mesh = ModelMesh.Build(mesh, PoseVertices(mesh, 0), _modelSheets, true, false, false,
+            if (mesh == null) { inst.Visible = false; key = (sub, frame); return null; }
+            if (key.Sub == sub && key.Frame == frame) return mesh;
+            key = (sub, frame);
+            if (!_advisorMeshes.TryGetValue((sub, frame), out var built))
+            {
+                built = ModelMesh.Build(mesh, PoseVertices(mesh, frame), _modelSheets, true, false, false,
                                         Vector3.Zero, 1f, out _);
+                // Five clips of at most 301 frames each; the cap is belt and braces, not a real bound.
+                if (_advisorMeshes.Count > 2048) _advisorMeshes.Clear();
+                _advisorMeshes[(sub, frame)] = built;
+            }
+            inst.Mesh = built;
             inst.Visible = true;
+            return mesh;
+        }
+        readonly Dictionary<(int Sub, int Frame), ArrayMesh> _advisorMeshes = new();
+
+        /// <summary>A posed bone as a Godot transform, with the model's z negated the way vertices are.</summary>
+        static Transform3D BoneOf(MeshPose pose, int bone)
+        {
+            var b = pose.Bones[bone];
+            return new Transform3D(
+                new Basis(new Vector3(b.R.M00, b.R.M10, -b.R.M20),
+                          new Vector3(b.R.M01, b.R.M11, -b.R.M21),
+                          new Vector3(b.R.M02, b.R.M12, -b.R.M22)),
+                new Vector3(b.X, b.Y, -b.Z));
         }
 
         /// <summary>READ 0x80012E4C: the park's advisor is bound to FOLIO entry 0.</summary>
@@ -2699,7 +2740,8 @@ namespace TPWGodot
             if (_advisor.State != was)
                 GD.Print($"[advisor] {was} -> {_advisor.State} (tick {_advisorTicks}, queue "
                        + $"{(_advisor.QueueEmpty ? "empty" : "waiting")}, {_messages.Count} cards, "
-                       + $"{_advisor.Delivered} delivered)");
+                       + $"{_advisor.Delivered} delivered, scale {_advisor.Scale}, spin 0x{_advisor.Spin:X}, "
+                       + $"gesture {_advisor.Gesture} clip {_advisor.Clip}, mood {_advisor.Mood})");
             _advisorTicks++;
             // Whatever the rules posted this tick goes to the advisor, who decides when it is said.
             while (_advisorWorld.TakeMessage() is { } id) _advisor.Post(id);
