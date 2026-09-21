@@ -211,7 +211,13 @@ namespace TPWGodot
 
         bool Seek(IPathClient client, int fromX, int fromY, int toX, int toY, PathFlags flagA, int flagB)
         {
-            if (Preflight && _area != null
+            // ⚠ ONLY WHEN THE REQUEST IS NO MORE PERMISSIVE THAN THE MAP I BUILT. The connected pieces
+            // are flooded with the pathfinder's OWN step test at WalkFlags, so the two agree by
+            // construction — but only for a request at those flags or a subset of them. A caller that
+            // added Grass or Footprint could legally cross a boundary this map says is closed, and
+            // refusing it would be the preflight inventing a wall. Today every caller passes WalkFlags
+            // or 0x11 (Path|Queue), a subset; this makes that a requirement instead of a coincidence.
+            if (Preflight && _area != null && (flagA & ~WalkFlags) == 0
                 && AreaAt(fromX >> 8, fromY >> 8) != AreaAt(toX >> 8, toY >> 8))
             {
                 PreflightRefused++;
