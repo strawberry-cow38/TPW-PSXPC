@@ -1,0 +1,103 @@
+sim entry points the game never names: 69 candidates in 32 files
+
+  ParkSelection
+      CloseSelected                      5 test refs
+      CopyStatuses                      11 test refs
+      EntryPark                          4 test refs
+      OpenSelected                       9 test refs
+      ParkSelectionLink                  3 test refs
+      ParkSelectionNode                  1 test refs
+      SelectedPark                       8 test refs
+  ParkObjectives
+      AfterMinigameWin                   6 test refs
+      ObjectiveAward                     1 test refs
+      ObjectiveDescription               1 test refs
+      ObjectiveMinigameResult            2 test refs
+      ObjectiveState                     4 test refs
+  RidePanel
+      Candidate                          3 test refs
+      CoasterVelocity                    1 test refs
+      RideSliderRange                    9 test refs
+      RideSliderSave                     3 test refs
+      WearMultiplier                     7 test refs
+  Economy
+      DisplayedPayGrade                  1 test refs
+      TrainingCardCost                   2 test refs
+      TrainingCardWage                   2 test refs
+      TrainingCost                       3 test refs
+  Research
+      ApplyFundingSlider                 1 test refs
+      Candidates                         7 test refs
+      ResearchProgress                  12 test refs
+      TierCeiling                        7 test refs
+  Fixed
+      FromDouble                         7 test refs
+      FromInt                            5 test refs
+      ToIntFloor                         3 test refs
+  ParkScore
+      CopyBankRing                       7 test refs
+      ReadValue                          4 test refs
+      RecordSackingPay                   2 test refs
+  StatisticInterpreter
+      LastFailureDay                     5 test refs
+      NextCheckDay                       6 test refs
+      StatisticInstruction              17 test refs
+  VisitorCondition
+      Icon                               1 test refs
+      PercentWith                        4 test refs
+      TopThree                           4 test refs
+  VisitorQueue
+      GotoEntrance                       4 test refs
+      Loading                            2 test refs
+      WalkToLeavePoint                   2 test refs
+  Attractions
+      Admission                          1 test refs
+      PoolSize                           2 test refs
+  OtherRideWear
+      CheckBreakdown                     3 test refs
+      CombineRate                        1 test refs
+  ParkMessages
+      RetractAdvisor                     4 test refs
+      TextAt                             4 test refs
+  RideWear
+      MechanicMayClaim                   4 test refs
+      Repaired                           3 test refs
+  SaveArchive
+      Pack                               7 test refs
+      Unpack                             6 test refs
+  StaffHiring
+      Cancel                             1 test refs
+      TryPlace                           2 test refs
+  Waypoints
+      ChainLength                        2 test refs
+      IsAllocated                        4 test refs
+  AttractionStatus
+      WaitsForSomeoneElse                1 test refs
+  Bank
+      FreeSlot                           2 test refs
+  BusArrivals
+      IsArrivalTick                      3 test refs
+  CoasterTrack
+      CoasterPieceGeometry               3 test refs
+  FeatureStock
+      PanelAverage                       3 test refs
+  GuestSpending
+      WouldPayEntry                      3 test refs
+  InfluenceMap
+      CreateUnpleasantParticle           6 test refs
+  Mechanic
+      OnCataloguePickUp                  6 test refs
+  ParkHistory
+      MeanHappiness                      4 test refs
+  ParkObjectiveDefinition
+      CopyRecord                        10 test refs
+  Pathfinder
+      Pause                              1 test refs
+  RideCycle
+      StartRun                           4 test refs
+  RideLoading
+      CycleTicks                         1 test refs
+  StaffAppearance
+      StaffArt                           2 test refs
+  StaffRideNavigation
+      TryPathToJob                       1 test refs

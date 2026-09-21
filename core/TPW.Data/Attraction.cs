@@ -168,6 +168,15 @@ namespace TPW.Data
         /// launch speed 0x800B1E90, direction bits 0x800B1E9C/1ED4. Not guest doors.</summary>
         public CoasterDefinition Coaster;
 
+        /// <summary>READ: type 6 record+0xD0, passengers per vehicle (0x800AA0C8).
+        /// Type 7 uses the LOW BYTE of the same word as speed (0x800A1744), not seats.</summary>
+        public int TrackPassengersPerVehicle;
+        /// <summary>READ: first car class (4) in record+DC's model table, 0x800A6088;
+        /// findings/rides.md's eight-entry track model table. Variant selection remains host-side.</summary>
+        public int TrackCarSub;
+        /// <summary>READ: low byte of type-7 record+D0 (0x800A1744).</summary>
+        public byte TourBaseSpeed;
+
         /// <summary>A shop's product block, for type 4 only.</summary>
         public ShopFields? Shop;
 
@@ -196,6 +205,9 @@ namespace TPW.Data
             };
             if (r + 0x1C <= d.Length) a.BaseIntensity = BitConverter.ToInt32(d, r + 0x18);
             if (type == 1 && r + 0xD4 <= d.Length) a.Coaster = CoasterDefinition.Read(d.AsSpan(r));
+            if (type == 6 && r + 0xD4 <= d.Length) a.TrackPassengersPerVehicle = BitConverter.ToInt32(d, r + 0xD0);
+            if (type == 6 && r + 0xF0 <= d.Length) a.TrackCarSub = BitConverter.ToInt32(d, r + 0xEC);
+            if (type == 7 && r + 0xD4 <= d.Length) a.TourBaseSpeed = d[r + 0xD0];
             if (type == 2 && r + 0x2F <= d.Length)
             {
                 a.FeatureFlags = d[r + 0x2E];

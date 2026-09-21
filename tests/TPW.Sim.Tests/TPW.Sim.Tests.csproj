@@ -10,6 +10,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="../../game/ParkMovingRideWorld.cs" Link="ParkMovingRideWorld.cs" />
+    <Compile Include="../../game/ParkTrackRideWorld.cs" Link="ParkTrackRideWorld.cs" />
+    <Compile Include="../../game/ParkTourRideWorld.cs" Link="ParkTourRideWorld.cs" />
     <Compile Include="../../game/ParkCoasterWorld.cs" Link="ParkCoasterWorld.cs" />
     <ProjectReference Include="..\..\core\TPW.Sim\TPW.Sim.csproj" />
     <ProjectReference Include="..\..\core\TPW.Data\TPW.Data.csproj" />
