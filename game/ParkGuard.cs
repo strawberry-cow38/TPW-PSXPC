@@ -145,8 +145,22 @@ namespace TPWGodot
         {
             if (Current == null || !ReferenceEquals(Current.S, staff)) return;
             var g = _guestOf(guest);
-            if (g != null) _ask(Current, g.X >> 8, g.Z >> 8, (PathFlags)flags);
+            if (g == null) { ChasePathNoGuest++; return; }
+            // ⚠⚠ THE RETURN VALUE WAS DROPPED, AND IT IS THE DIFFERENCE BETWEEN TWO BUGS. `_ask`
+            // false means the request was REFUSED AT ENTRY — ten searches already outstanding, or no
+            // nodes — and produces NO message, so the guard sits in state 11 until the base machine
+            // wanders it away. A request that was ACCEPTED and came back with no route is a different
+            // animal entirely: it gets an answer and the purpose table handles it. Both end as
+            // "1 chase started, 0 caught" and only this counter tells them apart.
+            if (_ask(Current, g.X >> 8, g.Z >> 8, (PathFlags)flags)) ChasePathAsked++;
+            else ChasePathRefused++;
         }
+
+        /// <summary>The chase's own path requests: accepted, refused at entry, and asked for a guest
+        /// the host could not find. See PathToGuest.</summary>
+        public int ChasePathAsked { get; private set; }
+        public int ChasePathRefused { get; private set; }
+        public int ChasePathNoGuest { get; private set; }
 
         // ---- the gate and the way out -------------------------------------------------------------
 

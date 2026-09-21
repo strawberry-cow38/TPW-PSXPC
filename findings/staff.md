@@ -404,7 +404,34 @@ different guard reached `TakePost` through the spawn-point route. Both paths int
 fire; they are not the same guard's story, and an unnumbered staff log cannot tell them apart, which
 is why the log numbers them.
 
-### 6.6 What is still not proved
+### 6.6 Why a chase often ends without a catch: the chase cannot use the gate apron
+
+`Guard.ChasePathFlags` is **0x11** = `Path | Queue` (READ, pathfinder.md's call-site table), while
+the guests' own `WalkFlags` is **0x31** = `Path | Queue | GateSide`. So a guard **cannot step on a
+type-14 tile beside the gate** and a guest standing on one, or reachable only across one, cannot be
+chased. In a small test park most of the path network runs past the gate, so this fires often; in a
+big park it would be rare. It is the binary's own flag set, so it is ⚠ NOT to be fixed.
+
+**Measured, with the counters that separate the three outcomes:**
+`chase paths 1 asked, 0 refused at entry, 0 with no guest` — the request was ACCEPTED, so this is not
+the ten-slot refusal that produces no message at all; the search ran and found nothing.
+
+**And the state log needed two more fields before it could say that.** The transition reads
+`Walking -> RandomWander, purpose 8, waiting False, answer none`, which looks like a request that was
+never answered. It is not: the answer arrived and was consumed at the top of that same iteration,
+`StaffBase.OnPathMessage` sent purpose 8 to **Patrolling**, and `StaffBase.Patrol` on a guard with no
+patrol rectangle turned that into **RandomWander** — three state changes inside one tick, of which
+the log could only ever show the first and the last. `waiting` and `answer` are printed now because
+"accepted and never replied to" and "replied to with a failure" are different bugs that produce the
+same two-state line.
+
+⚠ **A note on the preflight, which is consistent and worth writing down rather than fixing.** The
+area map is built with `WalkFlags` — a SUPERSET of the chase's flags — so it can answer "same piece"
+for a route the chase itself cannot walk. That is harmless only because the preflight exists to
+REFUSE: a false "same area" means the search runs and fails, which is what already happens. A
+preflight that ever starts *allowing* things on that answer would be wrong.
+
+### 6.7 What is still not proved
 
 - Whether the ejected guest actually ends up outside the park. The guard's half of the ejection is
   now watched end to end; the GUEST's half — message 4, `VisitorMessages.OnMessage` — has not been
@@ -414,7 +441,7 @@ is why the log numbers them.
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
   base machine wanders it away. The park report's `map in N connected pieces` line is the check.
 
-### 6.7 The pattern, audited rather than the instance fixed
+### 6.8 The pattern, audited rather than the instance fixed
 
 `FreeWaypoints`/`SetAnimation` no-opping on a foreign member is a SHAPE, not one bug, so I swept every
 `ReferenceEquals(Current.S, staff)` guard in the game project: **nine, across `ParkGuard.cs` (six) and

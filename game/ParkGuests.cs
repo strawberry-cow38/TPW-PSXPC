@@ -1071,7 +1071,13 @@ namespace TPWGodot
                     default: WanderStaff(st); break;
                 }
                 if (LogStaff && st.S.State != wasState)
+                    // ⚠ WAITING AND THE ANSWER ARE THE TWO FIELDS THAT EXPLAIN A WANDER. State 11 is
+                    // "walk requested"; it leaves either because an ANSWER arrived (and then the purpose
+                    // table decides) or because it fell through to the base machine with neither — which
+                    // is a request that was accepted and never replied to. Those look identical in a
+                    // state log and are completely different bugs.
                     Godot.GD.Print($"[tpw] staff #{who} {st.S.Kind}: {wasState} -> {st.S.State}, purpose {st.S.Purpose}, "
+                                 + $"waiting {st.Waiting}, answer {(st.Answer?.ToString() ?? "none")}, "
                                  + $"jobs {(_rideJobs?.Invoke().Count ?? -1)}, tired {st.S.Tiredness}");
             }
         }
@@ -1620,6 +1626,9 @@ namespace TPWGodot
                  + (w == null ? "" : $"; dispatch asked {w.Calls}x, offered {w.Asked} ({w.Busy} busy, {w.TooFar} too far)")
                  + $"; chase saw culprit gone {_guardWorld?.CulpritGone ?? 0}x, last culprit state "
                  + $"{_guardWorld?.LastCulpritState ?? -1}"
+                 + $"; chase paths {_guardWorld?.ChasePathAsked ?? 0} asked, "
+                 + $"{_guardWorld?.ChasePathRefused ?? 0} refused at entry, "
+                 + $"{_guardWorld?.ChasePathNoGuest ?? 0} with no guest"
                  + $"; {StaffAdmitted} admitted by the turnstile"
                  + $"; post: {_guardWorld?.PostTaken ?? 0} taken of {_guardWorld?.PostTried ?? 0} tiles tried, "
                  + $"{_guardWorld?.PostGaveUp ?? 0} gave up after five, {_guardWorld?.PostNoGate ?? 0} with no gate";
