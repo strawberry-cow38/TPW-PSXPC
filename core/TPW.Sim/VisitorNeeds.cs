@@ -6,13 +6,16 @@ namespace TPW.Sim
     /// <summary>The tile-influence bits a guest standing somewhere picks up (§2.9).
     ///
     /// behaviour.md's original producer labels remain GUESS. READ refinement: the entertainer writes
-    /// 2 at 0x80095A34..38 through 0x800961D8; bit 1's producer remains NOT ESTABLISHED.
-    /// See findings/visitor-rest.md. Values are ORed over covering objects in list 0x80103860.</summary>
+    /// 2 at 0x80095A34..38 through 0x800961D8. The bounded writer census in
+    /// findings/influence-bit1.md finds only 2/4, so the +6 consumer has no retail producer
+    /// within those ownership routes. Values are ORed over covering objects in list 0x80103860.</summary>
     [Flags]
     public enum TileInfluence
     {
         None = 0,
-        /// <summary>Bit 1: +6 happiness. GUESS "something nice to look at".</summary>
+        /// <summary>READ: mask 1 and +6 at 0x8008FEE4..EFC. GUESS "something nice to look at"
+        /// remains only the historical label. No attraction records qualify for this effect in
+        /// the bounded SLES-026.88 writer census; retained for the consumer and synthetic tests.</summary>
         Pleasant = 1,
         /// <summary>READ: bit 2 is written by the entertainer, 0x80095A34..38.</summary>
         Entertainer = 2,

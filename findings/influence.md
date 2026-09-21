@@ -100,7 +100,14 @@ wrap to signed 16 bits. A radius-1 mark covers its tile and four edge neighbors,
   to emitter+0x30 by `0x8008C304` → `0x8008C458`; radius **1** at `0x8008C314..318`; +0x18 := **0**
   at `0x8008C320..324`; flag **4** at `0x8008C32C..330` → `0x8008C3CC`.
 
-## 2. Bit 1: NOT ESTABLISHED
+## 2. Bit 1: original search and bounded follow-up
+
+**Follow-up:** [influence-bit1.md](influence-bit1.md) closes the ordinary effector ownership routes
+with a bounded negative: **2 flag writers, supplied only 2/4; 0 bit-1 producers**. It counts every
+instruction-shaped field-store candidate, scans all named executable payloads and interior entries,
+traces owner/pool aliases, and injects both direct and aliased writes as controls. See that report
+for the exact scope and reopening conditions. The original evidence and limits below are retained
+as the record of the earlier investigation; no scenery mapping was introduced.
 
 There is no established scenery record/radius mapping to implement. `Pleasant` stays usable by the
 reader and explicit low-level fixtures, but no producer is fabricated.
@@ -245,6 +252,10 @@ controls, counting every excluded non-record and every unreadable file separatel
 inside this worktree and does not invoke `recs.py`'s old size guard or its external output paths.
 
 ## 6. What was NOT established
+
+This is the original run's gap list. The first two items have a **bounded static closure**, with
+explicit alias/ownership assumptions, in [influence-bit1.md](influence-bit1.md); no dynamic
+watchpoint proof is claimed by either report. The remaining gaps are unchanged.
 
 - **Any producer for bit 1**, including which scenery records, whether any scenery produces it, and
   what its radius/lifetime would be. No producer was added.
