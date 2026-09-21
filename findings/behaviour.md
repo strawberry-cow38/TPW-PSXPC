@@ -677,3 +677,40 @@ turnstile and takes up a post by the entrance before patrolling again.
 - Bubble ids 0x30..0x40 and sound ids — labels unknown; the code paths that show them are documented.
 - Staff S+0x47/S+0x48 (Entertainer +0x47/+0x48 are tiredness/morale of the embedded Staff base at
   +8, i.e. S+0x3F/S+0x40; I wrote the entertainer/mechanic/handyman numbers using that identity).
+
+
+## The guest's Update table — READ 2026-09-21
+
+The staff audit (staff.md §6.11) pulled each class's Update jump table out of the binary and diffed
+it against the host's switch. The guest has one too, and it is written down here because the audit
+itself is **not finished** and the next person should not have to find the table again.
+
+**`0x800916B4`** is the guest Update. It reads the state byte at **V+0x35**, bounds it with
+`sltiu v1, 0x3b` (states 0..58) and indexes the table at **`0x800E3BEC`**. The default target
+`0x80091954` appears 31 times; the **28 states with their own row** are:
+
+```
+ 0 Idle            1 Wander           2 WalkToDestination  3 WalkToWaypoint
+ 4 OnRide          5 RandomWander     6 MajorDecision     11 WalkToBin
+18 WaitingInQueue 19 ShuffleForward  21 Loading           22 Unloading
+23 GotoEntrance   28 WatchEntertainer 29 Vomiting         35 SpawnToGate
+36 WalkIn         37 PayEntryFee     38 LeavingPark       41 PickLane
+42 WalkToLaneSlot 43 ShuffleInLane   44 LaneFront         45 JoiningQueue
+46 AtGate         47 UsingAttraction 48 WalkOut           58 RemovedFromQueue
+```
+
+Three of them are reached by `jal` from consecutive sites — 21 at `0x80091854`, 22 at `0x80091864`,
+23 at `0x80091874` — which is how `VisitorQueue.Loading`, `.Unloading` and `.GotoEntrance` were
+located.
+
+**What this establishes:** the host's `case VisitorState.*` switch dispatches sixteen states and
+**every one of them has a row in this table.** No fabricated row, which is the failure that cost a
+day on the guard side (staff.md §6.10).
+
+⚠ **What it does NOT establish, and the reason this section stops here.** The other twelve are not
+therefore missing. `VisitorState.WalkToWaypoint` is named **zero times** in `game/` and guests
+plainly walk — the report prints `WalkToWaypoint x39` — so the host reaches those states through
+something other than a named constant, and a grep for the name proves nothing either way. Finishing
+this audit means reading the host's guest tick and following where each of the twelve is handled,
+not counting identifiers. Two conclusions were nearly published off that grep in the hour this was
+written; the table above is the part that is measured.
