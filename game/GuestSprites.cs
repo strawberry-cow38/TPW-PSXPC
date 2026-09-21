@@ -91,8 +91,7 @@ namespace TPWGodot
                 // A one-texel white sliver of a letter along the edge of a mirrored head is exactly what
                 // master photographed. Keeping the UVs forward and negating the quad's right vector gives
                 // the same mirrored picture and can never sample outside the rect.
-                m.Uv1Scale = new Vector3(sp.W / (float)_headsW, sp.H / (float)_headsH, 1);
-                m.Uv1Offset = new Vector3(px / (float)_headsW, py / (float)_headsH, 0);
+                Inset(m, px, py, sp.W, sp.H, _headsW, _headsH);
             }
             var towards = -cameraForward;
             if (towards.LengthSquared() < 1e-6f) towards = Vector3.Back;
@@ -204,8 +203,7 @@ namespace TPWGodot
                 // The sprite's rectangle in the baked sheet: its page's corner plus its own texels.
                 int px = (sp.PageX - sheet.VramX) / 64 * TextureSheet.PageTexels + sp.U;
                 int py = (sp.PageY - sheet.VramY) / TextureSheet.PageTexels * TextureSheet.PageTexels + sp.V;
-                m.Uv1Scale = new Vector3(sp.W / (float)_atlasW, sp.H / (float)_atlasH, 1);
-                m.Uv1Offset = new Vector3(px / (float)_atlasW, py / (float)_atlasH, 0);
+                Inset(m, px, py, sp.W, sp.H, _atlasW, _atlasH);
             }
             // ⭐ FULL BILLBOARD, VERTICALLY TOO (master). This used to zero the Y of the view direction,
             // which is a yaw-only billboard: upright and correct from the game's own low camera, but it
@@ -231,6 +229,24 @@ namespace TPWGodot
             if (Debug && (_shouted++ % 600) == 0)
                 GD.Print($"[guest] mesh {(inst.Mesh is QuadMesh qq ? qq.Orientation.ToString() + " " + qq.Size : inst.Mesh?.GetType().Name)} " +
                          $"basis x={inst.Transform.Basis.X} y={inst.Transform.Basis.Y} z={inst.Transform.Basis.Z} at {inst.Position} sprite {index} {sp.W}x{sp.H}");
+        }
+
+        /// <summary>The sprite's rectangle as UVs, pulled HALF A TEXEL inside it on every edge.
+        ///
+        /// ⚠⚠ WITHOUT THE INSET A SPRITE SAMPLES ITS NEIGHBOUR. A rect of W texels mapped across a quad's
+        /// full 0..1 puts the last sample at exactly px + W -- one texel PAST the sprite -- and the quad's
+        /// edges reach 0 and 1 exactly. In these atlases the neighbour is another sprite or, in the common
+        /// sheet, the HUD FONT: heads and glyphs are interleaved in one block. The symptom is letters
+        /// bleeding along one edge of a sprite, which is what master reported twice.
+        ///
+        /// ⚠ Nearest filtering does NOT save you: it picks the nearest texel to the sample point, and a
+        /// sample sitting exactly on the boundary is nearest to the wrong side as readily as the right.
+        /// Half a texel in is the standard fix and the only one that does not depend on how the rasteriser
+        /// rounds.</summary>
+        static void Inset(StandardMaterial3D m, int px, int py, int w, int h, int atlasW, int atlasH)
+        {
+            m.Uv1Scale = new Vector3((w - 1) / (float)atlasW, (h - 1) / (float)atlasH, 1);
+            m.Uv1Offset = new Vector3((px + 0.5f) / atlasW, (py + 0.5f) / atlasH, 0);
         }
 
         /// <summary>READ 0x8003186C. Which way round the world is from where the camera sits, as an
