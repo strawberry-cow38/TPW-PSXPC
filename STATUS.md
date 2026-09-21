@@ -54,7 +54,7 @@ did nothing.
 | --- | --- | --- | --- | --- |
 | built | Front-end: menus, boot, movies, music | ? | 2d ago | Nobody has claimed this row |
 | built | Saving / loading a park | ? | today | ⚠ THIS ROW SAID "not started, nothing written" while `ParkSaveHost.cs`, `ParkSaveProof.cs`, `findings/savehost.md` and a round-trip proof all existed. Corrected by looking rather than by reading the row. Still needs a UI — `--park-save` / `--park-load` are the only doors. |
-| not started | Scenarios + win conditions | — | today | Nothing written |
+| built (core) | Scenarios + win conditions | Codex | today | Campaign selection ported: 19 decoded rows = 8 park nodes + 11 ticket-cost links, open/closed/unopened status, three-open cap, spendable-ticket unlocks, selected world/park and existing archive status round-trip. See `findings/selection.md`. No scenario blob or terminal campaign victory established; awards remain in `ParkObjectives`. Still missing the map UI and game-host entry/ticket wiring. |
 
 ## Known bugs
 
