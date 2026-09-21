@@ -1,0 +1,166 @@
+{
+  "binary_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "scope": "0x80013F1C..0x80013F94 and all 289 established text-id fields; no whole-image negative search",
+  "guarded_words_examined": 13,
+  "direct_call_words": 4,
+  "noncall_words": 9,
+  "guarded_calls": [
+    {
+      "site": "0x80013f54",
+      "target": "0x8003a7bc"
+    },
+    {
+      "site": "0x80013f6c",
+      "target": "0x800141bc"
+    },
+    {
+      "site": "0x80013f74",
+      "target": "0x80050530"
+    },
+    {
+      "site": "0x80013f80",
+      "target": "0x800385ac"
+    }
+  ],
+  "cases": [
+    {
+      "flags": 0,
+      "text_id": 291,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": false
+    },
+    {
+      "flags": 0,
+      "text_id": 292,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": false
+    },
+    {
+      "flags": 0,
+      "text_id": 293,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": false
+    },
+    {
+      "flags": 1,
+      "text_id": 291,
+      "calls_reached": 4,
+      "calls_bypassed": 0,
+      "voice_gate_enabled": false
+    },
+    {
+      "flags": 1,
+      "text_id": 292,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": false
+    },
+    {
+      "flags": 1,
+      "text_id": 293,
+      "calls_reached": 4,
+      "calls_bypassed": 0,
+      "voice_gate_enabled": false
+    },
+    {
+      "flags": 2,
+      "text_id": 291,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": true
+    },
+    {
+      "flags": 2,
+      "text_id": 292,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": true
+    },
+    {
+      "flags": 2,
+      "text_id": 293,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": true
+    },
+    {
+      "flags": 3,
+      "text_id": 291,
+      "calls_reached": 4,
+      "calls_bypassed": 0,
+      "voice_gate_enabled": true
+    },
+    {
+      "flags": 3,
+      "text_id": 292,
+      "calls_reached": 0,
+      "calls_bypassed": 4,
+      "voice_gate_enabled": true
+    },
+    {
+      "flags": 3,
+      "text_id": 293,
+      "calls_reached": 4,
+      "calls_bypassed": 0,
+      "voice_gate_enabled": true
+    }
+  ],
+  "positive_push_controls": 4,
+  "bypass_controls": 8,
+  "table_rows_examined": 289,
+  "table_rows_unexamined": 0,
+  "advisor_pushes_suppressed": 46,
+  "captioned_positive_controls": 243,
+  "suppressed_message_ids": [
+    189,
+    190,
+    191,
+    192,
+    193,
+    194,
+    195,
+    196,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    220,
+    237,
+    238,
+    246,
+    249,
+    251,
+    252,
+    253,
+    254,
+    255,
+    256,
+    259,
+    260,
+    261,
+    262,
+    263,
+    264,
+    265,
+    266,
+    268,
+    271,
+    272,
+    274,
+    275,
+    277,
+    281,
+    285,
+    286,
+    287
+  ],
+  "result": "0x124 bypasses construction, three-field setup, HUD lookup and push; voice gate is independent"
+}
