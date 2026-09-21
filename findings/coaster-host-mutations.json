@@ -1,0 +1,262 @@
+{
+  "source_sha256": {
+    "core/TPW.Data/TrackBuilder.cs": "b14a4dae744aaa29e39a73022c430450407c651c5eadb9f0c4a49132a64c9590",
+    "game/ParkCoasterWorld.cs": "d063ec4dc89f56f3188340405298a4bac2533145123d0ce40d13e1b5eaeef7ad",
+    "core/TPW.Data/CoasterDefinition.cs": "490598439c257f5b0e28a2ee2ec63c74c60d7a859b1cb89e8d64ea3415be8f8a",
+    "core/TPW.Sim/CoasterSimulation.cs": "da7e5f612699031824531cd484ac254722b3450a5aea0d63e484b669385c1541"
+  },
+  "test_sha256": "fea884d385d653eefb0a771f0c9e5bfab6d0930ebf44ef98161416d6f3f28dc6",
+  "mutations": [
+    {
+      "name": "coaster start uses track-ride station",
+      "path": "core/TPW.Data/TrackBuilder.cs",
+      "old": "Start = ride.Coaster?.Connection(ride, ox, oz, rot, launch: true) ?? StartFor(ox, oz, rot);",
+      "new": "Start = StartFor(ox, oz, rot);",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 3, lx: 11, lz: 9, ax: 11, az: 12)",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 2, lx: 12, lz: 11, ax: 9, az: 11)",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 0, lx: 9, lz: 11, ax: 12, az: 11)",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 1, lx: 11, lz: 12, ax: 11, az: 9)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/00/result.trx"
+    },
+    {
+      "name": "approach collapsed into launch",
+      "path": "core/TPW.Data/TrackBuilder.cs",
+      "old": "Finish = ride.Coaster?.Connection(ride, ox, oz, rot, launch: false) ?? Start;",
+      "new": "Finish = Start;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.LiveControlsAndModelBatchSizeReachSimulation",
+        "TPW.Sim.Tests.ParkCoasterTests.UndoEjectsAndRebuildsButRefusedClicksDoNotResetRuntime",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 1, lx: 11, lz: 12, ax: 11, az: 9)",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 3, lx: 11, lz: 9, ax: 11, az: 12)",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 0, lx: 9, lz: 11, ax: 12, az: 11)",
+        "TPW.Sim.Tests.ParkCoasterTests.OnlyAcceptedPointsReachRuntimeAndClosureAddsNoSlot",
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly",
+        "TPW.Sim.Tests.ParkCoasterTests.GeometryUsesRealMapAndMeasuredModelWithExplicitDeckPolicy",
+        "TPW.Sim.Tests.ParkCoasterTests.GuestAvailabilityRequiresConnectionAndLiveStatus",
+        "TPW.Sim.Tests.ParkCoasterTests.ReportsDistinguishNoTrackUntickedAndMovingWithStableTrainIdentity",
+        "TPW.Sim.Tests.ParkCoasterTests.BuilderUsesCoasterConnections(rot: 2, lx: 12, lz: 11, ax: 9, az: 11)"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/01/result.trx"
+    },
+    {
+      "name": "coaster incorrectly projects onto two-tile grid",
+      "path": "core/TPW.Data/TrackBuilder.cs",
+      "old": "Ride.Coaster != null ? (x, z) : Project(End, (x, z))",
+      "new": "Project(End, (x, z))",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.GuestAvailabilityRequiresConnectionAndLiveStatus",
+        "TPW.Sim.Tests.ParkCoasterTests.OnlyAcceptedPointsReachRuntimeAndClosureAddsNoSlot",
+        "TPW.Sim.Tests.ParkCoasterTests.LiveControlsAndModelBatchSizeReachSimulation",
+        "TPW.Sim.Tests.ParkCoasterTests.GeometryUsesRealMapAndMeasuredModelWithExplicitDeckPolicy",
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly",
+        "TPW.Sim.Tests.ParkCoasterTests.UndoEjectsAndRebuildsButRefusedClicksDoNotResetRuntime",
+        "TPW.Sim.Tests.ParkCoasterTests.ReportsDistinguishNoTrackUntickedAndMovingWithStableTrainIdentity"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/02/result.trx"
+    },
+    {
+      "name": "terrain replaced by opaque padding",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "BaseHeight(piece.TileX, piece.TileY), supportHeight",
+      "new": "(short)piece.UnknownPositionPadding, supportHeight",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.GeometryUsesRealMapAndMeasuredModelWithExplicitDeckPolicy"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/03/result.trx"
+    },
+    {
+      "name": "model height omitted",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "supportHeight = bounds[pieces.Straight].H;",
+      "new": "supportHeight = 0;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.GeometryUsesRealMapAndMeasuredModelWithExplicitDeckPolicy"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/04/result.trx"
+    },
+    {
+      "name": "spline correction omitted",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "new(0, 24 - supportHeight, 0)",
+      "new": "new(0, 0, 0)",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.GeometryUsesRealMapAndMeasuredModelWithExplicitDeckPolicy"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/05/result.trx"
+    },
+    {
+      "name": "ignored accepted route",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "i < accepted.Length; i++",
+      "new": "i < 0; i++",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.UndoEjectsAndRebuildsButRefusedClicksDoNotResetRuntime",
+        "TPW.Sim.Tests.ParkCoasterTests.LiveControlsAndModelBatchSizeReachSimulation",
+        "TPW.Sim.Tests.ParkCoasterTests.GuestAvailabilityRequiresConnectionAndLiveStatus",
+        "TPW.Sim.Tests.ParkCoasterTests.ReportsDistinguishNoTrackUntickedAndMovingWithStableTrainIdentity",
+        "TPW.Sim.Tests.ParkCoasterTests.OnlyAcceptedPointsReachRuntimeAndClosureAddsNoSlot",
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/06/result.trx"
+    },
+    {
+      "name": "ejection omitted on route rebuild",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "Simulation?.EjectPassengers();",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.UndoEjectsAndRebuildsButRefusedClicksDoNotResetRuntime"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/07/result.trx"
+    },
+    {
+      "name": "host never ticks simulation",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "Simulation.Update();",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.ReportsDistinguishNoTrackUntickedAndMovingWithStableTrainIdentity",
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly",
+        "TPW.Sim.Tests.ParkCoasterTests.UndoEjectsAndRebuildsButRefusedClicksDoNotResetRuntime",
+        "TPW.Sim.Tests.ParkCoasterTests.LiveControlsAndModelBatchSizeReachSimulation"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/08/result.trx"
+    },
+    {
+      "name": "stale movement delta",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "MovementDelta = frameTime;",
+      "new": "MovementDelta = 0;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly",
+        "TPW.Sim.Tests.ParkCoasterTests.LiveControlsAndModelBatchSizeReachSimulation"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/09/result.trx"
+    },
+    {
+      "name": "batch uses eight train objects",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "BoardingBatchSize = Math.Max(1, models[CarSub].SeatCount);",
+      "new": "BoardingBatchSize = CoasterSimulation.TrainCount;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.ReportsDistinguishNoTrackUntickedAndMovingWithStableTrainIdentity",
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly",
+        "TPW.Sim.Tests.ParkCoasterTests.UndoEjectsAndRebuildsButRefusedClicksDoNotResetRuntime",
+        "TPW.Sim.Tests.ParkCoasterTests.LiveControlsAndModelBatchSizeReachSimulation"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/10/result.trx"
+    },
+    {
+      "name": "open without a connection",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "RollerCoaster.OpenToGuests(Status, Simulation.Track.Connected)",
+      "new": "AttractionLifecycle.OpenToGuests(Status)",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.GuestAvailabilityRequiresConnectionAndLiveStatus"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/11/result.trx"
+    },
+    {
+      "name": "connected and missing-track reports indistinguishable",
+      "path": "game/ParkCoasterWorld.cs",
+      "old": "accepted.Length == 0 ? \"no-track\"",
+      "new": "accepted.Length == 0 ? \"connected\"",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.ReportsDistinguishNoTrackUntickedAndMovingWithStableTrainIdentity"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/12/result.trx"
+    },
+    {
+      "name": "launch speed reads wrong field",
+      "path": "core/TPW.Data/CoasterDefinition.cs",
+      "old": "ReadInt16LittleEndian(record[0xC8..])",
+      "new": "ReadInt16LittleEndian(record[0xCA..])",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.DefinitionReadsConnectionAndLaunchInputsAtTheirOwnOffsets"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/13/result.trx"
+    },
+    {
+      "name": "park train movement severed after dispatch",
+      "path": "core/TPW.Sim/CoasterSimulation.cs",
+      "old": "train.Advance(Track, host, Elapsed);",
+      "new": ";",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/14/result.trx"
+    },
+    {
+      "name": "completed laps not retained after unload",
+      "path": "core/TPW.Sim/CoasterSimulation.cs",
+      "old": "CompletedLaps += train.Laps;",
+      "new": "CompletedLaps += 0;",
+      "outcome": "killed",
+      "returncode": 1,
+      "executed": 12,
+      "failed": [
+        "TPW.Sim.Tests.ParkCoasterTests.PlacedRouteLoadsMovesCompletesAndUnloadsThroughHostTickOnly"
+      ],
+      "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/15/result.trx"
+    }
+  ],
+  "baseline": {
+    "returncode": 0,
+    "executed": 12,
+    "failed": [],
+    "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/baseline/result.trx"
+  },
+  "restored_baseline": {
+    "returncode": 0,
+    "executed": 12,
+    "failed": [],
+    "trx": "tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/restored/result.trx"
+  }
+}

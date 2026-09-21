@@ -1318,6 +1318,7 @@ namespace TPWGodot
                               + $", sells at {Money.FromPounds(a.SalePrice)}: took {a.Takings} ({a.Profit} profit) "
                               + $"from {a.Served} sales over {a.Visits} visits, satisfaction {a.Satisfaction}"
                             : ""));
+                if (a.Coaster != null) sb.Append(CoasterReport(a));
             }
             return sb.ToString();
         }
@@ -1458,7 +1459,9 @@ namespace TPWGodot
         /// <paramref name="hover"/> (the ghost toward it stays pinned). For captures. Returns what the last press did.</summary>
         public QueueRun.Step? QueueAt(int entry, int x, int z, int rot, IReadOnlyList<(int X, int Z)> clicks, (int X, int Z)? hover = null)
         {
-            if (!PlaceAt(entry, x, z, rot)) return null;
+            // A coaster needs both tools on the same placed station: track first, then queue.
+            if (!_attractionsPlaced.Any(a => a.Rec.Entry == entry && a.Ox == x && a.Oz == z && a.Rot == (rot & 3))
+                && !PlaceAt(entry, x, z, rot)) return null;
             var rec = _attractions.Find(a => a.Rec.Entry == entry).Rec;
             StartQueue(rec, x, z, rot & 3);
             QueueRun.Step? last = null;
@@ -1478,7 +1481,9 @@ namespace TPWGodot
         /// mouse would; (-1, -1) is the undo. For captures.</summary>
         public TrackRun.Step? TrackAt(int entry, int x, int z, int rot, IReadOnlyList<(int X, int Z)> clicks, (int X, int Z)? hover = null)
         {
-            if (!PlaceAt(entry, x, z, rot)) return null;
+            // A CLI route may follow --park-place, just as the player's track tool follows placement.
+            if (!_attractionsPlaced.Any(a => a.Rec.Entry == entry && a.Ox == x && a.Oz == z && a.Rot == (rot & 3))
+                && !PlaceAt(entry, x, z, rot)) return null;
             var rec = _attractions.Find(a => a.Rec.Entry == entry).Rec;
             StartTrack(rec, x, z, rot & 3);
             TrackRun.Step? last = null;
@@ -1922,8 +1927,8 @@ namespace TPWGodot
         void StartTrack(AttractionDefinition rec, int ox, int oz, int rot)
         {
             if (_map == null || _worldIndex < 0) return;
-            _track = new TrackRun(rec, ox, oz, rot, _worldIndex);
-            PlacedForSave(rec, ox, oz, rot).Track = _track;
+            var owner = PlacedForSave(rec, ox, oz, rot);
+            _track = owner.Track ??= new TrackRun(rec, ox, oz, rot, _worldIndex);
             _queue = null; _pathMode = false; _runStart = null; _cursorPinned = false;
             _cursorTile = _track.Start;
             SwingGameCamera(_track.Start, rot);
@@ -1934,8 +1939,12 @@ namespace TPWGodot
         TrackRun.Step PressTrack((int X, int Z) c)
         {
             if (_bank != null && _bank.Balance.Pounds < TrackRun.PiecePrice[_track.World])
-            { PlaySfx(ToolSound.Refused); return TrackRun.Step.Refused; }
+            {
+                GD.Print($"[track-step] entry {_track.Ride.Entry} click {c.X},{c.Z}: Refused (cost), accepted {_track.Pylons.Count}, connected {_track.Circuit}");
+                PlaySfx(ToolSound.Refused); return TrackRun.Step.Refused;
+            }
             var step = _track.Lay(_map, c.X, c.Z);
+            GD.Print($"[track-step] entry {_track.Ride.Entry} click {c.X},{c.Z}: {step}, accepted {_track.Pylons.Count}, end {_track.End.X},{_track.End.Z}, connected {_track.Circuit}");
             switch (step)
             {
                 case TrackRun.Step.Refused: PlaySfx(ToolSound.Refused); break;
@@ -2014,6 +2023,12 @@ namespace TPWGodot
             int high = 0;
             foreach (var (x, z, _) in tiles) high = Math.Max(high, ParkCamera.GroundHeight(_map, x * u + u / 2, z * u + u / 2));
             float deck = high / (float)u + 1f;
+            var owner = _attractionsPlaced.Find(a => ReferenceEquals(a.Track, _track));
+            if (owner?.Coaster != null)
+            {
+                owner.Coaster.Synchronize(_track);
+                deck = owner.Coaster.DeckHeight / (float)u;
+            }
             foreach (var (x, z, pylon) in tiles)
             {
                 // Only a PYLON stands on the ground. The track between two of them is held up by them, which is
@@ -2308,6 +2323,7 @@ namespace TPWGodot
                 RiderCount = () => _guests?.Rides?.RuntimeFor(rec.Entry)?.Riders.Count ?? 0,
             };
             a.Eject = () => _guests?.Rides?.EjectAll(rec.Entry, g => _guests.PlaceAtExit(g, a.Rec, a.Ox, a.Oz, a.Rot));
+            if (rec.Coaster != null) CreateCoaster(a);
             a.Say = id => _advisor?.Post((ushort)id);
             a.Event = AdvisorEvent;
             // ⚠ THE STALL'S OWN PRICE, FROM THE RECORD, AT PLACEMENT. The game sets it here (and the
@@ -2528,6 +2544,8 @@ namespace TPWGodot
             // Keep completed tool data after the tool closes; the save stream stores these routes.
             public QueueRun Queue;
             public TrackRun Track;
+            public ParkCoasterWorld Coaster;
+            public readonly Dictionary<int, MeshInstance3D> CoasterCars = new();
             public AttractionStatus Status;
             /// <summary>Which of the eight build rigs this one uses (A+0x6D).</summary>
             public int Variant;
@@ -2573,8 +2591,8 @@ namespace TPWGodot
             // --- IRidePanelWorld ------------------------------------------------------------------------
             public AttractionType Type => (AttractionType)Rec.Type;
             /// <summary>⚠ Slot 99, and NOT the same as Capacity: a coaster overrides it with its model's
-            /// attachment count (0x800AD728). Until coaster trains exist, the level's seats.</summary>
-            public int MaximumSeats => MaxSeats;
+            /// attachment count (0x800AD728); the host resolves the car model at placement.</summary>
+            public int MaximumSeats => Coaster?.BoardingBatchSize ?? MaxSeats;
             public int BaseIntensity => Rec.BaseIntensity;
             public int Capacity { get; set; }
             public int ReliabilityFixed { get => Wear.Reliability; set => Wear.Reliability = value; }
@@ -2796,7 +2814,7 @@ namespace TPWGodot
                     // original (0x80066110), so their base is what belongs here.
                     Intensity = a.IsRide ? TPW.Sim.RidePanel.Intensity(a) : a.Rec.BaseIntensity,
                     Usable = a.Rec.Type == 2 && a.Rec.UsableByGuests ? 1 : 0,
-                    Open = AttractionLifecycle.OpenToGuests(a.Status),
+                    Open = a.Coaster?.OpenToGuests ?? AttractionLifecycle.OpenToGuests(a.Status),
                     StaffMayRest = a.Rec.Type == 2 && a.Rec.StaffMayRest,
                     Built = a.Status != AttractionStatus.JustPlaced,
                     DoorX = door.X, DoorZ = door.Z,
@@ -3105,7 +3123,7 @@ namespace TPWGodot
                 // animation rather than on a timer.
                 if (a.Status == AttractionStatus.UnderConstruction)
                     a.BuildAnimationComplete = a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
-                else if (a.Status == AttractionStatus.Running && a.IsRide)
+                else if (a.Status == AttractionStatus.Running && a.IsRide && a.Coaster == null)
                 {
                     a.Cycle.RunTick(a, a.CyclesPerLoad, frameTime, halfSpeed: false);
                     // ⭐ A RUNNING RIDE MAKES NOISE, ON ITS OWN SIXTEENS AND A SHARED QUARTER. 0x8009CA94
@@ -3121,7 +3139,7 @@ namespace TPWGodot
                 // (0x800E6A8C), Feature (0x800DCA5C) and SideShow (0x800E6D64) all carry 0x80065B78 —
                 // a wrapper whose whole body is the same animation clock, with the completion discarded.
                 // So they run their model and never count a cycle. See findings/rides.md §0 item 9.
-                else if (a.Status == AttractionStatus.Running)
+                else if (a.Status == AttractionStatus.Running && a.Coaster == null)
                     a.Cycle.Advance(a.Status, a, frameTime, halfSpeed: false);
 
                 // Wear runs on the ride's own tick and can send it to 4 or 5; the lifecycle's tick then
@@ -3138,7 +3156,8 @@ namespace TPWGodot
                 // at all: ParkGuests builds its ride world lazily, so Rides was still null there and the
                 // eject's own report never printed — which read exactly like an eject that never ran.
                 if (_guests?.Rides is { } lw) lw.Log = _logRides;
-                if (a.IsRide && _guests?.Rides is { } rw
+                if (a.Coaster != null) TickCoaster(a, frameTime);
+                if (a.IsRide && a.Coaster == null && _guests?.Rides is { } rw
                     && rw.RuntimeFor(a.Rec.Entry) is { } run
                     && (a.Status == AttractionStatus.Loading || a.Status == AttractionStatus.Unloading))
                 {
@@ -3154,7 +3173,10 @@ namespace TPWGodot
 
                 NoteLoadingStall(a);
 
-                var next = AttractionLifecycle.Tick(a.Status, a);
+                // READ: coaster completion belongs to each train (0x800B2244), not the flat
+                // ride's phase count. Shared construction/breakdown/closing hooks still run.
+                var next = a.Coaster != null && a.Status == AttractionStatus.Running
+                    ? a.Status : AttractionLifecycle.Tick(a.Status, a);
                 if (next != a.Status) a.Status = AttractionLifecycle.Enter(next, a);
 
                 // A ride spends most of a capture standing still waiting for a queue, so say when it
@@ -3166,7 +3188,7 @@ namespace TPWGodot
                 // it. A count taken off the simulation cannot see a view that has stopped listening to it
                 // (it was exactly that blindness that let "8 riding" print over a jammed-looking park), so
                 // the check for "does the ride move on screen" has to touch a.Inst.
-                if (_logRides && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
+                if (_logRides && a.Coaster == null && a.Status == AttractionStatus.Running && a.Inst.Mesh is { } drawn)
                 {
                     var box = drawn.GetAabb();
                     GD.Print($"[tpw] frame {Engine.GetFramesDrawn()}: {a.Rec.Entry} tick {a.Cycle.Accumulator >> RideCycle.FixedShift}, "
@@ -3411,7 +3433,8 @@ namespace TPWGodot
         /// record which queue or which track belongs to which attraction yet, so these answer "no" and the
         /// list always says Build rather than Edit.</summary>
         static bool HasQueue(PlacedAttraction a) => false;
-        static bool HasTrack(PlacedAttraction a) => false;
+        // Completed routes remain on their placed owner after the builder closes.
+        static bool HasTrack(PlacedAttraction a) => a.Track?.Pylons.Count > 0;
 
         /// <summary>The attraction whose context list is open (master: right button), or null, and where on
         /// screen the click was — the list pops up at the cursor, as the game's does.</summary>

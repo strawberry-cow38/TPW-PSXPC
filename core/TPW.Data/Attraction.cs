@@ -164,6 +164,10 @@ namespace TPW.Data
         /// <summary>The three upgrade levels of a ride, or empty for everything else (rides.md §1.3).</summary>
         public RideLevel[] Levels = Array.Empty<RideLevel>();
 
+        /// <summary>READ: coaster connection getters 0x800B1EB4/1EF4, heights 0x800B1EA8/1EE8,
+        /// launch speed 0x800B1E90, direction bits 0x800B1E9C/1ED4. Not guest doors.</summary>
+        public CoasterDefinition Coaster;
+
         /// <summary>A shop's product block, for type 4 only.</summary>
         public ShopFields? Shop;
 
@@ -191,6 +195,7 @@ namespace TPW.Data
                 EntranceFacing = d[r + 0x14] & 3, ExitFacing = d[r + 0x15] & 3,
             };
             if (r + 0x1C <= d.Length) a.BaseIntensity = BitConverter.ToInt32(d, r + 0x18);
+            if (type == 1 && r + 0xD4 <= d.Length) a.Coaster = CoasterDefinition.Read(d.AsSpan(r));
             if (type == 2 && r + 0x2F <= d.Length)
             {
                 a.FeatureFlags = d[r + 0x2E];

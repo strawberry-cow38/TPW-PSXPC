@@ -36,7 +36,8 @@ namespace TPW.Data
         {
             Ride = ride;
             World = Math.Clamp(world, 0, PiecePrice.Length - 1);
-            Start = StartFor(ox, oz, rot);
+            Start = ride.Coaster?.Connection(ride, ox, oz, rot, launch: true) ?? StartFor(ox, oz, rot);
+            Finish = ride.Coaster?.Connection(ride, ox, oz, rot, launch: false) ?? Start;
         }
 
         /// <summary>Where the rails leave a station whose tile is (ox, oz), turned (0x800A6550).</summary>
@@ -52,6 +53,9 @@ namespace TPW.Data
         public int World { get; }
         /// <summary>The rails' own end at the station: where the track starts and what closes it.</summary>
         public (int X, int Z) Start { get; }
+        /// <summary>READ: coasters return to the separate approach node (0x800ADE68),
+        /// track rides retain their single start/finish. Not a passenger exit.</summary>
+        public (int X, int Z) Finish { get; }
         public IReadOnlyList<(int X, int Z)> Pylons => _pylons;
         /// <summary>Set once a pylon lands back on <see cref="Start"/> (the ride's +0x18A).</summary>
         public bool Circuit { get; private set; }
@@ -64,7 +68,7 @@ namespace TPW.Data
         /// building there. The start is always allowed — landing on it is how the circuit closes.</summary>
         public bool Takes(ParkMap map, int x, int z)
         {
-            if ((x, z) == Start) return _pylons.Count > 0;
+            if ((x, z) == Finish) return _pylons.Count > 0;
             if (x < 0 || z < 0 || x >= map.Width - 1 || z >= map.Height - 1) return false;
             foreach (var p in _pylons) if (p == (x, z)) return false;
             var t = map[x, z];
@@ -76,8 +80,8 @@ namespace TPW.Data
         public List<(int X, int Z, int Sprite, bool Takes)> Ghost(PathTool tool, ParkMap map, int cx, int cz, out bool valid)
         {
             var ghost = new List<(int, int, int, bool)>();
-            var at = Project(End, (cx, cz));
-            valid = !Circuit && _pylons.Count < MaxPylons && PieceCount(End, (cx, cz)) >= 1 && Takes(map, at.X, at.Z);
+            var at = ProjectClick(cx, cz);
+            valid = CanLay(map, at);
             foreach (var (x, z) in Span(End, at))
                 ghost.Add((x, z, tool.Marker(valid ? 0 : 1), valid));
             ghost.Add((at.X, at.Z, tool.Marker(valid ? 6 : 1), valid));
@@ -124,8 +128,8 @@ namespace TPW.Data
         /// real bill is still open (rides.md §7b).</summary>
         public int GhostCost(ParkMap map, int cx, int cz)
         {
-            var at = Project(End, (cx, cz));
-            bool ok = !Circuit && _pylons.Count < MaxPylons && PieceCount(End, (cx, cz)) >= 1 && Takes(map, at.X, at.Z);
+            var at = ProjectClick(cx, cz);
+            bool ok = CanLay(map, at);
             return ok ? PiecePrice[World] : 0;
         }
 
@@ -133,14 +137,14 @@ namespace TPW.Data
         /// its end, and the track is what runs between.</summary>
         public Step Lay(ParkMap map, int cx, int cz)
         {
-            var at = Project(End, (cx, cz));
-            if (Circuit || _pylons.Count >= MaxPylons || PieceCount(End, (cx, cz)) < 1 || !Takes(map, at.X, at.Z))
+            var at = ProjectClick(cx, cz);
+            if (!CanLay(map, at))
                 return Step.Refused;
             var from = End;
             _pylons.Add(at);
             Mark(map, at.X, at.Z, (byte)TileType.TrackPiece);
             foreach (var (x, z) in Span(from, at)) Mark(map, x, z, (byte)TileType.TrackPiece);
-            if (at == Start) { Circuit = true; return Step.Closed; }
+            if (at == Finish) { Circuit = true; return Step.Closed; }
             return Step.Placed;
         }
 
@@ -151,13 +155,19 @@ namespace TPW.Data
             var gone = _pylons[^1];
             _pylons.RemoveAt(_pylons.Count - 1);
             foreach (var (x, z) in Span(_pylons.Count > 0 ? _pylons[^1] : Start, gone)) Mark(map, x, z, (byte)TileType.Grass);
-            if (gone != Start) Mark(map, gone.X, gone.Z, (byte)TileType.Grass);
+            if (gone != Finish) Mark(map, gone.X, gone.Z, (byte)TileType.Grass);
             Circuit = false;
             return true;
         }
 
         /// <summary>Take the whole track back (builder 8's Undo All).</summary>
         public void UndoAll(ParkMap map) { while (Undo(map)) { } }
+
+        // READ: coaster primitive append takes the editor's X/Z directly (0x8001FF30 →
+        // 0x800AF73C); the two-tile projection belongs to track rides (0x800221B0).
+        (int X, int Z) ProjectClick(int x, int z) => Ride.Coaster != null ? (x, z) : Project(End, (x, z));
+        bool CanLay(ParkMap map, (int X, int Z) at) => !Circuit && _pylons.Count < MaxPylons
+            && at != End && Takes(map, at.X, at.Z);
 
         /// <summary>Which of a ride's sub-models are its track.
         ///

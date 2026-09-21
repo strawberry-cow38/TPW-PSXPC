@@ -40,6 +40,9 @@ namespace TPW.Sim
     /// remains the completion controller; its AfterMovement signature is unchanged.</summary>
     public sealed class CoasterTrainMotion
     {
+        // Host diagnostics: stable pool identity, not a PSX field or an active-list index.
+        public int PoolId { get; internal set; }
+        public long PositionChanges { get; internal set; }
         public CoasterTrain Control { get; } = new();
         public CoasterTrackNode Segment { get; set; } // +0x20
         public CoasterTrackNode LaunchSegment { get; private set; } // +0x24
@@ -139,28 +142,37 @@ namespace TPW.Sim
         public int Riders { get; private set; }
         public int PendingPassengers => pending.Count;
         public int FreeTrains => free.Count;
+        // Observations, not inputs to dispatch/completion. Keep totals after a train is recycled.
+        public long Updates { get; private set; }
+        public long PositionChanges { get; private set; }
+        public long Dispatches { get; private set; }
+        public long CompletedTrips { get; private set; }
+        public long CompletedLaps { get; private set; }
 
         public CoasterSimulation(CoasterTrack track, ICoasterSimulationWorld world)
         {
             Track = track ?? throw new ArgumentNullException(nameof(track));
             host = world ?? throw new ArgumentNullException(nameof(world));
-            for (int i = 0; i < TrainCount; i++) free.Push(new CoasterTrainMotion());
+            for (int i = 0; i < TrainCount; i++) free.Push(new CoasterTrainMotion { PoolId = i });
         }
 
         public void Update()
         {
+            Updates++;
             if (Track.Connected && Track.ChecksPass)
             {
-                foreach (var train in active) train.Advance(Track, host, Elapsed);
+                foreach (var train in active)
+                {
+                    var before = train.Pose.Position;
+                    train.Advance(Track, host, Elapsed);
+                    if (train.Pose.Position != before) { train.PositionChanges++; PositionChanges++; }
+                }
             }
             else
             {
                 // READ: invalid route ejects ordinary active batches and THEN pending guests,
                 // 0x800B00C4/0x800B013C. It does not freeze passengers on a decorative route.
-                foreach (var train in active.ToArray())
-                    if (!train.Control.IsPreview) UnloadTrain(train.Control);
-                foreach (var guest in pending) { host.ExitGuest(guest); Riders--; }
-                pending.Clear();
+                EjectPassengers();
             }
             Elapsed = unchecked(Elapsed + host.MovementDelta);
             Controller.UpdateDispatch(this);
@@ -175,6 +187,16 @@ namespace TPW.Sim
                 case AttractionStatus.UnderRepair:
                     RollerCoaster.UnloadTick(this); break; // READ: 0x800B1020..10E8.
             }
+        }
+
+        /// <summary>Host lifecycle/track-edit boundary; reuse the same guest exit and pool transactions
+        /// as invalid-track ejection (0x800B00C4/013C). Preview remains exempt.</summary>
+        public void EjectPassengers()
+        {
+            foreach (var train in active.ToArray())
+                if (!train.Control.IsPreview) UnloadTrain(train.Control);
+            foreach (var guest in pending) { host.ExitGuest(guest); Riders--; }
+            pending.Clear();
         }
 
         uint IRollerCoasterWorld.NowTick => host.NowTick;
@@ -202,6 +224,7 @@ namespace TPW.Sim
             var train = free.Pop();
             train.Control.IsPreview = false;
             train.Start(Track, host.LaunchSpeed);
+            Dispatches++;
             active.Insert(0, train); // READ: intrusive push-front, 0x800B1730 → 0x800B1BD4.
             passengers.Add(train.Control, new List<Visitor>(pending));
             pending.Clear();
@@ -214,6 +237,7 @@ namespace TPW.Sim
             var motion = active.Find(t => t.Control == train);
             if (motion == null || train.IsPreview) return;
             var guests = passengers[train];
+            if (train.ReadyToUnload) { CompletedTrips++; CompletedLaps += train.Laps; }
             for (int i = guests.Count - 1; i >= 0; i--) { host.ExitGuest(guests[i]); Riders--; }
             passengers.Remove(train);
             active.Remove(motion);

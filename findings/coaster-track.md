@@ -12,6 +12,8 @@ are relative to their own objects. There are no live PSX timing measurements in 
 | `save.md` §3.2 calls saved piece `+2` “UNKNOWN copied position padding”. | The position getter `0x800B31FC..3250` copies runtime `+0x26` into this halfword. `0x800B3304..3334` writes it as the vertical coordinate; `0x800B35E8..365C` adds the support height to it. This is vertical position, not unused vector padding. The unused fourth halfword of that eight-byte vector is overwritten by the saved check word. | **Keep `UnknownPositionPadding`, opaque and lossless in the codec.** Do not silently turn old save data into terrain heights. `ICoasterTrackWorld` explicitly supplies `BaseHeight`. Two of fourteen saved bytes remain semantically unnamed in the public codec under this retention rule, despite the new binary evidence. |
 | `save.md` §3.2 assigns the connection boolean to record `0x95` bit 6 and says bit 7 is cleared. | This is correct for the writer (`0x800ADBA4..DBCC`), but the loader accepts **either** bit: `andi 0xC000` on the word at `0x94`, `0x800ADE00..DE10`. | Restore accepts **bit 6 only**, as the report's contract specifies. A bit-7-only synthetic record is the rejecting control. This is an additional loader edge, not a claim that the writer sets bit 7. |
 | The old `rides.md`/`TrackRun` material associated “32 cars” with the coaster pieces and reused track-ride construction assumptions. | Already settled by `ride-classes.md` §4: **32 route-object slots of 0x40**, constructed at `0x800B1AAC..AC8`; **eight train objects of 0x88**, constructed at `0x800B1B1C..38`. Coaster closure is `+0x104`, written at `0x800ADEF4`, not track ride `+0x18A`. | Follow the user's explicitly supplied controller report: eight trains; separate coaster route code. Existing `TrackRun` and `game/` are untouched and are not adapters for this module. This is inherited evidence, not a newly discovered disagreement. |
+| Host follow-up: `rides.md` §7b calls the second word beside each model selector “spare”. | `0x800B2F2C..30AC` initializes that word to model maximum Y minus minimum Y, or zero for a negative selector. `0x800B3168` reads it as a height. | The original static table and its published indices are not rewritten. The host supplies separately measured mesh dimensions through the already-established `CoasterPieceGeometry` boundary; it does not adopt a new serialized field. |
+| Host follow-up: `rides.md` §7b associates list `0x800F8D70` / car submodel 5 with entry 219 and calls that container six submodels. | The supplied archive's entry 219 has **seven submodels**, with the nonzero attachment count on submodel 6; `0x800F8D70` still contains car selector 5. This is a catalogue association disagreement, not a changed pointer-table reading. | The report's static mapping remains unresolved and is not silently corrected into a new entry-to-selector table. The host's independent measured-model selection is explicitly **GUESS-medium**; exact world/B/kind mapping remains unported. |
 
 `AfterMovement(bool onReturnSegment, int segmentFraction, int duration)` **agrees** with
 the instructions when its boolean uses the current segment **after** the possible handoff
@@ -375,3 +377,171 @@ ignored `tests/TPW.Sim.Tests/TestResults/coaster-mutations/` directory.
   pieces: the managed restore currently requires a populated route to apply that flag.
 - Real populated save-slot distribution: **zero saved coaster routes** were sampled.
   Tests use synthetic counts, never count the 64-slot reservation as 64 live pieces.
+
+## 8. Park host integration (2026-09-21, branch `coasterrun`)
+
+This section supersedes the **original module-only scope** of §5 and the corresponding
+host/builder gaps in §7. The codec, the opaque `UnknownPositionPadding` halfword and the
+bit-6-only restore rule are unchanged. The **64 reserved save slots**, **32 runtime route
+slots**, and **eight reusable trains** remain three separate counts.
+
+`RegisterPlaced` now constructs `ParkCoasterWorld` alongside the placed attraction's
+other host adapters. The host constructs the two station nodes immediately, then imports
+`TrackRun.Pylons` when the accepted route changes. Refused clicks never enter that list.
+The closing click is passed to `CoasterTrack.Append`, which connects the last piece to
+Approach without allocating another runtime piece. Undo ejects active and pending guests
+through the existing exit transaction before rebuilding; an unchanged list preserves the
+simulation and its train objects. Opening the track editor retains its owner's route.
+
+### Station inputs and ordinary builder
+
+Additional READs used by this host:
+
+- `0x800ACDA8..CF90`: launch connection uses definition signed halfwords `+BC/+BE`,
+  rotates with `0x800634B8`, steps outside along `(record+D0 >> 28 & 3) + rotation`,
+  adds the placed origin, and obtains terrain height.
+- `0x800AD28C..D474`: approach connection uses `+C0/+C2` and the top two bits of `+D0`.
+- `0x800ACFD4 → 0x800B1EE8`: launch height is signed `+C4`;
+  `0x800AD4B8 → 0x800B1EA8`: approach height is signed `+C6`.
+- `0x800B1E90`: signed `+C8` launch speed, already established in §3.
+
+These are decoded by `AttractionDefinition.Read` into `CoasterDefinition`; they are not
+passenger entrance/exit positions. `TrackRun` uses the two distinct connections for a
+coaster, and accepts its ordinary cursor point directly (`0x8001FF30 → 0x800AF73C`).
+The old two-tile projection and `StartFor` remain the track-ride path. For Chac Atak at
+`(24,24)`, rotation 0, launch is `(23,25)` and approach is `(26,25)`: the previous shared
+track-ride start `(22,25)` cannot represent this station. This implements the separation
+already retained in §0, rather than changing the coaster codec or completion rule.
+
+### Exactly what the host supplies
+
+| Input | Park supplier and limit |
+|---|---|
+| `BaseHeight` | The real `ParkMap`, sampled at tile centers through `ParkCamera.GroundHeight`. That uses map byte `+1 × 4` and interpolates the corners. No saved opaque halfword is read as elevation. |
+| Ordinary piece height | **GUESS-high, port rendering policy:** highest actual terrain crossed by the accepted route, plus one tile, minus this point's base. This shares the existing drawn deck height; the current 2D tool has no independent height/bank controls. The original editor's default/height UI is not claimed. |
+| Support/model correction | Actual selected track mesh's `maxY-minY`, supplied as `SupportTopOffset`; spline correction `(0,24-modelHeight,0)` follows `0x800B3424..3438` and `0x800B36B8..36DC`. The selector is the existing renderer's measured straight-piece heuristic (**GUESS-high**), not a universal dimension. The dimensions cancel from ordinary spline Y, but remain explicit in the support anchor. |
+| Shape/validation | Ordinary bank/kind/phase zero; successful builder append check 1 (`0x800AF880`). No stacked pylons or special-shape macro is invented. The adapter rejects nonordinary shape inputs. `ChecksPass` means accepted by the current port builder, not proven PSX collision clearance. |
+| Boarding batch/model | **GUESS-medium selection:** first passenger-bearing submodel, falling back to the last submodel for an empty attachment family. Its decoded `SeatCount`, with zero replaced by one (`0x800AD610`), supplies batch size and the coaster's panel maximum. Exact world/B/kind variant selection is still open. |
+| Tick/sliders/status | The same `StepAttractions(frameTime)` and 20.12 delta used by the other rides, the park's current tick, live capacity/speed/duration and lifecycle status. Half speed is false, as for the other placed rides. |
+| Guests | The real `ParkRideWorld` queue/rider lists. Boarding uses the shared hide/door/state-21/shuffle transaction. Unloading finds the particular train passenger, rather than popping another train's first rider, and uses the shared exit/state-22/visibility/queue-purpose transaction. Lifecycle ejection clears both owners and retains the existing message-10 guest handling. |
+| Drawing | One scene node per active pool identity, using the coaster's actual car mesh, centered at the sampled pose and oriented from its tangent. **GUESS-medium** display placement; full original car/seat matrices and banking are not claimed. Drawing is not needed for movement. |
+
+The flat-ride loader, cycle counter and whole-ride phase-completion gate no longer control
+coasters. Construction, wear and shared lifecycle hooks remain in the park scheduler.
+A coaster may remain in the controller's Loading status while individual trains are
+running; the per-train line reports that distinction explicitly.
+
+### Readout and test boundary
+
+Each coaster now prints `no-track`, `open-track` or `connected`, accepted-click count,
+populated pieces out of **32**, active/free trains out of **8**, pending passengers,
+update/dispatch/actual-position-change counts, and completed trips/laps. Each active train
+has a stable pool ID, segment, state, world position, distance, speed and lap counter.
+Counters retain completed laps after recycling. The park also reads each visible car's
+actual `GlobalPosition` into `drawn-train`, so a disconnected rendering call is observable.
+A connected, dispatched but frozen train has active objects and zero position changes;
+a coaster without a route prints `no-track` and zero populated pieces.
+
+`ParkCoasterWorld.cs` is compiled verbatim into the sim tests. The **12 new executed
+cases**, each with a REJECTS comment, cover decoded connection inputs, four rotations,
+accepted/refused points and closure, nonzero map/model geometry, actual host-tick boarding
+through return/unload, retained runtime identity, readout controls, undo/ejection, live
+controls/model batch count and guest availability. `tools/mutate_coaster_host.py` killed
+**16/16** production mutations through executed failures, with **zero survivors** and
+**zero invalid/compiler-only kills**. The restored focused baseline passes **12/12**.
+The portable audit is `coaster-host-mutations.json`; detailed TRX/logs are ignored local
+artifacts under `tests/TPW.Sim.Tests/TestResults/coaster-host-mutations/`.
+
+The full sim suite passes **1847/1847** cases; the data suite passes **295/295** cases.
+`dotnet build game/` was run explicitly. The earlier §6 counts describe that earlier
+module landing; they are not substituted for this checkout's executed totals.
+
+## 9. Rendered park run and rejecting controls
+
+`tools/prove_coaster_host.py` builds **game/** explicitly and runs the real disc under
+`xvfb-run`, using OpenGL3 and screenshots. It does not seed passengers, set completion
+flags, or call a test-only coaster entry point. Its command uses the existing park tools:
+
+```sh
+python3 tools/prove_coaster_host.py \
+  --godot /home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64 \
+  --data /home/ec2-user/tpw/tpw_psx.iso --frames 1200
+```
+
+The positive fixture places entry **212**, lays path, builds the route with
+`--park-track=212,24,24,0:0,0:19,25:19,31:30,31:30,25:26,25`, and completes its queue with
+`--park-queue=212,24,24,0:24,22`. Track results are checked individually: **one intentional
+Refused**, **four Placed**, **one Closed**. This is **five accepted clicks**, **four populated
+runtime pieces**, **two station nodes**, and an **eight-train pool**. A refusal that leaves
+the tool open is not reported as a laid piece. Both CLI tools can operate on the coaster
+already placed by `--park-place`; they do not attempt to buy a duplicate station.
+
+The first positive capture recorded, for the **same train 7**, with dispatch count still 1:
+
+| Park tick | Train state / segment | Sim position | Drawn position | Position changes |
+|---|---|---|---|---:|
+| 200 | launching / launch | `(6224,419,6524)` | `(6224,419,6524)` | 0 |
+| 220 | running / piece `(19,25)` | `(5618,454,6443)` | `(5618,454,6443)` | 20 |
+
+That run finished its 1200 rendered park frames with **nine dispatches**, **seven completed
+trips/laps**, **two active trains out of eight**, and **3784 observed train position changes**.
+It also had guests returned through the park exit transaction, zero failed guest routes,
+and matching hidden/aboard counts. The existing park `served` statistic is not used as a
+count of distinct passengers: the shared adapter and state-22 reward both increment it.
+
+The proof also runs the same placed station and queue with **no track**, then builds a
+controlled mutation which removes only `train.Advance(Track, host, Elapsed)` while allowing
+boarding/dispatch and drawing. Its movement assertion requires a position change of the
+same train between reports, with both positions matching the actual scene nodes. Sources
+are restored and **game/** is rebuilt in `finally`. The portable result and evidence rows
+are `coaster-host-run.json`; screenshots and full logs live in `game/obj/coaster-proof/`.
+
+Executed controls at **1200 rendered park frames** each:
+
+| Run | Populated pieces | Active trains / pool | Dispatches | Position changes | Completed laps |
+|---|---:|---:|---:|---:|---:|
+| Moving | 4 / 32 | 2 / 8 | 9 | 3784 | 7 |
+| No track | 0 / 32 | 0 / 8 | 0 | 0 | 0 |
+| Advancement removed | 4 / 32 | 1 / 8 | 1 | 0 | 0 |
+
+The frozen train's **simulation and drawn positions both remain `(6224,419,6524)`**.
+The proof's same-train movement check rejects this run, despite a connected route,
+successful boarding and a visible scene object. Different runs accumulate different
+numbers of simulation ticks during the same rendered-frame horizon; no timing parity
+is inferred from this table.
+
+After retaining the editor's existing route on reopen and centering the displayed car
+mesh, **game/** was built again and the final source was run for **600 rendered park
+frames**: **four dispatches**, **three completed trips/laps**, **1560 position changes**,
+and matching sim/drawn positions for train 7 at ticks **200 and 220**. The final run and
+source hashes are also in `coaster-host-run.json`; its screenshot is
+`game/obj/coaster-proof/final-moving.png`. The final restored sim suite again passed
+**1847/1847**. The mutation audit's source hashes still match the restored sources.
+
+Two preliminary fixtures were deliberately not promoted to positive evidence: a path beside
+rather than north of the doors reported **2 unreachable door/exit points for 1 attraction**;
+a directly adjacent path without finishing the queue tool reported reachability but failed
+guests' route requests. Neither dispatched a train. The completed queue fixture above has
+zero failed requests. This is why a green sim test and a connected-track flag alone were
+insufficient.
+
+## 10. Closing list: still not established
+
+- Live running evidence here covers **1 of the 12 disc coaster definitions** (entry 212),
+  not 12/12 layouts, rotations or terrain profiles. Four rotations are exercised synthetically.
+- Original height editor defaults, arbitrary grades, banking/special-shape UI, support
+  stacking, original full collision/clearance rules and train avoidance. The host's deck and
+  model selectors are explicitly qualified above.
+- Exact world/B/kind model selection, car variants, rider/seat matrices, audio and matching
+  original rendered rails to the spline. The existing tile-piece renderer remains approximate.
+- Exact PSX drawing/ticking/cache cadence or seconds per lap. This proves execution in the
+  port, not timing parity with a live console.
+- Coaster save/load through the application save host, which still explicitly refuses its
+  unported coaster suffix. The established codec and bit-6-only restore are untouched.
+- Multiple same-definition ride identities: the park's pre-existing guest registry is keyed
+  by definition entry. The proof uses one placed coaster. Multiple track rendering/save-host
+  restrictions are not removed here.
+- Exact passenger-service statistics: the existing shared served tally increments on both
+  the exit adapter and state-22 reward; the train lap/completion observations do not rely on it.
+- The unnamed save/train fields, extreme GTE cases and absence of sampled real populated
+  save routes listed in §7 remain open.

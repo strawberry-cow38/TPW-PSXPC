@@ -1,0 +1,282 @@
+{
+  "evidence": {
+    "train": "7",
+    "first": {
+      "tick": [
+        200,
+        146
+      ],
+      "track": "connected",
+      "checks": "True",
+      "accepted": 5,
+      "pieces": 4,
+      "active": 1,
+      "free": 7,
+      "pending": 0,
+      "updates": 201,
+      "dispatches": 1,
+      "changes": 0,
+      "completed": 0,
+      "laps": 0,
+      "trains": {
+        "7": {
+          "state": "launching",
+          "segment": "launch",
+          "position": [
+            6224,
+            419,
+            6524
+          ],
+          "distance": 147456,
+          "speed": 4096,
+          "laps": 0,
+          "changes": 0
+        }
+      },
+      "drawn": {
+        "7": [
+          6224.0,
+          419.0,
+          6524.0
+        ]
+      }
+    },
+    "second": {
+      "tick": [
+        220,
+        158
+      ],
+      "track": "connected",
+      "checks": "True",
+      "accepted": 5,
+      "pieces": 4,
+      "active": 1,
+      "free": 7,
+      "pending": 0,
+      "updates": 221,
+      "dispatches": 1,
+      "changes": 20,
+      "completed": 0,
+      "laps": 0,
+      "trains": {
+        "7": {
+          "state": "running",
+          "segment": "piece(19,25)",
+          "position": [
+            5618,
+            454,
+            6443
+          ],
+          "distance": 84231,
+          "speed": 2048,
+          "laps": 0,
+          "changes": 20
+        }
+      },
+      "drawn": {
+        "7": [
+          5618.0,
+          454.0,
+          6443.0
+        ]
+      }
+    }
+  },
+  "moving": {
+    "command": [
+      "xvfb-run",
+      "-a",
+      "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+      "--path",
+      "game",
+      "--rendering-driver",
+      "opengl3",
+      "--",
+      "--no-boot",
+      "--park=203",
+      "--park-open",
+      "--park-guests=25",
+      "--park-log-rides",
+      "--park-place=212,24,24,0",
+      "--park-lay=21,19,21,22;21,22,25,22",
+      "--park-queue=212,24,24,0:24,22",
+      "--park-track=212,24,24,0:0,0:19,25:19,31:30,31:30,25:26,25",
+      "--shot=/home/ec2-user/tpwport-coasterrun/game/obj/coaster-proof/moving.png:1600"
+    ],
+    "log": "game/obj/coaster-proof/moving.log",
+    "log_sha256": "b8508209ccfbb7609267421f1ca82d47ccd2b07f1e9979cd7b6753100b89fcc0",
+    "screenshot": "game/obj/coaster-proof/moving.png",
+    "served": 18,
+    "last": {
+      "tick": [
+        2460,
+        1606
+      ],
+      "track": "connected",
+      "checks": "True",
+      "accepted": 5,
+      "pieces": 4,
+      "active": 2,
+      "free": 6,
+      "pending": 0,
+      "updates": 2479,
+      "dispatches": 7,
+      "changes": 2854,
+      "completed": 5,
+      "laps": 5,
+      "trains": {
+        "6": {
+          "state": "running",
+          "segment": "piece(19,31)",
+          "position": [
+            4877,
+            543,
+            6698
+          ],
+          "distance": 70800,
+          "speed": 2048,
+          "laps": 0,
+          "changes": 1059
+        },
+        "7": {
+          "state": "running",
+          "segment": "piece(30,31)",
+          "position": [
+            7401,
+            535,
+            8224
+          ],
+          "distance": 873040,
+          "speed": 2048,
+          "laps": 0,
+          "changes": 1795
+        }
+      },
+      "drawn": {
+        "7": [
+          7401.0,
+          535.0,
+          8224.0
+        ],
+        "6": [
+          4877.0,
+          543.0,
+          6698.0
+        ]
+      }
+    }
+  },
+  "no_track": {
+    "command": [
+      "xvfb-run",
+      "-a",
+      "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+      "--path",
+      "game",
+      "--rendering-driver",
+      "opengl3",
+      "--",
+      "--no-boot",
+      "--park=203",
+      "--park-open",
+      "--park-guests=25",
+      "--park-log-rides",
+      "--park-place=212,24,24,0",
+      "--park-lay=21,19,21,22;21,22,25,22",
+      "--park-queue=212,24,24,0:24,22",
+      "--shot=/home/ec2-user/tpwport-coasterrun/game/obj/coaster-proof/no-track.png:1600"
+    ],
+    "log": "game/obj/coaster-proof/no-track.log",
+    "log_sha256": "4032052e271926942dc70d9cdb2877cb86cd0e18428338e95f9a4498ffa66825",
+    "screenshot": "game/obj/coaster-proof/no-track.png",
+    "served": 0,
+    "last": {
+      "tick": [
+        2400,
+        1621
+      ],
+      "track": "no-track",
+      "checks": "True",
+      "accepted": 0,
+      "pieces": 0,
+      "active": 0,
+      "free": 8,
+      "pending": 0,
+      "updates": 2403,
+      "dispatches": 0,
+      "changes": 0,
+      "completed": 0,
+      "laps": 0,
+      "trains": {},
+      "drawn": {}
+    }
+  },
+  "frozen": {
+    "command": [
+      "xvfb-run",
+      "-a",
+      "/home/ec2-user/godot46/Godot_v4.6-stable_mono_linux_arm64/Godot_v4.6-stable_mono_linux.arm64",
+      "--path",
+      "game",
+      "--rendering-driver",
+      "opengl3",
+      "--",
+      "--no-boot",
+      "--park=203",
+      "--park-open",
+      "--park-guests=25",
+      "--park-log-rides",
+      "--park-place=212,24,24,0",
+      "--park-lay=21,19,21,22;21,22,25,22",
+      "--park-queue=212,24,24,0:24,22",
+      "--park-track=212,24,24,0:0,0:19,25:19,31:30,31:30,25:26,25",
+      "--shot=/home/ec2-user/tpwport-coasterrun/game/obj/coaster-proof/frozen.png:1600"
+    ],
+    "log": "game/obj/coaster-proof/frozen.log",
+    "log_sha256": "21cb8c7b83257cc3608761e6d790319769079c0d3869675fcf1ab22487be7977",
+    "screenshot": "game/obj/coaster-proof/frozen.png",
+    "served": 0,
+    "last": {
+      "tick": [
+        2560,
+        1623
+      ],
+      "track": "connected",
+      "checks": "True",
+      "accepted": 5,
+      "pieces": 4,
+      "active": 1,
+      "free": 7,
+      "pending": 0,
+      "updates": 2561,
+      "dispatches": 1,
+      "changes": 0,
+      "completed": 0,
+      "laps": 0,
+      "trains": {
+        "7": {
+          "state": "launching",
+          "segment": "launch",
+          "position": [
+            6224,
+            419,
+            6524
+          ],
+          "distance": 147456,
+          "speed": 4096,
+          "laps": 0,
+          "changes": 0
+        }
+      },
+      "drawn": {
+        "7": [
+          6224.0,
+          419.0,
+          6524.0
+        ]
+      }
+    }
+  },
+  "frozen_rejected": true,
+  "restored_sha256": "da7e5f612699031824531cd484ac254722b3450a5aea0d63e484b669385c1541"
+}
