@@ -1635,14 +1635,16 @@ namespace TPWGodot
             // instead leaves the park full of people frozen mid-step, which is what it looked like.
             // ⚠ Guests only: Place draws staff through here too, and a member of staff has no visitor
             // state. Their own poses are a separate question (staff.md has different tables).
+            // The relative facing goes in for a pose as well: the sprite ignores it, the MIRROR does not.
+            int rel = (g.Facing + CameraOctant) & 7;
             if (g is Guest sick && sick.V.State == VisitorState.Vomiting)
-                _sprites.Draw(g.Inst, g.Block, 0, g.Frame, feet, CameraForward,
+                _sprites.Draw(g.Inst, g.Block, rel, g.Frame, feet, CameraForward,
                               PeopleSheet.VomitFirst, PeopleSheet.VomitFrames);
             else if (g.StillFor >= StillBeforeIdle)
-                _sprites.Draw(g.Inst, g.Block, 0, g.Frame, feet, CameraForward,
+                _sprites.Draw(g.Inst, g.Block, rel, g.Frame, feet, CameraForward,
                               PeopleSheet.IdleFirst, PeopleSheet.IdleFrames);
             else
-                _sprites.Draw(g.Inst, g.Block, (g.Facing + CameraOctant) & 7, g.Frame, feet, CameraForward);
+                _sprites.Draw(g.Inst, g.Block, rel, g.Frame, feet, CameraForward);
         }
 
         /// <summary>How many draws a guest must have gone nowhere before it stands rather than strides.
