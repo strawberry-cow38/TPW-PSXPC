@@ -48,6 +48,8 @@ namespace TPW.Sim
         bool MechanicAssigned { get; }
         /// <summary>Post one of the breakdown messages.</summary>
         void PostMessage(int id);
+        /// <summary>Bump one of the advisor's 20 event counters (0x800139B4).</summary>
+        void AdvisorEvent(int index, int amount);
         /// <summary>Throw every rider and queuer off (statuses 4 and 5 do this).</summary>
         void EjectEveryone();
         /// <summary>Clear the smoke effect when reopening.</summary>
@@ -76,6 +78,14 @@ namespace TPW.Sim
         /// <summary>Broken down, and a mechanic is on his way.</summary>
         public const int MessageBrokenMechanicComing = 0x41;
 
+        /// <summary>Advisor event 0: a ride ENTERED the warning state (0x8009C778). ⚠ A COUNT OF
+        /// ENTRIES, NOT OF RIDES CURRENTLY BROKEN -- break, repair and break again counts twice, and
+        /// repairing everything does not take it back down.</summary>
+        public const int AdvisorEventRideWarning = 0;
+        /// <summary>Advisor event 1: a ride ENTERED the broken state (0x8009C7F8). See
+        /// <see cref="AdvisorEventRideWarning"/> for why it never goes down.</summary>
+        public const int AdvisorEventRideBroken = 1;
+
         /// <summary>Reliability below this while running sends a ride to <see cref="AttractionStatus.AboutToBreakDown"/>.</summary>
         public const int AboutToBreakReliability = 10;
 
@@ -98,6 +108,13 @@ namespace TPW.Sim
                     return status;
 
                 case AttractionStatus.AboutToBreakDown:
+                    // ⭐ THE COUNTER IS BUMPED ON ENTERING THE STATE (0x8009C778), which is why it lives
+                    // here and not in a caller's before/after comparison. Every route in counts: the
+                    // wear rule, a reopen that breaks again, the test hook. I had it as a frame-edge
+                    // check in StepAttractions first, and a status set from OUTSIDE the step was already
+                    // settled by the time the step looked -- so the instrument missed the only event it
+                    // was built to catch, and read as "the port never breaks a ride".
+                    world.AdvisorEvent(AdvisorEventRideWarning, 1);
                     world.PostMessage(MessageAboutToBreak);
                     // ⚠ A ride with no life left throws everyone off on ENTERING this status, before it
                     // has actually broken. The warning and the ejection are the same event.
@@ -105,6 +122,7 @@ namespace TPW.Sim
                     return status;
 
                 case AttractionStatus.BrokenDown:
+                    world.AdvisorEvent(AdvisorEventRideBroken, 1);
                     world.PostMessage(world.MechanicAssigned ? MessageBrokenMechanicComing
                                                              : MessageBrokenNoMechanics);
                     world.EjectEveryone();

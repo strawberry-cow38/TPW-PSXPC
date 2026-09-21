@@ -20,6 +20,9 @@ namespace TPW.Sim.Tests
             public System.Collections.Generic.List<int> Messages { get; } = new();
 
             public void PostMessage(int id) => Messages.Add(id);
+            public readonly System.Collections.Generic.List<(int Index, int Amount)> Events
+                = new System.Collections.Generic.List<(int, int)>();
+            public void AdvisorEvent(int index, int amount) => Events.Add((index, amount));
             public void EjectEveryone() => Ejections++;
             public void ClearSmoke() => SmokeCleared++;
         }
