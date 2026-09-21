@@ -133,6 +133,19 @@ public partial class ParkView
         SaveFinances.Loans[0].Grant(Money.FromPounds(2468), Money.FromPounds(73), 19);
         SaveFinances.Loans[2].Grant(Money.Zero, Money.FromPounds(53), -2);
         SaveFinances.Bank.Receive(Money.FromRaw(314159) - SaveFinances.Bank.Balance);
+        // ⭐ AND SOMETHING RESEARCHED, because the fixture had NOTHING researched and so proved the
+        // research section round-tripped by comparing zero with zero. A section that is empty on both
+        // sides of a save is not evidence that it is carried.
+        //
+        // ⚠ PROGRESS, NOT A STARTED TOPIC. A topic cannot be selected on this disc at all —
+        // findings/research.md: the five-bin tier scan runs off the end of its array because bin 4 is
+        // empty — so the catalogue half is the half that can be exercised, and it is the half these
+        // bytes carry.
+        if (_guests.Research is { } research)
+        {
+            research.StoreProgress(new ResearchDefinition(3, 2), 1, 37);
+            research.StoreProgress(new ResearchDefinition(1, 0), 0, 100);
+        }
         CheckSaveProof();
     }
 
@@ -152,6 +165,12 @@ public partial class ParkView
             && g.V.Money.Raw == 876 && g.V.WalkSpeed == 19) && _guests.SaveVisitors.Any(g => g.Unknown63 != 0),
             "visitor ranges/unknown byte were not connected to live visitors");
         ParkSaveProof.Require(_attractionsPlaced.All(a => ReferenceEquals(a.Bank, SaveFinances.Bank)), "stale attraction bank");
+        // ⚠ 37 IS THE POINT: a percentage nothing else in this fixture produces, so a zeroed or
+        // defaulted research section cannot pass by accident.
+        ParkSaveProof.Require(_guests.Research is { } r
+            && r.ProgressPercent(new ResearchDefinition(3, 2), 1) == 37
+            && r.Progress(new ResearchDefinition(1, 0)).CompletedLevels >= 1,
+            "research catalogue progress was not carried");
     }
 
     internal string SaveProofSnapshot()
