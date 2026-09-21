@@ -38,7 +38,17 @@ namespace TPW.Sim
         DeadCounter4 = 55,
         BalloonEvents = 56, CostumeEvents = 57, SouvenirEvents = 58,
         /// <summary>READ: increment at 0x8002391C on a nonzero catalogue selection result.
-        /// GUESS-medium: rejected build attempts; the result's complete meaning is not established.</summary>
+        /// GUESS-medium: rejected build attempts; the result's complete meaning is not established.
+        ///
+        /// ⚠⚠ THE ONE EVENT COUNTER THIS PORT DOES NOT FEED, and deliberately. Every other counter with
+        /// a writer is now raised where the original raises it; this one's producer is a VIRTUAL call --
+        /// `lw v1,0x0C(a1); lh a0,0xF0(v1); lw v0,0xF4(v1); jalr v0` on the object at gp+0x1148 -- and
+        /// the counter goes up only when that returns nonzero. Both arms then return 292 (0x124, the
+        /// advisor's no-caption sentinel), so the return value tells us nothing about which arm ran.
+        /// Until the callee is identified there is nothing to hook that would not be a guess, and a
+        /// guessed producer feeding a real counter is worse than a counter left at zero: RULE 124 reads
+        /// this slot, so a wrong hook would make the advisor say something on evidence we invented.
+        /// It is the last of the 37 counter-gated rules still unreachable.</summary>
         CatalogueResultEvents = 59,
         ShopValueGroup0 = 60, ShopValueGroup2 = 61, ShopValueGroup5 = 62,
         ShopValueGroup1 = 63, SideShowValue = 64,
