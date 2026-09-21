@@ -128,6 +128,11 @@ namespace TPWGodot
         Vector3 _gEyePrev, _gEyeCur, _gLookPrev, _gLookCur;
         Label _info;
         string _infoText = "";
+        /// <summary>The build census, re-made by <see cref="RebuildGround"/>: it changes as path is laid,
+        /// so it cannot live in <see cref="_infoText"/>, which is composed once when the map loads.</summary>
+        string _buildCounts = "";
+        /// <summary>What follows the build census in the readout (the controls line).</summary>
+        string _infoTail = "";
 
         public bool HasMap => _map != null;
 
@@ -482,14 +487,13 @@ namespace TPWGodot
             foreach (var t in map.Tiles) if (t.NoGround) open++;
             _types.Mesh = TypeMesh(map);
             _types.Visible = ground == null;
-            _build.Mesh = BuildMesh(map, out string buildCounts);
+            _build.Mesh = BuildMesh(map, out _buildCounts);
 
             _infoText = $"{name}, {ParkWorlds.Describe(world)}: {map.Width}x{map.Height} tiles, " +
                         (ground != null ? $"ground from sheet #{world?.GroundSheet}, {quads.Count:n0} quads (with {GroundBorder} tiles past each edge), {open} tiles left to the scenery" +
                                           (scenery != null ? $"; {placed} scenery models from #{world?.SceneryEntry}" + (skipped > 0 ? $" ({skipped} naming no model)" : "") : "; no scenery pack")
-                                        : "no ground sheet, tile types only") +
-                        "\n" + buildCounts +
-                        "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, left-click the ground to lay path, Tab to place attractions";
+                                        : "no ground sheet, tile types only");
+            _infoTail = "\nWASD/arrows pan, Q/E turn, wheel zoom, R/F tilt, T tile types, B where you can build, O scenery, P open the park, G the game's camera, left-click the ground to lay path, Tab to place attractions";
 
             // Start over the path strip if there is one (the park's entrance), else the middle.
             _focus = At(map.Width / 2f, map.Height / 2f, 256);
@@ -1378,7 +1382,7 @@ namespace TPWGodot
             if (_info != null && _map != null && _guests != null && HasMap)
                 _infoLive = "\n" + GuestReport();
             if (_info != null && _map != null)
-                _info.Text = _infoText + _infoLive + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
+                _info.Text = _infoText + "\n" + _buildCounts + _infoTail + _infoLive + (_gameCam ? "\ncamera: THE GAME'S (fixed height and distance, Q/E quarter turns); G for the free camera"
                                                   : "\ncamera: free; G for the game's own")
                            + (_pathMode ? "\nPATH TOOL: click the start, then click the end; right button cancels the ghost, then closes the tool" : "")
                            + (_queue != null ? $"\nQUEUE TOOL ({_queue.Points.Count}/{QueueRun.MaxPoints - 1} corners): click to lay the queue toward the pointer; it goes on from its end, "
@@ -3867,7 +3871,7 @@ void fragment() {
             if (_groundSheet == null || _atlas == null) return;
             _ground.Mesh = GroundMesh(ParkTerrain.Build(_map, _groundSheet.Sprites, GroundBorder), _atlas, _scroll, _mat);
             _types.Mesh = TypeMesh(_map);
-            _build.Mesh = BuildMesh(_map, out _);
+            _build.Mesh = BuildMesh(_map, out _buildCounts);
         }
 
         /// <summary>Set the camera outright: focus tile (x, z), yaw and pitch in radians, distance in tiles. For
