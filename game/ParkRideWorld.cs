@@ -200,8 +200,16 @@ namespace TPWGodot
 
             public void UnloadFirstRider()
             {
-                var g = _r.Riders[0];
-                _r.Riders.RemoveAt(0);
+                UnloadRider(_r.Riders[0].V);
+            }
+
+            /// <summary>A coaster returns one particular train batch, in reverse boarding order.
+            /// Reuse the ordinary exit transaction without unloading another train's first rider.</summary>
+            public void UnloadRider(Visitor visitor)
+            {
+                var g = _r.Riders.Find(g => ReferenceEquals(g.V, visitor));
+                if (g == null) throw new InvalidOperationException("Coaster passenger is absent from the ride list.");
+                _r.Riders.Remove(g);
                 g.Hidden = false;
                 _place(g);                                    // puts it at the exit AND shows it again
                 // ⚠⚠ THE QUEUE PURPOSE OUTLIVES THE QUEUE, AND IT FREEZES THE GUEST. A guest joins a queue

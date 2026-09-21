@@ -10,6 +10,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="../../game/ParkCoasterWorld.cs" Link="ParkCoasterWorld.cs" />
     <ProjectReference Include="..\..\core\TPW.Sim\TPW.Sim.csproj" />
     <ProjectReference Include="..\..\core\TPW.Data\TPW.Data.csproj" />
     <None Include="../../findings/rating-audit.json" Link="rating-audit.json" CopyToOutputDirectory="PreserveNewest" />
