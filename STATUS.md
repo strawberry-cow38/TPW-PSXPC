@@ -22,7 +22,7 @@ did nothing.
 | --- | --- | --- | --- | --- |
 | PROVED | Placement: attractions, footprints, doors, ghosts, cost | catboy | today | place / delete / replace proved with a control |
 | PROVED | Paths + queues: lay, undo, doors, the type-13 join | catboy | today | A queue one tile short of a path never connects — measured both ways. ⚠ Laying a path rebuilt the ground mesh and never called `MapChanged`, so new tiles were not walkable and guests went on treating a new ride as unreachable; the queue tool and deletes always did. Fixed today. |
-| built | Track builder (coasters, track rides) | catboy | today | Builds; never driven end to end |
+| PROVED | Track builder (coasters, track rides) | catboy | today | Builds AND drives: a built coaster runs, and as of today so do the eight track rides. The builder's refusal/accept/close steps are asserted in the same run. |
 | PROVED | Attraction panel (Details) + context menu | catboy | today | Measured against the game's own percentages |
 | PROVED | Panel commands: Delete, Build/Edit Queue | catboy | today | Controls for both; Build/Edit Track and Call Mechanic still unwired |
 | PROVED | Sounds: tools, placement, UI, ride ambience | catboy | today | Every call site in the executable enumerated; probe-verified |
@@ -37,6 +37,7 @@ did nothing.
 | built | Rides: cycle, loading, wear, breakdown, closing | tinyclaw | today |  |
 | PROVED | Staff: hire, motion, mechanic, guard, entertainer | tinyclaw | today | The guard chain runs end to end for the first time: pelt → shock → dispatch → chase → **mid-walk catch** → escort to the exit → back through the gate → take a post. Five stacked breaks, findings/staff.md §6. Last leg unproved: the walk to the post itself. |
 | built | Pathfinder | tinyclaw | today |  |
+| PROVED | Moving rides: 8 track, 4 tour | tinyclaw | today | `PathedRide.CompleteLap` and `TourRide.StatusAfterMovement` had tests and no caller; they have production hosts now. Proved by a run whose report CHANGES between two samples, with a missing-route control and two frozen-movement controls all rejected. ⚠ The destination table was ported right and tested nowhere — three of four deliberate breakages passed all 1,879 tests; findings/ride-classes.md §8. Vehicles still share a start position and the path between destinations is straight-line. |
 
 ## Money & progression
 
