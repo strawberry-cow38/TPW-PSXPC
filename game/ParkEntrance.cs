@@ -39,6 +39,7 @@ namespace TPWGodot
                                  Func<IReadOnlyList<GuestTarget>> targets, Action<Guest> remove,
                                  Action<StaffMember, int> staffMessage = null)
         {
+            _gate = new GateCounters();
             _map = map; _now = now; _finances = finances; _bus = bus; _dice = dice;
             _pathTo = pathToTile; _setWaypoint = setWaypoint; _freeChain = freeChain;
             _guests = guests; _staff = staff; _byVisitor = byVisitor; _targets = targets; _remove = remove;
@@ -99,8 +100,18 @@ namespace TPWGodot
         public int LaneCount(int lane) => _laneCount[lane & 1];
         public void SetLaneCount(int lane, int value) => _laneCount[lane & 1] = value;
 
-        public int Counter80103950 { get; set; }
-        public int Counter80103954 { get; set; }
+        /// <summary>⭐ ONE WORD, TWO VIEWS — because the binary has ONE. 0x80103950 is written by
+        /// exactly four increment sites through the single leaf 0x8005996C: two in the GUEST arrival
+        /// table (0x8008E0C0, 0x8008E0FC) and two in the GUARD's (0x80097C7C, 0x80097CB8); the
+        /// decrement 0x80059984 likewise has one of each (0x8008E198, 0x80097D24). The port had an
+        /// auto-property on each world, so a guard arriving at the gate incremented storage the
+        /// turnstile never read — measured as `46 seen 8x at admit, 0x of those with the counter up`,
+        /// which is exactly the shape of a counter written to one place and read from another.</summary>
+        public sealed class GateCounters { public int Waiting, Crossed; }
+        readonly GateCounters _gate;
+        public GateCounters Counters => _gate;
+        public int Counter80103950 { get => _gate.Waiting; set => _gate.Waiting = value; }
+        public int Counter80103954 { get => _gate.Crossed; set => _gate.Crossed = value; }
 
         public int GateBatch { get => _bus()?.Batch ?? 0; set { if (_bus() is { } b) b.Batch = value; } }
         public int BusPhase => _bus()?.Phase ?? 0;

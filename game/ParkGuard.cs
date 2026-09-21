@@ -30,6 +30,7 @@ namespace TPWGodot
         readonly Func<IReadOnlyList<(int X, int Z)>> _spawnTiles;
         readonly Func<(int X, int Z)?> _gateArea;
         readonly IRandomSource _dice;
+        readonly ParkEntranceWorld.GateCounters _gate;
 
         public ParkGuardWorld(ParkStaffWorld shared, Func<IEnumerable<Guest>> guests,
                               Func<Visitor, Guest> guestOf,
@@ -38,10 +39,11 @@ namespace TPWGodot
                               Action<Staffer> freeChain, Action<Visitor, int> message,
                               Func<IReadOnlyList<(int X, int Z)>> spawnTiles,
                               Func<(int X, int Z)?> gateArea, IRandomSource dice,
-                              Func<StaffMember, Staffer> stafferOf)
+                              Func<StaffMember, Staffer> stafferOf,
+                              ParkEntranceWorld.GateCounters gate)
         { _base = shared; _guests = guests; _guestOf = guestOf; _ask = askTile; _askWorld = askWorld;
           _freeChain = freeChain; _message = message; _spawnTiles = spawnTiles; _gateArea = gateArea;
-          _dice = dice; _stafferOf = stafferOf; }
+          _dice = dice; _stafferOf = stafferOf; _gate = gate; }
 
         /// <summary>The host's Staffer for a StaffMember the sim names. See FreeWaypoints.</summary>
         readonly Func<StaffMember, Staffer> _stafferOf;
@@ -223,9 +225,10 @@ namespace TPWGodot
 
         /// <summary>READ: the word at 0x80103950, changed by arrivals 14 and 16. ⚠ ITS PURPOSE IS NOT
         /// ESTABLISHED — do not relabel it a guest count or clamp it. Both gate arrivals increment and
-        /// both crossings decrement, which is what makes it balance.</summary>
-        public int Counter80103950 { get; set; }
+        /// both crossings decrement, which is what makes it balance.
+        /// ⭐ AND IT IS THE TURNSTILE'S WORD, NOT A COPY. See ParkEntranceWorld.GateCounters.</summary>
+        public int Counter80103950 { get => _gate.Waiting; set => _gate.Waiting = value; }
         /// <summary>READ: the word at 0x80103954, incremented by arrival 16. NOT ESTABLISHED.</summary>
-        public int Counter80103954 { get; set; }
+        public int Counter80103954 { get => _gate.Crossed; set => _gate.Crossed = value; }
     }
 }

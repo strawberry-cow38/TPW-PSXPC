@@ -445,9 +445,7 @@ Two of the three items that stood here are now measured; see §6.9. What remains
 - The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the
   base machine wanders it away. The park report's `map in N connected pieces` line is the check.
-- The turnstile's staff broadcast is wired and still **unobserved**: `0 admitted by the turnstile` in
-  every run so far, including the two below. Nothing has reached state 46 at a moment the turnstile
-  was admitting.
+- (The turnstile's staff broadcast was the third item here. It fires now — §6.10.)
 
 ### 6.7b READ, and ⚠ DO NOT FIX: boarding a ride is not an escape, it is a stalemate
 
@@ -529,4 +527,55 @@ and 4 catches. The other eleven ended legitimately: 39 of the 64 guard offers we
 a per-class table at 0x800E0F6C telling every person the guest is gone. The port makes the first
 only. Nothing here holds a guest pointer across ticks except `Guard.Culprit`, and the guard polls
 `GuestExists` for that instead — `chase saw culprit gone 0x` in both runs above.
+
+
+### 6.10 The turnstile finally admits a guard, and it took two host bugs to get there
+
+`0 admitted by the turnstile` had survived every run since the broadcast was wired. One count, four
+possible causes, so the first move was an instrument that separates them — sampled on both sides of
+the staff loop, because a state entered and left inside one tick is invisible to a sampler at the top
+of it:
+
+```
+0 admitted by the turnstile (46 seen 8x at admit, 0x of those with the counter up, 8x after the staff loop)
+```
+
+Guards **did** reach state 46. On **zero** of those ticks was the counter `Turnstile.Admit` gates on
+non-zero. Two separate defects, both in the host, both confirmed against the binary:
+
+**1. The gate counter had two backing fields.** `ParkGuardWorld.Counter80103950` and
+`ParkEntranceWorld.Counter80103950` were independent auto-properties. The binary has **one word**.
+Census of its two leaf accessors settles it — the increment `0x8005996C` has exactly four call sites,
+`0x8008E0C0` and `0x8008E0FC` in the GUEST arrival table and `0x80097C7C` and `0x80097CB8` in the
+GUARD's; the decrement `0x80059984` has `0x8008E198` and `0x80097D24`. One storage, both classes. So
+a guard arriving at the gate incremented a number the turnstile never read, and the turnstile's batch
+never opened. The tell was already in the port and already labelled: the staff log printed
+`gate counter {grd.Counter80103950} [own]` — a previous pass had noticed the two were different
+objects, written "[own]" into the log line, and not followed it anywhere.
+
+**2. The host crossed the gate by itself.** `ParkGuests.RunGuard` had
+`case GuardStates.AtGate: g.CrossGate(grd); return true;` — a row the sim's `Guard.Tick` deliberately
+does not have. READ 0x80098290: the class Update switch indexes the table at **0x800E4978** by state,
+and entry **46 is 0x800983D0, the function's own epilogue**. Not the out-of-range default
+0x800983BC (52 of the 60 entries), which at least calls the shared base pass 0x80094AC4 — state 46
+does not even get that. It waits, and only a message moves it.
+
+⚠ **The sim already had a test for this and it could not fire.** `GuardTests` asserts
+`g.Tick(w); State(g, 46); Assert.Empty(w.Calls)` — exactly the behaviour the host contradicted. It
+passed throughout, because **`RunGuard` is a second copy of the same dispatch switch** and the host
+never calls `Guard.Tick`. A row the two switches disagree on is invisible to both suites at once.
+
+**After, same park, same 4,000 frames, same pelt schedule:**
+
+| | before | after |
+|---|---|---|
+| ticks with a guard in 46 at admit | 8 | **64** |
+| ...of those, with the counter up | **0** | **64** |
+| admitted by the turnstile | **0** | **3** |
+| caught / thrown out / removed | 4 / 4 / 4 | 3 / 3 / 3 |
+| posts taken | 4 | 1 |
+
+The guard now *waits* at the gate — 64 tick-samples instead of 8 — and is let through by the
+turnstile rather than letting itself through. Posts taken drops because the round trip is longer
+when it has a real gate in it; that is the fix showing, not a regression.
 

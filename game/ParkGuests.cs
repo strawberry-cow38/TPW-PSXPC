@@ -850,7 +850,8 @@ namespace TPWGodot
             // whether a readout happened to run first.
             () => { GateArea(); return GateTile.X < 0 ? null : GateTile; },
             _dice,
-            st => { foreach (var sf in _staff) if (sf.S == st) return sf; return null; });
+            st => { foreach (var sf in _staff) if (sf.S == st) return sf; return null; },
+            _entrance.Counters);
         ParkGuardWorld _guardWorld;
 
 
@@ -1107,7 +1108,16 @@ namespace TPWGodot
                                      + $"now {_now} busyUntil {st.S.BusyUntil}");
                     g.Chase(grd); return true;
                 case GuardStates.ToExitPoint: g.GoToExitPoint(grd); return true;
-                case GuardStates.AtGate: g.CrossGate(grd); return true;
+                // ⚠⚠ 46 IS HANDLED BY DOING NOTHING, AND THAT IS THE POINT. The host used to send
+                // AtGate straight into CrossGate, so a guard walked itself through the gate on the tick
+                // after it arrived and the turnstile's message 9 never had anything to arrive at —
+                // which is why `0 admitted by the turnstile` survived every run. READ 0x80098290: the
+                // class Update switch indexes 0x800E4978 by state, and entry 46 is 0x800983D0, the
+                // function's OWN EPILOGUE. Not the default entry 0x800983BC (52 of the 60 states),
+                // which at least calls the shared base pass 0x80094AC4 — 46 does not even get that.
+                // Returning true without running anything is that table row; falling through to the
+                // base would be the default row, and they are different.
+                case GuardStates.AtGate: return true;
                 case GuardStates.CrossGate: g.CrossGate(grd); return true;
                 case GuardStates.LeavePark: g.LeavePark(grd); return true;
                 case GuardStates.ToSpawnPoint: g.GoToSpawnPoint(grd); return true;
@@ -1268,6 +1278,20 @@ namespace TPWGodot
                 // ⚠ BOTH LANES EVERY TICK. LaneTick's own first act is `now & 31 == lane`, so the
                 // turn-taking lives in the sim; calling one lane per tick here would halve its rate and
                 // look like a tuning choice.
+                // ⭐ WHY "0 ADMITTED BY THE TURNSTILE" HAS FOUR CAUSES AND THE COUNT HAS ONE VALUE.
+                // Turnstile.Admit only reaches its staff loop when the gate counter is non-zero and a
+                // batch is open, and it runs HERE, at the top of the tick, while a guard enters state
+                // 46 down in TickStaff. So a delivery of 0 means any of: no guard ever held 46, one
+                // held it but only between two Admit calls, the counter was zero when it did, or the
+                // delivery itself is broken — and those need four different fixes. Sampling on both
+                // sides of the staff loop separates the second from the first.
+                int atGate = 0;
+                foreach (var sf in _staff) if (sf.S.State == GuardStates.AtGate) atGate++;
+                if (atGate > 0)
+                {
+                    AtGateAtAdmit++;
+                    if (_entrance.Counter80103950 != 0) AtGateWithCounter++;
+                }
                 Turnstile.Admit(_entrance);
                 Turnstile.LaneTick(_entrance, 0);
                 Turnstile.LaneTick(_entrance, 1);
@@ -1392,7 +1416,17 @@ namespace TPWGodot
             _ticking = false;
             DrainLeavers();
             TickStaff();
+            foreach (var sf in _staff)
+                if (sf.S.State == GuardStates.AtGate) { AtGateAfterStaff++; break; }
         }
+
+        /// <summary>Ticks on which a guard was in state 46 when the turnstile ran, how many of those
+        /// also had a non-zero gate counter (the batch's own precondition), and ticks on which one was
+        /// in 46 after the staff loop. AtGateAfterStaff &gt; 0 with AtGateAtAdmit == 0 is a state that
+        /// opens and closes inside one tick and can never be seen by a sampler at the top of it.</summary>
+        public int AtGateAtAdmit { get; private set; }
+        public int AtGateWithCounter { get; private set; }
+        public int AtGateAfterStaff { get; private set; }
 
         /// <summary>The longest any guest has held its in-queue bit without boarding, and what it was
         /// doing at that point. ⚠ A LONG TIME IS NORMAL ON A BUSY RIDE — what is not normal is one guest
@@ -1629,7 +1663,9 @@ namespace TPWGodot
                  + $"; chase paths {_guardWorld?.ChasePathAsked ?? 0} asked, "
                  + $"{_guardWorld?.ChasePathRefused ?? 0} refused at entry, "
                  + $"{_guardWorld?.ChasePathNoGuest ?? 0} with no guest"
-                 + $"; {StaffAdmitted} admitted by the turnstile"
+                 + $"; {StaffAdmitted} admitted by the turnstile "
+                 + $"(46 seen {AtGateAtAdmit}x at admit, {AtGateWithCounter}x of those with the counter up, "
+                 + $"{AtGateAfterStaff}x after the staff loop)"
                  + $"; post: {_guardWorld?.PostTaken ?? 0} taken of {_guardWorld?.PostTried ?? 0} tiles tried, "
                  + $"{_guardWorld?.PostGaveUp ?? 0} gave up after five, {_guardWorld?.PostNoGate ?? 0} with no gate"
                  + $"; thrown out: {_entrance?.ThrownOutSent ?? 0} told, "
