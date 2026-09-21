@@ -344,11 +344,21 @@ it actually landed on.
 content is READ; the claim that the entertainer uses it is inherited from the existing port, not
 re-verified here.
 
-### 6.3 What is still not proved
+### 6.3 The throw-out, and a value that was a side effect of a diagnostic
 
-- The catch's aftermath. The caught guest's guard goes to state **39** (`ToExitPoint`) and then
-  straight to `Idle` in the next tick, so `GoToExitPoint` is bailing — the throw-out walk has never
-  been watched to the gate.
+The catch left the guard in state **39** (`ToExitPoint`) and dropped it to `Idle` on the next tick.
+The tell was the PURPOSE in the log: still **8** (`ToCulprit`), so `Guard.GoToExitPoint` had returned
+at its first line — `if (!world.HasExits)` — before it could set its own purpose. `HasExits` is
+`GateTile.X >= 0`, and **`GateTile` was only ever assigned as a side effect of `GateArea()`**, which
+is the reachability DIAGNOSTIC. A park with no attractions never runs that readout, so the tile
+stayed `(-1,-1)` and the guard threw nobody out. Resolving it through `GateArea()` at the point of
+use — one cached flood fill — makes it depend on the map instead of on whether a readout happened
+to run first. After: `39 -> Walking, purpose 14` (`ExitPoint`), the ejection walk under way.
+
+### 6.4 What is still not proved
+
+- The end of the throw-out. The guard walks with purpose 14 and then returns to patrol; whether the
+  guest is actually put outside the gate has not been watched.
 - `0 on post`: `TakePost` has still never been seen to place a guard at the gate.
 - The measurement needs a **connected** park. On a map in two pieces every guest is stranded and the
   chase's path request is refused at issue, with no message, leaving the guard in state 11 until the

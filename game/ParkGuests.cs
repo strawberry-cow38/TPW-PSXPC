@@ -780,7 +780,15 @@ namespace TPWGodot
             // GateArea(), which answers which connected PIECE the gate is in. Both are small ints and
             // both look like an answer; only the return type told me apart. The post the guard takes
             // is meant to be inside the park by the gate, which is exactly what this already is.
-            () => GateTile.X < 0 ? null : GateTile,
+            // ⚠⚠ AND IT HAS TO BE COMPUTED, NOT HOPED FOR. `GateTile` is a side effect of
+            // GateArea(), which is a DIAGNOSTIC — the reachability readout. In a park with no
+            // attractions nothing calls it, so the tile stayed (-1,-1), HasExits answered false, and
+            // Guard.GoToExitPoint dropped the guard it had just caught somebody with straight back to
+            // Idle without ever walking them out. The tell in the log was the PURPOSE: still 8
+            // (ToCulprit), so GoToExitPoint had returned before it could set its own. Asking GateArea()
+            // here costs one cached flood fill and makes the value depend on the map rather than on
+            // whether a readout happened to run first.
+            () => { GateArea(); return GateTile.X < 0 ? null : GateTile; },
             _dice,
             st => { foreach (var sf in _staff) if (sf.S == st) return sf; return null; });
         ParkGuardWorld _guardWorld;
