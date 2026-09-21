@@ -1,0 +1,959 @@
+{
+  "image_sha256": "0b708dd74796abfedad55e55fa007ace1b5697407d36e8f7823bb06f4fa53beb",
+  "census": {
+    "bytes": 1065308,
+    "aligned_words": 266327,
+    "skipped_aligned_words": 0,
+    "trailing_bytes": 0,
+    "records": 8,
+    "records_skipped": 0,
+    "decision_cases": 28,
+    "overlays_scanned": 0,
+    "overlays_not_scanned": 12
+  },
+  "controls": {
+    "records_nonempty": true,
+    "decision_cases_nonempty": true,
+    "failing_admissions": true,
+    "passing_admissions": true,
+    "original_money": true,
+    "wrapper_effects": true,
+    "weekly_caller": true,
+    "nine_award_calls": true,
+    "rating_positive_control": true,
+    "interpreter_positive_control": true,
+    "no_direct_rating_call_in_weekly": true,
+    "no_direct_interpreter_call_in_weekly": true
+  },
+  "direct_call_candidates": {
+    "0x80067928": [
+      "0x80066E4C"
+    ],
+    "0x800676DC": [
+      "0x8001327C"
+    ],
+    "0x80067CD8": [
+      "0x80067DD8"
+    ],
+    "0x800677B8": [
+      "0x800679A0",
+      "0x800679FC",
+      "0x80067A88",
+      "0x80067B18",
+      "0x80067B58",
+      "0x80067BA8",
+      "0x80067C04",
+      "0x80067C44",
+      "0x80067CA0"
+    ],
+    "0x8005B830": [
+      "0x80067100"
+    ],
+    "0x80017024": [
+      "0x80016994"
+    ],
+    "0x800675A8": [
+      "0x8006770C",
+      "0x80067740",
+      "0x80067774",
+      "0x8006796C",
+      "0x800679AC",
+      "0x80067A08",
+      "0x80067AA0",
+      "0x800B9A8C"
+    ],
+    "0x80067590": [
+      "0x80067618",
+      "0x80067B34",
+      "0x80067B74",
+      "0x80067BC4",
+      "0x80067C20",
+      "0x80067C60"
+    ],
+    "0x80067658": [
+      "0x80067994",
+      "0x800679F0",
+      "0x80067A7C",
+      "0x80067B28",
+      "0x800B9AB0"
+    ],
+    "0x800675C0": [
+      "0x80067B68",
+      "0x80067BB8",
+      "0x80067C14",
+      "0x80067C54",
+      "0x80067CB0"
+    ]
+  },
+  "pointer_candidates": {
+    "0x80067928": [],
+    "0x800676DC": [],
+    "0x80067CD8": [],
+    "0x800677B8": [],
+    "0x8005B830": [],
+    "0x80017024": [],
+    "0x800675A8": [],
+    "0x80067590": [],
+    "0x80067658": [],
+    "0x800675C0": []
+  },
+  "weekly_body_calls": {
+    "0x80067928": [],
+    "0x800676DC": [],
+    "0x80067CD8": [],
+    "0x800677B8": [
+      "0x800679A0",
+      "0x800679FC",
+      "0x80067A88",
+      "0x80067B18",
+      "0x80067B58",
+      "0x80067BA8",
+      "0x80067C04",
+      "0x80067C44",
+      "0x80067CA0"
+    ],
+    "0x8005B830": [],
+    "0x80017024": [],
+    "0x800675A8": [
+      "0x8006796C",
+      "0x800679AC",
+      "0x80067A08",
+      "0x80067AA0"
+    ],
+    "0x80067590": [
+      "0x80067B34",
+      "0x80067B74",
+      "0x80067BC4",
+      "0x80067C20",
+      "0x80067C60"
+    ],
+    "0x80067658": [
+      "0x80067994",
+      "0x800679F0",
+      "0x80067A7C",
+      "0x80067B28"
+    ],
+    "0x800675C0": [
+      "0x80067B68",
+      "0x80067BB8",
+      "0x80067C14",
+      "0x80067C54",
+      "0x80067CB0"
+    ]
+  },
+  "records": [
+    {
+      "world": 0,
+      "park": 0,
+      "address": "0x800E1930",
+      "hex": "E3000000EC0000000300000064000000D007000001000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF01070000",
+      "words": [
+        227,
+        236,
+        3,
+        100,
+        2000,
+        1,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        1,
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 0,
+      "park": 1,
+      "address": "0x800E1964",
+      "hex": "D1000000EC00000005000000C8000000B80B000002000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00060000",
+      "words": [
+        209,
+        236,
+        5,
+        200,
+        3000,
+        2,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 1,
+      "park": 0,
+      "address": "0x800E1998",
+      "hex": "83000000A00000000500000096000000C409000001000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00050000",
+      "words": [
+        131,
+        160,
+        5,
+        150,
+        2500,
+        1,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 1,
+      "park": 1,
+      "address": "0x800E19CC",
+      "hex": "7C0000009700000005000000FA000000B80B000002000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00060000",
+      "words": [
+        124,
+        151,
+        5,
+        250,
+        3000,
+        2,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 2,
+      "park": 0,
+      "address": "0x800E1A00",
+      "hex": "280000003C0000000300000096000000C409000001000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00050000",
+      "words": [
+        40,
+        60,
+        3,
+        150,
+        2500,
+        1,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 2,
+      "park": 1,
+      "address": "0x800E1A34",
+      "hex": "370000004100000003000000F40100008813000005000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00060000",
+      "words": [
+        55,
+        65,
+        3,
+        500,
+        5000,
+        5,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 3,
+      "park": 0,
+      "address": "0x800E1A68",
+      "hex": "6D0100007E01000003000000FA000000B80B000002000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00050000",
+      "words": [
+        365,
+        382,
+        3,
+        250,
+        3000,
+        2,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "world": 3,
+      "park": 1,
+      "address": "0x800E1A9C",
+      "hex": "6C0100008001000003000000F40100008813000005000000D007000064000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00050000",
+      "words": [
+        364,
+        384,
+        3,
+        500,
+        5000,
+        5,
+        2000,
+        100,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "tail": [
+        0,
+        5,
+        0,
+        0
+      ]
+    }
+  ],
+  "decision_cases": [
+    {
+      "admissions": 99,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 100,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 101,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        175
+      ],
+      "park_bits": 4294967283,
+      "instructions": 149
+    },
+    {
+      "admissions": 4294967295,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        175
+      ],
+      "park_bits": 4294967283,
+      "instructions": 149
+    },
+    {
+      "admissions": 0,
+      "income": 20000,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 0,
+      "income": 20001,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        176
+      ],
+      "park_bits": 4294967285,
+      "instructions": 149
+    },
+    {
+      "admissions": 0,
+      "income": 30001,
+      "spending": 10000,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        176
+      ],
+      "park_bits": 4294967285,
+      "instructions": 149
+    },
+    {
+      "admissions": 0,
+      "income": 30000,
+      "spending": 10000,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 0,
+      "income": 30001,
+      "spending": 0,
+      "loans": 10000,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        176
+      ],
+      "park_bits": 4294967285,
+      "instructions": 149
+    },
+    {
+      "admissions": 0,
+      "income": 30000,
+      "spending": 0,
+      "loans": 10000,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 0,
+      "income": -1,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 0,
+      "income": 2147483647,
+      "spending": 0,
+      "loans": -1,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 0,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 1,
+      "month": 4,
+      "opened": 5,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 168
+    },
+    {
+      "admissions": 0,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 1,
+      "month": 5,
+      "opened": 5,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        177
+      ],
+      "park_bits": 4294967289,
+      "instructions": 176
+    },
+    {
+      "admissions": 0,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 1,
+      "month": 6,
+      "opened": 5,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        177
+      ],
+      "park_bits": 4294967289,
+      "instructions": 176
+    },
+    {
+      "admissions": 0,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 1,
+      "month": 5,
+      "opened": 5,
+      "park_open": false,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 141
+    },
+    {
+      "admissions": 0,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 65535,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        177
+      ],
+      "park_bits": 4294967289,
+      "instructions": 176
+    },
+    {
+      "admissions": 0,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 168
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 0,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 192
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 0,
+      "park": 1,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 190
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 1,
+      "park": 0,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 184
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 1,
+      "park": 1,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 186
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 2,
+      "park": 0,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 188
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 2,
+      "park": 1,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 190
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 3,
+      "park": 0,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 190
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": false,
+      "world": 3,
+      "park": 1,
+      "messages": [
+        175,
+        176,
+        177
+      ],
+      "park_bits": 4294967295,
+      "instructions": 192
+    },
+    {
+      "admissions": 1000,
+      "income": 90000,
+      "spending": 0,
+      "loans": 0,
+      "year": 20,
+      "month": 0,
+      "opened": 0,
+      "park_open": true,
+      "sandbox": true,
+      "world": 0,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 57
+    },
+    {
+      "admissions": 1000,
+      "income": 0,
+      "spending": 0,
+      "loans": 0,
+      "year": 0,
+      "month": 0,
+      "opened": 0,
+      "park_open": false,
+      "sandbox": false,
+      "world": 4,
+      "park": 0,
+      "messages": [],
+      "park_bits": 4294967281,
+      "instructions": 54
+    }
+  ],
+  "profit_cases": [
+    {
+      "income": 12345,
+      "spending": 2345,
+      "loans": 1000,
+      "raw": 9000
+    },
+    {
+      "income": 20001,
+      "spending": 0,
+      "loans": 0,
+      "raw": 20001
+    },
+    {
+      "income": 2147483647,
+      "spending": 0,
+      "loans": -1,
+      "raw": -2147483648
+    }
+  ],
+  "wrapper_effects": [
+    [
+      "tickets",
+      1
+    ],
+    [
+      "message",
+      175
+    ],
+    [
+      "advisor"
+    ],
+    [
+      "list_type",
+      2
+    ]
+  ],
+  "captions": [
+    {
+      "id": 141,
+      "record": "0x800EF000",
+      "text_id": 883,
+      "english": "You have been in the red for six months, so the banks have closed your park and declared you bankrupt."
+    },
+    {
+      "id": 175,
+      "record": "0x800EF2A8",
+      "text_id": 515,
+      "english": "Congratulations! Because you attracted enough visitors to reach your goal, you get a Gold Ticket!"
+    },
+    {
+      "id": 176,
+      "record": "0x800EF2BC",
+      "text_id": 902,
+      "english": "Nice work! You made a tidy profit in the last 12 months, enough to meet your goal. The Gold Ticket is yours!"
+    },
+    {
+      "id": 177,
+      "record": "0x800EF2D0",
+      "text_id": 882,
+      "english": "Nicely done. You\u0092ve stayed in business long enough to reach your goal. You win a Gold ticket!"
+    },
+    {
+      "id": 188,
+      "record": "0x800EF3AC",
+      "text_id": 300,
+      "english": "WON GOLD TICKET TUTORIAL"
+    },
+    {
+      "id": 178,
+      "record": "0x800EF2E4",
+      "text_id": 808,
+      "english": "You discovered a hidden award! For providing such thorough security coverage in your park, it is my honor to present you with the Security Award and a Gold Ticket. Congratulations!"
+    },
+    {
+      "id": 179,
+      "record": "0x800EF2F8",
+      "text_id": 573,
+      "english": "Congratulations on discovering a hidden award. Since you\u0092ve upgraded such a large percentage of your rides, I bestow upon you the Upgrade Award and a Gold ticket."
+    },
+    {
+      "id": 180,
+      "record": "0x800EF30C",
+      "text_id": 537,
+      "english": "Congratulations! You\u0092ve found a hidden award. In honor of building a large park full of  beautiful features, I present you with the Aesthetic Award and a Gold Ticket to go with it."
+    },
+    {
+      "id": 181,
+      "record": "0x800EF320",
+      "text_id": 451,
+      "english": "Nice work! You\u0092ve discovered a hidden award. For having seen to it that enough of your shops have litter bins to keep the park tidy, please accept the Green Award and a Gold Ticket as tokens of my esteem."
+    },
+    {
+      "id": 182,
+      "record": "0x800EF334",
+      "text_id": 979,
+      "english": "Nice work! You\u0092ve discovered a hidden award. For having seen to it that your visitors don\u0092t have to walk too far to get onto your rides, please accept the Path Award and a Gold Ticket as tokens of my esteem."
+    }
+  ],
+  "limitations": [
+    "Synthetic RAM; no emulator/live gameplay measurement.",
+    "Weekly oracle stubs bit helpers, live profit, open/sandbox getters and award effects; compiled selector, comparisons, calendar getters and Money conversion execute.",
+    "All hidden awards are masked in weekly decision fixtures; C# tests cover them independently from the disassembly.",
+    "Profit helper executes original subtraction; outstanding-loan summation is stubbed.",
+    "Direct calls/pointer words are candidates, including data. No indirect/aliased-write exclusion is claimed.",
+    "No overlay or level-script sweep; no claim that other awards or terminal paths do not exist."
+  ]
+}
