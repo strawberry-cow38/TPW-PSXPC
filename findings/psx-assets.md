@@ -566,7 +566,20 @@ matching the console screenshot.
 ## 5s. ✅ Parks come alive: music per world, scrolling water, names, and the code overlays (2026-09-19)
 
 **Music.** 0x80058694 (on entering a park) picks the module by world and hands 0x800B7A90 the bank header, bank
-body and module (module−1, module−2, module): jungle #305, halloween #302, fantasy #296, space #317. The only other
+body and module (module−1, module−2, module): jungle #305, halloween #302, fantasy #296, space #317.
+
+⭐ **AND IT IS ONLY THE WORLD — THERE IS NO DYNAMIC PARK MUSIC ON THE PSX** (re-read by hand 2026-09-21,
+asked whether the psx has the later versions' music that swells with the park). The function preloads
+eight halfwords from the table at `0x800F23CC`, then reads the world number from `gp+0x124C`
+(`0x801038A0`) and branches on it and on nothing else — `slti v1,s1,0x8` bounds the preload loop,
+`beq v1,v0` / `slti v0,v1,0x2` select the world, and the module numbers are immediates in each arm
+(`0x12F`/`0x13C`, `0x126`/`0x127`, …). No guest count, no rating, no built-attraction count is read
+anywhere in it. A park's music is chosen once, on entry, from which world it is.
+
+⚠ **SCOPE OF THAT NEGATIVE:** it covers the PARK music selector only. Four modules —
+#293/#308/#311/#314 — still "start some other way" and their trigger is NOT ESTABLISHED, so this does
+not say the whole soundtrack is static. It says the thing that picks a park's tune looks at one
+variable. The only other
 by-number start is 0x800BCE44 beside the front-end state machine: #299, the main menu/opening theme (master).
 #293/#308/#311/#314 start some other way; master: #308 is halloween's map-screen tune. The port's FT2 player
 (TrackerPlayer, rules from ft2-clone) matches libopenmpt on all nine and records bit-exact through Godot.
