@@ -126,6 +126,14 @@ namespace TPW.Data
         {
             pcm = null; coding = default; error = null;
             if (language < 0 || language >= Languages) { error = $"language {language} is not 0..{Languages - 1}"; return false; }
+            // ⚠ The SAME guard TryScan carries, and it belongs here for the same reason: without the
+            // subheaders every sector fails IsAudioSector, n comes out 0, and the line below reports
+            // "line 0 has no audio in language 0" -- which is TRUE of what this function looked at and
+            // completely misdirecting about why. It reads as "this line is silent", so you go looking
+            // at the line. The image cannot carry the answer at all; it has lost the channel number
+            // and the coding byte, which is also where the declared sample rate lives. One fault
+            // should give one diagnosis whichever door you come in.
+            if (!disc.IsRawSectors) { error = "cooked image: the XA channel numbers live in the subheaders it has lost"; return false; }
             int sectors = file.Length / DiscReader.UserDataSize;
             int first = line.FirstSector + language, n = 0;
             for (int k = first; k < sectors; k += Channels)
